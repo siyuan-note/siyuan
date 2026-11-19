@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 import {compile} from "sass";
 
 const browserCases = async (sources: string[], lutePath: string, styles: string[]) => {
@@ -14,10 +14,11 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
         _kernel: {16: "Untitled document"}}}});
     const unwrap = new Function(sources[0] + "\nreturn unwrapLongTextRuns;")();
     const restore = new Function("unwrapLongTextRuns", sources[1] + "\nreturn restoreInlineElementBoundaries;")(unwrap);
-    const {prepareDocumentTitleBlockDOM: prepare, prepareDocumentTitleInitialDOM: initial, getDocumentTitleUnsupportedPasteBlocks: unsupported,
+    const {flattenDocumentTitlePaste: flatten, prepareDocumentTitleBlockDOM: prepare,
+        prepareDocumentTitleInitialDOM: initial, getDocumentTitleUnsupportedPasteBlocks: unsupported,
         getDocumentTitleDOMFingerprint: fingerprint, getDocumentTitleLute: wrap} =
         new Function("restoreInlineElementBoundaries", sources[2] +
-            "\nreturn {prepareDocumentTitleBlockDOM, prepareDocumentTitleInitialDOM, getDocumentTitleUnsupportedPasteBlocks, getDocumentTitleDOMFingerprint, getDocumentTitleLute};")(restore);
+            "\nreturn {flattenDocumentTitlePaste, prepareDocumentTitleBlockDOM, prepareDocumentTitleInitialDOM, getDocumentTitleUnsupportedPasteBlocks, getDocumentTitleDOMFingerprint, getDocumentTitleLute};")(restore);
     const paragraph = (content: string, id = "20260101000000-abcdefg") =>
         `<div data-type="NodeParagraph" data-node-id="${id}" class="p"><div contenteditable="true" spellcheck="false">${content}</div></div>`;
     const source = paragraph(`<span data-type="strong em" style="color: red" data-custom="retained">Styled</span>
@@ -39,8 +40,23 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
     check.equal(template.content.querySelector("img").style.width, "42px");
     check.equal(template.content.querySelector('[data-type="inline-memo"]').getAttribute("data-inline-memo-content"), "memo & text");
     check.equal(template.content.querySelector('[data-type="file-annotation-ref"]').getAttribute("data-id"), "assets/a.pdf/annotation");
-    for (const invalid of [source + paragraph("Another"), '<div data-type="NodeHeading"><div contenteditable="true">Heading</div></div>',
-        `<div data-type="NodeList">${source}</div>`, '<div data-type="NodeTable"></div>']) {
+    const expectedInlines = template.content.querySelector("[contenteditable]").innerHTML;
+    for (const level of [1, 2, 3, 4, 5, 6]) {
+        const heading = source.replace('data-type="NodeParagraph"', `data-type="NodeHeading" data-subtype="h${level}"`)
+            .replace('class="p"', `class="h${level}" style="font-size: 36px" fold="1"`);
+        check.equal(unsupported(heading).length, 0);
+        template.innerHTML = prepare(heading, "20260101000003-abcdefg");
+        check.equal(template.content.firstElementChild.getAttribute("data-type"), "NodeParagraph");
+        check.equal(template.content.firstElementChild.className, "p");
+        check.equal(template.content.firstElementChild.hasAttribute("data-subtype"), false);
+        check.equal(template.content.firstElementChild.hasAttribute("style"), false);
+        check.equal(template.content.firstElementChild.hasAttribute("fold"), false);
+        check.equal(template.content.querySelector("[contenteditable]").innerHTML, expectedInlines,
+            "heading paste preserves every inline element");
+    }
+    template.innerHTML = rendered;
+    for (const invalid of [source + paragraph("Another"), source.replace('data-type="NodeParagraph"', 'data-type="NodeHeading"') + source,
+        `<div data-type="NodeList">${source}</div>`, '<div data-type="NodeTable"></div>', '<div data-type="NodeHeading">Missing carrier</div>']) {
         check.equal(unsupported(invalid).length, 1);
         check.throws(() => prepare(invalid), /Inline only/);
     }
@@ -66,6 +82,52 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
     lute.SetTag(true);
     lute.SetInlineMath(true);
     lute.SetKramdownIAL(true);
+    const webHTML = "<h2>Heading <strong>bold</strong></h2><blockquote><p>Quote</p></blockquote>" +
+        '<ul><li>One<ul><li><a href="https://example.org">Two</a></li></ul></li></ul>' +
+        "<table><tr><th>Column</th><th>Other</th></tr><tr><td>Cell</td><td>Value</td></tr></table>" +
+        "<pre><code>a &lt; b\nc</code></pre><p>Last<br>line</p>";
+    const external = lute.HTML2BlockDOM(webHTML);
+    check.equal(unsupported(external).length, 1);
+    const flattened = flatten(external, "unused fallback", false);
+    check.equal(unsupported(flattened).length, 0);
+    template.innerHTML = prepare(flattened);
+    check.equal(template.content.querySelectorAll('[data-type^="Node"]').length, 1);
+    check.equal(template.content.querySelector("[contenteditable]").textContent,
+        "Heading bold Quote One Two Column Other Cell Value a < b c  Last line");
+    check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "bold");
+    check.equal(template.content.querySelector('[data-type~="a"]').getAttribute("data-href"), "https://example.org");
+    template.innerHTML = flatten(lute.Md2BlockDOM("$$\nx^2\n$$"), "", false);
+    check.equal(template.content.querySelector('[data-type="inline-math"]').getAttribute("data-content"), "x^2");
+    template.innerHTML = flatten("", "Fallback\r\n<title>", false);
+    check.equal(template.content.querySelector("[contenteditable]").textContent, "Fallback <title>");
+    check.equal(template.content.querySelector("title"), null);
+    check.equal(flatten("", "", false), "");
+    const internal = paragraph('<span data-type="strong" style="color: red">First</span><br>second') +
+        paragraph('<span data-type="block-ref" data-id="20260101000001-abcdefg" data-subtype="d">Ref</span>') +
+        paragraph('<span class="img"><img src="assets/p.png" alt="Picture"></span>');
+    template.innerHTML = flatten(internal, "", true);
+    check.equal(unsupported(template.innerHTML).length, 0);
+    check.equal(template.content.querySelector("[contenteditable]").textContent, "First second Ref ");
+    check.equal(template.content.querySelector("br"), null);
+    check.equal(template.content.querySelector<HTMLElement>('[data-type="strong"]').style.color, "red");
+    check.equal(template.content.querySelector<HTMLElement>('[data-type="block-ref"]').dataset.id, "20260101000001-abcdefg");
+    check.equal(template.content.querySelector("img").getAttribute("src"), "assets/p.png");
+    template.innerHTML = lute.SpinBlockDOM(prepare(template.innerHTML, "20260101000000-abcdefg"));
+    check.match(template.content.querySelector("[contenteditable]").textContent, /^First second Ref/);
+    template.innerHTML = flatten('<span data-type="em">Inline</span>', "", true);
+    check.equal(template.content.querySelector('[data-type="em"]').textContent, "Inline");
+    const withRefCount = (block: string, count: number) => block.replace(/<\/div>$/,
+        `<div class="protyle-attr" contenteditable="false"><div class="protyle-attr--refcount popover__block">${count}</div></div></div>`);
+    const copiedParagraph = withRefCount(paragraph('<span data-type="strong">234234234</span>'), 1);
+    const copiedHeading = withRefCount(paragraph('<span data-type="block-ref" data-id="20260101000001-abcdefg" data-subtype="s">234</span>')
+        .replace('data-type="NodeParagraph"', 'data-type="NodeHeading" data-subtype="h2"')
+        .replace('class="p"', 'class="h2"'), 12);
+    template.innerHTML = flatten(copiedParagraph + copiedHeading, "234234234\n234", true);
+    check.equal(template.content.querySelector("[contenteditable]").textContent, "234234234 234",
+        "pasting blocks into a title excludes their reference counts");
+    check.equal(template.content.querySelector(".protyle-attr--refcount"), null);
+    check.equal(template.content.querySelector('[data-type="strong"]').textContent, "234234234");
+    check.equal(template.content.querySelector<HTMLElement>('[data-type="block-ref"]').dataset.id, "20260101000001-abcdefg");
     for (const prefix of ["Plain", '<span data-type="em">Styled</span>']) {
         for (const suffix of [" (Duplicated 2026-11-08 00:02:47)", " (Conflicted 2026-11-08 00:02:47)"]) {
             template.innerHTML = initial(paragraph(prefix + suffix), "20260101000000-abcdefg");
@@ -88,6 +150,37 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
         check.equal(template.content.querySelectorAll('[data-type^="Node"]').length, 1, text);
         check.equal(template.content.firstElementChild.getAttribute("data-type"), "NodeParagraph", text);
         check.equal(template.content.querySelector("[contenteditable]").textContent, text, text);
+    }
+    let blockTransactions = 0;
+    const conversions = new Function("decodeHTML", "transaction", "focusByWbr", "Constants", "dayjs", "escapeAttr",
+        sources.slice(7).join("\n") + "\nreturn {turnIntoTaskList, headingTurnIntoList, registerProtyleRuntimeCapabilities};")(
+        (html: string) => { const field = document.createElement("textarea"); field.innerHTML = html; return field.value; },
+        () => blockTransactions++, () => {}, {ATTRIBUTE_EDITING: "data-editing"}, () => ({format: () => "20260101000000"}),
+        (value: string) => value);
+    Object.assign(window.siyuan, {config: {editor: {markdown: {blockFullWidthTaskList: true}}}});
+    for (const restricted of [true, false]) {
+        for (const marker of ["[]", "[ ]", "[x]", "[/]", "【 】"]) {
+            const host = document.createElement("div");
+            host.innerHTML = paragraph(marker + " Task<wbr>");
+            const owner = {wysiwyg: {element: host}};
+            conversions.registerProtyleRuntimeCapabilities(owner, {blockConversion: !restricted});
+            const block = host.firstElementChild;
+            const editable = block.querySelector("[contenteditable]");
+            const original = host.innerHTML;
+            const before = blockTransactions;
+            check.equal(conversions.turnIntoTaskList(owner, "NodeParagraph", block, editable, document.createRange()), !restricted);
+            if (restricted) {
+                check.equal(host.innerHTML, original, "title task markers remain literal without DOM changes");
+                check.equal(blockTransactions, before, "title input cannot issue list transactions");
+                check.equal(conversions.headingTurnIntoList(owner, "NodeHeading", block, editable, document.createRange()), false);
+                template.innerHTML = lute.SpinBlockDOM(host.innerHTML);
+                check.equal(prepare(template.innerHTML).includes("NodeList"), false);
+                check.equal(template.content.querySelector("[contenteditable]").textContent, marker + " Task");
+            } else {
+                check.ok(host.querySelector('[data-type="NodeList"]'), "ordinary body input still creates tasks");
+                check.equal(blockTransactions, before + 1);
+            }
+        }
     }
     template.innerHTML = lute.SpinBlockDOM(paragraph("**Bold** and `code`"));
     check.equal(template.content.querySelector('[data-type~="strong"]').textContent, "Bold");
@@ -122,7 +215,7 @@ const browserCases = async (sources: string[], lutePath: string, styles: string[
         '<span class="katex">Untrusted cache</span></span>')));
     check.equal(template.content.querySelector(".katex"), null, "input HTML cannot supply trusted render caches");
 
-    const Editor = new Function("getDocumentTitleDOMFingerprint", sources[3] + "\nreturn DocumentTitleEditor;")(fingerprint);
+    const Editor = new Function("getDocumentTitleDOMFingerprint", "isIPad", sources[3] + "\nreturn DocumentTitleEditor;")(fingerprint, () => false);
     const Title = new Function(sources[4] + "\nreturn Title;")();
     const disable = new Function(sources[5] + "\nreturn disabledWYSIWYG;")();
     const root = document.createElement("div");
@@ -274,16 +367,24 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
             const titleWysiwyg = host.querySelector<HTMLElement>(".protyle-wysiwyg");
             const toolbar = host.querySelector<HTMLElement>(".protyle-toolbar");
             const subElement = host.querySelector<HTMLElement>(".protyle-util");
-            const protyle = {block: {}, undo: {}, toolbar: {element: toolbar, subElement}};
+            const protyle = {block: {}, undo: {}, lite: true, wysiwyg: {element: titleWysiwyg},
+                toolbar: {element: toolbar, subElement}};
             const fragment = {protyle, wysiwyg: titleWysiwyg, getBlockHTML: () => titleWysiwyg.innerHTML,
                 instance: {enable() {}, disable() {}}, destroy() {}};
             const dependencies = {
-                isMobile: () => mobile, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
+                isMobile: () => mobile, isIPad: () => false, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
+                copyDocumentTitleTarget: () => false, matchHotKey: () => false, isDocumentTitleBlockHotkey: () => false,
                 hintRef: () => {}, hintTag: () => {},
                 getDocumentTitleLute: () => lute, getAgentLute: () => lute,
                 prepareDocumentTitleInitialDOM: (html: string) => html,
                 prepareDocumentTitleBlockDOM: prepare, getDocumentTitleUnsupportedPasteBlocks: unsupported,
-                getDocumentTitleDOMFingerprint: fingerprint, mountProtyleLiteFragment: () => fragment,
+                flattenDocumentTitlePaste: flatten,
+                getDocumentTitleDOMFingerprint: fingerprint, mountProtyleLiteFragment: (_host: HTMLElement,
+                    options: {runtimeCapabilities: {blockConversion: boolean; transformPasteBlockDOM: typeof flatten}}) => {
+                    check.equal(options.runtimeCapabilities.blockConversion, false, "desktop/mobile titles and rename drafts forbid block conversion");
+                    check.equal(options.runtimeCapabilities.transformPasteBlockDOM, flatten);
+                    return fragment;
+                },
                 setMobileToolbarUndo: () => {}, hideElements, hideAllElements,
             };
             const MountedEditor = new Function(...Object.keys(dependencies), sources[3] + "\nreturn DocumentTitleEditor;")(
@@ -297,6 +398,47 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
             range.selectNodeContents(editable.querySelector("strong"));
             getSelection().removeAllRanges();
             getSelection().addRange(range);
+            if (mobile) {
+                const toolbarDependencies = {
+                    getCurrentEditor: () => ({protyle}), getSelection,
+                    hasClosestBlock: () => editable.parentElement,
+                    stripSemanticMarkersFromRangeText: (range: Range) => range.toString(),
+                    getEntryOrder: (): string[] => [], isEntryVisible: () => true,
+                    getMobileToolbarContextPath: () => "editor.toolbar",
+                    Constants: {ZWSP: "\u200b"}, MOBILE_TOOLBAR_NAMES: [] as string[], MOBILE_TOOLBAR_ACTION_NAMES: [] as string[],
+                    MOBILE_TOOLBAR_INSERTS: [] as Array<{name: string}>,
+                    applyMobileToolbarEntries: (_element: unknown, _toolbar: unknown, options: {
+                        isAvailable: (name: string) => boolean,
+                    }) => {
+                        for (const name of ["softLine", "moveup", "movedown"]) {
+                            check.equal(options.isAvailable(name), false, `${draft ? "rename drawer" : "inline title"}: ${name}`);
+                        }
+                        for (const name of ["add", "undo", "redo"]) {
+                            check.equal(options.isAvailable(name), true);
+                        }
+                    },
+                };
+                const applyEntries = new Function(...Object.keys(toolbarDependencies), sources[10] +
+                    "\nreturn applyKeyboardToolbarEntries;")(...Object.values(toolbarDependencies));
+                applyEntries(toolbar, []);
+            }
+            const original = titleWysiwyg.innerHTML;
+            for (let repeat = 0; repeat < 3; repeat++) {
+                const key = new KeyboardEvent("keydown", {key: "Enter", shiftKey: true, repeat: repeat > 0,
+                    bubbles: true, cancelable: true});
+                editable.dispatchEvent(key);
+                check.equal(key.defaultPrevented, true, "Shift+Enter cannot insert title line breaks");
+                const before = new InputEvent("beforeinput", {inputType: "insertLineBreak", bubbles: true, cancelable: true});
+                editable.dispatchEvent(before);
+                check.equal(before.defaultPrevented, true, "native/mobile line breaks are blocked without a keydown");
+                check.equal(titleWysiwyg.innerHTML, original, "blocked line breaks retain the draft and selection");
+                check.equal(getSelection().toString(), "Selected");
+            }
+            const formulaField = document.createElement("textarea");
+            subElement.append(formulaField);
+            const formulaBreak = new InputEvent("beforeinput", {inputType: "insertLineBreak", bubbles: true, cancelable: true});
+            formulaField.dispatchEvent(formulaBreak);
+            check.equal(formulaBreak.defaultPrevented, false, "formula source fields retain their own line breaks");
             let escaped = false;
             const onMouseDown = () => { escaped = true; };
             root.addEventListener("mousedown", onMouseDown);
@@ -311,6 +453,23 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
             check.equal(toolbar.classList.contains("fn__none"), false, "format buttons keep the toolbar available");
             check.equal(getSelection().toString(), "Selected", "format buttons retain their selection");
             check.equal(subElement.classList.contains("fn__none"), false, "selection dismissal does not close formatting menus");
+            for (const inputType of ["insertText", "insertReplacementText", "insertFromPaste", "deleteContentBackward"]) {
+                toolbar.classList.remove("fn__none");
+                toolbar.style.display = "block";
+                editable.dispatchEvent(new InputEvent("input", {bubbles: true, inputType, data: "x"}));
+                check.equal(toolbar.classList.contains("fn__none"), true, `${inputType} dismisses the title selection toolbar`);
+                check.equal(toolbar.style.display, "");
+                check.equal(subElement.classList.contains("fn__none"), false, "editing keeps formatting menus available");
+            }
+            const field = document.createElement("input");
+            subElement.append(field);
+            toolbar.classList.remove("fn__none");
+            field.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", data: "x"}));
+            check.equal(toolbar.classList.contains("fn__none"), false, "toolbar input fields retain the toolbar");
+            field.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+            check.equal(toolbar.classList.contains("fn__none"), false, "IME input in toolbar fields retains the toolbar");
+            editable.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+            check.equal(toolbar.classList.contains("fn__none"), true, "IME composition dismisses the title toolbar before committing");
             root.removeEventListener("mousedown", onMouseDown);
             mounted.destroy();
             host.remove();
@@ -322,14 +481,27 @@ padding-left: ${horizontalPadding}px; padding-right: ${horizontalPadding}px;}`;
 };
 
 test("native document title DOM preserves content, layout, readonly handoff and local toolbar dismissal", {
-    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+    skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
     timeout: 30000,
 }, async () => {
     const sources = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "documentTitleDOM.ts", "documentTitleEditor.ts",
-        "Title.ts", "../util/disabledWYSIWYG.ts", "../ui/hideElements.ts"].map(file =>
+        "Title.ts", "../util/disabledWYSIWYG.ts", "../ui/hideElements.ts", "../runtimeCapabilities.ts",
+        "../wysiwyg/taskListMarker.ts", "../wysiwyg/turnIntoList.ts"].map(file =>
         transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);
+    const toolbarSources = [
+        {file: "../../mobile/util/keyboardToolbar.ts", name: "applyKeyboardToolbarEntries"},
+        {file: "../util/hasClosest.ts", name: "hasClosestByClassName"},
+    ].map(({file, name}) => {
+        const text = readFileSync(path.join(__dirname, file), "utf8");
+        const ast = createSourceFile(file, text, ScriptTarget.ES2021, true);
+        const statement = ast.statements.find(node => isVariableStatement(node) &&
+            node.declarationList.declarations.some(item => item.name.getText(ast) === name));
+        assert.ok(statement, name);
+        return statement.getText(ast).replace(/^export /, "");
+    }).join("\n");
+    sources.push(transpileModule(toolbarSources, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText);
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-title-dom-test-"));
     const script = path.join(temporary, "run.cjs");
     const styles = ["base", "mobile"].map(entry => compile(path.resolve(__dirname,
@@ -351,7 +523,8 @@ app.whenReady().then(async () => {
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
-        const result = await promisify(execFile)(require("electron") as unknown as string, [script],
+        const args = process.env.SIYUAN_ELECTRON_HEADLESS ? ["--ozone-platform=headless", script] : [script];
+        const result = await promisify(execFile)(require("electron") as unknown as string, args,
             {env, windowsHide: true, timeout: 25000});
         assert.match(result.stdout, /Document title DOM cases passed/);
     } finally {

@@ -7,7 +7,7 @@
 		"id": "20210808180320-gyngv2x",
 		"title": "搜索进阶",
 		"type": "doc",
-		"updated": "20261026182843"
+		"updated": "20261118224805"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-ljls7op",
-				"updated": "20261026182843"
+				"updated": "20261114162405"
 			},
 			"Children": [
 				{
@@ -65,6 +65,70 @@
 				{
 					"Type": "NodeText",
 					"Data": "关键字与查询语法搜索支持块类型、笔记本和文档路径筛选、包含子文档，以及排序、分组和替换。按内容顺序排序仅在按文档分组时可用。直接输入块 ID 时，同样遵循笔记本、文档路径、块类型、子类型和忽略条件。关键字模式的多词搜索会按字面量匹配 %、_ 和反斜杠。按文档分组只整理当前页的结果，不改变当前搜索方式的分页单位；按块分页时，同一文档的命中块可能分布在多页。"
+				}
+			]
+		},
+		{
+			"ID": "20261114162405-1c3c4bf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261114162405-1c3c4bf",
+				"updated": "20261115223610"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在搜索面板中通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "分组结果"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "默认展开"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "默认折叠"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。默认展开，仅在按文档分组时生效。新搜索与刷新结果时会应用此偏好，仍可手动展开或折叠分组。桌面端仍会预览第一条结果，使用键盘导航时会展开选中结果所在的分组。"
+				}
+			]
+		},
+		{
+			"ID": "20261118224805-wwex1jx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118224805-wwex1jx",
+				"updated": "20261118224805"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果单行搜索结果中的首处高亮会被截掉，列表会省略部分前文，让命中内容出现在可见区域。"
 				}
 			]
 		},
@@ -101,7 +165,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010113646-r0h5r0j",
-				"updated": "20261010113646"
+				"updated": "20261113013235"
 			},
 			"Children": [
 				{
@@ -115,7 +179,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 换行；请保留 -- 行注释后的换行，避免后续语句被视为注释。搜索窗口需要完整块字段，例如 SELECT b.* FROM blocks b；仅选择部分字段或统计结果应交给智能体的 sql.query。"
+					"Data": " 换行；请保留 -- 行注释后的换行，避免后续语句被视为注释。其他搜索方式使用单行输入，粘贴的换行以及从 SQL 切换后留在输入框中的换行会转为空格。搜索窗口需要完整块字段，例如 SELECT b.* FROM blocks b；仅选择部分字段或统计结果应交给智能体的 sql.query。"
 				}
 			]
 		},
@@ -143,7 +207,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "当前搜索方式不支持的控件会禁用并显示说明提示。SQL 与语义搜索会隐藏替换输入行，但保留已输入文本和展开状态，切回支持替换的方式时恢复显示。保存和重置查询条件仍可使用。"
+					"Data": "当前搜索方式不支持的控件会禁用并显示说明提示。SQL 与语义搜索会隐藏替换输入行，但保留已输入文本和展开状态，切回支持替换的方式时恢复显示。桌面端通过搜索界面中的按钮保存和重置查询条件，移动端通过更多菜单操作。排序和分组选项会在重新打开搜索时记忆，也包含在保存的查询条件中；桌面端结果布局单独记忆。取消按文档分组时，按原文内容排序会切换为按类型排序，其他排序方式保持不变。"
 				}
 			]
 		},

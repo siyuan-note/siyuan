@@ -44,12 +44,21 @@ const runCases = async (sources, css, mobile, dark) => {
     let signal;
     const files = [{id: "doc-file", path: "/notebook/project/document.sy"}, ...Array.from({length: 20}, (_, i) => ({id: "file-" + i, path: "/notebook/project/note-" + i + ".sy"}))];
     let nextID = 0;
+    const dateSessions = [];
     const stubs = {
+        "datePicker/index": {openInternalDatePicker: options => {
+            let finish;
+            const session = {options, result: new Promise(resolve => { finish = resolve; }),
+                confirm: value => finish({type: "confirm", value}),
+                destroyed: false, destroy() { this.destroyed = true; finish({type: "cancel", reason: "destroy"}); }};
+            dateSessions.push(session);
+            return session;
+        }},
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
         "util/genID": {genUUID: () => String(++nextID)},
         "util/zIndex": {isAbove: () => false},
         "dialog/moveResize": {moveResize() {}},
-        "util/functions": {isMobile: () => mobile},
+        "util/functions": {isMobile: () => mobile, getFrontend: () => mobile ? "browser-mobile" : "browser-desktop"},
         "protyle/util/compatibility": {isNotCtrl: () => true, saveExportFile() {}},
         "protyle": {Protyle: class {}},
         "constants": {Constants: {TIMEOUT_DBLCLICK: 0, TIMEOUT_OPENDIALOG: 0, SIYUAN_ASSETS_IMAGE: [], SIYUAN_ASSETS_AUDIO: [], SIYUAN_ASSETS_VIDEO: []}},
@@ -61,6 +70,7 @@ const runCases = async (sources, css, mobile, dark) => {
         "util/pathName": {pathPosix: () => require("node:path").posix},
         "util/hostCapabilities": {getHostCapabilities: () => ({importExport: true})},
         "dayjs": require(path.join(sources.app, "node_modules/dayjs")),
+        "filesize": require(path.join(sources.app, "node_modules/filesize")),
         "util/fetch": {
             fetchSyncPost: async (url, body, _headers, _process, abortSignal) => {
                 if (url === "/api/history/getDocHistorySnapshots") {
@@ -96,15 +106,59 @@ const runCases = async (sources, css, mobile, dark) => {
     };
     const {Dialog} = load("dialog");
     const mobileRuntime = new Function("Dialog", "mobile", "return " + sources.mobileRuntime)(Dialog, mobile);
-    stubs["dialog/mobileDialog"] = mobileRuntime;
-    stubs["dialog/mobileConfirmDialog"] = mobileRuntime;
-    stubs["dialog/mobileInputDialog"] = mobileRuntime;
+    stubs["dialog/adaptiveDialog"] = mobileRuntime;
+    stubs["dialog/confirmDialog"] = mobileRuntime;
+    stubs["dialog/inputDialog"] = mobileRuntime;
     const {initRepoPanel} = load("history/repoPanel");
     const panel = document.createElement("div");
     panel.className = "history__repo fn__block";
     panel.innerHTML = `<div class="history__action"><div class="history__repo-pagination"></div><input class="b3-text-field"><button data-type="compare">Compare</button>${new Function("return `" + sources.snapshotButtons + "`;")()}</div><ul data-type="repoList"></ul>`;
     document.body.append(panel);
-    const disposePanel = initRepoPanel(panel, () => {});
+    let refreshes = 0;
+    const disposePanel = initRepoPanel(panel, () => { refreshes++; });
+    const start = panel.querySelector('[data-range="start"]');
+    const end = panel.querySelector('[data-range="end"]');
+    assert.equal(panel.querySelector('[data-role="date-calendar"]'), null, "snapshot dates reserve no inline calendar space");
+    assert.equal(start.type, "date");
+    assert.equal(end.type, "date");
+    if (mobile) panel.querySelector('[data-action="filters"]').click();
+    start.focus();
+    assert.equal(dateSessions.length, 0, "focus alone does not open the date dropdown");
+    start.click();
+    start.click();
+    assert.equal(dateSessions.length, 1, "repeated clicks reuse the open dropdown");
+    assert.equal(dateSessions.at(-1).options.ownerElement, start);
+    assert.equal(dateSessions.at(-1).options.min, "1970-01-01");
+    dateSessions.at(-1).confirm("2026-11-01");
+    await Promise.resolve();
+    assert.equal(end.min, "2026-11-01");
+    assert.equal(start.getAttribute("aria-expanded"), "false");
+    end.value = "2026-11-30";
+    end.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.equal(start.max, "2026-11-30");
+    end.click();
+    assert.equal(dateSessions.at(-1).options.ownerElement, end);
+    assert.equal(dateSessions.at(-1).options.min, "2026-11-01");
+    dateSessions.at(-1).confirm("2026-11-25");
+    await Promise.resolve();
+    assert.equal(end.value, "2026-11-25", "dropdown selection edits its own range endpoint");
+    assert.equal(start.max, "2026-11-25");
+    end.value = "2026-10-31";
+    end.dispatchEvent(new Event("input", {bubbles: true}));
+    panel.querySelector('[data-role="date-range"]').dispatchEvent(new Event("submit", {bubbles: true, cancelable: true}));
+    assert.equal(refreshes, 0, "invalid range drafts cannot query snapshots");
+    end.value = "2026-11-30";
+    end.dispatchEvent(new Event("change", {bubbles: true}));
+    assert.equal(refreshes, 0, "date editing keeps the existing explicit filter boundary");
+    panel.querySelector('[data-role="date-range"]').dispatchEvent(new Event("submit", {bubbles: true, cancelable: true}));
+    assert.equal(refreshes, 2, "filter refreshes local and cloud snapshots");
+    panel.querySelector('[data-action="range-clear"]').click();
+    assert.equal(start.value, "");
+    assert.equal(end.value, "");
+    assert.equal(start.max, "9999-12-31");
+    assert.equal(end.min, "1970-01-01");
+    assert.equal(refreshes, 4);
+    assert.equal(dateSessions.at(-1).options.autoConfirm, true, "range endpoints use the shared auto-confirm dropdown");
     await tick();
     const local = panel.querySelector('[data-repo-source="local"]');
     const cloud = panel.querySelector('[data-repo-source="cloud"]');
@@ -118,7 +172,12 @@ const runCases = async (sources, css, mobile, dark) => {
         assert.ok(heading.scrollWidth <= heading.clientWidth + 1, "snapshot controls must wrap on narrow screens");
         assert.ok(button.getBoundingClientRect().width > 0 && button.getBoundingClientRect().right <= innerWidth + 1, "full check must remain visible");
     }
+    end.click();
+    const closingSession = dateSessions.at(-1);
     disposePanel();
+    assert.equal(closingSession.destroyed, true, "panel disposal closes its active date dropdown");
+    assert.equal(start.classList.contains("date-picker-input"), false);
+    assert.equal(end.classList.contains("date-picker-input"), false);
     panel.remove();
     const {DocHistorySnapshots} = load("history/docSnapshots");
     const {closeNotebookHistoryDialogs} = load("history/notebookDialogs");
@@ -192,6 +251,190 @@ const runCases = async (sources, css, mobile, dark) => {
     view.destroy();
     history.destroy();
     await tick();
+
+    let confirmRestore;
+    let releaseUnload;
+    let finishDetail;
+    let detailSignal;
+    let deferDetail = false;
+    let emptyPluginData = false;
+    const operations = [];
+    const queries = [];
+    let lastPackage = "";
+    stubs["dialog/confirmDialog"] = {confirmDialog: ({confirm}) => { confirmRestore = confirm; }};
+    stubs["plugin/loader"] = {unloadPlugin: async () => {
+        operations.push("unload");
+        await new Promise(resolve => { releaseUnload = resolve; });
+    }};
+    stubs["util/fetch"].fetchSyncPost = async (url, body, _headers, _process, abortSignal) => {
+        if (url === "/api/bazaar/getInstalledPlugin") {
+            return {code: 0, data: {packages: [
+                {name: "example", preferredName: "Example <img src=x onerror=alert(1)>", enabled: true},
+                {name: "disabled-package", preferredName: "Disabled", enabled: false},
+            ]}};
+        }
+        if (url === "/api/repo/getPluginSnapshots") {
+            lastPackage = body.name;
+            queries.push(body);
+            return {code: 0, data: {pageCount: 2, totalCount: 40, snapshots: Array.from({length: 20}, (_, index) => ({
+                id: String(index).padStart(40, "a"), created: snapshots[0].created, memo: "<img src=x> Snapshot " + index,
+                program: {count: 1, size: 1024}, data: {count: 1, size: 2000000},
+            }))}};
+        }
+        if (url === "/api/repo/getRepoSnapshots") {
+            detailSignal = abortSignal;
+            const response = {code: 0, data: {snapshots: [{id: body.id, created: snapshots[0].created, memo: "Plugin", files: [
+                {id: "program-file", path: `plugins/${lastPackage}/index.js`},
+                ...emptyPluginData ? [] : [{id: "data-file", path: `storage/petal/${lastPackage}/data.json`}],
+                {id: "other-file", path: `storage/petal/${lastPackage}-other/data.json`},
+            ]}]}};
+            if (deferDetail) return new Promise(resolve => { finishDetail = () => resolve(response); });
+            return response;
+        }
+        if (url === "/api/petal/setPetalEnabled") { operations.push("disable"); assert.equal(body.enabled, false); return {code: 0}; }
+        assert.equal(url, "/api/repo/restorePluginSnapshot");
+        operations.push("restore");
+        return {code: 0, data: {backupID: "backup"}};
+    };
+    const {mountPluginSnapshots} = load("history/pluginSnapshots");
+    let disposePlugins;
+    const pluginDialog = new Dialog({title: "Snapshots", width: mobile ? "100vw" : "90vw", height: mobile ? "100dvh" : "80vh",
+        content: '<div class="history__repo fn__block"><div class="history__action"><div class="history__repo-pagination"></div><input class="b3-text-field"><button data-type="compare">Compare</button></div><ul data-type="repoList"></ul></div>',
+        beforeClose: () => disposePlugins?.canClose() !== false,
+        destroyCallback: () => disposePlugins?.(),
+    });
+    const pluginRoot = pluginDialog.element.querySelector(".history__repo");
+    disposePlugins = initRepoPanel(pluginRoot, () => {}, (container, setRestoring) =>
+        mountPluginSnapshots({appId: "app", plugins: [{name: "example"}]}, container, setRestoring));
+    const dialogCount = window.siyuan.dialogs.length;
+    pluginRoot.querySelector('[data-action="plugin-snapshots"]').click();
+    await tick();
+    assert.equal(window.siyuan.dialogs.length, dialogCount, "plugin mode reuses the existing snapshot dialog");
+    assert.equal(getComputedStyle(pluginRoot.querySelector(".history__snapshot-columns")).display, "none");
+    assert.equal(getComputedStyle(pluginRoot.querySelector('[data-action="filters"]')).display, "none");
+    const pluginInput = pluginRoot.querySelector('[role="combobox"]');
+    pluginInput.focus();
+    await tick();
+    assert.equal(pluginRoot.querySelectorAll('[role="option"]').length, 2, "disabled installed plugins remain selectable");
+    assert.equal(pluginRoot.querySelector(".history__plugin-options img"), null, "package labels remain text");
+    const options = pluginRoot.querySelectorAll('[role="option"]');
+    pluginInput.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown", bubbles: true, cancelable: true}));
+    assert.equal(pluginInput.getAttribute("aria-activedescendant"), options[1].id);
+    const optionBounds = options[1].getBoundingClientRect();
+    assert.ok(optionBounds.bottom <= innerHeight);
+    assert.equal(document.elementFromPoint(optionBounds.x + optionBounds.width / 2, optionBounds.y + optionBounds.height / 2)?.closest('[role="option"]'), options[1], "dropdown options remain visible and reachable outside the input row");
+    await require("electron").ipcRenderer.invoke("history-snapshots-capture", `plugin-chooser-${mobile ? "mobile" : "desktop"}-${dark ? "dark" : "light"}`);
+    pluginInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    assert.equal(pluginInput.getAttribute("aria-expanded"), "false");
+    pluginInput.value = "Example";
+    pluginInput.dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+    pluginRoot.querySelector("[data-plugin-search]").requestSubmit();
+    assert.equal(queries.length, 0, "IME composition cannot query or select a partial plugin name");
+    pluginInput.dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
+    pluginInput.dispatchEvent(new Event("input", {bubbles: true}));
+    assert.equal(pluginRoot.querySelectorAll('[role="option"]').length, 1);
+    pluginRoot.querySelector('[role="option"]').click();
+    await tick();
+    assert.equal(queries.at(-1).name, "example");
+    const rows = pluginRoot.querySelectorAll("[data-plugin-list] > li");
+    assert.equal(rows.length, 20);
+    assert.match(rows[0].textContent, /1.02 kB/);
+    assert.match(rows[0].textContent, /2 MB/);
+    assert.equal(rows[0].querySelector("img"), null);
+    await require("electron").ipcRenderer.invoke("history-snapshots-capture", `plugin-list-${mobile ? "mobile" : "desktop"}-${dark ? "dark" : "light"}`);
+    const actions = rows[0].querySelectorAll("button");
+    assert.ok(actions[0].getBoundingClientRect().top - rows[0].querySelector(".history__association-memo").getBoundingClientRect().bottom >= 8,
+        "plugin actions have space above the button row");
+    actions[0].click();
+    await tick();
+    assert.equal(window.siyuan.dialogs.length, dialogCount, "plugin files and preview stay inside the same dialog");
+    let pluginFiles = pluginRoot.querySelectorAll(".history__snapshot-detail-files [data-id]");
+    assert.equal(pluginFiles.length, 1);
+    assert.equal(pluginFiles[0].dataset.id, "data-file");
+    pluginFiles[0].click();
+    await tick();
+    assert.equal(pluginRoot.querySelector("textarea").value, "文档内容 data-file");
+    assert.ok(pluginRoot.scrollWidth <= pluginRoot.clientWidth + 1);
+    const checkPluginDetail = () => {
+        const panel = pluginRoot.querySelector(".history__plugin-detail");
+        const content = panel.querySelector(".history__snapshot-detail-content");
+        const panels = panel.querySelector(".history__snapshot-detail-panels");
+        const bounds = panel.getBoundingClientRect();
+        assert.ok(content.getBoundingClientRect().bottom <= bounds.bottom + 1, "snapshot detail fits below its toolbar");
+        assert.ok(panels.getBoundingClientRect().bottom <= bounds.bottom + 1, "file list and preview remain inside the panel");
+        assert.ok(panel.scrollHeight <= panel.clientHeight + 1, "the embedded detail does not overflow vertically");
+        assert.ok(panel.scrollWidth <= panel.clientWidth + 1, "the embedded detail does not overflow horizontally");
+        if (!mobile) {
+            const result = pluginRoot.querySelector("[data-plugin-result]");
+            const toolbar = panel.firstElementChild;
+            assert.equal(result.getBoundingClientRect().bottom, toolbar.getBoundingClientRect().bottom, "list and detail headers align");
+            assert.equal(getComputedStyle(panel).borderLeftWidth, "1px", "desktop columns have a visible boundary");
+        }
+    };
+    checkPluginDetail();
+    await require("electron").ipcRenderer.invoke("history-snapshots-capture", `plugin-detail-${mobile ? "mobile" : "desktop"}-${dark ? "dark" : "light"}`);
+    pluginRoot.querySelector("[data-plugin-back]").click();
+    actions[1].click();
+    await tick();
+    pluginFiles = pluginRoot.querySelectorAll(".history__snapshot-detail-files [data-id]");
+    assert.equal(pluginFiles.length, 1);
+    assert.equal(pluginFiles[0].dataset.id, "program-file");
+    pluginRoot.querySelector("[data-plugin-back]").click();
+    emptyPluginData = true;
+    actions[0].click();
+    await tick();
+    checkPluginDetail();
+    const empty = pluginRoot.querySelector(".history__snapshot-detail-panels");
+    assert.equal(empty.textContent, window.siyuan.languages.emptyContent);
+    assert.equal(empty.querySelector(".history__snapshot-detail-files"), null, "empty data does not leave a narrow file column");
+    assert.equal(empty.querySelector(".history__snapshot-detail-preview"), null, "empty data does not leave a blank preview column");
+    await require("electron").ipcRenderer.invoke("history-snapshots-capture", `plugin-empty-${mobile ? "mobile" : "desktop"}-${dark ? "dark" : "light"}`);
+    pluginRoot.querySelector("[data-plugin-back]").click();
+    emptyPluginData = false;
+    for (const font of [16, 28]) {
+        pluginRoot.style.fontSize = font + "px";
+        await tick();
+        const list = pluginRoot.querySelector("[data-plugin-list]");
+        assert.ok(list.scrollHeight > list.clientHeight, "plugin rows scroll within their panel");
+        assert.ok(list.getBoundingClientRect().bottom <= innerHeight + 1);
+        assert.ok(pluginRoot.scrollWidth <= pluginRoot.clientWidth + 1, "plugin controls fit narrow and enlarged layouts");
+        const buttons = list.querySelectorAll("button");
+        assert.ok(buttons[0].getBoundingClientRect().top - list.querySelector(".history__association-memo").getBoundingClientRect().bottom >= 8);
+        buttons[0].click();
+        await tick();
+        checkPluginDetail();
+        pluginRoot.querySelector("[data-plugin-back]").click();
+    }
+    pluginInput.value = "Dis"; pluginInput.dispatchEvent(new Event("input", {bubbles: true}));
+    pluginInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true}));
+    await tick();
+    assert.equal(queries.at(-1).name, "disabled-package");
+    pluginInput.value = "removed-package"; pluginInput.dispatchEvent(new Event("input", {bubbles: true}));
+    pluginRoot.querySelector("[data-plugin-search]").requestSubmit(); await tick();
+    assert.equal(queries.at(-1).name, "removed-package", "uninstalled packages can still be queried by exact name");
+    pluginInput.value = "example";
+    pluginRoot.querySelector("[data-plugin-search]").requestSubmit(); await tick();
+    pluginRoot.querySelector('[data-plugin-page="next"]').click(); await tick();
+    assert.equal(queries.at(-1).page, 2);
+    pluginRoot.querySelector('[data-plugin-restore="true"]').click();
+    const restoring = confirmRestore(); await tick();
+    assert.deepEqual(operations, ["disable", "unload"]);
+    assert.equal(disposePlugins.canClose(), false);
+    pluginDialog.destroy();
+    assert.equal(pluginDialog.element.dataset.dialogClosing, undefined, "restoring keeps the parent available");
+    releaseUnload(); assert.equal(await restoring, true);
+    assert.deepEqual(operations, ["disable", "unload", "restore"]);
+    assert.match(pluginRoot.querySelector("[data-plugin-result]").textContent, /backup/);
+    assert.equal(disposePlugins.canClose(), true);
+    pluginRoot.querySelector('[data-action="normal"]').click();
+    assert.equal(pluginRoot.classList.contains("history__snapshots--plugins"), false);
+    pluginRoot.querySelector('[data-action="plugin-snapshots"]').click();
+    deferDetail = true;
+    pluginRoot.querySelector("[data-plugin-list] button").click(); await tick();
+    pluginDialog.destroy(); await tick();
+    assert.ok(detailSignal.aborted, "closing the parent cancels its inline file request");
+    finishDetail(); await tick();
+    assert.equal(window.siyuan.dialogs.length, 0);
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -203,7 +446,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             ipcMain.handle("history-snapshots-capture", async (_event, name) => {
                 if (process.env.SIYUAN_HISTORY_CAPTURE_DIR) {
-                    assert.match(name, /^(history-)?(mobile|desktop)-(dark|light)$/);
+                    assert.match(name, /^(history-|plugin-list-|plugin-detail-|plugin-empty-|plugin-chooser-)?(mobile|desktop)-(dark|light)$/);
                     win.webContents.invalidate();
                     await new Promise(resolve => setTimeout(resolve, 350));
                     fs.writeFileSync(path.join(process.env.SIYUAN_HISTORY_CAPTURE_DIR, name + ".png"), (await win.webContents.capturePage()).toPNG());
@@ -213,8 +456,8 @@ if (process.versions.electron && process.type === "browser") {
             const sass = require("sass");
             const sources = {app: path.resolve(__dirname, ".."), icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"), languages: fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8")};
             sources.snapshotButtons = fs.readFileSync(path.join(__dirname, "../src/history/history.ts"), "utf8").match(/<button class="b3-button b3-button--outline" data-type="genRepo">[\s\S]*?data-type="fullCheckRepo">[^<]*<\/button>/)[0];
-            sources.mobileRuntime = require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource();
-            for (const name of ["dialog/index", "util/escape", "history/docSnapshots", "history/snapshotDetail", "history/notebookDialogs", "history/repoFile", "history/repoPanel", "history/repoBatch", "history/repoRange", "history/repoPurge"]) {
+            sources.mobileRuntime = require("./fixtures/dialogRuntime.cjs").dialogRuntimeSource();
+            for (const name of ["datePicker/binding", "datePicker/model", "dialog/index", "util/escape", "util/upDownHint", "history/docSnapshots", "history/snapshotDetail", "history/pluginSnapshotPaths", "history/pluginSnapshotSelect", "history/pluginSnapshots", "history/notebookDialogs", "history/repoFile", "history/repoPanel", "history/repoBatch", "history/repoRange", "history/repoPurge"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
             }
             sources["dialog/index"] = require("./fixtures/anchoredInputRuntime.cjs").withAnchoredInputRuntime(sources["dialog/index"]);
@@ -223,10 +466,24 @@ if (process.versions.electron && process.type === "browser") {
                 for (const dark of [false, true]) {
                     win.setContentSize(mobile ? 390 : 1280, 800);
                     await win.loadURL("data:text/html,<html><body></body></html>");
+                    win.show();
+                    win.focus();
+                    const expectedViewport = [mobile ? 390 : 1280, 800];
+                    let viewport;
+                    const deadline = Date.now() + 3000;
+                    do {
+                        viewport = await win.webContents.executeJavaScript("[innerWidth, innerHeight]");
+                        if (viewport.every((value, index) => value === expectedViewport[index])) {
+                            break;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 16));
+                    } while (Date.now() < deadline);
+                    assert.deepEqual(viewport, expectedViewport);
                     const theme = fs.readFileSync(path.join(__dirname, `../appearance/themes/${dark ? "midnight" : "daylight"}/theme.css`), "utf8");
                     await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)}, ${JSON.stringify(theme + styles)}, ${mobile}, ${dark})`);
                 }
             }
+            console.log("History snapshots passed: desktop/mobile, light/dark, date dropdown bindings.");
         } catch (error) {
             console.error(error);
             code = 1;
@@ -243,8 +500,10 @@ if (process.versions.electron && process.type === "browser") {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-history-snapshots-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;
+        const headlessArgs = process.platform === "linux" && !env.DISPLAY && !env.WAYLAND_DISPLAY ?
+            ["--no-sandbox", "--disable-gpu", "--ozone-platform=headless"] : [];
         try {
-            await promisify(execFile)(require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 90000});
+            await promisify(execFile)(require("electron"), [__filename, profile, ...headlessArgs], {env, windowsHide: true, timeout: 90000});
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});

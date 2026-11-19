@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -233,14 +234,24 @@ func hasConflict(root *os.Root, id string) (bool, error) {
 		return false, e
 	}
 	defer cr.Close()
-	_, e = cr.Lstat(id)
+	versions, e := subroot(cr, id, false)
 	if errors.Is(e, os.ErrNotExist) {
 		return false, nil
 	}
 	if e != nil {
 		return false, e
 	}
-	return true, nil
+	defer versions.Close()
+	file, e := versions.Open(".")
+	if e != nil {
+		return false, e
+	}
+	defer file.Close()
+	entries, e := file.ReadDir(1)
+	if e != nil && !errors.Is(e, io.EOF) {
+		return false, e
+	}
+	return len(entries) > 0, nil
 }
 func (s *Store) HasConflict(ctx context.Context, id string) (bool, error) {
 	if !idPattern.MatchString(id) {

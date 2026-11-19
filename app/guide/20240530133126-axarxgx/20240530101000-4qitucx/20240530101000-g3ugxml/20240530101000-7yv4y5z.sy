@@ -543,6 +543,20 @@
 			]
 		},
 		{
+			"ID": "20261119012733-f6114a4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261119012733-f6114a4",
+				"updated": "20261119012733"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Windows、macOS、Linux でタブをトップバーに統合している場合は、タブ切り替えボタンと右側のトップバーボタンの間にある空白をドラッグしてウィンドウを移動できます。"
+				}
+			]
+		},
+		{
 			"ID": "20260613204552-u19ss69",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -1621,6 +1635,69 @@
 				"id": "20260613204554-fzmwd6k",
 				"updated": "20260613204554"
 			}
+		},
+		{
+			"ID": "20261110180000-d57ccd2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110180000-d57ccd2",
+				"updated": "20261110180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通常、ドキュメントを再度開くと前回の閲覧位置に戻ります。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ドキュメント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "前回の閲覧位置を復元"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を無効にすると先頭から開きます。ブロックリンク、検索結果、タブの復元、戻る・進む操作では指定された位置を維持します。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "このドキュメントのみ全体設定を上書きするには、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "その他"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ドキュメントを開く位置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で「デフォルト」（全体設定に従う）、「前回の閲覧位置を復元」、「先頭から開く」を選択します。この設定はドキュメントと同期されますが、閲覧位置は各クライアントで個別に記録されます。"
+				}
+			]
 		}
 	]
 }

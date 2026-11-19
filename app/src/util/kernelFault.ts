@@ -1,5 +1,5 @@
 import {Constants} from "../constants";
-import {MobileDialog as Dialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog as Dialog} from "../dialog/adaptiveDialog";
 import {forceQuit, isHostQuitStarted} from "../dialog/processSystem";
 import {isBrowser, isKernelInContainer, isMobile} from "./functions";
 import {isInIOS, isInMobileApp} from "../protyle/util/compatibility";

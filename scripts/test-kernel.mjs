@@ -176,11 +176,31 @@ export const runCompilation = async (args, cwd = kernel, executable = "go") => {
     console.log(`compile: START ${startedAt}`);
     let timing;
     try {
-        await new Promise((resolve, reject) => {
-            const compiler = spawn(executable, args, {cwd, windowsHide: true, stdio: "inherit"});
-            compiler.on("error", reject);
-            compiler.on("close", code => code === 0 ? resolve() : reject(new Error("Sharded test compilation failed: " + code)));
-        });
+        for (let attempt = 1; ; attempt++) {
+            let diagnostics = "";
+            const code = await new Promise((resolve, reject) => {
+                const compiler = spawn(executable, args, {cwd, windowsHide: true, stdio: ["ignore", "inherit", "pipe"]});
+                compiler.stderr.setEncoding("utf8");
+                compiler.stderr.on("data", data => {
+                    process.stderr.write(data);
+                    diagnostics = (diagnostics + data).slice(-1024 * 1024);
+                });
+                compiler.on("error", reject);
+                compiler.on("close", resolve);
+            });
+            if (code === 0) {
+                break;
+            }
+            // 只重试编译阶段的模块下载中断；测试进程和模块校验失败不在此范围内。
+            const transientDownload = diagnostics.split(/\r?\n/).some(line =>
+                /(?:read|Get) "https:\/\/[^"\s]+\/@v\/[^"\s]+": /.test(line) &&
+                /stream error: stream ID \d+; (?:INTERNAL_ERROR|REFUSED_STREAM); received from peer|connection reset by peer|i\/o timeout|TLS handshake timeout|unexpected EOF/.test(line));
+            if (!transientDownload || attempt >= 3) {
+                throw new Error("Sharded test compilation failed: " + code);
+            }
+            console.warn(`compile: module download interrupted; retry ${attempt}/2 in ${attempt}s`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        }
     } finally {
         timing = {startedAt, endedAt: new Date().toISOString(), seconds: (performance.now() - started) / 1000};
         console.log(`compile: END ${timing.endedAt}, ${timing.seconds.toFixed(1)}s`);

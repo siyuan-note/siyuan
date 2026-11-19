@@ -240,46 +240,52 @@ type SettingFlashcard struct {
 // SettingEditor 描述编辑器配置。displayImgName、displayImgAlt、blockGutterMode 和 pageScrollButtons 默认关闭，
 // null 表示回到默认值，其他非布尔类型拒绝更新。
 type SettingEditor struct {
-	AllowSVGScript                  bool                 `json:"allowSVGScript" api:"optional,nullable"`
-	AllowHTMLBLockScript            bool                 `json:"allowHTMLBLockScript" api:"optional,nullable"`
-	CursorSurroundingLines          int                  `json:"cursorSurroundingLines" api:"optional,nullable"`
-	FontSize                        int                  `json:"fontSize" api:"optional,nullable"`
-	FontSizeScrollZoom              bool                 `json:"fontSizeScrollZoom" api:"optional,nullable"`
-	FontFamily                      string               `json:"fontFamily" api:"optional,nullable"`
-	FontWeight                      int                  `json:"fontWeight" api:"optional,nullable"`
-	FontFamilyDisplay               string               `json:"fontFamilyDisplay" api:"optional,nullable"`
-	FontFamilies                    []*SettingEditorFont `json:"fontFamilies" api:"optional,nullable"`
-	CodeFontFamilies                []*SettingEditorFont `json:"codeFontFamilies" api:"optional,nullable"`
-	CodeSyntaxHighlightLineNum      bool                 `json:"codeSyntaxHighlightLineNum" api:"optional,nullable"`
-	CodeTabSpaces                   int                  `json:"codeTabSpaces" api:"optional,nullable"`
-	CodeLineWrap                    bool                 `json:"codeLineWrap" api:"optional,nullable"`
-	CodeLigatures                   bool                 `json:"codeLigatures" api:"optional,nullable"`
-	DisplayBookmarkIcon             bool                 `json:"displayBookmarkIcon" api:"optional,nullable"`
-	BlockGutterMode                 bool                 `json:"blockGutterMode" api:"optional,nullable"`
-	DisplayNetImgMark               bool                 `json:"displayNetImgMark" api:"optional,nullable"`
-	DisplayImgName                  bool                 `json:"displayImgName" api:"optional,nullable"`
-	DisplayImgAlt                   bool                 `json:"displayImgAlt" api:"optional,nullable"`
-	DatabaseAttrShow                *bool                `json:"databaseAttrShow" api:"optional,nullable"`
-	DatabaseAttrClickMode           int                  `json:"databaseAttrClickMode" api:"optional,nullable"`
-	DatabaseAttrViewMode            int                  `json:"databaseAttrViewMode" api:"optional,nullable"`
-	DatabaseAttrHideEmpty           bool                 `json:"databaseAttrHideEmpty" api:"optional,nullable"`
-	DatabaseAttrUseTabs             *bool                `json:"databaseAttrUseTabs" api:"optional,nullable"`
-	GenerateHistoryInterval         int                  `json:"generateHistoryInterval" api:"optional,nullable"`
-	HistoryRetentionDays            int                  `json:"historyRetentionDays" api:"optional,nullable"`
-	Emoji                           []string             `json:"emoji" api:"optional,nullable"`
-	VirtualBlockRef                 bool                 `json:"virtualBlockRef" api:"optional,nullable"`
-	VirtualBlockRefExclude          string               `json:"virtualBlockRefExclude" api:"optional,nullable"`
-	VirtualBlockRefInclude          string               `json:"virtualBlockRefInclude" api:"optional,nullable"`
-	CheckBlockRef                   *bool                `json:"checkBlockRef" api:"optional,nullable"`
-	BlockRefDynamicAnchorTextMaxLen int                  `json:"blockRefDynamicAnchorTextMaxLen" api:"optional,nullable"`
-	AssetOpen                       *SettingAssetOpen    `json:"assetOpen" api:"optional,nullable"`
-	PlantUMLServePath               string               `json:"plantUMLServePath" api:"optional,nullable"`
-	FullWidth                       bool                 `json:"fullWidth" api:"optional,nullable"`
-	KaTexMacros                     string               `json:"katexMacros" api:"optional,nullable"`
-	ReadOnly                        bool                 `json:"readOnly" api:"optional,nullable"`
-	EmbedBlockBreadcrumb            bool                 `json:"embedBlockBreadcrumb" api:"optional,nullable"`
+	AllowSVGScript             bool                 `json:"allowSVGScript" api:"optional,nullable"`
+	AllowHTMLBLockScript       bool                 `json:"allowHTMLBLockScript" api:"optional,nullable"`
+	CursorSurroundingLines     int                  `json:"cursorSurroundingLines" api:"optional,nullable"`
+	FontSize                   int                  `json:"fontSize" api:"optional,nullable"`
+	FontSizeScrollZoom         bool                 `json:"fontSizeScrollZoom" api:"optional,nullable"`
+	FontFamily                 string               `json:"fontFamily" api:"optional,nullable"`
+	FontWeight                 int                  `json:"fontWeight" api:"optional,nullable"`
+	FontFamilyDisplay          string               `json:"fontFamilyDisplay" api:"optional,nullable"`
+	FontFamilies               []*SettingEditorFont `json:"fontFamilies" api:"optional,nullable"`
+	CodeFontFamilies           []*SettingEditorFont `json:"codeFontFamilies" api:"optional,nullable"`
+	CodeSyntaxHighlightLineNum bool                 `json:"codeSyntaxHighlightLineNum" api:"optional,nullable"`
+	CodeTabSpaces              int                  `json:"codeTabSpaces" api:"optional,nullable"`
+	CodeLineWrap               bool                 `json:"codeLineWrap" api:"optional,nullable"`
+	CodeLigatures              bool                 `json:"codeLigatures" api:"optional,nullable"`
+	DisplayBookmarkIcon        bool                 `json:"displayBookmarkIcon" api:"optional,nullable"`
+	BlockGutterMode            bool                 `json:"blockGutterMode" api:"optional,nullable"`
+	DisplayNetImgMark          bool                 `json:"displayNetImgMark" api:"optional,nullable"`
+	DisplayImgName             bool                 `json:"displayImgName" api:"optional,nullable"`
+	DisplayImgAlt              bool                 `json:"displayImgAlt" api:"optional,nullable"`
+	// 新建数据库视图的主键内容图标默认开关，默认 true；不修改已有视图，null 恢复默认值。
+	DatabaseShowIcon *bool `json:"databaseShowIcon" api:"optional,nullable"`
+	// 新建数据库视图的关联、汇总内容图标默认开关，默认 true；不修改已有视图，null 恢复默认值。
+	DatabaseShowRelationIcon        *bool             `json:"databaseShowRelationIcon" api:"optional,nullable"`
+	DatabaseAttrShow                *bool             `json:"databaseAttrShow" api:"optional,nullable"`
+	DatabaseAttrClickMode           int               `json:"databaseAttrClickMode" api:"optional,nullable"`
+	DatabaseAttrViewMode            int               `json:"databaseAttrViewMode" api:"optional,nullable"`
+	DatabaseAttrHideEmpty           bool              `json:"databaseAttrHideEmpty" api:"optional,nullable"`
+	DatabaseAttrUseTabs             *bool             `json:"databaseAttrUseTabs" api:"optional,nullable"`
+	GenerateHistoryInterval         int               `json:"generateHistoryInterval" api:"optional,nullable"`
+	HistoryRetentionDays            int               `json:"historyRetentionDays" api:"optional,nullable"`
+	Emoji                           []string          `json:"emoji" api:"optional,nullable"`
+	VirtualBlockRef                 bool              `json:"virtualBlockRef" api:"optional,nullable"`
+	VirtualBlockRefExclude          string            `json:"virtualBlockRefExclude" api:"optional,nullable"`
+	VirtualBlockRefInclude          string            `json:"virtualBlockRefInclude" api:"optional,nullable"`
+	CheckBlockRef                   *bool             `json:"checkBlockRef" api:"optional,nullable"`
+	BlockRefDynamicAnchorTextMaxLen int               `json:"blockRefDynamicAnchorTextMaxLen" api:"optional,nullable"`
+	AssetOpen                       *SettingAssetOpen `json:"assetOpen" api:"optional,nullable"`
+	PlantUMLServePath               string            `json:"plantUMLServePath" api:"optional,nullable"`
+	FullWidth                       bool              `json:"fullWidth" api:"optional,nullable"`
+	KaTexMacros                     string            `json:"katexMacros" api:"optional,nullable"`
+	ReadOnly                        bool              `json:"readOnly" api:"optional,nullable"`
+	EmbedBlockBreadcrumb            bool              `json:"embedBlockBreadcrumb" api:"optional,nullable"`
 	// 默认关闭；开启后将笔记本、文档和块路径合并为一条面包屑。省略保留当前值，null 恢复默认。
 	GlobalBreadcrumb bool `json:"globalBreadcrumb" api:"optional,nullable"`
+	// 隐藏全局面包屑中有文字的路径项图标，默认关闭；省略保留当前值，null 恢复默认。
+	HideBreadcrumbIcons bool `json:"hideBreadcrumbIcons" api:"optional,nullable"`
 	// 默认显示文档上层路径；省略保留当前值，null 恢复默认，块级显式设置优先。
 	EmbedBlockBreadcrumbParentPath *bool `json:"embedBlockBreadcrumbParentPath" api:"optional,nullable"`
 	ListLogicalOutdent             bool  `json:"listLogicalOutdent" api:"optional,nullable"`
@@ -387,6 +393,9 @@ type SettingFileTree struct {
 	CloseTabOnDoubleClick  bool   `json:"closeTabOnDoubleClick" api:"optional,nullable"`
 	// 默认 true；关闭或移走独立桌面窗口的最后一个页签后关闭该窗口，不影响主窗口。省略时保留现值，null 恢复默认。
 	CloseWindowOnLastTabClosed *bool `json:"closeWindowOnLastTabClosed" api:"optional,nullable"`
+	// 默认 true；普通重新打开文档时恢复上次浏览位置，false 从开头打开。显式定位和页签位置恢复不受影响。
+	// 省略时保留现值，null 恢复默认。
+	RestoreDocPosition *bool `json:"restoreDocPosition" api:"optional,nullable"`
 	// 单击文档图标或笔记本图标的行为：0 修改图标，1 展开或折叠子文档。无子文档时，1 在有可打开文档时打开文档，否则修改图标。
 	// 超出取值范围的输入按 0 处理。已废弃的 docIconClickExpand 不再读取，旧配置升级后回到 0。
 	DocIconClickMode int `json:"docIconClickMode" api:"optional,nullable"`
@@ -420,6 +429,8 @@ type SettingFileTree struct {
 }
 
 type SettingSearch struct {
+	// 文档分组结果默认折叠，默认关闭；省略保留当前值，null 恢复默认值。
+	GroupFolded bool `json:"groupFolded" api:"optional,nullable"`
 	// 思维导图默认开启，思维导图项默认关闭；null 表示回到默认值。
 	Mindmap                      *bool `json:"mindmap" api:"optional,nullable"`
 	MindmapItem                  *bool `json:"mindmapItem" api:"optional,nullable"`

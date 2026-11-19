@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
@@ -580,7 +580,7 @@ export const openRatingDialog = (controller: TBazaarController, bazaarType: TBaz
 <svg class="config-bazaar__rating-star config-bazaar__rating-star--outline" aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
 </button>`;
     }).join("");
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {beforeClose: () => !submitting},
         title: window.siyuan.languages.bazaarRatePackage,
         content: `<div class="b3-dialog__content">

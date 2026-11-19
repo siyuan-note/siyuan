@@ -1,6 +1,6 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {toggleMenu} from "../menus/menuToggle";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {fetchDueCardsSync} from "./fetchDueCards";
@@ -270,7 +270,7 @@ export const bindCardEvent = async (options: {
     cardsData: ICardData
     cardType: TCardType,
     id?: string,
-    dialog?: MobileDialog,
+    dialog?: AdaptiveDialog,
     index?: number,
 }) => {
     if (window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen) {
@@ -443,7 +443,7 @@ export const bindCardEvent = async (options: {
                             icon: "iconClock",
                             label: window.siyuan.languages.setDueTime,
                             click() {
-                                mobileInputDialog({
+                                openInputDialog({
                                     title: window.siyuan.languages.setDueTime,
                                     label: window.siyuan.languages.showCardDay,
                                     value: "1",
@@ -878,7 +878,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         cardsData = await app.plugins[i].updateCards(cardsData);
     }
     const state: {editor?: Protyle, loading: boolean} = {loading: true};
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {mode: "expanded", beforeClose: createMobileSecondaryEditorCloseGuard(() => state.editor, () => !state.loading)},
         hideCloseIcon: true,
         positionId: Constants.DIALOG_OPENCARD,
@@ -978,7 +978,7 @@ const newRound = (countElement: Element, editor: Protyle, actionElements: NodeLi
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
     emptyElement.innerHTML = `<div class="card__empty-icon">♻️ </div>
-<span>${window.siyuan.languages.continueReview2.replace("${count}", unreviewedCount)}</span>
+<span>${window.siyuan.languages.continueReview2.replace("${count}", String(unreviewedCount))}</span>
 <div class="fn__hr"></div>
 <button data-type="newround" class="b3-button fn__size200">${window.siyuan.languages.continueReview1}</button>`;
     emptyElement.classList.remove("fn__none");

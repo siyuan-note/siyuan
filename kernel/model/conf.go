@@ -1258,12 +1258,17 @@ func HideConfSecret(c *AppConf) {
 	c.System.Load().NetworkProxy = &conf.NetworkProxy{}
 }
 
-// HideBoxConfSecret 隐藏笔记本配置中的密钥材料。
+// HideBoxConfSecret 隐藏非管理员不应读取的笔记本配置：密钥材料以及新建文档、块引和日记的目标与路径。
 func HideBoxConfSecret(c *conf.BoxConf) {
-	if nil != c {
-		c.BoxCrypt = nil
-		c.DocCreateTarget, c.RefCreateTarget, c.DailyNoteTarget = nil, nil, nil
+	if nil == c {
+		return
 	}
+
+	c.BoxCrypt = nil
+	c.DocCreateTarget, c.RefCreateTarget, c.DailyNoteTarget = nil, nil, nil
+	c.DocCreateSaveBox, c.DocCreateSavePath, c.DocCreateTemplatePath = "", "", ""
+	c.RefCreateSaveBox, c.RefCreateSavePath = "", ""
+	c.DailyNoteSavePath, c.DailyNoteTemplatePath = "", ""
 }
 
 func clearPortJSON() {

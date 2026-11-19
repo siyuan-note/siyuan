@@ -1,3 +1,4 @@
+import * as entryIcon from "./entryIcon";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -10,7 +11,7 @@ import * as escape from "../../../util/escape";
 
 // checkbox 分支只依赖转义工具，其余依赖以严格代理隔离，新增依赖或意外调用都应立即使测试失败。
 const unusedDependencies = [
-    "./columnWindow", "./continuousInput",
+    "./columnWindow", "./continuousInput", "./primaryRich",
     "./viewType", "./renderData", "../../wysiwyg/transaction", "../../util/hasClosest", "./openMenuPanel",
     "./action", "../../util/compatibility", "../../../util/fetch", "../../util/selection", "../../util/selectionOffsets",
     "dayjs", "../../../emoji", "./col", "./attributeValue", "../../../constants", "../../hint/extend",
@@ -25,6 +26,7 @@ const unusedDependencies = [
 const loadModule = <T>(file: string) => {
     const methods = {} as T;
     const modules: Record<string, unknown> = {
+        "./entryIcon": entryIcon,
         ...Object.fromEntries(unusedDependencies.map(name => [name, new Proxy({}, {
             get: (_target, member) => {
                 if (member === "__esModule") return true;

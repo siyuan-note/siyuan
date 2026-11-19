@@ -1,6 +1,5 @@
-import {MobileDialog} from "../../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../../dialog/adaptiveDialog";
 import { getEditHTML, bindEditEvent, addCol, getColIconByType, getColNameByType, duplicateCol, removeCol } from "../col";
-import { formatNumber } from "../number";
 import { openEmojiPanel, unicode2Emoji } from "../../../../emoji";
 import { transaction } from "../../../wysiwyg/transaction";
 import { updateAttrViewCellAnimation } from "../action";
@@ -39,19 +38,6 @@ export const editPanel: IAVPanelDescriptor = {
         bindEditEvent({ protyle: context.options.protyle, data: context.data, menuElement: context.menuElement, isCustomAttr: context.isCustomAttr, blockID: context.blockID });
     },
     actions: {
-        "numberFormat": (context, action) => {
-            formatNumber({
-                avPanelElement: context.avPanelElement,
-                element: action.target,
-                protyle: context.options.protyle,
-                oldFormat: action.target.dataset.format,
-                colId: context.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id"),
-                avID: context.avID
-            });
-            action.event.preventDefault();
-            action.event.stopPropagation();
-            return "handled";
-        },
         "newCol": (context, action) => {
             context.avPanelElement.remove();
             const addMenu = addCol(context.options.protyle, context.options.blockElement);
@@ -251,7 +237,7 @@ export const editPanel: IAVPanelDescriptor = {
             });
             const isTwoWay = colData.type === "relation" && colData.relation?.isTwoWay;
             if (context.isCustomAttr || isTwoWay) {
-                const dialog = new MobileDialog({
+                const dialog = new AdaptiveDialog({
                     title: isTwoWay ? window.siyuan.languages.removeColConfirm : window.siyuan.languages.deleteOpConfirm,
                     content: `<div class="b3-dialog__content">
     ${isTwoWay ? window.siyuan.languages.confirmRemoveRelationField

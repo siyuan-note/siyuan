@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../../../dialog/mobileInputDialog";
+import {openInputDialog} from "../../../dialog/inputDialog";
 import {showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
 
@@ -6,7 +6,7 @@ export const openAgentInstructions = () => {
     fetchPost("/api/ai/agent/getInstructions", {}, (response) => {
         const revision = response.data.revision;
         let saving = false;
-        const dialog = mobileInputDialog({
+        const dialog = openInputDialog({
             mobileSheet: {beforeClose: () => !saving},
             title: window.siyuan.languages.agentInstructions,
             value: response.data.content,

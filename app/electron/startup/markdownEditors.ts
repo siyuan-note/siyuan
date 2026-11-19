@@ -4,6 +4,7 @@ import * as electron from "electron";
 import * as nodePath from "node:path";
 import {createMarkdownWindows, registerMarkdownSchemes} from "../markdown/windows";
 import {createMarkdownSystemFonts} from "../markdown/systemFonts";
+import {createQuickLookFontSync, publishQuickLookFonts} from "../markdown/quickLookFonts";
 import {createMarkdownLifecycle} from "../markdown/lifecycle";
 import {parseMarkdownLaunch} from "../markdown/launch";
 import {isSystemShuttingDown, paths, state, writeLog} from "../shared/runtime";
@@ -94,6 +95,14 @@ const createMarkdownEditors = (): void => {
     const {app, BrowserWindow, ipcMain, dialog, shell, protocol, nativeTheme} = electron;
     const systemFonts = createMarkdownSystemFonts(nodePath.join(paths.appDir, "kernel", process.platform === "win32" ? "SiYuan-Kernel.exe" : "SiYuan-Kernel"));
     app.once("will-quit", () => systemFonts.dispose());
+    const quickLookFonts = process.platform === "darwin" && app.isPackaged ? createQuickLookFontSync(
+        nodePath.join(paths.confDir, "markdown"),
+        (publication, signal) => publishQuickLookFonts(nodePath.join(nodePath.dirname(app.getPath("exe")), "SiYuanQuickLookFonts"), publication, signal),
+        error => writeLog("synchronize Quick Look fonts failed: " + errorMessage(error))) : undefined;
+    if (quickLookFonts) {
+        void quickLookFonts.refresh();
+        app.once("will-quit", () => quickLookFonts.close());
+    }
     state.markdown.windows = createMarkdownWindows({
         app, BrowserWindow, ipcMain, dialog, shell, protocol, nativeTheme,
         rootDirectory: paths.appDir,
@@ -101,6 +110,7 @@ const createMarkdownEditors = (): void => {
         lang: resolveAppLanguage(getArgFrom(process.argv, "--lang") ?
             [getArgFrom(process.argv, "--lang") as string] : app.getPreferredSystemLanguages()),
         systemFonts,
+        onAppearance: () => { void quickLookFonts?.refresh(); },
         platform: process.platform,
         windowControls: {getOptions: getTitleBarOverlayOptions, update: updateTitleBarOverlay},
         devTools: {isShortcut: isDevToolsShortcut, toggle: toggleDevTools},

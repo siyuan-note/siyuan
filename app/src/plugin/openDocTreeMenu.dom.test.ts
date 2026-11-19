@@ -96,7 +96,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
         "protyle/wysiwyg/transaction": {}, "protyle/export/exportMd": {},
         "util/fileTreeSort": {}, "util/hostCapabilities": {getHostCapabilities: () => ({documentImportExport: false})},
         "emoji": {openEmojiPanel: (...args: unknown[]) => icons.push(args), unicode2Emoji: () => '<img src="data:,">'},
-        "mobile/editor": {}, "dialog/message": {}, "dialog/mobileConfirmDialog": {},
+        "mobile/editor": {}, "dialog/message": {}, "dialog/confirmDialog": {},
     };
     for (const name of ["viewType", "subItems", "cell", "action", "view", "col", "row", "openDatabaseRow",
         "columnWidth", "attributeValue", "cellValue", "richText", "blockIcon", "relationLayout", "relationKeyboard", "host"]) {
@@ -306,10 +306,10 @@ for (const mobile of [false, true]) {
     test(`plugin document tree menus use detached rows and real ${mobile ? "mobile sheet" : "desktop popup"} interactions`,
         {timeout: 45000}, async () => {
         const sources = Object.fromEntries(["plugin/openDocTreeMenu", "plugin/EventBus", "plugin/Menu", "menus/navigation",
-            "menus/navigationSelection", "menus/Menu", "menus/menuToggle", "menus/menuPosition", "menus/menuMouseScroll",
+            "menus/navigationSelection", "menus/Menu", "menus/menuToggle", "menus/menuPosition", "menus/menuMouseScroll", "menus/overlayOwnership",
             "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
             "util/setPosition", "protyle/util/hasClosest", "layout/dock/docTree/row", "layout/dock/docTree/rowData",
-            "protyle/render/av/addToDatabase", "protyle/render/av/relation"]
+            "protyle/render/av/addToDatabase", "protyle/render/av/relation", "protyle/render/av/relationPosition"]
             .map(name => [name, transpileModule(parse(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"),
                 {MOBILE: mobile, BROWSER: true}, false, true, name + ".ts"), {
                 compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},

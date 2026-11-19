@@ -75,8 +75,8 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
     }
     const stubs = {
         "dialog": {Dialog},
-        "dialog/mobileDialog": mobileRuntime,
-        "dialog/mobileInputDialog": {mobileInputDialog(options) {
+        "dialog/adaptiveDialog": mobileRuntime,
+        "dialog/inputDialog": {openInputDialog(options) {
             const prompt = new Dialog({content: "<input>"});
             prompt.element.querySelector("input").value = options.value;
             confirmInput = value => {
@@ -85,7 +85,7 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
             };
             return prompt;
         }},
-        "dialog/mobileConfirmDialog": {mobileConfirmDialog: (title, text, callback) => confirmations.push({title, text, callback})},
+        "dialog/confirmDialog": {confirmDialog: ({title, text, confirm: callback}) => confirmations.push({title, text, callback})},
         "dialog/message": {showMessage() {}},
         "util/hostCapabilities": {getHostCapabilities: () => ({localFileSystem: true})},
         "util/functions": {isMobile: () => mobile, isBrowser: () => false},
@@ -343,7 +343,7 @@ if (process.versions.electron && process.type === "browser") {
             for (const [mobile, legacyMobile] of [[false, false], [true, false], [true, true]]) {
                 await win.loadURL("data:text/html,<html><body></body></html>");
                 const sources = {
-                    mobileRuntime: require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource(),
+                    mobileRuntime: require("./fixtures/dialogRuntime.cjs").dialogRuntimeSource(),
                     dialog: require("./fixtures/anchoredInputRuntime.cjs").withAnchoredInputRuntime(ts.transpileModule(
                         fs.readFileSync(path.join(__dirname, "../src/dialog/index.ts"), "utf8"), {
                             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},

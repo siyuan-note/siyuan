@@ -49,14 +49,15 @@ export const formatDateValue = (value: IAVCellDateValue, format: TAVDateFormat =
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const parseFullDate = (value: string) => {
+const parseFullDate = (value: string, locale?: string) => {
     const template = typeof window === "undefined" ? undefined : window.siyuan?.languages?._attrView?.dateFormatFullTemplate;
     if (!template) {
         return;
     }
-    const tokens = template.split(/(\$\{year}|\$\{month}|\$\{day})/);
+    const normalize = (text: string) => locale ? text.toLocaleLowerCase(locale) : text;
+    const tokens = normalize(template).split(/(\$\{year}|\$\{month}|\$\{day})/);
     const captures: string[] = [];
-    const months = getMonths();
+    const months = getMonths().map(normalize);
     const pattern = tokens.map((token: string) => {
         if (token === "${year}") {
             captures.push("year");
@@ -72,8 +73,12 @@ const parseFullDate = (value: string) => {
         }
         return escapeRegExp(token);
     }).join("");
-    const match = value.match(new RegExp(`^${pattern}$`, "i"));
+    const match = normalize(value).match(new RegExp(`^${pattern}$`, "i"));
     if (!match) {
+        // 土耳其语月份允许带点与不带点 I 的本地大小写，已匹配的通用输入保持原解释。
+        if (!locale && window.siyuan?.config?.lang === "tr") {
+            return parseFullDate(value, "tr");
+        }
         return;
     }
     const parts: Record<string, string> = {};
@@ -82,7 +87,7 @@ const parseFullDate = (value: string) => {
     });
     return {
         year: Number(parts.year),
-        month: months.findIndex((month) => month.toLocaleLowerCase() === parts.month.toLocaleLowerCase()) + 1,
+        month: months.findIndex((month) => new RegExp(`^${escapeRegExp(month)}$`, "i").test(parts.month)) + 1,
         day: Number(parts.day),
     };
 };

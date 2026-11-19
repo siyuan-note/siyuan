@@ -100,6 +100,7 @@ const transactionActions: Record<IOperation["action"], true> = {
     "setAttrViewDisplayEmptyFields": true,
     "setAttrViewFillColBackgroundColor": true,
     "setAttrViewShowIcon": true,
+    "setAttrViewShowRelationIcon": true,
     "setAttrViewWrapField": true,
     "changeAttrViewLayout": true,
     "setAttrViewBlockView": true,

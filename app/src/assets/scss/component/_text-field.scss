@@ -10,6 +10,9 @@
 }
 
 .b3-text-field {
+  &--touch {
+    min-height: 44px;
+  }
   border: 0;
   border-radius: var(--b3-border-radius);
   outline: 1px solid var(--b3-border-color);

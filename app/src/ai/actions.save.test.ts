@@ -23,7 +23,7 @@ for (const action of ["create", "edit", "delete"]) {
             require: () => ({
                 Constants: {}, isMobile: () => true,
                 fetchSyncPost: (url: string, data: unknown) => new Promise(resolve => requests.push({url, data, resolve})),
-                MobileDialog: class {
+                AdaptiveDialog: class {
                     element = {setAttribute() {}, querySelector: (selector: string) => selector === "input" ? input : textarea,
                         querySelectorAll: () => buttons};
                     bindInput() {}

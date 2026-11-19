@@ -333,7 +333,7 @@ func TestAuthFilePublishAccessThrottlesBruteForce(t *testing.T) {
 	}
 
 	const attackerIP = "192.0.2.200"
-	defer util.AuthThrottleReset(attackerIP)
+	defer util.AuthThrottleReset(publishThrottleKey(attackerIP, protectedID))
 
 	// 前 5 次失败为普通失败响应，第 6 次失败触发锁定但本次仍返回普通响应（与 util.AuthThrottleFail 语义一致）
 	for i := range 6 {
@@ -385,7 +385,7 @@ func TestAuthFilePublishAccessThrottlesBruteForce(t *testing.T) {
 	}
 
 	// 锁定解除后正确密码可认证成功
-	util.AuthThrottleReset(attackerIP)
+	util.AuthThrottleReset(publishThrottleKey(attackerIP, protectedID))
 	recorder = post(password)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("post-lock success expected %d, got %d", http.StatusOK, recorder.Code)
@@ -402,6 +402,100 @@ func TestAuthFilePublishAccessThrottlesBruteForce(t *testing.T) {
 	}
 	if cookies := recorder.Result().Cookies(); len(cookies) != 1 || cookies[0].Name != "publish-auth-"+protectedID {
 		t.Fatalf("unexpected post-lock publish authentication cookies: %v", cookies)
+	}
+}
+
+func TestAuthFilePublishAccessThrottleIsPerDocument(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	const (
+		knownID       = "20260731000004-known01"
+		targetID      = "20260731000005-target1"
+		knownPassword = "known-secret"
+		wrongPassword = "wrong"
+	)
+
+	oldDataDir := util.DataDir
+	oldPublishAccess := model.PublishAccess{}
+	if oldDataDir != "" {
+		oldPublishAccess = model.GetPublishAccess()
+	}
+	oldConf := model.Conf
+	oldLangs := util.Langs
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.Lang = "test"
+	util.Langs = map[string]map[int]string{
+		"test": {285: "Password is incorrect", 354: "Too many failed authentication attempts, please try again later"},
+		"en":   {285: "Password is incorrect", 354: "Too many failed authentication attempts, please try again later"},
+	}
+	t.Cleanup(func() {
+		defer func() { model.Conf = oldConf }()
+		util.DataDir = oldDataDir
+		util.Langs = oldLangs
+		if oldDataDir != "" {
+			if err := model.SetPublishAccess(oldPublishAccess); err != nil {
+				t.Errorf("restore publish access failed: %v", err)
+			}
+		}
+	})
+	if err := model.SetPublishAccess(model.PublishAccess{
+		{ID: knownID, Visible: true, Password: knownPassword},
+		{ID: targetID, Visible: true, Password: "target-secret"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	engine := gin.New()
+	engine.POST("/api/filetree/authFilePublishAccess", authFilePublishAccess)
+	post := func(id, password string) *httptest.ResponseRecorder {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodPost, "/api/filetree/authFilePublishAccess",
+			strings.NewReader(`{"id":"`+id+`","password":"`+password+`"}`))
+		request.Header.Set("Content-Type", "application/json")
+		request.RemoteAddr = "192.0.2.201:1234"
+		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+	code := func(recorder *httptest.ResponseRecorder) int {
+		t.Helper()
+		var response struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+			t.Fatalf("unmarshal response failed: %v", err)
+		}
+		return response.Code
+	}
+
+	const attackerIP = "192.0.2.201"
+	t.Cleanup(func() {
+		util.AuthThrottleReset(publishThrottleKey(attackerIP, knownID))
+		util.AuthThrottleReset(publishThrottleKey(attackerIP, targetID))
+		util.AuthThrottleReset(publishThrottleKey(attackerIP, ""))
+	})
+
+	for range 5 {
+		if recorder := post(targetID, wrongPassword); recorder.Code != http.StatusOK || code(recorder) != -1 {
+			t.Fatalf("target failure expected ordinary denial, got %d %s", recorder.Code, recorder.Body.String())
+		}
+	}
+	// 另一个文档认证成功不得清除目标文档的失败次数
+	if recorder := post(knownID, knownPassword); recorder.Code != http.StatusOK || code(recorder) != 0 {
+		t.Fatalf("known document authentication failed: %d %s", recorder.Code, recorder.Body.String())
+	}
+	// 第 6 次失败触发目标文档锁定，本次仍为普通失败响应
+	if recorder := post(targetID, wrongPassword); recorder.Code != http.StatusOK || code(recorder) != -1 {
+		t.Fatalf("sixth target failure expected ordinary denial, got %d %s", recorder.Code, recorder.Body.String())
+	}
+	// 锁定生效后返回 429，说明跨文档的成功认证没有重置计数
+	if recorder := post(targetID, wrongPassword); recorder.Code != http.StatusTooManyRequests {
+		t.Fatalf("another document reset the throttle, got %d %s", recorder.Code, recorder.Body.String())
+	}
+	// 目标文档的锁定不影响其他文档认证
+	if recorder := post(knownID, knownPassword); recorder.Code != http.StatusOK || code(recorder) != 0 {
+		t.Fatalf("known document blocked by target throttle: %d %s", recorder.Code, recorder.Body.String())
 	}
 }
 
@@ -741,7 +835,7 @@ func TestFilterFileTreePublishAccess(t *testing.T) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + privateID,
-		Value: util.SHA256Hash([]byte(privateID + privatePassword)),
+		Value: model.PublishAuthCookieValue(privateID, privatePassword),
 	})
 	expectedPaths = paths[:4]
 	if filtered := filterFileTreePathsByPublishMetadataAccess(c, paths); !slices.Equal(filtered, expectedPaths) {

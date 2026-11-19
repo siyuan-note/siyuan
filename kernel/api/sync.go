@@ -6,12 +6,14 @@ package api
 
 import (
 	"encoding/hex"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/logging"
 
@@ -436,7 +438,7 @@ func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest)
 			err = model.SyncDataDownload(decision)
 		}
 		if err != nil {
-			return apicontract.Failure[apicontract.Null](-1, err.Error())
+			return syncSourceDecisionFailure(err)
 		}
 		return
 	}
@@ -456,6 +458,13 @@ func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest)
 		model.SyncDataDownload()
 	}
 	return
+}
+
+func syncSourceDecisionFailure(err error) apicontract.Response[apicontract.Null] {
+	if errors.Is(err, dejavu.ErrSyncSourcePreviewChanged) {
+		return apicontract.Failure[apicontract.Null](2, "")
+	}
+	return apicontract.Failure[apicontract.Null](-1, err.Error())
 }
 
 var performBootSync = contractHandler(apicontract.PerformBootSync, performBootSyncContract)

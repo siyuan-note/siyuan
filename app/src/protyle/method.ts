@@ -1,5 +1,6 @@
 import {tabsRender} from "./render/tabsRender";
 import {setAutoDirection} from "./render/autoDirection";
+import {observeTableCorners} from "./render/tableCorners";
 import {renderExportJSEmbeds} from "./export/jsEmbed";
 import {applyExportHeadingPageBreaks} from "./export/headingPageBreaks";
 import { graphvizRender } from "./render/graphvizRender";
@@ -16,6 +17,7 @@ import "../assets/scss/export.scss";
 
 class Protyle {
     public static setAutoDirection = setAutoDirection;
+    public static observeTableCorners = observeTableCorners;
     public static renderExportJSEmbeds = renderExportJSEmbeds;
     public static applyExportHeadingPageBreaks = applyExportHeadingPageBreaks;
     public static tabsRender = tabsRender;

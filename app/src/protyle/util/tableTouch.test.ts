@@ -1133,6 +1133,41 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         check.equal(ran, false, "unfinished composition blocks structural menu actions");
     }
     mobile = false;
+    for (const pinned of [false, true]) {
+        const f = fixture();
+        if (pinned) {
+            f.table.closest("[data-type='NodeTable']").setAttribute("custom-pinthead", "true");
+        }
+        Reflect.set(f.core, "hoverCell", f.cell(0, 1));
+        Reflect.set(f.core, "hoverType", "cell");
+        f.render();
+        await frames(3);
+        const row = f.touch("[data-type='row']");
+        const column = f.touch("[data-type='column']");
+        const left = column.style.left;
+        const firstColumn = f.table.querySelector<HTMLTableColElement>("col");
+        firstColumn.style.width = "120px";
+        await frames(3);
+        check.notEqual(column.style.left, left, "column handles follow width changes without pointer movement");
+        const header = f.cell(0, 1).getBoundingClientRect();
+        check.equal(parseFloat(column.style.left), Math.round(header.left + header.width / 2));
+        Reflect.set(f.core, "hoverCell", f.cell(2, 0));
+        f.render();
+        await frames(3);
+        const top = row.style.top;
+        f.table.rows[0].style.height = "80px";
+        await frames(3);
+        check.notEqual(row.style.top, top, "row handles follow height changes without pointer movement");
+        const cell = f.cell(2, 0).getBoundingClientRect();
+        check.equal(parseFloat(row.style.top), Math.round(cell.top + cell.height / 2));
+        let renders = 0;
+        const render = Reflect.get(f.core, "render");
+        Reflect.set(f.core, "render", () => { renders++; render.call(f.core); });
+        f.invoke("scheduleRender");
+        await frames(5);
+        check.equal(renders, 1, "pinned frame style writes do not trigger a rendering loop");
+        f.dispose();
+    }
     {
         const f = fixture();
         await frames(2);
@@ -1360,6 +1395,8 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         pointer(cell, "pointermove", x, rect.bottom);
         const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
         check.ok(guide.classList.contains("fn__none"), "hover starts with an invisible guide");
+        f.render();
+        check.ok(guide.classList.contains("fn__none"), "rendering preserves the boundary hover delay");
         await delay();
         check.equal(guide.classList.contains("fn__none"), false, "hover reveals the guide after its delay");
         check.equal(getComputedStyle(guide).backgroundColor, "rgb(80, 120, 255)");
@@ -1374,6 +1411,120 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         check.ok(Math.abs(guide.getBoundingClientRect().left + 1 - rect.right) <= 1,
             "column hover identifies the actual column boundary");
         f.dispose();
+    }
+    for (const kind of ["row", "column"]) {
+        const f = fixture();
+        const cell = f.cell(1, 1);
+        const rect = cell.getBoundingClientRect();
+        const x = kind === "row" ? rect.left + rect.width / 2 : rect.right;
+        const y = kind === "row" ? rect.bottom : rect.top + rect.height / 2;
+        pointer(cell, "pointermove", x, y);
+        const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+        f.table.style.transform = kind === "row" ? "translateY(20px)" : "translateX(20px)";
+        await delay();
+        check.ok(guide.classList.contains("fn__none"), "a pending hover cannot reveal a boundary that moved away");
+        f.table.style.transform = "";
+        await frames(3);
+        check.ok(guide.classList.contains("fn__none"), "returning layout alone does not restore expired feedback");
+        pointer(cell, "pointermove", x, y);
+        await delay();
+        check.equal(guide.classList.contains("fn__none"), false);
+        f.table.style.transform = kind === "row" ? "translateX(10px)" : "translateY(10px)";
+        await frames(3);
+        check.equal(guide.classList.contains("fn__none"), false,
+            "layout changes retain feedback while the pointer remains on the same boundary");
+        pointer(cell, "pointermove", rect.left + rect.width / 2, rect.top + rect.height / 2);
+        check.ok(guide.classList.contains("fn__none"), "moving into the cell clears boundary feedback immediately");
+        f.dispose();
+    }
+    for (const kind of ["row", "column"]) {
+        for (const fromControl of [false, true]) {
+            const f = fixture();
+            const cell = f.cell(0, 0);
+            const edit = document.createElement("div");
+            edit.contentEditable = "true";
+            edit.style.wordBreak = kind === "row" ? "break-all" : "normal";
+            edit.style.whiteSpace = kind === "row" ? "normal" : "nowrap";
+            const text = document.createTextNode("11111111");
+            edit.append(text);
+            cell.replaceChildren(edit);
+            f.table.style.tableLayout = kind === "row" ? "fixed" : "auto";
+            f.table.style.width = kind === "row" ? "270px" : "";
+            const initial = cell.getBoundingClientRect();
+            const x = kind === "row" ? initial.left + initial.width / 2 : initial.right;
+            const y = kind === "row" ? initial.bottom : initial.top + initial.height / 2;
+            pointer(cell, "pointermove", x, y);
+            if (fromControl) {
+                await frames(1);
+                const control = kind === "row" ? Reflect.get(f.core, "rowResizeHandle") : document.createElement("div");
+                if (kind === "column") {
+                    control.className = "table__resize";
+                    control.setAttribute("data-col-index", "0");
+                    f.table.parentElement.append(control);
+                }
+                check.equal(control.classList.contains("fn__none"), false, "the adjustment control is visible before hovering it");
+                pointer(control, "pointermove", x, y);
+            }
+            await delay();
+            const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+            check.equal(guide.classList.contains("fn__none"), false);
+            for (const value of ["1".repeat(kind === "row" ? 48 : 28), "11111111"]) {
+                text.data = value;
+                edit.dispatchEvent(new InputEvent("input", {bubbles: true,
+                    inputType: value.length > 8 ? "insertText" : "deleteContentBackward"}));
+                await frames(3);
+                const rect = cell.getBoundingClientRect();
+                if (value.length > 8) {
+                    check.ok(kind === "row" ? rect.height > initial.height : rect.width > initial.width,
+                        "typing changes the table's intrinsic row height or column width");
+                }
+                check.ok(guide.classList.contains("fn__none"),
+                    `${kind} feedback clears when typing or deletion moves the boundary away from the pointer (control=${fromControl})`);
+                f.render();
+                check.ok(guide.classList.contains("fn__none"), "rendering does not restore expired boundary feedback");
+                if (kind === "row") {
+                    const handle = Reflect.get(f.core, "rowResizeHandle") as HTMLElement;
+                    check.ok(Math.abs(parseFloat(handle.style.top) - rect.bottom) <= 1,
+                        "the row resize handle follows automatic wrapping");
+                }
+                pointer(cell, "pointermove", kind === "row" ? rect.left + rect.width / 2 : rect.right,
+                    kind === "row" ? rect.bottom : rect.top + rect.height / 2);
+                check.ok(guide.classList.contains("fn__none"), "returning to the boundary restarts the hover delay");
+                await delay();
+                check.equal(guide.classList.contains("fn__none"), false, "hovering the new boundary reveals its feedback");
+                const coordinate = parseFloat(kind === "row" ? guide.style.top : guide.style.left);
+                check.ok(Math.abs(coordinate - (kind === "row" ? rect.bottom : rect.right)) <= 1,
+                    "the feedback uses the new boundary position");
+            }
+            f.dispose();
+        }
+    }
+    for (const kind of ["row", "column"]) {
+        for (const mindmap of [false, true]) {
+            mobile = false;
+            const f = fixture(mindmap);
+            const cell = f.cell(1, 1);
+            const guide = Reflect.get(f.core, "dimensionGuide") as HTMLElement;
+            const resize = document.createElement("div");
+            resize.className = "table__resize";
+            f.table.parentElement.append(resize);
+            const hover = () => f.invoke("hoverDimensionBoundary", {table: f.table,
+                ...(kind === "row" ? {row: cell.parentElement} : {column: 1})});
+            const scroller = mindmap ? f.scrollContainer : f.root;
+            hover();
+            scroller.dispatchEvent(new Event("scroll"));
+            await new Promise(resolve => setTimeout(resolve, 230));
+            check.ok(guide.classList.contains("fn__none"), "scrolling cancels pending boundary feedback");
+            hover();
+            await new Promise(resolve => setTimeout(resolve, 230));
+            check.equal(guide.classList.contains("fn__none"), false);
+            f.table.parentElement.dispatchEvent(new Event("scroll"));
+            check.ok(guide.classList.contains("fn__none"), "table scrolling hides visible boundary feedback immediately");
+            check.equal(resize.style.display, "none", "scrolling dismisses the column resize hit target");
+            f.render();
+            check.ok(guide.classList.contains("fn__none"), "rendering does not restore a stale hover guide");
+            f.dispose();
+        }
     }
     for (const touchMode of [false, true]) {
         mobile = touchMode;
@@ -1397,6 +1548,9 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         pointer(document, "pointermove", x, y + 33, 99);
         f.render();
         check.equal(guide.classList.contains("fn__none"), false, "height feedback survives rendering during drag");
+        f.root.dispatchEvent(new Event("scroll"));
+        f.render();
+        check.equal(guide.classList.contains("fn__none"), false, "scrolling during an active resize retains its feedback");
         const guideRect = guide.getBoundingClientRect();
         check.equal(guideRect.top + guideRect.height / 2, row.getBoundingClientRect().bottom,
             "the guide is centered on the actual row boundary");

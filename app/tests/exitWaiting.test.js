@@ -27,6 +27,7 @@ const createExitDialog = (sources, languages, mobile) => {
     document.body.insertAdjacentHTML("beforeend", '<div id="message"><div></div></div>');
     window.showExitMessage = message.showMessage;
     const {Dialog} = load(sources.dialog, {
+        "../menus/overlayOwnership": load(sources.overlayOwnership, {}),
         "../util/genID": {genUUID: () => "exit-test"},
         "../util/zIndex": {isAbove: () => false},
         "./moveResize": {moveResize() {}},
@@ -38,8 +39,8 @@ const createExitDialog = (sources, languages, mobile) => {
     const mobileRuntime = new Function("Dialog", "mobile", "return " + sources.mobileRuntime)(Dialog, mobile);
     const {requestSystemExit, updateExitProgressStatus} = load(sources.exit, {
         "../util/functions": {isMobile: () => mobile},
-        "./mobileDialog": mobileRuntime,
-        "./mobileConfirmDialog": mobileRuntime,
+        "./adaptiveDialog": mobileRuntime,
+        "./confirmDialog": mobileRuntime,
         "./progress": progress,
         "../util/fetch": {fetchSyncPost: () => new Promise((resolve, reject) => {
             window.finishExit = resolve;
@@ -70,11 +71,11 @@ if (process.versions.electron && process.type === "browser") {
         const watchdog = setTimeout(() => app.exit(1), 45000);
         const root = path.join(__dirname, "..");
         const ts = require("typescript");
-        const sources = Object.fromEntries(Object.entries({dialog: "dialog/index.ts", exit: "dialog/exitRequest.ts", progress: "dialog/progress.ts", message: "dialog/message.ts"})
+        const sources = Object.fromEntries(Object.entries({overlayOwnership: "menus/overlayOwnership.ts", dialog: "dialog/index.ts", exit: "dialog/exitRequest.ts", progress: "dialog/progress.ts", message: "dialog/message.ts"})
             .map(([key, file]) => [key, ts.transpileModule(fs.readFileSync(path.join(root, "src", file), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
             }).outputText]));
-        sources.mobileRuntime = require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource();
+        sources.mobileRuntime = require("./fixtures/dialogRuntime.cjs").dialogRuntimeSource();
         const css = require("sass").compile(path.join(root, "src/assets/scss/base.scss"), {logger: {warn() {}, debug() {}}}).css;
         const mobileCSS = require("sass").compile(path.join(root, "src/assets/scss/mobile.scss"), {logger: {warn() {}, debug() {}}}).css;
         const icons = pathToFileURL(path.join(root, "appearance/icons/litheness/icon.js")).href;
@@ -147,7 +148,7 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(resumed.details, "ready");
                 assert.equal(resumed.progress, "100%");
                 assert.equal(resumed.samePage, true);
-                const html = `<html><head><style>${theme}\n${width === 360 ? mobileCSS : css}</style></head><body><script src="${icons}"></script></body></html>`;
+                const html = `<html data-theme-mode="${mode}"><head><style>${theme}\n${width === 360 ? mobileCSS : css}</style></head><body><script src="${icons}"></script></body></html>`;
                 const file = path.join(process.argv[2], "dialog.html");
                 fs.writeFileSync(file, html);
                 await win.loadFile(file);
@@ -175,6 +176,38 @@ if (process.versions.electron && process.type === "browser") {
                 assert.equal(waiting.noDialog, true);
                 assert.equal(waiting.inputBlocked, true);
                 assert.ok(waiting.text.includes(languages.exitWaiting));
+                const blur = await win.webContents.executeJavaScript(`(() => {
+                    const mask = document.querySelector("#exitProgress .b3-dialog__scrim");
+                    const animation = mask.getAnimations().find(item => item.animationName === "exit-progress-blur");
+                    if (!animation) throw new Error("Exit backdrop must gradually blur");
+                    animation.pause();
+                    const samples = [0, 2500, 5000].map(time => {
+                        animation.currentTime = time;
+                        return parseFloat(getComputedStyle(mask).backdropFilter.match(/blur\\(([^)]+)\\)/)[1]);
+                    });
+                    const duration = animation.effect.getTiming().duration;
+                    animation.finish();
+                    return {samples, duration};
+                })()`);
+                assert.equal(blur.duration, 5000);
+                assert.equal(blur.samples[0], 0);
+                assert.ok(blur.samples[1] > 0 && blur.samples[1] < 8);
+                assert.equal(blur.samples[2], 8);
+                for (const feature of ["prefers-reduced-motion", "prefers-reduced-transparency", "forced-colors"]) {
+                    await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                        features: [{name: feature, value: feature === "forced-colors" ? "active" : "reduce"}],
+                    });
+                    const fallback = await win.webContents.executeJavaScript(`(() => {
+                        const mask = document.querySelector("#exitProgress .b3-dialog__scrim");
+                        return {animation: getComputedStyle(mask).animationName, backdrop: getComputedStyle(mask).backdropFilter};
+                    })()`);
+                    assert.equal(fallback.animation, "none");
+                    if (feature === "prefers-reduced-motion") assert.match(fallback.backdrop, /blur\(8px\)/);
+                    else assert.equal(fallback.backdrop, "none");
+                }
+                await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+                    features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+                });
                 const merged = await win.webContents.executeJavaScript(`(() => {
                     window.showExitMessage(window.siyuan.languages._kernel[95]);
                     window.showExitMessage(window.siyuan.languages._kernel[81]);
@@ -257,7 +290,7 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("exit uses endless progress and boot resumes in place after waiting in light, dark and narrow layouts", {timeout: 60000}, async () => {
+    test("exit gradually blurs with accessible fallbacks and boot resumes in light, dark and narrow layouts", {timeout: 60000}, async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-exit-wait-test-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

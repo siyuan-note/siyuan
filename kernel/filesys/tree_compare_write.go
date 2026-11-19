@@ -96,10 +96,14 @@ func LoadTreeSnapshotWithFix(boxID, p string, luteEngine *lute.Lute) (tree *pars
 	if err != nil {
 		return nil, nil, false, err
 	}
-	data, needFix, err = fixTreeJSONDataInMode(boxID, p, data, luteEngine, dek, encrypted, false, mode)
+	data, needFix, tree, err = prepareTreeJSONDataInMode(boxID, p, data, luteEngine, dek, encrypted, false, mode)
 	if err != nil {
 		return nil, nil, false, err
 	}
-	tree, err = loadTreeByDataWithParentRecovery(data, boxID, p, luteEngine, mode, false)
+	if tree != nil {
+		tree, err = finishLoadedTree(tree, boxID, p, luteEngine, mode, false)
+	} else {
+		tree, err = loadTreeByDataWithParentRecovery(data, boxID, p, luteEngine, mode, false)
+	}
 	return
 }

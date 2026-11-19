@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {openPluginPublishData} from "./pluginPublish";
 import {fetchPost} from "../../util/fetch";
@@ -11,7 +11,7 @@ import {escapeHtml} from "../../util/escape";
 import {setGlobalPluginsDisabled} from "../../plugin/globalState";
 import {openBazaarPath} from "./openPath";
 import {previewImages} from "../../protyle/preview/image";
-import {isBazaarPackageRatingEditable, sortBazaarPackages} from "../../util/bazaarPackage";
+import {isBazaarPackageEnableDisabled, isBazaarPackageRatingEditable, sortBazaarPackages} from "../../util/bazaarPackage";
 import {Constants} from "../../constants";
 import {bindBazaarFilterMenu} from "./filterMenu";
 import {
@@ -198,15 +198,19 @@ const ACTION_HANDLERS = {
             }
             if (pkgType === "plugins") {
                 if (window.siyuan.config.bazaar.petalDisabled) {
-                    mobileConfirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
+                    confirmDialog({title: window.siyuan.languages.confirm, text: window.siyuan.languages.enablePluginTip2});
                 } else {
-                    mobileConfirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
-                        controller._setPluginEnabled(app, installItem, true, () => {
-                            if (controller._isMountCurrent(mount)) {
-                                controller._genMyHTML(pkgType, app, false);
-                                controller._refreshReadmeDetail(pkgType, installItem.name);
-                            }
-                        });
+                    confirmDialog({
+                        title: "💡 " + window.siyuan.languages.enablePlugin,
+                        text: window.siyuan.languages.enablePluginTip,
+                        confirm: () => {
+                            controller._setPluginEnabled(app, installItem, true, () => {
+                                if (controller._isMountCurrent(mount)) {
+                                    controller._genMyHTML(pkgType, app, false);
+                                    controller._refreshReadmeDetail(pkgType, installItem.name);
+                                }
+                            });
+                        },
                     });
                 }
             }
@@ -229,31 +233,35 @@ const ACTION_HANDLERS = {
             renderBazaarInstall(mount.element);
             return HANDLED;
         }
-        mobileConfirmDialog("⬆️ " + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
-            if (controller._batchUpdatePreferenceSaving) return;
-            const batch = beginBazaarBatchUpdate(controller._getBatchUpdateItems());
-            if (!batch) {
-                return;
-            }
-            renderBazaarInstall(mount.element);
-            fetchPost("/api/bazaar/batchUpdatePackage", {frontend: getFrontend()}, (response) => {
-                if (batch.controller.signal.aborted) {
+        confirmDialog({
+            title: "⬆️ " + window.siyuan.languages.updateAll,
+            text: window.siyuan.languages.confirmUpdateAll,
+            confirm: () => {
+                if (controller._batchUpdatePreferenceSaving) return;
+                const batch = beginBazaarBatchUpdate(controller._getBatchUpdateItems());
+                if (!batch) {
                     return;
                 }
-                if (response.code !== 0) {
-                    showMessage(response.msg);
-                    return;
-                }
-                if (controller._isMountCurrent(mount)) {
-                    mount.element.querySelector("#configBazaarReadme")?.classList.remove("config__view--show");
-                }
-            }, undefined, error => showMessage(error.msg), batch.controller.signal).finally(() => {
-                finishBazaarBatchUpdate(batch);
-                renderBazaarInstall(document);
-                if (controller._isMountCurrent(mount)) {
-                    controller._checkUpdate(true);
-                }
-            });
+                renderBazaarInstall(mount.element);
+                fetchPost("/api/bazaar/batchUpdatePackage", {frontend: getFrontend()}, (response) => {
+                    if (batch.controller.signal.aborted) {
+                        return;
+                    }
+                    if (response.code !== 0) {
+                        showMessage(response.msg);
+                        return;
+                    }
+                    if (controller._isMountCurrent(mount)) {
+                        mount.element.querySelector("#configBazaarReadme")?.classList.remove("config__view--show");
+                    }
+                }, undefined, error => showMessage(error.msg), batch.controller.signal).finally(() => {
+                    finishBazaarBatchUpdate(batch);
+                    renderBazaarInstall(document);
+                    if (controller._isMountCurrent(mount)) {
+                        controller._checkUpdate(true);
+                    }
+                });
+            },
         });
         return HANDLED;
     }) satisfies TBazaarActionHandler,
@@ -268,43 +276,47 @@ const ACTION_HANDLERS = {
         }
         if (!target.classList.contains("b3-button--progress") && !target.hasAttribute("disabled") &&
             packageName && pkgType) {
-            mobileConfirmDialog("⬆️ " + window.siyuan.languages.update, window.siyuan.languages.confirmUpdate, () => {
-                const updateItem = availableItem || updatedItem?.available || pkgItem;
-                const task = beginBazaarInstall(pkgType, packageName, updateItem.repoURL);
-                if (!task) {
-                    return;
-                }
-                renderBazaarInstall(mount.element);
-                const request = controller._beginBazaarRequest(pkgType, mount);
-                const config = BAZAAR_PACKAGE_CONFIG[pkgType];
-                const keyword = (mount.element.querySelector(
-                    `.config-bazaar__panel[data-type="${config.tabType}"] .b3-text-field`) as HTMLInputElement)?.value.trim() || "";
-                fetchPost("/api/bazaar/updateBazaarPackage", {
-                    packageType: pkgType,
-                    packageName,
-                    keyword,
-                    frontend: getFrontend()
-                }, response => {
-                    if (task.controller.signal.aborted) {
+            confirmDialog({
+                title: "⬆️ " + window.siyuan.languages.update,
+                text: window.siyuan.languages.confirmUpdate,
+                confirm: () => {
+                    const updateItem = availableItem || updatedItem?.available || pkgItem;
+                    const task = beginBazaarInstall(pkgType, packageName, updateItem.repoURL);
+                    if (!task) {
                         return;
                     }
-                    if (response.code !== 0) {
-                        showMessage(response.msg);
-                        return;
-                    }
-                    controller._onBazaar(response, pkgType, request);
-                    if (controller._isMountCurrent(mount)) {
-                        mount.element.querySelector("#configBazaarReadme")?.classList.remove("config__view--show");
-                        controller._genMyHTML(pkgType, app);
-                    }
-                }, undefined, error => showMessage(error.msg), task.controller.signal).finally(() => {
-                    finishBazaarInstall(pkgType, packageName, task);
-                    renderBazaarInstall(document);
-                    if (controller._isMountCurrent(mount)) {
-                        controller._refreshReadmeDetail(pkgType, packageName);
-                        controller._checkUpdate(true);
-                    }
-                });
+                    renderBazaarInstall(mount.element);
+                    const request = controller._beginBazaarRequest(pkgType, mount);
+                    const config = BAZAAR_PACKAGE_CONFIG[pkgType];
+                    const keyword = (mount.element.querySelector(
+                        `.config-bazaar__panel[data-type="${config.tabType}"] .b3-text-field`) as HTMLInputElement)?.value.trim() || "";
+                    fetchPost("/api/bazaar/updateBazaarPackage", {
+                        packageType: pkgType,
+                        packageName,
+                        keyword,
+                        frontend: getFrontend()
+                    }, response => {
+                        if (task.controller.signal.aborted) {
+                            return;
+                        }
+                        if (response.code !== 0) {
+                            showMessage(response.msg);
+                            return;
+                        }
+                        controller._onBazaar(response, pkgType, request);
+                        if (controller._isMountCurrent(mount)) {
+                            mount.element.querySelector("#configBazaarReadme")?.classList.remove("config__view--show");
+                            controller._genMyHTML(pkgType, app);
+                        }
+                    }, undefined, error => showMessage(error.msg), task.controller.signal).finally(() => {
+                        finishBazaarInstall(pkgType, packageName, task);
+                        renderBazaarInstall(document);
+                        if (controller._isMountCurrent(mount)) {
+                            controller._refreshReadmeDetail(pkgType, packageName);
+                            controller._checkUpdate(true);
+                        }
+                    });
+                },
             });
         }
         return HANDLED;
@@ -317,8 +329,10 @@ const ACTION_HANDLERS = {
         const uninstallName = installedItem.name;
         const config = BAZAAR_PACKAGE_CONFIG[pkgType];
         const keyword = (mount.element.querySelector(`.config-bazaar__panel[data-type="${config.tabType}"] .b3-text-field`) as HTMLInputElement).value;
-        mobileConfirmDialog("⚠️ " + window.siyuan.languages.uninstall,
-            window.siyuan.languages.confirmUninstall.replace("${name}", escapeHtml(uninstallName)), () => {
+        confirmDialog({
+            title: "⚠️ " + window.siyuan.languages.uninstall,
+            text: window.siyuan.languages.confirmUninstall.replace("${name}", escapeHtml(uninstallName)),
+            confirm: () => {
                 const request = controller._beginBazaarRequest(pkgType, mount);
                 fetchPost(config.api.uninstall, {
                     packageName: uninstallName,
@@ -337,7 +351,8 @@ const ACTION_HANDLERS = {
                         controller._checkUpdate(true);
                     }
                 });
-            });
+            },
+        });
         return HANDLED;
     }) satisfies TBazaarActionHandler,
     switch: ((context, target) => {
@@ -422,11 +437,13 @@ const ACTION_HANDLERS = {
         }
         if (!target.hasAttribute("disabled")) {
             target.setAttribute("disabled", "disabled");
-            const enabled = (target as HTMLInputElement).checked;
-            const pluginItem = installedItem || pkgItem;
+            const input = target as HTMLInputElement;
+            const enabled = input.checked;
+            const pluginItem = pkgItem || installedItem;
             controller._setPluginEnabled(app, pluginItem, enabled, () => {
                 if (controller._isMountCurrent(mount)) {
-                    target.removeAttribute("disabled");
+                    input.checked = Boolean(pluginItem.enabled);
+                    input.disabled = isBazaarPackageEnableDisabled("plugins", pluginItem);
                     controller._genMyHTML("plugins", app, true);
                 }
             });

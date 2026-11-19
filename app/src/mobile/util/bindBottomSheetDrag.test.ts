@@ -4,6 +4,8 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import * as gesture from "./mobileSheetGesture";
+import * as platform from "../../protyle/util/browserCompatibility";
+import * as nativeTextMenu from "../../protyle/wysiwyg/nativeTextMenu";
 
 const source = transpileModule(readFileSync("src/mobile/util/bindBottomSheetDrag.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -27,8 +29,10 @@ const setup = (initialHeight = 700) => {
     const body = {parentElement: element, closest: (): null => null};
     const scrim = {style: {opacity: ""}};
     const api: any = {};
-    runInNewContext(source, {exports: api, require: () => gesture, window, performance: {now: () => time},
-        console, getComputedStyle: () => ({overflowY: "auto"})});
+    const modules = {"./mobileSheetGesture": gesture, "../../protyle/util/browserCompatibility": platform,
+        "../../protyle/wysiwyg/nativeTextMenu": nativeTextMenu};
+    runInNewContext(source, {exports: api, require: (id: keyof typeof modules) => modules[id], window,
+        navigator: {userAgent: "Android"}, performance: {now: () => time}, console, getComputedStyle: () => ({overflowY: "auto"})});
     const dispose = api.bindBottomSheetDrag(element, scrim, () => { closeCount++; return close(); }, {
         grip, getBounds: () => ({min: 180, max: 800}), resize: (value: number) => { height = value; },
         canStart: () => permitted, isClosing: () => exiting,
@@ -118,14 +122,13 @@ test("body keeps downward dismissal without resizing and editable actions stay n
     assert.equal(s.height(), 700);
 });
 
-test("multitouch, wrong identifier, horizontal direction and viewport changes cancel active gestures", () => {
-    for (const cancel of ["multi", "identity", "horizontal", "viewport", "orientation", "touchcancel"]) {
+test("multitouch, wrong identifier and viewport changes cancel active gestures", () => {
+    for (const cancel of ["multi", "identity", "viewport", "orientation", "touchcancel"]) {
         const s = setup();
         s.send("touchstart", 0);
         s.send("touchmove", 100);
         if (cancel === "multi") s.send("touchmove", 150, {multi: true});
         if (cancel === "identity") s.send("touchmove", 150, {id: 8});
-        if (cancel === "horizontal") s.send("touchmove", 150, {x: 900});
         if (cancel === "viewport") s.listeners.get("visual:resize")();
         if (cancel === "orientation") s.listeners.get("orientation:change")();
         if (cancel === "touchcancel") s.send("touchcancel", 100);
@@ -205,3 +208,21 @@ for (const event of ["touchmove", "touchend", "touchcancel"]) {
         assert.equal(s.closes(), 0);
     });
 }
+
+test("grip tolerates initial jitter and locks a recognized vertical drag", () => {
+    const s = setup();
+    s.send("touchstart", 100);
+    s.send("touchmove", 101, {x: 102});
+    assert.equal(s.send("touchmove", 180, {x: 102}), true);
+    assert.equal(s.height(), 620);
+    assert.equal(s.send("touchmove", 110, {x: 150}), true);
+    assert.equal(s.height(), 690);
+});
+
+test("horizontal initiation still cancels before vertical recognition", () => {
+    const s = setup();
+    s.send("touchstart", 100);
+    s.send("touchmove", 101, {x: 110});
+    assert.equal(s.send("touchmove", 180), false);
+    assert.equal(s.height(), 700);
+});

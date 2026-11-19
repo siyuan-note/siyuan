@@ -1,5 +1,5 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {bindPasswordIconaToggle} from "../render/fragments";
 import {showMessage} from "../../dialog/message";
@@ -297,7 +297,7 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
 </div>`
         : "";
 
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: titleKey,
         width: mobile ? "92vw" : "520px",
         content: `<div class="b3-dialog__content">
@@ -391,19 +391,15 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
 };
 
 const showDeleteConfirm = (title: string, onConfirm: () => Promise<unknown>) => {
-    mobileConfirmDialog(
-        window.siyuan.languages.deleteOpConfirm,
-        window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
-        async () => {
+    confirmDialog({
+        title: window.siyuan.languages.deleteOpConfirm,
+        text: window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
+        confirm: async () => {
             await onConfirm();
             return true;
         },
-        undefined,
-        true,
-        undefined,
-        undefined,
-        {awaitConfirm: true},
-    );
+        isDelete: true,
+    });
 };
 
 // endregion

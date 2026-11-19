@@ -12,7 +12,9 @@ export const getRangeInlineFormats = (editableElement: Element, range: Range): s
             const start = range.startContainer === textNode ? range.startOffset : 0;
             const end = range.endContainer === textNode ? range.endOffset : textNode.data.length;
             const visibleStart = Math.max(start, getSemanticMarkerPrefixLengthForNode(textNode));
-            if (visibleStart < end && getTextWithLegacyInlineBoundary(textNode).substring(visibleStart, end).split("\u200b").join("")) {
+            const selectedText = getTextWithLegacyInlineBoundary(textNode).substring(visibleStart, end);
+            // 软换行不承载行级格式，普通空格仍参与选区的格式覆盖判断。
+            if (visibleStart < end && selectedText.replace(/[\u200b\n]/g, "")) {
                 const types: string[] = [];
                 let element = textNode.parentElement;
                 let image = false;

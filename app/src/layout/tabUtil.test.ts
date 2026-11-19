@@ -5,13 +5,21 @@ import test from "node:test";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {Tab} from "./Tab";
 
-const loadTabUtil = (headerTop: number) => {
+const loadTabUtil = (headerTop: number, frontend = "desktop-window", platform = "windows") => {
     const source = readFileSync(join(__dirname, "tabUtil.ts"), "utf8");
     const code = transpileModule(source, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
     const created: string[] = [];
     const spacerStyle = {} as Record<string, string>;
+    const toolbarDragStyle = new Map<string, string>();
+    const toolbarDrag = {
+        getBoundingClientRect: () => ({left: 100, right: 850}),
+        style: {setProperty: (name: string, value: string) => toolbarDragStyle.set(name, value)},
+    };
+    const center = {
+        element: {getBoundingClientRect: (): {left: number, right: number} => ({left: 0, right: 900})},
+    };
     const spacer = {style: spacerStyle, parentElement: {parentElement: {style: {}}} as unknown as HTMLElement};
     (spacer as unknown as {parentElement: {clientHeight: number}}).parentElement.clientHeight = 29;
     const headerElement = {
@@ -37,24 +45,24 @@ const loadTabUtil = (headerTop: number) => {
         saved.set(key, Object.getOwnPropertyDescriptor(globalThis, key));
     }
     Object.assign(globalThis, {
-        window: {siyuan: {layout: {layout: {element: {
-            getBoundingClientRect: (): {left: number, right: number} => ({left: 0, right: 900}),
-        }}}}},
-        document: {getElementById: (): null => null, querySelector: () => ({
-            getBoundingClientRect: () => ({left: 780, right: 900, width: 120}),
-        }),
-            body: {}},
+        window: {siyuan: {layout: {layout: center, centerLayout: center}, config: {appearance: {hideToolbar: true}}}},
+        document: {
+            getElementById: () => frontend === "desktop-window" ? null : toolbarDrag,
+            querySelector: () => ({getBoundingClientRect: () => ({left: 780, right: 900, width: 120})}),
+            documentElement: {dataset: {frontend}},
+            body: {matches: (selector: string) => selector.split(", ").includes(`.body--${platform}`)},
+        },
         getComputedStyle: (): {getPropertyValue: () => string} => ({getPropertyValue: (): string => "8px"}),
     });
     const exports = {} as typeof import("./tabUtil");
     const modules: Record<string, unknown> = {
         "./getAll": {getAllWnds: (_layout: unknown, wnds: unknown[]) => wnds.push(item)},
-        "../util/functions": {isWindow: () => true},
+        "../util/functions": {isWindow: () => frontend === "desktop-window"},
     };
     new Function("exports", "require", code)(exports, (name: string) => modules[name] || {});
     const restore = () => saved.forEach((descriptor, key) => descriptor ?
         Object.defineProperty(globalThis, key, descriptor) : Reflect.deleteProperty(globalThis, key));
-    return {setTabPosition: exports.setTabPosition, spacerStyle, headerElement, spacer, created, restore};
+    return {setTabPosition: exports.setTabPosition, spacerStyle, headerElement, spacer, created, restore, center, toolbarDragStyle};
 };
 
 test("tab drag spacer stretches with the row instead of pinning a pixel height", () => {
@@ -118,6 +126,50 @@ test("standalone tab rows reserve the actual toolbar overlap across fractional s
         f.restore();
     }
 });
+
+for (const platform of ["windows", "mac", "linux"]) {
+    test(`Fused tabs on ${platform} keep an icon-width drag area beside the right toolbar buttons`, () => {
+        const f = loadTabUtil(0, "desktop", platform);
+        try {
+            const header = f.headerElement;
+            f.setTabPosition(true);
+            assert.equal(f.toolbarDragStyle.get("--b3-toolbar-drag-left"), "8px");
+            assert.equal(f.toolbarDragStyle.get("--b3-toolbar-drag-right"), "24px");
+            assert.equal(header.lastElementChild.style.marginRight, "74px");
+
+            for (const [paneRight, expectedWidth, expectedMargin] of [[830, "24px", "4px"], [810, "40px", ""]] as const) {
+                f.center.element.getBoundingClientRect = () => ({left: 0, right: paneRight});
+                header.getBoundingClientRect = () => ({top: 0, left: 0, right: paneRight, width: paneRight}) as DOMRect;
+                f.setTabPosition(true);
+                assert.equal(f.toolbarDragStyle.get("--b3-toolbar-drag-right"), expectedWidth);
+                assert.equal(header.lastElementChild.style.marginRight, expectedMargin);
+            }
+
+            header.getBoundingClientRect = () => ({top: 0, left: 765, right: 850, width: 85}) as DOMRect;
+            f.setTabPosition(true);
+            assert.equal(header.style.visibility, "hidden");
+            header.getBoundingClientRect = () => ({top: 42, left: 0, right: 900, width: 900}) as DOMRect;
+            f.setTabPosition(true);
+            assert.equal(header.style.visibility, "");
+            assert.equal(header.lastElementChild.style.marginRight, "");
+        } finally {
+            f.restore();
+        }
+    });
+}
+
+for (const [frontend, platform] of [["browser-desktop", "windows"], ["browser-desktop", "linux"], ["desktop", "ios"]]) {
+    test(`${frontend} on ${platform} uses the standard drag gap and toolbar overlap`, () => {
+        const f = loadTabUtil(0, frontend, platform);
+        try {
+            f.setTabPosition(true);
+            assert.equal(f.toolbarDragStyle.get("--b3-toolbar-drag-right"), "8px");
+            assert.equal(f.headerElement.lastElementChild.style.marginRight, "50px");
+        } finally {
+            f.restore();
+        }
+    });
+}
 
 for (const type of ["closeOthers", "closeAll"] as const) {
     for (const outcome of ["immediate", "pending", "blocked", "failed", "mixed"] as const) {

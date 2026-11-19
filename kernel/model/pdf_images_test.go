@@ -85,6 +85,41 @@ func pdfImagesFixture(t *testing.T, filter string) (PDFImageSource, string) {
 	return PDFImageSource{DocumentID: tree.ID, Path: "assets/figures.pdf"}, fixture.targetID
 }
 
+func TestPDFImagesWithOptimizationDisabled(t *testing.T) {
+	if pdfImagesSubprocess(t) {
+		return
+	}
+	configDir := t.TempDir()
+	if err := pdfmodel.EnsureDefaultConfigAt(configDir, false); err != nil {
+		t.Fatal(err)
+	}
+	configPath := filepath.Join(configDir, "pdfcpu", "config.yml")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data = bytes.ReplaceAll(data, []byte("optimize: true"), []byte("optimize: false"))
+	if err = os.WriteFile(configPath, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = pdfmodel.EnsureDefaultConfigAt(configDir, false); err != nil {
+		t.Fatal(err)
+	}
+	if pdfmodel.NewDefaultConfiguration().Optimize {
+		t.Fatal("optimization must be disabled in the fixture")
+	}
+	source, _ := pdfImagesFixture(t, "")
+	list, err := ListPDFImages(context.Background(), source, nil, 0, 20, "")
+	if err != nil || list.Total != 3 || len(list.Images) != 3 {
+		t.Fatalf("list with optimization disabled: %+v %v", list, err)
+	}
+	first := list.Images[0]
+	prepared, err := PreparePDFImage(context.Background(), source, PDFImageSelection{Revision: list.Revision, Page: first.Page, Object: first.Object})
+	if err != nil || prepared.Width != 3 || prepared.Height != 2 {
+		t.Fatalf("preview with optimization disabled: %+v %v", prepared, err)
+	}
+}
+
 func TestPDFImagesListPreviewExtract(t *testing.T) {
 	if pdfImagesSubprocess(t) {
 		return

@@ -60,6 +60,7 @@ body {margin:0}.file-tree {position:absolute;top:40px;left:40px;width:232px}
     check.notEqual(getComputedStyle(tip).display, "none", "validation errors remain visible");
     tooltip.showTooltip("Scroll position", more);
     check.notEqual(getComputedStyle(tip).display, "none", "explicit position feedback remains visible");
+    await require("electron").ipcRenderer.invoke("hover", 0, 0);
     touch("pointerover", "mouse");
     check.equal(input.isTouchHoverInput(), false);
     await new Promise(resolve => setTimeout(resolve, 350));

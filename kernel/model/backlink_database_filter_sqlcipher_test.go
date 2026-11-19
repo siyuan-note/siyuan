@@ -107,7 +107,7 @@ func TestBacklinkDatabaseEncryptedScope(t *testing.T) {
 	if count != 1 {
 		t.Fatalf("encrypted filtered count: %d", count)
 	}
-	contexts, _ := GetBacklinkDocInBox(source.ID, target.ID, "", false, false, boxID, filter)
+	contexts, _ := GetBacklinkDocInBox(source.ID, target.ID, "", false, false, boxID, nil, filter)
 	if len(contexts) != 1 || contexts[0].ID != paragraph.ID {
 		t.Fatal("encrypted list/context mismatch")
 	}

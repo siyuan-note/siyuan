@@ -39,6 +39,7 @@ const checkDialog = async (css, languages, sources, mobile, rtl) => {
         return exports;
     };
     const {Dialog} = load(sources.dialog, {
+        "../menus/overlayOwnership": load(sources.overlayOwnership, {}),
         "../util/genID": {genUUID: () => `import-dialog-${++sequence}`},
         "../util/zIndex": {getZIndex: () => 0, isAbove: () => false},
         "./moveResize": {moveResize() {}}, "../util/functions": {isMobile: () => mobile},
@@ -53,7 +54,7 @@ const checkDialog = async (css, languages, sources, mobile, rtl) => {
     conflicts.push("<unsafe-notebook>");
     const requests = [];
     const imported = load(sources.importData, {
-        "../dialog/mobileDialog": mobileRuntime, "../util/escape": escape,
+        "../dialog/adaptiveDialog": mobileRuntime, "../util/escape": escape,
         "../util/functions": {isMobile: () => mobile},
         "../util/contractFormData": {ContractFormData: class {}},
         "../dialog/message": {showMessage: message => check.fail(message)},
@@ -137,8 +138,8 @@ if (process.versions.electron && process.type === "browser") {
             nodeIntegration: true, contextIsolation: false, offscreen: true, backgroundThrottling: false,
         }});
         try {
-            const sources = {dialog: compile("../src/dialog/index.ts"), escape: compile("../src/util/escape.ts"),
-                mobileRuntime: require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource(),
+            const sources = {overlayOwnership: compile("../src/menus/overlayOwnership.ts"), dialog: compile("../src/dialog/index.ts"), escape: compile("../src/util/escape.ts"),
+                mobileRuntime: require("./fixtures/dialogRuntime.cjs").dialogRuntimeSource(),
                 importData: compile("../src/menus/importData.ts")};
             for (const name of ["base", "mobile"]) {
                 const styles = sass.compile(path.join(__dirname, `../src/assets/scss/${name}.scss`), {logger: sass.Logger.silent}).css;

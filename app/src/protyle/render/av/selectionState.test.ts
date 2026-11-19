@@ -73,6 +73,7 @@ describe("database range selection helpers", () => {
                 colID: focusCell.colID,
             },
             cells: [anchorCell, focusCell],
+            input: {groupID: focusCell.groupID, rowID: focusCell.rowID, colID: focusCell.colID},
         });
 
         collapseAVCellSelectionToAnchor(blockElement);

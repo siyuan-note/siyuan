@@ -36,6 +36,7 @@ func testAPIContractMindmapMigration(t *testing.T, engine *gin.Engine, boxID, do
 	}
 	type response struct {
 		Code int                                   `json:"code"`
+		Msg  string                                `json:"msg"`
 		Data apicontract.MigrateLegacyMindmapsData `json:"data"`
 	}
 	post := func(body string) response {
@@ -64,6 +65,22 @@ func testAPIContractMindmapMigration(t *testing.T, engine *gin.Engine, boxID, do
 	}
 	if source := model.GetBlockDOM(id); source != sourceBefore {
 		t.Fatalf("reader request modified source: %s", source)
+	}
+	invalidRoot, _ := json.Marshal(map[string]string{"id": id, "notebook": boxID})
+	if result := post(string(invalidRoot)); result.Code != -1 || result.Msg == "" || result.Msg != model.Conf.Language(472) {
+		t.Fatalf("non-document migration did not return the localized error: %+v", result)
+	}
+	if err := model.SetBlockAttrs(docID, map[string]string{"custom-sy-readonly": "true"}); err != nil {
+		t.Fatal(err)
+	}
+	if result := post(string(body)); result.Code != 0 || result.Data.Converted != 0 || result.Data.Blocks == nil || len(result.Data.Blocks) != 0 {
+		t.Fatalf("read-only document migration was not skipped: %+v", result)
+	}
+	if source := model.GetBlockDOM(id); source != sourceBefore {
+		t.Fatalf("read-only request modified source: %s", source)
+	}
+	if err := model.SetBlockAttrs(docID, map[string]string{"custom-sy-readonly": ""}); err != nil {
+		t.Fatal(err)
 	}
 	result := post(string(body))
 	if result.Code != 0 || result.Data.Converted != 1 || len(result.Data.Blocks) != 1 || result.Data.Blocks[0].ID != id ||

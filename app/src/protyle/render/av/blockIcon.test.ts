@@ -155,8 +155,9 @@ describe("database item icons", () => {
                 }
                 for (const showIcon of [false, true]) {
                     const html = h.api.renderCell(h.cell.value, 0, showIcon);
-                    assert.match(html, /^<span class="av__primary-container"><span class="av__cellprimary"><span class="b3-menu__avemoji/);
-                    assert.match(html, /<\/span><span class="av__row-actions">/);
+                    const primaryTag = template ? "span" : "div";
+                    assert.match(html, new RegExp(`^<span class="av__primary-container"><${primaryTag} class="av__cellprimary"><span class="b3-menu__avemoji`));
+                    assert.match(html, new RegExp(`</${primaryTag}><span class="av__row-actions">`));
                     assert.equal((html.match(/data-type="av-row-open"/g) || []).length, 1);
                     assert.equal((html.match(/data-type="av-row-update"/g) || []).length, 1);
                     assert.equal((html.match(/data-type="av-row-more"/g) || []).length, 1);

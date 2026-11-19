@@ -10,23 +10,11 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"unicode/utf8"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 )
-
-func TestDoomSignaturePreservesUTF8(t *testing.T) {
-	for _, query := range []string{strings.Repeat("中", 30), strings.Repeat("😀", 30), strings.Repeat("a", 63) + "中"} {
-		sig := buildDoomSignature("search", "fulltext", map[string]any{"query": query})
-		const prefix = "search::action=fulltext::query="
-		if !utf8.ValidString(sig) || !strings.HasPrefix(sig, prefix) || !strings.HasSuffix(sig, "...") ||
-			len(sig)-len(prefix) > 67 {
-			t.Fatalf("invalid signature: %q", sig)
-		}
-	}
-}
 
 func TestConvertSchemaZodOptionalFields(t *testing.T) {
 	schema := tools.ToolSchema{
@@ -156,14 +144,14 @@ func TestParseToolArgsRejectsInvalidJSON(t *testing.T) {
 func TestDoomLoopTracksFailedQuestionCalls(t *testing.T) {
 	var tracker doomLoopTracker
 	for range doomLoopStopThreshold {
-		tracker.record("question", "", map[string]any{}, true)
+		tracker.record(nil, "question", "", map[string]any{}, "failed", true)
 	}
-	if tracker.count != doomLoopStopThreshold || tracker.prevName != "question" {
+	if tracker.count != doomLoopStopThreshold {
 		t.Fatalf("failed question calls were not tracked: %#v", tracker)
 	}
 
-	tracker.record("question", "", map[string]any{}, false)
-	if tracker.count != 0 || tracker.prevSig != "" || tracker.prevName != "" {
+	tracker.record(nil, "question", "", map[string]any{}, "answered", false)
+	if tracker.count != 0 || len(tracker.observations) != 0 {
 		t.Fatalf("successful question call did not reset tracker: %#v", tracker)
 	}
 }
@@ -172,22 +160,22 @@ func TestDoomLoopTracksDocumentParents(t *testing.T) {
 	var tracker doomLoopTracker
 	args := map[string]any{"notebook": "box", "parentID": "parent-a", "path": ""}
 	for range doomLoopWarnThreshold {
-		tracker.record("document", "create", args, true)
+		tracker.record(nil, "document", "create", args, "failed", true)
 	}
 	if tracker.count != doomLoopWarnThreshold {
 		t.Fatalf("repeated document failure was not tracked: %#v", tracker)
 	}
 	args["parentID"] = "parent-b"
-	tracker.record("document", "create", args, true)
+	tracker.record(nil, "document", "create", args, "failed", true)
 	if tracker.count != 1 {
 		t.Fatalf("different parent was treated as a repeated failure: %#v", tracker)
 	}
 	args["parentID"] = ""
-	tracker.record("document", "create", args, true)
+	tracker.record(nil, "document", "create", args, "failed", true)
 	if tracker.count != 1 {
 		t.Fatalf("notebook root was treated as the previous parent: %#v", tracker)
 	}
-	tracker.record("document", "create", args, false)
+	tracker.record(nil, "document", "create", args, "created", false)
 	if tracker.count != 0 {
 		t.Fatalf("successful document call did not reset tracker: %#v", tracker)
 	}

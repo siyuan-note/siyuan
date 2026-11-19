@@ -1,6 +1,6 @@
-import {mobileInputDialog} from "../../dialog/mobileInputDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {openInputDialog} from "../../dialog/inputDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {config as configApi} from "../util/configApi";
 import {fetchWithAppId} from "../../util/fetchWithAppId";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
@@ -13,7 +13,9 @@ import {showMessage} from "../../dialog/message";
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
-import {isInAndroid, isInHarmony, isInIOS, isInMobileApp, saveExportFile} from "../../protyle/util/compatibility";
+import {
+    isInAndroid, isInHarmony, isInIOS, isInMobileApp, isMac, isWindows, saveExportFile,
+} from "../../protyle/util/compatibility";
 import {openByMobile, openLink} from "../../editor/openLink";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../render/fragments";
 import {
@@ -57,7 +59,7 @@ const confirmWeakPassword = (password: string, confirm: () => void) => {
         confirm();
         return;
     }
-    mobileConfirmDialog("⚠️ " + window.siyuan.languages.weakPasswordConfirmTitle, window.siyuan.languages.weakPasswordConfirmTip, confirm);
+    confirmDialog({title: "⚠️ " + window.siyuan.languages.weakPasswordConfirmTitle, text: window.siyuan.languages.weakPasswordConfirmTip, confirm: confirm});
 };
 
 const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
@@ -74,7 +76,7 @@ const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
             afterMount: mountAuthCodeButton,
         });
     }
-    if (window.siyuan.config.accessAuthCode && !onWeb) {
+    if (window.siyuan.config.accessAuthCode && !onWeb && (isInMobileApp() || isMac() || isWindows())) {
         group.switch("system.lockScreenMode", {
             title: window.siyuan.languages.about7,
             desc: window.siyuan.languages.about8,
@@ -121,7 +123,7 @@ const mountOIDCButton = (root: HTMLElement) => {
         const config = window.siyuan.config.oidc;
         const escape = (value: string) => escapeHtmlTextAndAttr(value);
         let destroyOIDCDialog: () => void = (): undefined => undefined;
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             mobileSheet: {beforeClose: () => !validationActivating},
             title: window.siyuan.languages.oidcLogin,
             content: `<div class="b3-dialog__content" id="oidcConfigForm">
@@ -462,7 +464,7 @@ const mountOIDCButton = (root: HTMLElement) => {
 
 const mountAuthCodeButton = (root: HTMLElement) => {
     root.querySelector("#authCode")?.addEventListener("click", () => {
-        const dialog = mobileInputDialog({
+        const dialog = openInputDialog({
             title: window.siyuan.languages.about5,
             value: window.siyuan.config.accessAuthCode,
             placeholder: window.siyuan.languages.about5,
@@ -770,7 +772,6 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
                 <svg class="svg"><use xlink:href="#iconDownload"></use></svg>
                 ${window.siyuan.languages.exportNotebookCryptoBackup}
             </button>
-            <span class="fn__space"></span>
         </div>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200${disableImportExport ? " fn__none" : ""}" id="importCryptoBackupBtn">
             <svg class="svg"><use xlink:href="#iconUpload"></use></svg>
@@ -887,7 +888,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                 return;
             }
             // 导入前需输入主密码校验（备份文件不含密码，校验用导入备份对应的主密码）
-            mobileInputDialog({
+            openInputDialog({
                 awaitConfirm: true,
                 title: window.siyuan.languages.masterPassword,
                 value: "",
@@ -925,7 +926,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
             // 切到 OFF：没有加密笔记本时允许关闭
             fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
                 if (response.data.count > 0) {
-                    showMessage(window.siyuan.languages.encryptedNotebookDisableTip.replace("${x}", response.data.count), 4000);
+                    showMessage(window.siyuan.languages.encryptedNotebookDisableTip.replace("${x}", String(response.data.count)), 4000);
                     switchElement.checked = true;
                 } else if (response.data.hasHistoryDependency) {
                     // 已删除加密笔记本的历史仍依赖当前密钥备份，禁用会让其永久锁死（详见设计 §19）
@@ -948,7 +949,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
 };
 
 const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) => {
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: "🔐 " + window.siyuan.languages.setMasterPassword,
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
@@ -1005,7 +1006,7 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
 };
 
 const openChangeMasterPasswordDialog = (onChanged?: () => void) => {
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: "🔐 " + window.siyuan.languages.changeMasterPassword,
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.oldMasterPassword}" class="b3-text-field fn__block">

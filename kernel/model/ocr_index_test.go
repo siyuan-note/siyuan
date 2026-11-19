@@ -199,6 +199,40 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 	if err := ocrRegistry.Register(ocr.Tesseract, provider); err != nil {
 		t.Fatal(err)
 	}
+	Conf.OCR.Load().Provider = "paddleocr"
+	t.Run("discover images added after startup", func(t *testing.T) {
+		oldContainer := util.Container
+		t.Cleanup(func() { util.Container = oldContainer })
+		util.Container = util.ContainerAndroid
+		cache.LoadAssets()
+		for _, test := range []struct{ container, dir, path string }{
+			{util.ContainerAndroid, fixture.box.ID, "assets/late-notebook.png"},
+			{util.ContainerAndroid, "", "assets/late-global.png"},
+			{util.ContainerStd, fixture.box.ID, "assets/late-desktop-notebook.png"},
+		} {
+			util.Container = test.container
+			filename := filepath.Join(util.DataDir, test.dir, filepath.FromSlash(test.path))
+			if err := os.WriteFile(filename, []byte("new image"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			if cache.ExistAsset(test.path) {
+				t.Fatal("image was added to the startup cache")
+			}
+			provider.called = false
+			autoOCRAssets()
+			if !provider.called || provider.path != filename || !strings.Contains(util.GetAssetText(test.path), "nativeocrkeyword") {
+				t.Fatalf("automatic OCR missed %s: called=%v path=%q text=%q", test.path, provider.called, provider.path, util.GetAssetText(test.path))
+			}
+		}
+		for _, container := range []string{util.ContainerAndroid, util.ContainerStd} {
+			util.Container = container
+			provider.called = false
+			autoOCRAssets()
+			if provider.called || util.ExistsAssetText("assets/encrypted.png") {
+				t.Fatal("automatic OCR reached an already processed or encrypted image")
+			}
+		}
+	})
 	for _, unlocked := range []bool{false, true} {
 		if unlocked {
 			setDEKForTest(encryptedBox, key)

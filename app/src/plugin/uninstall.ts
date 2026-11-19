@@ -1,5 +1,7 @@
 import type {App} from "../index";
 import type {Plugin} from "./index";
+import {cancelPluginColorPickers} from "../colorPicker/owners";
+import {cancelPluginDatePickers} from "../datePicker/owners";
 /// #if !MOBILE
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {Custom} from "../layout/dock/Custom";
@@ -79,6 +81,8 @@ export const destroyPluginByName = (app: App, name: string) => {
 };
 
 export const beginPluginTeardown = (plugin: Plugin) => {
+    cancelPluginColorPickers(plugin);
+    cancelPluginDatePickers(plugin);
     runCleanup(plugin, "commands", () => unregisterPluginCommands(plugin));
     runCleanup(plugin, "asset upload", () => cancelAssetUploadsByPlugin(plugin));
     runCleanup(plugin, "tracked ranges", () => releaseTrackedRangesByPlugin(plugin));

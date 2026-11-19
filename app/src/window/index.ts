@@ -1,4 +1,6 @@
 import {onWindowWorkspaceStorageChanged} from "./workspace";
+import {registerColorPickerWindow} from "../colorPicker/panel";
+import {registerDatePickerWindow} from "../datePicker/panel";
 import {closeNotebookHistoryDialogs} from "../history/notebookDialogs";
 import {closeDocumentTitleDialogs} from "../protyle/header/documentTitleDialogs";
 import {clearDocumentCreationPlans} from "../util/configuredDocument";
@@ -57,6 +59,8 @@ class App {
     public appId: string;
 
     constructor() {
+        registerColorPickerWindow();
+        registerDatePickerWindow();
         addBaseURL();
         this.appId = Constants.SIYUAN_APPID;
 
@@ -254,11 +258,11 @@ class App {
             await notebookPromise;
             await loadPlugins(this);
             getLocalStorage(() => {
-                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, (languages: IObject) => {
+                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, (languages) => {
                     window.siyuan.languages = languages;
                     void initializeEnglishCommandTranslations(
                         window.siyuan.config.appearance.lang,
-                        languages as Record<string, string>,
+                        languages,
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);

@@ -148,6 +148,31 @@ const browserCases = async (sources: string[]) => {
     await settle();
     check.equal(content.scrollTop, 0, "shortened content clamps scrolling to the valid range");
     layout.dispose();
+    document.body.classList.add("body--ios");
+    for (const safeArea of [34, 21, 0]) {
+        document.body.style.setProperty("--mobile-bottom-bar-safe-area", `${safeArea}px`);
+        for (const bottom of [800, 300]) {
+            viewport.bottom = bottom;
+            document.body.innerHTML = markup;
+            const iosOverlay = document.querySelector<HTMLElement>(".b3-dialog");
+            const iosPanel = document.querySelector<HTMLElement>(".mobile-bottom-sheet");
+            const iosFooter = iosPanel.querySelector<HTMLElement>(".b3-dialog__action");
+            const iosLayout = dependencies.bindMobileSheetLayout(iosOverlay, iosPanel);
+            check.equal(getComputedStyle(iosOverlay).paddingBottom, "0px");
+            check.equal(parseFloat(getComputedStyle(iosPanel).paddingBottom), safeArea);
+            check.ok(Math.abs(iosPanel.getBoundingClientRect().bottom - bottom) < 1,
+                "iOS sheet background reaches the viewport or keyboard edge");
+            check.ok(iosFooter.getBoundingClientRect().bottom <= bottom - safeArea + 1,
+                "iOS action buttons remain above the home indicator safe area");
+            iosLayout.setMode("expanded");
+            check.equal(iosPanel.getBoundingClientRect().height, bottom - 20,
+                "iOS safe area is inside the panel and must not be subtracted twice");
+            iosLayout.dispose();
+        }
+    }
+    document.body.classList.remove("body--ios");
+    document.body.style.setProperty("--mobile-bottom-bar-safe-area", "30px");
+    viewport.bottom = 800;
     for (const gate of ["child", "root-inert", "body-inert", "root-busy", "body-busy", "business", "closing"]) {
         document.body.innerHTML = markup;
         const root = document.querySelector<HTMLElement>(".mobile-bottom-sheet-dialog");
@@ -273,10 +298,13 @@ const headless = process.env.SIYUAN_TEST_HEADLESS === "1";
 
 test("real sheet geometry keeps short minimums and footer visible across manual and keyboard resizing", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !headless,
-    timeout: 30000,
+    // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
+    timeout: 45000,
 }, async () => {
-    const sources = ["keyboardSheetState", "mobileSheetGesture", "mobileSheetLayout", "bindBottomSheetDrag", "bindBottomSheetDialog"].map(id => transpileModule(
-        readFileSync(`src/mobile/util/${id}.ts`, "utf8"), {
+    const sources = ["protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu", "mobile/util/keyboardSheetState",
+        "mobile/util/mobileSheetGesture", "mobile/util/mobileSheetLayout", "mobile/util/bindBottomSheetDrag",
+        "mobile/util/bindBottomSheetDialog"].map(id => transpileModule(
+        readFileSync(`src/${id}.ts`, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText);
     const css = compile("src/assets/scss/mobile.scss", {logger: {warn() {}}}).css;

@@ -488,10 +488,13 @@
   }
 
   &__text {
-    margin-left: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    &:not(:first-child) {
+      margin-left: 4px;
+    }
   }
 
   &__graphic {
@@ -584,7 +587,7 @@
 
   > .protyle-wysiwyg,
   > .sy__backlink--bottom {
-    padding-left: var(--b3-protyle-padding-left);
+    padding-left: max(var(--b3-protyle-padding-left), var(--b3-protyle-min-padding-left, 0px));
     padding-right: max(var(--b3-protyle-padding-right), var(--b3-protyle-page-scroll-gutter, 0px));
   }
 
@@ -592,7 +595,7 @@
     .protyle-title,
     .protyle-background__ia,
     .protyle-db-attr {
-      margin-left: var(--b3-protyle-padding-left);
+      margin-left: max(var(--b3-protyle-padding-left), var(--b3-protyle-min-padding-left, 0px));
       margin-right: max(var(--b3-protyle-padding-right), var(--b3-protyle-page-scroll-gutter, 0px));
     }
   }
@@ -601,7 +604,7 @@
 .protyle-preview[data-padding-mode="responsive"][data-device="desktop"] > .b3-typography {
   --b3-protyle-padding-left: 24px;
   --b3-protyle-padding-right: 16px;
-  padding-left: var(--b3-protyle-padding-left);
+  padding-left: max(var(--b3-protyle-padding-left), var(--b3-protyle-min-padding-left, 0px));
   padding-right: var(--b3-protyle-padding-right);
 }
 
@@ -990,6 +993,11 @@
     box-shadow: 2px 0 0 0 var(--b3-protyle-inline-mark-background) inset;
   }
 
+  > .protyle-title__rich {
+    // 富文本编辑器不能遮住外层标题的制卡标记和动画。
+    background-color: transparent;
+  }
+
   &__icon {
     position: absolute;
     left: -22px;
@@ -1152,6 +1160,8 @@
   // 跟随单元格的可用宽度，保证预览与编辑使用相同的折行边界。
   width: auto;
   max-width: 100%;
+  // 字形的绘制范围可以超出文字排版宽度，允许笔画伸入单元格留白。
+  overflow: visible;
 }
 
 .table__cell-rich .code-block,
@@ -1210,6 +1220,7 @@
   .protyle-wysiwyg {
     padding: 0 !important;
     min-height: 1.6em;
+    overflow: visible;
     // 继承单元格字号，保持预览与编辑时的文字大小一致。
     font-size: inherit;
   }

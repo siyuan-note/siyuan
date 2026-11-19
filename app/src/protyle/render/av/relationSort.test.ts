@@ -7,7 +7,7 @@ import {getAVHostBlockID} from "./host";
 
 it("keeps the footer loader hidden while refreshing existing candidates", () => {
     const source = readFileSync(join(__dirname, "relation.ts"), "utf8");
-    const start = source.indexOf("    const loadPage = (reset: boolean) => {");
+    const start = source.indexOf("    const loadPage = (reset: boolean, preservePosition = false) => {");
     const end = source.indexOf('    listElement.addEventListener("mousedown"', start);
     assert.ok(start > 0 && end > start);
     for (const test of [{initial: true, reset: true, loader: true},
@@ -16,13 +16,13 @@ it("keeps the footer loader hidden while refreshing existing candidates", () => 
         const dependencies = {
             state: {loading: false, page: 1, total: 32, keyword: "", controller: undefined as AbortController | undefined},
             initialLoad: test.initial,
+            searchTimer: undefined as number | undefined,
             hasMore: () => true,
             getSelectedItems: (): {id: string}[] => [],
             setLoading: (show: boolean) => loading.push(show),
             relationElement: {dataset: {}, getAttribute: () => "database"},
-            options: {blockElement: {dataset: {nodeId: "carrier"}, getAttribute: () => "carrier"}},
             getAVHostBlockID,
-            sourceIsCurrent: () => true,
+            getCurrentBlock: () => ({dataset: {nodeId: "carrier"}, getAttribute: () => "carrier"}),
             cellScope: {context: undefined as undefined},
             RELATION_PAGE_SIZE: 16,
             fetchPost: () => ({finally() {}}),

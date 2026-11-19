@@ -14,7 +14,7 @@ import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
 /// #endif
 
 // 重命名使用独立草稿，保存失败时保留输入。
-export const openDocumentTitleDialog = (options: {id: string, notebook?: string, app?: App}) => {
+export const openDocumentTitleDialog = (options: {id: string, notebook?: string, app?: App, ignoreEditLock?: boolean}) => {
     let closePending = false;
     let closing = false;
     let canClose = false;
@@ -65,7 +65,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
 <div class="fn__space"></div><button class="b3-button" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button></div>`;
     /// #if MOBILE
     width = "100vw";
-    actionHTML = `<div class="b3-dialog__action mobile-sheet-action-bar"><div class="mobile-sheet-action-group mobile-sheet-action-group--compact">
+    actionHTML = `<div class="b3-dialog__action mobile-sheet-action-bar"><div class="mobile-sheet-action-group">
 <button class="b3-button b3-button--touch b3-button--wrap b3-button--cancel b3-button--secondary" data-type="cancel">${escapeHtml(window.siyuan.languages.cancel)}</button>
 <button class="b3-button b3-button--touch b3-button--wrap" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button></div></div>`;
     /// #endif
@@ -145,7 +145,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
                     /// #endif
                 }
             },
-        });
+        }, {ignoreEditLock: options.ignoreEditLock});
     const guard = registerEditorSave(editor.protyle);
     dialog.editors = {title: editor};
     const unregister = registerDocumentTitleDialog(editor, options.id, options.notebook, closeInvalidated);

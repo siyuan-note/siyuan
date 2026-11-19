@@ -17,6 +17,7 @@ import {WYSIWYG} from "./wysiwyg";
 import {Toolbar} from "./toolbar";
 import {Gutter} from "./gutter";
 import {setAutoDirection} from "./render/autoDirection";
+import {observeTableCorners} from "./render/tableCorners";
 import {Breadcrumb} from "./breadcrumb";
 import {updateNotebookBreadcrumbIcon} from "./breadcrumb/iconRefresh";
 import {
@@ -47,6 +48,7 @@ import {destroyMobileBottomBacklinkPanel} from "../mobile/util/bottomBacklink";
 /// #endif
 import {resize} from "./util/resize";
 import {getDocByScroll} from "./scroll/saveScroll";
+import {getDocPosition} from "./scroll/docPosition";
 import type {App} from "../index";
 import {insertHTML} from "./util/insertHTML";
 import {avRender} from "./render/av/render";
@@ -219,6 +221,7 @@ export class Protyle {
         this.protyle.undo = this.protyle.lite ? new LocalUndo() : new Undo();
         this.protyle.wysiwyg = new WYSIWYG(this.protyle);
         setAutoDirection(this.protyle.wysiwyg.element, window.siyuan.config.editor.autoDirection);
+        observeTableCorners(this.protyle.wysiwyg.element);
         initFoldedRender(this.protyle);
         initEditorTabs(this.protyle);
         initListMindmaps(this.protyle);
@@ -464,28 +467,29 @@ export class Protyle {
                 return;
             }
 
-            const savedScroll = options.scrollAttr?.rootId === options.rootId ? options.scrollAttr :
-                window.siyuan.storage?.[Constants.LOCAL_FILEPOSITION]?.[options.rootId];
-            if (this.protyle.options.mode !== "preview" &&
-                options.rootId && savedScroll &&
-                (
-                    mergedOptions.action.includes(Constants.CB_GET_SCROLL) ||
-                    (mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL) && options.rootId === options.blockId)
-                )
-            ) {
-                getDocByScroll({
-                    protyle: this.protyle,
-                    scrollAttr: savedScroll,
-                    mergedOptions,
-                    cb: () => {
-                        this.afterOnGet(mergedOptions);
-                    }
-                });
-            } else {
-                this.getDoc(mergedOptions);
-            }
+            void this.loadInitialDoc(options, mergedOptions);
         } else {
             this.protyle.contentElement.classList.add("protyle-content--transition");
+        }
+    }
+
+    private async loadInitialDoc(options: IProtyleOptions, mergedOptions: IProtyleOptions) {
+        const restore = mergedOptions.action.includes(Constants.CB_GET_SCROLL) ||
+            (mergedOptions.action.includes(Constants.CB_GET_ROOTSCROLL) && options.rootId === options.blockId);
+        const savedScroll = restore && this.protyle.options.mode !== "preview" ?
+            await getDocPosition(options.rootId, options.scrollAttr) : undefined;
+        if (this.destroyed) { return; }
+        if (savedScroll) {
+            getDocByScroll({
+                protyle: this.protyle,
+                scrollAttr: savedScroll,
+                mergedOptions,
+                cb: () => {
+                    this.afterOnGet(mergedOptions);
+                }
+            });
+        } else {
+            this.getDoc(mergedOptions);
         }
     }
 

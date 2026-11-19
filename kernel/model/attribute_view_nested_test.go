@@ -337,3 +337,58 @@ func TestNestedGroupIdentityAndFlatMembershipRemainStable(t *testing.T) {
 		}
 	}
 }
+
+func TestNestedGroupsInheritLayoutPresentation(t *testing.T) {
+	for _, layoutType := range []av.LayoutType{av.LayoutTypeTable, av.LayoutTypeList} {
+		t.Run(string(layoutType), func(t *testing.T) {
+			database, ids := nestedFixture(t, 2)
+			util.AttrViewLangs["en"]["list"] = "List"
+			if err := database.SetSubItemsParents(map[string]string{ids[1]: ids[0]}); err != nil {
+				t.Fatal(err)
+			}
+			view := database.Views[0]
+			if layoutType == av.LayoutTypeList {
+				view.LayoutType, view.List, view.Table = layoutType, view.Table, nil
+			}
+			view.Group = &av.ViewGroup{Field: database.GetBlockKey().ID, Method: av.GroupMethodValue}
+			base := view.GetBaseLayout()
+			for _, primary := range []bool{false, true} {
+				for _, relation := range []*bool{nil, new(false), new(true)} {
+					for _, wrap := range []bool{false, true} {
+						base.ShowIcon, base.ShowRelationIcon, base.WrapField = primary, relation, wrap
+						for _, expanded := range []bool{false, true} {
+							request := &av.NestedRequest{}
+							if expanded {
+								request.ExpandedIDs = []string{ids[0]}
+							}
+							for range 2 {
+								result := nestedRender(t, database, "", 1, 50, nil, AttributeViewRenderOptions{Nested: request})
+								if len(result.Groups) == 0 {
+									t.Fatal("missing nested groups")
+								}
+								visible := 0
+								for _, group := range result.Groups {
+									table := av.TableFromViewable(group)
+									if table.ShowIcon != primary || table.ShowRelationIcon != base.EffectiveShowRelationIcon() || table.WrapField != wrap {
+										t.Fatalf("group presentation: primary=%v relation=%v wrap=%v; want %v/%v/%v", table.ShowIcon, table.ShowRelationIcon, table.WrapField, primary, base.EffectiveShowRelationIcon(), wrap)
+									}
+									visible += len(table.Rows)
+									if expanded && len(table.Rows) > 0 && (len(table.Rows) != 2 || table.Rows[1].Hierarchy.ParentID != ids[0]) {
+										t.Fatal("lost expanded hierarchy")
+									}
+								}
+								wantRows := 1
+								if expanded {
+									wantRows = 2
+								}
+								if visible != wantRows {
+									t.Fatalf("rows=%d, want %d", visible, wantRows)
+								}
+							}
+						}
+					}
+				}
+			}
+		})
+	}
+}

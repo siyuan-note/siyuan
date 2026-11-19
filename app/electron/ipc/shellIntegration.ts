@@ -3,6 +3,7 @@ import * as electron from "electron";
 import {state, getConsole} from "../shared/runtime";
 import {hasTray} from "../shared/traySupport";
 import {hideWindow, toggleMainWindow} from "../window/windowVisibility";
+import {finishWindowCloseOnHide} from "../window/closeRecovery";
 import {resetTrayMenu} from "../window/trayMenu";
 import {updateGlobalShortcutBindings} from "../window/globalShortcutBindings";
 import {hotKey2Electron} from "../window/appMenu";
@@ -40,11 +41,11 @@ const registerShellIntegrationIpc = (): void => {
         event.sender.send(Channel.SIYUAN_HOTKEY, {failed});
     });
 
-    // 前端在语言变化时提交新的托盘文案，这里据此重建菜单。
     electron.ipcMain.on(Channel.SIYUAN_CONFIG_TRAY, (event, data) => {
         state.workspaces.find(item => {
             if (item.browserWindow.webContents.id === event.sender.id) {
                 hideWindow(item.browserWindow);
+                finishWindowCloseOnHide(item.browserWindow);
                 if (hasTray(process.platform)) {
                     resetTrayMenu(item.tray as electron.Tray, data.languages, item.browserWindow);
                 }

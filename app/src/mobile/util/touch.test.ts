@@ -236,6 +236,30 @@ test("releasing an iOS native text gesture leaves its editing menu and selection
     assert.equal(f.multiSelectCount(), 0);
 });
 
+test("iOS form fields retain native long presses and selection handles on nearby padding", () => {
+    for (const {tagName, ios, targetIsField, selectionEnd, clientY, prevented} of [
+        {tagName: "INPUT", ios: true, targetIsField: true, selectionEnd: 3, clientY: 100, prevented: false},
+        {tagName: "INPUT", ios: true, targetIsField: false, selectionEnd: 8, clientY: 100, prevented: false},
+        {tagName: "TEXTAREA", ios: true, targetIsField: false, selectionEnd: 8, clientY: 100, prevented: false},
+        {tagName: "INPUT", ios: true, targetIsField: false, selectionEnd: 3, clientY: 100, prevented: true},
+        {tagName: "TEXTAREA", ios: true, targetIsField: false, selectionEnd: 8, clientY: 160, prevented: true},
+        {tagName: "INPUT", ios: false, targetIsField: false, selectionEnd: 8, clientY: 100, prevented: true},
+    ]) {
+        const f = fixture("", true);
+        if (ios) f.nativeMenu();
+        f.hideKeyboard();
+        f.startBlankTouch(f.element, 1, 1000, 100, clientY);
+        const field = {tagName, selectionStart: 3, selectionEnd,
+            getBoundingClientRect: () => ({left: 40, right: 300, top: 75, bottom: 89})};
+        f.document.activeElement = field;
+        let consumed = false;
+        f.exports.handleTouchEnd({target: targetIsField ? field : f.element, timeStamp: 3000,
+            changedTouches: [{clientX: 100, clientY}],
+            stopImmediatePropagation() {}, preventDefault() { consumed = true; }});
+        assert.equal(consumed, prevented, JSON.stringify({tagName, ios, targetIsField, selectionEnd, clientY}));
+    }
+});
+
 test("iOS editing long presses retain the keyboard without waiting for a native menu callback", () => {
     const f = fixture("", true);
     f.nativeMenu();

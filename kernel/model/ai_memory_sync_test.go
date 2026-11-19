@@ -9,228 +9,425 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/memory"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestAIMemorySyncCausalHistory(t *testing.T) {
-	for _, test := range []struct {
-		previous, next []string
-		want           bool
-	}{
-		{[]string{"a"}, []string{"a", "b"}, true},
-		{[]string{"a", "b"}, []string{"a"}, false},
-		{[]string{"a"}, []string{"b"}, false},
-		{[]string{"a"}, []string{"a"}, false},
-		{[]string{"a"}, []string{"a", "a"}, false},
-		{nil, []string{"a"}, false},
-	} {
-		if got := memoryOperationsExtend(test.previous, test.next); got != test.want {
-			t.Fatalf("causality: got %v want %v", got, test.want)
-		}
-	}
-}
-
-func TestAIMemorySyncPreservesProjectionBeforeRemoval(t *testing.T) {
-	dir := t.TempDir()
-	base := filepath.Join(dir, "storage/ai/memory")
-	if err := os.MkdirAll(base, 0700); err != nil {
-		t.Fatal(err)
-	}
-	original := []byte("legacy overview with unique content")
-	if err := os.WriteFile(filepath.Join(base, "USER.md"), original, 0600); err != nil {
-		t.Fatal(err)
-	}
-	plan := &dejavu.CheckoutPlan{Removes: []*entity.File{{Path: memorySyncPrefix + "USER.md"}}}
-	if err := memoryCheckoutPreflight(dir, plan); err != nil {
-		t.Fatal(err)
-	}
-	files, err := os.ReadDir(filepath.Join(base, "legacy-projections"))
-	if err != nil || len(files) != 1 {
-		t.Fatalf("backup: %v %v", files, err)
-	}
-	data, err := os.ReadFile(filepath.Join(base, "legacy-projections", files[0].Name()))
-	if err != nil || string(data) != string(original) {
-		t.Fatalf("original not preserved: %q %v", data, err)
-	}
-	plan.Removes = []*entity.File{{Path: memorySyncPrefix + "legacy-projections/" + files[0].Name()}}
-	if err = memoryCheckoutPreflight(dir, plan); err == nil {
-		t.Fatal("migration backup can be silently deleted by sync")
-	}
-}
 func memorySyncTestRecord() memory.Record {
 	return memory.Record{Schema: 1, Kind: "preference", Subject: "user", Scope: "workspace", State: "active", Content: "concise answers", Sources: []memory.Source{{Kind: "manual", ID: "test", Revision: "v1"}}}
 }
 
-func TestAIMemorySyncWithdrawalSurvivesPlan(t *testing.T) {
-	ctx := context.Background()
-	dir := t.TempDir()
-	store := memory.NewStore(dir)
-	entry, err := store.Save(ctx, memorySyncTestRecord(), "missing", "remember")
-	if err != nil {
-		t.Fatal(err)
-	}
-	forgotten, err := store.Forget(ctx, entry.Record.ID, entry.Revision, "forget")
-	if err != nil {
-		t.Fatal(err)
-	}
-	name := memorySyncPrefix + "withdrawals/" + forgotten.WithdrawalID + ".md"
-	plan := &dejavu.CheckoutPlan{Removes: []*entity.File{{Path: name}}}
-	if err = memoryCheckoutPreflight(dir, plan); err != nil {
-		t.Fatal(err)
-	}
-	if err = os.Remove(filepath.Join(dir, filepath.FromSlash(name))); err != nil {
-		t.Fatal(err)
-	}
-	// 恢复旧记录必须仍被新保存的撤回引用拦截。
-	if _, err = store.Save(ctx, entry.Record, "missing", "old-retry"); !errors.Is(err, memory.ErrWithdrawn) {
-		t.Fatalf("old memory revived: %v", err)
-	}
-	files, err := os.ReadDir(filepath.Join(dir, "storage/ai/memory/withdrawals"))
-	if err != nil || len(files) != 1 {
-		t.Fatalf("retained marker: %d %v", len(files), err)
-	}
-}
-
-func TestAIMemorySyncRejectsSymlink(t *testing.T) {
-	dir := t.TempDir()
-	outside := t.TempDir()
-	if err := os.Symlink(outside, filepath.Join(dir, "storage")); err != nil {
-		t.Skip(err)
-	}
-	_, err := memorySyncRead(dir, "/storage/ai/memory/records/20261029000000-abcdefg.md")
-	if !errors.Is(err, memory.ErrInvalid) {
-		t.Fatalf("symlink accepted: %v", err)
-	}
-}
-
-func TestAIMemorySyncCheckoutRestoresWithoutRevival(t *testing.T) {
-	ctx := context.Background()
+func memoryCheckoutTestRepo(t *testing.T, sync bool) *dejavu.Repo {
+	t.Helper()
 	repo := newCheckoutSourceTestRepo(t)
 	if err := os.MkdirAll(repo.DataPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	store := memory.NewStore(repo.DataPath)
-	entry, err := store.Save(ctx, memorySyncTestRecord(), "missing", "remember")
+	if sync {
+		repo.SetCheckoutHooks(dejavu.CheckoutHooks{Preflight: syncDocumentPreflight(repo)})
+	}
+	return repo
+}
+
+func memoryCheckoutTestIndex(t *testing.T, repo *dejavu.Repo) string {
+	t.Helper()
+	index, err := repo.IndexWithOptions("memory checkout test", false, nil, dejavu.IndexOptions{FullCheck: true})
 	if err != nil {
 		t.Fatal(err)
 	}
-	snapshot, err := repo.IndexWithOptions("memory before forgetting", false, nil, dejavu.IndexOptions{FullCheck: true})
-	if err != nil {
+	return index.ID
+}
+
+func memoryCheckoutTestRestore(t *testing.T, repo *dejavu.Repo, id string) {
+	t.Helper()
+	if _, _, err := repo.Checkout(id, nil); err != nil {
 		t.Fatal(err)
-	}
-	if _, err = store.Forget(ctx, entry.Record.ID, entry.Revision, "forget"); err != nil {
-		t.Fatal(err)
-	}
-	if _, err = repo.IndexWithOptions("memory after forgetting", false, nil, dejavu.IndexOptions{FullCheck: true}); err != nil {
-		t.Fatal(err)
-	}
-	if _, _, err = repo.Checkout(snapshot.ID, nil); err != nil {
-		t.Fatal(err)
-	}
-	if _, err = store.Get(ctx, entry.Record.ID); !errors.Is(err, memory.ErrWithdrawn) {
-		t.Fatalf("restored forgotten content usable: %v", err)
 	}
 }
 
-func TestAIMemorySyncCheckoutDivergenceQuarantines(t *testing.T) {
-	ctx := context.Background()
-	repo := newCheckoutSourceTestRepo(t)
-	if err := os.MkdirAll(repo.DataPath, 0700); err != nil {
-		t.Fatal(err)
-	}
-	store := memory.NewStore(repo.DataPath)
-	entry, err := store.Save(ctx, memorySyncTestRecord(), "missing", "remember")
-	if err != nil {
-		t.Fatal(err)
-	}
-	filename := filepath.Join(repo.DataPath, "storage/ai/memory/records", entry.Record.ID+".md")
-	original, err := os.ReadFile(filename)
-	if err != nil {
-		t.Fatal(err)
-	}
-	record := entry.Record
-	record.Content = "remote changed preference"
-	_, err = store.Save(ctx, record, entry.Revision, "remote-edit")
-	if err != nil {
-		t.Fatal(err)
-	}
-	snapshot, err := repo.IndexWithOptions("remote memory", false, nil, dejavu.IndexOptions{FullCheck: true})
-	if err != nil {
-		t.Fatal(err)
-	}
-	// 构建另一设备从共同祖先作出的不同修改。
-	if err = os.WriteFile(filename, original, 0600); err != nil {
-		t.Fatal(err)
-	}
-	record = entry.Record
-	record.Content = "local changed preference"
-	if _, err = store.Save(ctx, record, entry.Revision, "local-edit"); err != nil {
-		t.Fatal(err)
-	}
-	if _, err = repo.IndexWithOptions("local memory", false, nil, dejavu.IndexOptions{FullCheck: true}); err != nil {
-		t.Fatal(err)
-	}
-	if _, _, err = repo.Checkout(snapshot.ID, nil); err != nil {
-		t.Fatal(err)
-	}
-	if _, err = store.Get(ctx, entry.Record.ID); !errors.Is(err, memory.ErrConflict) {
-		t.Fatalf("divergence activated: %v", err)
-	}
-	archived, err := os.ReadDir(filepath.Join(repo.DataPath, "storage/ai/memory/conflicts", entry.Record.ID))
-	if err != nil || len(archived) < 2 {
-		t.Fatalf("both versions not preserved: %d %v", len(archived), err)
-	}
-}
-
-func TestAIMemorySyncProtectsSafetyMetadata(t *testing.T) {
-	for _, relative := range []string{"conflicts/20261029000000-abcdefg/version.md"} {
-		t.Run(relative, func(t *testing.T) {
-			dir := t.TempDir()
-			name := memorySyncPrefix + relative
-			target := filepath.Join(dir, filepath.FromSlash(name))
-			if err := os.MkdirAll(filepath.Dir(target), 0700); err != nil {
+func TestAIMemoryCheckoutRestoresWithdrawalState(t *testing.T) {
+	for _, sync := range []bool{false, true} {
+		t.Run(map[bool]string{false: "snapshot", true: "sync-preflight"}[sync], func(t *testing.T) {
+			ctx := context.Background()
+			repo := memoryCheckoutTestRepo(t, sync)
+			store := memory.NewStore(repo.DataPath)
+			entry, err := store.Save(ctx, memorySyncTestRecord(), "missing", "remember")
+			if err != nil {
 				t.Fatal(err)
 			}
-			if err := os.WriteFile(target, []byte("retained evidence"), 0600); err != nil {
+			before := memoryCheckoutTestIndex(t, repo)
+			if _, err = store.Forget(ctx, entry.Record.ID, entry.Revision, "forget"); err != nil {
 				t.Fatal(err)
 			}
-			plan := &dejavu.CheckoutPlan{Removes: []*entity.File{{Path: name}}}
-			if err := memoryCheckoutPreflight(dir, plan); err == nil {
-				t.Fatal("safety metadata deletion allowed")
+			after := memoryCheckoutTestIndex(t, repo)
+			memoryCheckoutTestRestore(t, repo, before)
+			restored, err := store.Get(ctx, entry.Record.ID)
+			if err != nil || restored.Revision != entry.Revision {
+				t.Fatalf("snapshot memory not restored: %+v %v", restored, err)
 			}
-			data, err := os.ReadFile(target)
-			if err != nil || string(data) != "retained evidence" {
-				t.Fatalf("metadata changed: %s %v", data, err)
+			files, err := os.ReadDir(filepath.Join(repo.DataPath, "storage/ai/memory/withdrawals"))
+			if err != nil && !errors.Is(err, os.ErrNotExist) {
+				t.Fatal(err)
+			}
+			if len(files) != 0 {
+				t.Fatalf("extra withdrawals retained: %v", files)
+			}
+			memoryCheckoutTestRestore(t, repo, after)
+			if _, err = store.Save(ctx, entry.Record, "missing", "old-retry"); !errors.Is(err, memory.ErrWithdrawn) {
+				t.Fatalf("forgotten state not restored: %v", err)
 			}
 		})
 	}
 }
 
-func TestAIMemorySyncIgnoresObsoleteOperations(t *testing.T) {
-	dir := t.TempDir()
-	name := memorySyncPrefix + "operations/legacy.md"
-	target := filepath.Join(dir, filepath.FromSlash(name))
-	if err := os.MkdirAll(filepath.Dir(target), 0700); err != nil {
+func TestAIMemoryCheckoutUsesSelectedVersion(t *testing.T) {
+	ctx := context.Background()
+	repo := memoryCheckoutTestRepo(t, false)
+	store := memory.NewStore(repo.DataPath)
+	entry, err := store.Save(ctx, memorySyncTestRecord(), "missing", "remember")
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(target, []byte("legacy opaque ledger"), 0600); err != nil {
+	original := memoryCheckoutTestIndex(t, repo)
+	record := entry.Record
+	record.Content = "updated preference"
+	updated, err := store.Save(ctx, record, entry.Revision, "edit")
+	if err != nil {
 		t.Fatal(err)
 	}
-	// No plan reader is supplied: obsolete operation contents must not be inspected.
-	for _, plan := range []*dejavu.CheckoutPlan{
-		{Upserts: []*entity.File{{Path: name, Size: memory.MaxFileSize + 1}}},
-		{Removes: []*entity.File{{Path: name}}},
-	} {
-		if err := memoryCheckoutPreflight(dir, plan); err != nil {
-			t.Fatalf("ordinary operation sync blocked: %v", err)
+	changed := memoryCheckoutTestIndex(t, repo)
+	memoryCheckoutTestRestore(t, repo, original)
+	got, err := store.Get(ctx, entry.Record.ID)
+	if err != nil || got.Revision != entry.Revision {
+		t.Fatalf("older version quarantined: %+v %v", got, err)
+	}
+	memoryCheckoutTestRestore(t, repo, changed)
+	got, err = store.Get(ctx, entry.Record.ID)
+	if err != nil || got.Revision != updated.Revision {
+		t.Fatalf("newer version not restored: %+v %v", got, err)
+	}
+	raw, err := os.ReadFile(filepath.Join(repo.DataPath, "storage/ai/memory/records", entry.Record.ID+".md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = store.Quarantine(ctx, entry.Record.ID, [][]byte{raw}); err != nil {
+		t.Fatal(err)
+	}
+	conflicted := memoryCheckoutTestIndex(t, repo)
+	if _, err = store.Get(ctx, entry.Record.ID); !errors.Is(err, memory.ErrConflict) {
+		t.Fatalf("existing conflict ignored: %v", err)
+	}
+	memoryCheckoutTestRestore(t, repo, original)
+	if _, err = store.Get(ctx, entry.Record.ID); err != nil {
+		t.Fatalf("conflict did not roll back: %v", err)
+	}
+	memoryCheckoutTestRestore(t, repo, conflicted)
+	if _, err = store.Get(ctx, entry.Record.ID); !errors.Is(err, memory.ErrConflict) {
+		t.Fatalf("conflict state not restored: %v", err)
+	}
+}
+
+func memoryCheckoutTestFiles(t *testing.T, dir string) map[string]string {
+	t.Helper()
+	files := map[string]string{}
+	err := filepath.WalkDir(dir, func(name string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		data, err := os.ReadFile(name)
+		if err != nil {
+			return err
+		}
+		relative, err := filepath.Rel(dir, name)
+		if err != nil {
+			return err
+		}
+		files[relative] = string(data)
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return files
+}
+
+func TestAIMemoryCheckoutAuxiliaryFilesFollowPlan(t *testing.T) {
+	for _, sync := range []bool{false, true} {
+		t.Run(map[bool]string{false: "snapshot", true: "sync-preflight"}[sync], func(t *testing.T) {
+			repo := memoryCheckoutTestRepo(t, sync)
+			names := []string{"storage/ai/memory/USER.md", "storage/ai/memory/MEMORY.md", "storage/ai/memory/conflicts/20261029000000-abcdefg/version.md", "storage/ai/memory/legacy-projections/version.md", "storage/ai/memory/operations/legacy.md", "storage/ai/memory/withdrawals/20261029000001-abcdefg.md", "storage/ai/memory/records/20261029000000-abcdefg.md", "assets/ordinary.txt"}
+			for _, name := range names {
+				writeCheckoutSourceTestFile(t, repo, name, []byte("older bytes"), 1)
+			}
+			beforeFiles := memoryCheckoutTestFiles(t, repo.DataPath)
+			before := memoryCheckoutTestIndex(t, repo)
+			for _, name := range names {
+				writeCheckoutSourceTestFile(t, repo, name, []byte("newer bytes"), 2)
+			}
+			writeCheckoutSourceTestFile(t, repo, "storage/ai/memory/legacy-projections/added.md", []byte("added"), 2)
+			writeCheckoutSourceTestFile(t, repo, "storage/ai/memory/conflicts/20261029000000-abcdefg/added.md", []byte("added"), 2)
+			afterFiles := memoryCheckoutTestFiles(t, repo.DataPath)
+			after := memoryCheckoutTestIndex(t, repo)
+			memoryCheckoutTestRestore(t, repo, before)
+			if got := memoryCheckoutTestFiles(t, repo.DataPath); !reflect.DeepEqual(got, beforeFiles) {
+				t.Fatalf("checkout differs from target: %v", got)
+			}
+			memoryCheckoutTestRestore(t, repo, after)
+			if got := memoryCheckoutTestFiles(t, repo.DataPath); !reflect.DeepEqual(got, afterFiles) {
+				t.Fatalf("checkout differs from target: %v", got)
+			}
+			if _, err := memory.NewStore(repo.DataPath).Get(context.Background(), "20261029000000-abcdefg"); err == nil {
+				t.Fatal("malformed memory became usable")
+			}
+		})
+	}
+}
+
+func TestAIMemoryCheckoutPathSafety(t *testing.T) {
+	for _, remove := range []bool{false, true} {
+		for _, kind := range []string{"directory-link", "file-link", "directory", "parent-file", "traversal", "large-file", "missing"} {
+			t.Run(kind+map[bool]string{false: "-upsert", true: "-remove"}[remove], func(t *testing.T) {
+				dir := t.TempDir()
+				outside := t.TempDir()
+				name := memorySyncPrefix + "records/test.md"
+				target := filepath.Join(dir, "storage/ai/memory/records/test.md")
+				if err := os.MkdirAll(filepath.Dir(target), 0700); err != nil {
+					t.Fatal(err)
+				}
+				wantErr := true
+				switch kind {
+				case "directory-link":
+					if err := os.Remove(filepath.Dir(target)); err != nil {
+						t.Fatal(err)
+					}
+					if err := os.Symlink(outside, filepath.Dir(target)); err != nil {
+						t.Skip(err)
+					}
+				case "file-link":
+					if err := os.Symlink(filepath.Join(outside, "missing.md"), target); err != nil {
+						t.Skip(err)
+					}
+				case "directory":
+					if err := os.Mkdir(target, 0700); err != nil {
+						t.Fatal(err)
+					}
+				case "parent-file":
+					if err := os.Remove(filepath.Dir(target)); err != nil {
+						t.Fatal(err)
+					}
+					if err := os.WriteFile(filepath.Dir(target), []byte("not directory"), 0600); err != nil {
+						t.Fatal(err)
+					}
+				case "traversal":
+					name = memorySyncPrefix + "missing/../../outside.md"
+				case "large-file":
+					f, err := os.Create(target)
+					if err != nil {
+						t.Fatal(err)
+					}
+					err = f.Truncate(memory.MaxFileSize + 1)
+					f.Close()
+					if err != nil {
+						t.Fatal(err)
+					}
+					wantErr = false
+				case "missing":
+					wantErr = false
+				}
+				plan := &dejavu.CheckoutPlan{}
+				files := []*entity.File{{Path: name, Size: memory.MaxFileSize + 1}}
+				if remove {
+					plan.Removes = files
+				} else {
+					plan.Upserts = files
+				}
+				err := memoryCheckoutPreflight(dir, plan)
+				if (err != nil) != wantErr {
+					t.Fatalf("path result: %v, want error %v", err, wantErr)
+				}
+			})
 		}
 	}
-	data, err := os.ReadFile(target)
-	if err != nil || string(data) != "legacy opaque ledger" {
-		t.Fatal("preflight deleted legacy files", err)
+}
+
+func TestAIMemorySyncReadRejectsSymlink(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.Symlink(t.TempDir(), filepath.Join(dir, "storage")); err != nil {
+		t.Skip(err)
+	}
+	if _, err := memorySyncRead(dir, "/storage/ai/memory/records/test.md"); !errors.Is(err, memory.ErrInvalid) {
+		t.Fatalf("symlink accepted: %v", err)
+	}
+}
+
+func TestAIMemorySyncRoundTrip(t *testing.T) {
+	for _, download := range []bool{false, true} {
+		t.Run(map[bool]string{false: "merge", true: "download"}[download], func(t *testing.T) {
+			previousConf, previousConfDir := Conf, util.ConfDir
+			t.Cleanup(func() { Conf, util.ConfDir = previousConf, previousConfDir })
+			Conf = &AppConf{Lang: "en"}
+			util.ConfDir = t.TempDir()
+			base := t.TempDir()
+			newRepo := func(device string) *dejavu.Repo {
+				dir := filepath.Join(base, device)
+				backend := cloud.NewLocal(&cloud.BaseCloud{Conf: &cloud.Conf{Dir: "main", RepoPath: filepath.Join(dir, "repo"), AvailableSize: 1 << 30, Local: &cloud.ConfLocal{Endpoint: filepath.Join(base, "cloud")}}})
+				repo, err := dejavu.NewRepo(filepath.Join(dir, "data"), filepath.Join(dir, "repo"), filepath.Join(dir, "history"), filepath.Join(dir, "temp"), device, device, "linux", []byte("0123456789abcdef0123456789abcdef"), nil, backend)
+				if err != nil {
+					t.Fatal(err)
+				}
+				repo.SetCheckoutHooks(dejavu.CheckoutHooks{Preflight: syncDocumentPreflight(repo)})
+				return repo
+			}
+			source, target := newRepo("source"), newRepo("target")
+			names := []string{"storage/ai/memory/legacy-projections/old.md", "storage/ai/memory/conflicts/20261029000000-abcdefg/old.md", "storage/ai/memory/USER.md", "storage/ai/memory/withdrawals/20261029000001-abcdefg.md", "assets/ordinary.txt"}
+			for _, repo := range []*dejavu.Repo{source, target} {
+				for _, name := range names {
+					writeCheckoutSourceTestFile(t, repo, name, []byte("initial bytes"), 10)
+				}
+				memoryCheckoutTestIndex(t, repo)
+				if _, _, err := repo.Sync(nil); err != nil {
+					t.Fatal(err)
+				}
+			}
+			for _, name := range names[:2] {
+				if err := os.Remove(filepath.Join(source.DataPath, name)); err != nil {
+					t.Fatal(err)
+				}
+			}
+			for _, name := range names[2:] {
+				writeCheckoutSourceTestFile(t, source, name, []byte("remote bytes"), 20)
+			}
+			memoryCheckoutTestIndex(t, source)
+			if _, _, err := source.Sync(nil); err != nil {
+				t.Fatal(err)
+			}
+			if download {
+				if _, _, err := target.SyncDownload(nil); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				if _, _, err := target.Sync(nil); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if got, want := memoryCheckoutTestFiles(t, target.DataPath), memoryCheckoutTestFiles(t, source.DataPath); !reflect.DeepEqual(got, want) {
+				t.Fatalf("sync differs from source: got %v want %v", got, want)
+			}
+			memoryCheckoutTestIndex(t, target)
+			for range 2 {
+				result, _, err := target.Sync(nil)
+				if err != nil || result.DataChanged() {
+					t.Fatalf("unchanged memory causes sync diff: %v %v", result, err)
+				}
+			}
+		})
+	}
+}
+
+func TestAIMemoryCheckoutMalformedRecordRemainsUnreadable(t *testing.T) {
+	repo := memoryCheckoutTestRepo(t, false)
+	id := "20261029000000-abcdefg"
+	name := "storage/ai/memory/records/" + id + ".md"
+	writeCheckoutSourceTestFile(t, repo, name, []byte("malformed record"), 1)
+	snapshot := memoryCheckoutTestIndex(t, repo)
+	writeCheckoutSourceTestFile(t, repo, name, []byte("different malformed record"), 2)
+	memoryCheckoutTestIndex(t, repo)
+	memoryCheckoutTestRestore(t, repo, snapshot)
+	if _, err := memory.NewStore(repo.DataPath).Get(context.Background(), id); err == nil {
+		t.Fatal("malformed record became usable")
+	}
+}
+
+func TestAIMemorySyncConflictUsesRepositoryHistory(t *testing.T) {
+	previousConfDir := util.ConfDir
+	util.ConfDir = t.TempDir()
+	t.Cleanup(func() { util.ConfDir = previousConfDir })
+	a, b, _ := newSyncPerceptionTestClients(t, -1)
+	for _, client := range []*syncPerceptionTestClient{a, b} {
+		client.repo.SetCheckoutHooks(dejavu.CheckoutHooks{Preflight: syncDocumentPreflight(client.repo)})
+	}
+	ctx := context.Background()
+	sa, sb := memory.NewStore(a.repo.DataPath), memory.NewStore(b.repo.DataPath)
+	entry, err := sa.Save(ctx, memorySyncTestRecord(), "missing", "remember")
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.index()
+	if _, _, err = a.repo.Sync(nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err = b.repo.Sync(nil); err != nil {
+		t.Fatal(err)
+	}
+	record := entry.Record
+	record.Content = "device a preference"
+	if _, err = sa.Save(ctx, record, entry.Revision, "edit-a"); err != nil {
+		t.Fatal(err)
+	}
+	record.Content = "device b preference"
+	if _, err = sb.Save(ctx, record, entry.Revision, "edit-b"); err != nil {
+		t.Fatal(err)
+	}
+	for i, client := range []*syncPerceptionTestClient{a, b} {
+		stamp := time.Now().Add(time.Duration(i+1) * time.Second)
+		name := filepath.Join(client.repo.DataPath, "storage/ai/memory/records", entry.Record.ID+".md")
+		if err = os.Chtimes(name, stamp, stamp); err != nil {
+			t.Fatal(err)
+		}
+	}
+	a.index()
+	b.index()
+	if _, _, err = a.repo.Sync(nil); err != nil {
+		t.Fatal(err)
+	}
+	result, _, err := b.repo.Sync(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.ConflictCount() != 1 || !result.HasHistory() {
+		t.Fatalf("conflict history missing: %+v", result)
+	}
+	got, err := sb.Get(ctx, entry.Record.ID)
+	if err != nil {
+		t.Fatalf("repository-selected record quarantined: %v", err)
+	}
+	if got.Record.Content != "device a preference" && got.Record.Content != "device b preference" {
+		t.Fatalf("unknown selected content: %q", got.Record.Content)
+	}
+	if conflict, err := sb.HasConflict(ctx, entry.Record.ID); err != nil || conflict {
+		t.Fatalf("extra memory conflict created: %v %v", conflict, err)
+	}
+}
+
+func TestAIMemoryCheckoutAllowsMetadataRemoval(t *testing.T) {
+	for _, name := range []string{"conflicts/20261029000000-abcdefg/version.md", "legacy-projections/version.md"} {
+		t.Run(name, func(t *testing.T) {
+			dir := t.TempDir()
+			relative := "storage/ai/memory/" + name
+			target := filepath.Join(dir, relative)
+			if err := os.MkdirAll(filepath.Dir(target), 0700); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(target, []byte("old bytes"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			plan := &dejavu.CheckoutPlan{Removes: []*entity.File{{Path: "/" + relative}}}
+			if err := memoryCheckoutPreflight(dir, plan); err != nil {
+				t.Fatal(err)
+			}
+			if got, err := os.ReadFile(target); err != nil || string(got) != "old bytes" {
+				t.Fatalf("preflight changed file: %q %v", got, err)
+			}
+		})
 	}
 }

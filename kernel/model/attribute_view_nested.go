@@ -619,6 +619,10 @@ func renderNestedPage(attrView *av.AttributeView, view, group *av.View, projecti
 			return nil, err
 		}
 		pageView.GetTableLayout().Columns = columns
+		base, groupBase := view.GetBaseLayout(), pageView.GetBaseLayout()
+		groupBase.ShowIcon = base.ShowIcon
+		groupBase.ShowRelationIcon = new(base.EffectiveShowRelationIcon())
+		groupBase.WrapField = base.WrapField
 	}
 	pageView.Groups = nil
 	expanded := map[string]bool{}

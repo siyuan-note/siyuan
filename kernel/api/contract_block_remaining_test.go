@@ -95,7 +95,7 @@ func testAPIContractRemainingBlockQueries(t *testing.T, engine *gin.Engine, boxI
 	}
 	post("getHeadingLevelTransaction", `{"ids":[],"level":2}`, 0)
 	data := post("getRecentUpdatedBlocks", "not JSON", 0)
-	want, _ := json.Marshal(model.RecentUpdatedBlocks())
+	want, _ := json.Marshal(model.RecentUpdatedBlocks(nil, nil))
 	if string(data) != string(want) {
 		t.Fatalf("recent blocks changed: %s != %s", data, want)
 	}

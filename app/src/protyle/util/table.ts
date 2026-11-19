@@ -1,4 +1,4 @@
-import {mobileInputDialog} from "../../dialog/mobileInputDialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {Constants} from "../../constants";
 import {getTableRowOpeningHTML} from "./tableRowHeight";
@@ -816,7 +816,7 @@ export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
     const captionElement = nodeElement.querySelector("caption");
     window.siyuan.menus.menu.remove();
     const html = nodeElement.outerHTML;
-    mobileInputDialog({
+    openInputDialog({
         title: window.siyuan.languages.table,
         label: window.siyuan.languages.title,
         value: captionElement?.textContent || "",

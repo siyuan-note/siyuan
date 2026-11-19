@@ -42,8 +42,6 @@ describe("Unicode 17 emoji fonts", () => {
     });
 
     it("declares an ink-aligned icon face only where the native emoji metrics are off-center", () => {
-        // 图标需与相邻文字的视觉中心对齐：Segoe UI Emoji 原度量会让字形比中文偏低约 0.75px，
-        // 因此把 ascent/descent 改写为 80%/19%，和仍保持 99% 不改变行盒高度。
         const iconFace = getFace(getEmojiFontStyle("windows11", ""), "Emojis Icon");
         assert.ok(iconFace.includes('local("Segoe UI Emoji")'));
         assert.ok(iconFace.includes("size-adjust: 85%"));
@@ -53,6 +51,20 @@ describe("Unicode 17 emoji fonts", () => {
         // 其他平台的字体栈与文字度量不同，尚未标定，保持原有声明。
         for (const platform of ["apple", "other"] as const) {
             assert.equal(getFace(getEmojiFontStyle(platform, ""), "Emojis Icon"), "");
+        }
+    });
+
+    it("declares separate Windows 11 metrics for built-in document tree icons", () => {
+        const style = getEmojiFontStyle("windows11", "");
+        const treeFace = getFace(style, "Emojis File Tree Native");
+        assert.ok(treeFace.includes('local("Segoe UI Emoji")'));
+        assert.ok(treeFace.includes("size-adjust: 85%"));
+        assert.ok(treeFace.includes("ascent-override: 82%"));
+        assert.ok(treeFace.includes("descent-override: 17%"));
+        assert.ok(treeFace.includes("line-gap-override: 0%"));
+        assert.ok(style.includes('--b3-font-family-emoji-file-tree: "Emojis Additional", "Emojis File Tree Native"'));
+        for (const platform of ["apple", "windows", "other"] as const) {
+            assert.equal(getFace(getEmojiFontStyle(platform, ""), "Emojis File Tree Native"), "");
         }
     });
 

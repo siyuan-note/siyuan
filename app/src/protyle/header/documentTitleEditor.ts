@@ -1,5 +1,6 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {Constants} from "../../constants";
+import {globalClickHideMenu} from "../../menus/menuClick";
 import {fetchSyncPost} from "../../util/fetch";
 import {showMessage} from "../../dialog/message";
 import {Dialog} from "../../dialog";
@@ -24,11 +25,11 @@ import {enterDocumentFromTitle} from "./titleEnter";
 import {copyDocumentTitleTarget, isDocumentTitleBlockHotkey} from "./documentTitleKeys";
 import {acknowledgeDocumentTitleReload} from "../util/editorSave";
 import {buildBlockDOMClipboardData} from "../util/blockDOMClipboard";
-import {writeClipboardData} from "../util/compatibility";
+import {isIPad, writeClipboardData} from "../util/compatibility";
 import {prepareExternalClipboardHTML} from "../util/richClipboard";
 import {isCommittedTextInput} from "../wysiwyg/compositionInput";
 import {hideAllElements} from "../ui/hideElements";
-import {getDocumentTitleDOMFingerprint, getDocumentTitleLute, getDocumentTitleUnsupportedPasteBlocks,
+import {flattenDocumentTitlePaste, getDocumentTitleDOMFingerprint, getDocumentTitleLute, getDocumentTitleUnsupportedPasteBlocks,
     prepareDocumentTitleBlockDOM, prepareDocumentTitleInitialDOM} from "./documentTitleDOM";
 
 export interface DocumentTitleEditorValue {
@@ -101,11 +102,12 @@ export class DocumentTitleEditor {
             protyleOptions: {notebookId: owner.notebookId, toolbar, hint,
                 click: {preventInsetEmptyBlock: true}},
             runtimeCapabilities: {
-                upload: true, websocket: false, pluginExtensions: false, customBlockRender: false,
+                upload: true, websocket: false, pluginExtensions: false, customBlockRender: false, blockConversion: false,
                 lute, lockedOptions: {toolbar, hint}, richHTMLPaste: true,
                 sanitizeBlockDOM: prepareDocumentTitleBlockDOM,
                 getUnsupportedPasteBlocks: getDocumentTitleUnsupportedPasteBlocks,
                 getUnsupportedPasteMessage: () => window.siyuan.languages.documentTitleInlineOnly,
+                transformPasteBlockDOM: flattenDocumentTitlePaste,
             },
             afterSetContent: (_protyle, element) => {
                 mathRender(element);
@@ -141,8 +143,12 @@ export class DocumentTitleEditor {
         });
         const events = ["input", "copy", "cut", "paste", "pointerdown", "pointerup", "mousedown", "mouseup",
             "click", "dblclick", "contextmenu", "dragstart", "dragover", "drop", "keyup"];
+        host.addEventListener("click", event => globalClickHideMenu(event.target as HTMLElement), true);
         events.forEach(type => host.addEventListener(type, event => event.stopPropagation()));
-        host.addEventListener("compositionstart", () => {
+        host.addEventListener("compositionstart", event => {
+            if (this.fragment.wysiwyg.contains(event.target as Node)) {
+                hideAllElements(["toolbar"]);
+            }
             clearTimeout(this.timer);
             this.composing = true;
         }, true);
@@ -151,13 +157,19 @@ export class DocumentTitleEditor {
             this.changed();
         }, true);
         host.addEventListener("input", (event: InputEvent) => {
+            if (this.fragment.wysiwyg.contains(event.target as Node)) {
+                hideAllElements(["toolbar"]);
+            }
             if (this.composing && isCommittedTextInput(event)) {
                 this.composing = false;
                 this.changed();
             }
         }, true);
         host.addEventListener("beforeinput", (event: InputEvent) => {
-            if (owner.disabled || event.inputType === "historyUndo" || event.inputType === "historyRedo") {
+            if (event.inputType === "insertLineBreak" && this.fragment.wysiwyg.contains(event.target as Node)) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            } else if (owner.disabled || event.inputType === "historyUndo" || event.inputType === "historyRedo") {
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 if (!owner.disabled) {
@@ -395,7 +407,7 @@ export class DocumentTitleEditor {
             void this.updateConflict?.().catch(error => console.error(error));
             return;
         }
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             title: window.siyuan.languages.rename,
             content: `<div class="b3-dialog__content">${escapeHtml(window.siyuan.languages.documentTitleConflict)}
 <div class="fn__hr"></div><div class="ft__secondary">${escapeHtml(window.siyuan.languages.documentTitleLatest)}</div>
@@ -465,6 +477,10 @@ export class DocumentTitleEditor {
             this.fragment.instance.disable();
         } else {
             this.fragment.instance.enable();
+            if (isIPad()) {
+                // 标题段落外层不能参与 iPad 原生组合删除，编辑宿主限定为段落内的输入框。
+                this.fragment.wysiwyg.setAttribute("contenteditable", "false");
+            }
         }
     }
 
@@ -474,7 +490,11 @@ export class DocumentTitleEditor {
     }
 
     public focus() {
-        this.fragment.focus();
+        if (isIPad()) {
+            this.editable?.focus();
+        } else {
+            this.fragment.focus();
+        }
     }
 
     private async undo(redo: boolean) {
@@ -515,16 +535,9 @@ export class DocumentTitleEditor {
             void this.undo(event.shiftKey || event.key.toLowerCase() === "y").catch((): void => {});
             return;
         }
-        if (isDocumentTitleBlockHotkey(event) || event.key === "Enter" && (event.ctrlKey || event.metaKey || event.altKey)) {
+        if (isDocumentTitleBlockHotkey(event) || event.key === "Enter" && (event.shiftKey || event.ctrlKey || event.metaKey || event.altKey)) {
             event.preventDefault();
             event.stopImmediatePropagation();
-            return;
-        }
-        if (event.key === "Enter" && event.shiftKey && this.fragment.hintElement.classList.contains("fn__none")) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            document.execCommand("insertLineBreak");
-            this.changed();
             return;
         }
         if (event.key === "Enter" && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey &&

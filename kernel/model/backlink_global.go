@@ -357,7 +357,7 @@ func GetGlobalBacklinkContexts(query GlobalBacklinkQuery, token string, ids []st
 					avRefs = sql.QueryRefsByDefIDInBox(query.ID, query.ContainChildren, query.Notebook)
 					avRefsLoaded = true
 				}
-				avTargets = backlinkAttributeViewTargets(tree, avRefs)
+				avTargets = backlinkAttributeViewTargets(tree, avRefs, accessible)
 				avTargetsByRoot[location.RootID] = avTargets
 			}
 		}

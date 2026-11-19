@@ -61,7 +61,7 @@ func TestCheckBlockIdAccessableByPublishAccessInBox(t *testing.T) {
 	}
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + docID,
-		Value: util.SHA256Hash([]byte(docID + docPassword)),
+		Value: PublishAuthCookieValue(docID, docPassword),
 	})
 	if !CheckBlockIdAccessableByPublishAccessInBox(c, protectedAccess, docID, boxID) {
 		t.Fatal("password-protected document in an encrypted notebook should be accessible after authorization")

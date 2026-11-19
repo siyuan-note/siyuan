@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261107150237"
+		"updated": "20261111233241"
 	},
 	"Children": [
 		{
@@ -132,7 +132,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "可通过复制粘贴或拖拽来上传图片。将鼠标移到图片上可显示边框外的小手柄，拖动右侧、底部或右下角的手柄可等比调整大小；触屏上先点击图片显示手柄，再拖动手柄"
+									"Data": "可通过复制粘贴或拖拽来上传图片。将鼠标移到图片上可显示边缘的小手柄，拖动右侧、底部或右下角的手柄可等比调整大小；触屏上先点击图片显示手柄，再拖动手柄"
 								}
 							]
 						},
@@ -2070,7 +2070,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091228-wdpx6ev",
-				"updated": "20261031115926"
+				"updated": "20261111233241"
 			},
 			"Children": [
 				{
@@ -2548,6 +2548,65 @@
 			]
 		},
 		{
+			"ID": "20261110224000-a9frk2n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110224000-a9frk2n",
+				"updated": "20261110224000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中一个或多个节点后，在节点工具栏中使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "连线样式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可单独修改从父节点接入所选节点的连线，使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "更多"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "节点形状"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可选择下划线、矩形或胶囊形。选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "默认"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可恢复使用整张导图的连线样式或主题的节点形状。修改随文档保存，支持撤销和重做。"
+				}
+			]
+		},
+		{
 			"ID": "20261017113512-kojg0bw",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -2721,7 +2780,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-xiam2u3",
-				"updated": "20261024161816"
+				"updated": "20261111233241"
 			},
 			"Children": [
 				{
@@ -2742,6 +2801,98 @@
 				{
 					"Type": "NodeText",
 					"Data": "先选中起点节点，点击底部节点菜单中的连接按钮，再选择目标节点，即可创建关系线。关系线用于表达父子层级之外的联系。"
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-vrv7oh0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-vrv7oh0",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新建关系线默认使用自由贝塞尔曲线，可从其他节点上方穿过。已有关系线在修改路径之前保持自动避障。节点编辑和操作控件仍可正常使用。"
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-obwpp5y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-obwpp5y",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "选中关系线，在底部设置中打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "关联线外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "路径"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可选择自动避障、直线、贝塞尔曲线或圆角折线。自由路径允许穿过节点；自动避障路径会绕开节点和控件。切换路径时保留各形状的调整结果。"
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-1j0jfek",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-1j0jfek",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "拖动两个曲线控制柄中的任意一个，可向任意方向调整弧度；圆角折线的线段手柄沿垂直于线段的方向移动。直线只显示端点手柄。支持鼠标和触屏操作，松手后保存一次可撤销、可重做的修改。"
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-u87ibz2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-u87ibz2",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "关联线外观"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "线型"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可为每条关系线选择实线、短虚线、长虚线或点线。虚线和点线可以减轻视觉干扰，但仍可能遮挡文字。思源格式的 HTML 和 PDF 预览也会使用保存的外观。"
 				}
 			]
 		},
@@ -2809,12 +2960,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001015635-ls0c0dv",
-				"updated": "20261012014859"
+				"updated": "20261111232017"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "选中关系线后，空心圆表示连接起点，实心圆表示连接终点，与箭头方向无关。沿对应节点的任意一条边拖动圆形手柄，可连续调整连接位置；拖到其他有效节点上则更换连接节点，支持鼠标和触屏操作。松手后保存一次可撤销的修改。落在空白处、无效目标、另一端节点或已有的同向连接上时取消修改；无法避开节点或控件的位置也不会保存。未调整的连接点保持自动选择；已调整的位置会随节点文字尺寸和布局变化而移动。"
+					"Data": "选中关系线后，空心圆表示连接起点，实心圆表示连接终点，与箭头方向无关。沿对应节点的任意一条边拖动圆形手柄，可连续调整连接位置；拖到其他有效节点上则更换连接节点，支持鼠标和触屏操作。松手后保存一次可撤销的修改。落在空白处、无效目标、另一端节点或已有的同向连接上时取消修改；自动避障模式下，无法避开节点或控件的位置也不会保存。未调整的连接点保持自动选择；已调整的位置会随节点文字尺寸和布局变化而移动。"
 				}
 			]
 		},
@@ -2823,7 +2974,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001051950-nie1ybs",
-				"updated": "20261012014859"
+				"updated": "20261111232017"
 			},
 			"Children": [
 				{
@@ -2837,7 +2988,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，可同时恢复两端的自动连接点，并保留手动调整的中间路径。双击线段上的拖拽手柄只恢复自动中间路径，保留连接点设置。关系文字、样式和箭头方向不变。"
+					"Data": "，可同时恢复两端的自动连接点，并保留手动调整的中间路径。双击曲线控制柄或线段上的拖拽手柄，会恢复当前形状的默认路径，保留连接点设置。关系文字、样式和箭头方向不变。"
 				}
 			]
 		},
@@ -2846,12 +2997,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001051950-el42cc3",
-				"updated": "20261012014859"
+				"updated": "20261111232017"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "布局变化导致已保存的手动路径不可用时，会先保留指定连接点并暂时使用自动路径；指定连接点也不可用时，才暂时使用自动连接点，并提示具体是哪项设置无法使用。已保存的设置不会删除，布局恢复可用后会重新使用。只读视图和导出使用相同的绘制规则，不显示调整手柄；只读视图也会显示回退提示。"
+					"Data": "自动避障模式下，布局变化导致已保存的手动路径不可用时，会先保留指定连接点并暂时使用自动路径；指定连接点也不可用时，才暂时使用自动连接点，并提示具体是哪项设置无法使用。已保存的设置不会删除，布局恢复可用后会重新使用。只读视图和导出使用相同的绘制规则，不显示调整手柄；只读视图也会显示回退提示。"
 				}
 			]
 		},
@@ -2880,7 +3031,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "将鼠标移到脑图外框上即可显示边框外的小尺寸手柄：拖动右侧中间的手柄调整宽度，拖动底部中间的手柄调整高度，拖动右下角的圆角手柄同时调整宽高；触屏可直接拖动手柄。此操作调整脑图块在文档中的尺寸，不改变画布缩放比例。松手后保存一次可撤销的修改；按 "
+					"Data": "将鼠标移到脑图外框上即可显示边缘的小尺寸手柄：拖动右侧中间的手柄调整宽度，拖动底部中间的手柄调整高度，拖动右下角的圆角手柄同时调整宽高；触屏可直接拖动手柄。此操作调整脑图块在文档中的尺寸，不改变画布缩放比例。松手后保存一次可撤销的修改；按 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -5269,7 +5420,7 @@
 				{
 					"ID": "20220307091943-xh5wtqf",
 					"Type": "NodeMathBlockContent",
-					"Data": "\\frac{1}{\n  \\Bigl(\\sqrt{\\phi \\sqrt{5}}-\\phi\\Bigr) e^{\n  \\frac25 \\pi}} = 1+\\frac{e^{-2\\pi}} {1+\\frac{e^{-4\\pi}} {\n    1+\\frac{e^{-6\\pi}}\n    {1+\\frac{e^{-8\\pi}}{1+\\cdots}}\n  }\n}",
+					"Data": "\\frac{1}{\n  \\Bigl(\\sqrt{\\phi \\sqrt{5}}-\\phi\\Bigr) e^{\n  \\frac{2\\pi}{5}}} = 1+\\frac{e^{-2\\pi}} {1+\\frac{e^{-4\\pi}} {\n    1+\\frac{e^{-6\\pi}}\n    {1+\\frac{e^{-8\\pi}}{1+\\cdots}}\n  }\n}",
 					"Properties": {
 						"id": "20220307091943-xh5wtqf"
 					}
@@ -5313,7 +5464,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "将鼠标移到块上即可显示边框外的小尺寸手柄：拖动右侧中间的手柄调整宽度，拖动底部中间的手柄调整高度，拖动右下角的圆角手柄同时调整宽高。触屏可直接拖动手柄，单独调整宽度或高度时会保留另一项尺寸。"
+					"Data": "将鼠标移到块上即可显示边缘的小尺寸手柄：拖动右侧中间的手柄调整宽度，拖动底部中间的手柄调整高度，拖动右下角的圆角手柄同时调整宽高。触屏可直接拖动手柄，单独调整宽度或高度时会保留另一项尺寸。"
 				}
 			]
 		},
@@ -5335,7 +5486,7 @@
 		{
 			"ID": "20210608113914-zvtw5kj",
 			"Type": "NodeVideo",
-			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
+			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" style=\"width: 640px; height: 327px;\"></video>",
 			"Properties": {
 				"id": "20210608113914-zvtw5kj",
 				"updated": "20210608113914"
@@ -5351,7 +5502,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "拖动视频右侧、底部或右下角的把手可等比例调整大小，也支持触摸拖动。"
+					"Data": "拖动视频右侧、下方或右下角的把手可等比例调整大小，也支持触摸拖动。把手位于画面外，不遮挡原生播放控件。"
 				}
 			]
 		},
@@ -5373,7 +5524,7 @@
 		{
 			"ID": "20210608113713-wm8271x",
 			"Type": "NodeAudio",
-			"Data": "<audio controls=\"controls\" src=\"assets/record1623120470117-20210608104750-2thv5m5.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608113713-4eddn56.wav\"></audio>",
+			"Data": "<audio controls=\"controls\" src=\"assets/record1623120470117-20210608104750-2thv5m5.wav\"></audio>",
 			"Properties": {
 				"id": "20210608113713-wm8271x",
 				"updated": "20210608113713"
@@ -6720,6 +6871,35 @@
 				{
 					"Type": "NodeText",
 					"Data": "手动设置的块级和行内方向优先。各列表项（包括子列表项）独立跟随自身首个正文块的方向，复选框、项目符号、编号和缩进同步调整到对应一侧，手动设置的列表方向优先。表格列顺序保持原有设置。预览及 HTML、PDF 导出也会应用自动文本方向。"
+				}
+			]
+		},
+		{
+			"ID": "20261110200000-374ba0a",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110200000-374ba0a",
+				"updated": "20261110200000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编辑颜色"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110200000-bd2c93d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110200000-bd2c93d",
+				"updated": "20261110200000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "颜色字段支持三位或六位 HEX（可省略 #）和 0 到 255 的 RGB 整数，并分别显示原色与草稿。图形选色由系统或浏览器提供；图形选色不可用时，仍可使用 HEX／RGB 输入。未完成、非法或输入法组合中的内容不能应用。关闭原生选色面板只会更新草稿，是否应用由思源编辑界面的确认或取消决定。行内样式和数据库颜色统一使用父面板确认，取消父面板会放弃其中的草稿。背景渐变和动态图标使用独立颜色编辑器，移动端以底部抽屉打开；确认后应用草稿，取消或关闭抽屉会放弃草稿。已有快捷色板仍可直接选择颜色。"
 				}
 			]
 		}

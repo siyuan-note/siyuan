@@ -9,15 +9,16 @@
         /* workspace.html 独有样式，公共样式在 window.css 中 */
         .layout {
             display: flex;
-            min-height: 100vh;
+            height: 100vh;
         }
 
         .wsPanel {
+            display: flex;
+            flex-direction: column;
             flex: none;
-            width: 300px;
+            width: min(300px, 32vw);
             border-right: 1px solid #e0e0e0;
-            padding: 24px;
-            overflow-y: auto;
+            padding: 24px clamp(8px, 2.55vw, 24px);
             text-align: left;
             box-sizing: border-box;
             background-color: #f6f6f6;
@@ -28,6 +29,12 @@
             font-weight: bold;
             color: rgba(0, 0, 0, .6);
             margin-bottom: 16px;
+            padding-inline: 12px;
+        }
+
+        .wsList {
+            min-height: 0;
+            overflow-y: auto;
         }
 
         .ws-item {
@@ -63,7 +70,35 @@
 
         .right {
             flex: 1;
-            padding: 0 32px;
+            min-width: 0;
+            min-height: 0;
+            margin-top: 32px;
+            padding: 0 clamp(16px, 3.4vw, 32px);
+            overflow: auto;
+        }
+
+        .right > .fn__flex-1 {
+            min-height: 12px;
+        }
+
+        .right > .icon {
+            flex-shrink: 0;
+            width: 72px;
+            margin-bottom: 8px;
+        }
+
+        .right > h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .right > .slogan {
+            font-size: 14px;
+        }
+
+        .right > .feedback {
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .ws-open {
@@ -277,13 +312,20 @@
             <div class="fn__flex-1"></div>
             <button class="b3-button fn__flex-center choosePath" data-i18n="selectBtn"></button>
         </label>
+        <div class="b3-label remote-kernel">
+            <div>
+                <span data-i18n="remoteKernelTitle"></span>
+                <div class="b3-label__text" id="remoteKernelDesc" data-i18n="remoteKernelDesc"></div>
+            </div>
+            <button class="b3-button" id="remoteKernelConnect" type="button" aria-describedby="remoteKernelDesc"></button>
+        </div>
         <label class="b3-label">
             <div>
                 <span data-i18n="lang"></span>
                 <div class="b3-label__text" data-i18n-html="langDesc"></div>
             </div>
             <div class="fn__flex-1"></div>
-            <select class="b3-select lang">
+            <select class="b3-select fn__flex-center lang">
                 <option value="ar">العربية</option>
                 <option value="de">Deutsch</option>
                 <option value="en">English</option>
@@ -387,6 +429,7 @@
     const normalButton = document.querySelector(".normal");
     if (isCrash) {
         document.querySelector(".wsPanel").classList.add("fn__none");
+        document.querySelector(".remote-kernel").classList.add("fn__none");
         if (isCrashWorkspaceMissing) {
             safeModeButton.disabled = true;
             normalButton.disabled = true;

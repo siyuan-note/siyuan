@@ -2,7 +2,7 @@ import {getAllDocks, getAllModels} from "../getAll";
 import {Tab} from "../Tab";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
-import {fixWndFlex1, getInstanceById, getWndByLayout} from "../util";
+import {getInstanceById, getWndByLayout} from "../util";
 import {getDockByType, resizeTabs, setTabPosition} from "../tabUtil";
 import {Backlink} from "./Backlink";
 import type {App} from "../../index";
@@ -179,9 +179,13 @@ export const openOutline = async (options: {
         options.title = getDocDisplayName(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
     }
     const newWnd = wnd.split("lr", false);
-    newWnd.element.style.width = "200px";
-    newWnd.element.classList.remove("fn__flex-1");
-    fixWndFlex1(newWnd.parent);
+    if (newWnd !== wnd) {
+        newWnd.element.style.width = Constants.SIYUAN_EMPTY_LAYOUT.left.data.flat()
+            .find(item => item.type === "outline").size.width + "px";
+        newWnd.element.classList.remove("fn__flex-1");
+        wnd.element.style.width = "";
+        wnd.element.classList.add("fn__flex-1");
+    }
     newWnd.addTab(new Tab({
         icon: "iconOutline",
         title: options.title,

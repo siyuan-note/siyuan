@@ -69,7 +69,6 @@ const printToPDF: GetHandler = ({data}) => {
     }
 };
 
-// 同一内核下同一文档已打开时把焦点交给那个窗口，而不是再开一个。
 const openFile: GetHandler = ({event, data}) => {
     const options = JSON.parse(data.options as string);
     return electron.BrowserWindow.getAllWindows().some((item: BrowserWindow) => {
@@ -94,7 +93,7 @@ const openFile: GetHandler = ({event, data}) => {
             return false;
         }
         if (ids.includes(options.rootID) || ids.includes(options.assetPath)) {
-            item.focus();
+            showWindow(item);
             item.webContents.send(Channel.SIYUAN_OPEN_FILE, options);
             return true;
         }

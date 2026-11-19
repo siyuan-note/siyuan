@@ -292,14 +292,8 @@ export class Dock {
                 } else {
                     currentNowSize = (currentSize + (x - moveEvent.clientY));
                 }
-                const minSize = this.getResponsiveMinimumSize();
-                if (currentNowSize < minSize && direction === "lr") {
-                    return;
-                }
-                if (currentNowSize < 64 && direction === "tb") {
-                    return;
-                }
-                if (currentNowSize === currentSize) {
+                currentNowSize = Math.max(direction === "lr" ? this.getResponsiveMinimumSize() : 64, currentNowSize);
+                if (currentNowSize === currentSize && !responsiveResizePrepared) {
                     return;
                 }
                 if (!responsiveResizePrepared) {
@@ -946,6 +940,7 @@ export class Dock {
                                     element: tab.panelElement,
                                     close: () => this.toggleModel("agentChat", false, true),
                                     focus: () => setPanelFocus(tab.panelElement),
+                                    reveal: () => this.toggleModel("agentChat", true, false),
                                 }));
                             }
                         });

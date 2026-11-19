@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {showMessage} from "../dialog/message";
 import {fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
@@ -45,7 +45,7 @@ export const openOCRImportModelsDialog = (options: {
     const selectedFiles = new Map<string, File>();
     let busy = false;
     let closed = false;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: languages.ocrImportModelsTitle,
         width: isMobile() ? "92vw" : "520px",
         destroyCallback: () => {

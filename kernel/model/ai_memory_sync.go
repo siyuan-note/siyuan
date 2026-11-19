@@ -5,16 +5,14 @@
 package model
 
 import (
-	"bytes"
-	"context"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path"
 	"strings"
 
 	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -68,138 +66,62 @@ func memorySyncRead(dataDir, name string) ([]byte, error) {
 	return nil, memory.ErrInvalid
 }
 
-// memoryCheckoutPreflight 保留撤回和冲突证据，并在覆盖前隔离非因果更新。
-// 计划是仓库提供的不可变副本；新保存的保护文件不在本次替换/删除集合中。
+// 记忆文件随普通数据同步和恢复；预检只检查路径，不改变仓库计划或当前记忆状态。
 func memoryCheckoutPreflight(dataDir string, plan *dejavu.CheckoutPlan) error {
-	store := memory.NewStore(dataDir)
-	ctx := context.Background()
-	for _, file := range plan.Upserts {
-		if !strings.HasPrefix(file.Path, memorySyncPrefix) {
-			continue
-		}
-		// Old operation ledgers are obsolete ordinary sync files, not safety metadata.
-		if strings.HasPrefix(strings.TrimPrefix(file.Path, memorySyncPrefix), "operations/") {
-			continue
-		}
-		if file.Size > memory.MaxFileSize {
-			return errors.New("memory checkout file exceeds size limit")
-		}
-		incoming, err := plan.ReadFile(file.Path)
-		if err != nil {
-			return err
-		}
-		current, readErr := memorySyncRead(dataDir, file.Path)
-		if readErr != nil && !errors.Is(readErr, os.ErrNotExist) {
-			return readErr
-		}
-		relative := strings.TrimPrefix(file.Path, memorySyncPrefix)
-		parts := strings.Split(relative, "/")
-		if (relative == "USER.md" || relative == "MEMORY.md") && readErr == nil && !bytes.Equal(current, incoming) {
-			if err = store.PreserveProjection(ctx, relative, current); err != nil {
-				return err
-			}
-		}
-		if (strings.HasPrefix(relative, "conflicts/") || strings.HasPrefix(relative, "legacy-projections/")) && readErr == nil && !bytes.Equal(current, incoming) {
-			return errors.New("memory safety metadata would be replaced by checkout")
-		}
-		if len(parts) == 2 && parts[0] == "withdrawals" && strings.HasSuffix(parts[1], ".md") {
-			id := strings.TrimSuffix(parts[1], ".md")
-			if err = memory.ValidateWithdrawal(incoming, id); err != nil {
-				return fmt.Errorf("invalid memory withdrawal: %w", err)
-			}
-			// 先应用远端撤回意图，再允许同批旧记录落盘，避免读取窗口短暂复活。
-			if !bytes.Equal(current, incoming) {
-				if _, err = store.PreserveWithdrawal(ctx, incoming, id); err != nil {
-					return err
-				}
-			}
-			if readErr == nil && !bytes.Equal(current, incoming) {
-				if _, err = store.PreserveWithdrawal(ctx, current, id); err != nil {
-					return err
-				}
-			}
-		}
-		if len(parts) == 2 && parts[0] == "records" && strings.HasSuffix(parts[1], ".md") {
-			id := strings.TrimSuffix(parts[1], ".md")
-			next, parseErr := memory.DecodeRecord(incoming, id)
-			if parseErr != nil {
-				versions := [][]byte{incoming}
-				if readErr == nil {
-					versions = append(versions, current)
-				}
-				if err = store.Quarantine(ctx, id, versions); err != nil {
-					return err
-				}
+	for _, files := range [][]*entity.File{plan.Upserts, plan.Removes} {
+		for _, file := range files {
+			if !strings.HasPrefix(file.Path, memorySyncPrefix) {
 				continue
 			}
-			if readErr == nil && !bytes.Equal(current, incoming) {
-				previous, previousErr := memory.DecodeRecord(current, id)
-				if previousErr != nil || !memoryOperationsExtend(previous.Record.Operations, next.Record.Operations) {
-					if err = store.Quarantine(ctx, id, [][]byte{current, incoming}); err != nil {
-						return err
-					}
-				}
-			}
-		}
-	}
-	for _, file := range plan.Removes {
-		relative := strings.TrimPrefix(file.Path, memorySyncPrefix)
-		if relative == file.Path {
-			continue
-		}
-		parts := strings.Split(relative, "/")
-		if relative == "USER.md" || relative == "MEMORY.md" {
-			current, readErr := memorySyncRead(dataDir, file.Path)
-			if readErr != nil && !errors.Is(readErr, os.ErrNotExist) {
-				return readErr
-			}
-			if readErr == nil {
-				if err := store.PreserveProjection(ctx, relative, current); err != nil {
-					return err
-				}
-			}
-		}
-		if len(parts) == 2 && parts[0] == "withdrawals" && strings.HasSuffix(parts[1], ".md") {
-			current, err := memorySyncRead(dataDir, file.Path)
-			if errors.Is(err, os.ErrNotExist) {
-				continue
-			}
-			if err != nil {
+			if err := memoryCheckoutPath(dataDir, file.Path); err != nil {
 				return err
 			}
-			if _, err = store.PreserveWithdrawal(ctx, current, strings.TrimSuffix(parts[1], ".md")); err != nil {
-				return err
-			}
-		}
-		// 未解决冲突不能通过删除证据自动恢复为事实，保留证据并报告恢复被阻止。
-		if strings.HasPrefix(relative, "conflicts/") || strings.HasPrefix(relative, "legacy-projections/") {
-			if _, err := memorySyncRead(dataDir, file.Path); errors.Is(err, os.ErrNotExist) {
-				continue
-			} else if err != nil {
-				return err
-			}
-			return errors.New("memory safety metadata would be removed by checkout")
 		}
 	}
 	return nil
 }
 
-func memoryOperationsExtend(previous, next []string) bool {
-	if len(previous) == 0 || len(next) <= len(previous) {
-		return false
-	}
-	set := map[string]bool{}
-	for _, op := range next {
-		set[op] = true
-	}
-	old := map[string]bool{}
-	for _, op := range previous {
-		if !set[op] {
-			return false
+// 不读取正文，确保损坏或超大的旧文件仍可被正常替换和删除。
+func memoryCheckoutPath(dataDir, name string) error {
+	parts := strings.Split(strings.TrimPrefix(name, "/"), "/")
+	for _, part := range parts {
+		if part == "" || part == "." || part == ".." || strings.Contains(part, "\\") {
+			return memory.ErrInvalid
 		}
-		old[op] = true
 	}
-	return len(set) > len(old)
+	root, err := os.OpenRoot(dataDir)
+	if err != nil {
+		return err
+	}
+	defer func() { root.Close() }()
+	for i, part := range parts {
+		info, err := root.Lstat(part)
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return memory.ErrInvalid
+		}
+		if i == len(parts)-1 {
+			if !info.Mode().IsRegular() {
+				return memory.ErrInvalid
+			}
+			return nil
+		}
+		if !info.IsDir() {
+			return memory.ErrInvalid
+		}
+		next, err := root.OpenRoot(part)
+		if err != nil {
+			return err
+		}
+		root.Close()
+		root = next
+	}
+	return memory.ErrInvalid
 }
 
 // memorySyncSourcesChanged 仅通知真实变更的文档身份，模型整理不在仓库写锁内执行。

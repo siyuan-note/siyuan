@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {genNotebookOption} from "../../menus/onGetnotebookconf";
 import {fetchPost} from "../../util/fetch";
 import {editorConfigApi} from "./editorRuntime";
@@ -80,6 +80,10 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
     group.switch("fileTree.alwaysSelectOpenedFile", {
         title: window.siyuan.languages.selectOpen,
         desc: window.siyuan.languages.fileTree2,
+    });
+    group.switch("fileTree.restoreDocPosition", {
+        title: window.siyuan.languages.restoreDocPosition,
+        desc: window.siyuan.languages.restoreDocPositionTip,
     });
 };
 
@@ -284,13 +288,13 @@ const registerFileManagementGroup = (tab: SettingTabBuilder) => {
 </div>`,
         afterMount: (root) => {
             root.querySelector("#clearHistory")?.addEventListener("click", () => {
-                mobileConfirmDialog(
-                    window.siyuan.languages.clearHistory,
-                    window.siyuan.languages.confirmClearHistory,
-                    () => {
+                confirmDialog({
+                    title: window.siyuan.languages.clearHistory,
+                    text: window.siyuan.languages.confirmClearHistory,
+                    confirm: () => {
                         fetchPost("/api/history/clearWorkspaceHistory", {});
                     },
-                );
+                });
             });
         },
         controls: [{

@@ -126,7 +126,7 @@ func testCalloutTitleReferenceLifecycle(t *testing.T, boxID string) {
 		t.Fatalf("rename did not persist the dynamic title anchor: %s", callout.CalloutTitle)
 	}
 	assertRefs(1)
-	backlinks, _ := GetBacklinkDoc(definition.ID, reference.ID, "", false, false)
+	backlinks, _ := GetBacklinkDoc(definition.ID, reference.ID, "", false, false, nil)
 	if len(backlinks) == 0 {
 		t.Fatal("title references must be visible through the backlink query")
 	}

@@ -73,3 +73,50 @@ test("table and list layouts keep their existing field name presentation", () =>
         assert.doesNotMatch(api.getLayoutHTML({viewType, view: {}} as IAV), /toggle-gallery-name/);
     }
 });
+
+test("all layouts toggle primary and related item icons independently with undo and repeated changes", () => {
+    for (const viewType of ["table", "list", "gallery", "kanban", "calendar"] as const) {
+        for (const previous of [false, true]) {
+            for (const related of [undefined, false, true]) {
+                const fixture = setup();
+                const document = new DOMFixture();
+                const menu = document.createElement("div");
+                const block = document.createElement("div");
+                block.setAttribute("data-av-id", "database");
+                block.setAttribute("data-node-id", "carrier");
+                block.innerHTML = '<div class="av__views"></div>';
+                const view = {showIcon: previous, showRelationIcon: related, calendar: {}, fields: [] as IAVGallery["fields"], columns: [] as IAVTable["columns"], pageSize: 20};
+                const data = {viewID: "view", viewType, view} as unknown as IAV;
+                menu.innerHTML = fixture.api.getLayoutHTML(data);
+                const primary = menu.querySelector('[data-type="toggle-entries-icons"]');
+                const relation = menu.querySelector('[data-type="toggle-relation-icons"]');
+                assert.equal(primary.hasAttribute("checked"), previous);
+                assert.equal(relation.hasAttribute("checked"), related ?? previous);
+                fixture.api.bindLayoutEvent({data, protyle: {} as IProtyle, menuElement: menu as unknown as HTMLElement,
+                    blockElement: block as unknown as Element});
+                for (const next of [!previous, previous]) {
+                    (primary as unknown as HTMLInputElement).checked = next;
+                    primary.dispatch("change");
+                    const current = fixture.transactions.at(-1);
+                    assert.equal(current.perform[0].action, "setAttrViewShowIcon");
+                    assert.equal(current.perform[0].data, next);
+                    assert.equal(current.undo[0].data, !next);
+                    assert.equal(view.showIcon, next);
+                    assert.equal(view.showRelationIcon, related ?? previous);
+                }
+                for (const next of [!(related ?? previous), related ?? previous]) {
+                    (relation as unknown as HTMLInputElement).checked = next;
+                    relation.dispatch("change");
+                    const current = fixture.transactions.at(-1);
+                    assert.equal(current.perform[0].action, "setAttrViewShowRelationIcon");
+                    assert.equal(current.perform[0].data, next);
+                    assert.equal(current.undo[0].data, !next);
+                    assert.equal(current.perform[0].viewID, "view");
+                    assert.equal(current.perform[0].avID, "database");
+                    assert.equal(view.showIcon, previous);
+                    assert.equal(view.showRelationIcon, next);
+                }
+            }
+        }
+    }
+});

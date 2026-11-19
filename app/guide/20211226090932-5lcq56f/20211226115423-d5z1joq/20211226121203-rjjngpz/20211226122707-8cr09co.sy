@@ -1673,7 +1673,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "本地快照支援依檔名搜尋，搜尋時會為檔案清單和預覽保留空間。未進入批次管理時，仍可選取兩個本地快照進行比較，並使用各項目的標記、上傳、下載和回復等操作。"
+					"Data": "本地快照支援依檔名搜尋，搜尋時會為檔案清單和預覽保留空間。在快照詳細資料中選取文件檔案，預覽會在正文上方顯示該快照中儲存的標題。未進入批次管理時，仍可選取兩個本地快照進行比較，並使用各項目的標記、上傳、下載和回復等操作。"
 				}
 			]
 		},
@@ -2487,6 +2487,58 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261110190000-d3c48e6",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110190000-d3c48e6",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "外掛快照"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110190000-7ab2dfd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110190000-7ab2dfd",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料歷史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "外掛快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：在現有資料快照面板中切換至外掛快照，選擇已安裝外掛，輸入顯示名稱或套件名稱可即時篩選下拉選項，也可手動輸入已解除安裝外掛的完整套件名稱查詢。清單分別顯示程式與標準資料的檔案數量及易讀的大小單位；開啟資料與開啟程式分別顯示對應目錄，檔案預覽也在同一面板內完成。恢復時自動停用外掛並建立備份快照，再以同一快照取代 data/plugins/<套件名稱>/ 和 data/storage/petal/<套件名稱>/ 兩個目錄，移除快照中不存在的檔案。恢復前請關閉其他用戶端，恢復後手動啟用外掛。其他目錄和共用設定不在恢復範圍內。"
 				}
 			]
 		}

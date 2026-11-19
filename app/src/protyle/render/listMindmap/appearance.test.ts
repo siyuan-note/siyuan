@@ -4,6 +4,7 @@ import {assignListMindmapBranchColors, clearListMindmapManualColors, getListMind
     getMindmapLineColor, getMindmapTextColor, isListMindmapAppearance, LIST_MINDMAP_CANVAS_COLORS,
     LIST_MINDMAP_PALETTES, resolveListMindmapColors} from "./appearance";
 import type {ListMindmapModel, ListMindmapNode} from "./model";
+import type {ListMindmapSummary} from "./summary";
 import {execFile} from "node:child_process";
 import {mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
@@ -705,6 +706,45 @@ const contrastCases = async (source: string, css: string, legacyPresets: typeof 
         .reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
     const contrast = (a: string, b: string) => (Math.max(luminance(a), luminance(b)) + .05) /
         (Math.min(luminance(a), luminance(b)) + .05);
+    const summary: ListMindmapSummary = {id: "contrast-summary", parentId: model.root.id, nodeIds: [emptyNode.id], label: "Summary"};
+    const branchStyle = model.metadata.nodes[emptyNode.id];
+    delete model.metadata.nodes[emptyNode.id];
+    model.metadata.summaries = [summary];
+    document.documentElement.style.removeProperty("--b3-theme-background");
+    for (const theme of themes) {
+        themeSheet.textContent = theme.css;
+        document.documentElement.dataset.themeMode = theme.mode;
+        for (const printLayout of [false, true]) {
+            view.options.printLayout = view.readOnly = printLayout;
+            for (const backgroundColor of [undefined, "#ffffff", "#1e1e1e"]) {
+                model.metadata.appearance = {version: 1, palette: ["#f9a8d4"], rootColor: "#67c9bd",
+                    nodeStyle: "branch", backgroundColor};
+                const before = JSON.stringify(model.metadata);
+                view.update(model);
+                await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+                const element = host.querySelector<HTMLElement>(".mindmap-view__summary");
+                const canvas = backgroundColor ? computedColor(backgroundColor) : getComputedStyle(host).backgroundColor;
+                for (const selected of [false, true]) {
+                    view.selectedSummary = selected ? summary.id : undefined;
+                    view.draw();
+                    check.ok(!element.hidden);
+                    check.equal(getComputedStyle(element).backgroundColor, "rgba(0, 0, 0, 0)");
+                    check.ok(contrast(getComputedStyle(element).color, canvas) >= 4.5,
+                        "transparent summaries contrast with their canvas in light/dark themes, selection and print views");
+                }
+                check.equal(JSON.stringify(model.metadata), before, "summary display colors never change saved appearance");
+                summary.color = "#ff00ff";
+                view.draw();
+                check.equal(getComputedStyle(element).color, "rgb(255, 0, 255)", "manual summary colors retain priority");
+                delete summary.color;
+            }
+        }
+    }
+    view.selectedSummary = undefined;
+    delete model.metadata.summaries;
+    if (branchStyle) {
+        model.metadata.nodes[emptyNode.id] = branchStyle;
+    }
     for (const theme of themes) {
         themeSheet.textContent = theme.css + "\n.mindmap-view__content span { transition: none !important; }";
         document.documentElement.dataset.themeMode = theme.mode;
@@ -798,7 +838,7 @@ test("reference and legacy palettes keep readable foregrounds, hierarchy paths a
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;
-    const source = ["../../wysiwyg/listContext.ts", "summary.ts", "connectors.ts", "appearance.ts", "model.ts",
+    const source = ["../../wysiwyg/listContext.ts", "summary.ts", "connectors.ts", "appearance.ts", "relationGeometry.ts", "model.ts",
         "fold.ts", "routing.ts", "pan.ts", "../av/richTextValue.ts", "view.ts"].map(compile).join("\n");
     const css = require("sass").compile(path.resolve(__dirname, "../../../assets/scss/base.scss"), {
         logger: require("sass").Logger.silent,

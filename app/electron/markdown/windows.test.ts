@@ -9,7 +9,7 @@ const {MarkdownDesktopHost} = require("./host");
 const {windowControls} = require("../fixtures/windowControlsStub.cjs");
 const {isDevToolsShortcut, toggleDevTools} = require("../window/devToolsDock");
 
-const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boolean; theme?: string; dark?: boolean} = {}) => {
+const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boolean; theme?: string; dark?: boolean; onAppearance?: () => void} = {}) => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-markdown-windows-"));
     const appDirectory = path.join(directory, "app");
     const build = path.join(appDirectory, "stage", "build", "markdown");
@@ -80,7 +80,7 @@ const fixture = async (t, options: {platform?: NodeJS.Platform; failLoad?: boole
         nativeTheme: Object.assign(new EventEmitter(), {shouldUseDarkColors: options.dark ?? false}),
         ipcMain: {handle: (_channel, callback) => { receive = callback; }}, dialog,
         shell: {openExternal: async url => opens.push(url), showItemInFolder: file => reveals.push(file)}, rootDirectory: appDirectory,
-        configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++,
+        configDirectory: path.join(directory, "config"), platform: options.platform, host, onEmpty: () => emptied++, onAppearance: options.onAppearance,
         // 标题栏按钮区由主进程注入，Markdown 模块不直接依赖 window 目录。
         windowControls,
         devTools: {isShortcut: isDevToolsShortcut, toggle: toggleDevTools},
@@ -480,6 +480,31 @@ test("relative images require a separate directory grant and remain scoped to th
     assert.equal(await call(window, "resource", "image.png"), resource);
     assert.equal((await window.request({url: resource, method: "GET"})).status, 200);
     assert.equal(await call(window, "resource", "https://example.com/image.png"), undefined);
+    const other = await manager.open();
+    assert.equal((await other.request({url: resource, method: "GET"})).status, 403);
+});
+
+test("batch resource IPC binds listed directories to this document and never grants on cancel or after a generation change", async t => {
+    const {directory, manager, call, host} = await fixture(t);
+    const file = path.join(directory, "note.md");
+    await fs.writeFile(file, "![image](image.png)");
+    await fs.writeFile(path.join(directory, "image.png"), "image");
+    const window = await manager.open(file);
+    const {sessionId} = await call(window, "bootstrap");
+    let proposals = await call(window, "resource-directories", ["image.png", "https://example.com/a.png"]);
+    assert.deepEqual(proposals.map(item => item.path), [await fs.realpath(directory)]);
+    assert.equal(await call(window, "resource", "image.png"), undefined);
+    assert.equal(await call(window, "confirm-resource-directories", []), false);
+    assert.equal(await call(window, "resource", "image.png"), undefined);
+    proposals = await call(window, "resource-directories", ["image.png"]);
+    host.sessions.get(sessionId).generation++;
+    assert.equal(await call(window, "confirm-resource-directories", proposals.map(item => item.id)), false);
+    assert.equal(await call(window, "resource", "image.png"), undefined);
+    proposals = await call(window, "resource-directories", ["image.png"]);
+    assert.equal(await call(window, "confirm-resource-directories", proposals.map(item => item.id)), true);
+    const resource = await call(window, "resource", "image.png");
+    assert.equal((await window.request({url: resource, method: "GET"})).status, 200);
+    assert.deepEqual(await call(window, "resource-directories", ["image.png"]), []);
     const other = await manager.open();
     assert.equal((await other.request({url: resource, method: "GET"})).status, 403);
 });
@@ -975,6 +1000,21 @@ test("independent appearance can be configured with no registered workspace", as
     assert.equal(restored.appearance.fontSize, 27);
     await assert.rejects(call(window, "appearance", {independent: {fontSize: 1000}}));
     assert.equal((await call(window, "bootstrap")).appearance.fontSize, 27);
+});
+
+test("font synchronization is notified only after appearance is resolved and saved", async t => {
+    let changes = 0;
+    const {manager, call, directory} = await fixture(t, {onAppearance: () => changes++});
+    const window = await manager.open();
+    assert.equal(changes, 1);
+    await call(window, "appearance", {independent: {fonts: {global: [{family: "Arial", weight: 500}], editor: [], code: []}}});
+    assert.equal(changes, 2);
+    const saved = JSON.parse(await fs.readFile(path.join(directory, "config", "preferences.json"), "utf8"));
+    assert.equal(saved.independent.fonts.global[0].family, "Arial");
+    await call(window, "appearance");
+    assert.equal(changes, 3);
+    await assert.rejects(call(window, "appearance", {sources: {fonts: "not-a-workspace"}}));
+    assert.equal(changes, 3);
 });
 
 test("missing workspace sources switch to independent persistently without altering other settings", async t => {

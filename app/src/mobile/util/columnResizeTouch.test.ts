@@ -125,7 +125,8 @@ const setup = (resize = true) => {
         "./closePanel": {closePanel: () => actions.push("sidebar:close"),
             showPanelMask: () => { actions.push("sidebar:mask"); mask.classList.remove("fn__none"); }},
         "./keyboardToolbar": {activeBlur() {}, resetAndroidBoundedSelectionGesture() {}},
-        "../../protyle/util/compatibility": {isInHarmony: () => false, isInAndroid: () => false, isIPhone: () => false},
+        "../../protyle/util/compatibility": {isInHarmony: () => false, isInAndroid: () => false,
+            isIPhone: () => false, isIOSDevice: () => false},
         "../editor": {getCurrentEditor: (): undefined => undefined},
         "../../constants": {Constants: {SIZE_DRAG_THRESHOLD: 5, TIMEOUT_LONGPRESS: 500, TIMEOUT_MULTIPLE_SELECT: 500}},
     };

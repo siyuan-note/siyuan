@@ -22,8 +22,9 @@ const functions = [
         "createCellInputTarget", "captureAVCellInput", "updateCellsValue"]),
     extract("openMenuPanel.ts", ["openMenuPanel"]),
     extract("date.ts", ["bindDateEvent", "getFullYearTime"]),
+    extract("lunarDate.ts", ["bindLunarDateEvent"]),
     extract("panels/date.ts", ["datePanel"]),
-    extract("select.ts", ["removeCellOption", "addColOptionOrCell", "setColOption"]),
+    extract("select.ts", ["bindSelectEvent", "removeCellOption", "addColOptionOrCell", "setColOption"]),
     extract("relation.ts", ["getRelationCellScope", "getRelationValue", "setRelationCell"]),
     extract("asset.ts", ["getVisibleAssetValues", "isAssetCellMenuCurrent", "getAssetHTML", "resolveAssetCellElement", "updateAssetCell", "editAssetItem",
         "captureAssetCellUpload", "captureAVAssetUploadHandler", "getUploadedAssetValues"]),
@@ -64,6 +65,24 @@ const relation = id => ({blockIDs: [id], contents: [{type: "block", block: {cont
 
 const fixture = (type, {count = 1, batch = "", groups = false, cached = true, related = false} = {}) => {
     const transactions = [];
+    const dateBindings = [];
+    const datePositionBindings = [];
+    const getInlineDateType = input => input.dataset.datePickerType || input.type;
+    const getInlineDateValue = input => getInlineDateType(input) === "datetime-local" ? input.value.replace(" ", "T") : input.value;
+    const setInlineDateValue = (input, value) => {
+        const type = getInlineDateType(input);
+        const normalized = type === "datetime-local" ? value.replace(" ", "T") : value;
+        input.value = type === "datetime-local" && load("../../../datePicker/model").validateDateValue(normalized, {type, step: "any"}) === "valid" ?
+            normalized.replace("T", " ") : value;
+    };
+    const validateInlineDateInput = input => {
+        const type = getInlineDateType(input);
+        const value = type === "datetime-local" ? input.value.replace(" ", "T") : input.value;
+        return load("../../../datePicker/model").validateDateValue(value, {
+            type, min: input.min, max: input.max, step: input.step, required: input.required,
+            stepBase: input.defaultValue || "",
+        }) === "valid";
+    };
     const owner = {contains: () => true};
     const values = Array.from({length: count}, (_, index) => ({
         id: `value-${index}`, keyID: "column", blockID: `row-${index}`, type,
@@ -103,6 +122,8 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
     const chips = element();
     const menuItems = element();
     menuItems.scrollTop = 0;
+    menu.lastElementChild = menuItems;
+    menuItems.lastElementChild = element();
     const relatedItems = [];
     const relationRoot = element({keyId: "column"});
     const selectedRows = {append: target => relatedItems.push(target)};
@@ -117,7 +138,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
     const context = {
         ...load("capabilities"), ...load("cellValue"), ...load("batchValue"), ...load("dragFillValue"),
         ...load("viewType"), ...load("dateSubmit"), ...load("selectionState"), ...load("panelTarget"),
-        ...load("assetUploadTarget"),
+        ...load("assetUploadTarget"), ...load("relationPosition"),
         document, window, CustomEvent, setTimeout,
         cellValues: plain(values),
         getAVData: () => state.data,
@@ -126,7 +147,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         canEditAVHost: (_block, editor) => !editor.disabled && !window.siyuan.config.readonly &&
             !window.siyuan.isPublish && !editor.options.history?.created && !editor.options.history?.snapshot &&
             (!state.relationHost || state.relationHost.active && state.relationHost.available && !state.relationHost.readonly()),
-        hasClosestBlock: cell => block.contains(cell) ? block : null,
+        getAVHost: cell => block.contains(cell) ? block : null,
         hasClosestByClassName: (cell, name) => name === "b3-menu" ? menu :
             name === "custom-attr" && cell.dataset.avId ? {} : null,
         getColId: cell => cell.dataset.colId,
@@ -144,7 +165,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         escapeAriaLabel: value => value, escapeHtml: value => value,
         applyAVColorPalette() {}, getAVCustomColors: () => [], getAVColorGridHTML: () => "",
         getAVColorOrder: () => [], AV_MANAGE_CUSTOM_COLORS_TYPE: "manage",
-        mobileConfirmDialog: (_title, _text, callback) => {state.confirm = callback;},
+        confirmDialog: ({confirm}) => {state.confirm = confirm;},
         Menu: class {
             constructor(_id, callback) {
                 this.items = [];
@@ -161,7 +182,33 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
             open() {}
             fullscreen() {}
         },
-        getSelectHTML: () => "", bindSelectEvent() {}, setSelectMenuPosition() {},
+        getSelectHTML: () => "", setSelectMenuPosition() {},
+        getInlineDateType, getInlineDateValue, setInlineDateValue, validateInlineDateInput,
+        // 几何/ResizeObserver 在 datePosition.dom.test.ts 验证；这里保留宿主绑定与释放契约。
+        bindDatePanelPosition: (menuElement, getAnchor) => {
+            assert.ok(menuElement);
+            assert.equal(typeof getAnchor, "function");
+            const binding = {menuElement, getAnchor, destroyed: false};
+            datePositionBindings.push(binding);
+            return () => {binding.destroyed = true;};
+        },
+        bindInlineDatePicker: (host, inputs, options) => {
+            assert.ok(host);
+            assert.equal(inputs.length, 2);
+            const binding = {host, inputs, options, active: undefined, destroyed: false};
+            dateBindings.push(binding);
+            inputs.forEach(input => {
+                input.dataset.datePickerType = input.type;
+                input.type = "text";
+            });
+            return {
+                activate: input => {assert.ok(inputs.includes(input)); binding.active = input;},
+                validate: () => !binding.destroyed && inputs.every(validateInlineDateInput),
+                update() {},
+                destroy: () => {binding.destroyed = true;},
+            };
+        },
+        bindLunarDateEditor: options => {state.lunarEditor = options;},
         bindAssetEvent: options => {state.boundMenu = options;},
         removeCompressURL: value => value, openMenu: () => [], isBrowserRenderableImagePath: () => false,
         base64ToURL: async () => state.base64Response,
@@ -173,13 +220,13 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
                 cell.dataset.cellValue = encodeURIComponent(JSON.stringify(value));
             }
         },
-        transaction: (_protyle, operations, undo) => transactions.push({operations, undo}),
+        transaction: (_protyle, operations, undo, options) => transactions.push({operations, undo, options}),
         captureUploadDocument: (_protyle, options) => options,
         getAssetUploadSuccesses: result => result.successes, pathPosix: () => path.posix,
         showMessage: message => assert.fail(`unexpected message: ${message}`),
     };
     const api = runInNewContext(compiledFunctions + "\n({openMenuPanel, bindDateEvent, datePanel, updateCellsValue," +
-        "addColOptionOrCell, removeCellOption, setColOption, setRelationCell, updateAssetCell, captureAssetCellUpload," +
+        "bindSelectEvent, addColOptionOrCell, removeCellOption, setColOption, setRelationCell, updateAssetCell, captureAssetCellUpload," +
         "getAssetHTML, editAssetItem, captureAVCellInput, captureAVAssetUploadHandler});", context);
     api.openMenuPanel({type: type === "mAsset" ? "asset" : type === "mSelect" ? "select" : type,
         protyle, blockElement: block, cellElements: cells});
@@ -191,28 +238,59 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
     const unmount = () => cells.forEach(cell => {cell.isConnected = false;});
     const select = () => api.addColOptionOrCell(protyle, state.data, cells,
         element({name: "new", color: "1"}), menu, block);
-    const selectRelation = async () => {
-        const target = element({rowId: "new", relationType: "candidate"}, ["b3-menu__item"]);
-        const label = element({content: "New relation"});
+    const selectRelation = async (id = "new") => {
+        const target = element({rowId: id, relationType: "candidate"}, ["b3-menu__item"]);
+        const label = element({content: id});
         const primary = element();
         target.querySelector = selector => selector === ".b3-menu__label" ? label : primary;
         await api.setRelationCell(protyle, block, target, cells);
     };
-    const saveDate = (dirty = true) => {
+    const editDate = (dirty = true, {value = "2026-11-06", change = "input", constraints = {}} = {}) => {
+        const transactionCount = transactions.length;
         const inputs = Array.from({length: 4}, () => element());
-        inputs[0].value = "2026-11-06";
+        inputs[0].defaultValue = "2026-11-06";
+        inputs[1].defaultValue = "";
+        inputs[0].value = value;
         inputs[1].value = "";
+        inputs.slice(0, 2).forEach(input => {input.type = "date"; input.dataset.value = input.value;});
+        Object.assign(inputs[0], constraints);
         inputs[2].checked = false;
         inputs[3].checked = false;
-        const close = api.bindDateEvent({protyle, data: state.data, blockElement: block, cellElements: cells,
-            menuElement: {querySelectorAll: () => inputs}, requireExplicitChange: true});
-        if (dirty) inputs[0].dispatchEvent(new Event("input"));
-        close();
+        const host = element();
+        const menuElement = {querySelectorAll: () => inputs,
+            querySelector: selector => selector === "[data-date-inline]" ? host : null};
+        const panelContext = {options: {protyle, blockElement: block, cellElements: cells, requireExplicitChange: true},
+            data: state.data, fields: columns, menuElement, cellRect: cells.at(-1).getBoundingClientRect()};
+        api.datePanel.bind(panelContext);
+        const close = panelContext.closeCB;
+        const position = datePositionBindings.at(-1);
+        assert.equal(position.menuElement, menuElement);
+        assert.deepEqual(plain(position.getAnchor()), plain(panelContext.cellRect));
+        const binding = dateBindings.at(-1);
+        assert.equal(binding.host, host);
+        assert.deepEqual(Array.from(binding.inputs), inputs.slice(0, 2));
+        assert.equal(binding.active, inputs[0]);
+        assert.equal(inputs[0].type, "text");
+        assert.equal(inputs[1].type, "text");
+        assert.equal(transactions.length, transactionCount, "mount and activation cannot write the date prefill");
+        if (dirty) {
+            if (change === "select") {
+                binding.options.onChange(inputs[0], {value, draft: value, valid: validateInlineDateInput(inputs[0]), kind: "select"});
+            } else {
+                inputs[0].dispatchEvent(new Event(change));
+            }
+        }
+        return {inputs, close: () => {
+            close();
+            assert.equal(binding.destroyed, true, "closing releases the shared inline binding");
+            assert.equal(position.destroyed, true, "closing releases the date panel positioning binding");
+        }};
     };
+    const saveDate = (dirty = true, options = {}) => editDate(dirty, options).close();
     const save = type === "date" ? saveDate : type === "relation" ? selectRelation : type === "mAsset" ?
         () => api.updateAssetCell({protyle, blockElement: block, cellElements: cells, addValue: [asset("new")]}) : select;
     return {api, state, context, cells, view, columns, rows, owner, block, protyle, menu, panel, transactions, window,
-        save, saveDate, unmount};
+        save, saveDate, editDate, unmount};
 };
 
 for (const type of ["date", "select", "mSelect", "relation", "mAsset"]) {
@@ -290,6 +368,31 @@ test("explicit-change date panel cancellation does not save a prefilled date", (
     assert.equal(f.transactions.length, 0);
 });
 
+test("explicitly selecting an unchanged inline date commits against the captured target", () => {
+    const f = fixture("date");
+    f.unmount();
+    f.saveDate(true, {change: "select"});
+    assert.equal(f.transactions.length, 1);
+    assert.equal(f.transactions[0].operations[0].rowID, "row-0");
+    assert.equal(f.transactions[0].operations[0].data.date.content, new Date("2026-11-06 00:00").getTime());
+});
+
+for (const [name, value, constraints] of [
+    ["impossible day", "2026-02-30", {}],
+    ["unfinished draft", "2026-11-", {}],
+    ["required empty", "", {required: true}],
+    ["minimum", "2026-11-06", {min: "2026-11-07"}],
+    ["maximum", "2026-11-06", {max: "2026-11-05"}],
+    ["step", "2026-11-06", {min: "2026-11-05", step: "2"}],
+]) {
+    test(`date stable-target saves reject ${name} through the real date model`, () => {
+        const f = fixture("date");
+        f.unmount();
+        f.saveDate(true, {value, constraints});
+        assert.equal(f.transactions.length, 0);
+    });
+}
+
 test("date clear action keeps its stable target after unmount", () => {
     const f = fixture("date");
     f.unmount();
@@ -309,8 +412,94 @@ test("multi-select chip removal and repeated saves read current values while off
     assert.deepEqual(plain(f.transactions[1].undo[0].data.mSelect), [option("old-0"), option("new")]);
 });
 
-const attributeSelectFixture = () => {
-    const f = fixture("mSelect", {cached: false});
+const selectKeyboardFixture = (type, {checked = false, create = false} = {}) => {
+    const f = fixture(type);
+    const input = f.menu.querySelector("input");
+    const chip = element({content: "old-0"});
+    const candidate = element({name: checked ? "old-0" : create ? "created" : "new", color: "1"});
+    const next = element({colId: "column"});
+    candidate.querySelector = selector =>
+        (checked && selector === ".b3-menu__checked") || (create && selector === ".b3-menu__accelerator") ? element() : null;
+    const queryMenu = f.menu.querySelector;
+    f.menu.querySelector = selector => selector.startsWith(".b3-chips .b3-chip") ? chip : queryMenu(selector);
+    const state = {closed: false, prepared: 0, scrolled: []};
+    f.context.document.querySelector = selector => selector === ".av__panel" && !state.closed ? f.panel : null;
+    f.menu.parentElement.addEventListener("click", event => {state.closed = event.detail === "close";});
+    f.context.upDownHint = () => candidate;
+    f.context.isAVContinuousInputKey = event => !event.repeat && !event.shiftKey;
+    f.context.prepareAVContinuousInput = (protyle, block, cells, onNext) => {
+        assert.equal(protyle, f.protyle);
+        assert.equal(block, f.block);
+        assert.equal(cells[0], f.cells[0]);
+        state.prepared++;
+        return () => onNext(next);
+    };
+    f.context.cellScrollIntoView = (block, cell) => {assert.equal(block, f.block); state.scrolled.push(cell);};
+    f.api.bindSelectEvent(f.protyle, f.state.data, f.menu, f.cells, f.block);
+    const enter = (options = {}) => input.dispatchEvent(Object.assign(new Event("keydown", {cancelable: true}), {
+        key: "Enter", ...options,
+    }));
+    return {f, state, enter, next};
+};
+
+for (const options of [{}, {create: true}, {checked: true}]) {
+    test(`single-select Enter advances after ${options.checked ? "clearing" : options.create ? "creating" : "choosing"} an option`, () => {
+        const {f, state, enter, next} = selectKeyboardFixture("select", options);
+        assert.equal(enter(), false);
+        assert.equal(state.closed, true);
+        assert.equal(state.prepared, 1);
+        assert.equal(f.transactions.length, 1);
+        assert.deepEqual(state.scrolled, []);
+        f.transactions[0].options.callback();
+        assert.deepEqual(state.scrolled, [next]);
+    });
+}
+
+test("single-select Enter ignores held keys and leaves later cell or panel focus intact", () => {
+    const {f, state, enter} = selectKeyboardFixture("select");
+    enter({isComposing: true});
+    enter({repeat: true});
+    assert.equal(f.transactions.length, 0);
+    enter();
+    const complete = f.transactions[0].options.callback;
+    state.closed = false;
+    complete();
+    state.closed = true;
+    f.context.setAVCellSelection(f.block, {});
+    complete();
+    assert.deepEqual(state.scrolled, []);
+});
+
+test("single-select range confirmation opens the next field only after a successful save", () => {
+    for (const create of [false, true]) {
+        const {f, state, enter, next} = selectKeyboardFixture("select", {create});
+        f.context.setAVCellSelection(f.block, {input: {groupID: "", rowID: "row-0", colID: "column"}});
+        const opened = [];
+        f.context.popTextCell = (protyle, cells) => {
+            assert.equal(protyle, f.protyle);
+            opened.push(cells[0]);
+        };
+        enter();
+        assert.deepEqual(opened, []);
+        f.transactions[0].options.callback();
+        assert.deepEqual(opened, [next]);
+        assert.deepEqual(state.scrolled, [next]);
+    }
+});
+
+test("multi-select Enter updates the current cell and keeps the option panel open", () => {
+    const {f, state, enter} = selectKeyboardFixture("mSelect");
+    assert.equal(enter(), false);
+    assert.equal(f.transactions.length, 1);
+    const {operations, options} = f.transactions[0];
+    assert.deepEqual(plain(operations[0].data.mSelect), [option("old-0"), option("new")]);
+    assert.equal(options.callback, undefined);
+    assert.equal(state.closed, false);
+    assert.equal(state.prepared, 0);
+});
+
+const attributePanelFixture = (type = "mSelect") => {
+    const f = fixture(type, {cached: false});
     f.state.data = {id: "database", viewType: "table", view: {columns: f.columns}};
     f.context.getAVData = () => undefined;
     let currentBlock = f.block;
@@ -330,7 +519,7 @@ const attributeSelectFixture = () => {
                 selector.includes(`[data-${name}="${currentCell.getAttribute(`data-${name}`)}"]`)) ? currentCell : null;
     };
     bindCell();
-    f.context.hasClosestBlock = target => currentBlock.contains(target) ? currentBlock : null;
+    f.context.getAVHost = target => currentBlock.contains(target) ? currentBlock : null;
     f.context.updateAttrViewCellInOtherElements = (_protyle, _avID, _rowID, _colID, value, cell) => {
         assert.equal(cell, currentCell);
         cell.dataset.cellValue = encodeURIComponent(JSON.stringify(value));
@@ -351,8 +540,71 @@ const attributeSelectFixture = () => {
 };
 
 for (const replaceBlock of [false, true]) {
+    for (const mobile of [false, true]) {
+        test(`attribute lunar dates save ranges and times after ${replaceBlock ? "body" : "field"} refreshes (${mobile ? "mobile" : "desktop"})`, () => {
+            const f = attributePanelFixture("date");
+            f.context.isMobile = () => mobile;
+            f.cells[0].dataset.dateFormat = "lunar";
+            f.api.bindDateEvent({protyle: f.protyle, data: f.state.data, blockElement: f.block,
+                cellElements: f.cells, menuElement: f.menu});
+            const value = {content: new Date("2026-08-10 12:30").getTime(), isNotEmpty: true,
+                content2: new Date("2026-08-12 15:45").getTime(), isNotEmpty2: true,
+                hasEndDate: true, isNotTime: false};
+            const current = f.repaint(replaceBlock);
+            const before = JSON.parse(decodeURIComponent(current.cell.dataset.cellValue));
+            f.state.lunarEditor.update(value);
+            assert.equal(f.transactions.length, 1);
+            const saved = f.transactions[0].operations[0].data.date;
+            for (const key of Object.keys(value)) {
+                assert.equal(saved[key], value[key]);
+            }
+            assert.deepEqual(plain(f.transactions[0].undo[0].data), before);
+            assert.equal(f.cells[0], current.cell);
+        });
+    }
+
+    test(`attribute dates save consecutive edits across ${replaceBlock ? "body" : "field"} refreshes`, () => {
+        const f = attributePanelFixture("date");
+        for (const day of [10, 11, 12]) {
+            const before = plain(JSON.parse(decodeURIComponent(f.current().cell.dataset.cellValue)));
+            const editor = f.editDate(true, {value: `2026-08-${day}`});
+            const current = f.repaint(replaceBlock);
+            current.cell.dataset.id = `refreshed-value-${day}`;
+            const refreshed = {...before, id: current.cell.dataset.id};
+            current.cell.dataset.cellValue = encodeURIComponent(JSON.stringify(refreshed));
+            current.block.setAttribute("updated", `refreshed-${day}`);
+            editor.close();
+            assert.equal(f.transactions.length, day - 9);
+            const transaction = f.transactions.at(-1);
+            const operation = transaction.operations[0];
+            assert.equal(operation.action, "updateAttrViewCell");
+            assert.equal(operation.avID, "database");
+            assert.equal(operation.blockID, "carrier");
+            assert.equal(operation.keyID, "column");
+            assert.equal(operation.rowID, "row-0");
+            assert.equal(operation.id, `refreshed-value-${day}`);
+            assert.equal(operation.data.date.content, new Date(`2026-08-${day} 00:00`).getTime());
+            assert.deepEqual(plain(transaction.undo[0].data), refreshed);
+            assert.equal(transaction.undo[1].data, `refreshed-${day}`);
+            assert.equal(f.cells[0], current.cell);
+        }
+    });
+
+    test(`attribute dates clear the refreshed ${replaceBlock ? "body" : "field"} with an undo snapshot`, () => {
+        const f = attributePanelFixture("date");
+        const current = f.repaint(replaceBlock);
+        const before = plain(JSON.parse(decodeURIComponent(current.cell.dataset.cellValue)));
+        f.api.datePanel.actions.clearDate({data: f.state.data, fields: f.columns, avPanelElement: element(),
+            options: {protyle: f.protyle, blockElement: f.block, cellElements: f.cells}},
+        {event: {preventDefault() {}, stopPropagation() {}}});
+        assert.equal(f.transactions.length, 1);
+        assert.equal(f.transactions[0].operations[0].data.date.isNotEmpty, false);
+        assert.deepEqual(plain(f.transactions[0].undo[0].data), before);
+        assert.equal(f.cells[0], current.cell);
+    });
+
     test(`attribute multi-select keeps adding and removing after ${replaceBlock ? "body" : "field"} refreshes`, () => {
-        const f = attributeSelectFixture();
+        const f = attributePanelFixture();
         f.save();
         f.repaint(replaceBlock);
         const add = name => f.api.addColOptionOrCell(f.protyle, f.state.data, f.cells,
@@ -387,6 +639,33 @@ for (const [name, invalidate] of [
     ["display instance change", f => {f.current().block.dataset.nodeId = "other";}],
     ["attribute target change", f => {f.current().block.dataset.attributeId = "other";}],
     ["row change", f => {f.current().cell.dataset.rowId = "other";}],
+    ["field change", f => {f.current().cell.dataset.colId = "other";}],
+    ["field deletion", f => {f.current().cell.isConnected = false;}],
+    ["field retyping", f => {f.current().cell.dataset.type = "select";}],
+    ["readonly", f => {f.protyle.disabled = true;}],
+    ["global readonly", f => {f.window.siyuan.config.readonly = true;}],
+    ["history preview", f => {f.protyle.options.history = {created: true};}],
+]) {
+    test(`attribute dates reject save and clear after refresh and ${name}`, () => {
+        const f = attributePanelFixture("date");
+        const editor = f.editDate();
+        f.repaint();
+        invalidate(f);
+        editor.close();
+        f.api.datePanel.actions.clearDate({data: f.state.data, fields: f.columns, avPanelElement: element(),
+            options: {protyle: f.protyle, blockElement: f.block, cellElements: f.cells}},
+        {event: {preventDefault() {}, stopPropagation() {}}});
+        assert.equal(f.transactions.length, 0);
+    });
+}
+
+for (const [name, invalidate] of [
+    ["document switch", f => {f.protyle.block.rootID = "other";}],
+    ["panel removal", f => {f.panel.querySelector = () => null;}],
+    ["database change", f => {f.current().block.dataset.avId = "other";}],
+    ["display instance change", f => {f.current().block.dataset.nodeId = "other";}],
+    ["attribute target change", f => {f.current().block.dataset.attributeId = "other";}],
+    ["row change", f => {f.current().cell.dataset.rowId = "other";}],
     ["field deletion", f => {f.current().cell.isConnected = false;}],
     ["field retyping", f => {f.current().cell.dataset.type = "select";}],
     ["readonly", f => {f.protyle.disabled = true;}],
@@ -394,7 +673,7 @@ for (const [name, invalidate] of [
     ["history preview", f => {f.protyle.options.history = {created: true};}],
 ]) {
     test(`attribute multi-select rejects add and removal after refresh and ${name}`, () => {
-        const f = attributeSelectFixture();
+        const f = attributePanelFixture();
         f.save();
         f.repaint();
         invalidate(f);
@@ -405,14 +684,28 @@ for (const [name, invalidate] of [
 }
 
 test("attribute multi-select does not follow an in-place change to another attribute target", () => {
-    const f = attributeSelectFixture();
+    const f = attributePanelFixture();
     f.current().block.dataset.attributeId = "other";
     f.save();
     assert.equal(f.transactions.length, 0);
 });
 
+test("attribute relation writes and undo use the current field across panel replacements", async () => {
+    const f = attributePanelFixture("relation");
+    await f.save("first");
+    f.repaint();
+    await f.save("second");
+    f.repaint();
+    const first = f.menu.querySelectorAll('[data-relation-type="selected"]')[0];
+    await f.api.setRelationCell(f.protyle, f.block, first, f.cells);
+    assert.deepEqual(f.transactions.map(transaction => plain(transaction.operations[0].data.relation.blockIDs)),
+        [["first"], ["first", "second"], ["second"]]);
+    assert.deepEqual(plain(f.transactions[2].undo[0].data.relation.blockIDs), ["first", "second"]);
+    assert.equal(f.cells[0], f.current().cell);
+});
+
 test("attribute multi-select uses refreshed concurrent values for edits and undo", () => {
-    const f = attributeSelectFixture();
+    const f = attributePanelFixture();
     f.save();
     const {cell} = f.repaint();
     const current = JSON.parse(decodeURIComponent(cell.dataset.cellValue));
@@ -425,7 +718,7 @@ test("attribute multi-select uses refreshed concurrent values for edits and undo
 });
 
 test("mobile attribute multi-select continues after refresh without reopening the keyboard", () => {
-    const f = attributeSelectFixture();
+    const f = attributePanelFixture();
     f.context.isMobile = () => true;
     f.menu.querySelector("input").focus = () => assert.fail("an option tap must not focus the search input");
     f.save();

@@ -5,6 +5,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {normalizeSiYuanUri} from "./normalizeSiYuanUri";
 import {resolveCustomModelFactory} from "../plugin/customTabOwner";
+import {isNodeID} from "./nodeID";
 
 const preprocess: (source: string, options: {MOBILE: boolean, BROWSER: boolean}) => string =
     require("ifdef-loader/preprocessor").parse;
@@ -34,7 +35,7 @@ const createParser = (URLClass: typeof URL) => {
     runInNewContext(pathNameSource, {
         exports,
         URL: URLClass,
-        require: () => ({normalizeSiYuanUri}),
+        require: () => ({normalizeSiYuanUri, isNodeID}),
     });
     return exports;
 };
@@ -80,6 +81,10 @@ test("block URI parsing continues to reject unrelated protocols, invalid IDs and
         for (const uri of [null, undefined, "invalid", `https://blocks/${blockID}`, `siyuan://other/${blockID}`,
             "siyuan://blocks/invalid", `siyuan://blocks/${blockID}?avItemID=invalid`,
             `siyuan://blocks/${blockID}?avViewID=invalid`, `siyuan://blocks/${blockID}?avGroupID=invalid`,
+            "siyuan://blocks/20261118000000-Abcdefg", "siyuan://blocks/20261118000000-abc_def",
+            `siyuan://blocks/${blockID}?avItemID=20261118000000-Abcdefg`,
+            `siyuan://blocks/${blockID}?avViewID=20261118000000-abc_def`,
+            `siyuan://blocks/${blockID}?avGroupID=20261118000000-abc_def`,
             `siyuan:////blocks/${blockID}`, `siyuan://blocks:65536/${blockID}`]) {
             assert.equal(parser.parseSiYuanUriInfo(uri), null, String(uri));
         }
@@ -109,7 +114,7 @@ const createDispatcher = (URLClass: typeof URL, mobile: boolean, exists = true) 
             requests.push({url, id: data.id});
             callback({data: exists});
         },
-        checkFold: (_id: string, callback: (zoomIn: boolean) => void) => callback(false),
+        checkReferenceFold: (_id: string, callback: (zoomIn: boolean) => void) => callback(false),
         openStandaloneDatabaseItemByURI: () => false,
         openFileById: (options: {id: string, action: string[]}) => opens.push(options),
         openMobileFileById: (_app: unknown, id: string, action: string[]) => opens.push({id, action}),

@@ -84,6 +84,7 @@ ${data.viewType === "table" || rule.target === "property" ? `<select class="b3-s
             bindInlineFilterEvents(filterRoot, filterData, protyle, blockElement.dataset.nodeId, data.id, {
                 root: filterRoot,
                 render: renderFilter,
+                onResize,
                 save: filters => {
                     const field = fields.find(field => field.id === filters[0]?.column);
                     const current = rules.find(item => item.id === rule.id);

@@ -538,6 +538,20 @@
 			]
 		},
 		{
+			"ID": "20261119012733-83ff6f1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261119012733-83ff6f1",
+				"updated": "20261119012733"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On Windows, macOS, and Linux, when tabs are merged into the top bar, drag the gap between the tab switcher and the top bar buttons on its right to move the window."
+				}
+			]
+		},
+		{
 			"ID": "20260613204526-buhhsds",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -1626,6 +1640,69 @@
 				"id": "20260613204604-9nmigbp",
 				"updated": "20260613204604"
 			}
+		},
+		{
+			"ID": "20261110180000-f03f95e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110180000-f03f95e",
+				"updated": "20261110180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ordinary document reopening restores the last reading position by default. Disable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Document"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Restore last reading position"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reopen at the beginning. Block links, search results, restored tabs and navigation history keep their target positions."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " To override the global preference for this document, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Document opening position"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Select Default (follow the global setting), Restore last reading position, or Open at the beginning. This preference travels with the document; saved reading positions remain local to each client."
+				}
+			]
 		}
 	]
 }

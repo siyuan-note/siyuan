@@ -117,7 +117,7 @@ var checkBlockRef = contractHandler(apicontract.CheckBlockRef, func(c *gin.Conte
 })
 
 var getBlockTreeInfos = contractHandler(apicontract.GetBlockTreeInfos, func(c *gin.Context, request apicontract.BlocksQueryRequest) apicontract.Response[map[string]*apicontract.BlockTreeInfo] {
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[map[string]*apicontract.BlockTreeInfo](-1, err.Error())
 	}
@@ -126,7 +126,7 @@ var getBlockTreeInfos = contractHandler(apicontract.GetBlockTreeInfos, func(c *g
 })
 
 var getBlockSiblingID = contractHandler(apicontract.GetBlockSiblingID, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[apicontract.BlockSiblingData] {
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockSiblingData](-1, err.Error())
 	}
@@ -138,7 +138,7 @@ var getBlockSiblingID = contractHandler(apicontract.GetBlockSiblingID, func(c *g
 })
 
 var getBlockRelevantIDs = contractHandler(apicontract.GetBlockRelevantIDs, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[apicontract.BlockRelevantData] {
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockRelevantData](-1, err.Error())
 	}
@@ -197,7 +197,7 @@ var getHeadingChildrenDOM = contractHandler(apicontract.GetHeadingChildrenDOM, f
 	if request.RemoveFoldAttr != nil {
 		removeFoldAttr = *request.RemoveFoldAttr
 	}
-	return apicontract.Success(model.GetHeadingChildrenDOM(request.ID, removeFoldAttr))
+	return apicontract.Success(model.GetHeadingChildrenDOM(request.ID, removeFoldAttr, model.IsReadOnlyRoleContext(c)))
 })
 
 var getHeadingDeleteTransaction = contractHandler(apicontract.GetHeadingDeleteTransaction, func(c *gin.Context, request apicontract.BlockIDRequest) apicontract.Response[*apicontract.BlockTransaction] {
@@ -276,7 +276,7 @@ var setCloudReminder = contractHandler(apicontract.SetCloudReminder, func(c *gin
 })
 
 var getUnfoldedParentID = contractHandler(apicontract.GetUnfoldedParentID, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[apicontract.UnfoldedParentData] {
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.UnfoldedParentData](-1, err.Error())
 	}
@@ -294,8 +294,8 @@ var checkBlockFold = contractHandler(apicontract.CheckBlockFold, func(c *gin.Con
 	if !isBlockPublishAccessible(c, request.ID, boxID) {
 		return apicontract.Success(apicontract.BlockFoldData{})
 	}
-	isFolded, isRoot := model.IsBlockFolded(request.ID)
-	return apicontract.Success(apicontract.BlockFoldData{IsFolded: isFolded, IsRoot: isRoot})
+	isFolded, isRoot, isHidden := model.IsBlockFolded(request.ID)
+	return apicontract.Success(apicontract.BlockFoldData{IsFolded: isFolded, IsRoot: isRoot, IsHidden: isHidden})
 })
 
 var checkBlockExist = contractHandler(apicontract.CheckBlockExist, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[bool] {
@@ -406,15 +406,23 @@ var getDocsInfo = contractHandler(apicontract.GetDocsInfo, func(c *gin.Context, 
 })
 
 var getRecentUpdatedBlocks = contractHandler(apicontract.GetRecentUpdatedBlocks, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.SearchBlock] {
-	blocks := model.RecentUpdatedBlocks()
+	var blocks []*model.Block
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+		denyAll, excludeBoxIDs, excludeDocIDs := model.GetPublishAccessSearchExclusion(c)
+		if denyAll {
+			return apicontract.Success([]*apicontract.SearchBlock{})
+		}
+		blocks = model.RecentUpdatedBlocks(excludeBoxIDs, excludeDocIDs)
+	} else {
+		blocks = model.RecentUpdatedBlocks(nil, nil)
 	}
 	return apicontract.Success(searchBlockContracts(blocks))
 })
 
 var getContentWordCount = contractHandler(apicontract.GetContentWordCount, func(c *gin.Context, request apicontract.ContentWordCountRequest) apicontract.Response[apicontract.WordCountData] {
+	if err := filesys.ValidateContentStatContent(request.Content); nil != err {
+		return apicontract.Failure[apicontract.WordCountData](-1, err.Error())
+	}
 	return apicontract.Success(apicontract.WordCountData{ReqID: request.ReqID, Stat: blockStatContract(filesys.ContentStat(request.Content))})
 })
 
@@ -435,7 +443,7 @@ var getTreeStat = contractHandler(apicontract.GetTreeStat, func(c *gin.Context, 
 	if err := util.ValidateID(id); err != nil {
 		return apicontract.FailureFrom[apicontract.TreeStatData](err)
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.TreeStatData](-1, err.Error())
 	}
@@ -616,7 +624,7 @@ var getBlockIndex = contractHandler(apicontract.GetBlockIndex, func(c *gin.Conte
 })
 
 var getBlocksIndexes = contractHandler(apicontract.GetBlocksIndexes, func(c *gin.Context, request apicontract.BlocksQueryRequest) apicontract.Response[map[string]int] {
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[map[string]int](-1, err.Error())
 	}
@@ -804,11 +812,11 @@ var getBlockDOM = contractHandler(apicontract.GetBlockDOM, func(c *gin.Context, 
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(apicontract.BlockDOMData{ID: id})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockDOMData](-1, err.Error())
 	}
-	dom := model.GetBlockDOMInBox(id, boxID)
+	dom := model.GetBlockDOMInBox(id, boxID, model.IsReadOnlyRoleContext(c))
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
@@ -850,11 +858,11 @@ var getBlockDOMs = contractHandler(apicontract.GetBlockDOMs, func(c *gin.Context
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(map[string]string{})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[map[string]string](-1, err.Error())
 	}
-	doms := model.GetBlockDOMsInBox(ids, boxID)
+	doms := model.GetBlockDOMsInBox(ids, boxID, model.IsReadOnlyRoleContext(c))
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
@@ -871,7 +879,7 @@ var getBlockDOMWithEmbed = contractHandler(apicontract.GetBlockDOMWithEmbed, fun
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(apicontract.BlockDOMData{ID: id})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockDOMData](-1, err.Error())
 	}
@@ -884,7 +892,7 @@ var getBlockDOMWithEmbed = contractHandler(apicontract.GetBlockDOMWithEmbed, fun
 			return model.CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, blockID, boxID)
 		}
 	}
-	dom := model.GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID, accessChecker)
+	dom := model.GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID, accessChecker, model.IsReadOnlyRoleContext(c))
 
 	if isReadOnlyRole {
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
@@ -909,7 +917,7 @@ var getBlockDOMsWithEmbed = contractHandler(apicontract.GetBlockDOMsWithEmbed, f
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(map[string]string{})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[map[string]string](-1, err.Error())
 	}
@@ -922,7 +930,7 @@ var getBlockDOMsWithEmbed = contractHandler(apicontract.GetBlockDOMsWithEmbed, f
 			return model.CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, blockID, boxID)
 		}
 	}
-	doms := model.GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids, boxID, accessChecker)
+	doms := model.GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids, boxID, accessChecker, model.IsReadOnlyRoleContext(c))
 
 	if isReadOnlyRole {
 		publishIgnore := model.GetDisablePublishAccess(publishAccess)
@@ -948,7 +956,7 @@ func blockPublishDenied(c *gin.Context, id, boxID string, publishAccess, publish
 		!model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore)
 }
 
-// filterBlocksByPublishAccess 把被发布访问控制屏蔽的块内容置空，保留原有键位。
+// filterBlocksByPublishAccess 把被发布访问控制屏蔽的块从结果中移除，避免保留键位泄露块存在性。
 func filterBlocksByPublishAccess(c *gin.Context, contents map[string]string, ids []string, boxID string,
 	publishAccess, publishIgnore model.PublishAccess) {
 	for _, id := range ids {
@@ -956,7 +964,7 @@ func filterBlocksByPublishAccess(c *gin.Context, contents map[string]string, ids
 			continue
 		}
 		if blockPublishDenied(c, id, boxID, publishAccess, publishIgnore) {
-			contents[id] = ""
+			delete(contents, id)
 		}
 	}
 }
@@ -982,15 +990,22 @@ var getBlockKramdown = contractHandler(apicontract.GetBlockKramdown, func(c *gin
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(apicontract.BlockKramdownData{ID: id})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[apicontract.BlockKramdownData](-1, err.Error())
 	}
+	var filterIAL func([][]string) [][]string
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		filterIAL = func(ial [][]string) [][]string {
+			return model.FilterBlockIALByPublishAccess(c, publishAccess, ial)
+		}
+	}
 	var kramdown string
 	if boxID != "" {
-		kramdown = model.GetBlockKramdownInBox(id, mode, boxID)
+		kramdown = model.GetBlockKramdownInBoxFiltered(id, mode, boxID, filterIAL)
 	} else {
-		kramdown = model.GetBlockKramdown(id, mode)
+		kramdown = model.GetBlockKramdownFiltered(id, mode, filterIAL)
 	}
 
 	if model.IsReadOnlyRoleContext(c) {
@@ -1027,15 +1042,22 @@ var getBlockKramdowns = contractHandler(apicontract.GetBlockKramdowns, func(c *g
 	if isEncryptedNotebookDeniedForPublish(c, requestedNotebook) {
 		return apicontract.Success(map[string]string{})
 	}
-	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
 	if err != nil {
 		return apicontract.Failure[map[string]string](-1, err.Error())
 	}
+	var filterIAL func([][]string) [][]string
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		filterIAL = func(ial [][]string) [][]string {
+			return model.FilterBlockIALByPublishAccess(c, publishAccess, ial)
+		}
+	}
 	var kramdowns map[string]string
 	if boxID != "" {
-		kramdowns = model.GetBlockKramdownsInBox(ids, mode, boxID)
+		kramdowns = model.GetBlockKramdownsInBoxFiltered(ids, mode, boxID, filterIAL)
 	} else {
-		kramdowns = model.GetBlockKramdowns(ids, mode)
+		kramdowns = model.GetBlockKramdownsFiltered(ids, mode, filterIAL)
 	}
 
 	if model.IsReadOnlyRoleContext(c) {

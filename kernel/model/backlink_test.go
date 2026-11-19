@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/sql"
 )
 
 func TestQuoteFTSPhrase(t *testing.T) {
@@ -53,5 +55,20 @@ func TestBuildBackmentionQueryBindsValues(t *testing.T) {
 	expectedArgs = []any{matchExpression, rootID, beforeID, 64}
 	if !reflect.DeepEqual(args, expectedArgs) {
 		t.Fatalf("expected arguments %#v, got %#v", expectedArgs, args)
+	}
+}
+
+func TestBackmentionAnchorKeywordsRespectPublishAccess(t *testing.T) {
+	refs := []*sql.Ref{
+		nil,
+		{BlockID: "20260906170001-publc01", Content: "Public anchor"},
+		{BlockID: "20260906170002-hiddn01", Content: "Private anchor"},
+	}
+	if got := backmentionAnchorKeywords(refs, nil); !reflect.DeepEqual(got, []string{"Public anchor", "Private anchor"}) {
+		t.Fatalf("unfiltered anchor keywords changed: %#v", got)
+	}
+	accessible := func(id string) bool { return "20260906170002-hiddn01" != id }
+	if got := backmentionAnchorKeywords(refs, accessible); !reflect.DeepEqual(got, []string{"Public anchor"}) {
+		t.Fatalf("inaccessible anchor keyword was returned: %#v", got)
 	}
 }

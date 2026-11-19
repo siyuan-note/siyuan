@@ -163,6 +163,7 @@ func TestAutomationSuccessNotificationSuppression(t *testing.T) {
 
 func TestAutomationSuccessNotificationsMergeCollectionAndActions(t *testing.T) {
 	fixture, source, _, statusID, _ := setupAutomationTest(t)
+	addCollectionDatabaseBlock(t, source, fixture.sourceID)
 	setupAutomationNotificationLanguage(t)
 	source.Automations.Rules = source.Automations.Rules[:1]
 	source.Automations.Rules = append(source.Automations.Rules, &av.AutomationRule{ID: ast.NewNodeID(), Name: "Collect", Enabled: true, Trigger: "block",

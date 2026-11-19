@@ -36,7 +36,7 @@
   height: var(--mindmap-view-height, 460px);
   min-height: min(260px, var(--mindmap-view-height, 260px));
   box-sizing: border-box;
-  // 画布由内部视口裁剪，外侧尺寸把手保持可见。
+  // 画布由内部视口裁剪，边缘尺寸把手保持可见。
   overflow: visible;
   border: 1px solid var(--b3-border-color);
   border-radius: var(--b3-border-radius);
@@ -264,6 +264,15 @@
     pointer-events: none;
   }
 
+  &__relation-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    transform-origin: 0 0;
+    pointer-events: none;
+  }
+
   &__document-viewport {
     position: absolute;
     top: 0;
@@ -425,6 +434,25 @@
       }
     }
 
+    &[data-mindmap-shape="rectangle"],
+    &[data-mindmap-shape="capsule"] {
+      border: 1px solid var(--mindmap-node-line-color, var(--b3-border-color, currentColor));
+    }
+
+    &[data-mindmap-shape="rectangle"] {
+      border-radius: 0;
+    }
+
+    &[data-mindmap-shape="capsule"] {
+      border-radius: 1em;
+      padding-inline: 12px;
+    }
+
+    &[data-mindmap-shape="underline"] {
+      border-bottom: 1px solid var(--mindmap-node-line-color, var(--b3-border-color, currentColor));
+      border-radius: 0;
+    }
+
     &--untitled:not(.mindmap-view__node--editing) {
       width: 32px;
       min-width: 32px;
@@ -457,7 +485,7 @@
       inset: 0;
       z-index: 3;
       pointer-events: none;
-      border-radius: var(--b3-border-radius);
+      border-radius: inherit;
       background-color: var(--b3-theme-primary-lightest);
       box-shadow: inset 0 0 0 1px var(--b3-theme-primary-lighter);
     }
@@ -1040,9 +1068,12 @@
 
   &__inspector--relation {
     width: max-content;
+    column-gap: 4px;
 
     .mindmap-view__palette-row {
-      width: 176px;
+      width: 180px;
+      // 抵消色块在首尾列的半个间距，使色块与操作按钮等距。
+      margin-inline: -2px;
       flex-shrink: 0;
     }
   }

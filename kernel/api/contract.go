@@ -7,8 +7,10 @@ package api
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"io"
 	"mime/multipart"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	goccyJSON "github.com/goccy/go-json"
@@ -17,6 +19,43 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// maxContractJSONBodyBytes 限制契约 JSON 请求体的读取量，公开接口不再按请求内容无限分配内存。
+// 表单和 multipart 上传保留各自的内存与文件上限。
+const maxContractJSONBodyBytes = 32 << 20
+
+const contractBodyLimitKey = "siyuan-contract-body-limit"
+
+// limitedRequestBody 在超限读取发生时留下标记，解码错误被包装后仍可统一返回请求体过大。
+type limitedRequestBody struct {
+	io.ReadCloser
+	exceeded *bool
+}
+
+func (r *limitedRequestBody) Read(p []byte) (int, error) {
+	n, err := r.ReadCloser.Read(p)
+	if err != nil {
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &maxBytesErr) {
+			*r.exceeded = true
+		}
+	}
+	return n, err
+}
+
+// limitContractBody 为请求体设置读取上限，同一请求的多个上限共用超限标记。
+func limitContractBody(c *gin.Context, limit int64) *bool {
+	exceeded, ok := c.Get(contractBodyLimitKey)
+	var flag *bool
+	if ok {
+		flag = exceeded.(*bool)
+	} else {
+		flag = new(bool)
+		c.Set(contractBodyLimitKey, flag)
+	}
+	c.Request.Body = &limitedRequestBody{ReadCloser: http.MaxBytesReader(c.Writer, c.Request.Body, limit), exceeded: flag}
+	return flag
+}
 
 func notebookConfContract(value *conf.BoxConf) *apicontract.NotebookConf {
 	if value == nil {
@@ -114,6 +153,16 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 			}
 			return
 		}
+		// 解码前限制 JSON 请求体读取量，避免公开接口按请求内容分配内存。
+		var bodyLimit *bool
+		switch endpoint.Definition().Body {
+		case apicontract.JSONBody, apicontract.StructJSONBody, apicontract.LegacyOptionalBody:
+			bodyLimit = limitContractBody(c, maxContractJSONBodyBytes)
+		}
+		if merge && nil == bodyLimit {
+			bodyLimit = limitContractBody(c, maxContractJSONBodyBytes)
+		}
+		bodyTooLarge := func() bool { return nil != bodyLimit && *bodyLimit }
 		// 保留在读取请求体前完成的角色判断或大小限制，提前响应也使用相同的载荷类型。
 		for _, before := range beforeDecode {
 			if response := before(c); response != nil {
@@ -126,6 +175,10 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 		if merge {
 			body, err := io.ReadAll(c.Request.Body)
 			if err != nil {
+				if bodyTooLarge() {
+					writeResponse(apicontract.Failure[Data](-1, "request body is too large"))
+					return
+				}
 				writeResponse(endpoint.DecodeFailure(err))
 				return
 			}
@@ -157,9 +210,15 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 		run := func() apicontract.Response[Data] {
 			request, err := decodeRequest()
 			if err != nil {
+				if bodyTooLarge() {
+					return apicontract.Failure[Data](-1, "request body is too large")
+				}
 				return endpoint.DecodeFailure(err)
 			}
 			if err = model.LockRequestAfterDecode(c); err != nil {
+				if bodyTooLarge() {
+					return apicontract.Failure[Data](-1, "request body is too large")
+				}
 				return endpoint.DecodeFailure(err)
 			}
 			return handler(c, request)
@@ -203,11 +262,22 @@ func notebookInfoContract(info *model.BoxInfo) *apicontract.NotebookInfo {
 }
 
 // holdContractBlockRequest 保留显式笔记本选择及全部附带 ID 的租约检查。
+// 只读角色对发布门禁拒绝的加密笔记本不取得租约，并统一按块缺失处理，避免锁定状态经响应差异泄露
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-v79r-27qf-2pmg
 func holdContractBlockRequest(c *gin.Context, notebook, id string, ids []string, allowMissing bool) (boxID string, err error) {
+	readOnly := model.IsReadOnlyRoleContext(c)
 	if notebook != "" && model.IsEncryptedBox(notebook) {
 		boxID = notebook
+		if readOnly && model.IsEncryptedBoxDeniedByPublishAccess(notebook) {
+			return
+		}
 	}
 	leaseIDs := append([]string{id}, ids...)
-	err = holdEncryptedBlockRequests(c, boxID, leaseIDs, allowMissing)
+	err = holdEncryptedBlockRequests(c, boxID, leaseIDs, allowMissing || readOnly)
 	return
+}
+
+// holdContractBlockReadRequest 读取块时对只读角色放行缺失 ID：发布拒绝与不存在都返回空结果，避免暴露块存在性。
+func holdContractBlockReadRequest(c *gin.Context, notebook, id string, ids []string) (boxID string, err error) {
+	return holdContractBlockRequest(c, notebook, id, ids, model.IsReadOnlyRoleContext(c))
 }

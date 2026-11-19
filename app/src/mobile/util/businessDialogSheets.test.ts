@@ -35,14 +35,14 @@ test("mobile business dialogs explicitly opt in, including nested and failure en
         const visit = (node: import("typescript").Node) => {
             if (isCallExpression(node) || isNewExpression(node)) {
                 const name = node.expression.getText(source);
-                if (["Dialog", "MobileDialog", "openInputDialog", "confirmDialog"].includes(name)) {
+                if (["Dialog", "AdaptiveDialog", "openInputDialog", "confirmDialog"].includes(name)) {
                     const options = node.arguments[0];
                     if (name === "Dialog" && file === "menus/commonMenuItem.ts" &&
                         options.getText(source).includes("mobile-attributes-sheet")) {
                         // 属性编辑器保留原有关闭回调，使用独立的抽屉绑定入口。
                     } else {
-                        const moduleName = name === "confirmDialog" ? "mobileConfirmDialog" :
-                            name === "openInputDialog" ? "mobileInputDialog" : "mobileDialog";
+                        const moduleName = name === "confirmDialog" ? "confirmDialog" :
+                            name === "openInputDialog" ? "openInputDialog" : "adaptiveDialog";
                         assert.ok(source.text.includes(moduleName), `${file}: ${name}`);
                         found++;
                     }
@@ -79,10 +79,11 @@ test("existing editable sheets reuse standard geometry without a second construc
     assert.match(reference, /await sheet\.flush\(\)/);
 });
 
-test("desktop-only dialogs and mobile page replacements are not opted in", () => {
+// 这些页面使用共享的确认入口，移动端由独立页面接管。
+test("desktop-only pages use the shared confirmation entry without importing adaptiveDialog directly", () => {
     for (const file of ["menus/importObsidian.ts", "menus/workspace.ts", "menus/layouts.ts",
         "menus/onGetnotebookconf.ts", "boot/globalEvent/command/panel.ts", "boot/globalEvent/keydown.ts",
         "editor/util.ts"]) {
-        assert.doesNotMatch(readFileSync(`src/${file}`, "utf8"), /from "[^"\n]*mobile(?:Dialog|InputDialog|ConfirmDialog)"/, file);
+        assert.doesNotMatch(readFileSync(`src/${file}`, "utf8"), /from "[^"\n]*\/adaptiveDialog"/, file);
     }
 });

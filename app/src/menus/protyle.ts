@@ -1,6 +1,7 @@
 import {createImageOCRMenu} from "./imageOCRMenu";
 import {toggleMenu, IMenuSession} from "./menuToggle";
 import {escapeHtmlTextAndAttr} from "../util/escape";
+import {getBlockLinkID} from "../util/nodeID";
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {
     hasClosestBlock,
@@ -62,7 +63,7 @@ import {pushBack} from "../mobile/util/MobileBackFoward";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "./util";
 import {removeInlineType} from "../protyle/toolbar/util";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
-import {checkFold, genTagList, renameTag} from "../util/noRelyPCFunction";
+import {checkReferenceFold, genTagList, renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openMobileFileById} from "../mobile/editor";
@@ -121,7 +122,7 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
         }
         let searchHTML = "";
         response.data.forEach((item: { path: string, hName: string }, index: number) => {
-            searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${item.hName}</div></div>`;
+            searchHTML += `<div data-value="${escapeHtmlTextAndAttr(item.path)}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${escapeHtmlTextAndAttr(item.hName)}</div></div>`;
         });
 
         const listElement = element.querySelector(".b3-list");
@@ -457,7 +458,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         icon: "iconOpen",
         accelerator: window.siyuan.config.keymap.editor.general.openBy.custom + "/" + window.siyuan.languages.click,
         click() {
-            checkFold(refBlockId, (zoomIn, action, isRoot) => {
+            checkReferenceFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
                     action.push(Constants.CB_GET_HL);
                 }
@@ -476,7 +477,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         icon: "iconEyeoff",
         accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/" + updateHotkeyTip("⌘" + window.siyuan.languages.click),
         click() {
-            checkFold(refBlockId, (zoomIn) => {
+            checkReferenceFold(refBlockId, (zoomIn) => {
                 openFileById({
                     app: protyle.app,
                     id: refBlockId,
@@ -495,7 +496,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             (window.siyuan.config.keymap.editor.general.insertRight.custom ? "/" : "") +
             updateHotkeyTip("⌥" + window.siyuan.languages.click),
         click() {
-            checkFold(refBlockId, (zoomIn, action, isRoot) => {
+            checkReferenceFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
                     action.push(Constants.CB_GET_HL);
                 }
@@ -515,7 +516,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         icon: "iconLayoutBottom",
         accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + updateHotkeyTip("⇧" + window.siyuan.languages.click),
         click() {
-            checkFold(refBlockId, (zoomIn, action, isRoot) => {
+            checkReferenceFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
                     action.push(Constants.CB_GET_HL);
                 }
@@ -1852,18 +1853,22 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                 }
             }).element);
         }
-        if (linkAddress?.startsWith("siyuan://blocks/")) {
+        if (getBlockLinkID(linkAddress)) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "turnIntoRef",
                 label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.ref}</b>`,
                 icon: "iconTurnInto",
                 click() {
+                    const target = getBlockLinkID(inputElements[0].value);
+                    if (!target) {
+                        return;
+                    }
                     linkElement.setAttribute("data-subtype", "s");
                     const types = linkElement.getAttribute("data-type").split(" ");
                     types.push("block-ref");
                     types.splice(types.indexOf("a"), 1);
                     linkElement.setAttribute("data-type", types.join(" "));
-                    linkElement.setAttribute("data-id", inputElements[0].value.replace("siyuan://blocks/", ""));
+                    linkElement.setAttribute("data-id", target);
                     inputElements[0].value = "";
                     inputElements[2].value = "";
                     linkElement.removeAttribute("data-href");
@@ -1934,12 +1939,12 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
     }
     window.siyuan.menus.menu.removeCB = () => {
         if (inputElements[2].value) {
-            linkElement.setAttribute("data-title", escapeHtmlTextAndAttr(inputElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
+            linkElement.setAttribute("data-title", inputElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
         } else {
             linkElement.removeAttribute("data-title");
         }
         if (linkElement.getAttribute("data-type").indexOf("a") > -1) {
-            linkElement.setAttribute("data-href", escapeHtmlTextAndAttr(inputElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")));
+            linkElement.setAttribute("data-href", inputElements[0].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
         } else {
             linkElement.removeAttribute("data-href");
         }

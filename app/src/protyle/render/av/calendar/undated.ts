@@ -8,6 +8,7 @@ import {bindMenuMouseScroll} from "../../../../menus/menuMouseScroll";
 import {calendarDayDistance} from "./date";
 import {getCalendarDropDay} from "./hitTest";
 import type {ICalendarState} from "./state";
+import {getAVPrimaryPreviewHTML} from "../primaryRich";
 
 const PAGE_SIZE = 50;
 const dismissControllers = new WeakMap<ICalendarState, AbortController>();
@@ -20,7 +21,7 @@ const toUndatedRow = (source: AVTableRow, dateKeyID: string): IAVRow | undefined
     }
     return {id: source.id, cells: [
         {id: primary.id, valueType: "block", value: {id: primary.value.id, type: "block", isDetached: primary.value.isDetached,
-            block: {content: primary.value.block.content, id: primary.value.block.id, icon: primary.value.block.icon}}},
+            block: {...primary.value.block}}},
         {id: date.id, valueType: "date", value: {id: date.value.id, keyID: dateKeyID, type: "date", date: date.value.date || {}}},
     ]};
 };
@@ -119,7 +120,8 @@ export const bindCalendarUndated = (options: {
             const primary = row.cells.find(cell => cell.value?.type === "block")?.value;
             const title = primary?.block?.content || window.siyuan.languages.untitled;
             const previewID = primary?.isDetached ? "" : primary?.block?.id;
-            return `<div class="b3-menu__item av__calendar-undated-item" role="button" tabindex="0" aria-pressed="false" data-calendar-undated-row="${escapeAttr(row.id)}"><svg class="b3-menu__icon${previewID ? " popover__block" : ""}"${previewID ? ` data-id="${escapeAttr(previewID)}"` : ""}><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label fn__ellipsis"><span${previewID ? ' class="av__celltext--ref"' : ""}>${escapeHtml(title)}</span></span><button type="button" class="block__icon block__icon--show ariaLabel" data-calendar-undated-open="${escapeAttr(row.id)}" data-position="4west" aria-label="${escapeAttr(window.siyuan.languages.openBy)}"><svg><use xlink:href="#iconOpen"></use></svg></button></div>`;
+            const preview = primary?.block?.richBlockDOM ? getAVPrimaryPreviewHTML(primary) : escapeHtml(title);
+            return `<div class="b3-menu__item av__calendar-undated-item" role="button" tabindex="0" aria-pressed="false" data-calendar-undated-row="${escapeAttr(row.id)}"><svg class="b3-menu__icon${previewID ? " popover__block" : ""}"${previewID ? ` data-id="${escapeAttr(previewID)}"` : ""}><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label fn__ellipsis"><span class="${previewID ? "av__celltext--ref " : ""}${primary?.block?.richBlockDOM ? "b3-typography document-title-preview" : ""}" data-protyle-lite-render="safe">${preview}</span></span><button type="button" class="block__icon block__icon--show ariaLabel" data-calendar-undated-open="${escapeAttr(row.id)}" data-position="4west" aria-label="${escapeAttr(window.siyuan.languages.openBy)}"><svg><use xlink:href="#iconOpen"></use></svg></button></div>`;
         }).join("");
         list.innerHTML = rows.length ? mobile ? `<div class="b3-menu__group-items">${rowHTML}</div>` : rowHTML :
             `<div class="av__calendar-undated-empty ft__on-surface">${escapeHtml(window.siyuan.languages.empty)}</div>`;

@@ -168,25 +168,38 @@ export class AgentSessionPanel {
             }
             this.popup.style.zIndex = (++window.siyuan.zIndex).toString();
 
-            if (!this.mobile) {
+            const touchLayout = !this.mobile && (isPhablet() || window.matchMedia?.("(pointer: coarse)").matches);
+            const viewport = touchLayout ? window.visualViewport : null;
+            const positionPopup = () => {
                 const btnRect = this.triggerBtn.getBoundingClientRect();
+                if (viewport) {
+                    this.popup.style.setProperty("--agent-session-viewport-height", viewport.height + "px");
+                }
                 setPosition(this.popup, btnRect.right - 280, btnRect.bottom, btnRect.height, btnRect.width);
+                if (viewport) {
+                    const rect = this.popup.getBoundingClientRect();
+                    this.popup.style.top = Math.max(viewport.offsetTop,
+                        Math.min(rect.top, viewport.offsetTop + viewport.height - rect.height)) + "px";
+                }
+            };
+            if (!this.mobile) {
+                positionPopup();
             }
 
             this.popup.addEventListener("click", (e: MouseEvent) => {
                 e.stopPropagation();
             });
             const onResize = () => {
-                if (isPhablet() && this.popup) {
+                if (touchLayout && this.popup) {
                     // 平板软键盘改变视口时重新定位，保留会话搜索与列表。
-                    const btnRect = this.triggerBtn.getBoundingClientRect();
-                    setPosition(this.popup, btnRect.right - 280, btnRect.bottom, btnRect.height, btnRect.width);
+                    positionPopup();
                     return;
                 }
                 this.close();
             };
             if (!this.mobile) {
                 window.addEventListener("resize", onResize);
+                viewport?.addEventListener("resize", onResize);
             }
             const closeOut = () => {
                 this.close();
@@ -198,8 +211,9 @@ export class AgentSessionPanel {
                 clearTimeout(closeTimer);
                 document.removeEventListener("click", closeOut);
                 window.removeEventListener("resize", onResize);
+                viewport?.removeEventListener("resize", onResize);
             };
-            if (!this.mobile && !isPhablet()) {
+            if (!this.mobile && !touchLayout) {
                 searchInput.focus();
             }
         } finally {

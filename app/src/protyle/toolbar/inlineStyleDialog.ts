@@ -1,5 +1,5 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {showMessage} from "../../dialog/message";
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../dialog/themeColorEditor";
 import {escapeHtml} from "../../util/escape";
@@ -62,11 +62,12 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         return;
     }
     const draft = cloneInlineStyles();
+    const baseline = JSON.stringify(normalizeInlineStyles(draft));
     const persistedStyleIDs = new Set(draft.styles.map(style => style.id));
     const properties = getProperties(initialType);
     let editingKey: string | undefined;
     let editingKind: "builtin" | "custom" | "new" | undefined;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: window.siyuan.languages.color,
         width: isMobile() ? "92vw" : "600px",
         content: `<div class="b3-dialog__content" style="max-height:70vh">
@@ -202,7 +203,9 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
 
     const confirmEditor = () => {
         if (editingKind === "builtin" && editingKey) {
-            writeBuiltinEntry(draft, initialType, builtinEditor.commit(getBuiltinEntry(editingKey)));
+            const entry = builtinEditor.commit(getBuiltinEntry(editingKey));
+            if (!entry) { return; }
+            writeBuiltinEntry(draft, initialType, entry);
             showList();
             return;
         }
@@ -218,7 +221,8 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
             return;
         }
         const previous = editingKey ? getInlineStyleByID(editingKey, draft) : undefined;
-        const value = customThemeEditor.getValue(initialType);
+        const value = customThemeEditor.commitDraft(initialType);
+        if (!value) { return; }
         const style: IInlineStyle = {
             id: previous?.id || Lute.NewNodeID(),
             name,
@@ -314,9 +318,12 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
                 renderList();
             };
             if (persistedStyleIDs.has(style.id)) {
-                mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm,
-                    window.siyuan.languages.deleteCustomColorTip.replace("${name}", `<b>${escapeHtml(style.name)}</b>`),
-                    removeStyle, undefined, true);
+                confirmDialog({
+                    title: window.siyuan.languages.deleteOpConfirm,
+                    text: window.siyuan.languages.deleteCustomColorTip.replace("${name}", `<b>${escapeHtml(style.name)}</b>`),
+                    confirm: removeStyle,
+                    isDelete: true,
+                });
             } else {
                 removeStyle();
             }
@@ -329,6 +336,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         } else if (action === "save") {
             await dialog.runPending(async () => {
                 try {
+                    if (JSON.stringify(normalizeInlineStyles(draft)) === baseline) { return true; }
                     const response = await saveInlineStyles(draft);
                     if (response?.code !== 0) {
                         showMessage(response?.msg || window.siyuan.languages.invalid, 6000, "error");

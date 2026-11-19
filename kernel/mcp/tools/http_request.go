@@ -95,10 +95,15 @@ func httpRequestHandler(args map[string]any) (CallToolResult, error) {
 		}, nil
 	}
 
+	return httpResponseResult(statusCode, contentType, text), nil
+}
+
+func httpResponseResult(statusCode int, contentType, text string) CallToolResult {
 	result := fmt.Sprintf("HTTP %d %s\n\n%s", statusCode, contentType, text)
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: result}},
-	}, nil
+		IsError: statusCode >= 400,
+	}
 }
 
 // parseHeaderValues 把请求头收敛成字符串。嵌套对象与数组必须报错：直接格式化会把 Go 的

@@ -1,5 +1,5 @@
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import type {AVBlockCollectionMatch, AVCollectionReview, AVCollectionReviewItem} from "../../../types/api";
 import {fetchSyncPost} from "../../../util/fetch";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
@@ -27,7 +27,7 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
         unreadable: lang.automationCollectionReasonUnreadable,
     };
     const tab = (attribute: string, value: string, label: string) => `<div class="item item--full" ${attribute}="${value}" role="tab" tabindex="0" aria-selected="false"><span class="fn__flex-1"></span><span class="item__text">${escapeHtml(label)}</span><span class="fn__flex-1"></span></div>`;
-    const dialog = new MobileDialog({title: lang.automationCollectionManage, width: isMobile() ? "92vw" : "760px",
+    const dialog = new AdaptiveDialog({title: lang.automationCollectionManage, width: isMobile() ? "92vw" : "760px",
         content: `<div class="layout-tab-bar fn__flex av__collection-tabs" role="tablist" aria-label="${escapeAttr(lang.automationCollectionManage)}">${tab("data-collection-view", "rules", lang.automationCollectionRules)}${tab("data-collection-view", "entries", lang.automationCollectionEntries)}</div>
 <div class="b3-dialog__content av__collection-preview av__collection-manager">
 <label class="av__automation-control fn__none" data-rule-control><span>${lang.automationRule}</span><select class="b3-select fn__block" data-collection-rule></select></label>
@@ -131,12 +131,19 @@ export const openCollectionManager = async (protyle: IProtyle, avID: string, blo
         busy = true;
         updateActions();
         let committed = false;
-        mobileConfirmDialog(title, text, async () => {
-            if (!root.isConnected) return true;
-            if (committed) await load();
-            else await perform(operations, undo, () => { committed = true; });
-            return true;
-        }, () => { busy = false; updateActions(); }, true, undefined, lang.confirm, {awaitConfirm: true});
+        confirmDialog({
+            title: title,
+            text: text,
+            confirm: async () => {
+                if (!root.isConnected) return true;
+                if (committed) await load();
+                else await perform(operations, undo, () => { committed = true; });
+                return true;
+            },
+            cancel: () => { busy = false; updateActions(); },
+            isDelete: true,
+            confirmLabel: lang.confirm,
+        });
     };
     root.addEventListener("click", event => {
         const button = (event.target as Element).closest<HTMLElement>("[data-collection-view], [data-collection-status], [data-remove-item]");

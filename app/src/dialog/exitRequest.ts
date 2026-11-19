@@ -1,9 +1,10 @@
-import {MobileDialog as Dialog} from "./mobileDialog";
+import {Dialog} from "./index";
+import {AdaptiveDialog} from "./adaptiveDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {withFetchTimeout} from "../util/fetchTimeout";
 import {escapeHtml} from "../util/escape";
 import {progressLoading} from "./progress";
-import {mobileConfirmDialog as confirmDialog} from "./mobileConfirmDialog";
+import {confirmDialog} from "./confirmDialog";
 import {sanitizeKernelHTML} from "../util/hostCapabilities";
 import {isMobile} from "../util/functions";
 
@@ -48,12 +49,18 @@ export const requestSystemExit = (options: {
                 if (settled || skipSync || confirmation) {
                     return;
                 }
-                confirmation = confirmDialog(languages.sync, escapeHtml(languages.skipExitSyncConfirm), () => {
-                    if (!settled) {
-                        skipSync = true;
-                        controller.abort();
-                    }
-                }, () => { confirmation = undefined; }, false, undefined, languages.skipExitSync);
+                confirmation = confirmDialog({
+                    title: languages.sync,
+                    text: escapeHtml(languages.skipExitSyncConfirm),
+                    confirm: () => {
+                        if (!settled) {
+                            skipSync = true;
+                            controller.abort();
+                        }
+                    },
+                    cancel: () => { confirmation = undefined; },
+                    confirmLabel: languages.skipExitSync,
+                });
             },
         });
     }, 12000);
@@ -101,7 +108,7 @@ export const requestSystemExit = (options: {
         console.warn("exit request failed", error);
         // 请求失败不代表内核已经停止；保留界面供用户重试，并继续接收内核退出事件。
         progressLoading({code: 2, msg: ""}, progressID);
-        const errorDialog = new Dialog({
+        const errorDialog = new AdaptiveDialog({
             disableClose: true,
             disableAnimation: true,
             width: "480px",

@@ -14,7 +14,9 @@ test("asset menu previews preserve list geometry and pointer selection during im
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "util/setPosition", "protyle/util/hasClosest", "plugin/Menu", "asset/renderAssets", "asset/previewPath"];
+    const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen",
+        "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "util/setPosition",
+        "protyle/util/hasClosest", "plugin/Menu", "menus/overlayOwnership", "asset/renderAssets", "asset/previewPath", "util/escape"];
     const sources = Object.fromEntries(names.map(name => [name, compile(fs.readFileSync(path.join(root, "src", name + ".ts"), "utf8"))]));
     const menuSource = ts.createSourceFile("protyle.ts", fs.readFileSync(path.join(root, "src/menus/protyle.ts"), "utf8"), ts.ScriptTarget.Latest, true);
     const declarations = ["renderAssetPreview", "renderAssetList", "buildAssetMenu"].map(name => menuSource.statements.find(node => ts.isVariableStatement(node) && node.declarationList.declarations.some(item => item.name.getText(menuSource) === name)).getText(menuSource)).join("\n");
@@ -33,7 +35,7 @@ test("asset menu previews preserve list geometry and pointer selection during im
             "protyle/undo": {electronUndo() {}}, "menus/menuKeyboard": {setMenuInputCurrent() {}},
             "plugin/EventBusCore": {forEachPluginSubscriber() {}}, "mobile/util/keyboardToolbar": {activeBlur() {}},
             "block/popoverLifecycle": {setPopoverMenuOpen() {}}, "config/entryVisibility/runtime": {applyMenuEntryVisibility() {}},
-            "menus/menuToggle": {}, "util/escape": {escapeAttr: value => String(value ?? ""), escapeHtml: value => String(value ?? "")},
+            "menus/menuToggle": {},
             "util/pathName": {getAssetExtension: value => value.slice(value.lastIndexOf("."))},
             "layout/getAll": {}, dayjs: {}, "asset/html": {}, "util/imageURL": {},
         };
@@ -60,9 +62,13 @@ test("asset menu previews preserve list geometry and pointer selection during im
         const {Menu} = load("menus/Menu");
         const {Menu: PluginMenu} = load("plugin/Menu");
         const {renderAssetsPreview} = load("asset/renderAssets");
+        const {escapeHtmlTextAndAttr} = load("util/escape");
         const items = ["portrait-one", "portrait-two", "landscape"].map(name => ({path: origin + "/" + name + ".png", hName: name + ".png"}));
-        const build = new Function("Menu", "Constants", "isMobile", "fetchPost", "renderAssetsPreview", "hasClosestByClassName", "hasClosestByAttribute", "upDownHint", "hintRenderAssets", "focusByRange", declarations + "\nreturn buildAssetMenu;")(
-            PluginMenu, constants, () => mobile, (_url, _data, callback) => setTimeout(() => callback({data: _data.k === "no results" ? [] : items}), 0), renderAssetsPreview,
+        const build = new Function("Menu", "Constants", "isMobile", "fetchPost", "renderAssetsPreview", "escapeHtmlTextAndAttr",
+            "hasClosestByClassName", "hasClosestByAttribute", "upDownHint", "hintRenderAssets", "focusByRange",
+            declarations + "\nreturn buildAssetMenu;")(
+            PluginMenu, constants, () => mobile, (_url, _data, callback) => setTimeout(() => callback({data: _data.k === "no results" ? [] : items}), 0),
+            renderAssetsPreview, escapeHtmlTextAndAttr,
             load("protyle/util/hasClosest").hasClosestByClassName, load("protyle/util/hasClosest").hasClosestByAttribute,
             () => null, () => {}, () => {});
         const element = document.createElement("div");

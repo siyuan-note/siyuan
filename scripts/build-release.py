@@ -55,6 +55,8 @@ def compile_kernels(commands, directory, jobs=2, on_complete=None):
         pending = []
         exhausted = False
         while pending or not exhausted:
+            if BUILD_CANCEL is not None and BUILD_CANCEL.is_set():
+                raise BuildError("并行构建已取消")
             while len(pending) < jobs and not exhausted:
                 item = next(queued, None)
                 if item is None:
@@ -72,6 +74,10 @@ def compile_kernels(commands, directory, jobs=2, on_complete=None):
                 entry = (name, process, stream, path)
                 processes.append(entry)
                 pending.append(entry)
+                with BUILD_PROCESS_LOCK:
+                    BUILD_PROCESSES.add(process)
+                    if BUILD_CANCEL is not None and BUILD_CANCEL.is_set():
+                        stop_build_process(process)
                 print(f"内核编译已启动：{name}；日志：{path}", flush=True)
             for item in pending[:]:
                 name, process, stream, path = item
@@ -88,14 +94,13 @@ def compile_kernels(commands, directory, jobs=2, on_complete=None):
                 time.sleep(0.1)
     finally:
         for _, process, stream, _ in processes:
-            if process.poll() is None:
-                if os.name == "nt":
-                    subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
-                else:
-                    process.terminate()
+            with BUILD_PROCESS_LOCK:
+                BUILD_PROCESSES.discard(process)
+                stop_build_process(process)
+            try:
                 process.wait()
-            stream.close()
+            finally:
+                stream.close()
 
 
 class BuildError(Exception):
@@ -698,9 +703,11 @@ class Builder:
         started = time.time()
         command = ["bash", "scripts/linux-build.sh", "--target=all"]
         if hasattr(self, "parallel_marker"):
-            command = ["setsid"] + command
+            command = ["setsid", "--wait"] + command
             command.extend(("--process-id-file=" + self.parallel_remote + ".pid",
                             "--harmony-ready-file=" + self.parallel_remote + ".ready"))
+            if "windows" in self.args.platforms:
+                command.append("--windows-ready-file=" + self.parallel_remote + ".windows-ready")
         if "harmony" in self.args.platforms:
             command.append("--with-harmony-kernel")
         self.wsl(command)
@@ -712,16 +719,29 @@ class Builder:
         self.collect(expected, "Linux", started)
 
     def parallel_platforms(self, assets):
-        """Linux owns its kernel workers; mobile packaging waits only for its own inputs."""
         global BUILD_CANCEL
-        BUILD_CANCEL = threading.Event()
         marker = self.wsl_root / ".cache" / self.work.name
         marker.parent.mkdir(parents=True, exist_ok=True)
         self.parallel_marker = marker
         self.parallel_remote = self.args.wsl_repo.rstrip("/") + "/.cache/" + marker.name
         self.harmony_prebuilt_started = time.time()
         linux_done = threading.Event()
+        windows_done = threading.Event()
+        if "windows" not in self.args.platforms:
+            windows_done.set()
+
         def task(platform):
+            if platform == "windows":
+                self.windows()
+                Path(str(marker) + ".windows-ready").touch()
+                windows_done.set()
+                return
+            if platform == "android":
+                while not windows_done.wait(0.2):
+                    if BUILD_CANCEL.is_set():
+                        return
+                if BUILD_CANCEL.is_set():
+                    return
             if platform == "harmony":
                 while not Path(str(marker) + ".ready").exists():
                     if Path(str(marker) + ".ready.failed").exists():
@@ -756,10 +776,11 @@ class Builder:
             with BUILD_PROCESS_LOCK:
                 for process in list(BUILD_PROCESSES):
                     stop_build_process(process)
+        BUILD_CANCEL = threading.Event()
         try:
-            with ThreadPoolExecutor(max_workers=3) as pool:
-                futures = [pool.submit(task, platform) for platform in PLATFORMS[1:] if platform in self.args.platforms]
+            with ThreadPoolExecutor(max_workers=len(self.args.platforms)) as pool:
                 try:
+                    futures = [pool.submit(task, platform) for platform in PLATFORMS if platform in self.args.platforms]
                     done, _ = wait(futures, return_when=FIRST_EXCEPTION)
                     error = next((future.exception() for future in done if future.exception() is not None), None)
                     if error is not None:
@@ -769,7 +790,7 @@ class Builder:
                     raise
         finally:
             BUILD_CANCEL = None
-            for suffix in (".pid", ".ready", ".ready.failed"):
+            for suffix in (".pid", ".ready", ".ready.failed", ".windows-ready"):
                 Path(str(marker) + suffix).unlink(missing_ok=True)
 
     def check_kernel(self, path, architecture):
@@ -931,6 +952,8 @@ def main():
     print(f"Windows 与同时选中的 Android 内核编译并发数：{args.kernel_jobs}；打包与签名串行")
     if {"linux", "harmony"} & set(args.platforms):
         print("构建前自动同步 WSL 到 Windows 当前提交；提交不同时要求两端工作区干净，目标已推送且包含 WSL 当前提交")
+    if {"windows", "linux"}.issubset(args.platforms):
+        print("Windows 构建期间提前安装 WSL Linux 前端依赖")
     for platform in args.platforms:
         print(f"  {platform}: {descriptions[platform]}")
     print("各平台产物生成后立即复制到收集目录，构建完成后请单独执行安装包校验")
@@ -970,11 +993,12 @@ def execute_build(args, version, record, signing_pin=None):
     if set(args.platforms) & {"android", "harmony"}:
         with record.stage("assets"):
             create_mobile_assets(assets, version)
-    for platform in PLATFORMS:
-        if platform in args.platforms:
-            if platform == "linux" and set(args.platforms) & {"android", "harmony"}:
-                builder.parallel_platforms(assets)
-                break
+    if "linux" in args.platforms and len(args.platforms) > 1:
+        builder.parallel_platforms(assets)
+    else:
+        for platform in PLATFORMS:
+            if platform not in args.platforms:
+                continue
             method = getattr(builder, platform)
             with record.stage(platform) if platform != "windows" else nullcontext():
                 method(assets) if platform in {"android", "harmony"} else method()

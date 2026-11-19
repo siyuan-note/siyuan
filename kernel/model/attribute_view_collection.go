@@ -23,6 +23,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -277,9 +278,9 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		!slices.Contains([]string{"", "block", "container"}, source.TagTarget) {
 		return fmt.Errorf("invalid block collection match mode")
 	}
-	for _, id := range source.NotebookIDs {
-		if !ast.IsNodeIDPattern(id) || Conf.Box(id) == nil || !IsSameCryptoBoundary(boxID, id) {
-			return fmt.Errorf("invalid block collection notebook [%s]", id)
+	if len(source.NotebookIDs) > 0 {
+		if err := validateBlockCollectionNotebooks(source.NotebookIDs, boxID); err != nil {
+			return err
 		}
 	}
 	for _, id := range source.DocumentIDs {
@@ -332,6 +333,49 @@ func (tx *Transaction) validateBlockCollectionRule(view *av.AttributeView, rule 
 		}
 		if value.Mode != "static" || value.Value == nil || value.Value.Type != key.Type {
 			return unavailableAutomationReference("fields", keyID, fmt.Sprintf("invalid collection field value [%s]", keyID))
+		}
+	}
+	return nil
+}
+
+func validateBlockCollectionNotebooks(ids []string, boxID string) error {
+	for _, id := range ids {
+		if !ast.IsNodeIDPattern(id) {
+			return fmt.Errorf("invalid block collection notebook [%s]", id)
+		}
+		notebookPath := filepath.Join(util.DataDir, id)
+		info, err := os.Lstat(notebookPath)
+		if os.IsNotExist(err) {
+			// 工作空间本身不可用时，不能将其中的笔记本判定为已删除。
+			workspace, statErr := os.Stat(util.DataDir)
+			if statErr != nil {
+				return statErr
+			}
+			if !workspace.IsDir() {
+				return fmt.Errorf("workspace data path [%s] is not a directory", util.DataDir)
+			}
+			if !IsSameCryptoBoundary(boxID, id) {
+				return fmt.Errorf("invalid block collection notebook [%s]", id)
+			}
+			return unavailableAutomationReference("automationCollectionScope", id, fmt.Sprintf("unavailable block collection notebook [%s]", id))
+		}
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			return fmt.Errorf("invalid block collection notebook [%s]", id)
+		}
+		data, err := os.ReadFile(filepath.Join(notebookPath, ".siyuan", "conf.json"))
+		if err != nil {
+			return fmt.Errorf("read block collection notebook [%s] configuration: %w", id, err)
+		}
+		var notebookConf conf.BoxConf
+		if err = json.Unmarshal(data, &notebookConf); err != nil {
+			return fmt.Errorf("parse block collection notebook [%s] configuration: %w", id, err)
+		}
+		// 同步更新配置后，运行时可能仍缓存普通笔记本身份。
+		if notebookConf.Encrypted && id != boxID || !IsSameCryptoBoundary(boxID, id) {
+			return fmt.Errorf("invalid block collection notebook [%s]", id)
 		}
 	}
 	return nil
@@ -555,6 +599,45 @@ func collectionNodes(tree *parse.Tree) map[string]*ast.Node {
 	return ret
 }
 
+func (tx *Transaction) hasCollectionDatabaseBlock(avID, boxID string) (bool, error) {
+	for _, tree := range tx.trees {
+		if !IsSameCryptoBoundary(boxID, tree.Box) {
+			continue
+		}
+		for _, node := range tree.Root.ChildrenByType(ast.NodeAttributeView) {
+			if node.AttributeViewID == avID {
+				return true, nil
+			}
+		}
+	}
+	blockIDs, err := av.GetAttributeViewBlockIDsInBox(avID, boxID)
+	if err != nil {
+		return false, err
+	}
+	for _, id := range blockIDs {
+		block := attributeViewBindingBlockTree(id, boxID)
+		if block == nil {
+			continue
+		}
+		// 事务内的树代表最终状态，磁盘和索引可能仍包含本次删除的数据库块。
+		tree := tx.trees[block.RootID]
+		if tree == nil {
+			tree, _, err = filesys.LoadTreeSnapshot(block.BoxID, block.Path, tx.luteEngine)
+			if os.IsNotExist(err) {
+				continue
+			}
+			if err != nil {
+				return false, err
+			}
+		}
+		node := treenode.GetNodeInTree(tree, id)
+		if node != nil && node.Type == ast.NodeAttributeView && node.AttributeViewID == avID {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func (tx *Transaction) runAttributeViewCollections() error {
 	state := tx.attributeViewCollections
 	if state == nil || tx.isReplay {
@@ -588,6 +671,13 @@ func (tx *Transaction) runAttributeViewCollections() error {
 	sort.Strings(viewKeys)
 	for _, viewKey := range viewKeys {
 		boxID, id, _ := strings.Cut(viewKey, "/")
+		alive, err := tx.hasCollectionDatabaseBlock(id, boxID)
+		if err != nil {
+			return err
+		}
+		if !alive {
+			continue
+		}
 		view, err := tx.readAttributeViewForMutation(id, "", boxID)
 		if err != nil {
 			return err

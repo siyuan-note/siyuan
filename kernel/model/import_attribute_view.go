@@ -92,12 +92,12 @@ func remapImportedAttributeViewBlockReferences(database *av.AttributeView, block
 		if value.URL != nil {
 			value.URL.Content = link(value.URL.Content)
 		}
-		if value.Text == nil || value.Text.Rich == nil {
-			return
-		}
-		tree, parseErr := av.ParseValueTextRich(value.Text.Rich)
+		tree, parseErr := av.RichValueTree(value)
 		if parseErr != nil {
 			err = parseErr
+			return
+		}
+		if tree == nil {
 			return
 		}
 		changed := false
@@ -129,10 +129,7 @@ func remapImportedAttributeViewBlockReferences(database *av.AttributeView, block
 			return ast.WalkContinue
 		})
 		if changed {
-			value.Text.Rich.Content, err = av.RenderValueTextRich(tree)
-			if err == nil {
-				err = value.Text.NormalizeRichContent()
-			}
+			err = av.SetRichValueTree(value, tree)
 		}
 	})
 	if database.Automations != nil {

@@ -1,10 +1,11 @@
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {getAVCellShowIcon} from "./entryIcon";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {prepareAVColumnWindow} from "./columnWindow";
 import {insertAVTableColumn} from "./columnPresentation";
 import {getTablePinIndex} from "./groupTableVirtual";
 import {bindTemplateHTTPPermission, templateHTTPPermissionHTML} from "../../../template/httpPermission";
 import {hasAVCapability, isAVReadonlyType, isAVSelectType, isAVTimestampType} from "./capabilities";
-import {isTableLikeView} from "./viewType";
+import {isAVCardView, isTableLikeView} from "./viewType";
 import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
 import {MenuItem} from "../../../menus/Menu";
@@ -16,7 +17,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {getPropertiesHTML} from "./panels/properties";
 import {getLabelByNumberFormat} from "./number";
 import {getDefaultDateFormat, getLabelByDateFormat} from "./dateFormat";
-import {bindDateCalendarMenu} from "./dateCalendarMenu";
+import {bindFieldMenus} from "./fieldMenu";
 import {bindRelatedViewConfig, getRelatedViewConfigHTML} from "./relatedViewConfig";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation, updateAttrViewColAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
@@ -216,11 +217,13 @@ export const getEditHTML = (options: {
     <span class="b3-menu__accelerator">${getLabelByDateFormat(colData.dateFormat)}</span>
 </button>
 <label class="b3-menu__item">
+    <span class="b3-menu__icon"></span>
     <span class="fn__flex-center">${window.siyuan.languages.fillCreated}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="fillCreated" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.autoFillNow ? "checked" : ""}>
 </label>
 <label class="b3-menu__item">
+    <span class="b3-menu__icon"></span>
     <span class="fn__flex-center">${window.siyuan.languages.fillSpecificTime}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="fillSpecificTime" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.fillSpecificTime ? "checked" : ""}>
@@ -252,7 +255,7 @@ export const getEditHTML = (options: {
     <span class="fn__space fn__flex-1"></span>
     <input type="checkbox" data-type="wrap" class="b3-switch b3-switch--menu"${colData.wrap ? " checked" : ""}>
 </label>`;
-    if (colData.type !== "block" || options.data.viewType === "gallery") {
+    if (colData.type !== "block" || isAVCardView(options.data.viewType)) {
         html += options.isCustomAttr ? "" : `<button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
     <svg class="b3-menu__icon"><use xlink:href="#${colData.hidden ? "iconEye" : "iconEyeoff"}"></use></svg>
     <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hide}</span>
@@ -316,7 +319,7 @@ export const bindEditEvent = (options: {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
-    bindDateCalendarMenu(options.protyle, avID, colData, options.menuElement);
+    bindFieldMenus(options.protyle, avID, colData, options.menuElement);
     if (colData.type === "relation") {
         void bindRelatedViewConfig(options.protyle, avID, colData, options.menuElement, options.blockID);
     }
@@ -831,7 +834,7 @@ export const addAttrViewColAnimation = (options: {
                 const value = genCellValue(options.type, null);
                 html = `<div class="av__cell${options.type === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${escapeAttr(options.id)}"
 data-wrap="false" data-dtype="${escapeAttr(options.type)}" data-date-format="${escapeAttr(dateFormat)}" data-align="" style="width: 200px">${renderCell(value,
-                    parseInt(item.getAttribute("data-index")) || 0)}</div>`;
+                    parseInt(item.getAttribute("data-index")) || 0, getAVCellShowIcon(data?.view, value.type))}</div>`;
             }
             const sticky = previousElement.parentElement;
             if (sticky.classList.contains("av__colsticky") && sticky.lastElementChild === previousElement) {
@@ -1522,7 +1525,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         if (relResponse.code !== 0) {
                             return;
                         }
-                        const dialog = new MobileDialog({
+                        const dialog = new AdaptiveDialog({
                             title: window.siyuan.languages.removeColConfirm,
                             content: `<div class="b3-dialog__content">
     ${window.siyuan.languages.confirmRemoveRelationField

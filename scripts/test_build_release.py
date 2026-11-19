@@ -10,6 +10,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 import warnings
@@ -422,18 +423,67 @@ class BuildTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which("node") and (build.ROOT / "app/node_modules/electron-builder").exists(),
                          "需要已安装的 Electron Builder，仅加载配置，不执行构建")
-    def test_installed_builder_configuration_excludes_old_kernel(self):
-        destination = self.root / "windows.json"
-        with contextlib.redirect_stdout(io.StringIO()):
-            build.run(["node", build.ROOT / "scripts/release-windows-config.cjs",
-                       build.ROOT / "app/electron-builder.yml", self.root / "new-kernel",
-                       self.root / "build", "A" * 40, destination], build.ROOT / "app", capture=True)
-        config = json.loads(destination.read_text(encoding="utf-8"))
-        self.assertEqual(config["win"]["extraResources"], [{"from": str(self.root / "new-kernel"), "to": "kernel"}])
-        self.assertTrue(config["forceCodeSigning"])
-        self.assertNotIn("extends", config)
-        self.assertEqual(config["win"]["signtoolOptions"]["signingHashAlgorithms"], ["sha256"])
-        self.assertTrue(any(entry.get("to") == "stage" for entry in config["extraResources"]))
+    def test_installed_builder_configurations_preserve_resources_and_replace_kernel(self):
+        inspect_resources = """
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const {createRequire} = require("node:module");
+const [project, base, generated, output, arch] = process.argv.slice(1);
+const projectRequire = createRequire(path.join(project, "package.json"));
+const builderRequire = createRequire(projectRequire.resolve("electron-builder"));
+const library = path.dirname(builderRequire.resolve("app-builder-lib"));
+const {getConfig} = require(path.join(library, "util/config/config.js"));
+const {getFileMatchers, copyFiles} = require(path.join(library, "fileMatcher.js"));
+(async () => {
+    const original = await getConfig(project, base, null);
+    const config = await getConfig(project, generated, null);
+    const otherResources = resources => resources.filter(resource => resource.to !== "kernel");
+    assert.deepEqual(otherResources(config.win.extraResources), otherResources(original.win.extraResources));
+    assert.deepEqual(config.extraResources, original.extraResources);
+    const resources = path.join(output, "resources");
+    const matchers = getFileMatchers(config, "extraResources", resources, {
+        defaultSrc: project,
+        globalOutDir: output,
+        customBuildOptions: config.win,
+        macroExpander: value => value.replaceAll("${arch}", arch),
+    });
+    const icon = matchers.filter(matcher => matcher.to === path.join(resources, "markdown.ico"));
+    const kernel = matchers.filter(matcher => matcher.to === path.join(resources, "kernel"));
+    assert.equal(icon.length, 1);
+    assert.equal(kernel.length, 1);
+    assert.equal(icon[0].from, path.join(project, "src/assets/markdown.ico"));
+    await copyFiles([...icon, ...kernel], null, false);
+    assert.deepEqual(fs.readFileSync(icon[0].to), fs.readFileSync(icon[0].from));
+    assert.equal(fs.readFileSync(path.join(kernel[0].to, "kernel-marker.txt"), "utf8"), arch);
+    assert.deepEqual(fs.readdirSync(kernel[0].to), ["kernel-marker.txt"]);
+    assert.equal(config.win.icon, original.win.icon);
+    assert.equal(config.nsis.include, "nsis/installer.nsh");
+    const installer = fs.readFileSync(path.join(project, config.nsis.include), "utf8");
+    assert.ok(installer.includes(String.raw`\\DefaultIcon" "" '"$INSTDIR\\resources\\markdown.ico",0'`));
+})().catch(error => { console.error(error); process.exitCode = 1; });
+"""
+        for name, arch in (("electron-builder.yml", "x64"), ("electron-builder-arm64.yml", "arm64")):
+            with self.subTest(arch=arch):
+                destination = self.root / f"windows-{arch}.json"
+                kernel_dir = self.root / f"new-kernel-{arch}"
+                self.write(kernel_dir / "kernel-marker.txt", arch.encode("ascii"))
+                output = self.root / arch
+                base = build.ROOT / "app" / name
+                with contextlib.redirect_stdout(io.StringIO()):
+                    build.run(["node", build.ROOT / "scripts/release-windows-config.cjs",
+                               base, kernel_dir, output, "A" * 40, destination], build.ROOT / "app", capture=True)
+                config = json.loads(destination.read_text(encoding="utf-8"))
+                kernels = [entry for entry in config["win"]["extraResources"] if entry.get("to") == "kernel"]
+                self.assertEqual(kernels, [{"from": str(kernel_dir), "to": "kernel"}])
+                self.assertIn({"from": "src/assets/markdown.ico", "to": "markdown.ico"}, config["win"]["extraResources"])
+                self.assertTrue(config["forceCodeSigning"])
+                self.assertNotIn("extends", config)
+                self.assertEqual(config["win"]["signtoolOptions"]["signingHashAlgorithms"], ["sha256"])
+                self.assertTrue(any(entry.get("to") == "stage" for entry in config["extraResources"]))
+                with contextlib.redirect_stdout(io.StringIO()):
+                    build.run(["node", "-e", inspect_resources, build.ROOT / "app", base, destination, output, arch],
+                              build.ROOT / "app", capture=True)
 
     @unittest.skipUnless(shutil.which("node") and (build.ROOT / "app/node_modules/electron-builder").exists(),
                          "需要已安装的 Electron Builder")
@@ -508,6 +558,76 @@ class BuildTests(unittest.TestCase):
             with patch.object(self.builder, "wsl") as wsl, patch.object(self.builder, "collect"):
                 self.builder.linux()
             self.assertEqual("--with-harmony-kernel" in wsl.call_args.args[0], selected)
+
+    def test_parallel_linux_waits_for_session_process(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.builder.parallel_marker = self.root / "marker"
+        self.builder.parallel_remote = "/tmp/siyuan-release-test"
+        self.args.platforms = ["linux"]
+        with patch.object(self.builder, "wsl") as wsl, patch.object(self.builder, "collect"):
+            self.builder.linux()
+        self.assertEqual(wsl.call_args.args[0][:3], ["setsid", "--wait", "bash"])
+        self.assertFalse(any(arg.startswith("--windows-ready-file=") for arg in wsl.call_args.args[0]))
+
+    def test_linux_dependency_install_overlaps_windows_and_android_waits(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["windows", "linux", "android"]
+        dependencies_started = threading.Event()
+        windows_ready = self.builder.wsl_root / ".cache/work.windows-ready"
+
+        def windows():
+            self.assertTrue(dependencies_started.wait(3))
+            self.assertFalse(windows_ready.exists())
+
+        def wsl(command):
+            self.assertIn("--windows-ready-file=/home/d/88250/siyuan/.cache/work.windows-ready", command)
+            dependencies_started.set()
+            deadline = time.monotonic() + 3
+            while not windows_ready.exists() and time.monotonic() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(windows_ready.exists())
+
+        def android(assets):
+            self.assertTrue(windows_ready.exists())
+
+        with patch.object(self.builder, "windows", side_effect=windows), \
+                patch.object(self.builder, "wsl", side_effect=wsl), patch.object(self.builder, "collect"), \
+                patch.object(self.builder, "android", side_effect=android) as build_android:
+            self.builder.parallel_platforms(self.root / "assets.zip")
+        build_android.assert_called_once_with(self.root / "assets.zip")
+        self.assertFalse(windows_ready.exists())
+
+    def test_linux_dependency_failure_reaps_windows_compiler(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["windows", "linux", "android"]
+        launched = threading.Event()
+        original = build.subprocess.Popen
+        command = [sys.executable, "-c", "import time; time.sleep(30)"]
+        compilers = []
+
+        def launch(args, **kwargs):
+            process = original(args, **kwargs)
+            if args == command:
+                compilers.append(process)
+                launched.set()
+            return process
+
+        def windows():
+            build.compile_kernels([("amd64", command, self.root, None)], self.root / "logs")
+
+        def linux():
+            self.assertTrue(launched.wait(3))
+            raise build.BuildError("dependency install failed")
+
+        with patch.object(self.builder, "windows", side_effect=windows), \
+                patch.object(self.builder, "linux", side_effect=linux), patch.object(self.builder, "android") as android, \
+                patch.object(build.subprocess, "Popen", side_effect=launch), \
+                self.assertRaisesRegex(build.BuildError, "dependency install failed"):
+            self.builder.parallel_platforms(self.root / "assets.zip")
+        self.assertEqual(len(compilers), 1)
+        self.assertIsNotNone(compilers[0].poll())
+        self.assertFalse(build.BUILD_PROCESSES)
+        android.assert_not_called()
 
     def test_mobile_packaging_overlaps_linux_and_harmony_waits_for_ready(self):
         import threading
@@ -841,29 +961,43 @@ class RecordTests(unittest.TestCase):
                 build.create_record(self.args, "3.8.4")
 
     def test_execution_records_partial_windows_success(self):
+        linux_started = threading.Event()
+
+        def preflight(builder):
+            builder.wsl_root = self.root / "wsl"
+
         def windows_arch(builder, arch, config):
             if arch == "arm64":
+                self.assertTrue(linux_started.wait(3))
                 raise build.BuildError("ARM64 build failed")
             package = builder.work / "windows.exe"
             package.write_bytes(b"package")
             builder.collect([package], "Windows", time.time())
 
+        def linux(builder):
+            linux_started.set()
+            self.assertTrue(build.BUILD_CANCEL.wait(3))
+            self.assertFalse(Path(str(builder.parallel_marker) + ".windows-ready").exists())
+            raise build.BuildError("Linux dependency install cancelled")
+
         with contextlib.redirect_stdout(io.StringIO()), patch.object(build.tempfile, "tempdir", str(self.root)), \
-                patch.object(build.Builder, "preflight"), patch.object(build.Builder, "build_ui"), \
+                patch.object(build.Builder, "preflight", preflight), patch.object(build.Builder, "build_ui"), \
                 patch.object(build.Builder, "windows_tools"), \
                 patch.object(build.Builder, "windows_arch", windows_arch), \
-                patch.object(build.Builder, "linux") as linux, self.assertRaises(build.BuildError):
+                patch.object(build.Builder, "linux", linux), self.assertRaisesRegex(build.BuildError, "ARM64 build failed"):
             with self.record.session():
                 build.execute_build(self.args, "3.8.4", self.record)
         stages = {stage["id"]: stage for stage in self.progress()["stages"]}
         self.assertEqual(stages["windows_amd64"]["status"], "succeeded")
         self.assertEqual(stages["windows_amd64"]["artifacts"], [str(self.args.output / "windows.exe")])
         self.assertEqual(stages["windows_arm64"]["status"], "failed")
-        self.assertEqual(stages["linux"]["status"], "pending")
+        self.assertEqual(stages["linux"]["status"], "failed")
         self.assertNotIn("verification", stages)
-        linux.assert_not_called()
 
     def test_complete_execution_persists_progress_without_validation(self):
+        def preflight(builder):
+            builder.wsl_root = self.root / "wsl"
+
         def windows_arch(builder, arch, config):
             package = builder.work / f"siyuan-3.8.4-win-{arch}.exe"
             package.write_bytes(b"package")
@@ -875,7 +1009,7 @@ class RecordTests(unittest.TestCase):
             builder.collect([package], "Linux", time.time())
 
         with contextlib.redirect_stdout(io.StringIO()), patch.object(build.tempfile, "tempdir", str(self.root)), \
-                patch.object(build.Builder, "preflight"), patch.object(build.Builder, "build_ui"), \
+                patch.object(build.Builder, "preflight", preflight), patch.object(build.Builder, "build_ui"), \
                 patch.object(build.Builder, "windows_tools"), \
                 patch.object(build.Builder, "windows_arch", windows_arch), patch.object(build.Builder, "linux", linux), \
                 patch.object(build.VERIFY, "verify") as verify:

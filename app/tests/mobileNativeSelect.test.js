@@ -28,6 +28,7 @@ const runCases = source => {
     new Function("require", "exports", source)(name => ({
         "../../plugin/Menu": {Menu},
         "../../util/escape": {escapeHtml: value => value.replace(/&/g, "&amp;").replace(/</g, "&lt;")},
+        "../../menus/overlayOwnership": {getMenuOwnerElement: target => target?.closest(".b3-menu")},
     })[name], api);
     api.initMobileSelect();
     const host = document.createElement("div");

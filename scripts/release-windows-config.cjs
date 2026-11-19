@@ -17,7 +17,10 @@ async function main() {
     delete config.extends;
     config.directories = {...config.directories, output: path.resolve(output)};
     config.forceCodeSigning = true;
-    config.win.extraResources = [{from: path.resolve(kernel), to: "kernel"}];
+    config.win.extraResources = [
+        ...(config.win.extraResources || []).filter(resource => resource.to !== "kernel"),
+        {from: path.resolve(kernel), to: "kernel"},
+    ];
     config.win.signtoolOptions = {...config.win.signtoolOptions, certificateSha1: thumbprint};
     delete config.win.signtoolOptions.certificateSubjectName;
     if (sign) {

@@ -6,7 +6,7 @@
 		"id": "20211226123130-jpeg5b2",
 		"title": "書籤和標籤",
 		"type": "doc",
-		"updated": "20261024161440"
+		"updated": "20261116220110"
 	},
 	"Children": [
 		{
@@ -94,7 +94,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123145-fgyfo0x",
-				"updated": "20260810212846"
+				"updated": "20261116220110"
 			},
 			"Children": [
 				{
@@ -214,6 +214,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "​）中列出。如果需要取消標簽，在內容區塊中刪掉該標簽即可。"
+				}
+			]
+		},
+		{
+			"ID": "20261116215152-20a2423",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261116215152-20a2423",
+				"updated": "20261116220110"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在標籤面板選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重命名"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可跨文件統一修改該標籤及其子標籤。可在任一受影響文件中復原，並在該文件中重做；資料庫中已有的項目及其欄位值會保留。"
 				}
 			]
 		},

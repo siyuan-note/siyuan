@@ -85,6 +85,13 @@ func (fingerprint *attributeViewOrderFingerprint) value(value *av.Value) {
 		fingerprint.text(block.ID)
 		fingerprint.text(block.Icon)
 		fingerprint.text(block.Content)
+		fingerprint.flag(block.Rich != nil)
+		if block.Rich != nil {
+			fingerprint.integer(int64(block.Rich.Spec))
+			fingerprint.text(block.Rich.Format)
+			fingerprint.text(block.Rich.Content)
+		}
+		fingerprint.text(block.RichBlockDOM)
 		fingerprint.text(string(block.RefSubtype))
 		fingerprint.integer(block.Created)
 		fingerprint.integer(block.Updated)

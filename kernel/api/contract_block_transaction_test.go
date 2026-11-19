@@ -79,12 +79,14 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 		t.Fatal(err)
 	}
 	var language struct {
-		Time map[string]any `json:"_time"`
+		Time   map[string]any `json:"_time"`
+		Kernel map[int]string `json:"_kernel"`
 	}
 	if err = json.Unmarshal(langData, &language); err != nil {
 		t.Fatal(err)
 	}
 	util.TimeLangs[model.Conf.Lang] = language.Time
+	util.Langs[model.Conf.Lang] = language.Kernel
 	{
 		confSectionValue0, confSectionValue1, confSectionValue2 := conf.NewFileTree(), conf.NewSync(), conf.NewNotebookCrypto()
 		model.Conf.FileTree.Store(confSectionValue0)

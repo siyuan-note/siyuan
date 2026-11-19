@@ -6,9 +6,13 @@ package model
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/88250/lute/ast"
@@ -125,5 +129,56 @@ func TestDocumentSourceRecoveryPreservesConflictsAndCorruptRecords(t *testing.T)
 				}
 			}
 		})
+	}
+}
+
+func TestDocumentSourceJournalEnvelopeCompatibility(t *testing.T) {
+	oldQueue := util.QueueDir
+	util.QueueDir = t.TempDir()
+	t.Cleanup(func() { util.QueueDir = oldQueue })
+	for _, forward := range []bool{false, true} {
+		for _, state := range []string{"pending", "committed", "recovered"} {
+			t.Run(fmt.Sprintf("forward=%t/%s", forward, state), func(t *testing.T) {
+				j := &documentSourceJournal{Version: 1, Forward: forward, ID: ast.NewNodeID(), State: state, Files: []*documentSourceFile{
+					{Box: ast.NewNodeID(), Path: "/" + ast.NewNodeID() + ".sy", Before: []byte{0, 255, '<', '>', '&', '\n'}, After: bytes.Repeat([]byte("changed source"), 1000)},
+					{Box: ast.NewNodeID(), Path: "/" + ast.NewNodeID() + ".sy", Before: nil, After: []byte{}},
+				}}
+				persisted := *j
+				if forward {
+					persisted.Files = make([]*documentSourceFile, len(j.Files))
+					for i, entry := range j.Files {
+						copy := *entry
+						copy.Before, copy.After = nil, nil
+						persisted.Files[i] = &copy
+					}
+				}
+				data, err := json.Marshal(&persisted)
+				if err != nil {
+					t.Fatal(err)
+				}
+				digest := sha256.Sum256(data)
+				expected, err := json.Marshal(struct {
+					Data   json.RawMessage `json:"data"`
+					Digest string          `json:"sha256"`
+				}{data, hex.EncodeToString(digest[:])})
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err = j.save(); err != nil {
+					t.Fatal(err)
+				}
+				actual, err := os.ReadFile(j.filename())
+				if err != nil || !bytes.Equal(expected, actual) {
+					t.Fatalf("journal wire bytes changed: %v", err)
+				}
+				decoded, err := parseDocumentSourceJournal(actual, filepath.Base(j.filename()))
+				if err != nil || !reflect.DeepEqual(decoded, &persisted) {
+					t.Fatalf("journal recovery source changed: %v", err)
+				}
+				if !bytes.Equal(j.Files[0].Before, []byte{0, 255, '<', '>', '&', '\n'}) || j.Files[1].After == nil {
+					t.Fatal("saving mutated in-memory source images")
+				}
+			})
+		}
 	}
 }

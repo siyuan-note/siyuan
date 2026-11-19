@@ -10,7 +10,7 @@ for (const kind of ["secret", "variable"]) {
         const items = [{name: "remove", value: "test"}, {name: "keep", value: "test"}];
         let click: (event: unknown) => void;
         let confirm: () => Promise<boolean>;
-        let options: {awaitConfirm: boolean};
+        let options: {awaited: boolean};
         let fail = true;
         let saved: unknown;
         const root = {querySelector: (selector: string) => selector.endsWith("Block")
@@ -29,9 +29,10 @@ for (const kind of ["secret", "variable"]) {
                     if (fail) throw new Error("delete failed");
                     saved = next;
                 }},
-                mobileConfirmDialog: (...args: unknown[]) => {
-                    confirm = args[2] as typeof confirm;
-                    options = args[7] as typeof options;
+                confirmDialog: (options_: unknown) => {
+                    const {confirm: confirmCallback} = options_ as {confirm: typeof confirm};
+                    confirm = confirmCallback;
+                    options = {awaited: true};
                 },
             }),
         });
@@ -39,7 +40,7 @@ for (const kind of ["secret", "variable"]) {
         const action = {dataset: {type: kind === "secret" ? "deleteSecret" : "deleteVariable"},
             closest: () => ({dataset: {secretName: "remove", variableName: "remove"}})};
         click({target: {closest: () => action}, preventDefault() {}, stopPropagation() {}});
-        assert.equal(options.awaitConfirm, true);
+        assert.equal(options.awaited, true);
         await assert.rejects(confirm(), /delete failed/);
         assert.equal(saved, undefined);
         assert.equal(items.length, 2);
@@ -73,7 +74,7 @@ for (const kind of ["secret", "variable"]) {
                 escapeHtmlTextAndAttr: (value: string) => value,
                 bindPasswordIconaToggle: () => {},
                 secretsConfigApi: {patch}, variablesConfigApi: {patch},
-                MobileDialog: class {
+                AdaptiveDialog: class {
                     element = {setAttribute() {}, querySelector: (selector: string) => values[selector.slice(1) as keyof typeof values],
                         querySelectorAll: () => buttons};
                     focusWhenReady() { focusScheduled = true; }

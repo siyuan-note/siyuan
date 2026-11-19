@@ -3,6 +3,7 @@ import {readdirSync, readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {escapeHtmlTextAndAttr} from "../../util/escape";
 
 const createPreviewHarness = async (language = "en", zIndex = 10) => {
     const actions = ["zoom-in", "zoom-out", "one-to-one", "reset", "prev", "play", "next",
@@ -74,7 +75,8 @@ const createPreviewHarness = async (language = "en", zIndex = 10) => {
     const compiled = transpileModule(source, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
-    const exports = {} as {previewImages: (sources: string[]) => void};
+    const exports = {} as Pick<typeof import("./image"), "previewImages" | "previewDocImage">;
+    const requests: Array<{id: string}> = [];
     const languages = JSON.parse(readFileSync(`appearance/langs/${language}.json`, "utf8"));
     const previewWindow = {
         siyuan: {languages, zIndex, viewer: undefined as TestViewer},
@@ -84,7 +86,12 @@ const createPreviewHarness = async (language = "en", zIndex = 10) => {
         exports,
         require: () => ({
             Constants: {PROTYLE_CDN: ""},
+            escapeHtmlTextAndAttr,
             addScript: () => Promise.resolve(),
+            fetchPost: (_url: string, data: {id: string}, callback: (response: {data: string[]}) => void) => {
+                requests.push(data);
+                callback({data: ["assets/source.png"]});
+            },
             copyPNGByLink: (src: string) => copied.push(src),
             writeClipboardData: ({textPlain}: {textPlain: string}) => {
                 copiedURLs.push(textPlain);
@@ -111,11 +118,31 @@ const createPreviewHarness = async (language = "en", zIndex = 10) => {
     const instance = previewWindow.siyuan.viewer;
     const copyURLButton = customButtons.find(button => button.className.includes("viewer-copy-url"));
     return {
-        instance, copyURLButton, copied, copiedURLs, copiedFiles, messages, languages, buttons, sourceElement,
+        instance, copyURLButton, copied, copiedURLs, copiedFiles, messages, languages, buttons, sourceElement, requests, api: exports,
         setWriteResult: (callback: typeof writeResult) => {writeResult = callback;},
         setSupportsFiles: (value: boolean) => {supportsFiles = value;},
     };
 };
+
+test("embedded image galleries request the source document while ordinary images retain their document", async () => {
+    const {api, requests} = await createPreviewHarness();
+    const cases: Array<Record<string, string> | undefined> = [undefined,
+        {"data-root-id": "source-doc", "data-id": "source-block"}, {"data-id": "source-block"}, {}];
+    for (const attributes of cases) {
+        const image = {closest: (selector: string) => {
+            if (selector === ".av__richtext-host, .av__celltext--rich") {
+                return null;
+            }
+            assert.equal(selector, ".protyle-wysiwyg__embed");
+            return attributes ? {getAttribute: (name: string) => attributes[name]} : null;
+        }} as unknown as HTMLElement;
+        api.previewDocImage("assets/source.png", "host-doc", "", image);
+        assert.equal(requests.at(-1).id, attributes?.["data-root-id"] || attributes?.["data-id"] || "host-doc");
+    }
+    api.previewDocImage("assets/source.png", "host-doc");
+    assert.equal(requests.at(-1).id, "host-doc", "callers without an image element retain their existing gallery");
+    await Promise.resolve();
+});
 
 test("image preview initializes its toolbar and reports successful address copies from clicks and keyboard", async () => {
     const {instance, copyURLButton, copied, copiedURLs, copiedFiles, messages, languages, buttons, sourceElement,

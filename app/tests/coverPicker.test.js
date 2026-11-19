@@ -28,7 +28,7 @@ const runCases = async (sources, css, mobile, manifest, languages, image, mobile
     };
     const stubs = {
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
-        "util/functions": {isMobile: () => mobile},
+        "util/functions": {isMobile: () => mobile, getRandom: (_min, max) => max},
         "util/genID": {genUUID: () => "cover-picker"},
         "util/zIndex": {isAbove: () => false},
         "dialog/moveResize": {moveResize() {}},
@@ -69,14 +69,45 @@ const runCases = async (sources, css, mobile, manifest, languages, image, mobile
         }
         return cache[name];
     };
-    stubs["dialog/mobileDialog"] = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(load("dialog").Dialog, mobile);
+    stubs["dialog/adaptiveDialog"] = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(load("dialog").Dialog, mobile);
     const {Background} = load("protyle/header/Background");
     const owner = document.createElement("div");
-    const background = new Background({element: owner, block: {rootID: "cover-document"}, disabled: false});
+    const protyle = {element: owner, block: {rootID: "cover-document"}, disabled: false};
+    const background = new Background(protyle);
     background.uploadBuiltInCover = (_protyle, name) => chosen.push(name);
     owner.append(background.element);
-    owner.hidden = true;
     document.body.append(owner);
+    background.element.classList.add("protyle-background--enable", "protyle-background--mobileshow");
+    background.element.querySelector('[data-type="position"]').classList.remove("fn__none");
+    const toolbar = background.element.querySelector(".protyle-icons");
+    const randomButton = toolbar.querySelector('[data-type="random-cover"]');
+    const galleryButton = toolbar.querySelector('[data-type="show-random"]');
+    assert.equal(randomButton.getAttribute("aria-label"), languages.random);
+    assert.equal(randomButton.querySelector("use").getAttribute("xlink:href"), "#iconDices");
+    assert.equal(galleryButton.querySelector("use").getAttribute("xlink:href"), "#iconGallery");
+    for (const fontSize of [16, 24]) {
+        owner.style.fontSize = `${fontSize}px`;
+        await settle();
+        const rect = toolbar.getBoundingClientRect();
+        assert.ok(rect.left >= 0 && rect.right <= innerWidth, "all cover actions fit the viewport");
+        const controls = Array.from(toolbar.children, element => element.getBoundingClientRect());
+        for (let index = 0; index < controls.length; index++) {
+            assert.ok(controls[index].width > 0 && controls[index].height > 0, "cover actions remain visible");
+            if (index > 0) {
+                assert.ok(controls[index].left >= controls[index - 1].right - 1, "cover actions do not overlap");
+            }
+        }
+    }
+    randomButton.click();
+    await settle();
+    assert.deepEqual(chosen, [manifest.at(-1).file], "the toolbar draws from the complete built-in list");
+    protyle.disabled = true;
+    randomButton.click();
+    await settle();
+    assert.equal(chosen.length, 1, "read-only document headers cannot randomize covers");
+    protyle.disabled = false;
+    chosen.length = 0;
+    owner.hidden = true;
     background.element.querySelector('[data-type="show-random"]').click();
     await settle();
     await new Promise(resolve => setTimeout(resolve, 350));
@@ -242,7 +273,7 @@ const runElectron = async () => {
         for (const mobile of [false, true]) {
             const sources = {};
             for (const name of ["protyle/header/Background", "protyle/header/coverData", "protyle/header/coverPicker",
-                "dialog/index", "config/tabs/lockScreenWallpaper", "util/contractFormData", "util/escape"]) {
+                "menus/overlayOwnership", "dialog/index", "config/tabs/lockScreenWallpaper", "util/contractFormData", "util/escape"]) {
                 const source = preprocess(fs.readFileSync(path.join(root, "src", name + ".ts"), "utf8"),
                     {MOBILE: mobile, BROWSER: false}, false, true);
                 sources[name] = ts.transpileModule(source, {
@@ -258,7 +289,7 @@ const runElectron = async () => {
                 await win.loadURL("data:text/html,<html><body></body></html>");
                 await win.webContents.executeJavaScript(`(${runCases.toString()})(${JSON.stringify(sources)},
                     ${JSON.stringify(css)}, ${mobile}, ${JSON.stringify(manifest)}, ${JSON.stringify(languages)}, ${JSON.stringify(image)},
-                    ${JSON.stringify(require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource())})`);
+                    ${JSON.stringify(require("./fixtures/dialogRuntime.cjs").dialogRuntimeSource())})`);
             }
         }
         console.log("Cover picker layout cases passed");

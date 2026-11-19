@@ -1,5 +1,5 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {renderMemoryOverview} from "./overview";
 import {showMessage} from "../../dialog/message";
 import {fetchSyncPost} from "../../util/fetch";
@@ -49,7 +49,7 @@ export const openMemoryManager = () => {
             }
         });
     };
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: `<span class="fn__flex"><span class="fn__flex-1">${escapeHtml(lang.aiMemorySummary)}</span><button type="button" class="block__icon block__icon--show" data-memory-more aria-label="${escapeHtml(lang.more)}" aria-haspopup="menu"><svg><use xlink:href="#iconMore"></use></svg></button></span>`,
         width: isMobile() ? "94vw" : "860px",
         content: `<div class="b3-dialog__content memory-manager">
@@ -61,7 +61,7 @@ export const openMemoryManager = () => {
         beforeClose: () => {
             if (submitting || clearing) { return false; }
             if (!taskDirty) { return true; }
-            mobileConfirmDialog(lang.aiMemory, lang.discardUnsavedChanges, () => { taskDirty = false; dialog.destroy(); });
+            confirmDialog({title: lang.aiMemory, text: lang.discardUnsavedChanges, confirm: () => { taskDirty = false; dialog.destroy(); }});
             return false;
         },
         destroyCallback: () => {
@@ -399,8 +399,12 @@ export const openMemoryManager = () => {
                 icon: "iconTrashcan", warning: true, label: lang.aiMemoryClearAndDisable,
                 click: () => {
                     if (closed || isReadOnly() || submitting || clearing) { return; }
-                    mobileConfirmDialog(lang.aiMemoryClearAndDisable, escapeHtml(lang.aiMemoryClearAndDisableConfirm),
-                        clearMemory, undefined, true, undefined, undefined, {awaitConfirm: true});
+                    confirmDialog({
+                        title: lang.aiMemoryClearAndDisable,
+                        text: escapeHtml(lang.aiMemoryClearAndDisableConfirm),
+                        confirm: clearMemory,
+                        isDelete: true,
+                    });
                 },
             }).element);
             const rect = more.getBoundingClientRect();

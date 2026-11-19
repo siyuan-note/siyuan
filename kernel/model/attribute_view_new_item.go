@@ -468,6 +468,7 @@ func newBoundAttributeViewItemValue(original *av.Value, docID, icon string) (*av
 	bound.IsDetached = false
 	bound.Block.ID = docID
 	bound.Block.Content = ""
+	bound.Block.Rich, bound.Block.RichBlockDOM = nil, ""
 	bound.Block.Icon = icon
 	bound.Block.RefSubtype = av.BlockRefSubtypeDynamic
 	return bound, nil

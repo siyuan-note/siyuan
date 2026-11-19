@@ -104,6 +104,7 @@ function fixture(delay, mobile = false) {
     });
     const zIndex = load("util/zIndex.ts");
     const { Dialog } = load("dialog/index.ts", {
+        "../menus/overlayOwnership": load("menus/overlayOwnership.ts"),
         "../util/genID": { genUUID: () => "palette" }, "../util/zIndex": zIndex,
         "./moveResize": { moveResize() { } }, "../util/functions": { isMobile: () => false },
         "../constants": { Constants },

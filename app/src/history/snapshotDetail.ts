@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import type {App} from "../index";
 import type {DocHistorySnapshot} from "../types/api";
 import {Protyle} from "../protyle";
@@ -8,41 +8,66 @@ import {isMobile} from "../util/functions";
 import {renderRepoFile} from "./repoFile";
 import dayjs from "dayjs";
 import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "./notebookDialogs";
+import {isPluginSnapshotPath, TPluginSnapshotPart} from "./pluginSnapshotPaths";
 
 export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot, notebook: string) => {
-    const lang = window.siyuan.languages;
-    let editor: Protyle;
-    const abort = new AbortController();
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {mode: "expanded"},
         title: escapeHtml(reference.tags.join(" / ")),
-        content: `<div class="history__snapshot-detail"><div class="history__snapshot-detail-status" data-detail-status role="status">${lang.loading}</div><div class="history__snapshot-detail-content fn__none"><div class="history__snapshot-detail-meta"></div><div class="history__snapshot-detail-panels"><ul class="b3-list b3-list--background history__snapshot-detail-files"></ul><div class="history__snapshot-detail-preview"></div></div></div></div>`,
+        content: "",
         width: isMobile() ? "100vw" : "85vw",
         height: isMobile() ? "100dvh" : "80vh",
         containerClassName: "b3-dialog__container--theme",
         destroyCallback: () => {
             forgetNotebookHistoryDialog(dialog);
-            abort.abort();
-            dialog.element.querySelector(".history__snapshot-detail-preview")?.removeAttribute("data-request-id");
-            editor?.destroy();
+            detail?.destroy();
         }
     });
+    const detail = mountSnapshotDetail(app, dialog.element.querySelector(".b3-dialog__body"), reference, notebook, {
+        onNotebooks: notebooks => trackNotebookHistoryDialog(dialog, notebooks),
+    });
+    await detail.loaded;
+};
+
+export const mountSnapshotDetail = (app: App, root: HTMLElement, reference: DocHistorySnapshot, notebook: string,
+                                    options: {plugin?: {name: string, part: TPluginSnapshotPart}, onNotebooks?: (notebooks: string[]) => void} = {}) => {
+    const lang = window.siyuan.languages;
+    let editor: Protyle;
+    const abort = new AbortController();
+    root.innerHTML = `<div class="history__snapshot-detail">
+    <div class="history__snapshot-detail-status" data-detail-status role="status">${lang.loading}</div>
+    <div class="history__snapshot-detail-content fn__none">
+        <div class="history__snapshot-detail-meta"></div>
+        <div class="history__snapshot-detail-panels">
+            <ul class="b3-list b3-list--background history__snapshot-detail-files"></ul>
+            <div class="history__snapshot-detail-preview">
+                <div class="protyle-title__input ft__center ft__breakword fn__flex-shrink fn__none" data-type="snapshotFileTitle"></div>
+                <div data-type="snapshotFileContent"></div>
+            </div>
+        </div>
+    </div>
+</div>`;
     const notebooks = new Set([notebook]);
-    trackNotebookHistoryDialog(dialog, Array.from(notebooks));
-    const root = dialog.element;
+    options.onNotebooks?.(Array.from(notebooks));
     const status = root.querySelector<HTMLElement>("[data-detail-status]");
     const list = root.querySelector<HTMLElement>(".history__snapshot-detail-files");
-    const preview = root.querySelector<HTMLElement>(".history__snapshot-detail-preview");
+    const title = root.querySelector<HTMLElement>('[data-type="snapshotFileTitle"]');
+    const preview = root.querySelector<HTMLElement>('[data-type="snapshotFileContent"]');
     const select = (row: HTMLElement) => {
         if (row.dataset.notebook) {
             notebooks.add(row.dataset.notebook);
-            trackNotebookHistoryDialog(dialog, Array.from(notebooks));
+            options.onNotebooks?.(Array.from(notebooks));
         }
         editor?.destroy();
         editor = undefined;
         list.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
         row.classList.add("b3-list-item--focus");
-        renderRepoFile(app, row, preview, value => { editor = value; });
+        title.textContent = "";
+        title.classList.add("fn__none");
+        renderRepoFile(app, row, preview, value => { editor = value; }, row.dataset.path.endsWith(".sy") ? value => {
+            title.textContent = value;
+            title.classList.toggle("fn__none", !value);
+        } : undefined);
     };
     list.addEventListener("click", event => {
         const row = (event.target as Element).closest<HTMLElement>("[data-id]");
@@ -59,8 +84,7 @@ export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot
             }
         }
     });
-    try {
-        const response = await fetchSyncPost("/api/repo/getRepoSnapshots", {id: reference.id, page: 1, includeFiles: true}, undefined, false, abort.signal);
+    const loaded = fetchSyncPost("/api/repo/getRepoSnapshots", {id: reference.id, page: 1, includeFiles: true}, undefined, false, abort.signal).then(response => {
         if (abort.signal.aborted || !root.isConnected) {
             return;
         }
@@ -75,12 +99,16 @@ export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot
         const fragment = document.createDocumentFragment();
         let selected: HTMLElement;
         snapshot.files.forEach(file => {
+            if (options.plugin && !isPluginSnapshotPath(file.path, options.plugin.name, options.plugin.part)) {
+                return;
+            }
             const row = document.createElement("li");
             row.className = "b3-list-item";
             row.tabIndex = 0;
             row.setAttribute("role", "button");
             row.dataset.id = file.id;
             row.dataset.snapshot = snapshot.id;
+            row.dataset.path = file.path;
             row.dataset.notebook = file.path.split("/").filter(Boolean)[0];
             row.title = file.path;
             const text = document.createElement("span");
@@ -93,16 +121,28 @@ export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot
             }
         });
         list.replaceChildren(fragment);
+        if (!list.children.length) {
+            const empty = document.createElement("div");
+            empty.className = "history__snapshot-detail-status";
+            empty.setAttribute("role", "status");
+            empty.textContent = lang.emptyContent;
+            root.querySelector(".history__snapshot-detail-panels").replaceChildren(empty);
+        }
         status.classList.add("fn__none");
         root.querySelector(".history__snapshot-detail-content").classList.remove("fn__none");
         if (selected) {
             select(selected);
             selected.scrollIntoView({block: "start"});
         }
-    } catch (error) {
+    }).catch(error => {
         if (!abort.signal.aborted && root.isConnected) {
             status.textContent = error instanceof Error ? error.message : String(error);
             status.classList.add("ft__error");
         }
-    }
+    });
+    return {loaded, destroy: () => {
+        abort.abort();
+        preview.removeAttribute("data-request-id");
+        editor?.destroy();
+    }};
 };

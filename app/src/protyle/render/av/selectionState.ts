@@ -19,6 +19,7 @@ interface IAVCellSelection {
     anchor: IAVCellPoint;
     focus: IAVCellPoint;
     cells: IAVSelectedCell[];
+    input?: IAVCellPoint;
 }
 
 interface IAVItemSelection {
@@ -90,6 +91,7 @@ export const collapseAVCellSelectionToAnchor = (blockElement: HTMLElement) => {
     }
     selection.focus = {...selection.anchor};
     selection.cells = [anchorCell];
+    delete selection.input;
 };
 
 export const getAVSelectedCells = (blockElement: HTMLElement) => {
@@ -194,6 +196,7 @@ export const restoreAVCellSelection = (blockElement: HTMLElement) => {
     if (!selection) {
         return;
     }
+    const active = selection.input || selection.anchor;
     const selectedKeys = new Set(selection.cells.map(item => `${item.groupID}:${item.rowID}:${item.colID}`));
     blockElement.querySelectorAll<HTMLElement>(".av__cell--active, .av__cell--select").forEach(item => {
         item.classList.remove("av__cell--active", "av__cell--select");
@@ -206,8 +209,8 @@ export const restoreAVCellSelection = (blockElement: HTMLElement) => {
             return;
         }
         cellElement.classList.add("av__cell--active");
-        if (groupID === selection.anchor.groupID && rowElement.dataset.id === selection.anchor.rowID &&
-            cellElement.dataset.colId === selection.anchor.colID) {
+        if (groupID === active.groupID && rowElement.dataset.id === active.rowID &&
+            cellElement.dataset.colId === active.colID) {
             cellElement.classList.add("av__cell--select");
         }
         if (groupID === selection.focus.groupID && rowElement.dataset.id === selection.focus.rowID &&

@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20261026182843"
+		"updated": "20261118224805"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261009182324-t1r641c",
-				"updated": "20261026182843"
+				"updated": "20261114162405"
 			},
 			"Children": [
 				{
@@ -65,6 +65,70 @@
 				{
 					"Type": "NodeText",
 					"Data": "Keyword and query syntax searches support block-type, notebook and document-path filters, including child documents, as well as sorting, grouping and replacement. Content-order sorting is available only when grouping by document. An exact block ID follows the same notebook, document-path, block-type, subtype and ignore filters. Multi-keyword searches in keyword mode match %, _ and backslashes literally. Grouping by document organizes only the current page and keeps the pagination unit of the selected search method; with block-based pagination, matches from one document can span several pages."
+				}
+			]
+		},
+		{
+			"ID": "20261114162405-28b48a6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261114162405-28b48a6",
+				"updated": "20261115223610"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the search panel, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Grouped results"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Expand by default"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Collapse by default"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Groups are expanded by default. This preference applies only when grouping by document. New searches and refreshed results follow this preference; you can still expand or collapse groups manually. The first result remains available in the desktop preview, and keyboard navigation expands the group containing the selected result."
+				}
+			]
+		},
+		{
+			"ID": "20261118224805-tz4wptt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118224805-tz4wptt",
+				"updated": "20261118224805"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the first highlighted match would be cut off in a single-line search result, the list shortens the text before it to bring the match into view."
 				}
 			]
 		},
@@ -101,7 +165,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261010113646-apg2y00",
-				"updated": "20261010113646"
+				"updated": "20261113013235"
 			},
 			"Children": [
 				{
@@ -115,7 +179,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to insert a newline. Keep the newline after a -- line comment so that the following statement is not treated as a comment. The search window requires complete block columns, such as SELECT b.* FROM blocks b; use the agent's sql.query for projections or aggregates."
+					"Data": " to insert a newline. Keep the newline after a -- line comment so that the following statement is not treated as a comment. Other search methods use a single line: pasted line breaks and line breaks remaining after leaving SQL mode become spaces. The search window requires complete block columns, such as SELECT b.* FROM blocks b; use the agent's sql.query for projections or aggregates."
 				}
 			]
 		},
@@ -143,7 +207,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Controls that do not apply to the selected method are disabled with an explanatory tooltip. SQL and semantic search hide the replacement row while keeping its text and expanded state, which are restored when returning to a method that supports replacement. Saving and resetting query conditions remain available."
+					"Data": "Controls that do not apply to the selected method are disabled with an explanatory tooltip. SQL and semantic search hide the replacement row while keeping its text and expanded state, which are restored when returning to a method that supports replacement. Saving and resetting query conditions remain available through the buttons in desktop search and the More menu on mobile. Sorting and grouping are remembered when search is reopened and are included in saved query conditions; the desktop result layout is remembered separately. Turning off document grouping switches content-order sorting to type sorting; other sort orders are retained."
 				}
 			]
 		},

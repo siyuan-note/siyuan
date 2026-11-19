@@ -12,7 +12,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     const check: typeof assert = require("node:assert/strict");
     document.head.innerHTML = `<style>${css}</style>`;
     document.body.innerHTML = '<div class="sy__agentChat' + (mobile ? " sy__agentChat--mobile" : "") +
-        '" style="position:absolute;left:20px;top:20px;width:360px;height:400px">' +
+        '" style="position:absolute;left:80px;top:20px;width:360px;height:400px">' +
         '<div class="agent-chat__messages-wrap" style="height:100%">' +
         '<div class="agent-chat__messages"><button id="copy" style="position:absolute">Copy</button></div>' +
         '<span class="agent-chat__scroll-bottom agent-chat__scroll-bottom--visible"></span></div></div>' +
@@ -46,7 +46,10 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     chat.messagesContainer.addEventListener("scroll", () => chat.updateActiveMarker());
     chat.entries = [
         {type: "user", id: "first", content: 'First <img src=x> & "quoted" %2F'},
-        {type: "assistant", id: "answer", content: "Answer"},
+        {type: "assistant", id: "intermediate", content: "Intermediate response"},
+        {type: "thinking", id: "thinking", content: "Private reasoning"},
+        {type: "assistant", id: "answer", content: 'Answer <img src=x> & "quoted"'},
+        {type: "assistant", id: "tool", content: ""},
         {type: "user", id: "second", content: "Second question"},
     ];
     for (const id of ["first", "second"]) {
@@ -80,14 +83,38 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     const initialWidth = rail.getBoundingClientRect().width;
     const first = markers[0].getBoundingClientRect();
     check.ok(first.height >= 8, "markers have a usable click height");
+    check.equal(getComputedStyle(rail).pointerEvents, "none", "the collapsed painting space cannot intercept clicks");
     await move(first.left + first.width / 2, first.top + first.height / 2);
     check.equal(getComputedStyle(tip).animationName, "none", "navigation previews appear without a delayed animation");
-    check.equal(rail.getBoundingClientRect().width, initialWidth, "hover never expands the clickable rail");
-    check.ok(initialWidth <= 24);
+    check.equal(rail.getBoundingClientRect().width, initialWidth, "hover never shifts marker layout");
+    check.ok(first.width <= 24, "collapsed markers have narrow hit targets");
+    check.equal(getComputedStyle(rail).pointerEvents, "auto", "hover activates the whole expanded rail");
     check.equal(chat.messagesContainer.scrollTop, 0, "hover never jumps");
     check.equal(tip.classList.contains("fn__none"), false);
-    check.equal(tip.textContent, chat.entries[0].content, "preview preserves literal HTML, quotes and percent sequences");
-    check.equal(tip.children.length, 0, "message content cannot create interactive preview elements");
+    check.equal(tip.querySelector(".agent-chat__nav-title").textContent, chat.entries[0].content,
+        "preview preserves literal HTML, quotes and percent sequences");
+    check.equal(tip.querySelector(".agent-chat__nav-summary").textContent, chat.entries[3].content,
+        "preview uses the last nonempty response in this turn and excludes thinking and tool-only entries");
+    check.equal(tip.querySelectorAll("img, a, button").length, 0, "message content cannot create interactive preview elements");
+    check.equal(markers[0].style.getPropertyValue("--nav-scale"), "4.2");
+    check.ok(Math.abs(parseFloat(markers[1].style.getPropertyValue("--nav-scale")) - 3.4) < 0.001);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    const paint = getComputedStyle(markers[0], "::before");
+    const scale = new DOMMatrix(paint.transform).a;
+    const paintLeft = first.right - parseFloat(paint.right) - parseFloat(paint.width) * scale;
+    check.ok(scale >= 4, "the hovered line grows to at least four times its resting width");
+    check.ok(paintLeft >= rail.getBoundingClientRect().left, "the extended line stays inside the scroll clip");
+    check.ok(tip.getBoundingClientRect().right < paintLeft, "the preview leaves the whole extended line visible");
+    const expandedX = paintLeft + 2;
+    await move(expandedX, first.top + first.height / 2);
+    check.equal(tip.querySelector(".agent-chat__nav-title").textContent, chat.entries[0].content,
+        "moving sideways onto the extended line keeps the preview open");
+    const lower = markers[1].getBoundingClientRect();
+    await move(expandedX, lower.top + lower.height / 2);
+    check.equal(tip.textContent, "Second question", "moving vertically in the expanded area activates another question");
+    await move(expandedX, first.top + first.height / 2);
+    check.equal(tip.querySelector(".agent-chat__nav-title").textContent, chat.entries[0].content,
+        "the expanded area supports switching back without reentering the narrow markers");
     check.equal(getComputedStyle(tip).pointerEvents, "none", "preview cannot intercept clicks");
     const next = markers[1].getBoundingClientRect();
     check.ok(Math.abs(first.bottom - next.top) < 0.1, "adjacent hit targets have no gap");
@@ -95,7 +122,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     for (let y = Math.ceil(first.top + first.height / 2); y < next.bottom; y++) {
         await move(first.left + first.width / 2, y);
         check.equal(tip.classList.contains("fn__none"), false, "preview stays visible between lines");
-        check.equal(tip.textContent, y < next.top ? chat.entries[0].content : "Second question",
+        check.equal(tip.querySelector(".agent-chat__nav-title").textContent, y < next.top ? chat.entries[0].content : "Second question",
             `preview at y=${y}, next marker starts at ${next.top}`);
     }
     // 分数缩放下接缝的命中会被浏览器反复改判，预览必须由坐标解析并保持稳定。
@@ -103,12 +130,13 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     const seamTexts = new Set<string>();
     for (let i = 0; i < 20; i++) {
         rail.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientY: seam - 0.001}));
-        seamTexts.add(tip.textContent || "");
+        seamTexts.add(tip.querySelector(".agent-chat__nav-title").textContent || "");
     }
     check.equal(seamTexts.size, 1, "preview never alternates around a marker seam");
     check.equal(Array.from(seamTexts)[0], chat.entries[0].content, "a coordinate above the seam previews the upper marker");
     rail.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientY: seam + 0.001}));
     check.equal(tip.textContent, "Second question", "a coordinate below the seam previews the lower marker");
+    check.equal(tip.querySelector(".agent-chat__nav-summary"), null, "unanswered questions do not reuse an earlier response");
     check.equal((chat.resolveNavMarker(seam - 0.001) as HTMLElement).dataset.messageId, "first",
         "click resolution above the seam matches the preview");
     check.equal((chat.resolveNavMarker(seam + 0.001) as HTMLElement).dataset.messageId, "second",
@@ -126,11 +154,13 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
         "the copy control remains the hit target beneath the visible preview");
     await click(copyRect.left + 5, copyRect.top + 5);
     check.equal(copied, 1, "copying beside navigation still works");
+    check.equal(markers[0].style.getPropertyValue("--nav-scale"), "", "leaving restores the short lines");
+    check.equal(getComputedStyle(rail).pointerEvents, "none", "leaving restores the narrow activation area");
     check.equal(chat.messagesContainer.scrollTop, 0, "copying never jumps");
     const second = markers[1].getBoundingClientRect();
     await move(second.left + 10, second.top + 4);
     check.equal(tip.textContent, "Second question", "hover updates only the selected message preview");
-    await click(second.left + 10, second.top + 0.5);
+    await click(second.left - 20, second.top + 0.5);
     await new Promise(resolve => setTimeout(resolve, 800));
     check.ok(chat.messagesContainer.scrollTop > 0, "clicking a marker scrolls to its message");
     check.ok(chat.messagesContainer.querySelector('[data-message-id="second"]').classList.contains("agent-chat__msg--jumped"));
@@ -252,7 +282,7 @@ test("agent navigation keeps previews outside its click targets, paints short li
     const source = createSourceFile("AgentChat.ts", readFileSync(path.join(__dirname, "AgentChat.ts"), "utf8"),
         ScriptTarget.Latest, true);
     const methods: string[] = [];
-    const names = new Set(["initNavRail", "resolveNavMarker", "showNavPreview", "resetNavPreview",
+    const names = new Set(["initNavRail", "resolveNavMarker", "showNavPreview", "resetNavPreview", "updateNavEmphasis",
         "rebuildNavMarkers", "updateActiveMarker", "jumpToMessage"]);
     const visit = (node: import("typescript").Node) => {
         if (isMethodDeclaration(node) && names.has(node.name.getText(source))) methods.push(node.getText(source));

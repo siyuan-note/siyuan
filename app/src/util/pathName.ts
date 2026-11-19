@@ -1,7 +1,7 @@
 import {toggleMenu} from "../menus/menuToggle";
 import * as path from "path";
 import {fetchPost, fetchSyncPost} from "./fetch";
-import {MobileDialog as Dialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog as Dialog} from "../dialog/adaptiveDialog";
 import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "./escape";
 import {genFileTreeDocAriaLabel} from "./fileTreeTooltip";
 import {isMobile} from "./functions";
@@ -24,6 +24,7 @@ import {getHostCapabilities} from "./hostCapabilities";
 import {highlightSearchText} from "./searchHighlight";
 import {addClearButton} from "./addClearButton";
 import {normalizeSiYuanUri} from "./normalizeSiYuanUri";
+import {isNodeID} from "./nodeID";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     if (!getHostCapabilities().localFileSystem) {
@@ -69,16 +70,16 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
             return null;
         }
         const uriObj = normalizeSiYuanUri(parsedURI);
-        if (uriObj.hostname === "blocks" && /^\/\d{14}-\w{7}/.test(uriObj.pathname)) {
+        const id = uriObj.pathname.substring(1, 23);
+        if (uriObj.hostname === "blocks" && uriObj.pathname.startsWith("/") && isNodeID(id)) {
             const avItemID = uriObj.searchParams.get("avItemID") || undefined;
             const avViewID = uriObj.searchParams.get("avViewID") || undefined;
             const avGroupID = uriObj.searchParams.get("avGroupID") || undefined;
-            const isNodeID = (id?: string) => !id || /^\d{14}-\w{7}$/.test(id);
-            if (!isNodeID(avItemID) || !isNodeID(avViewID) || !isNodeID(avGroupID)) {
+            if ([avItemID, avViewID, avGroupID].some(value => value && !isNodeID(value))) {
                 return null;
             }
             return {
-                id: uriObj.pathname.substring(1, 1 + 22),
+                id,
                 focus: uriObj.searchParams.get("focus") === "1",
                 fullscreen: uriObj.searchParams.get("fullscreen") === "1",
                 avItemID,

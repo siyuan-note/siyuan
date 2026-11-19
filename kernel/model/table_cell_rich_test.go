@@ -252,7 +252,7 @@ func TestAttributeViewRichTextExport(t *testing.T) {
 	cell := tree.Root.FirstChild.LastChild.LastChild
 	value := &av.ValueText{Content: "foo\n123\n123", Rich: &av.ValueTextRich{
 		Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
-		Content: "**foo**\n\n- 123\n  - 123",
+		Content: "**foo** ![picture](assets/field.png)\n\n- 123\n  - 123",
 	}}
 	if err := appendAttributeViewRichTextExport(cell, value, true); err != nil {
 		t.Fatal(err)
@@ -281,6 +281,9 @@ func TestAttributeViewRichTextExport(t *testing.T) {
 				listMarker, boldMarker = `data-type="NodeList"`, `data-type="strong"`
 			}
 			text := luteEngine.HTML2Text(output)
+			if !strings.Contains(output, "assets/field.png") {
+				t.Fatalf("database text field image missing from %s", name)
+			}
 			if strings.Count(output, listMarker) != 2 || !strings.Contains(output, boldMarker) ||
 				!strings.Contains(text, "foo") || strings.Count(text, "123") != 2 {
 				t.Fatalf("database rich text lost nested lists or formatting (markers %q/%q): %s", listMarker, boldMarker, output)

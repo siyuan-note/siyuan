@@ -394,6 +394,7 @@ func registerTagRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/tag/removeTag", contractRouteHandlers(apicontract.RemoveTag, removeTag)...)
 	ginServer.Handle("POST", "/api/tag/previewTagRemoval", contractRouteHandlers(apicontract.PreviewTagRemoval, previewTagRemoval)...)
 	ginServer.Handle("POST", "/api/tag/removeTagWithCollections", contractRouteHandlers(apicontract.RemoveTagWithCollections, removeTagWithCollections)...)
+	ginServer.Handle("POST", "/api/tag/batchRemoveTag", contractRouteHandlers(apicontract.BatchRemoveTag, batchRemoveTag)...)
 }
 
 // registerLuteRoutes 注册本域的契约路由。
@@ -616,6 +617,9 @@ func registerAssetRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/asset/getMissingAssets", contractRouteHandlers(apicontract.GetMissingAssets, getMissingAssets)...)
 	ginServer.Handle("POST", "/api/asset/removeUnusedAsset", contractRouteHandlers(apicontract.RemoveUnusedAsset, removeUnusedAsset)...)
 	ginServer.Handle("POST", "/api/asset/removeUnusedAssets", contractRouteHandlers(apicontract.RemoveUnusedAssets, removeUnusedAssets)...)
+	ginServer.Handle("POST", "/api/asset/getAssetCleanupIgnore", contractRouteHandlers(apicontract.GetAssetCleanupIgnore, getAssetCleanupIgnore)...)
+	ginServer.Handle("POST", "/api/asset/setAssetCleanupIgnore", contractRouteHandlers(apicontract.SetAssetCleanupIgnore, setAssetCleanupIgnore)...)
+	ginServer.Handle("POST", "/api/asset/addAssetCleanupIgnore", contractRouteHandlers(apicontract.AddAssetCleanupIgnore, addAssetCleanupIgnore)...)
 	ginServer.Handle("POST", "/api/asset/getDocImageAssets", contractRouteHandlers(apicontract.GetDocImageAssets, getDocImageAssets)...)
 	ginServer.Handle("POST", "/api/asset/getDocPreviewImages", contractRouteHandlers(apicontract.GetDocPreviewImages, getDocPreviewImages)...)
 	ginServer.Handle("POST", "/api/asset/startLivePhotoPreview", contractRouteHandlers(apicontract.StartLivePhotoPreview, startLivePhotoPreview)...)
@@ -815,6 +819,8 @@ func registerRepoRoutes(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/tagSnapshot", contractRouteHandlers(apicontract.TagSnapshot, tagSnapshot)...)
 	ginServer.Handle("POST", "/api/repo/checkoutRepo", contractRouteHandlers(apicontract.CheckoutRepo, checkoutRepo)...)
 	ginServer.Handle("POST", "/api/repo/getRepoSnapshots", contractRouteHandlers(apicontract.GetRepoSnapshots, getRepoSnapshots)...)
+	ginServer.Handle("POST", "/api/repo/getPluginSnapshots", contractRouteHandlers(apicontract.GetPluginSnapshots, getPluginSnapshots)...)
+	ginServer.Handle("POST", "/api/repo/restorePluginSnapshot", contractRouteHandlers(apicontract.RestorePluginSnapshot, restorePluginSnapshot)...)
 	ginServer.Handle("POST", "/api/repo/searchRepoFile", contractRouteHandlers(apicontract.SearchRepoFile, searchRepoFile)...)
 	ginServer.Handle("POST", "/api/repo/getRepoDocHistory", contractRouteHandlers(apicontract.GetRepoDocHistory, getRepoDocHistory)...)
 	ginServer.Handle("POST", "/api/repo/getRepoTagSnapshots", contractRouteHandlers(apicontract.GetRepoTagSnapshots, getRepoTagSnapshots)...)

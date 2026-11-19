@@ -148,3 +148,32 @@ test("calendar templates preserve the field calendar rules while clipboard parsi
     value.renderedContent = formatDateDisplay(new Date(1800, 0, 2).valueOf(), "lunar");
     assert.equal(getCalendarDate(value, "full"), undefined);
 });
+
+test("localized months keep regex matching consistent under a Turkish default locale", () => {
+    const original = String.prototype.toLocaleLowerCase;
+    try {
+        String.prototype.toLocaleLowerCase = function (locale?: string | string[]) {
+            return original.call(this, locale ?? "tr");
+        };
+        setLanguage("tr.json");
+        window.siyuan.config = {lang: "tr"} as typeof window.siyuan.config;
+        for (const text of ["12 Ekim 2024", "12 EKIM 2024", "12 EKİM 2024"]) {
+            assert.equal(parseDateValue(text, "full").content, new Date(2024, 9, 12).valueOf(), text);
+        }
+        for (const text of ["12 Mayıs 2024", "12 MAYIS 2024"]) {
+            assert.equal(parseDateValue(text, "full").content, new Date(2024, 4, 12).valueOf(), text);
+        }
+        assert.equal(parseDateValue("32 EKIM 2024", "full").isNotEmpty, false);
+        assert.equal(parseDateValue("12 unknown 2024", "full").isNotEmpty, false);
+        setLanguage("en.json");
+        window.siyuan.config = {lang: "en_US"} as typeof window.siyuan.config;
+        assert.equal(parseDateValue("APRIL 12, 2024", "full").content, new Date(2024, 3, 12).valueOf());
+        const months = window.siyuan.languages._attrView.dateMonths.split("|");
+        months[0] = "A.pr(il)";
+        window.siyuan.languages._attrView.dateMonths = months.join("|");
+        assert.equal(parseDateValue("A.pr(il) 12, 2024", "full").content, new Date(2024, 0, 12).valueOf());
+        assert.equal(parseDateValue("Axpril 12, 2024", "full").isNotEmpty, false);
+    } finally {
+        String.prototype.toLocaleLowerCase = original;
+    }
+});

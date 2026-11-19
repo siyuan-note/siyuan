@@ -12,6 +12,7 @@ import {createMarkdownWindowChrome} from "./windowChrome";
 import {createMarkdownTooltips} from "./tooltip";
 import {createMarkdownSidebarShortcuts} from "./shortcuts";
 import {markdownWorkspaceChoice, createMarkdownAppearanceForm, createMarkdownFontAppearance} from "./appearance";
+import {showMarkdownResourceDirectories} from "./resourceDirectories";
 
 declare const SIYUAN_VERSION: string;
 (window as unknown as {SIYUAN_VERSION: string}).SIYUAN_VERSION = SIYUAN_VERSION;
@@ -56,6 +57,12 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     let fontChoice: MarkdownChoice = undefined;
     let fontsChoice: MarkdownChoice = undefined;
     let destroyAppearanceForm: () => void;
+    let destroyResourceDialog: () => void;
+    let resourceDialogPending = false;
+    let resourceDialogSequence = 0;
+    let resourcePromptTimer: ReturnType<typeof setTimeout>;
+    const promptedResources = new Set<string>();
+    const pendingResourcePrompts = new Set<string>();
     let appearanceMenu: ReturnType<typeof createMarkdownSubmenu> = undefined;
     let switching = false;
     let switchTask: Promise<boolean>;
@@ -84,6 +91,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             <button type="button" class="b3-menu__item" id="markdownSave"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconSave"></use></svg><span class="b3-menu__label" data-label="save"></span></button>
             <button type="button" class="b3-menu__item" id="markdownSaveAs"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconDownloadAssets"></use></svg><span class="b3-menu__label" data-label="saveAs"></span></button>
             <hr class="b3-menu__separator">
+            <button type="button" class="b3-menu__item" id="markdownFind"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconSearch"></use></svg><span class="b3-menu__label" data-label="search"></span></button>
             <button type="button" class="b3-menu__item" id="markdownInsertImage"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconImage"></use></svg><span class="b3-menu__label" data-label="insertImage"></span></button>
             <button type="button" class="b3-menu__item" id="markdownResources"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconKey"></use></svg><span class="b3-menu__label" data-label="markdownResources"></span></button>
             <button type="button" class="b3-menu__item" id="markdownRecovery" aria-expanded="false" aria-controls="markdownRecoveryPanel"><svg class="b3-menu__icon" aria-hidden="true"><use href="#iconHistory"></use></svg><span class="b3-menu__label" data-label="markdownRecovery"></span></button>
@@ -102,7 +110,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
 <footer class="markdown-footer" id="markdownFooter" hidden>
     <div class="markdown-status"><span id="markdownStatus" role="status" aria-live="polite"></span><span class="markdown-status__actions" id="markdownProblemActions"><button type="button" class="b3-button b3-button--text" id="markdownRetry" data-label="retry" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownReload" data-label="markdownReload" hidden></button><button type="button" class="b3-button b3-button--text" id="markdownOverwrite" data-label="markdownOverwrite" hidden></button></span></div>
 </footer>
-<dialog id="markdownAppearancePanel" class="b3-dialog b3-dialog--open markdown-appearance-dialog" hidden aria-labelledby="markdownAppearanceTitle"></dialog>`;
+<dialog id="markdownAppearancePanel" class="b3-dialog b3-dialog--open markdown-appearance-dialog" hidden aria-labelledby="markdownAppearanceTitle"></dialog>
+<dialog id="markdownResourcesPanel" class="b3-dialog b3-dialog--open markdown-appearance-dialog" hidden aria-labelledby="markdownResourcesTitle"></dialog>`;
     let tooltips: ReturnType<typeof createMarkdownTooltips>;
     const sidebarShortcuts = createMarkdownSidebarShortcuts({
         platform: bootstrap.platform, keymap: bootstrap.keymap,
@@ -128,6 +137,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     control("markdownEditor").inert = true;
     control("markdownMoreButton").setAttribute("aria-label", text("more"));
     control("markdownMoreButton").dataset.tooltip = text("more");
+    control("markdownFind").dataset.tooltipShortcut = bootstrap.platform === "darwin" || bootstrap.platform === "ios" ? "⌘F" : "Ctrl+F";
     for (const [id, label] of [["markdownUndo", "undo"], ["markdownRedo", "redo"], ["markdownOutlineToggle", "outline"]]) {
         control(id).setAttribute("aria-label", text(label));
         control(id).dataset.tooltip = text(label);
@@ -257,6 +267,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         updateSidebarShortcutHints();
         control<HTMLButtonElement>("markdownSaveAs").disabled = frozen || state.composing || problem?.kind === "indeterminate";
         control<HTMLButtonElement>("markdownInsertImage").disabled = frozen || state.composing || problem?.kind === "indeterminate";
+        control<HTMLButtonElement>("markdownFind").disabled = frozen || state.composing;
         modeChoice?.setDisabled(frozen || state.composing);
         if (targetGeneration !== state.targetGeneration) {
             targetGeneration = state.targetGeneration;
@@ -288,7 +299,11 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         if (disposed) return;
         frozen = value || switching || Boolean(pendingSwitch);
         clearTimeout(autoSave);
-        if (frozen) closeMore(false);
+        if (frozen) {
+            closeMore(false);
+            resourceDialogSequence++;
+            destroyResourceDialog?.();
+        }
         control("markdownEditor").inert = frozen;
         more.inert = frozen;
         control("markdownActions").inert = frozen;
@@ -298,13 +313,17 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         control("markdownProblemActions").inert = frozen && !pendingSwitch;
         tree?.freeze(frozen);
         render(session.getState());
-        if (!frozen) scheduleAutoSave();
+        if (!frozen) {scheduleAutoSave(); scheduleResourcePrompt();}
     };
 
     const windowChrome = createMarkdownWindowChrome({root, header, bridge: bridge.window, platform: bootstrap.platform, text, onError: reportError});
     // 窗口外壳独立于文档存活；仅重建编辑器，隔离同窗口不同文档的撤销历史和资源权限。
     const initializeDocument = async (next: MarkdownBootstrap) => {
         const generation = ++documentGeneration;
+        clearTimeout(resourcePromptTimer);
+        destroyResourceDialog?.();
+        promptedResources.clear();
+        pendingResourcePrompts.clear();
         const current = () => !disposed && generation === documentGeneration;
         if (bridge.appearance && next.appearance && next.appearance !== appearance) {
             appearance = next.appearance;
@@ -352,7 +371,13 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                     const result = await bridge.resolveResource(reference);
                     return current() ? result : undefined;
                 },
-                onResourceUnavailable: () => {if (current()) {resourceUnavailable = true; render(documentSession.getState());}},
+                onResourceUnavailable: reference => {
+                    if (!current()) return;
+                    resourceUnavailable = true; render(documentSession.getState());
+                    if (!reference || !bridge.resourceDirectories || promptedResources.has(reference)) return;
+                    pendingResourcePrompts.add(reference);
+                    scheduleResourcePrompt();
+                },
                 onLink: url => {if (current()) void bridge.openLink(url).catch(() => {if (current()) reportError();});},
                 onEditPending(pending) {
                     if (!current()) return;
@@ -481,6 +506,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     action("markdownUndo", () => editor.undo());
     action("markdownRedo", () => editor.redo());
     action("markdownOutlineToggle", () => editor.setOutline(!outline.enabled));
+    action("markdownFind", () => editor.openFind());
     action("markdownSaveAs", saveAs);
     action("markdownInsertImage", async () => {
         if (frozen || editor.flush().composing) return;
@@ -521,14 +547,49 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         if (problem?.kind === "conflict" && problem.baseline && await bridge.confirm("overwrite") &&
             !disposed && generation === documentGeneration) await currentSession.overwrite(problem.baseline);
     });
-    action("markdownResources", async () => {
+    const authorizeResources = async (automatic = false) => {
+        if (resourceDialogPending) return;
         const generation = documentGeneration;
-        if (await bridge.authorizeResources() && !disposed && generation === documentGeneration) {
+        const sequence = ++resourceDialogSequence;
+        const current = () => !disposed && generation === documentGeneration && sequence === resourceDialogSequence;
+        const refresh = () => {
+            if (!current()) return;
             resourceUnavailable = false;
             editor.refreshResources();
             render(session.getState());
+        };
+        if (!bridge.resourceDirectories || !bridge.confirmResourceDirectories) {
+            if (await bridge.authorizeResources()) refresh();
+            return;
         }
-    });
+        resourceDialogPending = true;
+        try {
+            pendingResourcePrompts.clear();
+            const references = editor.resourceReferences();
+            references.forEach(reference => {promptedResources.add(reference); pendingResourcePrompts.delete(reference);});
+            const directories = await bridge.resourceDirectories(references);
+            if (!current() || frozen) return;
+            if (automatic && !directories.length) return;
+            await new Promise<void>(resolve => {
+                destroyResourceDialog = showMarkdownResourceDirectories(control<HTMLDialogElement>("markdownResourcesPanel"), directories, text,
+                    ids => current() && !frozen ? bridge.confirmResourceDirectories(ids) : Promise.resolve(false), authorized => {
+                        destroyResourceDialog = undefined;
+                        if (authorized) refresh();
+                        else void bridge.confirmResourceDirectories([]).catch((): void => undefined);
+                        if (current()) moreButton.focus();
+                        resolve();
+                    });
+            });
+        } finally {resourceDialogPending = false; scheduleResourcePrompt();}
+    };
+    function scheduleResourcePrompt() {
+        clearTimeout(resourcePromptTimer);
+        if (disposed || frozen || resourceDialogPending || !pendingResourcePrompts.size) return;
+        resourcePromptTimer = setTimeout(() => {
+            if (!disposed && !frozen && !resourceDialogPending) runAction(() => authorizeResources(true));
+        }, 150);
+    }
+    action("markdownResources", () => authorizeResources());
 
     const showRecoveries = async (show = true) => {
         control("markdownRecoveryPanel").hidden = !show;
@@ -661,6 +722,9 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
 
     const protectExit = async (kind: "close" | "prepare-quit"): Promise<boolean> => {
         const sequence = ++exitSequence;
+        resourceDialogSequence++;
+        clearTimeout(resourcePromptTimer);
+        destroyResourceDialog?.();
         await pendingFileAction;
         if (disposed || sequence !== exitSequence || (preparing && !prepared)) return false;
         if (prepared && kind === "close") {
@@ -853,14 +917,16 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     unsubscribeInitialization();
     const unsubscribe = bridge.onCommand(message => { void command(message).catch(reportError); });
     const shortcut = (event: KeyboardEvent) => {
-        if (control<HTMLDialogElement>("markdownAppearancePanel").open) return;
+        if (control<HTMLDialogElement>("markdownAppearancePanel").open || control<HTMLDialogElement>("markdownResourcesPanel").open) return;
         if (sidebarShortcuts.handle(event)) return;
         const modifier = bootstrap.platform === "darwin" || bootstrap.platform === "ios" ? event.metaKey : event.ctrlKey;
-        if (!modifier || event.altKey || event.isComposing || !/^[nos]$/i.test(event.key)) return;
+        if (!modifier || event.altKey || event.isComposing || !/^[nosf]$/i.test(event.key)) return;
+        if (event.key.toLowerCase() === "f" && event.shiftKey) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         if (frozen || editor.flush().composing) return;
         closeMore();
+        if (event.key.toLowerCase() === "f") {editor.openFind(); return;}
         const run = event.key.toLowerCase() === "n" ? () => bridge.newDocument() :
             event.key.toLowerCase() === "o" ? () => bridge.openDocument() : event.shiftKey ? () => saveAs() : save;
         runAction(async () => { await run(); }, event.key.toLowerCase() === "s", event.key.toLowerCase() !== "s");
@@ -876,6 +942,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
         tree?.destroy(); modeChoice?.destroy(); appearanceMenu?.destroy(); themeChoice?.destroy(); fontChoice?.destroy(); fontsChoice?.destroy();
         fontAppearance.destroy();
         destroyAppearanceForm?.();
+        clearTimeout(resourcePromptTimer);
+        destroyResourceDialog?.();
         windowChrome?.destroy();
         editor?.destroy();
     }

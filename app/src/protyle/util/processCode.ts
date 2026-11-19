@@ -18,6 +18,7 @@ import {renderImageActions} from "../render/imageActions";
 import {renderImageDisplay} from "../render/imageDisplay";
 import {renderMediaResize} from "../render/mediaResize";
 import {renderBlockDirection} from "../render/blockDirection";
+import {renderTableCorners} from "../render/tableCorners";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
@@ -88,6 +89,7 @@ export const processRender = (previewPanel: Element) => {
     renderLongTextRuns(previewPanel);
     renderEmbedHeadings(previewPanel);
     renderTableCellRichElements(previewPanel);
+    renderTableCorners(previewPanel);
     // 受限 Lite 编辑器只渲染公式，代码围栏始终作为源码编辑，不能执行图表或 HTML。
     if (previewPanel.closest('[data-protyle-lite-render="safe"]')) {
         mathRender(previewPanel);

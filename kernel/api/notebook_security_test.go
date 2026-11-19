@@ -527,3 +527,189 @@ func TestGetEncryptedNotebookStatusAuthorization(t *testing.T) {
 		})
 	}
 }
+
+func TestGetNotebookConfHidesCreationTargetsFromReader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldConf, oldDataDir := model.Conf, util.DataDir
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	t.Cleanup(func() {
+		model.Conf, util.DataDir = oldConf, oldDataDir
+	})
+
+	const boxID = "20260724000001-abcdefh"
+	const saveBoxID = "20260724000002-savebx1"
+	boxConf := conf.NewBoxConf()
+	boxConf.Name = "Visible notebook"
+	boxConf.Closed = false
+	boxConf.DocCreateSaveBox = saveBoxID
+	boxConf.DocCreateSavePath = "/private/doc-save"
+	boxConf.DocCreateTemplatePath = "/private/doc-template.sy"
+	boxConf.RefCreateSaveBox = saveBoxID
+	boxConf.RefCreateSavePath = "/private/ref-save"
+	boxConf.DailyNoteSavePath = "/private/daily"
+	boxConf.DailyNoteTemplatePath = "/private/daily-template.sy"
+	boxConfPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
+	if err := os.MkdirAll(filepath.Dir(boxConfPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	data, err := json.Marshal(boxConf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(boxConfPath, data, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name        string
+		role        model.Role
+		keepTargets bool
+	}{
+		{name: "reader", role: model.RoleReader},
+		{name: "administrator", role: model.RoleAdministrator, keepTargets: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(func(c *gin.Context) {
+				c.Set(model.RoleContextKey, test.role)
+				c.Next()
+			})
+			engine.POST("/api/notebook/getNotebookConf", getNotebookConf)
+
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(
+				http.MethodPost,
+				"/api/notebook/getNotebookConf",
+				strings.NewReader(`{"notebook":"`+boxID+`"}`),
+			)
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			response := &struct {
+				Code int `json:"code"`
+				Data struct {
+					Conf *conf.BoxConf `json:"conf"`
+				} `json:"data"`
+			}{}
+			requireAPIContract(t, http.MethodPost, "/api/notebook/getNotebookConf", recorder)
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if 0 != response.Code || nil == response.Data.Conf {
+				t.Fatalf("unexpected notebook configuration response: %s", recorder.Body.String())
+			}
+			got := response.Data.Conf
+			if boxConf.Name != got.Name {
+				t.Fatalf("functional notebook settings were changed: %#v", got)
+			}
+			if test.keepTargets {
+				if saveBoxID != got.DocCreateSaveBox || boxConf.DocCreateSavePath != got.DocCreateSavePath ||
+					boxConf.DocCreateTemplatePath != got.DocCreateTemplatePath ||
+					boxConf.RefCreateSaveBox != got.RefCreateSaveBox || boxConf.RefCreateSavePath != got.RefCreateSavePath ||
+					boxConf.DailyNoteSavePath != got.DailyNoteSavePath ||
+					boxConf.DailyNoteTemplatePath != got.DailyNoteTemplatePath {
+					t.Fatalf("administrator did not receive notebook creation targets: %#v", got)
+				}
+				return
+			}
+			if "" != got.DocCreateSaveBox || "" != got.DocCreateSavePath || "" != got.DocCreateTemplatePath ||
+				"" != got.RefCreateSaveBox || "" != got.RefCreateSavePath ||
+				"" != got.DailyNoteSavePath || "" != got.DailyNoteTemplatePath {
+				t.Fatalf("reader received notebook creation targets: %s", recorder.Body.String())
+			}
+		})
+	}
+}
+
+// TestListNotebooksFlashcardFiltersUnpublishedForReader 验证发布读者通过闪卡列表也看不到
+// 隐藏或禁止发布的笔记本，且不会拿到超出发布范围的闪卡计数。
+func TestListNotebooksFlashcardFiltersUnpublishedForReader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldConf, oldDataDir, oldGetFlashcardNotebooks := model.Conf, util.DataDir, getFlashcardNotebooks
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	t.Cleanup(func() {
+		if err := model.SetPublishAccess(model.PublishAccess{}); err != nil {
+			t.Errorf("reset publish access failed: %v", err)
+		}
+		getFlashcardNotebooks = oldGetFlashcardNotebooks
+		model.Conf, util.DataDir = oldConf, oldDataDir
+	})
+
+	const (
+		publicID    = "20261116000000-publica"
+		hiddenID    = "20261116000001-hiddenx"
+		forbiddenID = "20261116000002-forbidd"
+	)
+	if err := model.SetPublishAccess(model.PublishAccess{
+		{ID: hiddenID, Visible: false},
+		{ID: forbiddenID, Visible: false, Disable: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	getFlashcardNotebooks = func() []*model.Box {
+		return []*model.Box{
+			{ID: publicID, Name: "Public", NewFlashcardCount: 5, DueFlashcardCount: 4, FlashcardCount: 9},
+			{ID: hiddenID, Name: "Hidden", NewFlashcardCount: 3, DueFlashcardCount: 2, FlashcardCount: 5},
+			{ID: forbiddenID, Name: "Forbidden", NewFlashcardCount: 1, DueFlashcardCount: 1, FlashcardCount: 2},
+		}
+	}
+
+	request := func(role model.Role) []*model.Box {
+		t.Helper()
+
+		engine := gin.New()
+		engine.Use(func(c *gin.Context) {
+			c.Set(model.RoleContextKey, role)
+			c.Next()
+		})
+		engine.POST("/api/notebook/lsNotebooks", lsNotebooks)
+
+		recorder := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, "/api/notebook/lsNotebooks", strings.NewReader(`{"flashcard":true}`))
+		httpRequest.Header.Set("Content-Type", "application/json")
+		engine.ServeHTTP(recorder, httpRequest)
+		requireAPIContract(t, http.MethodPost, "/api/notebook/lsNotebooks", recorder)
+
+		response := &struct {
+			Code int `json:"code"`
+			Data struct {
+				Notebooks []*model.Box `json:"notebooks"`
+			} `json:"data"`
+		}{}
+		if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+			t.Fatalf("unmarshal response failed: %v", err)
+		}
+		if 0 != response.Code {
+			t.Fatalf("unexpected response: %s", recorder.Body.String())
+		}
+		return response.Data.Notebooks
+	}
+
+	reader := request(model.RoleReader)
+	if 1 != len(reader) || publicID != reader[0].ID {
+		t.Fatalf("reader saw unpublished flashcard notebooks: %+v", reader)
+	}
+	if 0 != reader[0].NewFlashcardCount || 0 != reader[0].DueFlashcardCount || 0 != reader[0].FlashcardCount {
+		t.Fatalf("reader saw flashcard counts beyond the publish scope: %+v", reader[0])
+	}
+
+	administrator := request(model.RoleAdministrator)
+	if 3 != len(administrator) {
+		t.Fatalf("administrator saw %d notebooks, want 3", len(administrator))
+	}
+	counts := map[string]int{}
+	for _, notebook := range administrator {
+		counts[notebook.ID] = notebook.FlashcardCount
+	}
+	if 9 != counts[publicID] || 5 != counts[hiddenID] || 2 != counts[forbiddenID] {
+		t.Fatalf("administrator flashcard counts changed: %+v", counts)
+	}
+}

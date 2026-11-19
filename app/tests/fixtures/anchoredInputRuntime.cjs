@@ -8,6 +8,7 @@ const compileAnchoredInputRuntime = (entry = "./anchoredInput") => {
         ["./anchoredInputPosition", "dialog/anchoredInputPosition"],
         ["../util/functions", "util/functions"],
         ["./hostCapabilities", "util/hostCapabilities"],
+        ["../menus/overlayOwnership", "menus/overlayOwnership"],
     ].map(([name, file]) => [name,
         ts.transpileModule(readFileSync(path.join(__dirname, "../../src", file + ".ts"), "utf8"), {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
@@ -30,8 +31,10 @@ const compileAnchoredInputRuntime = (entry = "./anchoredInput") => {
 
 const withAnchoredInputRuntime = source => `
     const anchoredInputRuntime = ${compileAnchoredInputRuntime()};
+    const overlayOwnership = ${compileAnchoredInputRuntime("../menus/overlayOwnership")};
     const parentRequire = require;
-    require = name => name === "./anchoredInput" ? anchoredInputRuntime : parentRequire(name);
+    require = name => name === "./anchoredInput" ? anchoredInputRuntime :
+        name === "../menus/overlayOwnership" ? overlayOwnership : parentRequire(name);
     ${source}`;
 
 module.exports = {compileAnchoredInputRuntime, withAnchoredInputRuntime};

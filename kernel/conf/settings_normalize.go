@@ -20,6 +20,9 @@ func NormalizeFileTree(fileTree *FileTree) *FileTree {
 	if fileTree.CloseWindowOnLastTabClosed == nil {
 		fileTree.CloseWindowOnLastTabClosed = NewFileTree().CloseWindowOnLastTabClosed
 	}
+	if fileTree.RestoreDocPosition == nil {
+		fileTree.RestoreDocPosition = NewFileTree().RestoreDocPosition
+	}
 	if fileTree.MaxListCount < 1 {
 		fileTree.MaxListCount = 512
 	}
@@ -83,6 +86,12 @@ func NormalizeEditor(editor *Editor) *Editor {
 	}
 	if editor.BackmentionSort == nil {
 		editor.BackmentionSort = defaults.BackmentionSort
+	}
+	if editor.DatabaseShowIcon == nil {
+		editor.DatabaseShowIcon = defaults.DatabaseShowIcon
+	}
+	if editor.DatabaseShowRelationIcon == nil {
+		editor.DatabaseShowRelationIcon = defaults.DatabaseShowRelationIcon
 	}
 	if editor.DatabaseAttrShow == nil {
 		editor.DatabaseAttrShow = defaults.DatabaseAttrShow

@@ -103,3 +103,17 @@ test("font picker hides empty spacing, keeps its spinner during search, and expo
     assert.equal(chips.hidden, true);
     picker.destroy();
 });
+
+test("font matching is independent of the default Turkish case mapping", () => {
+    const original = String.prototype.toLocaleLowerCase;
+    try {
+        String.prototype.toLocaleLowerCase = function (locale?: string | string[]) {
+            return original.call(this, locale ?? "tr");
+        };
+        const fonts = [{family: "Inter", displayName: "Inter", weight: 400}];
+        assert.equal(filterMarkdownFonts(fonts, "inter", false, []).length, 1);
+        assert.equal(filterMarkdownFonts(fonts, "INTER", false, []).length, 1);
+    } finally {
+        String.prototype.toLocaleLowerCase = original;
+    }
+});

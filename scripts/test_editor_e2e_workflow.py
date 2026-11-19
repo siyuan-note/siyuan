@@ -358,13 +358,15 @@ class EditorWorkflowTests(unittest.TestCase):
             self.assertIn("if: always()", step)
         self.assertNotIn('e2e_shards: "main:6806"', job("build"))
 
-    def test_macos_packaging_and_e2e_depend_only_on_raw_builds(self):
+    def test_macos_consumers_preserve_raw_builds_and_serial_packaging(self):
         package = (ROOT / ".github/workflows/desktop-package.yml").read_text(encoding="utf-8")
         for architecture, tests in [("amd64", "main_e2e"), ("arm64", "editor_e2e")]:
             build = job(f"build_macos_{architecture}")
             self.assertIn("runtime_only: true", build)
-            for consumer in [job(f"package_macos_{architecture}"), job(tests)]:
-                self.assertIn(f"needs: [prepare, build_macos_{architecture}]", consumer)
+            for name in [f"package_macos_{architecture}", tests]:
+                consumer = job(name)
+                dependency = ", package_macos_amd64" if name == "package_macos_arm64" else ""
+                self.assertIn(f"needs: [prepare, build_macos_{architecture}{dependency}]", consumer)
                 self.assertIn("${{ needs.prepare.outputs.testing_ref }}", consumer)
             self.assertIn(f"name: desktop-runtime-macos-{architecture}", job(tests))
         self.assertNotIn("go build", package)
@@ -375,6 +377,23 @@ class EditorWorkflowTests(unittest.TestCase):
         # Test artifacts may be downloaded for summaries, but release package names stay unchanged.
         self.assertIn("pattern: siyuan-*", job("create_release"))
         self.assertNotIn("name: siyuan-", DESKTOP.split("- name: Upload raw macOS runtime", 1)[1].split("      - ", 1)[0])
+
+    def test_serial_packaging_does_not_propagate_independent_failure(self):
+        package = job("package_macos_arm64")
+        expression = re.search(r"if: >-\s*\$\{\{(.*?)\}\}", package, re.S).group(1)
+        expression = expression.replace("always()", "True").replace("!cancelled()", "not cancelled")
+        expression = expression.replace("&&", " and ")
+        expression = re.sub(r"needs\.([\w-]+)\.result", r'results["\1"]', expression)
+        expression = compile(" ".join(expression.split()), "packaging condition", "eval")
+        states = ["success", "failure", "skipped", "cancelled"]
+        for prepare, build, previous, cancelled in itertools.product(states, states, states, [False, True]):
+            results = {"prepare": prepare, "build_macos_arm64": build, "package_macos_amd64": previous}
+            expected = not cancelled and prepare == build == "success" and previous != "cancelled"
+            self.assertEqual(eval(expression, {"__builtins__": {}}, {"results": results, "cancelled": cancelled}), expected)
+        # 两个 main、两个 editor 和一个封装任务可同时运行，封装间依赖不能回到测试链。
+        for name in ["main_e2e", "editor_e2e", "package_macos_amd64"]:
+            dependencies = re.search(r"needs: \[(.*?)\]", job(name)).group(1)
+            self.assertNotIn("package_macos", dependencies)
 
     @unittest.skipUnless(os.name == "posix" and all(shutil.which(tool) for tool in ["bash", "node", "tar", "shasum"]),
                          "Snapshot command requires Unix tools")

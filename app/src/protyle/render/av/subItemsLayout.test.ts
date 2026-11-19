@@ -38,6 +38,7 @@ const getRowsHTML = () => {
         dependencies["./" + name] = exports;
         return exports;
     };
+    load<typeof import("./entryIcon")>("entryIcon");
     load<typeof import("./subItemsState")>("subItemsState");
     const {getRowHTML} = load<typeof import("./row")>("row");
     const result = ["table", "list"].map(type => {
@@ -69,7 +70,7 @@ const checkLayout = (mobile: boolean, clickCode: string) => {
     const check = require("node:assert/strict");
     const navigated: HTMLElement[] = [];
     const click = new Function("prepareAVColumnWindow", "getAVTemplateInteractiveElement", "isOnlyMeta", "hasClosestByClassName",
-        "hasClosestBlock", "navigateSubItems", "isCardCoverPositioning", clickCode + "\nreturn avClick;")(
+        "getAVHost", "navigateSubItems", "isCardCoverPositioning", clickCode + "\nreturn avClick;")(
         () => {}, (): null => null, () => false, (element: HTMLElement, name: string) => element.closest("." + name),
         (element: HTMLElement) => element.closest(".av"), (element: HTMLElement) => { navigated.push(element); return true; },
         () => false);

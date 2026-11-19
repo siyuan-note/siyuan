@@ -5,6 +5,7 @@ import {highlightRender} from "../highlightRender";
 import {getAgentLute} from "../setLute";
 import {restoreInlineElementBoundaries} from "../../util/inlineElementBoundary";
 import {mathRender} from "../mathRender";
+import {renderImageDisplay} from "../imageDisplay";
 import {
     createAVRichTextStyleBackslashEncoding,
     createAVRichTextStyleEntityReplacer,
@@ -179,7 +180,7 @@ export const getAVRichTextUnsupportedPasteBlocks = (blockDOM: string, images = f
     return Array.from(names);
 };
 
-export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false, tableCellCustomInline = false) => {
+export const sanitizeAVRichTextBlockDOM = (blockDOM: string, codeSettings = false, tableCellCustomInline = false) => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
     // 在过滤临时属性前恢复边界，避免把显示占位符当成富文本内容保存。
@@ -193,22 +194,21 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false, tab
         if (type === "NodeHeading") {
             element.className = element.dataset.subtype;
         }
-        removeUnsupportedBlockAttributes(element, images);
+        removeUnsupportedBlockAttributes(element, codeSettings);
     });
     template.content.querySelectorAll(
-        (images ? "" : ".img, img, ") +
         "iframe, audio, video, object, embed, script, style, link, meta, form, input, button, textarea, select"
     ).forEach((element) => {
         element.remove();
     });
     template.content.querySelectorAll<HTMLElement>("*").forEach((element) => {
-        if (!isAVRichTextEditorAllowedTag(element.tagName) && !(images && element.tagName === "IMG")) {
+        if (!isAVRichTextEditorAllowedTag(element.tagName) && element.tagName !== "IMG") {
             replaceWithText(element);
         }
     });
     template.content.querySelectorAll<HTMLElement>("span[data-type]").forEach((element) => {
         const types = (element.dataset.type || "").split(" ").filter(Boolean);
-        if (images && types.length === 1 && types[0] === "img") {
+        if (types.length === 1 && types[0] === "img") {
             return;
         }
         if (types.some((type) => !ALLOWED_INLINE_TYPES.has(type) &&
@@ -233,11 +233,11 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false, tab
     template.content.querySelectorAll<HTMLElement>("*").forEach((element) => {
         Array.from(element.attributes).forEach((attribute) => {
             const name = attribute.name.toLowerCase();
-            const imageAttribute = images && ["src", "data-src", "alt", "title", "data-title", "loading"].includes(name) &&
+            const imageAttribute = ["src", "data-src", "alt", "title", "data-title", "loading"].includes(name) &&
                 (element.tagName === "IMG" || element.classList.contains("img"));
             const linkTitleAttribute = tableCellCustomInline && name === "data-title" &&
                 (element.dataset.type || "").split(" ").includes("a");
-            const codeAttribute = images && element.dataset.type === "NodeCodeBlock" &&
+            const codeAttribute = codeSettings && element.dataset.type === "NodeCodeBlock" &&
                 (["linewrap", "ligatures", "linenumber"].includes(name) && ["true", "false"].includes(attribute.value) ||
                     name === Constants.CUSTOM_SY_CODE_TAB_SPACES &&
                     CODE_TAB_SPACE_VALUES.some(value => value.toString() === attribute.value));
@@ -268,26 +268,24 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false, tab
     });
     template.content.querySelectorAll<HTMLElement>("[style]:not(span[data-type])")
         .forEach((element) => {
-            if (!images || !element.closest(".img")) {
+            if (!element.closest(".img")) {
                 element.removeAttribute("style");
             }
         });
-    if (images) {
-        template.content.querySelectorAll<HTMLElement>(".img[style], .img [style]").forEach(element => {
-            if (/[\\<>@]|url\s*\(|expression\s*\(/i.test(element.getAttribute("style"))) {
-                element.removeAttribute("style");
-            }
-        });
-        template.content.querySelectorAll<HTMLImageElement>("img").forEach(element => {
-            const source = getAVRichTextSafeURL(element.getAttribute("data-src") || element.getAttribute("src"));
-            if (!source) {
-                (element.closest(".img") || element).remove();
-                return;
-            }
-            element.setAttribute("src", source);
-            element.setAttribute("data-src", source);
-        });
-    }
+    template.content.querySelectorAll<HTMLElement>(".img[style], .img [style]").forEach(element => {
+        if (/[\\<>@]|url\s*\(|expression\s*\(/i.test(element.getAttribute("style"))) {
+            element.removeAttribute("style");
+        }
+    });
+    template.content.querySelectorAll<HTMLImageElement>("img").forEach(element => {
+        const source = getAVRichTextSafeURL(element.getAttribute("data-src") || element.getAttribute("src"));
+        if (!source) {
+            (element.closest(".img") || element).remove();
+            return;
+        }
+        element.setAttribute("src", source);
+        element.setAttribute("data-src", source);
+    });
     return (template.innerHTML || "").trim();
 };
 
@@ -374,9 +372,9 @@ const getAVRichTextPlainContent = (blockDOM: string, lute: Lute) => {
     return projectAVRichTextPlainBlocks(blocks, lute.BlockDOM2Content(blockDOM));
 };
 
-export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTextLute(), images = false,
+export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTextLute(), codeSettings = false,
                                           tableCellCustomInline = false) => {
-    const sanitizedBlockDOM = sanitizeAVRichTextBlockDOM(blockDOM, images, tableCellCustomInline);
+    const sanitizedBlockDOM = sanitizeAVRichTextBlockDOM(blockDOM, codeSettings, tableCellCustomInline);
     let cleanBlockDOM = cleanAVRichTextBlockDOMStructure(sanitizedBlockDOM);
     const template = document.createElement("template");
     template.innerHTML = cleanBlockDOM;
@@ -384,7 +382,7 @@ export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTe
     const hasEmptyParagraph = paragraphs.some(element => lute.BlockDOM2Md(element.outerHTML).trim() === "");
     const singleEmptyParagraph = template.content.children.length === 1 &&
         template.content.firstElementChild === paragraphs[0] && hasEmptyParagraph;
-    const hasCodeSettings = images && !!template.content.querySelector(
+    const hasCodeSettings = codeSettings && !!template.content.querySelector(
         `[data-type="NodeCodeBlock"]:is([linewrap], [ligatures], [linenumber], [${Constants.CUSTOM_SY_CODE_TAB_SPACES}])`);
     // 空段落和代码设置依靠块属性列表保留，同时保留相邻块的标识，避免属性被合并到前一段。
     if ((hasEmptyParagraph && !singleEmptyParagraph) || hasCodeSettings) {
@@ -395,7 +393,7 @@ export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTe
     const markdown = protectedBlockDOM ?
         styleBackslashEncoding.encodeMarkdown(lute.BlockDOM2Md(protectedBlockDOM).trim()) : "";
     const normalizedBlockDOM = markdown ?
-        sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown, lute), images, tableCellCustomInline) : "";
+        sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown, lute), codeSettings, tableCellCustomInline) : "";
     return {
         blockDOM: normalizedBlockDOM,
         markdown,
@@ -403,8 +401,8 @@ export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTe
     };
 };
 
-export const getAVRichTextBlockDOM = (markdown: string, images = false, tableCellCustomInline = false) => markdown ?
-    sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown), images, tableCellCustomInline) : "";
+export const getAVRichTextBlockDOM = (markdown: string, codeSettings = false, tableCellCustomInline = false) => markdown ?
+    sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown), codeSettings, tableCellCustomInline) : "";
 
 const getAVRichTextPreviewBlockDOM = (blockDOM: string) => {
     const template = document.createElement("template");
@@ -416,7 +414,8 @@ const getAVRichTextPreviewBlockDOM = (blockDOM: string) => {
 
 const prepareAVRichTextPreviewHTML = (html: string) => {
     const template = document.createElement("template");
-    template.innerHTML = window.DOMPurify.sanitize(html, AV_RICH_TEXT_PREVIEW_SANITIZE_OPTIONS);
+    template.innerHTML = window.DOMPurify.sanitize(html, {...AV_RICH_TEXT_PREVIEW_SANITIZE_OPTIONS,
+        ADD_TAGS: ["img"], ADD_ATTR: ["src", "alt", "title"]});
     template.content.querySelectorAll<HTMLElement>(AV_RICH_TEXT_PREVIEW_TEXT_ONLY_TAGS.join(","))
         .forEach((element) => {
         // BlockDOM2HTML 使用 sup 输出备注内容；这里只保留文本，避免备注伪造可交互标记。
@@ -477,22 +476,23 @@ const prepareAVRichTextPreviewHTML = (html: string) => {
     return template.innerHTML;
 };
 
-export const getAVRichTextPreviewHTML = (markdown: string) => {
+export const getAVRichTextPreviewHTML = (markdown: string, codeSettings = false) => {
     if (!markdown) {
         return "";
     }
-    const cached = previewCache.get(markdown);
+    const cacheKey = `${codeSettings ? "code:" : "text:"}${markdown}`;
+    const cached = previewCache.get(cacheKey);
     if (typeof cached === "string") {
-        previewCache.delete(markdown);
-        previewCache.set(markdown, cached);
+        previewCache.delete(cacheKey);
+        previewCache.set(cacheKey, cached);
         return cached;
     }
     try {
         const lute = getAVRichTextLute();
-        const blockDOM = getAVRichTextBlockDOM(markdown);
+        const blockDOM = getAVRichTextBlockDOM(markdown, codeSettings);
         const previewBlockDOM = getAVRichTextPreviewBlockDOM(blockDOM);
         const html = previewBlockDOM ? prepareAVRichTextPreviewHTML(lute.BlockDOM2HTML(previewBlockDOM)) : "";
-        previewCache.set(markdown, html);
+        previewCache.set(cacheKey, html);
         if (previewCache.size > PREVIEW_CACHE_LIMIT) {
             const oldestKey = previewCache.keys().next().value;
             if (oldestKey) {
@@ -522,5 +522,6 @@ export const renderAVRichTextElements = (root: Element) => {
     elements.forEach((element) => {
         mathRender(element);
         highlightRender(element);
+        if (element.querySelector("img")) { renderImageDisplay(element); }
     });
 };

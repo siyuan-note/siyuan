@@ -1,4 +1,4 @@
-import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchSyncPost} from "./fetch";
 import {getRelativeReorderRequest} from "./fileTreeMove";
 import {showMessage} from "../dialog/message";
@@ -49,12 +49,16 @@ export const reorderSortedFileTree = async (sourceIDs: string[], targetID: strin
         const action = await new Promise<"cancel" | "reorder" | "move">(resolve => {
             const text = window.siyuan.languages.fileTreeDragRemoveSorts + (moveTarget.fromPaths.length > 0 ?
                 `<br><br>${window.siyuan.languages.fileTreeMoveKeepSortTip}` : "");
-            confirmDialog(window.siyuan.languages.removeSorts, text,
-                () => resolve("reorder"), () => resolve("cancel"), false,
-                moveTarget.fromPaths.length > 0 ? {
+            confirmDialog({
+                title: window.siyuan.languages.removeSorts,
+                text: text,
+                confirm: () => resolve("reorder"),
+                cancel: () => resolve("cancel"),
+                extraAction: moveTarget.fromPaths.length > 0 ? {
                     label: window.siyuan.languages.fileTreeMoveKeepSort,
                     callback: () => resolve("move"),
-                } : undefined);
+                } : undefined,
+            });
         });
         if (action === "move") {
             // 对话框打开期间文档可能被移动，执行前重新读取源路径和目标层级。

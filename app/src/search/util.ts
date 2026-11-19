@@ -2,6 +2,7 @@ import {removeSearchCriterion} from "../config/util/resourceConfig";
 import {toggleMenu} from "../menus/menuToggle";
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {updateSearchMethodControls} from "./methodCapabilities";
+import {bindSearchInput} from "./input";
 import {getAttr} from "./attrs";
 import type {APICallbackResponse, APIPOSTRoutes, BlockQueryRequestInput} from "../types/api";
 import {getAllModels} from "../layout/getAll";
@@ -60,6 +61,7 @@ import {electronUndo} from "../protyle/undo";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {IDatabaseItemOpenData, openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
 import {scheduleSearchRequest} from "./request";
+import {observeSearchResultSnippets} from "./resultSnippet";
 import {
     buildSearchRequest,
     cloneSearchConfig,
@@ -711,7 +713,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                 submenu: [{
                                     iconHTML: "",
                                     label: window.siyuan.languages.topBottomLayout,
-                                    current: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
+                                    checked: isPopover ? localData.layout === 0 : localData.layoutTab === 0,
                                     click() {
                                         element.querySelector(".search__layout").classList.remove("search__layout--row");
                                         edit.protyle.element.style.width = "";
@@ -732,7 +734,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                 }, {
                                     iconHTML: "",
                                     label: window.siyuan.languages.leftRightLayout,
-                                    current: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
+                                    checked: isPopover ? localData.layout === 1 : localData.layoutTab === 1,
                                     click() {
                                         element.querySelector(".search__layout").classList.add("search__layout--row");
                                         edit.protyle.element.style.height = "";
@@ -1003,11 +1005,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         }
         saveKeyList("keys", searchInputElement.value, config);
     });
-    searchInputElement.addEventListener("beforeinput", (event: InputEvent) => {
-        if (event.inputType === "insertLineBreak" && config.method !== 2) {
-            event.preventDefault();
-        }
-    });
+    bindSearchInput(searchInputElement, () => config.method);
     searchInputElement.addEventListener("keydown", (event) => {
         electronUndo(event);
     });
@@ -1624,9 +1622,9 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                         const blocks = emitBeforeSearchResultsRender(response.data.blocks, edit, requestConfig, searchInputElement);
                         onSearch(blocks, edit, element, requestConfig, requestFocusId);
                         if (response.data.matchedBlockCount > 0) {
-                            let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
+                            let text = window.siyuan.languages.findInDoc.replace("${x}", String(response.data.matchedRootCount)).replace("${y}", String(response.data.matchedBlockCount));
                             if ("docMode" in response.data && response.data.docMode) {
-                                text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);
+                                text = window.siyuan.languages.matchDoc.replace("${x}", String(response.data.matchedRootCount));
                             }
                             searchResultElement.innerHTML = `${requestConfig.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
 <span class="ft__on-surface">${text}</span>`;
@@ -1646,6 +1644,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
                       currentId?: string,
                       newId?: string
                   }) => {
+    const groupFolded = config.group === 1 && Boolean(window.siyuan.config.search?.groupFolded);
     let resultHTML = "";
     let currentData;
     let newData;
@@ -1655,11 +1654,11 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
         if (item.children) {
             resultHTML += `<div class="b3-list-item">
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
-    <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
+    <svg class="b3-list-item__arrow${groupFolded ? "" : " b3-list-item__arrow--open"}"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${getFileTreeIconHTML(getNotebookIcon(item.box), "notebook", "b3-list-item__graphic", true)}
 <span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" data-tooltip-encoding="none" aria-label="${escapeHtmlTextAndAttr(title)}">${title}</span>
-</div><div>`;
+</div><div${groupFolded ? ' class="fn__none"' : ""}>`;
             item.children.forEach((childItem) => {
                 if (focusId) {
                     if (childItem.id === focusId.currentId) {
@@ -1729,7 +1728,8 @@ ${countHTML}
         edit.protyle.element.classList.add("fn__none");
         element.querySelector(".search__drag").classList.add("fn__none");
     }
-    element.querySelector("#searchList").innerHTML = resultHTML || (
+    const listElement = element.querySelector("#searchList");
+    listElement.innerHTML = resultHTML || (
         config.method === 0 ? `<div class="b3-list-item b3-list-item--focus" data-type="search-new">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
     <span class="b3-list-item__text">
@@ -1744,6 +1744,7 @@ ${countHTML}
         ${window.siyuan.languages.emptyContent}
     </span>
 </div>`);
+    observeSearchResultSnippets(listElement);
     if (currentData) {
         const currentList = element.querySelector(`[data-node-id="${currentData.id}"]`) as HTMLElement;
         if (currentList) {

@@ -82,7 +82,7 @@ func TestBacklinkRefFilterListContextAndCandidates(t *testing.T) {
 	if len(filtered) != 1 || count != 1 || filtered[0].Count != 1 {
 		t.Fatalf("unexpected filtered list/count: %+v, %d", filtered, count)
 	}
-	context, _ := GetBacklinkDocInBox(fixture.sourceID, fixture.targetID, "", false, false, "", filter)
+	context, _ := GetBacklinkDocInBox(fixture.sourceID, fixture.targetID, "", false, false, "", nil, filter)
 	if mentionCount == 0 || mentionCount != filteredMentionCount || !reflect.DeepEqual(mentions, filteredMentions) {
 		t.Fatal("excluding direct backlinks changed mentions")
 	}
@@ -100,7 +100,7 @@ func TestBacklinkRefFilterListContextAndCandidates(t *testing.T) {
 	if !ids[archiveID] || !ids[sameNameID] || !ids[fixture.sourceID] {
 		t.Fatalf("candidates should include excluded entries and distinguish equal names: %+v", candidates)
 	}
-	context, _ = GetBacklinkDocInBox(fixture.sourceID, fixture.targetID, "", false, false, "", nil)
+	context, _ = GetBacklinkDocInBox(fixture.sourceID, fixture.targetID, "", false, false, "", nil, nil)
 	if len(context) != 2 {
 		t.Fatalf("clearing the filter did not restore both entries: %+v", context)
 	}

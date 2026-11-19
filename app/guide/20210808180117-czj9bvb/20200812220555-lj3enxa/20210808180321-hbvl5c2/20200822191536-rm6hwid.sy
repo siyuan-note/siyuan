@@ -538,6 +538,20 @@
 			]
 		},
 		{
+			"ID": "20261119012733-8ab8529",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261119012733-8ab8529",
+				"updated": "20261119012733"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Windows、macOS 或 Linux 桌面端启用页签融合至顶栏后，拖动页签切换按钮与右侧顶栏按钮之间的空白处，即可移动窗口。"
+				}
+			]
+		},
+		{
 			"ID": "20260613204349-81ggat5",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,

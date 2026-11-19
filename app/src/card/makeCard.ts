@@ -1,6 +1,6 @@
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
-import {MobileDialog} from "../dialog/mobileDialog";
+import {openInputDialog} from "../dialog/inputDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {hideMessage, showMessage} from "../dialog/message";
@@ -48,7 +48,7 @@ export const makeCard = (app: App, ids: string[]) => {
         response.data.forEach((item: ICardPackage) => {
             html += genCardItem(item);
         });
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             positionId: Constants.DIALOG_MAKECARD,
             width: isMobile() ? "92vw" : "50vw",
             height: "70vh",
@@ -113,13 +113,18 @@ export const makeCard = (app: App, ids: string[]) => {
                     event.preventDefault();
                     break;
                 } else if (type === "delete") {
-                    mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(target.parentElement.getAttribute("data-name"))}</b>?`, () => {
-                        fetchPost("/api/riff/removeRiffDeck", {
-                            deckID: target.parentElement.getAttribute("data-id"),
-                        }, () => {
-                            target.parentElement.remove();
-                        });
-                    }, undefined, true);
+                    confirmDialog({
+                        title: window.siyuan.languages.deleteOpConfirm,
+                        text: `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(target.parentElement.getAttribute("data-name"))}</b>?`,
+                        confirm: () => {
+                            fetchPost("/api/riff/removeRiffDeck", {
+                                deckID: target.parentElement.getAttribute("data-id"),
+                            }, () => {
+                                target.parentElement.remove();
+                            });
+                        },
+                        isDelete: true,
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -136,7 +141,7 @@ export const makeCard = (app: App, ids: string[]) => {
                     event.preventDefault();
                     break;
                 } else if (type === "rename") {
-                    mobileInputDialog({
+                    openInputDialog({
                         title: window.siyuan.languages.rename,
                         value: target.parentElement.getAttribute("data-name"),
                         onConfirm: (value, renameDialog) => {

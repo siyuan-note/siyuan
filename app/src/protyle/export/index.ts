@@ -1,4 +1,3 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 /// #if !BROWSER
@@ -77,7 +76,7 @@ export const saveExport = (option: IExportOptions) => {
         };
         fetchPost("/api/block/getBlockInfo", {id: option.id}, (response) => {
             if (response.code === 0 && isEncryptedBox(response.data.box)) {
-                mobileConfirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, startExport);
+                confirmDialog({title: "⚠️ " + window.siyuan.languages.export, text: window.siyuan.languages.encryptedExportRiskTip, confirm: startExport});
                 return;
             }
             startExport();
@@ -90,8 +89,12 @@ export const saveExport = (option: IExportOptions) => {
     /// #if !BROWSER
     if (option.type === "pdf") {
         if (window.siyuan.config.appearance.mode === 1) {
-            confirmDialog(window.siyuan.languages.pdfTip, window.siyuan.languages.pdfConfirm, () => {
-                renderPDF(option.id);
+            confirmDialog({
+                title: window.siyuan.languages.pdfTip,
+                text: window.siyuan.languages.pdfConfirm,
+                confirm: () => {
+                    renderPDF(option.id);
+                },
             });
         } else {
             renderPDF(option.id);
@@ -502,6 +505,15 @@ const renderPDF = async (id: string) => {
             <span class="fn__hr"></span>
             <input id="titleImage" class="b3-switch" type="checkbox" ${localData.titleImage !== false ? "checked" : ""}>
         </label>
+        <label class="b3-label">
+            <div>${window.siyuan.languages.exportBlockRefMode}</div>
+            <span class="fn__hr"></span>
+            <select id="blockRefMode" class="b3-select fn__block">
+                <option value="2" ${window.siyuan.config.export.blockRefMode === 2 ? "selected" : ""}>${window.siyuan.languages.export2}</option>
+                <option value="3" ${window.siyuan.config.export.blockRefMode === 3 ? "selected" : ""}>${window.siyuan.languages.export3}</option>
+                <option value="4" ${window.siyuan.config.export.blockRefMode === 4 ? "selected" : ""}>${window.siyuan.languages.export4}</option>
+            </select>
+        </label>
         <label id="customTitlePanel" class="b3-label${window.siyuan.config.export.addTitle ? "" : " fn__none"}">
             <div>
                 ${window.siyuan.languages.title}
@@ -765,6 +777,7 @@ ${getIconScript(servePath)}
             wysElement.setAttribute(key, data.attrs[key]);
         })
         Protyle.setAutoDirection(previewElement, ${!!window.siyuan.config.editor.autoDirection});
+        Protyle.observeTableCorners(previewElement);
         await Protyle.renderExportJSEmbeds(wysElement, {
             disabled: ${window.siyuan.config.system.safeMode || getHostCapabilities().remoteKernel},
             disabledTip: ${toScriptLiteral(window.siyuan.languages.safeModeJSTip)},
@@ -801,6 +814,7 @@ ${getIconScript(servePath)}
         keepJSEmbed: true,
         keepFold: ${localData.keepFold},
         pdf: true,
+        blockRefMode: ${window.siyuan.config.export.blockRefMode},
         excludeTitleImage: ${localData.titleImage === false},
         addTitle: ${window.siyuan.config.export.addTitle},
         customTitle: "",
@@ -857,6 +871,10 @@ ${getIconScript(servePath)}
             refreshPreview();
         });
         const addTitleElement = actionElement.querySelector('#addTitle');
+        const blockRefModeElement = actionElement.querySelector('#blockRefMode');
+        blockRefModeElement.addEventListener('change', () => {
+            refreshPreview();
+        });
         const titleImageElement = actionElement.querySelector('#titleImage');
         titleImageElement.addEventListener('change', () => {
             refreshPreview();
@@ -911,6 +929,7 @@ ${getIconScript(servePath)}
                 keepJSEmbed: true,
                 keepFold: keepFoldElement.checked,
                 pdf: true,
+                blockRefMode: Number(blockRefModeElement.value),
                 excludeTitleImage: !titleImageElement.checked,
                 addTitle: addTitleElement.checked,
                 customTitle: customTitleElement.value,
@@ -1140,8 +1159,12 @@ const getExportPath = (
             return;
         }
         if (!confirmed && isEncryptedBox(response.data.box)) {
-            confirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, () => {
-                getExportPath(option, removeAssets, mergeSubdocs, mergeDocHeadingMode, mergeContentHeadingMode, true);
+            confirmDialog({
+                title: "⚠️ " + window.siyuan.languages.export,
+                text: window.siyuan.languages.encryptedExportRiskTip,
+                confirm: () => {
+                    getExportPath(option, removeAssets, mergeSubdocs, mergeDocHeadingMode, mergeContentHeadingMode, true);
+                },
             });
             return;
         }
@@ -1275,6 +1298,7 @@ ${getIconScript(servePath)}
     const previewElement = document.getElementById('preview');
     Protyle.highlightRender(previewElement, "stage/protyle");
     Protyle.setAutoDirection(previewElement, ${!!window.siyuan.config.editor.autoDirection});
+    Protyle.observeTableCorners(previewElement);
     Protyle.mathRender(previewElement, "stage/protyle", ${exportOption.type === "pdf"});
     Protyle.mermaidRender(previewElement, "stage/protyle");
     Protyle.flowchartRender(previewElement, "stage/protyle");

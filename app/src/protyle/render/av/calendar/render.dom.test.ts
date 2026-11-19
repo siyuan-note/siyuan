@@ -113,7 +113,7 @@ test("calendar primary references receive native clicks and bubble while card sp
     const renderCell = cell.statements.find(statement => isVariableStatement(statement) &&
         statement.declarationList.declarations.some(item => item.name.getText(cell) === "renderCell"));
     assert.ok(renderCell);
-    const source = ["date.ts", "../blockIcon.ts", "render.ts"].map(file => readFileSync(path.join(__dirname, file), "utf8"))
+    const source = ["date.ts", "../blockIcon.ts", "../entryIcon.ts", "render.ts"].map(file => readFileSync(path.join(__dirname, file), "utf8"))
         .concat(renderCell.getText(cell)).map(text => transpileModule(text.replace(/^import [\s\S]*?;\r?\n/gm, "")
             .replace(/^export /gm, ""), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText).join("\n");
     const css = require("sass").compile(path.resolve(__dirname, "../../../../assets/scss/base.scss"),

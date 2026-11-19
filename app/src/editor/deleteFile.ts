@@ -1,7 +1,7 @@
 import type {BlockQueryRequestInput} from "../types/api";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {getDisplayName, getNotebookName, isEncryptedBox} from "../util/pathName";
-import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {Constants} from "../constants";
 import {checkBlockRef, getBlockRefWarningHTML} from "../util/checkBlockRef";
@@ -36,21 +36,26 @@ export const deleteFile = async (notebookId: string, pathString: string) => {
     const fileName = escapeHtml(response.data.name);
     let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", fileName)}
 <div class="fn__hr"></div>
-<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
+<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", String(window.siyuan.config.editor.historyRetentionDays))}</div>`;
     if (response.data.subFileCount > 0) {
-        tip = `${window.siyuan.languages.andSubFile.replace("${x}", fileName).replace("${y}", response.data.subFileCount)}
+        tip = `${window.siyuan.languages.andSubFile.replace("${x}", fileName).replace("${y}", String(response.data.subFileCount))}
 <div class="fn__hr"></div>
-<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
+<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", String(window.siyuan.config.editor.historyRetentionDays))}</div>`;
     }
     if (hasRef) {
         tip += getBlockRefWarningHTML();
     }
-    confirmDialog(window.siyuan.languages.deleteOpConfirm, tip, () => {
-        fetchPost("/api/filetree/removeDoc", {
-            notebook: notebookId,
-            path: pathString
-        });
-    }, undefined, true);
+    confirmDialog({
+        title: window.siyuan.languages.deleteOpConfirm,
+        text: tip,
+        confirm: () => {
+            fetchPost("/api/filetree/removeDoc", {
+                notebook: notebookId,
+                path: pathString
+            });
+        },
+        isDelete: true,
+    });
 };
 
 export const deleteNotebooks = async (notebookIds: string[]) => {
@@ -66,15 +71,20 @@ export const deleteNotebooks = async (notebookIds: string[]) => {
         .join(", ");
     let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", notebookNames)}
 <div class="fn__hr"></div>
-<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
+<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", String(window.siyuan.config.editor.historyRetentionDays))}</div>`;
     if (refResults.some((result) => result)) {
         tip += getBlockRefWarningHTML();
     }
-    confirmDialog(window.siyuan.languages.deleteOpConfirm, tip, async () => {
-        for (const notebook of uniqueNotebookIds) {
-            await fetchPost("/api/notebook/removeNotebook", {notebook});
-        }
-    }, undefined, true);
+    confirmDialog({
+        title: window.siyuan.languages.deleteOpConfirm,
+        text: tip,
+        confirm: async () => {
+            for (const notebook of uniqueNotebookIds) {
+                await fetchPost("/api/notebook/removeNotebook", {notebook});
+            }
+        },
+        isDelete: true,
+    });
 };
 
 export const deleteFiles = (liElements: Element[]) => deleteDocTreeItems(liElements.flatMap(element => {
@@ -111,16 +121,20 @@ export const deleteDocTreeItems = async (selected: readonly {
                 }
                 let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(getNotebookName(itemNotebookId)))}
 <div class="fn__hr"></div>
-<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
+<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", String(window.siyuan.config.editor.historyRetentionDays))}</div>`;
                 if (hasRef) {
                     tip += getBlockRefWarningHTML();
                 }
-                confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                    tip, () => {
+                confirmDialog({
+                    title: window.siyuan.languages.deleteOpConfirm,
+                    text: tip,
+                    confirm: () => {
                         fetchPost("/api/notebook/removeNotebook", {
                             notebook: itemNotebookId,
                         });
-                    }, undefined, true);
+                    },
+                    isDelete: true,
+                });
             }
         }
     } else {
@@ -158,16 +172,21 @@ export const deleteDocTreeItems = async (selected: readonly {
             }).filter(Boolean).join(", ");
             let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", itemNames)}
 <div class="fn__hr"></div>
-<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
+<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", String(window.siyuan.config.editor.historyRetentionDays))}</div>`;
             if (refResults.some((result) => result)) {
                 tip += getBlockRefWarningHTML();
             }
-            confirmDialog(window.siyuan.languages.deleteOpConfirm, tip, async () => {
-                await fetchPost("/api/filetree/removeDocs", {paths});
-                for (const notebook of notebookIds) {
-                    await fetchPost("/api/notebook/removeNotebook", {notebook});
-                }
-            }, undefined, true);
+            confirmDialog({
+                title: window.siyuan.languages.deleteOpConfirm,
+                text: tip,
+                confirm: async () => {
+                    await fetchPost("/api/filetree/removeDocs", {paths});
+                    for (const notebook of notebookIds) {
+                        await fetchPost("/api/notebook/removeNotebook", {notebook});
+                    }
+                },
+                isDelete: true,
+            });
             return;
         }
         const hasRef = await checkBlockRef({
@@ -177,17 +196,21 @@ export const deleteDocTreeItems = async (selected: readonly {
         if (hasRef === undefined) {
             return;
         }
-        let tip = `${window.siyuan.languages.confirmRemoveAll.replace("${count}", paths.length)}
+        let tip = `${window.siyuan.languages.confirmRemoveAll.replace("${count}", String(paths.length))}
 <div class="fn__hr"></div>
-<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
+<div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", String(window.siyuan.config.editor.historyRetentionDays))}</div>`;
         if (hasRef) {
             tip += getBlockRefWarningHTML();
         }
-        confirmDialog(window.siyuan.languages.deleteOpConfirm,
-            tip, () => {
+        confirmDialog({
+            title: window.siyuan.languages.deleteOpConfirm,
+            text: tip,
+            confirm: () => {
                 fetchPost("/api/filetree/removeDocs", {
                     paths
                 });
-            }, undefined, true);
+            },
+            isDelete: true,
+        });
     }
 };

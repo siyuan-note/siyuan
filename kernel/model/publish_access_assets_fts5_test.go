@@ -127,7 +127,7 @@ func testPublishDocAssets(t *testing.T, titleImage, uncached bool) {
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
-		Value: util.SHA256Hash([]byte(protectedDocID + protectedPassword)),
+		Value: PublishAuthCookieValue(protectedDocID, protectedPassword),
 	})
 	filtered = FilterAssetContentByPublishAccess(c, publishAccess, newAssetContents())
 	if !CheckAbsPathAccessableByPublishAccess(c, filepath.Join(util.DataDir, protectedAsset), publishAccess) {

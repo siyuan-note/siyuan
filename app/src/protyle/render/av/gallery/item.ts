@@ -1,3 +1,5 @@
+import {getAVCellShowIcon} from "../entryIcon";
+import {getAVData} from "../virtualScroll";
 import {isAVTimestampType} from "../capabilities";
 import {genCellValue, getTypeByCellElement, renderCell, renderCellAttr} from "../cell";
 import {fetchPost} from "../../../../util/fetch";
@@ -46,7 +48,7 @@ data-wrap="${item.dataset.wrap}"
 data-dtype="${escapeAttr(item.dataset.dtype)}" 
 data-date-format="${escapeAttr(item.dataset.dateFormat || "")}"
 ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber,
-    false, type, undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
+    getAVCellShowIcon(getAVData(options.blockElement)?.view, fieldType), type, undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
         if (item.previousElementSibling.classList.contains("av__gallery-name")) {
             cellsHTML += `<div class="${item.parentElement.className}" data-empty="${item.parentElement.dataset.empty}">
     ${item.previousElementSibling.outerHTML}
@@ -95,7 +97,7 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
                         if (cellValue.type === "checkbox" && cellItem.parentElement.querySelector(".av__gallery-tip")) {
                             cellValue.checkbox.content = cellItem.getAttribute("aria-label").split('<div class="ft__on-surface">')[0];
                         }
-                        cellItem.innerHTML = renderCell(cellValue, undefined, false, type, undefined,
+                        cellItem.innerHTML = renderCell(cellValue, undefined, getAVCellShowIcon(getAVData(options.blockElement)?.view, cellValue.type), type, undefined,
                             cellItem.dataset.dateFormat as TAVDateFormat);
                         renderCellAttr(cellItem, cellValue);
                         renderAVRichTextElements(cellItem);

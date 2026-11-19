@@ -397,7 +397,7 @@ export const initBlockPopover = (app: App) => {
                         return;
                     }
                     const boxData = response.data.boxInfo;
-                    const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`;
+                    const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", String(boxData.docCount)) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`;
                     showTooltip(tip, notebookItemElement as Element, undefined, event);
                     (notebookItemElement as HTMLElement).setAttribute("aria-label", tip);
                     if (tooltipAbortController === capturedController) {

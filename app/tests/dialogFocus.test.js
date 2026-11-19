@@ -288,8 +288,8 @@ const runFlashcardCases = async (dialogSource, cardSource, mobile, mobileRuntime
     };
     modules["../dialog"] = load(dialogSource);
     const runtime = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(modules["../dialog"].Dialog, mobile);
-    modules["../dialog/mobileDialog"] = runtime;
-    modules["../dialog/mobileInputDialog"] = runtime;
+    modules["../dialog/adaptiveDialog"] = runtime;
+    modules["../dialog/inputDialog"] = runtime;
     modules["../mobile/util/secondaryEditors"] = runtime.secondaryEditors;
     modules["./pendingAction"] = runtime.pendingCardAction;
     const cards = load(cardSource);
@@ -430,7 +430,7 @@ const runSearchCases = async (dialogSource, focusSource, searchSource, mobileSou
         return exports;
     };
     modules["../dialog"] = load(dialogSource);
-    modules["../dialog/mobileDialog"] = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(modules["../dialog"].Dialog, false);
+    modules["../dialog/adaptiveDialog"] = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(modules["../dialog"].Dialog, false);
     modules["./focus"] = modules["../search/focus"] = load(focusSource);
     modules["./openOptions"] = load(openOptionsSource);
     modules["./databaseRowNavigation"] = load(navigationSource);
@@ -583,7 +583,7 @@ if (process.versions.electron && process.type === "browser") {
             await win.webContents.executeJavaScript(
                 `(${runPositionCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(positionSource)}, ${JSON.stringify(dialogCSS)})`);
             const {parse} = require("ifdef-loader/preprocessor");
-            const mobileRuntimeSource = require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource();
+            const mobileRuntimeSource = require("./fixtures/dialogRuntime.cjs").dialogRuntimeSource();
             const compileSearch = (file, mobile = false) => ts.transpileModule(parse(
                 fs.readFileSync(path.join(__dirname, "../src", file), "utf8"),
                 {MOBILE: mobile, BROWSER: true}, false, true), {

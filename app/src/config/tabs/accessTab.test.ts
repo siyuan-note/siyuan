@@ -20,6 +20,7 @@ test("wallpaper settings require password or OIDC authentication on desktop, web
                         const exports = {} as {registerAccessAuthGroup: (tab: unknown) => void};
                         runInNewContext(compiled, {exports, require: () => ({
                             isBrowser: () => browser, isInMobileApp: () => mobile,
+                            isMac: () => false, isWindows: () => true,
                             getHostCapabilities: () => ({oidcAuthentication: true}),
                         }), window: {siyuan: {config: {readonly, accessAuthCode: password,
                             oidc: {enabled: oidc}, api: {token: "token"}, appearance}, languages: {about14: "${token}"}}}});
@@ -34,6 +35,46 @@ test("wallpaper settings require password or OIDC authentication on desktop, web
                 }
             }
         }
+    }
+});
+
+test("application system lock follows the client platform and preserves hidden configuration", () => {
+    const compiled = transpileModule(readFileSync("src/config/tabs/accessTab.ts", "utf8") +
+        "\nexport {registerAccessAuthGroup};", {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    for (const [platform, browser, mobile, password, kernelOS, expected] of [
+        ["windows", false, false, "password", "windows", true],
+        ["mac", false, false, "password", "darwin", true],
+        ["linux", false, false, "password", "linux", false],
+        ["windows", false, false, "password", "linux", true],
+        ["mac", false, false, "password", "linux", true],
+        ["linux", false, false, "password", "windows", false],
+        ["windows", true, false, "password", "windows", false],
+        ["mac", true, false, "password", "darwin", false],
+        ["android", true, true, "password", "android", true],
+        ["ios", true, true, "password", "ios", true],
+        ["harmony", true, true, "password", "harmony", true],
+        ["windows", false, false, "", "windows", false],
+        ["unknown", false, false, "password", "windows", false],
+    ] as const) {
+        const switches: string[] = [];
+        const system = {os: kernelOS, lockScreenMode: 1};
+        const config = {accessAuthCode: password, readonly: false, oidc: {enabled: false},
+            api: {token: "token"}, system};
+        const exports = {} as {registerAccessAuthGroup: (tab: unknown) => void};
+        runInNewContext(compiled, {exports, require: () => ({
+            isBrowser: () => browser, isInMobileApp: () => mobile,
+            isMac: () => platform === "mac", isWindows: () => platform === "windows",
+            getHostCapabilities: () => ({oidcAuthentication: true}),
+        }), window: {siyuan: {config, languages: {about14: "${token}"}}}});
+        exports.registerAccessAuthGroup({group: () => ({
+            button: () => {}, text: () => {}, slot: () => {},
+            switch: (id: string) => switches.push(id),
+        })});
+        assert.equal(switches.includes("system.lockScreenMode"), expected,
+            JSON.stringify({platform, browser, mobile, password: Boolean(password), kernelOS}));
+        assert.equal(system.lockScreenMode, 1);
     }
 });
 
@@ -146,7 +187,7 @@ test("crypto backup import trims passwords and rejects whitespace-only input", a
             requests.push(data);
             return {code: 0};
         },
-        mobileInputDialog: (options: {awaitConfirm: boolean, onConfirm: (value: string) => Promise<boolean>}) => {
+        openInputDialog: (options: {awaitConfirm: boolean, onConfirm: (value: string) => Promise<boolean>}) => {
             assert.equal(options.awaitConfirm, true);
             confirm = (value, dialog) => options.onConfirm(value).then(success => { if (success) dialog.destroy(); });
         },

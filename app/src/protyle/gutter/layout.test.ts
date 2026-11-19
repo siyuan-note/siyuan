@@ -5,6 +5,7 @@ import {
     getContainerGutterSpace,
     getFixedGutterPosition,
     getGutterMarginHeight,
+    getGutterPaneRect,
     getListGutterAnchorLeft
 } from "./layout";
 
@@ -46,6 +47,29 @@ describe("getFixedGutterPosition", () => {
 
     it("converts viewport coordinates to transformed container coordinates", () => {
         assert.equal(getFixedGutterPosition(860, 640), 220);
+    });
+});
+
+describe("getGutterPaneRect", () => {
+    it("uses the fullscreen boundary and restores split-pane clipping on exit", () => {
+        const viewport = {left: 0, right: 1200, top: 30, bottom: 800} as DOMRect;
+        const split = {left: 260, right: 800, top: 60, bottom: 700} as DOMRect;
+        let fullscreen = false;
+        const element = {closest: (selector: string) => selector === ".fullscreen" ?
+            fullscreen ? {getBoundingClientRect: () => viewport} : null :
+            {getBoundingClientRect: () => split}} as unknown as HTMLElement;
+        assert.equal(getGutterPaneRect(element, viewport), split);
+        fullscreen = true;
+        const boundary = getGutterPaneRect(element, viewport);
+        assert.equal(boundary, viewport);
+        assert.ok(boundary.left <= 100 && boundary.right >= 100, "left-side fullscreen gutters stay visible");
+        fullscreen = false;
+        assert.equal(getGutterPaneRect(element, viewport), split);
+    });
+
+    it("uses the content viewport without a desktop pane", () => {
+        const viewport = {left: 0, right: 360} as DOMRect;
+        assert.equal(getGutterPaneRect({closest: (): Element => null} as unknown as HTMLElement, viewport), viewport);
     });
 });
 

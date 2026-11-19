@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20261107150237"
+		"updated": "20261111233241"
 	},
 	"Children": [
 		{
@@ -132,7 +132,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Paste or drag images to upload them. Hover over an image to reveal the small handles outside its border, then drag the right, bottom, or bottom-right handle to resize it proportionally. On touchscreens, tap an image to reveal its handles, then drag a handle"
+									"Data": "Paste or drag images to upload them. Hover over an image to reveal the small handles along its edges, then drag the right, bottom, or bottom-right handle to resize it proportionally. On touchscreens, tap an image to reveal its handles, then drag a handle"
 								}
 							]
 						},
@@ -2067,7 +2067,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-v1x69oc",
-				"updated": "20261031115926"
+				"updated": "20261111233241"
 			},
 			"Children": [
 				{
@@ -2662,6 +2662,65 @@
 			]
 		},
 		{
+			"ID": "20261110224000-x8g1zmq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110224000-x8g1zmq",
+				"updated": "20261110224000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select one or more nodes. In the selection toolbar, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Connector style"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to override the connector from each selected node’s parent. Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "More"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Node shape"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose Underline, Rectangle, or Capsule. Choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Default"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to use the map’s connector style or the theme’s node shape again. These changes are saved with the document and support undo and redo."
+				}
+			]
+		},
+		{
 			"ID": "20261017113512-rxzvh9f",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -2863,7 +2922,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161816-b13pkc3",
-				"updated": "20261024164212"
+				"updated": "20261111233241"
 			},
 			"Children": [
 				{
@@ -2884,6 +2943,98 @@
 				{
 					"Type": "NodeText",
 					"Data": "Select a starting node, click the connect button in the bottom node menu, then choose a target node to create a relationship line. Use it for connections outside the parent-child hierarchy."
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-bvhuk7q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-bvhuk7q",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "New relationships use a free Bézier curve that can cross above other nodes. Existing relationships keep automatic obstacle avoidance until you change their path. Node editing and controls remain accessible."
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-xz95pen",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-xz95pen",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select a relationship and open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Relationship appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Path"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the bottom settings to choose automatic obstacle avoidance, a straight line, a Bézier curve, or a rounded orthogonal line. Free paths can cross nodes; automatic paths avoid nodes and controls. Switching paths retains the adjustments for each shape."
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-ncxbpae",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-ncxbpae",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Drag either of the two curve handles to adjust curvature in any direction, or drag a rounded line’s segment handle perpendicular to the segment. Straight lines only have endpoint handles. Mouse and touch adjustments are saved once on release and support undo and redo."
+				}
+			]
+		},
+		{
+			"ID": "20261111232017-wc8bhox",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111232017-wc8bhox",
+				"updated": "20261111232017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Relationship appearance"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Line pattern"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose a solid line, short dashes, long dashes, or dots for each relationship. Dashes and dots reduce visual interference but can still overlap text. The saved appearance also applies to SiYuan-format HTML and PDF previews."
 				}
 			]
 		},
@@ -2965,12 +3116,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261024161816-fcd022g",
-				"updated": "20261024161816"
+				"updated": "20261111232017"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Dropping on blank space, an invalid target, the opposite endpoint’s node, or an existing same-direction connection cancels the change. A position that cannot avoid nodes or controls is also rejected. Connection points remain automatic until adjusted; adjusted positions follow the node as its text size or layout changes."
+					"Data": "Dropping on blank space, an invalid target, the opposite endpoint’s node, or an existing same-direction connection cancels the change. In automatic obstacle avoidance mode, a position that cannot avoid nodes or controls is also rejected. Connection points remain automatic until adjusted; adjusted positions follow the node as its text size or layout changes."
 				}
 			]
 		},
@@ -2979,7 +3130,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001051950-ow14bv7",
-				"updated": "20261012014859"
+				"updated": "20261111232017"
 			},
 			"Children": [
 				{
@@ -2993,7 +3144,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to reset both connection points while keeping the manually adjusted intermediate path. Double-clicking a path-segment handle resets only the intermediate path and preserves the connection points. Labels, styles, and arrow direction are unchanged."
+					"Data": " to reset both connection points while keeping the manually adjusted intermediate path. Double-clicking a curve or path-segment handle restores the current shape’s default path and preserves the connection points. Labels, styles, and arrow direction are unchanged."
 				}
 			]
 		},
@@ -3002,12 +3153,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261001051950-ue75z7f",
-				"updated": "20261024164212"
+				"updated": "20261111232017"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If a layout change blocks the saved manual path, the line temporarily uses an automatic path while retaining the specified connection points. If those connection points are also unavailable, it temporarily uses automatic connection points."
+					"Data": "With automatic obstacle avoidance, if a layout change blocks the saved manual path, the line temporarily uses an automatic path while retaining the specified connection points. If those connection points are also unavailable, it temporarily uses automatic connection points."
 				}
 			]
 		},
@@ -3050,7 +3201,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Hover over the outer frame to reveal the small handles outside the border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both."
+					"Data": "Hover over the outer frame to reveal the small handles along the edges. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both."
 				}
 			]
 		},
@@ -5535,7 +5686,7 @@
 				},
 				{
 					"Type": "NodeMathBlockContent",
-					"Data": "\\frac{1}{\n  \\Bigl(\\sqrt{\\phi \\sqrt{5}}-\\phi\\Bigr) e^{\n  \\frac25 \\pi}} = 1+\\frac{e^{-2\\pi}} {1+\\frac{e^{-4\\pi}} {\n    1+\\frac{e^{-6\\pi}}\n    {1+\\frac{e^{-8\\pi}}{1+\\cdots}}\n  }\n}"
+					"Data": "\\frac{1}{\n  \\Bigl(\\sqrt{\\phi \\sqrt{5}}-\\phi\\Bigr) e^{\n  \\frac{2\\pi}{5}}} = 1+\\frac{e^{-2\\pi}} {1+\\frac{e^{-4\\pi}} {\n    1+\\frac{e^{-6\\pi}}\n    {1+\\frac{e^{-8\\pi}}{1+\\cdots}}\n  }\n}"
 				},
 				{
 					"Type": "NodeMathBlockCloseMarker"
@@ -5576,7 +5727,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Hover over the block to reveal the small handles outside its border. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly; changing one dimension preserves the other."
+					"Data": "Hover over the block to reveal the small handles along its edges. Drag the handle at the center of the right edge to change width, the one at the center of the bottom edge to change height, or the rounded bottom-right handle to change both. On touch devices, drag the handles directly; changing one dimension preserves the other."
 				}
 			]
 		},
@@ -5598,7 +5749,7 @@
 		{
 			"ID": "20220909095340-rr23xv7",
 			"Type": "NodeVideo",
-			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
+			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" style=\"width: 640px; height: 327px;\"></video>",
 			"Properties": {
 				"id": "20220909095340-rr23xv7",
 				"updated": "20220909095340"
@@ -5614,7 +5765,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Drag the handles on the right, bottom, or bottom-right corner of a video to resize it proportionally. Touch dragging is also supported."
+					"Data": "Drag the handles just outside the right, bottom, or bottom-right corner of the video to resize it proportionally. Touch dragging is also supported. The handles leave the native playback controls accessible."
 				}
 			]
 		},
@@ -5636,7 +5787,7 @@
 		{
 			"ID": "20210608121458-7rrz8f2",
 			"Type": "NodeAudio",
-			"Data": "<audio controls=\"controls\" src=\"assets/record1623077643753-20210607225403-7cg1jkq.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608121458-mc4mcvz.wav\"></audio>",
+			"Data": "<audio controls=\"controls\" src=\"assets/record1623077643753-20210607225403-7cg1jkq.wav\"></audio>",
 			"Properties": {
 				"id": "20210608121458-7rrz8f2",
 				"updated": "20210608121458"
@@ -6976,6 +7127,35 @@
 				{
 					"Type": "NodeText",
 					"Data": "Manual block and inline directions take priority. Each list item, including nested items, independently follows the direction of its own first text block: checkboxes, bullets, numbers, and indentation move to the corresponding side. Manual list directions take priority. Table column order keeps its existing setting. Preview and HTML/PDF export also use automatic text direction."
+				}
+			]
+		},
+		{
+			"ID": "20261110200000-db26feb",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110200000-db26feb",
+				"updated": "20261110200000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Editing colors"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110200000-b9cb565",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110200000-b9cb565",
+				"updated": "20261110200000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Color fields support three- or six-digit HEX (with or without #) and integer RGB values from 0 to 255. The original color and draft are shown separately. The system or browser provides graphical color selection; HEX/RGB inputs remain available when graphical selection is unavailable. Incomplete, invalid or composing input cannot be applied. Closing the native panel only updates the draft; use the SiYuan editor’s confirmation or cancellation to decide whether to apply it. Inline styles and database colors use their parent panel’s confirmation, and cancelling that panel discards its drafts. Background gradients and dynamic icons use a separate color editor, which opens as a bottom sheet on mobile. Use Confirm to apply the draft; Cancel or dismissing the sheet discards it. Existing quick color palettes still apply directly."
 				}
 			]
 		}

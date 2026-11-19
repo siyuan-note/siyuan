@@ -88,7 +88,7 @@ func TestTagAndBookmarkMutationsRejectConcurrentEdits(t *testing.T) {
 			}
 			switch action {
 			case "renameTag":
-				err = renameTag("review", "done", concurrentEdit)
+				_, err = renameTag("review", "done", concurrentEdit)
 			case "removeTag":
 				err = removeTag("review", concurrentEdit)
 			case "renameBookmark":

@@ -79,6 +79,22 @@ html[data-frontend="mobile"] body.body--android {
   }
 }
 
+body.body--ios {
+  .mobile-bottom-sheet-dialog .b3-dialog,
+  .mobile-sheet-layout {
+    padding-bottom: 0;
+  }
+
+  .mobile-bottom-sheet,
+  .mobile-sheet-panel {
+    padding-bottom: var(--mobile-bottom-bar-safe-area);
+  }
+
+  .sync-checkout__panel.mobile-sheet-panel {
+    padding-bottom: calc(24px + var(--mobile-bottom-bar-safe-area));
+  }
+}
+
 body.mobile-keyboard--open {
   --mobile-bottom-bar-offset: 0px;
 
@@ -151,7 +167,7 @@ body.mobile-keyboard--open {
 
 .b3-list--mobile {
   .file-tree__row {
-    --file-tree-indent: 30px;
+    --file-tree-indent: 22px;
     --file-tree-toggle-size: 32px;
     --file-tree-toggle-padding: 8px;
   }
@@ -1965,7 +1981,7 @@ body.mobile-topbar--merged {
     justify-content: flex-start;
     flex-wrap: nowrap;
     flex-shrink: 1;
-    min-height: 0;
+    min-height: 63px;
     overflow-y: auto;
     align-items: stretch;
     padding-inline: 16px;
@@ -1985,16 +2001,6 @@ body.mobile-topbar--merged {
 
     &--stacked {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    &--compact {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-
-      > .b3-button {
-        max-width: 100%;
-      }
     }
   }
 
@@ -2059,6 +2065,11 @@ body.mobile-topbar--merged {
 }
 
 .mobile-bottom-sheet-dialog .mobile-sheet-panel--compact {
+  .mobile-sheet-action-bar {
+    min-height: 57px;
+    padding-block: 4px;
+  }
+
   > .b3-dialog__header {
     display: none;
   }
@@ -2111,6 +2122,28 @@ body.mobile-topbar--merged {
     min-height: 0;
     overflow: hidden;
     flex: 1 1 auto;
+  }
+
+  .emojis {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+
+    &__tabheader {
+      flex-shrink: 0;
+    }
+
+    &__tabbody {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+
+      > div[data-type="tab-emoji"] {
+        flex: 1;
+        min-height: 0;
+        height: auto;
+      }
+    }
   }
 }
 
@@ -2358,7 +2391,7 @@ body.mobile-topbar--merged {
   }
 
   .av__cellprimary {
-    display: block;
+    display: flex;
     flex: 1;
     min-width: 0;
     overflow: hidden;

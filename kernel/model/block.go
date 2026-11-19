@@ -595,7 +595,7 @@ func GetUnfoldedParentID(id string) (parentID string) {
 	return
 }
 
-func IsBlockFolded(id string) (isFolded, isRoot bool) {
+func IsBlockFolded(id string) (isFolded, isRoot, isHidden bool) {
 	tree, _ := LoadTreeByBlockID(id)
 	if nil == tree {
 		return
@@ -609,6 +609,7 @@ func IsBlockFolded(id string) (isFolded, isRoot bool) {
 	if nil == node {
 		return
 	}
+	isHidden = treenode.IsHiddenByFold(node)
 	if treenode.IsSelfFolded(node) || treenode.IsInFoldedHeading(node, nil) {
 		isFolded = true
 		return
@@ -622,7 +623,11 @@ func IsBlockFolded(id string) (isFolded, isRoot bool) {
 	return
 }
 
-func RecentUpdatedBlocks() (ret []*Block) {
+// RecentUpdatedBlocks 返回全库最近更新的块。
+//
+// excludeBoxIDs 与 excludeDocIDs 在排序和截断前排除读者不可见的笔记本与文档，
+// 避免被隐藏的更新挤占固定窗口，泄露其活动。
+func RecentUpdatedBlocks(excludeBoxIDs, excludeDocIDs []string) (ret []*Block) {
 	ret = []*Block{}
 
 	sqlStmt := "SELECT * FROM blocks WHERE type = 'p' AND length > 1"
@@ -640,8 +645,9 @@ func RecentUpdatedBlocks() (ret []*Block) {
 		sqlStmt += buf.String()
 	}
 
-	sqlStmt += " ORDER BY updated DESC"
-	sqlBlocks := sql.SelectBlocksRawStmt(sqlStmt, 1, 16)
+	excludeFilter, excludeArgs := buildPublishAccessExclusionFilter(excludeBoxIDs, excludeDocIDs)
+	sqlStmt += excludeFilter + " ORDER BY updated DESC"
+	sqlBlocks := sql.SelectBlocksRawStmtArgs(sqlStmt, excludeArgs, 16)
 	if 1 > len(sqlBlocks) {
 		return
 	}
@@ -973,7 +979,7 @@ func AppendHeadingChildren(id, childrenDOM string) {
 	}
 }
 
-func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
+func GetHeadingChildrenDOM(id string, removeFoldAttr, forPublish bool) (ret string) {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return
@@ -985,6 +991,11 @@ func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 
 	children := treenode.HeadingChildren(heading)
 	nodes := prepareHeadingChildrenDOMNodes(heading, children, removeFoldAttr)
+	if forPublish {
+		for _, node := range nodes {
+			clearInlineMemoContent(node)
+		}
+	}
 
 	luteEngine := util.NewLute()
 	ret = renderBlockDOMByNodes(nodes, luteEngine)
@@ -1155,22 +1166,22 @@ func buildHeadingLevelTransaction(headings, foldedHeadings []*ast.Node, diff int
 }
 
 func GetBlockDOM(id string) (ret string) {
-	return GetBlockDOMInBox(id, "")
+	return GetBlockDOMInBox(id, "", false)
 }
 
 // GetBlockDOMInBox 渲染指定笔记本内的块 DOM。boxID 为空时仅查询普通全局库。
-func GetBlockDOMInBox(id, boxID string) (ret string) {
+func GetBlockDOMInBox(id, boxID string, forPublish bool) (ret string) {
 	if "" == id {
 		return
 	}
 
-	doms := GetBlockDOMsInBox([]string{id}, boxID)
+	doms := GetBlockDOMsInBox([]string{id}, boxID, forPublish)
 	ret = doms[id]
 	return
 }
 
 // GetBlockDOMsInBox 渲染指定笔记本内的块 DOM。禁止在 boxID 未指定时遍历加密笔记本。
-func GetBlockDOMsInBox(ids []string, boxID string) (ret map[string]string) {
+func GetBlockDOMsInBox(ids []string, boxID string, forPublish bool) (ret map[string]string) {
 	ret = map[string]string{}
 	if 0 == len(ids) {
 		return
@@ -1198,7 +1209,11 @@ func GetBlockDOMsInBox(ids []string, boxID string) (ret map[string]string) {
 			return ast.WalkContinue
 		})
 
-		ret[id] = luteEngine.RenderNodeBlockDOM(cleanRenderNode(node, false))
+		domNode := cleanRenderNode(node, false)
+		if forPublish {
+			clearInlineMemoContent(domNode)
+		}
+		ret[id] = luteEngine.RenderNodeBlockDOM(domNode)
 	}
 	return
 }
@@ -1207,18 +1222,18 @@ func GetBlockDOMsInBox(ids []string, boxID string) (ret map[string]string) {
 type EmbedBlockAccessChecker func(blockID string) bool
 
 // GetBlockDOMWithEmbedInBoxWithAccessChecker 按访问权限渲染指定笔记本内包含嵌入块的 DOM。
-func GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID string, accessChecker EmbedBlockAccessChecker) (ret string) {
+func GetBlockDOMWithEmbedInBoxWithAccessChecker(id, boxID string, accessChecker EmbedBlockAccessChecker, forPublish bool) (ret string) {
 	if "" == id {
 		return
 	}
 
-	doms := GetBlockDOMsWithEmbedInBoxWithAccessChecker([]string{id}, boxID, accessChecker)
+	doms := GetBlockDOMsWithEmbedInBoxWithAccessChecker([]string{id}, boxID, accessChecker, forPublish)
 	ret = doms[id]
 	return
 }
 
 // GetBlockDOMsWithEmbedInBoxWithAccessChecker 按访问权限渲染指定笔记本内包含嵌入块的 DOM。
-func GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids []string, boxID string, accessChecker EmbedBlockAccessChecker) (ret map[string]string) {
+func GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids []string, boxID string, accessChecker EmbedBlockAccessChecker, forPublish bool) (ret map[string]string) {
 	ret = map[string]string{}
 	if 0 == len(ids) {
 		return
@@ -1249,7 +1264,11 @@ func GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids []string, boxID string, acc
 			return ast.WalkContinue
 		})
 
-		htmlContent := luteEngine.RenderNodeBlockDOM(cleanRenderNode(node, false))
+		domNode := cleanRenderNode(node, false)
+		if forPublish {
+			clearInlineMemoContent(domNode)
+		}
+		htmlContent := luteEngine.RenderNodeBlockDOM(domNode)
 
 		htmlContent = processEmbedHTML(htmlContent)
 
@@ -1389,11 +1408,21 @@ func processEmbedHTML(htmlStr string) string {
 }
 
 func GetBlockKramdown(id, mode string) (ret string) {
-	return GetBlockKramdownInBox(id, mode, "")
+	return GetBlockKramdownFiltered(id, mode, nil)
+}
+
+// GetBlockKramdownFiltered 与 GetBlockKramdown 一致，并在导出前应用 IAL 过滤。
+func GetBlockKramdownFiltered(id, mode string, filterIAL func([][]string) [][]string) (ret string) {
+	return GetBlockKramdownInBoxFiltered(id, mode, "", filterIAL)
 }
 
 // GetBlockKramdownInBox 与 GetBlockKramdown 一致，但按 boxID 路由 blocktree 查询。
 func GetBlockKramdownInBox(id, mode, boxID string) (ret string) {
+	return GetBlockKramdownInBoxFiltered(id, mode, boxID, nil)
+}
+
+// GetBlockKramdownInBoxFiltered 与 GetBlockKramdownInBox 一致，并在导出前应用 IAL 过滤。
+func GetBlockKramdownInBoxFiltered(id, mode, boxID string, filterIAL func([][]string) [][]string) (ret string) {
 	if "" == id {
 		return
 	}
@@ -1404,15 +1433,25 @@ func GetBlockKramdownInBox(id, mode, boxID string) (ret string) {
 	}
 
 	luteEngine := NewLute()
-	return getBlockKramdown0(tree, id, mode, luteEngine)
+	return getBlockKramdown0Filtered(tree, id, mode, luteEngine, filterIAL)
 }
 
 func GetBlockKramdowns(ids []string, mode string) (ret map[string]string) {
-	return GetBlockKramdownsInBox(ids, mode, "")
+	return GetBlockKramdownsFiltered(ids, mode, nil)
+}
+
+// GetBlockKramdownsFiltered 与 GetBlockKramdowns 一致，并在导出前应用 IAL 过滤。
+func GetBlockKramdownsFiltered(ids []string, mode string, filterIAL func([][]string) [][]string) (ret map[string]string) {
+	return GetBlockKramdownsInBoxFiltered(ids, mode, "", filterIAL)
 }
 
 // GetBlockKramdownsInBox 与 GetBlockKramdowns 一致，但按 boxID 路由 blocktree 查询。
 func GetBlockKramdownsInBox(ids []string, mode, boxID string) (ret map[string]string) {
+	return GetBlockKramdownsInBoxFiltered(ids, mode, boxID, nil)
+}
+
+// GetBlockKramdownsInBoxFiltered 与 GetBlockKramdownsInBox 一致，并在导出前应用 IAL 过滤。
+func GetBlockKramdownsInBoxFiltered(ids []string, mode, boxID string, filterIAL func([][]string) [][]string) (ret map[string]string) {
 	ret = make(map[string]string, len(ids))
 	if 0 == len(ids) {
 		return
@@ -1425,12 +1464,21 @@ func GetBlockKramdownsInBox(ids []string, mode, boxID string) (ret map[string]st
 		if err != nil {
 			continue
 		}
-		ret[id] = getBlockKramdown0(tree, id, mode, luteEngine)
+		ret[id] = getBlockKramdown0Filtered(tree, id, mode, luteEngine, filterIAL)
 	}
 	return
 }
 
 func getBlockKramdown0(tree *parse.Tree, id, mode string, luteEngine *lute.Lute) (ret string) {
+	return getBlockKramdown0Filtered(tree, id, mode, luteEngine, nil)
+}
+
+func getBlockKramdown0Filtered(tree *parse.Tree, id, mode string, luteEngine *lute.Lute, filterIAL func([][]string) [][]string) (ret string) {
+	if nil != filterIAL {
+		if node := treenode.GetNodeInTree(tree, id); nil != node {
+			node.KramdownIAL = filterIAL(node.KramdownIAL)
+		}
+	}
 	addCanonicalBlockIALNodes(tree, false)
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {

@@ -231,17 +231,9 @@
     "count": 2,
     "reason": "AV 菜单保持既有构造和交互"
   },
-  "app/src/protyle/render/av/dateCalendarMenu.ts | bindDateCalendarMenu/event:\"click\" | menu | open": {
+  "app/src/protyle/render/av/fieldMenu.ts | bindFieldSubmenu/event:\"click\" | menu | open": {
     "count": 1,
-    "reason": "AV 菜单保持既有构造和交互"
-  },
-  "app/src/protyle/render/av/dateFormatMenu.ts | formatDate | menu | open": {
-    "count": 1,
-    "reason": "AV 菜单保持既有构造和交互"
-  },
-  "app/src/protyle/render/av/fieldValueEditor.ts | bindFieldLunarDates/event:\"click\" | menu | open": {
-    "count": 1,
-    "reason": "AV 菜单保持既有构造和交互"
+    "reason": "移动端字段选项使用全屏菜单，桌面端使用字段面板内的子菜单"
   },
   "app/src/protyle/render/av/fieldValueEditor.ts | openFieldRelationMenu | menu | open": {
     "count": 1,
@@ -276,10 +268,6 @@
     "reason": "AV 菜单保持既有构造和交互"
   },
   "app/src/protyle/render/av/newItemTemplate.ts | openNewItemTemplateMenu | menu | open": {
-    "count": 1,
-    "reason": "AV 菜单保持既有构造和交互"
-  },
-  "app/src/protyle/render/av/number.ts | formatNumber | menu | open": {
     "count": 1,
     "reason": "AV 菜单保持既有构造和交互"
   },

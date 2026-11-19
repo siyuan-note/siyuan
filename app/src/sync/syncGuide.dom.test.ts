@@ -31,6 +31,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                     document.body.append(this.element);
                 }
                 destroy() { this.element.remove(); }
+                invalidate() { this.destroy(); }
                 focusWhenReady(target: () => HTMLElement) { target()?.focus(); }
                 async runPending(task: () => Promise<boolean>, options: {close?: boolean} = {}) {
                     if (this.pending) return false;
@@ -42,7 +43,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 }
             }
             const dependencies: Record<string, unknown> = {
-                "../dialog/mobileDialog": {MobileDialog: Dialog},
+                "../dialog/adaptiveDialog": {AdaptiveDialog: Dialog},
                 "../dialog/message": {showMessage: (message: string) => messages.push(message)},
                 "../util/escape": {escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")},
                 "../util/needSubscribe": {needSubscribe: () => false, isPaidUser: () => true},
@@ -51,7 +52,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 "../constants": {Constants: {DIALOG_SYNCCHOOSEDIR: "choose-dir", DIALOG_SETPASSWORD: "set-password"}},
                 "../util/hostCapabilities": {sanitizeKernelHTML: (value: string) => value},
                 "../dialog/processSystem": {processSync() {}},
-                "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _text: string, confirm: () => void) =>
+                "../dialog/confirmDialog": {confirmDialog: ({confirm}: {confirm: () => void}) =>
                     confirmations.push(confirm)},
                 "../util/fetch": {fetchPost: (url: string, data: unknown, reply: (response: unknown) => void) =>
                     requests.push({url, data, reply}), fetchSyncPost: (url: string, data: unknown) =>
@@ -69,7 +70,8 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 renderSyncCloudList: (element: Element, reload: boolean) => void};
             new Function("exports", "require", "window", "document", code)(guide,
                 (name: string) => dependencies[name] || {},
-                {siyuan: {config, languages: new Proxy({}, {get: (_target, name) => name === "syncSourcePreview" ?
+                {siyuan: {config, languages: new Proxy({}, {get: (_target, name) => name === "_kernel" ?
+                    {464: "Review the latest preview and choose again"} : name === "syncSourcePreview" ?
                     "Local ${local}; cloud ${cloud}; ${device}; upload ${upload}; overwrite ${overwrite}; remove ${remove}" : String(name)})}}, document);
             guide.syncGuide();
             if (initializeKey) {
@@ -164,9 +166,45 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 check.equal(document.querySelector<HTMLInputElement>('input[name="upload"]:checked').value, String(!mobile));
                 buttons[1].click();
                 check.equal(requests.length, 1);
+                requests.shift().reply({code: 2, msg: "", data: null});
+                await new Promise(resolve => setTimeout(resolve, 0));
+                check.equal(requests.length, 1, "stale previews trigger one refresh, never another sync");
+                check.equal(requests[0].url, "/api/sync/getSyncSourceState");
+                check.equal(document.querySelector('input[name="upload"]:checked'), null);
+                check.match(document.body.textContent, /Review the latest preview and choose again/);
+                requests.shift().reply({code: -1, msg: "preview unavailable"});
+                await new Promise(resolve => setTimeout(resolve, 0));
+                check.equal(buttons[1].textContent, "refresh");
+                check.doesNotMatch(document.body.textContent, /Local 12/);
+                buttons[1].click();
+                buttons[1].click();
+                check.equal(requests.length, 1, "failed refresh retries are serialized");
+                check.equal(requests[0].url, "/api/sync/getSyncSourceState");
+                requests.shift().reply({code: 0, data: {pending: true, source: "fresh-source", localID: "fresh-local",
+                    cloudID: "fresh-cloud", localFiles: 13, cloudFiles: 11, cloudCreated: 2, cloudDevice: "<img src=x>",
+                    uploadFiles: 4, overwriteFiles: 2, removeFiles: 3}});
+                await new Promise(resolve => setTimeout(resolve, 0));
+                check.equal(buttons[1].textContent, "confirm");
+                check.match(document.body.textContent, /Local 13; cloud 11; <img src=x>; upload 4; overwrite 2; remove 3/);
+                check.equal(document.querySelector("img"), null);
+                check.equal(requests.length, 0, "refresh requires explicit confirmation");
+                check.equal(document.querySelector('input[name="upload"]:checked'), null);
+                document.querySelector<HTMLInputElement>(`input[name="upload"][value="${!mobile}"]`).checked = true;
+                buttons[1].click();
+                check.deepEqual(requests[0].data, {upload: !mobile, source: "fresh-source", localID: "fresh-local", cloudID: "fresh-cloud"});
                 requests.shift().reply({code: 0});
                 await new Promise(resolve => setTimeout(resolve, 0));
                 check.equal(buttons[1].isConnected, false);
+                guide.syncGuide();
+                requests.shift().reply({code: 0, data: {pending: true, source: "another-source", localID: "local", cloudID: "cloud"}});
+                document.querySelector<HTMLInputElement>('input[name="upload"][value="true"]').checked = true;
+                document.querySelectorAll<HTMLButtonElement>(".b3-dialog__action button")[1].click();
+                requests.shift().reply({code: 2, msg: "", data: null});
+                await new Promise(resolve => setTimeout(resolve, 0));
+                requests.shift().reply({code: 0, data: {pending: false, source: ""}});
+                await new Promise(resolve => setTimeout(resolve, 0));
+                check.equal(document.querySelector('input[name="upload"]'), null, "another client's completed choice dismisses the obsolete form");
+                check.equal(requests.length, 0, "resolved sources do not implicitly start automatic sync");
             } else {
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {});
@@ -176,15 +214,27 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 requests.shift().reply({data: {pending: false, source: "empty-source", localID: "local", cloudID: ""}});
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {upload: true, source: "empty-source", localID: "local", cloudID: ""});
+                requests.shift().reply({code: 2, msg: "", data: null});
+                check.equal(requests[0].url, "/api/sync/getSyncSourceState");
+                requests.shift().reply({code: 0, data: {pending: false, source: "empty-source", localID: "fresh-empty-local", cloudID: ""}});
+                await new Promise(resolve => setTimeout(resolve, 0));
+                check.equal(requests.length, 0, "empty-source invalidation also requires confirmation instead of retrying uploads");
+                check.equal(document.querySelector<HTMLInputElement>('input[name="upload"][value="false"]').disabled, true);
+                document.querySelector<HTMLInputElement>('input[name="upload"][value="true"]').checked = true;
+                document.querySelectorAll<HTMLButtonElement>(".b3-dialog__action button")[1].click();
+                check.deepEqual(requests[0].data, {upload: true, source: "empty-source", localID: "fresh-empty-local", cloudID: ""});
+                requests.shift().reply({code: 0});
+                await new Promise(resolve => setTimeout(resolve, 0));
             }
         }
     }
     return "Sync setup directory cases passed";
 };
 
-test("sync setup loads directories and enables sync after selection on desktop and mobile", {
+test("sync setup and stale preview recovery require confirmed choices on desktop and mobile", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 45000,
+    // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
+    timeout: 65000,
 }, async () => {
     const source = readFileSync(path.join(__dirname, "syncGuide.ts"), "utf8");
     const sources = [false, true].map(mobile => transpileModule(

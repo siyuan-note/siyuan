@@ -47,9 +47,13 @@ export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
     const centerRect = (isWindowMode ? window.siyuan.layout.layout : window.siyuan.layout.centerLayout).element.getBoundingClientRect();
     const toolbarDragElement = document.getElementById("drag");
     const toolbarDragRect = toolbarDragElement?.getBoundingClientRect() || {left: 0, right: 0};
+    const toolbarDragRightInset = toolbarDragElement && window.siyuan.config.appearance.hideToolbar &&
+        document.documentElement.dataset.frontend === "desktop" &&
+        document.body.matches(".body--windows, .body--mac, .body--linux") ? 24 : 0;
+    const toolbarDragRightMinWidth = toolbarDragRightInset || 8;
     if (toolbarDragElement) {
         toolbarDragElement.style.setProperty("--b3-toolbar-drag-left", "8px");
-        toolbarDragElement.style.setProperty("--b3-toolbar-drag-right", "8px");
+        toolbarDragElement.style.setProperty("--b3-toolbar-drag-right", toolbarDragRightMinWidth + "px");
     }
     wndsTemp.forEach(item => {
         const headerElement = item.headersElement.parentElement;
@@ -86,14 +90,17 @@ export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
                     }
                 }
             } else {
-                if (headerRect.right < toolbarDragRect.right && headerRect.right === centerRect.right) {
-                    toolbarDragElement.style.setProperty("--b3-toolbar-drag-right", toolbarDragRect.right - headerRect.right + "px");
-                } else if (headerRect.right > toolbarDragRect.right) {
+                const rightGap = toolbarDragRect.right - headerRect.right;
+                if (rightGap > 0 && headerRect.right === centerRect.right) {
+                    toolbarDragElement.style.setProperty("--b3-toolbar-drag-right", Math.max(toolbarDragRightInset, rightGap) + "px");
+                }
+                const rightOverlap = toolbarDragRightInset - rightGap;
+                if (rightOverlap > 0) {
                     // 不能取 clientWidth，因为设置了 min-width(64) 导致 clientWidth 大于实际宽度
-                    if (headerRect.right - toolbarDragRect.right + 64 > headerRect.width) {
+                    if (rightOverlap + 64 > headerRect.width) {
                         headerElement.style.visibility = "hidden";
                     } else {
-                        (headerElement.lastElementChild as HTMLElement).style.marginRight = (headerRect.right - toolbarDragRect.right) + "px";
+                        (headerElement.lastElementChild as HTMLElement).style.marginRight = rightOverlap + "px";
                     }
                 }
             }

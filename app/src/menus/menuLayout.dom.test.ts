@@ -56,6 +56,7 @@ const browserCases = async (sources: Record<string, string>, css: string,
         "protyle/render/av/automationPosition": {},
         "protyle/render/av/select": {},
         "protyle/render/av/cell": {},
+        "protyle/render/av/primaryRich": {getAVPrimaryPreviewHTML: (value: IAVCellValue) => value.block.content},
         "protyle/render/av/filter": {},
         "protyle/ui/hideElements": {},
         "protyle/render/av/mobilePanel": {},
@@ -669,6 +670,39 @@ const browserCases = async (sources: Record<string, string>, css: string,
     const innerScrollItems = markMenuInnerScroll(innerScroll.element);
     innerScroll.popup({x: 40, y: 40});
     await settle();
+    const modelList = innerScroll.element.querySelector<HTMLElement>(".b3-list");
+    const wideItem = document.createElement("div");
+    wideItem.style.cssText = "width:1200px;height:1px";
+    modelList.append(wideItem);
+    await settle();
+    for (const h of [0, 28]) {
+        for (const y of [60, 650]) {
+            innerScroll.popup({x: 40, y, h});
+            await settle();
+            modelList.scrollTop = 700;
+            modelList.scrollLeft = 100;
+            const {scrollTop, scrollLeft} = modelList;
+            check.ok(scrollTop > 0 && scrollLeft > 0);
+            const row = modelList.querySelector<HTMLElement>('[data-model="Model 30"]');
+            row.append(document.createElement("span"));
+            await settle();
+            check.equal(modelList.scrollTop, scrollTop, `Inner list vertical offset survives mutations (h=${h}, y=${y})`);
+            check.equal(modelList.scrollLeft, scrollLeft, "Inner list horizontal offset survives layout measurement");
+            fitsViewport(innerScroll.element);
+            innerScroll.resetPosition();
+            check.equal(modelList.scrollTop, scrollTop, "Explicit repositioning preserves inner scrolling");
+            check.equal(modelList.scrollLeft, scrollLeft);
+        }
+    }
+    wideItem.remove();
+    modelSearch.value = "Model 59";
+    modelSearch.dispatchEvent(new InputEvent("input", {bubbles: true}));
+    await settle();
+    check.equal(modelList.scrollTop, 0, "Filtering to shorter content clamps the saved scroll position");
+    modelSearch.value = "";
+    modelSearch.dispatchEvent(new InputEvent("input", {bubbles: true}));
+    await settle();
+    check.equal(modelList.scrollTop, 0, "Restoring content does not revive an obsolete scroll position");
     check.ok(innerScrollItems === innerScroll.element.lastElementChild,
         "markMenuInnerScroll returns the content container");
     check.ok(innerScrollItems.classList.contains("b3-menu__items--inner-scroll"), "the container is marked for inner scrolling");
@@ -940,7 +974,7 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     timeout: 45000,
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
-        "util/setPosition", "util/zIndex", "protyle/util/hasClosest", "plugin/Menu", "protyle/render/av/openMenuPanel", "protyle/render/av/renderData",
+        "util/setPosition", "util/zIndex", "protyle/util/hasClosest", "plugin/Menu", "menus/overlayOwnership", "protyle/render/av/openMenuPanel", "protyle/render/av/renderData",
         "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated", "protyle/gutter/embedBreadcrumbMenu",
         "layout/dock/agent/AgentSessionPanel", "protyle/render/listMindmap/appearance"].map(name => [name,
         transpileModule(readFileSync(path.join(__dirname, "..", name.endsWith(".js") ? name : name + ".ts"), "utf8"), {

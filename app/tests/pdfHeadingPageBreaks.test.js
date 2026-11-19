@@ -19,7 +19,8 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     root.className = "protyle-wysiwyg";
     root.style.cssText = "font:16px/24px Arial;padding:0;margin:0";
     document.body.append(root);
-    const h = (level, id) => `<div data-type="NodeHeading" data-subtype="h${level}" data-node-id="${id}">${id}</div>`;
+    const h = (level, id, subdocument = false) => `<div data-type="NodeHeading" data-subtype="h${level}" data-node-id="${id}"${
+        subdocument ? ' data-export-subdocument-title="true"' : ""}>${id}</div>`;
     const p = text => `<div data-type="NodeParagraph" data-node-id="p">${text}</div>`;
     const marked = () => Array.from(root.querySelectorAll("[data-export-heading-page-break]"))
         .map(element => element.getAttribute("data-node-id"));
@@ -48,7 +49,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     let confirmed = 0;
     let activeDialog;
     const Constants = {LOCAL_EXPORTPDF: "pdf", SIYUAN_VERSION: "test", SIYUAN_GET: "get"};
-    window.siyuan = {storage: {pdf: {headingPageBreakLevels: [2]}}, languages: {
+    window.siyuan = {config: {export: {blockRefMode: 4}}, storage: {pdf: {headingPageBreakLevels: [2]}}, languages: {
         print: "Print", confirm: "Confirm", cancel: "Cancel", pdfHeadingPageBreaks: "Heading page breaks",
         pdfHeadingPageBreaksTip: "Choose levels", exportTitleImage: "Export title image",
     }};
@@ -58,7 +59,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         if (name.includes("constants")) return {Constants};
         if (name.includes("compatibility")) return {setStorageVal: (key, value) => saved = {
             key, levels: [...value.headingPageBreakLevels], titleImage: value.titleImage}};
-        if (name.includes("dialog")) return {MobileDialog: class {
+        if (name.includes("dialog")) return {AdaptiveDialog: class {
             constructor(options) {
                 this.element = document.createElement("div");
                 this.element.innerHTML = options.content;
@@ -70,6 +71,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         throw new Error(name);
     });
     ui.openHeadingPageBreakDialog(() => confirmed++);
+    check.equal(activeDialog.element.querySelector("#blockRefMode").value, "4");
     check.equal(activeDialog.element.querySelector("#titleImage").checked, true);
     for (const width of [280, 360]) {
         activeDialog.element.style.width = `${width}px`;
@@ -93,20 +95,24 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     activeDialog.element.querySelector(".b3-button--cancel").click();
     check.equal(saved, undefined);
     check.equal(confirmed, 0);
-    ui.openHeadingPageBreakDialog(() => confirmed++);
+    ui.openHeadingPageBreakDialog(mode => { check.equal(mode, 3); confirmed++; });
+    activeDialog.element.querySelector("#blockRefMode").value = "3";
     check.equal(activeDialog.element.querySelector("#titleImage").checked, true, "Cancel preserves the default");
     activeDialog.element.querySelector('input[value="6"]').checked = true;
     activeDialog.element.querySelector("#titleImage").checked = false;
     activeDialog.element.querySelector(".b3-button--text").click();
     check.deepEqual(saved, {key: "pdf", levels: [2, 6], titleImage: false});
     check.equal(confirmed, 1);
+    check.equal(window.siyuan.config.export.blockRefMode, 4);
+    check.equal(window.siyuan.storage.pdf.blockRefMode, undefined);
     ui.openHeadingPageBreakDialog(() => confirmed++);
     check.equal(activeDialog.element.querySelector("#titleImage").checked, false, "Mobile printing restores the saved choice");
+    check.equal(activeDialog.element.querySelector("#blockRefMode").value, "4", "Each print starts with the global mode");
     check.equal(activeDialog.element.querySelector('input[value="6"]').checked, true);
     activeDialog.element.querySelector(".b3-button--cancel").click();
 
     let html;
-    const config = {appearance: {themeLight: "daylight"}, editor: {}, export: {addTitle: true}, system: {}};
+    const config = {appearance: {themeLight: "daylight"}, editor: {}, export: {addTitle: true, blockRefMode: 4}, system: {}};
     window.siyuan = {config, storage: {pdf: {paged: true, scale: 1, mergeSubdocs: false,
         mergeDocHeadingMode: "flat", mergeContentHeadingMode: "preserve", headingPageBreakLevels: [2, 6]}},
     languages: new Proxy({}, {get: (_object, key) => key === "_kernel" ? {16: "Untitled"} : String(key)})};
@@ -136,12 +142,22 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         return {ok: true, json: async () => ({code: 0, data: {name: "Test", attrs: {},
             content: (request.excludeTitleImage ? "" : "<div data-cover>Title image</div>") +
                 (request.addTitle ? h(1, "root-title") : "") + p("Body") +
-                h(2, "child-title") + p("Child body") + h(6, "deep-title")}})};
+                h(2, "child-title") + p("Child body") +
+                (request.merge ? h(3, "last-heading") + h(6, "deep-title", true) : h(6, "deep-title"))}})};
     };
     await new Function(inline + "; return new Promise(resolve => setTimeout(resolve, 30));")();
     const preview = document.getElementById("preview");
     const waitForPreview = () => new Promise(resolve => setTimeout(resolve, 30));
     check.equal(previewRequests.at(-1).pdf, true);
+    check.equal(previewRequests.at(-1).blockRefMode, 4);
+    const blockRefMode = document.getElementById("blockRefMode");
+    for (const mode of [3, 2, 4]) {
+        blockRefMode.value = String(mode);
+        blockRefMode.dispatchEvent(new Event("change"));
+        await waitForPreview();
+        check.equal(previewRequests.at(-1).blockRefMode, mode);
+        check.equal(config.export.blockRefMode, 4);
+    }
     check.equal(previewRequests.at(-1).excludeTitleImage, false);
     check.ok(preview.querySelector("[data-cover]"));
     const titleImage = document.getElementById("titleImage");
@@ -183,8 +199,9 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     document.getElementById("mergeDocHeadingMode").value = "tree";
     document.getElementById("mergeSubdocs").dispatchEvent(new Event("change"));
     await new Promise(resolve => setTimeout(resolve, 30));
-    check.equal(preview.querySelectorAll("[data-export-heading-page-break]").length, 1,
-        "Refreshing merged previews reapplies the selected levels");
+    check.deepEqual(Array.from(preview.querySelectorAll("[data-export-heading-page-break]"))
+        .map(element => element.getAttribute("data-node-id")), ["deep-title"],
+    "Refreshing merged previews starts a selected subdocument even after a heading");
     const exportStyle = html.match(/<style>([\s\S]*?)<\/style>/)[1];
 
     const persist = new Function("Constants", "setStorageVal", "ipcData", persistSource);
@@ -203,7 +220,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
         "getPluginStyle", "getSnippetCSS", "getSnippetJS", "getIconScript", "getExportLanguages", "normalizeHeadingPageBreakLevels",
         mobileSource + ";return onExport;")(Constants, () => true, () => 390, () => "light", async () => "",
         async () => "", () => "", () => "", () => "", () => "{}", normalize);
-    const data = {data: {name: "Mobile", content: h(1, "first") + p("Body") + h(2, "second") + p("Body") + h(6, "sixth")}};
+    const data = {data: {name: "Mobile", content: h(1, "first") + p("Body") + h(2, "second") + h(6, "sixth", true)}};
     const mobileHTML = await onExport(data, undefined, "/", {type: "pdf", id: "root"});
     const ordinaryHTML = await onExport(data, undefined, "/", {type: "html", id: "root"});
     check.ok(!ordinaryHTML.includes("Protyle.applyExportHeadingPageBreaks"), "HTML export ignores PDF preferences");
@@ -220,7 +237,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     window.siyuan.storage.pdf.titleImage = false;
     const mobilePrint = new Function("openHeadingPageBreakDialog", "showMessage", "Constants", "id", "fetchPost",
         "onExport", "isInAndroid", "isInHarmony", "isInIOS", "hideMessage", mobileMenuSource + ";return printPDF;")(
-        callback => callback(), () => "message", Constants, "root",
+        callback => callback(3), () => "message", Constants, "root",
         (_url, request, callback) => {
             mobileRequest = request;
             return callback({data: {name: "Mobile", content: (request.excludeTitleImage ? "" : "<div data-cover>Cover</div>") + p("Body")}});
@@ -228,6 +245,7 @@ const browserCases = async (headingSource, uiSource, desktopSource, mobileSource
     mobilePrint();
     await waitForPreview();
     check.equal(mobileRequest.pdf, true);
+    check.equal(mobileRequest.blockRefMode, 3);
     check.equal(mobileRequest.excludeTitleImage, true);
     check.ok(printed.content.includes("Body"));
     check.ok(!printed.content.includes("data-cover"));
@@ -276,6 +294,9 @@ const runElectron = async () => {
 
         const h = level => `<div data-node-id="h${level}" data-type="NodeHeading" data-subtype="h${level}">Heading ${level}</div>`;
         const p = '<div data-node-id="p" data-type="NodeParagraph">Body</div>';
+        const title = level => h(level).replace("<div ", '<div data-export-subdocument-title="true" ');
+        const merged = h(1) + title(1) + h(2) + title(1) + h(2);
+        const emptyTitle = h(1).replace("Heading 1", '<div><a href="pdf-outline://parent"> </a></div>');
         const cases = [
             {html: h(1) + p + h(2) + p + h(6) + p, levels: [], pages: 1},
             {html: h(1) + p + h(2) + p + h(6) + p, levels: [2, 6], pages: 3},
@@ -284,6 +305,11 @@ const runElectron = async () => {
             {html: p + h(1) + '<div data-type="NodeParagraph"><br></div>' + h(3) + p, levels: [1, 3], pages: 2},
             {html: p + h(2) + p + h(6) + p, levels: [2, 6], enabled: false, pages: 1},
             {html: h(1) + p + h(1) + p, levels: [1], pages: 2},
+            {html: merged, levels: [1], pages: 3},
+            {html: merged, levels: [2], pages: 1},
+            {html: merged, levels: [1], enabled: false, pages: 1},
+            {html: emptyTitle + title(1) + h(2), levels: [1], pages: 1},
+            {html: title(1) + h(2) + title(2) + h(3), levels: [1, 2, 3], pages: 2},
         ];
         for (const item of cases) {
             await win.loadURL("data:text/html,<!DOCTYPE html><html><body style='margin:0'></body></html>");
@@ -315,7 +341,7 @@ const runElectron = async () => {
 if (process.versions.electron && process.type === "browser") {
     runElectron().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
-    require("node:test").it("heading page breaks support multiple levels, continuous headings and desktop/mobile controls", {
+    require("node:test").it("PDF settings support heading page breaks and per-export reference modes on desktop and mobile", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 60000,
     }, async () => {

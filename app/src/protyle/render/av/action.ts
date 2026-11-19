@@ -1,3 +1,4 @@
+import {getAVCellShowIcon} from "./entryIcon";
 import {isTableLikeView} from "./viewType";
 import {prepareAVColumnWindow} from "./columnWindow";
 import {removeAVTableColumn} from "./columnPresentation";
@@ -9,7 +10,7 @@ import {addSubItemsMenu} from "./subItems";
 import {Menu} from "../../../plugin/Menu";
 import {toggleMenu} from "../../../menus/menuToggle";
 import {hasClosestByClassName} from "../../util/hasClosest";
-import {getAVHost as hasClosestBlock, getAVRelationHost} from "./host";
+import {getAVHost, getAVRelationHost} from "./host";
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {openFileAttr} from "../../../menus/commonMenuItem";
@@ -406,7 +407,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     }
     // 富文本预览以 b3-typography 作为渲染边界，先回到单元格再查找数据库块。
     const cellElement = hasClosestByClassName(event.target, "av__cell");
-    const blockElement = hasClosestBlock(cellElement || event.target);
+    const blockElement = getAVHost(cellElement || event.target);
     if (!blockElement) {
         return false;
     }
@@ -923,7 +924,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
     if (rowElement?.classList.contains("av__row--header")) {
         return false;
     }
-    const blockElement = options?.blockElement || (rowElement ? hasClosestBlock(rowElement) : undefined);
+    const blockElement = options?.blockElement || (rowElement ? getAVHost(rowElement) : undefined);
     if (!blockElement) {
         return false;
     }
@@ -1539,12 +1540,14 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
         updateHeaderCell(cellElement, headerValue);
     } else {
         const hasDragFill = cellElement.querySelector(".av__drag-fill");
-        const blockElement = hasClosestBlock(cellElement);
+        const blockElement = getAVHost(cellElement);
         if (!blockElement) {
             return;
         }
         const viewType = blockElement.getAttribute("data-av-type") as TAVView;
         const iconElement = cellElement.querySelector(".b3-menu__avemoji");
+        const view = getAVData(blockElement)?.view;
+        const showIcon = view ? getAVCellShowIcon(view, value.type) : !!iconElement && !iconElement.classList.contains("fn__none");
         const renderTemplate = cellElement.dataset.renderTemplate;
         if (renderTemplate?.trim() && typeof value.renderedContent !== "string" &&
             cellElement.querySelector(".av__celltext--template")) {
@@ -1566,13 +1569,13 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
                     content: cellElement.getAttribute("aria-label").split('<div class="ft__on-surface">')[0],
                 };
             }
-            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
+            cellElement.innerHTML = renderCell(value, 0, showIcon,
                 viewType, undefined, cellElement.dataset.dateFormat as TAVDateFormat, renderTemplate);
             cellElement.parentElement.setAttribute("data-empty",
                 cellValueIsEmpty(value, true, renderTemplate).toString());
         } else {
             const contentElement = cellElement.querySelector(".av__cellcontent") || cellElement;
-            contentElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
+            contentElement.innerHTML = renderCell(value, 0, showIcon,
                 undefined, undefined, cellElement.dataset.dateFormat as TAVDateFormat, renderTemplate);
         }
         if (hasDragFill) {

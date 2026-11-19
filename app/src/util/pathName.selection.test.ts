@@ -21,7 +21,7 @@ const browserCases = async (sourceCode: string) => {
         languages: {confirm: "Confirm", cancel: "Cancel", specifyPath: "Specify path", searchPlaceholder: "Search"},
         menus: {menu: {element: document.createElement("div")}}}});
     new Function("exports", "require", sourceCode)(api, (name: string) => ({
-        "../dialog/mobileDialog": {MobileDialog: class {
+        "../dialog/adaptiveDialog": {AdaptiveDialog: class {
             pending = false;
             element = document.createElement("div");
             constructor(options: {title: string, content: string}) {

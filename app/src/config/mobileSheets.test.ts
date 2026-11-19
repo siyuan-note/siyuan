@@ -9,7 +9,7 @@ const sourceFiles = (directory: string): string[] => readdirSync(directory, {wit
     return entry.isDirectory() ? sourceFiles(file) : file.endsWith(".ts") && !file.endsWith(".test.ts") ? [file] : [];
 });
 
-test("settings and sync opt in at all inventoried mobile dialog entries, retaining desktop exclusions", () => {
+test("settings and sync route every confirmation through the shared adapter", () => {
     const original: string[] = [];
     let adapters = 0;
     for (const file of [...sourceFiles("src/config"), ...sourceFiles("src/sync")]) {
@@ -17,19 +17,19 @@ test("settings and sync opt in at all inventoried mobile dialog entries, retaini
         const visit = (node: Node) => {
             if (isCallExpression(node) || isNewExpression(node)) {
                 const name = node.expression.getText(source);
-                if (["Dialog", "openInputDialog", "confirmDialog"].includes(name)) {
+                // confirmDialog 与 openInputDialog 自身按平台选择实现，不再属于绕过适配的桌面直连调用。
+                if (name === "Dialog") {
                     original.push(`${relative("src", file).replaceAll("\\", "/")}:${name}`);
                 }
-                if (["MobileDialog", "mobileInputDialog", "mobileConfirmDialog"].includes(name)) adapters++;
+                if (["AdaptiveDialog", "openInputDialog", "confirmDialog"].includes(name)) adapters++;
             }
             forEachChild(node, visit);
         };
         visit(source);
     }
-    assert.deepEqual(original.sort(), ["config/index.ts:Dialog", "config/tabs/appearanceTab.ts:confirmDialog",
-        "config/tabs/keymapUi.ts:confirmDialog"]);
-    // 70 个原有接入点，以及代码片段移动端关闭前的独立保存确认。
-    assert.equal(adapters, 71);
+    assert.deepEqual(original.sort(), ["config/index.ts:Dialog"]);
+    // 73 处已统一使用 confirmDialog 或其他移动适配入口。
+    assert.equal(adapters, 73);
 });
 
 test("settings reuse shared viewport, delayed focus and pending save contracts", () => {
@@ -52,7 +52,7 @@ test("complex settings forms use shared drawers without forcing expanded height"
         "tabs/ai/aiInstructions.ts", "tabs/secretsVariablesUi.ts", "tabs/syncUi.ts",
         "tabs/appearanceTab.ts", "notebookArchive.ts", "encryptedAssets.ts"]) {
         const source = readFileSync(`src/config/${file}`, "utf8");
-        assert.match(source, /new MobileDialog\(|mobileInputDialog\(/, file);
+        assert.match(source, /new AdaptiveDialog\(|openInputDialog\(/, file);
         assert.doesNotMatch(source, /expandable:/, file);
         assert.doesNotMatch(source, /mode: "expanded"/, file);
     }

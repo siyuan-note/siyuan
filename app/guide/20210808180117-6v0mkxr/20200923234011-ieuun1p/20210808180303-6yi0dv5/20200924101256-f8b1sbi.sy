@@ -38,7 +38,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Block references link to existing content so that the same note can be used in different contexts. A reference appears as clickable anchor text; hovering over it previews the referenced block."
+					"Data": "Block references link to existing content so that the same note can be used in different contexts. A reference appears as clickable anchor text; hovering over it previews the referenced block. When following a block reference or a block link in the editor, a folded heading, a folded list item, or its still-visible first paragraph is located in the full document, preserving its context. Targets hidden by a folded ancestor open in focus mode."
 				}
 			]
 		},

@@ -1,4 +1,6 @@
 import {Constants} from "./constants";
+import {registerColorPickerWindow} from "./colorPicker/panel";
+import {registerDatePickerWindow} from "./datePicker/panel";
 import {refreshSettingConfig} from "./config/setting/sync";
 import {closeNotebookHistoryDialogs} from "./history/notebookDialogs";
 import {closeDocumentTitleDialogs} from "./protyle/header/documentTitleDialogs";
@@ -88,6 +90,8 @@ export class App {
             completeStartup();
             return;
         }
+        registerColorPickerWindow();
+        registerDatePickerWindow();
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
 
@@ -360,12 +364,12 @@ export class App {
             setStartupStage("storage");
             getLocalStorage(guardStartup<void>(() => {
                 setStartupStage("language");
-                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, guardStartup<IObject>((languages) => {
+                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, guardStartup((languages) => {
                     setStartupStage("interface");
                     window.siyuan.languages = languages;
                     void initializeEnglishCommandTranslations(
                         window.siyuan.config.appearance.lang,
-                        languages as Record<string, string>,
+                        languages,
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);

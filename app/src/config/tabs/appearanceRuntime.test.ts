@@ -9,7 +9,7 @@ import {createSectionRuntime} from "../util/sectionRuntime";
 const {parse} = require("ifdef-loader/preprocessor");
 
 for (const mobile of [true, false]) {
-    for (const change of ["gradient", "duplicate", "theme", "initial", "font", "font-reset", "compact", "scroll", "pdf", "outline", "mobile-bars", "wallpaper", "floating-dock", "floating-status"] as const) {
+    for (const change of ["gradient", "duplicate", "theme", "initial", "font", "font-reset", "theme-and-font", "compact", "scroll", "pdf", "outline", "mobile-bars", "wallpaper", "floating-dock", "floating-status"] as const) {
         test(`appearance updates preserve gradient controls without skipping theme initialization (${change}, mobile=${mobile})`, async () => {
             const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appearanceRuntime.ts"), "utf8");
             const processed = parse(source, {MOBILE: mobile, BROWSER: true}, false, true);
@@ -20,7 +20,7 @@ for (const mobile of [true, false]) {
             };
             const next = change === "initial" ? appearance : {
                 ...appearance,
-                mode: change === "theme" ? 1 : 0,
+                mode: change === "theme" || change === "theme-and-font" ? 1 : 0,
                 compactMode: change === "compact", menuMouseScroll: change === "scroll",
                 pdfTheme: change === "pdf" ? {light: "dark"} : undefined,
                 outlineKeepCurrentExpand: change === "outline", mobileBars: change === "mobile-bars" ? {autoHide: false} : undefined,
@@ -28,7 +28,7 @@ for (const mobile of [true, false]) {
                 showFloatingDockBar: change === "floating-dock" ? false : undefined,
                 showFloatingStatusBar: change === "floating-status" ? true : undefined,
                 bodyGradient: {mode: change === "duplicate" ? "auto" : "custom"},
-                globalFontFamilies: change === "font" ? [{family: "Arial", weight: 700}] : [],
+                globalFontFamilies: change === "font" || change === "theme-and-font" ? [{family: "Arial", weight: 700}] : [],
             };
             const siyuan = {config: {appearance}};
             const calls: string[] = [];
@@ -49,7 +49,7 @@ for (const mobile of [true, false]) {
                     }
                     if (name === "../../util/assets") {
                         return new Proxy({}, {get: (_, key) => key === "enqueueAppearanceUpdate" ?
-                            (apply: () => Promise<void>) => pending = apply() : () => calls.push(String(key))});
+                            (apply: () => Promise<void>) => pending = apply() : () => { calls.push(String(key)); }});
                     }
                     return new Proxy({}, {get: (_, key) => () => calls.push(String(key))});
                 },
@@ -57,7 +57,7 @@ for (const mobile of [true, false]) {
             moduleExports.appearanceConfigApi.apply(next);
             await pending;
             assert.equal(siyuan.config.appearance, next);
-            const updatesInPlace = ["gradient", "duplicate", "compact", "scroll", "pdf", "outline", "mobile-bars", "wallpaper", "floating-dock", "floating-status"].includes(change);
+            const updatesInPlace = !["initial", "theme", "theme-and-font"].includes(change);
             assert.equal(calls.includes("syncStatusBarVisibility"), !mobile);
             assert.equal(calls.includes("syncFloatingDockBarPreference"), change === "floating-dock" && !mobile);
             assert.equal(calls.includes("syncLockScreenWallpaper"), change === "wallpaper");
@@ -65,7 +65,13 @@ for (const mobile of [true, false]) {
             assert.equal(calls.includes("setBodyHighlight"), updatesInPlace);
             assert.equal(calls.includes("loadAssets"), !updatesInPlace);
             assert.equal(calls.includes("remountOpenSettingTab"), !updatesInPlace && !mobile);
-            assert.equal(calls.includes("refreshDynamicIcons"), change === "font" || change === "font-reset");
+            const fontChanged = ["font", "font-reset", "theme-and-font"].includes(change);
+            for (const name of ["setInlineStyle", "refreshHeadingNumberMeasurements", "refreshDynamicIcons", "syncAppearanceFontInputs"]) {
+                assert.equal(calls.includes(name), fontChanged, name);
+            }
+            if (change === "theme-and-font") {
+                assert.ok(calls.indexOf("loadAssets") < calls.indexOf("setInlineStyle"));
+            }
         });
     }
 }
@@ -120,7 +126,7 @@ for (const mobile of [true, false]) {
                                     return affected !== "cannot-unload";
                                 };
                             }
-                            return () => calls.push(String(key));
+                            return () => { calls.push(String(key)); };
                         }});
                     }
                     if (name === "../../layout/util") {

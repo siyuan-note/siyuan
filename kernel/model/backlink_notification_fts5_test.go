@@ -114,9 +114,9 @@ func TestBackmentionNotificationPlainAndEncrypted(t *testing.T) {
 			}
 			var docs []*Backlink
 			if encrypted {
-				docs, _ = GetBackmentionDocInBox(fixture.sourceID, fixture.targetID, "", false, true, boxID, notify)
+				docs, _ = GetBackmentionDocInBox(fixture.sourceID, fixture.targetID, "", false, true, boxID, nil, notify)
 			} else {
-				docs, _ = GetBackmentionDoc(fixture.sourceID, fixture.targetID, "", false, true, notify)
+				docs, _ = GetBackmentionDoc(fixture.sourceID, fixture.targetID, "", false, true, nil, notify)
 			}
 			if calls != 1 || len(docs) == 0 {
 				t.Fatalf("document warning calls=%d results=%d", calls, len(docs))

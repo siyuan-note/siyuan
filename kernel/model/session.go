@@ -39,6 +39,9 @@ func LogoutAuth(c *gin.Context, request apicontract.EmptyRequest) (ret apicontra
 	}
 
 	session := util.GetSession(c)
+	// 只有此前已认证的会话才广播登出，未认证请求不得迫使其他客户端重新认证
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-4w2q-xjc2-gwvv
+	authenticated := IsWorkspaceSessionAuthenticated(util.GetWorkspaceSession(session))
 	util.RemoveWorkspaceSession(session)
 	if err := session.Save(c); err != nil {
 		logging.LogError("saves session failed: " + err.Error())
@@ -47,7 +50,9 @@ func LogoutAuth(c *gin.Context, request apicontract.EmptyRequest) (ret apicontra
 		return
 	}
 
-	util.BroadcastByType("main", "logoutAuth", 0, "", nil)
+	if authenticated {
+		util.BroadcastByType("main", "logoutAuth", 0, "", nil)
+	}
 	return
 }
 

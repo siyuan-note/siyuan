@@ -162,7 +162,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "System mode uses supported system settings or the proxy environment inherited when the kernel started. The kernel reads manual proxy settings on Windows, Linux GNOME, and macOS; on Linux and macOS, explicit proxy environment variables take priority. These readers do not support automatic PAC configuration; Windows and macOS automatic detection is also unsupported. On other platforms the kernel retains its initial proxy environment instead of reading OS settings"
+									"Data": "System mode uses supported system settings or the proxy environment inherited when the kernel started. The kernel reads manual proxy settings on Windows, Linux GNOME, Linux KDE, and macOS; on Linux and macOS, explicit proxy environment variables take priority. These readers do not support automatic PAC configuration; Windows and macOS automatic detection is also unsupported. On other platforms the kernel retains its initial proxy environment instead of reading OS settings"
 								}
 							]
 						}

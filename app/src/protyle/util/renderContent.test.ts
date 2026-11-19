@@ -42,7 +42,9 @@ const browserCases = async (renderSource: string, onGetSource: string, reloadSou
         updateWidgetCacheVersion: noop, containsCurrentSelection: () => false,
         invalidateTrackedRangesInElement: noop, disposeCustomBlocksInElement: (root: Element) => disposed.push(root),
         hideElements: noop, invalidateTrackedRanges: noop, applyPublishFoldStates: noop,
-        updateDocumentBottomEof: noop, activeBlur: noop, getContenteditableElement: (): HTMLElement | null => null,
+        updateDocumentBottomEof: noop, updateDocumentTopEof: noop,
+        markDocumentBoundaryLoaded: (element: HTMLElement) => element.firstElementChild?.setAttribute("data-eof", "1"),
+        activeBlur: noop, getContenteditableElement: (): HTMLElement | null => null,
         foldPassiveType: noop, renderHeadingNumbers: noop, queueHeadingNumberRefresh: noop, beginPerformance: noop};
     const setHTML = new Function(...Object.keys(dependencies), onGetSource + "\nreturn setHTML;")(
         ...Object.values(dependencies)) as (options: Record<string, unknown>, protyle: IProtyle) => void;

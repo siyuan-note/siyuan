@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	ginSessions "github.com/gin-contrib/sessions"
@@ -71,6 +72,72 @@ func TestTLSEnforceRedirectsPlaintextFromOtherHosts(t *testing.T) {
 // TestTLSEnforcePassesThroughOverRealConnection 通过真实 HTTP 往返确认放行路径可用。
 // httptest 服务监听环回地址，因此这里覆盖的是「本机明文连接不被跳转」，
 // 也顺带验证 gin 对 3xx 的惰性写头不会影响放行分支。
+// TestTLSEnforceRedirectsAuthPageWithSchemeInQuery 覆盖 GHSA-cv86-qp5w-79wh：
+// 查询串里的 "://" 不能阻止明文登录页被跳转到 HTTPS。
+func TestTLSEnforceRedirectsAuthPageWithSchemeInQuery(t *testing.T) {
+	prepareTLSEnforceTest(t, true, true)
+	engine := newTLSEnforceTestEngine()
+
+	request := httptest.NewRequest(http.MethodGet, "/check-auth?next=https://attacker.invalid", nil)
+	request.RemoteAddr = "192.0.2.10:54321"
+	request.Host = "notes.example.com:6806"
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, request)
+
+	if status := recorder.Result().StatusCode; status != http.StatusTemporaryRedirect {
+		t.Fatalf("status = %d, want %d", status, http.StatusTemporaryRedirect)
+	}
+	want := "https://notes.example.com:6806/check-auth?next=https://attacker.invalid"
+	if location := recorder.Header().Get("Location"); location != want {
+		t.Fatalf("Location = %q, want %q", location, want)
+	}
+}
+
+// TestTLSEnforceRedirectsAbsoluteFormTarget 校验绝对形式请求目标按路径与查询串跳转，
+// 不会被拼成站外地址，也不会被放行明文处理。
+func TestTLSEnforceRedirectsAbsoluteFormTarget(t *testing.T) {
+	prepareTLSEnforceTest(t, true, true)
+	engine := newTLSEnforceTestEngine()
+
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request.URL = &url.URL{Scheme: "http", Host: "notes.example.com:6806", Path: "/check-auth", RawQuery: "x=1"}
+	request.RequestURI = "http://notes.example.com:6806/check-auth?x=1"
+	request.RemoteAddr = "192.0.2.10:54321"
+	request.Host = "notes.example.com:6806"
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, request)
+
+	if status := recorder.Result().StatusCode; status != http.StatusTemporaryRedirect {
+		t.Fatalf("status = %d, want %d", status, http.StatusTemporaryRedirect)
+	}
+	want := "https://notes.example.com:6806/check-auth?x=1"
+	if location := recorder.Header().Get("Location"); location != want {
+		t.Fatalf("Location = %q, want %q", location, want)
+	}
+}
+
+// TestTLSEnforceRejectsUnsafeRequestTarget 校验无法安全拼接的请求目标被拒绝，
+// 不能因为目标不合规而继续明文处理。
+func TestTLSEnforceRejectsUnsafeRequestTarget(t *testing.T) {
+	prepareTLSEnforceTest(t, true, true)
+	gin.SetMode(gin.TestMode)
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request.URL = &url.URL{Path: "//evil.example/check-auth"}
+	request.RequestURI = "//evil.example/check-auth"
+	request.RemoteAddr = "192.0.2.10:54321"
+	request.Host = "notes.example.com:6806"
+	c.Request = request
+
+	tlsEnforceMiddleware()(c)
+
+	if status := recorder.Code; status != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", status, http.StatusBadRequest)
+	}
+}
+
 func TestTLSEnforcePassesThroughOverRealConnection(t *testing.T) {
 	prepareTLSEnforceTest(t, true, true)
 

@@ -63,7 +63,7 @@ import {
     shouldPreserveTableCellSelectAll,
     type TSelectionEndpoint,
 } from "./touchSelection";
-import {getVisibleViewportBounds} from "./visibleViewport";
+import {getMobileVisualViewport, getVisibleViewportBounds} from "./visibleViewport";
 import {createInlineMathSelection} from "./inlineMathSelection";
 import {isCommittedTextInput} from "../../protyle/wysiwyg/compositionInput";
 import {
@@ -123,7 +123,7 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
         isVisible: key => isEntryVisible(`${contextPath}.${key}`),
         isAvailable: name => {
             if (protyle && ["softLine", "moveup", "movedown"].includes(name) &&
-                hasClosestByClassName(protyle.wysiwyg.element, "protyle-title__rich")) {
+                protyle.wysiwyg.element.closest(".protyle-title__rich")) {
                 return false;
             }
             if (hasText && (name === "block-type" || MOBILE_TOOLBAR_ACTION_NAMES.includes(name))) {
@@ -437,20 +437,18 @@ const preventKeyboardToolbarRender = () => {
 
 const updateKeyboardToolbarPosition = () => {
     updateKeyboardPanelHeight();
-    scrollKeyboardSelectionIntoView();
-    if (isInMobileApp() || !window.visualViewport) {
-        return;
+    if (getMobileVisualViewport()) {
+        const toolbarElement = document.getElementById("keyboardToolbar");
+        const toolbarHeight = toolbarElement.getBoundingClientRect().height || 48;
+        toolbarElement.style.transform = "";
+        toolbarElement.style.bottom = "auto";
+        toolbarElement.style.top = `${getVisibleViewportBounds().bottom - toolbarHeight}px`;
     }
-    const toolbarElement = document.getElementById("keyboardToolbar");
-    const viewportBottom = window.visualViewport.offsetTop + window.visualViewport.height;
-    const toolbarHeight = toolbarElement.getBoundingClientRect().height || 48;
-    toolbarElement.style.transform = "";
-    toolbarElement.style.bottom = "auto";
-    toolbarElement.style.top = `${viewportBottom - toolbarHeight}px`;
+    scrollKeyboardSelectionIntoView();
 };
 
-const getKeyboardViewportBottom = () => !isInMobileApp() && window.visualViewport ?
-    window.visualViewport.offsetTop + window.visualViewport.height : document.documentElement.getBoundingClientRect().height;
+const getKeyboardViewportBottom = () => getMobileVisualViewport() ?
+    getVisibleViewportBounds().bottom : document.documentElement.getBoundingClientRect().height;
 
 const updateKeyboardPanelHeight = () => {
     if (keyboardPanelTop === undefined) {
@@ -464,8 +462,8 @@ const updateKeyboardPanelHeight = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     // 与展开入口保持相同高度口径，避免边框和整数取整导致交接时上下跳动。
     const barHeight = toolbarElement.querySelector<HTMLElement>(".keyboard__bar").clientHeight;
-    const native = isInMobileApp();
-    const bottomOffset = native ? parseFloat(getComputedStyle(toolbarElement).bottom) || 0 : 0;
+    const usesLayoutViewport = isInMobileApp() && !getMobileVisualViewport();
+    const bottomOffset = usesLayoutViewport ? parseFloat(getComputedStyle(toolbarElement).bottom) || 0 : 0;
     const height = getKeyboardPanelHeight(getKeyboardViewportBottom(), keyboardPanelTop, barHeight, bottomOffset);
     if (keyboardPanelClosing && height <= barHeight) {
         keyboardPanelClosing = false;
@@ -473,12 +471,12 @@ const updateKeyboardPanelHeight = () => {
         return;
     }
     // 原生端占位随视口同步变化，避免等待 resize 时编辑器短暂增高，导致滚动位置被截断。
-    const panelHeight = native ?
+    const panelHeight = usesLayoutViewport ?
         `max(${barHeight}px, calc(100vh - var(--android-navigation-bar-height, 0px) - ${keyboardPanelTop}px))` : `${height}px`;
     toolbarElement.style.height = panelHeight;
     const editor = getCurrentEditor();
     if (editor) {
-        const padding = native ? `calc(${panelHeight} + var(--android-navigation-bar-height, 0px))` : panelHeight;
+        const padding = usesLayoutViewport ? `calc(${panelHeight} + var(--android-navigation-bar-height, 0px))` : panelHeight;
         getMobileToolbarPaddingElement(editor.protyle)?.style.setProperty("padding-bottom", padding);
     }
 };
@@ -816,8 +814,8 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("orderedList", "1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
     ${getSlashItem("check", "- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
     ${getSlashItem("quote", "> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
-    ${getSlashItem("horizontalSuperBlock", getSuperBlockCommand("col"), "iconSuper", window.siyuan.languages.horizontalSuperBlock, "true")}
-    ${getSlashItem("verticalSuperBlock", getSuperBlockCommand("row"), "iconSuper", window.siyuan.languages.verticalSuperBlock, "true")}
+    ${getSlashItem("horizontalSuperBlock", getSuperBlockCommand("col"), "iconSplitLR", window.siyuan.languages.horizontalSuperBlock, "true")}
+    ${getSlashItem("verticalSuperBlock", getSuperBlockCommand("row"), "iconSplitTB", window.siyuan.languages.verticalSuperBlock, "true")}
     ${getSlashItem("tabs", `::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`, "iconTabs", window.siyuan.languages.tabs, "true")}
     ${getSlashItem("mindmap", `- ${Lute.Caret}\n{: ${Constants.CUSTOM_SY_LIST_MINDMAP}="1"}`, "iconMindmap", window.siyuan.languages.mindmap, "true")}
     ${getSlashItem("calloutNote", `> [!NOTE]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">✏️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span>`, "true")}
@@ -1522,7 +1520,8 @@ export const initKeyboardToolbar = () => {
         inlineMathSelection.update(getMathEditor(), getSelection(), composing);
     }, true);
     document.addEventListener("focusout", () => inlineMathSelection.reset(), true);
-    if (!isInMobileApp() && window.visualViewport) {
+    const viewport = getMobileVisualViewport();
+    if (viewport) {
         let pendingUpdate = false;
         const viewportHandler = () => {
             if (pendingUpdate) {
@@ -1534,8 +1533,8 @@ export const initKeyboardToolbar = () => {
                 updateKeyboardToolbarPosition();
             });
         };
-        window.visualViewport.addEventListener("resize", viewportHandler);
-        window.visualViewport.addEventListener("scroll", viewportHandler);
+        viewport.addEventListener("resize", viewportHandler);
+        viewport.addEventListener("scroll", viewportHandler);
         viewportHandler();
     }
     document.addEventListener("selectionchange", () => {

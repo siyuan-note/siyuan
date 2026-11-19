@@ -66,20 +66,24 @@ const bindKeymapToolbar = (root: HTMLElement) => {
         void reloadUI();
     });
     root.querySelector("#keymapResetBtn")?.addEventListener("click", () => {
-        confirmDialog("⚠️ " + window.siyuan.languages.reset, window.siyuan.languages.confirmReset, () => {
-            keymapSaveQueue = trackSettingSave(keymapSaveQueue.then(async () => {
-                try {
-                    const data = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
-                    await configApi.set("keymap", keymapPayload(data), () => {
-                        savedKeymap = data;
-                        applyKeymap(data);
-                        void reloadUI();
-                    });
-                } catch (error) {
-                    console.error("Could not reset shortcuts:", error);
-                    showMessage(window.siyuan.languages.keymapSaveFailed);
-                }
-            }));
+        confirmDialog({
+            title: "⚠️ " + window.siyuan.languages.reset,
+            text: window.siyuan.languages.confirmReset,
+            confirm: () => {
+                keymapSaveQueue = trackSettingSave(keymapSaveQueue.then(async () => {
+                    try {
+                        const data = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
+                        await configApi.set("keymap", keymapPayload(data), () => {
+                            savedKeymap = data;
+                            applyKeymap(data);
+                            void reloadUI();
+                        });
+                    } catch (error) {
+                        console.error("Could not reset shortcuts:", error);
+                        showMessage(window.siyuan.languages.keymapSaveFailed);
+                    }
+                }));
+            },
         });
     });
 };
@@ -94,9 +98,6 @@ export const mountKeymapTab = async (root: HTMLElement, keywords?: string, _app?
             }
         });
         refreshKeymapBindings(root);
-        searchKeymapList(root.querySelector<HTMLElement>("#keymapList"),
-            root.querySelector<HTMLInputElement>("#keymapInput").value,
-            root.querySelector<HTMLElement>("#searchByKey").dataset.keymap || "");
         return;
     }
     if (root.innerHTML === "") {
@@ -417,7 +418,6 @@ const bindKeymapList = (root: HTMLElement) => {
             delete getKeymapItem(data, row.dataset.key.split(Constants.ZWSP)).bindings.priority;
         } : undefined);
         refreshBindings();
-        searchKeymapList(keymapListElement, searchElement.value, searchKeymapElement.dataset.keymap || "");
     };
     keymapListElement.addEventListener("pointerdown", (event) => {
         if (recording && (event.target as HTMLElement).closest(".config-keymap__controls") &&
@@ -715,15 +715,12 @@ const refreshKeymapBindings = (root: HTMLElement) => {
     });
     const list = root.querySelector<HTMLElement>("#keymapList");
     const hasConflict = Boolean(list.querySelector('[data-conflict="true"]'));
-    if (!hasConflict && list.dataset.keymapFilter === "conflict") {
-        list.dataset.keymapFilter = "all";
-    }
     list.querySelectorAll<HTMLElement>("[data-keymap-filter-value]").forEach(button => {
         const active = button.dataset.keymapFilterValue === list.dataset.keymapFilter;
         button.classList.toggle("b3-chip--current", active);
         button.setAttribute("aria-pressed", String(active));
         if (button.dataset.keymapFilterValue === "conflict") {
-            button.classList.toggle("fn__none", !hasConflict);
+            button.classList.toggle("fn__none", !hasConflict && !active);
         }
     });
 };
@@ -761,9 +758,6 @@ const saveKeymapRow = (root: HTMLElement, row: HTMLElement, keys: string[], chan
                 renderRowBindings(element, getKeymapBindings(getKeymapItem(savedKeymap, element.dataset.key.split(Constants.ZWSP))));
             });
             refreshKeymapBindings(root);
-            searchKeymapList(root.querySelector<HTMLElement>("#keymapList"),
-                root.querySelector<HTMLInputElement>("#keymapInput").value,
-                root.querySelector<HTMLElement>("#searchByKey").dataset.keymap || "");
             showMessage(window.siyuan.languages.keymapSaveFailed);
         }
     }));

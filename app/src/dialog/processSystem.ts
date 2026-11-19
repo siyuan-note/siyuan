@@ -3,6 +3,7 @@ import {clearReloadSnapshot} from "../layout/reloadSnapshot";
 import {renderBazaarInstall, updateBazaarInstallProgress} from "../config/bazaar/installTask";
 import {getSettingsWindowHost} from "../config/setting/windowContext";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {withFetchTimeout} from "../util/fetchTimeout";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
@@ -13,14 +14,14 @@ import {getAllEditor, getAllModels} from "../layout/getAll";
 import {ipcRenderer} from "electron";
 /// #endif
 import {hideMessage, showMessage} from "./message";
-import {MobileDialog as Dialog} from "./mobileDialog";
+import {AdaptiveDialog as Dialog} from "./adaptiveDialog";
 import {isMobile} from "../util/functions";
-import {mobileConfirmDialog as confirmDialog} from "./mobileConfirmDialog";
-import {escapeHtml} from "../util/escape";
+import {confirmDialog} from "./confirmDialog";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {saveMobileLayout} from "../mobile/util/saveLayout";
-import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, saveExportFile, setStorageVal} from "../protyle/util/compatibility";
 import {emitToPlugins} from "../plugin/EventBusCore";
 import {createHostQuitGuard} from "./hostQuit";
 import {requestSystemExit, updateExitProgressStatus} from "./exitRequest";
@@ -246,18 +247,24 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
     }
     await requestSystemExit({force: false, setCurrentWorkspace}, (response) => {
         if (response.code === 1) { // 同步执行失败
-            confirmDialog(window.siyuan.languages.sync, escapeHtml(window.siyuan.languages._kernel[96]), () => {
-                void exitSiYuan(setCurrentWorkspace);
-            }, undefined, false, {
-                label: window.siyuan.languages._kernel[97],
-                callback: () => {
-                    if (response.data.installPkgPath) {
-                        installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
-                        return;
+            confirmDialog({
+                title: window.siyuan.languages.sync,
+                text: escapeHtml(window.siyuan.languages._kernel[96]),
+                confirm: () => {
+                    void exitSiYuan(setCurrentWorkspace);
+                },
+                extraAction: {
+                    label: window.siyuan.languages._kernel[97],
+                    callback: () => {
+                        if (response.data.installPkgPath) {
+                            installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
+                            return;
+                        }
+                        void requestSystemExit({force: true, setCurrentWorkspace}, forceQuit);
                     }
-                    void requestSystemExit({force: true, setCurrentWorkspace}, forceQuit);
-                }
-            }, window.siyuan.languages.retry);
+                },
+                confirmLabel: window.siyuan.languages.retry,
+            });
         } else if (response.code === 2) { // 提示新安装包
             hideMessage();
 
@@ -267,14 +274,32 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
             }
             /// #endif
 
-            confirmDialog(window.siyuan.languages.updateVersion, response.msg, () => {
-                installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
-            }, () => {
-                void requestSystemExit({
-                    force: true,
-                    setCurrentWorkspace,
-                    execInstallPkg: 1 // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
-                }, forceQuit);
+            let message = response.msg;
+            const releaseURL = response.data.releaseURL;
+            if (releaseURL && /^https?:\/\//i.test(releaseURL)) {
+                const escapedURL = escapeHtmlTextAndAttr(releaseURL);
+                const link = `<a href="${escapedURL}" target="_blank" rel="noopener">${escapedURL}</a>`;
+                const announcement = escapeHtml(window.siyuan.languages.updateReleaseAnnouncement).replace("${link}", () => link);
+                const paragraphBreak = "<br><br>";
+                message = message.includes(paragraphBreak) ?
+                    message.replace(paragraphBreak, () => paragraphBreak + announcement + paragraphBreak) :
+                    message + paragraphBreak + announcement;
+            }
+            confirmDialog({
+                title: window.siyuan.languages.updateVersion,
+                text: message,
+                confirm: () => {
+                    installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
+                },
+                cancel: () => {
+                    void requestSystemExit({
+                        force: true,
+                        setCurrentWorkspace,
+                        execInstallPkg: 1 // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
+                    }, forceQuit);
+                },
+                confirmLabel: window.siyuan.languages.updateInstallNow,
+                cancelLabel: window.siyuan.languages.updateInstallLater,
             });
         } else { // 正常退出
             forceQuit();
@@ -286,6 +311,7 @@ export const transactionError = (msg?: string) => {
     if (document.getElementById("transactionError")) {
         return;
     }
+    const canExportLog = getHostCapabilities().importExport;
     const dialog = new Dialog({
         disableClose: true,
         title: `${window.siyuan.languages.stateExcepted} v${Constants.SIYUAN_VERSION}`,
@@ -294,15 +320,39 @@ export const transactionError = (msg?: string) => {
     ${msg ? `<div class="fn__hr"></div>${escapeHtml(msg.trim())}` : ""}
 </div>
 <div class="b3-dialog__action">
-    <button class="b3-button b3-button--text">${window.siyuan.languages._kernel[97]}</button>
+    ${canExportLog ? `<button class="b3-button b3-button--text" data-action="export-log">${window.siyuan.languages.exportSystemLog}</button>
+    <div class="fn__space fn__flex-1"></div>` : ""}
+    <button class="b3-button b3-button--text" data-action="exit">${window.siyuan.languages._kernel[97]}</button>
     <div class="fn__space"></div>
-    <button class="b3-button">${window.siyuan.languages.rebuildDataIndex}</button>
+    <button class="b3-button" data-action="rebuild">${window.siyuan.languages.rebuildDataIndex}</button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_STATEEXCEPTED);
-    const btnsElement = dialog.element.querySelectorAll(".b3-button");
-    btnsElement[0].addEventListener("click", () => {
+    const exportButton = dialog.element.querySelector<HTMLButtonElement>('[data-action="export-log"]');
+    exportButton?.addEventListener("click", async () => {
+        exportButton.disabled = true;
+        try {
+            const response = await withFetchTimeout(
+                signal => fetchSyncPost("/api/system/exportLog", {}, undefined, true, signal), undefined, 30000);
+            if (!dialog.element.isConnected || response.code !== 0) {
+                return;
+            }
+            if (response.data?.zip) {
+                await saveExportFile(response.data.zip);
+            } else {
+                showMessage(window.siyuan.languages._kernel[290], 6000, "error");
+            }
+        } catch (error) {
+            console.warn(error);
+            if (dialog.element.isConnected) {
+                showMessage(window.siyuan.languages._kernel[290], 6000, "error");
+            }
+        } finally {
+            exportButton.disabled = false;
+        }
+    });
+    dialog.element.querySelector('[data-action="exit"]').addEventListener("click", () => {
         /// #if MOBILE
         exitSiYuan();
         /// #else
@@ -312,7 +362,7 @@ export const transactionError = (msg?: string) => {
         });
         /// #endif
     });
-    btnsElement[1].addEventListener("click", () => {
+    dialog.element.querySelector('[data-action="rebuild"]').addEventListener("click", () => {
         refreshFileTree();
         dialog.destroy();
     });

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261109202618"
+		"updated": "20261112174810"
 	},
 	"Children": [
 		{
@@ -373,7 +373,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-v4cp9kf",
-				"updated": "20261024161058"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -382,6 +382,129 @@
 				}
 			],
 			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110134234-mano130",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110134234-mano130",
+				"updated": "20261110134234"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Database"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", configure "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Show primary key entry icons"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Show relation and rollup entry icons"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Both are enabled by default and apply only when creating databases and views; changing these defaults does not affect existing views."
+				}
+			]
+		},
+		{
+			"ID": "20261110134234-18z72oi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110134234-18z72oi",
+				"updated": "20261110134234"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the current view’s "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Layout"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " menu, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Show primary key entry icons"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Show relation and rollup entry icons"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to control the two kinds of icons independently. Duplicating a view or changing its layout preserves both settings."
+				}
+			]
+		},
+		{
+			"ID": "20261112174810-27e8617",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112174810-27e8617",
+				"updated": "20261112174810"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the current view’s "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Fields"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " menu, drag a field within a section to reorder it, or between Show field and Hide field to change its visibility and position together. When a section is empty, drop on the lower half of its heading. Headings of nonempty sections do not accept drops. These changes support undo and redo. The primary key cannot be hidden in table, list, or calendar views."
+				}
+			]
 		},
 		{
 			"ID": "20260613162855-gkemixn",
@@ -1101,7 +1224,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613162855-cdeorum",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1130,7 +1253,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613162855-y67hk0x",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1203,7 +1326,7 @@
 					},
 					"Properties": {
 						"id": "20260613162855-i1ifv63",
-						"updated": "20261025011511"
+						"updated": "20261111211629"
 					},
 					"Children": [
 						{
@@ -1211,7 +1334,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613162855-q8b0pyo",
-								"updated": "20261025011511"
+								"updated": "20261111211629"
 							},
 							"Children": [
 								{
@@ -1244,6 +1367,28 @@
 								{
 									"Type": "NodeText",
 									"Data": " to show field names beside their values. This option is saved per view; turn it off to hide the names"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". In the view settings, open "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Fields"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and hide the primary key to keep the preview without repeating its text. Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Open"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " on the card to open the entry"
 								}
 							]
 						}
@@ -5873,7 +6018,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Collection is evaluated after user creation, copying, content or attribute edits, content template application, global find and replace, and block or document moves into a watched scope. Document tree copies and moves include descendant documents. Existing rows keep their field values. Markdown and .sy imports, sync, history restoration, undo, and redo do not trigger new collection; use the preview to collect existing content explicitly."
+					"Data": "Collection is evaluated after user creation, copying, content or attribute edits, content template application, global find and replace, and block or document moves into a watched scope. Document tree copies and moves include descendant documents. Existing rows keep their field values. If a watched notebook has been deleted, the next edit that checks the rule saves normally and pauses the rule. Adjust its scope before enabling it again. Temporarily closing a notebook leaves the rule enabled. Markdown and .sy imports, sync, history restoration, undo, and redo do not trigger new collection; use the preview to collect existing content explicitly."
 				}
 			]
 		},
@@ -5888,6 +6033,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "Automatic actions do not chain into other rules. Sources and the target database must remain within the same encryption boundary; unlock an encrypted notebook before previewing or editing its rules."
+				}
+			]
+		},
+		{
+			"ID": "20261110124116-90b25e6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110124116-90b25e6",
+				"updated": "20261110124116"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Deleting the last database block, including by deleting its document, stops automatic block collection. Other mirrors keep collection active. Undoing the deletion restores collection for subsequent edits without collecting existing content automatically. Database data and rule settings are preserved."
 				}
 			]
 		},
@@ -6161,7 +6320,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In table and list views, Enter confirms an input field and immediately edits the same field in the next row of the same group. This applies to text, number, URL, email, phone and unbound primary-key input fields. The last row does not create another entry. Shift+Enter inserts a text line break; use entry details for full rich text editing. Composition and candidate selection keep their existing behavior. A failed save keeps the current draft open."
+					"Data": "When editing a single cell in a table or list view, Enter saves a number, URL, email, phone or Select field and selects the same field in the next row of the same group. Press Enter again to edit that cell. In a Multi-select field, Enter keeps the option picker open for the current cell. The last row does not create another entry. In text and primary-key fields, Enter edits paragraphs and list items, and Shift+Enter inserts a line break. Select multiple cells and press Enter to start entering values within the selection. Entry proceeds from left to right, then to the next selected row, and stops at the end of the selection. A single-column selection proceeds downward. Range entry supports text, number, URL, email, phone, unbound primary keys and Select fields, skipping other fields. For text and primary keys within a range, use Ctrl+Enter (Cmd+Enter on macOS) or the mobile Confirm button to save and continue. Composition and candidate selection keep their existing behavior. A failed save keeps the current input draft open."
 				}
 			]
 		},
@@ -6172,6 +6331,63 @@
 				"id": "20260613194213-n2rytff",
 				"updated": "20260613194213"
 			}
+		},
+		{
+			"ID": "20261110155812-vnwu8jk",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110155812-vnwu8jk",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rich primary keys"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110155812-jqq7g2f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110155812-jqq7g2f",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Primary keys share the text field block editor, supporting paragraphs, headings, lists, blockquotes, code and math blocks while retaining text styles, links, images, inline formulas and block references. On desktop, double-click an inline image while editing a primary key or text field to preview it and browse the other images in that field. Enter creates paragraphs or list items; Shift+Enter inserts an inline line break. During range entry, use Ctrl+Enter (Cmd+Enter on macOS) or the mobile Confirm button to save and continue. Table, list, gallery, kanban, calendar, entry details, relations and rollups display the complete source. Filtering, sorting, search and plain-text copying use the text projection; existing Markdown-looking primary keys remain literal."
+				}
+			]
+		},
+		{
+			"ID": "20261110155812-s0dfq3p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110155812-s0dfq3p",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Editing a bound primary key sets a custom static anchor without rewriting the source document or block. Clearing it restores the dynamic source. Dynamic anchors follow supported inline styling in the source document title or paragraph, including changes to styling alone. Static anchors retain their own content. Binding, rebinding and detaching preserve the entry identity. Unsupported block structures are rejected, and failed saves retain the draft."
+				}
+			]
+		},
+		{
+			"ID": "20261110155812-zuuix8w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110155812-zuuix8w",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Newly saved rich primary keys use the same Kramdown source structure as text fields and upgrade that database to format 16. Existing format 15 inline sources remain readable; unedited databases are not upgraded by this feature. Older clients without format 16 support cannot open an upgraded database. Rolling back requires restoring a complete pre-upgrade snapshot; automatic downgrading is not supported. Images and references follow the database notebook access boundary. Back up the workspace before upgrading or switching clients. Text fields also accept pasted inline images. Saving the first inline image in a text field upgrades the database to format 17. Use a client that supports format 17 to open it."
+				}
+			]
 		}
 	]
 }

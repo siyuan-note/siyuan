@@ -22,7 +22,7 @@ const makeSources = () => {
     };
     const sources = Object.fromEntries(["virtualScroll", "selectionState", "groupTableVirtual", "tableRowHeights",
         "viewType", "capabilities", "capabilities.generated", "columnWindow", "columnVirtualScroll", "rangeSelect",
-        "cellValue", "locationValue", "columnPresentation"].map(name => ["./" + name,
+        "cellValue", "locationValue", "columnPresentation", "entryIcon", "continuousInput"].map(name => ["./" + name,
         transpile(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"))]));
     for (const [file, names] of Object.entries({
         row: ["getRowHTML", "getFreezeDragHTML"],
@@ -97,8 +97,8 @@ const browserCases = async sources => {
         .replaceAll(">", "&gt;").replaceAll('"', "&quot;");
     const shared = {Constants: constants, escapeAttr: escape, escapeHtml: escape,
         escapeHtmlTextAndAttr: escape, escapeAriaLabel: escape, ...load("./capabilities"),
-        ...load("./cellValue"), ...load("./viewType"), hasClosestByClassName: closest,
-        hasClosestBlock: element => element.closest(".av"), renderAVRichTextElements() {},
+        ...load("./cellValue"), ...load("./viewType"), ...load("./entryIcon"), hasClosestByClassName: closest,
+        getAVHost: element => element.closest(".av"), renderAVRichTextElements() {},
         renderAVBlockIcon: () => "", getColIconByType: () => "iconText", getCalcValue: () => "",
         updateAVSelectionStatus() {}, addDragFill() {}, matchHotKey: () => false, isMobile: () => false,
     };
@@ -116,7 +116,7 @@ const browserCases = async sources => {
     const columns = load("./columnWindow");
     const selection = load("./selectionState");
     const range = load("./rangeSelect");
-    Object.assign(shared, virtual, columns, selection, range, load("./groupTableVirtual"), load("./columnPresentation"));
+    Object.assign(shared, virtual, columns, selection, range, load("./groupTableVirtual"), load("./columnPresentation"), load("./continuousInput"));
     const renderTable = extract("getTableHTMLs", shared);
     shared.cellScrollIntoView = extract("cellScrollIntoView", shared);
     shared.updateAttrViewCellAnimation = extract("updateAttrViewCellAnimation", shared);
@@ -127,7 +127,8 @@ const browserCases = async sources => {
     const addColumn = extract("addAttrViewColAnimation", shared);
     const updateMirrors = extract("updateAttrViewCellInOtherElements", shared);
     const removeColumn = extract("removeAttrViewColAnimation", shared);
-    const keydown = extract("avKeydown", shared);
+    const openedCells = [];
+    const keydown = extract("avKeydown", {...shared, popTextCell: (_protyle, cells) => openedCells.push(...cells)});
     const clearSelections = block => {
         range.clearAVCellRange(block);
         range.clearAVItemSelection(block, true);
@@ -274,6 +275,18 @@ const browserCases = async sources => {
     let target = row.querySelector(`[data-col-id="c${boundary + 1}"]`);
     visibleColumn(navigation, target);
     check.equal(selection.getAVCellSelection(navigation.block).focus.colID, `c${boundary + 1}`);
+    for (const type of ["select", "number", "url", "email", "phone"]) {
+        target.dataset.dtype = type;
+        const heldEnter = new KeyboardEvent("keydown", {key: "Enter", repeat: true, cancelable: true});
+        check.equal(keydown(heldEnter, navigation.block, navigation.protyle, () => false), true, type);
+        check.equal(heldEnter.defaultPrevented, true, type);
+        check.deepEqual(openedCells, [], type);
+        const enter = new KeyboardEvent("keydown", {key: "Enter", cancelable: true});
+        keydown(enter, navigation.block, navigation.protyle, () => false);
+        check.deepEqual(openedCells, [target], type);
+        openedCells.length = 0;
+    }
+    target.dataset.dtype = "text";
     const shifted = new KeyboardEvent("keydown", {key: "ArrowRight", shiftKey: true, cancelable: true});
     keydown(shifted, navigation.block, navigation.protyle, () => false);
     await settle();
@@ -443,19 +456,21 @@ const browserCases = async sources => {
             const fixture = create();
             await settle();
             let finish;
-            let started = false;
+            let signalStarted;
+            const started = new Promise(resolve => { signalStarted = resolve; });
             const cloning = new Promise((resolve, reject) => { finish = failed ? reject : resolve; });
-            const clone = () => { started = true; return cloning; };
+            const clone = () => { signalStarted(); return cloning; };
             window.htmlToImage = {toBlob: clone};
             window.modernScreenshot = {domToBlob: clone};
             const renderImage = extract("renderImageBlob", {...shared, previewElement: fixture.viewport,
                 exportDialog: {element: {querySelector: () => fixture.viewport}},
                 updateExportImageLayout() {}, getExportImageSize: () => ({width: 640, height: 300}),
-                isExportImageSizeSupported: () => true, isIPhone: () => false, isIPad: () => false,
+                getExportImageLayoutScale: () => 1,
+                isExportImageSizeSupported: () => true, isMac: () => false, isIPhone: () => false, isIPad: () => false,
                 isSafari: () => safari, addScript: async () => {}, getExportImageLocalFontCSS: () => "",
                 getExportImageFontCSS: async () => "", IMAGE_PLACEHOLDER: "placeholder"});
             const pending = renderImage();
-            while (!started) await new Promise(resolve => setTimeout(resolve, 0));
+            await Promise.race([started, pending.then(() => check.fail("Export finished before cloning started"))]);
             const fullRows = () => check.ok(rowsOf(fixture.block).every(item =>
                 item.querySelectorAll(".av__cell").length === fixture.view.columns.length));
             fullRows();
@@ -509,7 +524,7 @@ if (process.versions.electron && process.type === "browser") {
     runElectron().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
     require("node:test").test("real table and cell renderers integrate row/column windows, navigation, mirrors and export", {
-        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
         timeout: 90000,
     }, async () => {
         const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-av-window-integration-"));
@@ -517,7 +532,9 @@ if (process.versions.electron && process.type === "browser") {
         delete env.ELECTRON_RUN_AS_NODE;
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
-                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 80000});
+                require("electron"), [...(process.env.SIYUAN_ELECTRON_HEADLESS ?
+                    ["--ozone-platform=headless", "--ozone-override-screen-size=1920,1080"] : []),
+                    __filename, profile], {env, windowsHide: true, timeout: 80000});
             assert.match(stdout, /Combined database windows passed/);
             console.log(stdout.trim());
         } finally {

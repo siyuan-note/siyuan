@@ -1,5 +1,5 @@
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
-import {MobileDialog} from "../dialog/mobileDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
 import dayjs from "dayjs";
 import {Protyle} from "../protyle";
@@ -29,7 +29,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         page: pageIndex
     }, (response) => {
         pageCount = Math.max(response.data.pageCount, 1);
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             mobileSheet: {mode: "expanded", beforeClose: createMobileSecondaryEditorCloseGuard(() => edit)},
             hideCloseIcon: true,
             positionId: Constants.DIALOG_VIEWCARDS,
@@ -227,8 +227,10 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                     event.preventDefault();
                     break;
                 } else if (type === "resetAll") {
-                    mobileConfirmDialog(window.siyuan.languages.reset,
-                        window.siyuan.languages.resetCardTip.replace("${x}", dialog.element.querySelector(".counter").textContent), () => {
+                    confirmDialog({
+                        title: window.siyuan.languages.reset,
+                        text: window.siyuan.languages.resetCardTip.replace("${x}", dialog.element.querySelector(".counter").textContent),
+                        confirm: () => {
                             fetchPost("/api/riff/resetRiffCards", {
                                 type: deckType === "" ? "deck" : deckType.toLowerCase(),
                                 deckID: deckType === "" ? deckID : Constants.QUICK_DECK_ID,
@@ -238,7 +240,8 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                                     item.textContent = dayjs().format("YYYY-MM-DD");
                                 });
                             });
-                        });
+                        },
+                    });
                     event.stopPropagation();
                     event.preventDefault();
                     break;

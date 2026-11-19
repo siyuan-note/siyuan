@@ -23,10 +23,57 @@ const gnomeProxySchema = "org.gnome.system.proxy"
 
 type gnomeProxySettingReader func(context.Context, string, string) (string, error)
 
+// linuxDesktopProxy 表示当前会话可识别的桌面代理来源。
+type linuxDesktopProxy int
+
+const (
+	linuxDesktopProxyUnsupported linuxDesktopProxy = iota
+	linuxDesktopProxyGNOME
+	linuxDesktopProxyKDE
+)
+
 func readSystemNetworkProxy() (*systemNetworkProxyConfig, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	return readGNOMENetworkProxy(ctx, os.Getenv, readGNOMEProxySetting)
+	switch linuxDesktopProxyKind(os.Getenv) {
+	case linuxDesktopProxyGNOME:
+		return readGNOMENetworkProxy(ctx, os.Getenv, readGNOMEProxySetting)
+	case linuxDesktopProxyKDE:
+		return readKDENetworkProxy(os.Getenv)
+	}
+	return nil, nil
+}
+
+// linuxDesktopProxyKind 按会话环境选择桌面代理来源；未识别的桌面不启用系统代理。
+func linuxDesktopProxyKind(getenv func(string) string) linuxDesktopProxy {
+	desktop := getenv("XDG_CURRENT_DESKTOP")
+	if desktop != "" {
+		for _, name := range strings.Split(desktop, ":") {
+			switch strings.ToLower(strings.TrimSpace(name)) {
+			case "gnome":
+				return linuxDesktopProxyGNOME
+			case "kde", "plasma":
+				return linuxDesktopProxyKDE
+			}
+		}
+		return linuxDesktopProxyUnsupported
+	}
+	for _, name := range []string{"XDG_SESSION_DESKTOP", "DESKTOP_SESSION"} {
+		session := strings.ToLower(strings.TrimSpace(getenv(name)))
+		switch session {
+		case "gnome", "gnome-classic", "gnome-xorg", "gnome-wayland":
+			return linuxDesktopProxyGNOME
+		case "kde", "plasma", "plasmawayland":
+			return linuxDesktopProxyKDE
+		}
+		if session != "" {
+			return linuxDesktopProxyUnsupported
+		}
+	}
+	if strings.EqualFold(getenv("KDE_FULL_SESSION"), "true") {
+		return linuxDesktopProxyKDE
+	}
+	return linuxDesktopProxyUnsupported
 }
 
 // readGNOMENetworkProxy 仅在 GNOME 会话且没有显式代理环境配置时读取桌面代理。
@@ -35,10 +82,8 @@ func readGNOMENetworkProxy(ctx context.Context, getenv func(string) string, read
 	if !isGNOMEProxySession(getenv) {
 		return nil, nil
 	}
-	for _, name := range []string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy"} {
-		if getenv(name) != "" {
-			return nil, nil
-		}
+	if explicitProxyEnvironment(getenv) {
+		return nil, nil
 	}
 	get := func(schema, key string) (string, error) {
 		value, err := read(ctx, schema, key)
@@ -109,16 +154,8 @@ func readGNOMENetworkProxy(ctx context.Context, getenv func(string) string, read
 		proxies[protocol] = proxy
 	}
 	ret := &systemNetworkProxyConfig{HTTPProxy: proxies["http"], HTTPSProxy: proxies["https"]}
-	// GNOME 的 HTTPS 未单独配置时复用 HTTP，然后才回退 SOCKS。
-	if ret.HTTPSProxy == "" {
-		ret.HTTPSProxy = ret.HTTPProxy
-	}
-	if ret.HTTPProxy == "" {
-		ret.HTTPProxy = proxies["socks"]
-	}
-	if ret.HTTPSProxy == "" {
-		ret.HTTPSProxy = proxies["socks"]
-	}
+	// HTTPS 未单独配置时复用 HTTP，然后才回退 SOCKS。
+	applyGNOMEProxyFallback(ret, proxies["socks"])
 	if ret.HTTPProxy == "" && ret.HTTPSProxy == "" {
 		return nil, nil
 	}
@@ -140,6 +177,54 @@ func readGNOMENetworkProxy(ctx context.Context, getenv func(string) string, read
 		}
 	}
 	// 单独设置 NO_PROXY 不阻止读取桌面代理；保留两方的直连例外。
+	noProxy, err := mergeProxyBypass(bypass, getenv)
+	if err != nil {
+		return nil, err
+	}
+	ret.NoProxy = noProxy
+	return ret, nil
+}
+
+func isGNOMEProxySession(getenv func(string) string) bool {
+	return linuxDesktopProxyKind(getenv) == linuxDesktopProxyGNOME
+}
+
+// explicitProxyEnvironment 判断启动环境是否已显式配置 HTTP(S) 代理。
+// 显式环境变量整组优先于桌面设置，避免将两个来源的 HTTP 和 HTTPS 配置混合。
+func explicitProxyEnvironment(getenv func(string) string) bool {
+	for _, name := range []string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy"} {
+		if getenv(name) != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// applyGNOMEProxyFallback 补齐 GNOME 未单独配置的协议：HTTPS 先复用 HTTP，HTTP 和 HTTPS 再回退 SOCKS。
+func applyGNOMEProxyFallback(config *systemNetworkProxyConfig, socksProxy string) {
+	if config.HTTPSProxy == "" {
+		config.HTTPSProxy = config.HTTPProxy
+	}
+	if config.HTTPProxy == "" {
+		config.HTTPProxy = socksProxy
+	}
+	if config.HTTPSProxy == "" {
+		config.HTTPSProxy = socksProxy
+	}
+}
+
+// applyKDEProxyFallback 只在同一协议内回退 SOCKS，不把 HTTP 代理用于 HTTPS。
+func applyKDEProxyFallback(config *systemNetworkProxyConfig, socksProxy string) {
+	if config.HTTPProxy == "" {
+		config.HTTPProxy = socksProxy
+	}
+	if config.HTTPSProxy == "" {
+		config.HTTPSProxy = socksProxy
+	}
+}
+
+// mergeProxyBypass 合并桌面直连例外与环境 no_proxy，并按首次出现的顺序去重。
+func mergeProxyBypass(bypass []string, getenv func(string) string) (string, error) {
 	environmentBypass := getenv("no_proxy")
 	if environmentBypass == "" {
 		environmentBypass = getenv("NO_PROXY")
@@ -150,38 +235,14 @@ func readGNOMENetworkProxy(ctx context.Context, getenv func(string) string, read
 	for _, entry := range bypass {
 		entry = strings.TrimSpace(entry)
 		if strings.ContainsAny(entry, ",\x00\r\n") {
-			return nil, fmt.Errorf("invalid GNOME proxy bypass entry")
+			return "", fmt.Errorf("invalid proxy bypass entry")
 		}
 		if entry != "" && !seen[entry] {
 			seen[entry] = true
 			entries = append(entries, entry)
 		}
 	}
-	ret.NoProxy = strings.Join(entries, ",")
-	return ret, nil
-}
-
-func isGNOMEProxySession(getenv func(string) string) bool {
-	desktop := getenv("XDG_CURRENT_DESKTOP")
-	if desktop != "" {
-		for _, name := range strings.Split(desktop, ":") {
-			if strings.EqualFold(strings.TrimSpace(name), "GNOME") {
-				return true
-			}
-		}
-		return false
-	}
-	for _, name := range []string{"XDG_SESSION_DESKTOP", "DESKTOP_SESSION"} {
-		session := strings.ToLower(getenv(name))
-		switch session {
-		case "gnome", "gnome-classic", "gnome-xorg", "gnome-wayland":
-			return true
-		}
-		if session != "" {
-			return false
-		}
-	}
-	return false
+	return strings.Join(entries, ","), nil
 }
 
 func readGNOMEProxySetting(ctx context.Context, schema, key string) (string, error) {

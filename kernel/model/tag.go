@@ -5,7 +5,6 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -99,127 +98,6 @@ func removeTag(label string, beforeCommit func()) (err error) {
 		finishTitles()
 		if err = finishRich(); err != nil {
 			return err
-		}
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
-		if beforeCommit != nil {
-			beforeCommit()
-		}
-		if err = writeReplacementTree(tree, original, "", false, nil); err != nil {
-			util.ClearPushProgress(100)
-			return
-		}
-		util.RandomSleep(50, 150)
-		reloadTreeIDs = append(reloadTreeIDs, tree.ID)
-	}
-
-	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
-	sql.FlushQueue()
-
-	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)
-	for _, id := range reloadTreeIDs {
-		ReloadProtyle(id)
-	}
-
-	updateAttributeViewBlockText(updateNodes)
-
-	sql.FlushQueue()
-	util.PushClearProgress()
-	return
-}
-
-func RenameTag(oldLabel, newLabel string) (err error) {
-	return renameTag(oldLabel, newLabel, nil)
-}
-
-func renameTag(oldLabel, newLabel string, beforeCommit func()) (err error) {
-	if invalidChar := treenode.ContainsMarker(newLabel); "" != invalidChar {
-		return fmt.Errorf(Conf.Language(112), invalidChar)
-	}
-
-	newLabel = strings.TrimPrefix(newLabel, "/")
-	newLabel = strings.TrimSuffix(newLabel, "/")
-	newLabel = strings.TrimSpace(newLabel)
-
-	if "" == newLabel {
-		return errors.New(Conf.Language(114))
-	}
-
-	if oldLabel == newLabel {
-		return
-	}
-
-	util.PushEndlessProgress(Conf.Language(110))
-	util.RandomSleep(500, 1000)
-
-	tags := sql.QueryTagSpansByLabel(oldLabel)
-	treeBlocks := map[string][]string{}
-	for _, tag := range tags {
-		if blocks, ok := treeBlocks[tag.RootID]; !ok {
-			treeBlocks[tag.RootID] = []string{tag.BlockID}
-		} else {
-			treeBlocks[tag.RootID] = append(blocks, tag.BlockID)
-		}
-	}
-
-	var reloadTreeIDs []string
-	updateNodes := map[string]*ast.Node{}
-	historyDir, err := getHistoryDir(HistoryOpReplace)
-	if nil != err {
-		return
-	}
-
-	for treeID, blocks := range treeBlocks {
-		util.PushEndlessProgress("[" + treeID + "]")
-		tree, original, e := loadBatchMutationTree(treeID)
-		if nil != e {
-			util.ClearPushProgress(100)
-			return e
-		}
-
-		generateTreeHistory(tree, historyDir)
-
-		for _, blockID := range blocks {
-			node := treenode.GetNodeInTree(tree, blockID)
-			if nil == node {
-				continue
-			}
-
-			if ast.NodeDocument == node.Type {
-				if docTagsVal := node.IALAttr("tags"); strings.Contains(docTagsVal, oldLabel) {
-					docTags := strings.Split(docTagsVal, ",")
-					var tmp []string
-					for _, docTag := range docTags {
-						if strings.HasPrefix(docTag, oldLabel+"/") || docTag == oldLabel {
-							docTag = strings.Replace(docTag, oldLabel, newLabel, 1)
-							tmp = append(tmp, docTag)
-						} else {
-							tmp = append(tmp, docTag)
-						}
-					}
-					node.SetIALAttr("tags", strings.Join(tmp, ","))
-				}
-				continue
-			}
-
-			finishRich, richErr := treenode.MaterializeTableCellRich(node)
-			if richErr != nil {
-				return richErr
-			}
-			finishTitles := treenode.MaterializeInlineTitles(node)
-			nodeTags := node.ChildrenByType(ast.NodeTextMark)
-			for _, nodeTag := range nodeTags {
-				if nodeTag.IsTextMarkType("tag") {
-					if strings.HasPrefix(nodeTag.TextMarkTextContent, oldLabel+"/") || nodeTag.TextMarkTextContent == oldLabel {
-						nodeTag.TextMarkTextContent = strings.Replace(nodeTag.TextMarkTextContent, oldLabel, newLabel, 1)
-					}
-				}
-			}
-
-			finishTitles()
-			if err = finishRich(); err != nil {
-				return err
-			}
-			updateNodes[node.ID] = node
 		}
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(treenode.ReadDocumentTitle(tree.Root).Text)))
 		if beforeCommit != nil {

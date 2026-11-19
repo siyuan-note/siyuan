@@ -9,15 +9,19 @@ import {promisify} from "node:util";
 import {transpileModule, ModuleKind, ScriptTarget} from "typescript";
 import {compileString} from "sass";
 
-test("image gallery shows copy results above the preview and releases Live Photos on navigation and slideshow", async () => {
+test("image gallery scopes database images, shows copy results above the preview, and releases Live Photos", async () => {
     const root = realpathSync(tmpdir());
     const temporary = mkdtempSync(path.join(root, "siyuan-live-photo-gallery-"));
     const css = compileString(readFileSync("src/assets/scss/viewerjs/_viewer.scss", "utf8") +
         readFileSync("src/assets/scss/component/_snackbar.scss", "utf8")).css;
+    const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
     const server = createServer((request, response) => {
         if (request.url?.startsWith("/stage/protyle/js/viewerjs/viewer.js")) {
             response.writeHead(200, {"Content-Type": "text/javascript"});
             response.end(readFileSync("stage/protyle/js/viewerjs/viewer.js"));
+        } else if (request.url?.startsWith("/assets/")) {
+            response.writeHead(200, {"Content-Type": "image/png"});
+            response.end(Buffer.from(png, "base64"));
         } else {
             response.writeHead(200, {"Content-Type": "text/html"});
             response.end(`<!doctype html><title>Gallery verification</title><style>${css}</style><body><div id="message" class="b3-snackbars"><div class="fn__flex-1"></div></div><script>${readFileSync("appearance/icons/litheness/icon.js", "utf8")}</script>`);
@@ -33,6 +37,9 @@ test("image gallery shows copy results above the preview and releases Live Photo
         const messageSource = transpileModule(readFileSync("src/dialog/message.ts", "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
         }).outputText;
+        const escapeSource = transpileModule(readFileSync("src/util/escape.ts", "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+        }).outputText;
         const languages = JSON.parse(readFileSync("appearance/langs/en.json", "utf8"));
         const browserCase = `(async () => {
             const starts = [];
@@ -43,7 +50,7 @@ test("image gallery shows copy results above the preview and releases Live Photo
             let phase = "playing";
             const closed = [];
             const active = {playing:false,converting:false};
-            const image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
+            const image = "data:image/png;base64,${png}";
             const entries = [{src:image,video:"assets/first.mov"},{src:image,video:"assets/second.mov"},{src:image}];
             window.siyuan = {languages:${JSON.stringify(languages)},zIndex:10};
             const messageAPI = {};
@@ -54,12 +61,17 @@ test("image gallery shows copy results above the preview and releases Live Photo
                 Constants: {SIYUAN_VERSION:"test"},
             }));
             const exports = {};
+            const escapeAPI = {};
+            new Function("exports",${JSON.stringify(escapeSource)})(escapeAPI);
+            const requests = [];
             const require = () => ({
+                ...escapeAPI,
                 Constants:{PROTYLE_CDN:"/stage/protyle"},
                 addScript: src => new Promise((resolve,reject) => {
+                    if (window.Viewer) {resolve();return;}
                     const script=document.createElement("script");script.src=src;script.onload=resolve;script.onerror=reject;document.head.append(script);
                 }),
-                fetchPost: (_url,_data,callback) => callback({data:entries}),
+                fetchPost: (url,data,callback) => {requests.push({url,data});callback({data:entries});},
                 createLivePhotoPlayer: (_host,video) => {
                     const current=phase;
                     active[current]=true;
@@ -142,7 +154,30 @@ test("image gallery shows copy results above the preview and releases Live Photo
             checkCount("3/3");
             const hidden=button.classList.contains("fn__none");
             viewer.destroy();
-            return {starts,stopped,hidden,closed};
+
+            const field=document.createElement("div");
+            field.innerHTML='<div class="av__richtext-host">' +
+                '<img src="/assets/first%20photo.png?box=notebook&amp;version=2"><img class="emoji" src="/assets/emoji.png">' +
+                '<img src=""><img src="/assets/second%23photo.png"><img src="/assets/first%20photo.png?box=notebook&amp;version=2">' +
+                '</div><div class="av__celltext--rich"><img src="/assets/other-field.png"></div>';
+            document.body.append(field);
+            const clicked=field.querySelector(".av__richtext-host img:last-child");
+            exports.previewDocImage(clicked.getAttribute("src"),"host-doc","",clicked);
+            await wait(()=>window.siyuan.viewer!==viewer && window.siyuan.viewer.viewed);
+            const gallery=window.siyuan.viewer;
+            const fieldImages=Array.from(gallery.images, item=>item.getAttribute("src"));
+            const selected=gallery.index;
+            gallery.prev();
+            await wait(()=>gallery.index===1 && gallery.viewed);
+            const previous=gallery.image.getAttribute("src");
+            gallery.destroy();
+            const other=field.querySelector(".av__celltext--rich img");
+            exports.previewDocImage(other.getAttribute("src"),"host-doc","",other);
+            await wait(()=>window.siyuan.viewer!==gallery && window.siyuan.viewer.viewed);
+            const singleGallery=window.siyuan.viewer;
+            const single=Array.from(singleGallery.images, item=>item.getAttribute("src"));
+            singleGallery.destroy();
+            return {starts,stopped,hidden,closed,requests,fieldImages,selected,previous,single};
         })()`;
         const script = path.join(temporary, "main.cjs");
         writeFileSync(script, `
@@ -172,6 +207,10 @@ test("image gallery shows copy results above the preview and releases Live Photo
         assert.deepEqual(JSON.parse(result.stdout.trim().split("\n").at(-1)), {
             starts: ["assets/second.mov", "assets/first.mov", "assets/first.mov"], stopped: 3, hidden: true,
             closed: ["playing", "playing", "converting"],
+            requests: [{url: "/api/asset/getDocPreviewImages", data: {id: "document"}}],
+            fieldImages: ["/assets/first%20photo.png?box=notebook&version=2", "/assets/second%23photo.png",
+                "/assets/first%20photo.png?box=notebook&version=2"],
+            selected: 2, previous: "/assets/second%23photo.png", single: ["/assets/other-field.png"],
         });
     } finally {
         server.close();

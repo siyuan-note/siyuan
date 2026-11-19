@@ -104,9 +104,10 @@ test("rename construction retains local undo and toolbar history while inline ti
         let floating = false;
         let cleared = false;
         const subElement = {remove: () => { floating = false; }, replaceChildren: () => { cleared = true; }};
-        const listeners = new Map<string, () => void>();
+        const listeners = new Map<string, (event?: unknown) => void>();
         const wysiwygListeners = new Map<string, () => void>();
         let toolbarHides = 0;
+        let menuHides = 0;
         const editable = {classList: {contains: () => true}, dataset: {tip: "Untitled"}};
         const localUndo = {undo: () => localUndos++, redo: () => {}, clear: () => {}};
         const fragment = {protyle: {block: {}, undo: localUndo, toolbar: {subElement}, wysiwyg: {flushPendingInput: async () => {}}},
@@ -117,11 +118,12 @@ test("rename construction retains local undo and toolbar history while inline ti
         const owner = {element: {classList: {contains: () => draft}}, block: {rootID: "doc"},
             preview: {element: {classList: {contains: () => !preview}}}};
         const host = {classList: {add: () => {}}, dataset: {}, closest: () => inline ? {} : null,
-            addEventListener: (type: string, listener: () => void) => listeners.set(type, listener)};
+            addEventListener: (type: string, listener: (event?: unknown) => void, capture = false) =>
+                listeners.set(type + (capture ? ":capture" : ""), listener)};
         const moduleExports: {DocumentTitleEditor?: new (...args: unknown[]) => {destroy: () => void}} = {};
         const dependencies = {
-            isMobile: () => true, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
-            getDocumentTitleLute: () => ({}), getAgentLute: () => ({}),
+            isMobile: () => true, isIPad: () => false, getDefaultToolbar: (): string[] => [], registerBuiltinSlashHint: () => {},
+            getDocumentTitleLute: () => ({}), getAgentLute: () => ({}), flattenDocumentTitlePaste: () => "",
             prepareDocumentTitleInitialDOM: (html: string) => html,
             getDocumentTitleDOMFingerprint: (html: string) => html,
             mountProtyleLiteFragment: (_host: unknown, options: {onChange: () => void}) => {
@@ -137,6 +139,10 @@ test("rename construction retains local undo and toolbar history while inline ti
                 assert.deepEqual(Array.from(types), ["toolbar"]);
                 toolbarHides++;
             },
+            globalClickHideMenu: (target: unknown) => {
+                assert.equal(target, editable);
+                menuHides++;
+            },
         };
         runInNewContext(transpileModule(readFileSync(join(__dirname, "documentTitleEditor.ts"), "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -149,6 +155,12 @@ test("rename construction retains local undo and toolbar history while inline ti
         assert.equal(floating, inline, "only top-bar title menus escape their clipping and stacking ancestors");
         wysiwygListeners.get("mousedown")();
         assert.equal(toolbarHides, 1, "title pointer selection hides body and title toolbars despite stopped bubbling");
+        let stopped = false;
+        const event = {target: editable, stopPropagation: () => {stopped = true;}};
+        listeners.get("click:capture")(event);
+        assert.equal(menuHides, 1, "title clicks dismiss menus before descendants stop event propagation");
+        listeners.get("click")(event);
+        assert.equal(stopped, true);
         assert.equal(toolbarOwner, draft ? fragment.protyle : owner);
         assert.equal(fragment.protyle.undo === localUndo, draft);
         assert.equal(disabled, preview, "late source loading keeps preview-mode titles readonly");
@@ -241,6 +253,26 @@ test("rename undo and redo use only local fragment history and Enter activates c
     await state.enter();
     assert.equal(confirmed, 1);
     assert.equal(requests.length, 0);
+});
+
+test("undo commits pending title content before replaying document history", async () => {
+    const {state, requests, setHTML, finish} = setup();
+    const pasted = '<div class="p" data-type="NodeParagraph"><div contenteditable="true">First Second</div></div>';
+    state.owner.element = {classList: {contains: () => false}} as unknown as HTMLElement;
+    let undone = false;
+    state.owner.undo.undo = async () => {
+        assert.equal(state.saved, pasted);
+        assert.equal(state.revision, "r1");
+        undone = true;
+    };
+    setHTML(pasted);
+    const undoing = state.undo(false);
+    await tick();
+    assert.equal(undone, false);
+    assert.equal(requests[0].data.transactions[0].doOperations[0].data.blockDOM, pasted);
+    finish(0, "r1");
+    await undoing;
+    assert.equal(undone, true);
 });
 
 test("title saves serialize the current source revision while retaining edits made during an acknowledgement", async () => {

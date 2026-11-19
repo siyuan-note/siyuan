@@ -183,7 +183,7 @@ const cases = async compiled => {
             focusWhenReady(target) {target()?.focus();}
         }
         const focusByRange = range => {getSelection().removeAllRanges(); getSelection().addRange(range);};
-        const openCard = new Function("window", "MobileDialog", "Constants", "genCardHTML", "isMobile", "bindCardEvent",
+        const openCard = new Function("window", "AdaptiveDialog", "Constants", "genCardHTML", "isMobile", "bindCardEvent",
             "focusByRange", "updateCardHV", "createMobileSecondaryEditorCloseGuard", "registerMobileSecondaryEditor",
             compiled.card + "\nreturn openCardByData;")(
             window, Dialog, Constants, () => "", () => mobile, async () => editor, focusByRange, () => {},

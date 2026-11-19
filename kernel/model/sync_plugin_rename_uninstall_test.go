@@ -92,7 +92,7 @@ func TestSyncMergePluginFileRenameKeepsPluginAsReload(t *testing.T) {
 		Removes: []*entity.File{{Path: "/plugins/" + plugin + "/README_zh_CN.md"}},
 		Upserts: []*entity.File{{Path: "/plugins/" + plugin + "/README.zh-CN.md"}},
 	}
-	processSyncMergeResult(true, false, mergeResult, &dejavu.TrafficStat{}, "a", 0)
+	processSyncMergeResult(true, false, mergeResult, &dejavu.TrafficStat{}, "a", 0, false, nil)
 
 	line := lastReloadPluginsLog(t)
 	t.Logf("分类结果：%s", line)
@@ -112,7 +112,7 @@ func TestSyncMergePluginRemovedDirTriggersUninstall(t *testing.T) {
 	mergeResult := &dejavu.MergeResult{
 		Removes: []*entity.File{{Path: "/plugins/" + plugin + "/plugin.json"}},
 	}
-	processSyncMergeResult(true, false, mergeResult, &dejavu.TrafficStat{}, "a", 0)
+	processSyncMergeResult(true, false, mergeResult, &dejavu.TrafficStat{}, "a", 0, false, nil)
 
 	line := lastReloadPluginsLog(t)
 	t.Logf("分类结果：%s", line)
@@ -128,7 +128,7 @@ func TestSyncMergePluginOnlyDSStoreTriggersUninstall(t *testing.T) {
 	mergeResult := &dejavu.MergeResult{
 		Removes: []*entity.File{{Path: "/plugins/" + plugin + "/plugin.json"}},
 	}
-	processSyncMergeResult(true, false, mergeResult, &dejavu.TrafficStat{}, "a", 0)
+	processSyncMergeResult(true, false, mergeResult, &dejavu.TrafficStat{}, "a", 0, false, nil)
 	line := lastReloadPluginsLog(t)
 	if !strings.Contains(line, "uninstalls=["+plugin+"]") {
 		t.Fatalf("metadata-only plugin must be uninstalled: %s", line)
@@ -146,7 +146,7 @@ func TestSyncMergeRemovedPetalStillTriggersUninstall(t *testing.T) {
 		Removes:      []*entity.File{{Path: "/plugins/" + plugin + "/README.md"}},
 		RemovePetals: []string{plugin},
 	}
-	processSyncMergeResult(true, false, mergeResult, &dejavu.TrafficStat{}, "a", 0)
+	processSyncMergeResult(true, false, mergeResult, &dejavu.TrafficStat{}, "a", 0, false, nil)
 	line := lastReloadPluginsLog(t)
 	if !strings.Contains(line, "uninstalls=["+plugin+"]") {
 		t.Fatalf("explicit petal removal must trigger uninstall: %s", line)

@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/memory"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -59,6 +60,7 @@ func maintainAIMemoryCandidates(ctx context.Context, now time.Time) error {
 	removed, err := memory.NewStore(workspace).MaintainCandidates(ctx, now.Add(-aiMemoryCandidateRetention), check)
 	if removed > 0 && util.DataDir == workspace {
 		memoryChanged("")
+		logging.LogInfof("retired [%d] automatic AI memory candidates", removed)
 	}
 	return err
 }

@@ -5,6 +5,10 @@
 package conf
 
 import (
+	"encoding/json"
+	"reflect"
+	"strings"
+
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -28,6 +32,73 @@ type BoxConf struct {
 	SortMode              int             `json:"sortMode"`              // 排序方式
 	Encrypted             bool            `json:"encrypted"`             // 是否为加密笔记本
 	BoxCrypt              *BoxEncryption  `json:"boxCrypt"`              // 笔记本加密参数，仅 Encrypted=true 时有值
+
+	Extra map[string]json.RawMessage `json:"-"` // 当前版本未知的顶层配置字段
+}
+
+type boxConfJSON BoxConf
+
+var boxConfJSONNames = func() map[string]struct{} {
+	names := map[string]struct{}{}
+	for field := range reflect.TypeFor[boxConfJSON]().Fields() {
+		name, _, _ := strings.Cut(field.Tag.Get("json"), ",")
+		if name != "-" {
+			if name == "" {
+				name = field.Name
+			}
+			names[name] = struct{}{}
+		}
+	}
+	return names
+}()
+
+func isBoxConfJSONName(name string) bool {
+	if _, known := boxConfJSONNames[name]; known {
+		return true
+	}
+	for known := range boxConfJSONNames {
+		if strings.EqualFold(name, known) {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *BoxConf) UnmarshalJSON(data []byte) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	if err := json.Unmarshal(data, (*boxConfJSON)(c)); err != nil {
+		return err
+	}
+	for name := range fields {
+		if isBoxConfJSONName(name) {
+			delete(fields, name)
+		}
+	}
+	c.Extra = nil
+	if len(fields) > 0 {
+		c.Extra = fields
+	}
+	return nil
+}
+
+func (c BoxConf) MarshalJSON() ([]byte, error) {
+	data, err := json.Marshal(boxConfJSON(c))
+	if err != nil || len(c.Extra) == 0 {
+		return data, err
+	}
+	var fields map[string]json.RawMessage
+	if err = json.Unmarshal(data, &fields); err != nil {
+		return nil, err
+	}
+	for name, value := range c.Extra {
+		if !isBoxConfJSONName(name) {
+			fields[name] = value
+		}
+	}
+	return json.Marshal(fields)
 }
 
 // BoxEncryption 维护单个加密笔记本的密钥包络参数。WrappedDEK 是用全局 KEK 加密后的 DEK，本身可落盘。

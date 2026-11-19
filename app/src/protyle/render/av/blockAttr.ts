@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {guardTemplateHTTPRequest} from "../../../template/http";
 import {clearAVAttributeDropTarget, getAVAttributeDropTarget, getAVAttributePreviousID, getAVAttributeSort, IAVAttributeDropTarget} from "./attributePanelDrag";
 import {observeAVAttributeLayout, updateAVAttributeLayout} from "./attributePanelLayout";
@@ -592,27 +592,33 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                         }];
                         const restoreEditorRange = () => restoreEditorFocusRange(protyle.wysiwyg.element,
                             editorRange);
-                        mobileConfirmDialog(window.siyuan.languages.removeAV, window.siyuan.languages.confirmDelete + "?", () => {
-                            if (protyle.disabled) {
-                                return;
-                            }
-                            removeElement.setAttribute("disabled", "true");
-                            transaction(protyle, doOperations, undoOperations.length > 0 ? undoOperations : undefined, {
-                                callback: () => {
-                                    blockElement.remove();
-                                    protyle.databaseAttributePanel?.refresh();
-                                    if (!element.querySelector("[data-av-id]")) {
-                                        window.siyuan.dialogs.find(item => {
-                                            if (item.element.getAttribute("data-key") === Constants.DIALOG_ATTR) {
-                                                item.destroy();
-                                                return true;
-                                            }
-                                        });
-                                    }
+                        confirmDialog({
+                            title: window.siyuan.languages.removeAV,
+                            text: window.siyuan.languages.confirmDelete + "?",
+                            confirm: () => {
+                                if (protyle.disabled) {
+                                    return;
                                 }
-                            });
-                            restoreEditorRange();
-                        }, restoreEditorRange, true);
+                                removeElement.setAttribute("disabled", "true");
+                                transaction(protyle, doOperations, undoOperations.length > 0 ? undoOperations : undefined, {
+                                    callback: () => {
+                                        blockElement.remove();
+                                        protyle.databaseAttributePanel?.refresh();
+                                        if (!element.querySelector("[data-av-id]")) {
+                                            window.siyuan.dialogs.find(item => {
+                                                if (item.element.getAttribute("data-key") === Constants.DIALOG_ATTR) {
+                                                    item.destroy();
+                                                    return true;
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                                restoreEditorRange();
+                            },
+                            cancel: restoreEditorRange,
+                            isDelete: true,
+                        });
                     }
                     event.stopPropagation();
                     return;
@@ -788,7 +794,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
             break;
         } else if ((isAVTextType(type) && type !== "template") &&
             (target.querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template") ||
-                (type === "text" && target.querySelector(":scope > .av__celltext")))) {
+                ((type === "text" || type === "block") && target.querySelector(":scope > .av__celltext")))) {
             popTextCell(protyle, [target], type as TAVCol);
             event.stopPropagation();
             event.preventDefault();

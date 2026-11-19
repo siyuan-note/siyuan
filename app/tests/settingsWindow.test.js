@@ -28,7 +28,7 @@ const rendererModules = (sources) => {
         "../util/functions": {isMobile: () => false}, "../protyle/util/compatibility": {isNotCtrl: () => true},
         "../constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
     });
-    const {MobileDialog} = loadRendererModule(sources.mobileDialog, {
+    const {AdaptiveDialog} = loadRendererModule(sources.adaptiveDialog, {
         "./index": {Dialog}, "../util/functions": {isMobile: () => false},
         "../mobile/util/bindBottomSheetDialog": {}, "../constants": {Constants: {}},
         "../mobile/util/mobileAppUtil": {}, "../mobile/util/visibleViewport": {},
@@ -55,13 +55,13 @@ const rendererModules = (sources) => {
     const titles = loadRendererModule(sources.titles, {
         "./escape": {}, "../constants": {Constants: {}}, "./pathName": {pathPosix: () => require("node:path").posix},
     });
-    return {Dialog, MobileDialog, genUUID, context, fit, controls, frontend, titles};
+    return {Dialog, AdaptiveDialog, genUUID, context, fit, controls, frontend, titles};
 };
 
 const bootChild = async (sources) => {
     const {ipcRenderer} = require("electron");
     const {waitForWindowPaint} = loadRendererModule(sources.paint, {});
-    const {Dialog, MobileDialog, genUUID, context, fit, frontend, titles} = rendererModules(sources);
+    const {Dialog, AdaptiveDialog, genUUID, context, fit, frontend, titles} = rendererModules(sources);
     require("node:assert/strict").equal(navigator.userAgent.startsWith("SiYuan/"), false);
     require("node:assert/strict").equal(frontend.getFrontend(), "desktop", navigator.userAgent);
     const host = await new Promise(resolve => {
@@ -106,7 +106,7 @@ const bootChild = async (sources) => {
         document.title = host.title;
         if (host.plugin) {
             const {Setting} = loadRendererModule(sources.setting, {
-                "../dialog/mobileDialog": {MobileDialog},
+                "../dialog/adaptiveDialog": {AdaptiveDialog},
                 "../util/functions": {isMobile: () => false, getFrontend: frontend.getFrontend},
                 "../dialog": {Dialog}, "../config/setting/nativeWindow": {},
                 "../config/setting/windowContext": context, "../config/setting/windowDialog": fit,
@@ -186,7 +186,7 @@ const bootChild = async (sources) => {
     check.ok(pluginEvents.includes("before-hide-tooltip"));
     button.remove();
     const {Setting: NestedSetting} = loadRendererModule(sources.setting, {
-        "../dialog/mobileDialog": {MobileDialog},
+        "../dialog/adaptiveDialog": {AdaptiveDialog},
         "../util/functions": {isMobile: () => false, getFrontend: frontend.getFrontend}, "../dialog": {Dialog},
         "../config/setting/nativeWindow": {}, "../config/setting/windowContext": context,
         "../config/setting/windowDialog": fit, "../util/genID": {genUUID},
@@ -205,7 +205,7 @@ const bootChild = async (sources) => {
 const runCases = async (sources) => {
     const assert = require("node:assert/strict");
     const {ipcRenderer} = require("electron");
-    const {Dialog, MobileDialog, genUUID, context, fit, titles} = rendererModules(sources);
+    const {Dialog, AdaptiveDialog, genUUID, context, fit, titles} = rendererModules(sources);
     window.settingsPaths = [];
     const bazaarPath = loadRendererModule(sources.bazaarPath, {
         path: require("node:path"), "../../util/pathName": {useShell: (...args) => window.settingsPaths.push(args)},
@@ -243,7 +243,7 @@ const runCases = async (sources) => {
         }},
     });
     const {Setting} = loadRendererModule(sources.setting, {
-        "../dialog/mobileDialog": {MobileDialog},
+        "../dialog/adaptiveDialog": {AdaptiveDialog},
         "../util/functions": {isMobile: () => false, getFrontend: () => "desktop"}, "../dialog": {Dialog},
         "../config/setting/nativeWindow": native, "../config/setting/windowContext": context,
         "../config/setting/windowDialog": fit, "../util/genID": {genUUID},
@@ -438,6 +438,10 @@ const runCases = async (sources) => {
     assert.equal(confirmed, 1);
     assert.equal(destroyed, 1);
     assert.equal(setting.dialog, undefined);
+    for (let attempt = 0; attempt < 100 && await ipcRenderer.invoke("test-settings-window-count") !== 0; attempt++) {
+        await wait();
+    }
+    assert.equal(await ipcRenderer.invoke("test-settings-window-count"), 0, "closed plugin window is released before reopening");
 
     setting.open("Plugin");
     phase("waiting for native settings window");
@@ -513,11 +517,27 @@ const runCases = async (sources) => {
 
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow, ipcMain, screen} = require("electron");
+    // 主进程异常直接交给测试父进程，避免原生错误框阻塞到子进程超时。
+    const fail = error => {
+        fs.writeSync(2, String(error?.stack || error) + "\n");
+        app.exit(1);
+    };
+    process.on("uncaughtException", fail);
+    process.on("unhandledRejection", fail);
     const {createServer} = require("node:http");
         const {createSettingsWindows} = require("../electron/window/settingsWindows");
         const {updateTitleBarOverlay} = require("../electron/window/windowControlsOverlay");
     app.setPath("userData", process.argv[2]);
     app.whenReady().then(async () => {
+        const failure = process.argv[3];
+        if (failure === "uncaughtException") {
+            setImmediate(() => { throw new Error("Settings fixture uncaught exception"); });
+            return;
+        }
+        if (failure === "unhandledRejection") {
+            void Promise.reject(new Error("Settings fixture unhandled rejection"));
+            return;
+        }
         const startedAt = Date.now();
         const progress = name => console.log(`Settings window (${Date.now() - startedAt}ms): ${name}`);
         const waitForLifecycle = async (promise, name) => {
@@ -548,7 +568,7 @@ if (process.versions.electron && process.type === "browser") {
         const themes = Object.fromEntries(["daylight", "midnight"].map(name => [name,
             fs.readFileSync(path.join(__dirname, "../appearance/themes", name, "theme.css"), "utf8") +
             "\n.config__panel {border-radius: var(--b3-border-radius-b);}\n"]));
-        for (const [key, file] of Object.entries({dialog: "dialog/index.ts", mobileDialog: "dialog/mobileDialog.ts", setting: "plugin/Setting.ts",
+        for (const [key, file] of Object.entries({dialog: "dialog/index.ts", adaptiveDialog: "dialog/adaptiveDialog.ts", setting: "plugin/Setting.ts",
             native: "config/setting/nativeWindow.ts", fit: "config/setting/windowDialog.ts", controls: "boot/windowControls.ts",
             breadcrumbRegistry: "plugin/breadcrumbButtonRegistry.ts",
             overlay: "boot/windowControlsOverlay.ts", color: "util/color.ts",
@@ -678,7 +698,9 @@ if (process.versions.electron && process.type === "browser") {
         });
         ipcMain.on("siyuan-cmd", (event, command) => {
             if (command?.cmd === "setTitleBarOverlay") {
-                assert.ok(updateTitleBarOverlay(BrowserWindow.fromWebContents(event.sender), command));
+                const win = event.sender.isDestroyed() ? null : BrowserWindow.fromWebContents(event.sender);
+                const available = !!win && !win.isDestroyed();
+                assert.equal(updateTitleBarOverlay(win, command), available);
                 return;
             }
             if (event.sender === owner.webContents) {
@@ -768,11 +790,19 @@ if (process.versions.electron && process.type === "browser") {
             for (const child of children) {
                 assert.equal(previousTokens.has(new URL(child.webContents.getURL()).searchParams.get("settingsWindowToken")), false);
             }
+            const closingContents = [...children].map(child => child.webContents);
             const closed = [...children].map(child => new Promise(resolve => child.once("closed", resolve)));
             progress("destroying owner");
             owner.destroy();
             await waitForLifecycle(Promise.all(closed), "owner destruction and child closure");
             assert.equal(children.size, 0);
+            // 模拟窗口关闭后仍在队列中的更新，失效窗口按命令通道的约定忽略。
+            for (const contents of closingContents) {
+                assert.ok(contents.isDestroyed() || BrowserWindow.fromWebContents(contents) === null);
+                ipcMain.emit("siyuan-cmd", {sender: contents}, {
+                    cmd: "setTitleBarOverlay", height: 32, symbolColor: "#808080",
+                });
+            }
         } catch (error) {
             console.error(error);
             code = 1;
@@ -807,4 +837,27 @@ if (process.versions.electron && process.type === "browser") {
             fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
         }
     });
+    for (const [failure, message] of [
+        ["uncaughtException", "Settings fixture uncaught exception"],
+        ["unhandledRejection", "Settings fixture unhandled rejection"],
+    ]) {
+        test(`settings fixture reports ${failure} without a native error dialog`, async () => {
+            const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-settings-error-"));
+            const env = {...process.env};
+            delete env.ELECTRON_RUN_AS_NODE;
+            try {
+                await assert.rejects(promisify(execFile)(require("electron"), [__filename, profile, failure],
+                    {env, windowsHide: true, timeout: 15000}), error => {
+                    assert.equal(error.code, 1);
+                    assert.equal(error.killed, false);
+                    assert.equal(error.signal, null);
+                    assert.ok(error.stderr.includes(message), error.stderr);
+                    return true;
+                });
+            } finally {
+                assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
+                fs.rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
+            }
+        });
+    }
 }

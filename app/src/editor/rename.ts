@@ -1,5 +1,5 @@
 import {showMessage} from "../dialog/message";
-import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
@@ -77,15 +77,16 @@ export const rename = (options: {
     const notebookDocument = options.type === "notebook" && window.siyuan.config.fileTree?.boxDocEnabled;
     if ((options.type === "file" && rootID) || notebookDocument) {
         void import("../protyle/header/documentTitleDialog").then(({openDocumentTitleDialog}) => {
-            openDocumentTitleDialog({id: notebookDocument ? options.notebookId : rootID, notebook: options.notebookId});
+            openDocumentTitleDialog({
+                id: notebookDocument ? options.notebookId : rootID,
+                notebook: options.notebookId,
+                ignoreEditLock: true,
+            });
         });
         return;
     }
     const initialName = options.empty ? "" : options.name;
     const dialog = openInputDialog({
-        /// #if MOBILE
-        compactActions: true,
-        /// #endif
         title: window.siyuan.languages.rename,
         value: initialName,
         awaitConfirm: true,

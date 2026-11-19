@@ -7,7 +7,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (code: string, confirmationCode: string, markerCode: string, mobileConfirmationCode: string) => {
+const browserCases = async (code: string, confirmationCode: string, markerCode: string) => {
     const check: typeof assert = require("node:assert/strict");
     Object.assign(window, {siyuan: {languages: {cancel: "Cancel", delete: "Delete", deleteOpConfirm: "Confirm deletion",
         tagRemovalDatabaseTip: "Remove entries and field values; source is kept and undo is available",
@@ -24,17 +24,17 @@ const browserCases = async (code: string, confirmationCode: string, markerCode: 
         destroy() { this.element.remove(); this.options.destroyCallback(); }
         focusWhenReady(target: () => HTMLElement) { target().focus(); }
         requestClose() { this.destroy(); return Promise.resolve(true); }
+        async runPending(task: () => Promise<boolean>) {
+            if (await task()) return this.requestClose();
+            return false;
+        }
     }
     let mobile = false;
     const confirmation = {exports: {}};
     new Function("require", "module", "exports", confirmationCode)((dependency: string) => ({
-        "../util/functions": {isMobile: () => mobile}, "./index": {Dialog}, "../constants": {Constants: {DIALOG_CONFIRM: "confirm"}},
+        "../util/functions": {isMobile: () => mobile}, "./index": {Dialog}, "./adaptiveDialog": {AdaptiveDialog: Dialog},
+        "../constants": {Constants: {DIALOG_CONFIRM: "confirm"}},
     })[dependency], confirmation, confirmation.exports);
-    const mobileConfirmation = {exports: {}};
-    new Function("require", "module", "exports", mobileConfirmationCode)((dependency: string) => ({
-        "../util/functions": {isMobile: () => mobile}, "./mobileDialog": {MobileDialog: Dialog},
-        "./confirmDialog": confirmation.exports, "../constants": {Constants: {DIALOG_CONFIRM: "confirm"}},
-    })[dependency], mobileConfirmation, mobileConfirmation.exports);
     const sourceVersions = {root: "source-version"};
     let response: {code: number, data: {collections: unknown[], sourceVersions: Record<string, string>}, msg: string} =
         {code: 0, data: {collections: [], sourceVersions}, msg: ""};
@@ -44,7 +44,7 @@ const browserCases = async (code: string, confirmationCode: string, markerCode: 
     const marker = {exports: {}};
     new Function("require", "module", "exports", markerCode)(() => ({}), marker, marker.exports);
     new Function("require", "module", "exports", code)((dependency: string) => ({
-        "../../dialog/mobileConfirmDialog": mobileConfirmation.exports,
+        "../../dialog/confirmDialog": confirmation.exports,
         "../../util/escape": {escapeAttr: escape, escapeHtml: escape},
         "../../util/fetch": {fetchSyncPost: async (url: string, data: unknown) => { requests.push({url, data}); return response; }},
         "./inlineElementMarker": marker.exports,
@@ -185,8 +185,7 @@ test("source removal detects tag and reference deletions and offers desktop and 
     const code = compile(path.join(__dirname, "collectionRemoval.ts"));
     const confirmation = compile(path.join(__dirname, "../../dialog/confirmDialog.ts"));
     const marker = compile(path.join(__dirname, "inlineElementMarker.ts"));
-    const mobileConfirmation = compile(path.join(__dirname, "../../dialog/mobileConfirmDialog.ts"));
-    const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(code)}, ${JSON.stringify(confirmation)}, ${JSON.stringify(marker)}, ${JSON.stringify(mobileConfirmation)})`;
+    const source = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(code)}, ${JSON.stringify(confirmation)}, ${JSON.stringify(marker)})`;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-collection-removal-test-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");

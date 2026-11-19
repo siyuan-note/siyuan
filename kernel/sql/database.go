@@ -1760,7 +1760,7 @@ func beginHistoryTx() (tx *sql.Tx, err error) {
 
 func beginAssetContentTx() (tx *sql.Tx, err error) {
 	if tx, err = assetContentDB.Begin(); err != nil {
-		logging.LogErrorf("begin asset content tx failed: %s\n  %s", err, logging.ShortStack())
+		logging.LogErrorf("begin asset content database [%s] tx failed: %s\n  %s", util.AssetContentDBPath, err, logging.ShortStack())
 		if strings.Contains(err.Error(), "database is locked") {
 			os.Exit(logging.ExitCodeUnavailableDatabase)
 		}
@@ -1817,6 +1817,7 @@ func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []any) (err error) {
 	if !ok {
 		stmt, err = tx.Prepare(stmtSQL)
 		if err != nil {
+			handleDatabaseWriteError(tx, stmtSQL, args, err)
 			return
 		}
 		txStmtCacheLock.Lock()
@@ -1830,16 +1831,7 @@ func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []any) (err error) {
 	}
 
 	if _, err = stmt.Exec(args...); err != nil {
-		tx.Rollback()
-		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmtSQL, err, logging.ShortStack())
-
-		if isRecoverableDBFileError(err) {
-			closeDatabase()
-			util.RemoveDatabaseFile(util.DBPath)
-			time.Sleep(time.Second)
-			initDatabase(true)
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmtSQL, args)
-		}
+		handleDatabaseWriteError(tx, stmtSQL, args, err)
 		return
 	}
 	return
@@ -1847,16 +1839,7 @@ func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []any) (err error) {
 
 func execStmtTx(tx *sql.Tx, stmt string, args ...any) (err error) {
 	if _, err = tx.Exec(stmt, args...); err != nil {
-		tx.Rollback()
-		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
-
-		if isRecoverableDBFileError(err) {
-			closeDatabase()
-			util.RemoveDatabaseFile(util.DBPath)
-			time.Sleep(time.Second)
-			initDatabase(true)
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmt, args)
-		}
+		handleDatabaseWriteError(tx, stmt, args, err)
 		return
 	}
 	return
@@ -1912,6 +1895,10 @@ func ialAttr(ial, name string) (ret string) {
 func isRecoverableDBFileError(err error) bool {
 	if nil == err {
 		return false
+	}
+	var sqliteErr sqlite3.Error
+	if errors.As(err, &sqliteErr) && sqliteErr.Code == sqlite3.ErrCorrupt {
+		return true
 	}
 	errStr := err.Error()
 	return strings.Contains(errStr, "database disk image is malformed") ||

@@ -1,4 +1,4 @@
-import type {BrowserWindow, TitleBarOverlay} from "electron";
+import type {BrowserWindow, TitleBarOverlay, WebPreferences} from "electron";
 
 type CaptionDensity = "comfortable" | "compact";
 type CaptionMetrics = {toolbar: number; panel: number};
@@ -23,6 +23,14 @@ const getTitleBarOverlayOptions = (platform = process.platform, height = getCapt
     }
     return {color: "#00000000", symbolColor: "#808080", height};
 };
+
+const withWindowControlsOverlay = (titleBarOverlay: TitleBarOverlay | false, webPreferences: WebPreferences) => ({
+    titleBarOverlay,
+    webPreferences: titleBarOverlay ? {
+        ...webPreferences,
+        additionalArguments: [...(webPreferences.additionalArguments ?? []), "--siyuan-window-controls-overlay"],
+    } : webPreferences,
+});
 
 // 只接收本窗口的尺寸和图标颜色，背景透出页面，保留主题的透明与渐变效果。
 const updateTitleBarOverlay = (win: BrowserWindow, data: {height?: unknown; symbolColor?: unknown},
@@ -56,4 +64,4 @@ const updateTitleBarOverlay = (win: BrowserWindow, data: {height?: unknown; symb
     }
 };
 
-export {getCaptionHeight, getTitleBarOverlayOptions, updateTitleBarOverlay};
+export {getCaptionHeight, getTitleBarOverlayOptions, updateTitleBarOverlay, withWindowControlsOverlay};

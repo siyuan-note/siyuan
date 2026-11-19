@@ -1,4 +1,88 @@
 .history {
+  &__plugin-panel,
+  &__plugin-results,
+  &__plugin-detail,
+  &__plugin-detail-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  &__plugin-panels {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  &__plugin-detail {
+    flex: 2;
+    border-left: 1px solid var(--b3-border-color);
+  }
+
+  &__plugin-detail-content > .history__snapshot-detail {
+    height: auto;
+    flex: 1;
+  }
+
+  &__plugin-heading {
+    min-height: 45px;
+    box-sizing: border-box;
+  }
+
+  &__plugin-actions {
+    margin-top: 8px;
+  }
+
+  &__plugin-chooser {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__plugin-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    max-height: min(30vh, 240px);
+    overflow: auto;
+    background-color: var(--b3-theme-background);
+  }
+
+  &__plugin-list {
+    list-style: none;
+    margin: 8px 0;
+    padding: 0 8px;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overflow-wrap: anywhere;
+  }
+
+  &__plugin-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 850px) {
+    &__plugin-detail {
+      border-left: 0;
+    }
+
+    &__plugin-panel--detail > [data-plugin-search],
+    &__plugin-panel--detail .history__plugin-results {
+      display: none;
+    }
+  }
+
   &__associations {
     padding: 8px 16px;
     flex-shrink: 0;
@@ -37,10 +121,18 @@
 
   &__snapshot-detail,
   &__snapshot-detail-content {
-    height: 100%;
     min-height: 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
+  }
+
+  &__snapshot-detail {
+    height: 100%;
+  }
+
+  &__snapshot-detail-content {
+    flex: 1;
   }
 
   &__snapshot-detail-status {
@@ -76,9 +168,21 @@
     display: flex;
     flex-direction: column;
 
-    > div {
+    > [data-type="snapshotFileTitle"] {
+      max-height: 40%;
+      overflow: auto;
+    }
+
+    > [data-type="snapshotFileContent"] {
+      display: flex;
+      flex-direction: column;
       flex: 1;
       min-height: 0;
+
+      > div {
+        flex: 1;
+        min-height: 0;
+      }
     }
   }
 
@@ -162,9 +266,22 @@
         display: none;
       }
     }
+
+    &--plugins > .history__snapshot-columns,
+    &--plugins > [data-role="batch"],
+    &--plugins .history__snapshot-date-controls,
+    &--plugins [data-action="filters"],
+    &--plugins [data-action="manage"] {
+      display: none;
+    }
   }
 
   &__snapshot {
+    &-calendar {
+      flex-basis: 100%;
+      min-width: 0;
+    }
+
     &-date-controls {
       display: flex;
       align-items: center;

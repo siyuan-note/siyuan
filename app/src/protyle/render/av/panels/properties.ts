@@ -1,5 +1,6 @@
 import { setPosition } from "../../../../util/setPosition";
 import { openFieldVisibilityPanel } from "../fieldVisibility";
+import { isAVCardView } from "../viewType";
 import { transaction } from "../../../wysiwyg/transaction";
 import { getEditHTML, bindEditEvent, getColIconByType } from "../col";
 import { unicode2Emoji } from "../../../../emoji";
@@ -21,14 +22,13 @@ export const getPropertiesHTML = (fields: IAVColumn[], viewType: TAVView) => {
             showHTML += `<button class="b3-menu__item" data-type="editCol" draggable="true" data-id="${item.id}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="b3-menu__label fn__flex">${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}<span class="fn__flex-1">${escapeHtml(item.name) || "&nbsp;"}</span></div>
-    <svg class="b3-menu__action${item.type === "block" && viewType !== "gallery" ? " fn__none" : ""}" data-type="hideCol"><use xlink:href="#iconEyeoff"></use></svg>
+    <svg class="b3-menu__action${item.type === "block" && !isAVCardView(viewType) ? " fn__none" : ""}" data-type="hideCol"><use xlink:href="#iconEyeoff"></use></svg>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;
         }
     });
-    if (hideHTML) {
-        hideHTML = `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="nobg">
+    hideHTML = `<button class="b3-menu__separator"></button>
+<button class="b3-menu__item" data-type="nobg" data-av-field-section="hidden">
     <span class="b3-menu__label">${window.siyuan.languages.hideCol}</span>
     <span class="block__icon" data-type="showAllCol">
         ${window.siyuan.languages.showAll}
@@ -37,7 +37,6 @@ export const getPropertiesHTML = (fields: IAVColumn[], viewType: TAVView) => {
     </span>
 </button>
 ${hideHTML}`;
-    }
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
     <span class="block__icon block__icon--menu-back" data-type="go-config">
@@ -46,7 +45,7 @@ ${hideHTML}`;
     <span class="b3-menu__label ft__center">${window.siyuan.languages.fields}</span>
 </button>
 <button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="nobg">
+<button class="b3-menu__item" data-type="nobg" data-av-field-section="visible">
     <span class="b3-menu__label">${window.siyuan.languages.showCol}</span>
     <span class="block__icon" data-type="hideAllCol">
         ${window.siyuan.languages.hideAll}
@@ -130,7 +129,7 @@ export const propertiesPanel: IAVPanelDescriptor = {
             const doOperations: IOperation[] = [];
             const undoOperations: IOperation[] = [];
             context.fields.forEach((item: IAVColumn) => {
-                if (!item.hidden && (item.type !== "block" || context.data.viewType === "gallery")) {
+                if (!item.hidden && (item.type !== "block" || isAVCardView(context.data.viewType))) {
                     doOperations.push({
                         action: "setAttrViewColHidden",
                         id: item.id,

@@ -2,12 +2,13 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const {pathToFileURL} = require("node:url");
 const {test} = require("node:test");
 const {execFileSync} = require("node:child_process");
-const {selectTests, scanReferences, changedFiles, parseArguments} = require("./test-changed.mjs");
+const {selectTests, scanReferences, scanReferenceDetails, changedFiles, parseArguments} = require("./test-changed.mjs");
 
 const fixture = t => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-test-changed-"));
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-test-changed-")));
     t.after(() => fs.rmSync(root, {recursive: true, force: true}));
     const write = (name, content) => {
         const target = path.join(root, name);
@@ -28,6 +29,68 @@ test("module specifiers and source path literals are both treated as dependencie
         'const url = "https://example.com/x.ts";',
     ].join("\n"));
     assert.deepEqual(references.sort(), ["../b.ts", "./a", "src/c.ts", "src/d.scss", "src/e.ts"]);
+});
+
+test("only whole type declarations omit runtime edges and duplicate source reads remain", () => {
+    assert.deepEqual(scanReferenceDetails([
+        'import type {A} from "./a.ts";',
+        'export type {A} from "./a.ts";',
+        'import {type A} from "./a.ts";',
+        'import "./side";',
+        'import("./dynamic");',
+        'require("./required");',
+        'readFileSync("./a.ts");',
+    ].join("\n")), [
+        {reference: "./a.ts", kind: "type"},
+        {reference: "./a.ts", kind: "type"},
+        {reference: "./a.ts", kind: "runtime"},
+        {reference: "./side", kind: "runtime"},
+        {reference: "./dynamic", kind: "runtime"},
+        {reference: "./required", kind: "runtime"},
+        {reference: "./a.ts", kind: "source"},
+    ]);
+});
+
+test("parse failures preserve the conservative reference scan", () => {
+    assert.deepEqual(scanReferenceDetails('import type {A} from "./a.ts"; const ='),
+        [{reference: "./a.ts", kind: "unknown"}]);
+});
+
+test("embedded source, template paths and comments retain conservative dependencies", () => {
+    const code = 'const snippet = `import {value} from "./module";`; // readFileSync("src/raw.ts")';
+    assert.deepEqual(scanReferenceDetails(code), [
+        {reference: "./module", kind: "source"},
+        {reference: "src/raw.ts", kind: "source"},
+    ]);
+});
+
+test("type-only paths require typecheck while source observers retain type dependencies", t => {
+    const {root, write} = fixture(t);
+    const leaf = write("src/leaf.ts", "export interface A {};");
+    const middle = write("src/middle.ts", 'import type {A} from "./leaf.ts"; export const value = 1;');
+    const runtime = write("src/runtime.test.ts", 'import {value} from "./middle";');
+    const source = write("src/source.test.ts", 'readFileSync("./middle.ts");');
+    const unknown = write("src/unknown.test.ts", 'readFileSync("./middle.ts"); const =');
+    const details = {};
+    const reasons = new Map();
+    assert.deepEqual(selectTests([leaf], [leaf, middle, runtime, source, unknown], root, reasons, details), [source, unknown].sort());
+    assert.equal(details.typecheck, true);
+    assert.deepEqual(details.paths.get(source), ["type", "source"]);
+    assert.deepEqual(reasons.get(source), [leaf, middle, source]);
+    assert.deepEqual(selectTests([middle], [leaf, middle, runtime, source], root), [runtime, source].sort());
+});
+
+test("runtime duplicates, named type bindings, cycles and deleted type sources stay safe", t => {
+    const {root, write} = fixture(t);
+    const leaf = write("src/leaf.ts", 'import {value} from "./middle";');
+    const middle = write("src/middle.ts", 'import type {A} from "./leaf.ts"; require("./leaf.ts");');
+    const runtime = write("src/runtime.test.ts", 'import {value} from "./middle";');
+    const named = write("src/named.test.ts", 'import {type A} from "./leaf.ts";');
+    const typed = write("src/typed.test.ts", 'import type {A} from "./leaf.ts";');
+    fs.unlinkSync(leaf);
+    const details = {};
+    assert.deepEqual(selectTests([leaf], [middle, runtime, named, typed], root, new Map(), details), [runtime, named].sort());
+    assert.equal(details.typecheck, true);
 });
 
 test("changed sources select tests that reach them through other sources", t => {
@@ -131,7 +194,8 @@ test("affected arguments reject misspellings and missing baselines", () => {
 
 test("affected CLI distinguishes no changes from an unmapped change without claiming coverage", t => {
     const {root, write} = fixture(t);
-    const script = write("app/scripts/test-changed.mjs", fs.readFileSync(path.join(__dirname, "test-changed.mjs")));
+    const script = write("app/scripts/test-changed.mjs", fs.readFileSync(path.join(__dirname, "test-changed.mjs"), "utf8")
+        .replace('from "typescript"', `from ${JSON.stringify(pathToFileURL(require.resolve("typescript")).href)}`));
     const run = (...args) => execFileSync("git", args, {cwd: root});
     run("init", "--quiet");
     run("add", ".");
@@ -153,4 +217,37 @@ test("affected CLI distinguishes no changes from an unmapped change without clai
     assert.equal(preview.stdout.trim(), "src/isolated.test.js");
     assert.match(preview.stderr, /选中 1 个测试文件/);
     assert.match(preview.stderr, /isolated\.test\.js:/);
+});
+
+test("affected CLI runs typecheck even without runtime tests and propagates failure", t => {
+    const {root, write} = fixture(t);
+    const script = write("app/scripts/test-changed.mjs", fs.readFileSync(path.join(__dirname, "test-changed.mjs"), "utf8")
+        .replace('from "typescript"', `from ${JSON.stringify(pathToFileURL(require.resolve("typescript")).href)}`));
+    write("app/package.json", JSON.stringify({scripts: {typecheck: "node check.cjs"}}));
+    write("app/.npmrc", "verify-deps-before-run=false\n");
+    write("app/check.cjs", 'require("node:fs").writeFileSync("checked", "yes"); process.exit(7);');
+    write("app/src/leaf.ts", "export interface A {}");
+    write("app/src/typed.test.ts", 'import type {A} from "./leaf.ts";');
+    const git = (...args) => execFileSync("git", args, {cwd: root});
+    git("init", "--quiet");
+    git("add", ".");
+    const tree = git("write-tree").toString("utf8").trim();
+    write("app/src/leaf.ts", "export interface A { value: string }");
+    const invoke = () => require("node:child_process").spawnSync(process.execPath,
+        [script, "--base", tree, "--run"], {encoding: "utf8"});
+    const failed = invoke();
+    assert.notEqual(failed.status, 0);
+    assert.ok(fs.existsSync(path.join(root, "app/checked")), failed.stderr + failed.stdout);
+    assert.equal(fs.readFileSync(path.join(root, "app/checked"), "utf8"), "yes");
+    assert.doesNotMatch(failed.stderr, /Cannot find module.*electron/);
+    const runtime = write("app/src/runtime.test.js", 'require("node:fs").writeFileSync("ran", "yes");');
+    const blocked = invoke();
+    assert.notEqual(blocked.status, 0);
+    assert.doesNotMatch(blocked.stderr, /Cannot find module.*electron/);
+    assert.equal(fs.existsSync(path.join(root, "app/ran")), false);
+    fs.unlinkSync(runtime);
+    write("app/check.cjs", 'require("node:fs").writeFileSync("checked", "passed");');
+    const passed = invoke();
+    assert.equal(passed.status, 0, passed.stderr);
+    assert.equal(fs.readFileSync(path.join(root, "app/checked"), "utf8"), "passed");
 });

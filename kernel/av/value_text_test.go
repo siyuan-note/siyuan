@@ -160,6 +160,7 @@ func TestValueTextRichASTWhitelist(t *testing.T) {
 		"<span data-type=\"text\" style=\"color: var(--b3-font-color8); background-color: var(--b3-font-background8);\">styled</span>",
 		"<span data-type=\"inline-memo\" data-inline-memo-content=\"memo\">annotated</span>",
 		"<<assets/document-20240101000000-abcdefg.pdf/20240101000001-bcdefgh \"annotation\">>",
+		"before ![image](assets/image.png) after",
 		"- first\n- [ ] task\n  - nested",
 		"> quote",
 		"```go\nfmt.Println(1)\n```",
@@ -184,7 +185,7 @@ func TestValueTextRichASTWhitelist(t *testing.T) {
 	}
 
 	rejected := []string{
-		"![image](assets/image.png)",
+		"![image](file:///tmp/image.png)",
 		"| a | b |\n| --- | --- |\n| 1 | 2 |",
 		"<div>HTML</div>",
 		"{{ SELECT * FROM blocks }}",

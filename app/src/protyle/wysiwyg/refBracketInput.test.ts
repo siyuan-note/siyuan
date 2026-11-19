@@ -35,6 +35,7 @@ test("reference bracket input waits for IME commit and avoids saving duplicate c
                 getEditorRange: () => range, hasClosestBlock: () => block,
                 isCommittedTextInput: (event: InputEvent) => !event.isComposing && event.inputType === "insertText",
                 normalizeInlineElementBoundaries: (): undefined => undefined, renderLongTextRuns: (): undefined => undefined,
+                hideElements: (): undefined => undefined,
                 isMac: () => false, input: () => calls.push("save"),
                 protyle: {wysiwyg: {lastHTMLs: {}}, hint: {enableExtend: false, handleRefBracketInput: (_protyle: unknown, actual: unknown, text: string) => {
                     assert.equal(actual, range);

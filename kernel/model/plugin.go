@@ -280,9 +280,11 @@ func loadPetals(frontend string, isPublish, isKernel bool, names []string) (ret 
 		}
 
 		if petal.DisallowInstall {
-			// disallow install plugin (require upgrade SiYuan), auto disable it to avoid potential issues, and skip loading
-			SetPetalEnabled(petal.Name, false)
-			logging.LogInfof("plugin [%s] disallowed install, auto disabled", petal.Name)
+			// 只停止本机运行的内核插件，启用状态由用户设置并参与同步。
+			if OnKernelPluginStop != nil {
+				OnKernelPluginStop(petal)
+			}
+			logging.LogInfof("plugin [%s] requires a newer SiYuan version, skip loading", petal.Name)
 			continue
 		}
 		if isPublish && !isPetalAccessableInPublish(petal, disabledInPublish, disallowInstall) {

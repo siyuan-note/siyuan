@@ -48,12 +48,16 @@ const editLayout = (layoutName?: string) => {
             }
             const hadName = window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((item: SavedLayout) => {
                 if (item.name === value) {
-                    confirmDialog(window.siyuan.languages.save, window.siyuan.languages.exportTplTip, async () => {
-                        item.windowGeometry = await captureWindowGeometry() ?? item.windowGeometry;
-                        item.layout = getAllLayout();
-                        item.time = Date.now();
-                        item.filesPaths = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
-                        setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
+                    confirmDialog({
+                        title: window.siyuan.languages.save,
+                        text: window.siyuan.languages.exportTplTip,
+                        confirm: async () => {
+                            item.windowGeometry = await captureWindowGeometry() ?? item.windowGeometry;
+                            item.layout = getAllLayout();
+                            item.time = Date.now();
+                            item.filesPaths = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
+                            setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
+                        },
                     });
                     return true;
                 }

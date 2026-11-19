@@ -6,7 +6,7 @@
 		"id": "20211226122523-rl8356a",
 		"title": "在瀏覽器上使用",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261117222105"
 	},
 	"Children": [
 		{
@@ -329,6 +329,38 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中設定鎖屏密碼。留空表示不啟用密碼登入；一般的非本機存取仍需要密碼或有效的 OIDC 設定。請先完成鑑權設定，再將核心開放給其他裝置。"
+				}
+			]
+		},
+		{
+			"ID": "20261117222105-sjbmejl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261117222105-sjbmejl",
+				"updated": "20261117222105"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "跟隨系統鎖屏"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 僅支援 Windows 和 macOS。Linux 請在鎖定系統前，透過工作空間選單中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鎖定畫面"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 手動鎖定思源。"
 				}
 			]
 		},

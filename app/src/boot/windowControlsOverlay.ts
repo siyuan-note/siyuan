@@ -35,9 +35,10 @@ const getSymbolColor = (color: string) => {
 export const updateWindowControlsOverlay = () => {
     scheduled = false;
     const overlay = getOverlay();
-    if (!initialized || !overlay) return;
-    const visible = overlay.visible && !document.body.classList.contains("body--fullscreen");
+    if (!initialized) return;
+    const visible = !!overlay?.visible && !document.body.classList.contains("body--fullscreen");
     document.documentElement.classList.toggle("window-controls-overlay--hidden", !visible);
+    if (!overlay) return;
     const toolbar = document.querySelector<HTMLElement>("#toolbar, .toolbar__window, .toolbar--settings");
     if (!toolbar) return;
     const standalone = toolbar.classList.contains("toolbar__window");
@@ -86,7 +87,9 @@ const schedule = () => {
 
 export const initWindowControlsOverlay = (container: HTMLElement) => {
     const overlay = getOverlay();
-    if (!document.body.classList.contains("body--windows") || !overlay?.visible) return false;
+    // 建窗参数先于覆盖层几何到达，旧桌面端可通过可见的覆盖层识别原生按钮。
+    if (!document.body.classList.contains("body--windows") ||
+        (!process.argv.includes("--siyuan-window-controls-overlay") && !overlay?.visible)) return false;
     if (container.id === "windowControls") {
         container.classList.add("window-controls-overlay__placeholder");
     } else if (!container.querySelector(".window-controls-overlay__placeholder")) {
@@ -115,7 +118,7 @@ export const initWindowControlsOverlay = (container: HTMLElement) => {
         });
         sizeObserver = new ResizeObserver(schedule);
         window.addEventListener("resize", schedule);
-        overlay.addEventListener("geometrychange", schedule);
+        overlay?.addEventListener("geometrychange", schedule);
     }
     sizeObserver.observe(container);
     updateWindowControlsOverlay();

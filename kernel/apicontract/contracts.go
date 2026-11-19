@@ -344,7 +344,9 @@ var (
 	RemoveBookmark     = define[RemoveBookmarkRequest, Null]("removeBookmark", "/api/bookmark/removeBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	RenameBookmark     = define[RenameBookmarkRequest, Null]("renameBookmark", "/api/bookmark/renameBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	RemoveTag          = define[RemoveTagRequest, Null]("removeTag", "/api/tag/removeTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	RenameTag          = define[RenameTagRequest, Null]("renameTag", "/api/tag/renameTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	// 精确匹配标签及其子标签前缀，通过单笔可撤销事务改名并广播编辑操作；成功仍返回 null。
+	// 无匹配时不写入；源快照变化时拒绝提交，保留并发编辑。自动收集保留已有条目和字段。
+	RenameTag = define[RenameTagRequest, Null]("renameTag", "/api/tag/renameTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 )
 
 var (
@@ -360,9 +362,10 @@ var (
 )
 
 var (
-	GetBlockSiblingID     = define[BlockQueryRequest, BlockSiblingData]("getBlockSiblingID", "/api/block/getBlockSiblingID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-	GetBlockRelevantIDs   = define[BlockQueryRequest, BlockRelevantData]("getBlockRelevantIDs", "/api/block/getBlockRelevantIDs", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-	GetUnfoldedParentID   = define[BlockQueryRequest, UnfoldedParentData]("getUnfoldedParentID", "/api/block/getUnfoldedParentID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	GetBlockSiblingID   = define[BlockQueryRequest, BlockSiblingData]("getBlockSiblingID", "/api/block/getBlockSiblingID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	GetBlockRelevantIDs = define[BlockQueryRequest, BlockRelevantData]("getBlockRelevantIDs", "/api/block/getBlockRelevantIDs", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	GetUnfoldedParentID = define[BlockQueryRequest, UnfoldedParentData]("getUnfoldedParentID", "/api/block/getUnfoldedParentID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	// isFolded 保留自身或上级折叠的判断；isHidden 表示目标被折叠遮挡，裁剪容器内无法确定可见性的目标按隐藏处理
 	CheckBlockFold        = define[BlockQueryRequest, BlockFoldData]("checkBlockFold", "/api/block/checkBlockFold", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 	CheckBlockExist       = define[BlockQueryRequest, bool]("checkBlockExist", "/api/block/checkBlockExist", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 	GetBlockIndex         = define[BlockQueryRequest, int]("getBlockIndex", "/api/block/getBlockIndex", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
@@ -509,6 +512,7 @@ var UpdateBlock = define[UpdateBlockRequest, []*BlockTransaction]("updateBlock",
 // 要求管理员身份，保留只读保护及加密笔记本请求租约；请求必须提供文档 id 和 notebook。
 // 保存历史后在一次可撤销事务中转换能够完整解析的旧 mindmap 列表，返回 converted 数量与文档脑图的
 // 权威 blocks（id、dom）。重复请求返回当前块内容而不重复转换，不完整的原文保持不变。
+// 文档为只读时跳过转换，成功返回 converted 为 0、blocks 为空数组；非文档根 ID 返回本地化错误。
 var MigrateLegacyMindmaps = define[MigrateLegacyMindmapsRequest, MigrateLegacyMindmapsData]("migrateLegacyMindmaps", "/api/block/migrateLegacyMindmaps", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var BatchUpdateBlock = define[BatchUpdateBlockRequest, []*BlockTransaction]("batchUpdateBlock", "/api/block/batchUpdateBlock", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1061,9 +1065,10 @@ var GetSyncSourceState = define[EmptyRequest, SyncSourceState]("getSyncSourceSta
 
 // PerformSync retains automatic and fully manual mode behavior when source is omitted.
 // A source decision requires upload, localID and cloudID from getSyncSourceState and performs one-way sync in any mode.
-// The source and both snapshot IDs are revalidated before applying files. A failed decision returns code -1.
+// 来源和两个快照 ID 会在应用文件前重新校验；预览失效返回 code 2、空 msg 和 null data，需重新预览并确认。
+// 其他选择失败返回 code -1；code 2 不推送错误通知，避免通知记录使预览继续失效。
 // Automatic sync rejects a changed nonempty source until an explicit direction succeeds; empty sources use local data.
-var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/performSync", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/performSync", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{2}}, "POST")
 
 // CancelSyncCheckout 请求取消当前文件恢复任务，taskID 必须来自当前 syncProgress 消息。
 // requested 只表示已接受取消请求，旧任务或已完成任务返回 false；可能先完成恢复，再收到请求。
@@ -1138,6 +1143,15 @@ var UploadCloudSnapshot = define[UploadCloudSnapshotRequest, Null]("uploadCloudS
 // 两端均非 0 时终点必须大于起点；ID 查询应用时间范围后仍忽略分页。
 // 要求管理员权限，返回已有的快照元数据及资源下载状态，不下载或回滚快照。
 var GetRepoSnapshots = define[GetRepoSnapshotsRequest, RepoSnapshotsData]("getRepoSnapshots", "/api/repo/getRepoSnapshots", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 按插件包名查询本地快照，先筛选再按时间倒序分页，每页 32 项。仅统计 plugins/<name>/ 和 storage/petal/<name>/。
+// 包名必须是单个合法路径段；分别返回程序与标准数据的文件数和字节数，不读取正文或自动下载云端快照。
+var GetPluginSnapshots = define[GetPluginSnapshotsRequest, PluginSnapshotsData]("getPluginSnapshots", "/api/repo/getPluginSnapshots", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 从同一个完整快照恢复插件程序和标准数据目录，移除这两个目录中快照未收录的文件，缺失目录恢复为空。
+// 写入前认证全部源文件、停用插件并创建完整检查备份快照；成功后保持停用。调用方须先等待本窗口卸载插件并提示关闭其他客户端。
+// 不恢复共享配置或其他目录；失败保留备份和恢复材料。返回恢复前的备份快照 ID。
+var RestorePluginSnapshot = define[RestorePluginSnapshotRequest, RestorePluginSnapshotData]("restorePluginSnapshot", "/api/repo/restorePluginSnapshot", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var SearchRepoFile = define[SearchRepoFileRequest, RepoSearchData]("searchRepoFile", "/api/repo/searchRepoFile", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
 // 每个文件版本包含 snapshots，按文件 ID 关联全部本地标记快照。
@@ -1343,6 +1357,8 @@ var ExportBrowserHTML = define[ExportBrowserHTMLRequest, ExportZipData]("exportB
 // 内核不执行脚本；调用方须遵守安全模式限制，并等待异步渲染完成后再导出。
 // image=true 或 pdf=true 时可用 excludeTitleImage=true 排除题头图；省略、null 或 false 保留，独立于 addTitle。
 // 未指定图片或 PDF 模式时忽略 excludeTitleImage；原始文档、正文图片及加密笔记本读取授权不受影响。
+// pdf=true 时 blockRefMode 可设为 2（锚文本和区块链接）、3（仅锚文本）或 4（脚注和锚点哈希），仅本次生效。
+// blockRefMode 省略或 null 沿用全局设置；非 PDF 请求忽略该选项，PDF 请求的其他整数值返回错误。
 var ExportPreviewHTML = define[ExportPreviewHTMLRequest, ExportPreviewHTMLData]("exportPreviewHTML", "/api/export/exportPreviewHTML", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var ExportHTML = define[ExportHTMLRequest, ExportHTMLData]("exportHTML", "/api/export/exportHTML", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 
@@ -1484,7 +1500,23 @@ var AssetUploadCloud = define[AssetCloudUploadRequest, Null]("uploadCloud", "/ap
 var AssetUploadCloudByAssetsPaths = define[AssetPathsCloudUploadRequest, Null]("uploadCloudByAssetsPaths", "/api/asset/uploadCloudByAssetsPaths", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var InsertLocalAssets = define[InsertLocalAssetsRequest, AssetUploadData]("insertLocalAssets", "/api/asset/insertLocalAssets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var InsertCover = define[InsertCoverRequest, AssetInsertCoverData]("insertCover", "/api/asset/insertCover", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+// excludeFromCleanup 是可选表单文本，仅接受 "true" 或 "false"，省略时为 false。
+// 为 true 时，将成功上传或复用的普通资源路径加入清理排除规则；规则保存失败的文件不作为成功返回。
+// 不支持借此保护加密笔记本资源；省略该字段时保持原有上传行为。
 var UploadAsset = define[UploadAssetRequest, AssetUploadData]("uploadAsset", "/api/asset/upload", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// 返回 data/.siyuan/assets-cleanup-ignore 的完整 UTF-8 内容及不透明版本号；文件不存在时内容为空。
+// 规则语法与原有清理排除文件一致，内容上限 1 MiB；读取失败返回错误，不能视为空配置。
+var GetAssetCleanupIgnore = define[EmptyRequest, AssetCleanupIgnoreData]("getAssetCleanupIgnore", "/api/asset/getAssetCleanupIgnore", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// 原样保存完整排除规则，expectedRevision 必须来自最近一次读取或写入的 revision。
+// 版本不匹配返回 code 409，不覆盖已有内容；成功后返回新内容和版本号。
+var SetAssetCleanupIgnore = define[SetAssetCleanupIgnoreRequest, AssetCleanupIgnoreData]("setAssetCleanupIgnore", "/api/asset/setAssetCleanupIgnore", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{409}}, "POST")
+
+// 将全局普通资源的 assets/... 路径追加为精确匹配规则，保留已有注释和模式，已受保护的路径不重复添加。
+// 拒绝无效路径和加密笔记本资源；批量校验失败时不写入任何规则。
+var AddAssetCleanupIgnore = define[AddAssetCleanupIgnoreRequest, AssetCleanupIgnoreData]("addAssetCleanupIgnore", "/api/asset/addAssetCleanupIgnore", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet", "/api/setting/setSnippet", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "snippet", Merge: true}}, "POST")
 
@@ -1513,6 +1545,7 @@ var SetFlashcard = define[SetFlashcardRequest, *SettingFlashcard]("setFlashcard"
 // backlinkGlobalSort、backlinkBlockSort、floatWindowMode、headingEmbedMode 仅接受 0、1、2，越界值回退 0。
 // databaseAttrClickMode、databaseAttrViewMode 仅接受 0、1；codeTabSpaces 仅接受 0、2、4、6、8，越界值回退 0。
 // 只提交 fontFamily、fontWeight 时按新的首选字体重建 fontFamilies；显式提交 fontFamilies 时以该列表为准。
+// hideBreadcrumbIcons 隐藏面包屑中有文字的路径项图标，独立于 globalBreadcrumb，默认关闭，null 恢复默认。
 var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/setting/setEditor", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "editor", Merge: true}}, "POST")
 
 // PatchSetting 保留省略字段，成功后客户端重新读取配置；通知不包含密码或密钥。
@@ -1652,8 +1685,11 @@ var PreviewAttributeViewCollection = define[AVBlockCollectionPreviewRequest, *AV
 // 使用 cleanupAttrViewBlocks 事务明确移出预览后确认的条目，执行时重新检查并支持撤销。
 var ReviewAttributeViewCollection = define[AVCollectionReviewRequest, *AVCollectionReview]("reviewAttributeViewCollection", "/api/av/reviewAttributeViewCollection", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
+// 内部接口，不属于稳定的插件公开API。
 // 删除前只读检查标签移除影响，返回按数据库分组的自动收集条目；不执行删除或移出。
 // 包括逐字改名后实际移除的标签所涉及的条目；手动条目及仍匹配启用规则的条目保留。
+// label、labels、changes 三选一；labels 原始数组为 1 至 100 项，拒绝空标签并精确去重。
+// 批量预览按所有标签删除后的最终状态计算，不隐式删除子标签或相似名称。
 var PreviewTagRemoval = define[TagRemovalPreviewRequest, []*TagRemovalCollection]("previewTagRemoval", "/api/tag/previewTagRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
 // PreviewCollectionRemoval 只读投影整笔编辑，预览删除标签或引用后失配的自动收集条目。
@@ -1662,8 +1698,16 @@ var PreviewTagRemoval = define[TagRemovalPreviewRequest, []*TagRemovalCollection
 // 保留手动、仍符合其他启用规则和未知状态的条目；支持加密笔记本的认证与隔离。
 var PreviewCollectionRemoval = define[CollectionRemovalPreviewRequest, *CollectionRemovalPreview]("previewCollectionRemoval", "/api/av/previewCollectionRemoval", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
+// 内部接口，不属于稳定的插件公开API。
 // 删除指定标签，并复查后移出用户明确选择的自动收集条目；原文修改与字段移出支持一起撤销。
+// label 与 labels 二选一；labels 原始数组为 1 至 100 项，拒绝空标签并精确去重。
+// 所有标签在一次事务中删除，同块合并并按最终状态复查自动收集；不隐式删除子标签或相似名称。
 var RemoveTagWithCollections = define[RemoveTagWithCollectionsRequest, Null]("removeTagWithCollections", "/api/tag/removeTagWithCollections", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// 内部接口，不属于稳定的插件公开API。
+// 批量删除精确标签，同一事务中合并修改，按最终状态复查自动收集并保留撤销。
+// labels 原始数组为 1 至 100 项，拒绝空标签并精确去重；仅移出用户确认的自动收集条目。
+var BatchRemoveTag = define[BatchRemoveTagRequest, Null]("batchRemoveTag", "/api/tag/batchRemoveTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // PreviewAttributeViewTemplate 在实际条目快照上预览模板赋值，返回通过类型和引用校验的字段值，不写入数据。
 // 使用规则时区和可选的预览输入；加密笔记本遵守请求租约及相同加密边界，失败返回 code -1。
@@ -1897,6 +1941,7 @@ var SystemDismissOnboarding = define[EmptyRequest, *SystemOnboarding]("dismissOn
 var SystemEnsureOnboarding = define[EmptyRequest, *SystemOnboarding]("ensureOnboarding", "/api/system/ensureOnboarding", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 
 // SystemExit 默认保留退出同步及更新选择，返回 0 表示完成、1 表示同步失败、2 表示等待更新选择。
+// 返回 2 时可选 releaseURL 对应待安装包版本；优先使用本次运行检查到的公告地址，否则使用该版本的 GitHub Release。
 // 普通退出请求断开时取消其同步或同步锁等待，不将取消报告为同步成功；已开始的数据清理仍完整执行。
 // force 跳过本次同步，并等待活动同步取消及收尾后再关闭数据库；本地未上传数据保留。
 // 可选 recoverExit 绑定当前进程和退出批次，只接管没有活动会话的桌面退出；不匹配返回 -1，有会话返回 3。

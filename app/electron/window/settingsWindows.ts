@@ -1,5 +1,5 @@
 import {normalizeWindowGeometry, captureWindowGeometry} from "./windowGeometry";
-import {getCaptionHeight, getTitleBarOverlayOptions} from "./windowControlsOverlay";
+import {getCaptionHeight, getTitleBarOverlayOptions, withWindowControlsOverlay} from "./windowControlsOverlay";
 import {APP_INDEX_PAGE, APP_PAGE, SETTINGS_PAGE, WINDOW_PAGE} from "../shared/pagePaths";
 import {MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH, appIconPath, desktopUserAgent} from "../shared/desktopDefaults";
 import * as electron from "electron";
@@ -154,7 +154,17 @@ const createSettingsWindows = ({initialize = initializeSettingsWindow,
     };
     const cancel = (approved: ApprovedWindow, ownerInvalidated = false): void => {
         finish(approved, ownerInvalidated);
-        if (approved.win && !approved.win.isDestroyed()) approved.win.destroy();
+        const win = approved.win;
+        if (win && !win.isDestroyed()) {
+            if (ownerInvalidated) {
+                // 导航回调内同步销毁子窗口会阻塞 Windows 原生消息循环，授权仍须立即失效。
+                setImmediate(() => {
+                    if (!win.isDestroyed()) win.destroy();
+                });
+            } else {
+                win.destroy();
+            }
+        }
     };
     const watchOwner = (owner: WebContents): OwnerState => {
         let state = owners.get(owner);
@@ -288,7 +298,6 @@ const createSettingsWindows = ({initialize = initializeSettingsWindow,
         title: approved.data.title || "SiYuan",
         frame: platform === "darwin",
         titleBarStyle: "hidden",
-        titleBarOverlay: getTitleBarOverlayOptions(platform, getCaptionHeight(approved.data.compactMode, false)),
         trafficLightPosition: {x: 8, y: 8},
         autoHideMenuBar: true,
         fullscreenable: true,
@@ -298,7 +307,7 @@ const createSettingsWindows = ({initialize = initializeSettingsWindow,
         width: 1000,
         height: 760,
         ...normalizeWindowGeometry(approved.data.geometry, electron.screen),
-        webPreferences: {
+        ...withWindowControlsOverlay(getTitleBarOverlayOptions(platform, getCaptionHeight(approved.data.compactMode, false)), {
             contextIsolation: false,
             nodeIntegration: true,
             nodeIntegrationInSubFrames: false,
@@ -307,7 +316,7 @@ const createSettingsWindows = ({initialize = initializeSettingsWindow,
             webSecurity: approved.target.mode === "remote",
             // 首次显示前保持帧和定时器正常调度，显示后恢复后台节流。
             backgroundThrottling: false,
-        },
+        }),
     });
 
     const bindRevealOnFirstPaint = (approved: ApprovedWindow, win: BrowserWindow): void => {

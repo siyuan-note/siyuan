@@ -15,6 +15,8 @@ const getFunctionKey = () => {
 };
 
 export abstract class Constants {
+    public static readonly TABLE_CORNERS = "data-table-corners";
+    public static readonly TABLE_CELL_CORNER = "data-table-cell-corner";
     public static readonly SIYUAN_VERSION: string = _SIYUAN_VERSION;
     public static readonly NODE_ENV: string = _NODE_ENV;
     public static readonly SIYUAN_APPID: string = Math.random().toString(36).substring(8);
@@ -39,6 +41,7 @@ export abstract class Constants {
     public static readonly SIYUAN_CMD: string = "siyuan-cmd";
     public static readonly SIYUAN_GET: string = "siyuan-get";
     public static readonly SIYUAN_EVENT: string = "siyuan-event";
+    public static readonly SIYUAN_AGENT_NOTIFICATION = "siyuan-agent-notification";
     public static readonly SIYUAN_WINDOW_WORKSPACE_SAVED = "siyuan-window-workspace-saved";
 
     public static readonly SIYUAN_WINDOW_WORKSPACE_SET = "siyuan-window-workspace-set";
@@ -89,6 +92,7 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_SUBDOC_SORT_MODE: string = "custom-sy-subdoc-sort-mode";
     public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";
     public static readonly CUSTOM_SY_HEADING_NUMBER: string = "custom-sy-heading-number";
+    public static readonly CUSTOM_SY_RESTORE_DOC_POSITION: string = "custom-sy-restore-doc-position";
     public static readonly CUSTOM_SY_AV_VIEW: string = "custom-sy-av-view";
     public static readonly CUSTOM_SY_AV_VISIBLE_VIEWS: string = "custom-sy-av-visible-views";
     public static readonly CUSTOM_SY_LIST_MINDMAP: string = "custom-sy-list-mindmap";
@@ -334,7 +338,6 @@ export abstract class Constants {
     public static readonly MENU_AV_ADD_FILTER = "av-add-filter"; // 数据库添加筛选条件菜单
     public static readonly MENU_AV_ADD_SORT = "av-add-sort"; // 数据库添加排序条件菜单
     public static readonly MENU_AV_COL_OPTION = "av-col-option"; // 数据库单选多选字段的选项编辑菜单
-    public static readonly MENU_AV_COL_FORMAT_NUMBER = "av-col-format-number"; // 数据库数字字段格式化菜单
     public static readonly MENU_AV_COL_FORMAT_DATE = "av-col-format-date"; // 数据库日期字段格式化菜单
     public static readonly MENU_AV_GROUP_DATE = "avGroupDate"; // 数据库日期字段分组菜单的日期菜单
     public static readonly MENU_AV_GROUP_SORT = "avGroupSort"; // 数据库日期字段分组菜单的排序菜单

@@ -16,6 +16,22 @@ const element = (...classes: string[]) => {
 const items = (...children: HTMLElement[]) => Object.assign(element(), {children});
 
 describe("menu groups", () => {
+    it("does not write unchanged classes when regrouping menus or inline control containers", () => {
+        for (const container of [items(element()), items(element("b3-menu__item"), element("b3-menu__separator"),
+            element("b3-menu__item"), element("b3-menu__item", "fn__none"))]) {
+            updateMenuItemGroupClasses(container);
+            let writes = 0;
+            [container, ...Array.from(container.children)].forEach(node => {
+                const add = node.classList.add.bind(node.classList);
+                const remove = node.classList.remove.bind(node.classList);
+                node.classList.add = (...names) => { writes++; add(...names); };
+                node.classList.remove = (...names) => { writes++; remove(...names); };
+            });
+            for (let index = 0; index < 20; index++) { updateMenuItemGroupClasses(container); }
+            assert.equal(writes, 0);
+        }
+    });
+
     it("updates rounded edges after deleting the first and last history entries", () => {
         const clear = element("b3-menu__item");
         const first = element("b3-menu__item");

@@ -46,6 +46,8 @@ type syncCheckoutTask struct {
 	sentProgress         dejavu.CheckoutProgress
 	upserts, removes     map[string]*entity.File
 	beforePetals         []*Petal
+
+	previousNotebookConfs map[string][]byte
 }
 
 var activeSyncCheckout struct {
@@ -63,11 +65,25 @@ func startSyncCheckout(repo *dejavu.Repo) *syncCheckoutTask {
 		return nil
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	task := &syncCheckoutTask{id: util.RandString(16), ctx: ctx, phase: "background", revision: syncCheckoutRevision.Add(1), cancel: cancel, done: make(chan struct{}), upserts: map[string]*entity.File{}, removes: map[string]*entity.File{}, beforePetals: getPetals()}
+	task := &syncCheckoutTask{
+		id: util.RandString(16), ctx: ctx, phase: "background", revision: syncCheckoutRevision.Add(1),
+		cancel: cancel, done: make(chan struct{}),
+		upserts: map[string]*entity.File{}, removes: map[string]*entity.File{},
+		beforePetals: getPetals(), previousNotebookConfs: map[string][]byte{},
+	}
 	activeSyncCheckout.task = task
 	activeSyncCheckout.Unlock()
 	repo.SetCheckoutHooks(dejavu.CheckoutHooks{
-		Context: ctx, Apply: task.prepareApply, Applied: task.completeApply, Before: checkCheckoutSpace, Cleaned: notifyCheckoutCleanup,
+		Context: ctx, Apply: task.prepareApply, Applied: task.completeApply, Cleaned: notifyCheckoutCleanup,
+		Before: func(files []*entity.File) error {
+			if err := checkCheckoutSpace(files); err != nil {
+				return err
+			}
+			task.Lock()
+			snapshotSyncNotebookConfs(files, task.previousNotebookConfs)
+			task.Unlock()
+			return nil
+		},
 		Preflight: syncDocumentPreflight(repo),
 		Progress: func(progress dejavu.CheckoutProgress) {
 			task.Lock()
@@ -233,7 +249,7 @@ func (task *syncCheckoutTask) finish(repo *dejavu.Repo, syncErr *error) {
 			changes.Removes = append(changes.Removes, file)
 		}
 		calcPetalDiff(task.beforePetals, changes)
-		processSyncMergeResult(false, true, changes, &dejavu.TrafficStat{}, "c", 0, true)
+		processSyncMergeResult(false, true, changes, &dejavu.TrafficStat{}, "c", 0, true, task.previousNotebookConfs)
 	}
 	if errors.Is(*syncErr, context.Canceled) {
 		msg := Conf.Language(433)

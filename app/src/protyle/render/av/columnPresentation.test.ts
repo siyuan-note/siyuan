@@ -1,9 +1,10 @@
+import {updateAVViewShowIcon} from "./entryIcon";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-import {insertAVTableColumn, removeAVTableColumn, updateAVTableColumnPresentation, updateAVTableShowIcon} from "./columnPresentation";
+import {insertAVTableColumn, removeAVTableColumn, updateAVTableColumnPresentation} from "./columnPresentation";
 import {getTablePinIndex} from "./groupTableVirtual";
 
 const code = transpileModule(readFileSync("src/protyle/render/av/render.ts", "utf8"), {
@@ -56,9 +57,10 @@ test("alignment and block icons stay in the model for newly mounted rows and fol
     const block = {closest: (): null => null, getAttribute: () => "view", querySelectorAll: () => [cell]};
     const exports = {} as typeof import("./render");
     runInNewContext(code, {exports, require: (name: string) => ({
-        "./virtualScroll": {getAVData: () => ({viewType: "table", view})},
+        "./virtualScroll": {getAVData: () => ({viewType: "table", view}), invalidateAVTableRowHeights() {}},
         "./viewType": {isTableLikeView: () => true},
-        "./columnPresentation": {updateAVTableColumnPresentation, updateAVTableShowIcon},
+        "./columnPresentation": {updateAVTableColumnPresentation},
+        "./entryIcon": {updateAVViewShowIcon},
         "./columnWindow": {prepareAVColumnWindow() {}},
         "../../../constants": {Constants: {}},
     }[name] || {})});

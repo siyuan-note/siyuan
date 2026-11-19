@@ -8,7 +8,7 @@ export const AV_RICH_TEXT_PREVIEW_ALLOWED_TAGS = [
 ];
 export const AV_RICH_TEXT_PREVIEW_ALLOWED_ATTRIBUTES = [
     "checked", "class", "data-content", "data-href", "data-id", "data-language", "data-subtype", "data-type",
-    "disabled", "href", "style", "title", "type",
+    "disabled", "href", "start", "style", "title", "type",
 ];
 export const AV_RICH_TEXT_PREVIEW_TEXT_ONLY_TAGS = ["sup"];
 export const AV_RICH_TEXT_EDITOR_ALLOWED_TAGS = ["br", "div", "span", "svg", "use", "wbr"];

@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	CurrentSpec   = 14
+	CurrentSpec   = 17
+	TextImageSpec = 17
 	PlainTextSpec = 8
 	RichTextSpec  = 9
 	// 单一 WGS84 位置使用独立版本，防止其他格式的内核重写坐标含义。
@@ -47,6 +48,12 @@ func UpgradeSpec(av *AttributeView) {
 	if av.HasSubItems() && av.Spec < SubItemsSpec {
 		av.Spec = SubItemsSpec
 	}
+	if av.HasPrimaryRich() && av.Spec < PrimaryRichSpec {
+		av.Spec = PrimaryRichSpec
+	}
+	if av.HasPrimaryBlockRich() && av.Spec < PrimaryBlockRichSpec {
+		av.Spec = PrimaryBlockRichSpec
+	}
 }
 
 // upgradeSpec10 仅为包含列表或日历配置的数据库升级，保留其他数据库的旧版兼容性。
@@ -71,6 +78,12 @@ func upgradeSpec10(av *AttributeView) {
 }
 
 func CheckSpec(av *AttributeView) (err error) {
+	if av.HasPrimaryBlockRich() && av.Spec < PrimaryBlockRichSpec {
+		return fmt.Errorf("primary block rich text requires format %d", PrimaryBlockRichSpec)
+	}
+	if av.HasPrimaryRich() && av.Spec < PrimaryRichSpec {
+		return fmt.Errorf("primary rich text requires format %d", PrimaryRichSpec)
+	}
 	if av.HasSubItems() && av.Spec < SubItemsSpec {
 		return fmt.Errorf("database sub-items require format %d", SubItemsSpec)
 	}
@@ -114,40 +127,69 @@ func (av *AttributeView) HasRichText() bool {
 }
 
 // NormalizeRichText 校验所有富文本载荷，并刷新对应的纯文本投影。
-func (av *AttributeView) NormalizeRichText() (err error) {
+func (av *AttributeView) NormalizeRichText() error {
+	return av.normalizeRichText(nil)
+}
+
+func (av *AttributeView) normalizeRichText(saveSpec *int) (err error) {
 	if nil == av {
 		return
 	}
-	type normalizedText struct {
-		value       *ValueText
+	type projection struct {
 		content     string
 		richContent string
 	}
+	type normalizedText struct {
+		value *ValueText
+		projection
+	}
 	var normalized []normalizedText
+	spec := av.Spec
+	projections := map[ValueTextRich]projection{}
 	var luteEngine *lute.Lute
 	av.visitPersistedValues(func(value *Value) {
 		if nil != err || nil == value.Text || !value.Text.IsRich() {
 			return
 		}
 		rich := *value.Text.Rich
+		if cached, ok := projections[rich]; ok {
+			normalized = append(normalized, normalizedText{value.Text, cached})
+			return
+		}
 		if luteEngine == nil {
 			luteEngine = newValueTextRichLute()
 		}
 		var tree *parse.Tree
 		if tree, err = normalizeValueTextRichWithLute(&rich, luteEngine); nil == err {
-			normalized = append(normalized, normalizedText{
-				value:       value.Text,
-				content:     valueTextRichPlainContent(tree),
-				richContent: rich.Content,
-			})
+			if spec < TextImageSpec {
+				ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+					if entering && node.Type == ast.NodeImage {
+						spec = TextImageSpec
+						return ast.WalkStop
+					}
+					return ast.WalkContinue
+				})
+			}
+			result := projection{valueTextRichPlainContent(tree), rich.Content}
+			projections[*value.Text.Rich] = result
+			normalized = append(normalized, normalizedText{value.Text, result})
 		}
 	})
 	if nil != err {
 		return
 	}
+	if spec != av.Spec && saveSpec == nil {
+		return fmt.Errorf("text field images require database format %d", TextImageSpec)
+	}
+	if err = av.NormalizePrimaryRich(); err != nil {
+		return
+	}
 	for _, text := range normalized {
 		text.value.Content = text.content
 		text.value.Rich.Content = text.richContent
+	}
+	if saveSpec != nil {
+		*saveSpec = spec
 	}
 	return
 }

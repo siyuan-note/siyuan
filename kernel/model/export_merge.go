@@ -6,6 +6,7 @@ package model
 
 import (
 	"slices"
+	"strings"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -22,8 +23,9 @@ const (
 )
 
 type MergeHeadingOptions struct {
-	DocHeadingMode     string
-	ContentHeadingMode string
+	DocHeadingMode        string
+	ContentHeadingMode    string
+	MarkSubdocumentTitles bool
 }
 
 func mergeHeadingOptionsOrDefault(options []MergeHeadingOptions) (ret MergeHeadingOptions) {
@@ -137,6 +139,9 @@ func loadTreeNodes(box string, p string, level int, options MergeHeadingOptions,
 	if err != nil {
 		return nil, err
 	}
+	if options.MarkSubdocumentTitles {
+		heading.SetIALAttr("data-export-subdocument-title", "true")
+	}
 	tree.Root.PrependChild(heading)
 	for c := tree.Root.FirstChild; nil != c; c = c.Next {
 		ret = append(ret, c)
@@ -163,6 +168,27 @@ func exportDocumentHeading(root *ast.Node, level int, customTitle string) (*ast.
 			heading.AppendChild(child)
 			child = next
 		}
+	}
+	// 旧标题源仍可读取；导出的标题行将换行转为空格，避免再次导入时拆成正文。
+	lineBreaks := strings.NewReplacer("\r\n", " ", "\r", " ", "\n", " ")
+	var breaks []*ast.Node
+	ast.Walk(heading, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		switch node.Type {
+		case ast.NodeSoftBreak, ast.NodeHardBreak, ast.NodeBr:
+			node.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(" ")})
+			breaks = append(breaks, node)
+		case ast.NodeText, ast.NodeLinkText, ast.NodeBackslashContent, ast.NodeCodeSpanContent:
+			node.Tokens = []byte(lineBreaks.Replace(string(node.Tokens)))
+		case ast.NodeTextMark:
+			node.TextMarkTextContent = lineBreaks.Replace(node.TextMarkTextContent)
+		}
+		return ast.WalkContinue
+	})
+	for _, node := range breaks {
+		node.Unlink()
 	}
 	return heading, nil
 }

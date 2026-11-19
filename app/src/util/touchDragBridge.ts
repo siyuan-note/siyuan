@@ -1219,6 +1219,33 @@ const handleCancel = () => {
     cancelManualTouch();
 };
 
+// 块标边缘划选仅接管同一目标上尚未开始的触摸拖拽候选。
+export const cancelTouchDragCandidate = (target: HTMLElement): (() => void) | false => {
+    if (manualState || foreignDragState || window.siyuan.touchDragActive) return false;
+    const gutter = target.closest<HTMLElement>(".protyle-gutters");
+    if (!gutter) return false;
+    if (dragState && (dragState.inputType !== "touch" || dragState.isMouse || dragState.isDragging ||
+        !isBlockGutter(dragState.draggableElement) || !dragState.draggableElement.contains(target))) return false;
+    const draggable = dragState?.draggableElement || getDraggableAncestor(target);
+    const originalDraggable = dragState?.restoreDraggable ? "true" : draggable?.getAttribute("draggable");
+    if (dragState) {
+        dragState.restoreDraggable = false;
+        completeBridgeDrag(undefined, true);
+    }
+    draggable?.setAttribute("draggable", "false");
+    setGutterTouchDragging(gutter, true);
+    let released = false;
+    return () => {
+        if (released) return;
+        released = true;
+        if (draggable) {
+            if (originalDraggable === null) draggable.removeAttribute("draggable");
+            else if (originalDraggable !== undefined) draggable.setAttribute("draggable", originalDraggable);
+        }
+        setGutterTouchDragging(gutter, false);
+    };
+};
+
 // 取消手动桥接（mousedown）路径：派发 mouseup 以触发各组件注册的清理回调（如 Outline.bindSort 的 mouseup 会清空 document.onmousemove 等），并复位状态
 // event.ts 的 touchend 会无条件前置调用它，确保 Outline.bindSort 等注册的 onmousemove/onmouseup 不残留，避免被后续事件误触发（创建拖拽 ghost、启动滚动动画等）
 export const cancelManualTouch = () => {

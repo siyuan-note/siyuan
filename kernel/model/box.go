@@ -887,7 +887,7 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 			}
 
 			// Import the YAML at the beginning of the Markdown as a code block https://github.com/siyuan-note/siyuan/issues/16488
-			codeBlock := &ast.Node{Type: ast.NodeCodeBlock, ID: ast.NewNodeID()}
+			codeBlock := &ast.Node{Type: ast.NodeCodeBlock, ID: ast.NewNodeID(), IsFencedCodeBlock: true}
 			codeBlock.SetIALAttr("id", codeBlock.ID)
 			codeBlock.SetIALAttr("updated", codeBlock.ID[:14])
 			openMarker := &ast.Node{Type: ast.NodeCodeBlockFenceOpenMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3}
@@ -1057,10 +1057,25 @@ func ReindexFTS() {
 
 func fullReindex() {
 	fullReindexWithTxFlush(true)
+	debug.FreeOSMemory()
 }
 
-// Snapshot checkout already drained transactions while holding flushLock.
+// 快照恢复已经持有事务锁并完成旧事务；缓存、数据库和文档索引需共享该边界，避免旧索引覆盖编辑。
 func fullReindexWithTxFlush(flushTransactions bool) {
+	if flushTransactions {
+		for {
+			FlushTxQueue()
+			flushLock.Lock()
+			if txQueueSize() == 0 {
+				break
+			}
+			flushLock.Unlock()
+		}
+		defer flushLock.Unlock()
+	}
+	wasFlushing := isFlushing.Swap(true)
+	defer isFlushing.Store(wasFlushing)
+
 	cache.ClearTreeCache()
 	cache.ClearDocsIAL()
 	cache.ClearBlocksIAL()
@@ -1072,10 +1087,6 @@ func fullReindexWithTxFlush(flushTransactions bool) {
 		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
 	}()
 
-	if flushTransactions {
-		FlushTxQueue()
-	}
-
 	sql.InitDatabase(true)
 
 	sql.IndexIgnoreCached = false
@@ -1084,7 +1095,6 @@ func fullReindexWithTxFlush(flushTransactions bool) {
 		indexBox(openedBox.ID)
 	}
 	LoadFlashcards()
-	debug.FreeOSMemory()
 }
 
 func ChangeBoxSort(boxIDs []string) {

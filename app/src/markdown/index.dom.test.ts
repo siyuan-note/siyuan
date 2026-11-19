@@ -206,6 +206,23 @@ const browserCases = async (languages: Record<string, string>) => {
         button.click();
         check.equal(more.open, false, "choosing a menu action closes the menu");
     };
+    menuAction("markdownFind"); await tick();
+    const findPanel = document.querySelector<HTMLElement>(".vditor-find");
+    const findQuery = findPanel.querySelector<HTMLInputElement>('input[type="search"]');
+    check.equal(findPanel.hidden, false, "More opens the shared Vditor find panel");
+    check.ok(findQuery.classList.contains("b3-text-field"));
+    findQuery.value = "Markdown";
+    findQuery.dispatchEvent(new Event("input", {bubbles: true}));
+    await tick();
+    check.ok(/^1\/[1-9]\d*$/.test(findPanel.querySelector("output").textContent));
+    check.equal(application.editor.flush().edited, false, "find keeps the document pristine");
+    check.equal(writes.length, 0, "finding does not save the document");
+    await ipcRenderer.invoke("markdown-screenshot", "find-light");
+    findQuery.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    check.equal(findPanel.hidden, true);
+    document.dispatchEvent(new KeyboardEvent("keydown", {key: "f", ctrlKey: true, metaKey: true, bubbles: true, cancelable: true}));
+    check.equal(findPanel.hidden, false, "the window shortcut opens find");
+    findQuery.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
     await tick();
     check.equal(document.querySelector("#markdownName").textContent, "README.md");
     check.equal(document.title, "README.md");
@@ -227,6 +244,11 @@ const browserCases = async (languages: Record<string, string>) => {
     menuAction("markdownRevealFile"); await tick();
     check.equal(document.querySelector<HTMLElement>(".markdown-footer").hidden, true, "successful actions without session updates clear stale error DOM");
     check.equal(document.querySelector(".markdown-tree__heading"), null);
+    const initialTreeViewport = document.querySelector(".markdown-tree__viewport");
+    const treeBounds = initialTreeViewport.getBoundingClientRect();
+    const firstTreeRow = initialTreeViewport.querySelector(".markdown-tree__row").getBoundingClientRect();
+    check.equal(firstTreeRow.top - treeBounds.top, firstTreeRow.left - treeBounds.left,
+        "the first file tree row has matching top and side insets");
     check.deepEqual(Array.from(document.querySelectorAll<HTMLElement>(".markdown-header button, .markdown-header select, .markdown-header summary"))
         .filter(element => element.checkVisibility()).map(element => element.id), ["markdownTreeToggle", "markdownOutlineToggle", "markdownUndo", "markdownRedo", "markdownMoreButton"]);
     const outlineToggle = document.querySelector<HTMLButtonElement>("#markdownOutlineToggle");
@@ -859,6 +881,17 @@ const browserCases = async (languages: Record<string, string>) => {
     failWrite = true;
     application.session.updateEditor({content: "Unsaved at exit", edited: true, composing: false});
     application.editor.setValue("Unsaved at exit");
+    await application.session.flush(application.editor);
+    for (const width of [1000, 400]) {
+        await ipcRenderer.invoke("markdown-resize", width, 360);
+        await tick();
+        const status = document.getElementById("markdownStatus").getBoundingClientRect();
+        const retry = document.getElementById("markdownRetry").getBoundingClientRect();
+        const gap = retry.left - status.right;
+        check.ok(retry.width > 0 && gap >= 0 && gap <= 8 && retry.right <= innerWidth &&
+            retry.top < status.bottom && retry.bottom > status.top,
+            `retry is visible beside the save error at ${width}px`);
+    }
     onCommand({id: "prepared-close", type: "prepare-quit"});
     await tick();
     check.equal(responses.at(-1), true);
@@ -869,6 +902,83 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(application.session.getState().lifecycle, "closed");
     check.equal(closeConfirmations, 1);
     application.destroy();
+    const confirmations: string[][] = [];
+    const scans: string[][] = [];
+    const allowed = new Set<string>();
+    bridge.resourceDirectories = async references => {
+        scans.push(references);
+        return references.filter(reference => !allowed.has(reference)).map(reference => ({id: reference, path: `C:\\Images\\${reference}`}));
+    };
+    bridge.confirmResourceDirectories = async ids => {confirmations.push(ids); ids.forEach(id => allowed.add(id)); return ids.length > 0;};
+    const localReferences = Array.from({length: 45}, (_, i) => `folder${i}/image.png`);
+    const resourceContent = localReferences.map(reference => `![image](${reference})`).join("\n\n") +
+        "\n\n![duplicate](folder0/image.png)\n\n![ref][photo]\n\n[photo]: folder1/image.png\n\n" +
+        "[link](link-only/private.png)\n\n![remote](https://example.com/a.png)\n\n```md\n![code](code-only/private.png)\n```\n";
+    const resourceBootstrap = {...await bridge.bootstrap(), sessionId: "resource-session", content: resourceContent,
+        preferences: {...storedPreferences, theme: "system" as const}, dark: false};
+    const resourceApplication = await api.mountMarkdownApplication(bridge, document.getElementById("markdownApp"), resourceBootstrap);
+    await tick(); await tick();
+    const resourcePanel = document.getElementById("markdownResourcesPanel") as HTMLDialogElement;
+    check.equal(resourcePanel.open, true, "new local image paths automatically open one batch confirmation");
+    check.deepEqual([...scans[0]].sort(), [...localReferences].sort(), "only parsed local images are proposed, including reference images");
+    const resourceCheckboxes = () => Array.from(resourcePanel.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+    check.equal(resourceCheckboxes().length, 45);
+    check.ok(resourceCheckboxes().every(input => input.checked), "all directories default to selected");
+    const resourceList = resourcePanel.querySelector<HTMLElement>(".markdown-resource-directories__list");
+    const resourceActions = resourcePanel.querySelector<HTMLElement>(".b3-dialog__action");
+    check.ok(resourceList.scrollHeight > resourceList.clientHeight, "long directory lists scroll");
+    const actionTop = resourceActions.getBoundingClientRect().top;
+    resourceList.scrollTop = resourceList.scrollHeight;
+    await tick();
+    check.equal(resourceActions.getBoundingClientRect().top, actionTop, "actions stay fixed while the list scrolls");
+    check.ok(resourceActions.getBoundingClientRect().bottom <= innerHeight);
+    await ipcRenderer.invoke("markdown-screenshot", "resources-all-selected-light");
+    resourcePanel.querySelector<HTMLButtonElement>('button[type="button"]').click(); await tick();
+    check.deepEqual(confirmations, [[]], "cancelling discards proposals and grants nothing");
+    check.equal(resourcePanel.open, false);
+    resourceApplication.editor.refreshResources(); await tick(); await tick();
+    check.equal(resourcePanel.open, false, "cancelled paths do not repeatedly interrupt this editing session");
+    document.querySelector<HTMLDetailsElement>("#markdownMore").open = true;
+    document.getElementById("markdownResources").click(); await tick();
+    check.equal(resourcePanel.open, true, "the menu permits retrying skipped directories");
+    resourceCheckboxes()[1].click();
+    const resourceForm = resourcePanel.querySelector("form");
+    resourceForm.requestSubmit(); resourceForm.requestSubmit(); await tick();
+    check.deepEqual(confirmations.at(-1), localReferences.filter(reference => reference !== localReferences[1]));
+    check.equal(confirmations.length, 2, "repeated confirmation does not submit twice");
+    check.equal(resourcePanel.open, false);
+    resourceApplication.editor.setValue(resourceContent + "\n\n![new](new-folder/image.png)\n");
+    await tick(); await tick();
+    check.equal(resourcePanel.open, true, "a later unauthorized image path prompts again");
+    check.equal(resourceCheckboxes().length, 2, "already authorized directories are omitted");
+    for (const input of resourceCheckboxes()) input.click();
+    check.equal(resourcePanel.querySelector<HTMLButtonElement>('button[type="submit"]').disabled, true);
+    resourceCheckboxes()[0].click();
+    check.equal(resourcePanel.querySelector<HTMLButtonElement>('button[type="submit"]').disabled, false);
+    await ipcRenderer.invoke("markdown-resize", 360, 640); await tick();
+    await resourceApplication.dispatch({id: "resource-dark", type: "theme", dark: true});
+    document.getElementById("markdownApp").style.setProperty("--markdown-font-size", "32px");
+    await tick();
+    check.ok(getComputedStyle(resourcePanel.querySelector("form")).backgroundColor.match(/\d+/g).slice(0, 3).every(value => Number(value) < 128),
+        "the directory dialog follows the loaded dark theme");
+    const narrowActions = resourcePanel.querySelector<HTMLElement>(".b3-dialog__action").getBoundingClientRect();
+    check.ok(narrowActions.bottom <= innerHeight && narrowActions.left >= 0 && narrowActions.right <= innerWidth,
+        "confirmation and cancel stay reachable in a narrow window with large editor fonts");
+    await ipcRenderer.invoke("markdown-screenshot", "resources-partial-narrow-dark");
+    resourcePanel.dispatchEvent(new Event("cancel", {cancelable: true})); await tick();
+    check.equal(resourcePanel.open, false, "Escape cancellation grants nothing");
+    check.deepEqual(confirmations.at(-1), []);
+    let completeResourceScan: (directories: import("./resourceDirectories").MarkdownResourceDirectory[]) => void;
+    bridge.resourceDirectories = () => new Promise(resolve => {completeResourceScan = resolve;});
+    document.querySelector<HTMLDetailsElement>("#markdownMore").open = true;
+    document.getElementById("markdownResources").click(); await tick();
+    const closingResources = resourceApplication.dispatch({id: "resource-close", type: "close"});
+    await tick();
+    completeResourceScan([{id: "late", path: "C:\\Late\\images"}]);
+    await closingResources;
+    check.equal(resourcePanel.open, false, "a directory scan completed during closing cannot reopen the dialog");
+    resourceApplication.destroy();
+    delete bridge.resourceDirectories; delete bridge.confirmResourceDirectories;
     const bootstrap = await bridge.bootstrap();
     await ipcRenderer.invoke("markdown-resize", 1100, 850);
     document.body.classList.remove("body--android");
@@ -1296,14 +1406,20 @@ const browserCases = async (languages: Record<string, string>) => {
         {family: "Arial", displayName: "Arial Bold", weight: 700},
         {family: "Courier", displayName: "Courier", weight: 400, spacing: "monospace"},
     ];
-    bridge.bootstrap = async () => ({...bootstrap, sessionId: "workspace-appearance", preferences: {mode: "ir"}, appearance: appearanceSnapshot});
+    bridge.bootstrap = async () => ({...bootstrap, content: original + "\nInline `code`\n", sessionId: "workspace-appearance",
+        preferences: {mode: "ir"}, appearance: appearanceSnapshot});
     const inheritedApp = await api.mountMarkdownApplication(bridge);
     const inheritedEditor = inheritedApp.editor;
     const inheritedText = inheritedApp.editor.flush().content;
     check.equal(document.querySelectorAll("#markdownFonts button").length, 3);
     check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').getAttribute("data-value"), "one");
     check.equal(getComputedStyle(document.querySelector(".vditor-ir .vditor-reset")).fontSize, "23px");
-    check.ok(getComputedStyle(document.getElementById("markdownApp")).fontFamily.includes("serif"));
+    const appFont = getComputedStyle(document.getElementById("markdownApp")).fontFamily;
+    check.ok(appFont.includes("serif"));
+    check.equal(getComputedStyle(document.querySelector(".vditor-outline__title")).fontFamily, appFont);
+    const inlineCode = getComputedStyle(document.querySelector(".vditor-ir .vditor-reset p code"));
+    check.match(inlineCode.fontFamily, /\bserif\b/);
+    check.equal(inlineCode.fontWeight, "600");
     const oldPreferencesCount = preferenceUpdates.length;
     document.querySelector<HTMLButtonElement>('#markdownTheme button[data-value="two"]').click();
     document.querySelector<HTMLButtonElement>('#markdownFont button[data-value="two"]').click();
@@ -1338,11 +1454,54 @@ const browserCases = async (languages: Record<string, string>) => {
     document.querySelector<HTMLButtonElement>('#markdownFonts button[data-value="independent"]').click(); await tick();
     const fontSections = independentPanel.querySelectorAll("section");
     check.equal(fontSections.length, 3);
+    const fontPlatformClasses = document.body.className;
+    const fontTheme = document.getElementById("markdownThemeStyle") as HTMLLinkElement;
+    const fontThemeHref = fontTheme.href;
+    for (const [width, platform, theme] of [[1100, "windows", "daylight"], [360, "windows", "midnight"],
+        [360, "android", "daylight"], [360, "ios", "midnight"], [360, "harmony", "daylight"]] as const) {
+        await ipcRenderer.invoke("markdown-resize", width, 850);
+        document.body.className = `body--${platform}`;
+        const href = new URL(`./appearance/themes/${theme}/theme.css`, location.href).href;
+        if (fontTheme.href !== href) await new Promise<void>(resolve => {fontTheme.onload = () => resolve(); fontTheme.href = href;});
+        for (const section of fontSections) {
+            const list = section.querySelector<HTMLElement>(".markdown-font-picker__list");
+            for (const row of list.querySelectorAll<HTMLButtonElement>(".b3-list-item")) {
+                row.scrollIntoView({block: "center"});
+                const bounds = row.getBoundingClientRect();
+                const parent = list.getBoundingClientRect();
+                const style = getComputedStyle(row);
+                check.ok(Math.abs(bounds.left - parent.left - list.clientLeft - parseFloat(style.marginLeft)) < 1,
+                    `${platform}: font rows retain the shared left inset`);
+                check.ok(Math.abs(bounds.right - parent.left - list.clientLeft - list.clientWidth + parseFloat(style.marginRight)) < 1,
+                    `${platform}: font rows fill the available list width`);
+                check.equal(document.elementFromPoint(bounds.right - 8, bounds.top + bounds.height / 2)?.closest(".b3-list-item"), row,
+                    `${platform}: the blank end of a font row is clickable`);
+            }
+        }
+    }
+    document.body.className = fontPlatformClasses;
+    await ipcRenderer.invoke("markdown-resize", 1100, 850);
+    if (fontTheme.href !== fontThemeHref) await new Promise<void>(resolve => {fontTheme.onload = () => resolve(); fontTheme.href = fontThemeHref;});
     const familySearch = fontSections[0].querySelector<HTMLInputElement>('input[type="search"]');
     familySearch.value = "Sans"; familySearch.dispatchEvent(new Event("input")); await tick();
     check.equal(fontSections[0].querySelectorAll(".b3-list-item").length, 1);
-    fontSections[0].querySelector<HTMLButtonElement>('.b3-list-item[data-family="Arial"]').click();
+    const fontRow = fontSections[0].querySelector<HTMLButtonElement>('.b3-list-item[data-family="Arial"]');
+    fontRow.scrollIntoView({block: "center"});
+    const fontBounds = fontRow.getBoundingClientRect();
+    await ipcRenderer.invoke("markdown-pointer-move", fontBounds.right - 8, fontBounds.top + fontBounds.height / 2);
+    check.notEqual(getComputedStyle(fontRow).backgroundColor, "rgba(0, 0, 0, 0)", "hover feedback covers the blank end of a font row");
+    await ipcRenderer.invoke("markdown-touch", fontBounds.right - 8, fontBounds.top + fontBounds.height / 2);
+    await tick();
     const chip = fontSections[0].querySelector<HTMLElement>(".b3-chip");
+    const selectedRow = fontSections[0].querySelector('[aria-checked="true"]');
+    const checkmark = selectedRow.querySelector("svg").getBoundingClientRect();
+    check.ok(checkmark.width > 0 && checkmark.width <= 16, "the font selection checkmark uses list icon dimensions");
+    check.ok(selectedRow.getBoundingClientRect().height <= 32);
+    for (const action of chip.querySelectorAll("button")) {
+        const button = action.getBoundingClientRect();
+        const icon = action.querySelector("svg").getBoundingClientRect();
+        check.ok(Math.abs((icon.left + icon.right) - (button.left + button.right)) < 1, "chip button icons are centered");
+    }
     chip.querySelector<HTMLButtonElement>('[aria-haspopup="menu"]').click();
     check.deepEqual(Array.from(fontSections[0].querySelectorAll("[data-weight]")).map(item => item.getAttribute("data-weight")), ["400", "700"]);
     fontSections[0].querySelector<HTMLButtonElement>('[data-weight="700"]').click();
@@ -1400,14 +1559,14 @@ const browserCases = async (languages: Record<string, string>) => {
 
 test("Markdown file tree and compact menus preserve edits across switching, stale replies and safe exit", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
-    timeout: 80000,
+    timeout: 120000,
 }, async () => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-markdown-ui-test-"));
     const artifacts = mkdtempSync(path.join(tmpdir(), "siyuan-markdown-ui-screenshots-"));
     const compileSource = (name: string) => transpileModule(readFileSync(path.join(__dirname, name), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")
         .replace('require("vditor")', "globalThis.Vditor"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
-    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "../util/systemFontCore.ts", "../util/fontPreview.ts", "fontPicker.ts", "appearance.ts", "index.ts"].map(compileSource).join("\n") +
+    const source = ["../layout/dock/docTree/DocTreeModel.ts", "../menus/menuPosition.ts", "../util/keymapBindings.ts", "../util/dockKeymap.ts", "../constants.ts", "../util/shortcut.ts", "../util/hotKeyPolicy.ts", "shortcuts.ts", "identity.ts", "limits.ts", "resourcePolicy.ts", "resourceDirectories.ts", "link.ts", "panelAnimation.ts", "editor.ts", "session.ts", "nativeBridge.ts", "errors.ts", "treeAnimation.ts", "tree.ts", "choiceMenu.ts", "windowChrome.ts", "tooltip.ts", "../util/systemFontCore.ts", "../util/fontPreview.ts", "fontPicker.ts", "appearance.ts", "index.ts"].map(compileSource).join("\n") +
         "\nwindow.MarkdownApplicationTest = {mountMarkdownApplication, createMarkdownTree, MARKDOWN_RENDER_BYTES}; void 0;";
     const style = compile(path.resolve(__dirname, "../assets/scss/markdown.scss")).css;
     const template = readFileSync(path.resolve(__dirname, "../assets/template/markdown/index.tpl"), "utf8")
@@ -1478,7 +1637,7 @@ app.whenReady().then(async () => {
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
-        const result = await promisify(execFile)(require("electron") as unknown as string, [script], {env, timeout: 75000, windowsHide: true});
+        const result = await promisify(execFile)(require("electron") as unknown as string, [script], {env, timeout: 115000, windowsHide: true});
         assert.match(result.stdout, /Markdown application DOM cases passed/);
         console.log(`Markdown UI screenshots: ${artifacts}`);
     } finally {

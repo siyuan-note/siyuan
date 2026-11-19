@@ -128,6 +128,8 @@ type ExportHTMLRequest struct {
 }
 type ExportPreviewHTMLRequest struct {
 	ID string `json:"id" api:"trim"`
+	// BlockRefMode 仅在 pdf=true 时覆盖本次导出的引用模式；省略或 null 沿用全局设置，支持 2、3、4。
+	BlockRefMode *int `json:"blockRefMode" api:"optional"`
 	// ExcludeTitleImage 在 image=true 或 pdf=true 时排除题头图；省略、null 或 false 保留，不影响标题和正文图片。
 	ExcludeTitleImage bool `json:"excludeTitleImage" api:"optional,nullable"`
 	// KeepJSEmbed 保留 JavaScript 嵌入块供受信任的前端异步渲染；默认关闭，内核不执行脚本。
@@ -266,7 +268,7 @@ func decodeExportFields(value reflect.Value, fields map[string]json.RawMessage) 
 			if kind == reflect.Pointer {
 				kind = dest.Type().Elem().Kind()
 			}
-			kindName := map[reflect.Kind]string{reflect.String: "String", reflect.Bool: "Boolean", reflect.Float64: "Number", reflect.Slice: "Array"}[kind]
+			kindName := map[reflect.Kind]string{reflect.String: "String", reflect.Bool: "Boolean", reflect.Int: "Number", reflect.Float64: "Number", reflect.Slice: "Array"}[kind]
 			return fmt.Errorf("Field [%s] should be of type [%s]", name, kindName)
 		}
 		if has("trim") {

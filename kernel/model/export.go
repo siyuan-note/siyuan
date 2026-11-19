@@ -1100,6 +1100,9 @@ func ExportPreview(id string, fillCSSVar bool, avPublishFilter AVExportPublishFi
 		})
 
 		tree = normalizeExportPreviewTree(tree, luteEngine)
+		// 预览 HTML 会直接写入前端 innerHTML，Markdown 往返还会把属性列表文本提升为元素属性，
+		// 因此这里必须移除事件处理器属性 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-x62v-7955-xx6v
+		filterHandlerIALInTree(tree.Root)
 		// 使用实际主题样式值替换样式变量 Use real theme style value replace var in preview mode https://github.com/siyuan-note/siyuan/issues/11458
 		if fillCSSVar {
 			fillThemeStyleVar(tree)
@@ -1389,16 +1392,16 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool, mergeHeadingOpti
 
 func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle bool, customTitle string,
 	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
-	return exportHTMLWithTitle(id, savePath, pdf, keepFold, merge, addTitle, customTitle, false, false, mergeHeadingOptions...)
+	return exportHTMLWithTitle(id, savePath, pdf, keepFold, merge, addTitle, customTitle, false, false, nil, mergeHeadingOptions...)
 }
 
 func ExportPreviewHTMLWithTitle(id string, keepFold, merge, addTitle bool, customTitle string, keepJSEmbed, excludeTitleImage bool,
-	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
-	return exportHTMLWithTitle(id, "", true, keepFold, merge, addTitle, customTitle, keepJSEmbed, excludeTitleImage, mergeHeadingOptions...)
+	blockRefMode *int, mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
+	return exportHTMLWithTitle(id, "", true, keepFold, merge, addTitle, customTitle, keepJSEmbed, excludeTitleImage, blockRefMode, mergeHeadingOptions...)
 }
 
 func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle bool, customTitle string, keepJSEmbed, excludeTitleImage bool,
-	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
+	blockRefModeOverride *int, mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
 	if err := prepareExportBlockAssets(id, merge); err != nil {
 		util.PushErrMsg(err.Error(), 7000)
 		return
@@ -1436,6 +1439,9 @@ func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 
 		blockRefMode := confExportSnapshot.BlockRefMode
 		var headings []*ast.Node
+		if blockRefModeOverride != nil {
+			blockRefMode = *blockRefModeOverride
+		}
 		if pdf { // 导出 PDF 需要标记目录书签
 			headings = collectOutlineHeadings(tree)
 			for _, h := range headings {
@@ -1547,6 +1553,9 @@ func exportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 		// 不进行安全过滤，因为导出时需要保留所有的 HTML 标签
 		// 使用属性 `data-export-html` 导出时 `<style></style>` 标签丢失 https://github.com/siyuan-note/siyuan/issues/6228
 		luteEngine.SetSanitize(false)
+		// 导出的 HTML 会在桌面端本地页面中打开，仍需移除 IAL 中的事件处理器属性
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-x62v-7955-xx6v
+		filterHandlerIALInTree(tree.Root)
 
 		renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		if keepJSEmbed {
@@ -1949,7 +1958,10 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node, headingNum
 
 			tip := cur.(*pdfcpu.Bookmark)
 			if tip.Level < h.HeadingLevel {
-				bm := bms[h.ID]
+				bm, ok := bms[h.ID]
+				if !ok {
+					break L
+				}
 				bm.Level = h.HeadingLevel
 				bm.Parent = tip
 				tip.Kids = append(tip.Kids, bm)
@@ -2838,6 +2850,8 @@ func exportSYZipWithConfig(boxID, rootDirPath, baseFolderName string, docPaths [
 		boxConf.DocCreateSaveBox = ""
 		boxConf.Encrypted = false
 		boxConf.BoxCrypt = nil
+		// 分享用的明文导出仅包含可识别的笔记本设置。
+		boxConf.Extra = nil
 		confData, marshalErr := gulu.JSON.MarshalIndentJSON(boxConf, "", "  ")
 		if marshalErr != nil {
 			logging.LogErrorf("marshal export notebook conf failed: %s", marshalErr)
@@ -4051,6 +4065,12 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 					}
 					if av.KeyTypeBlock == cell.Value.Type {
 						if nil != cell.Value.Block {
+							if cell.Value.Block.Rich != nil {
+								if attrViewRichErr = appendAttributeViewPrimaryRichExport(mdTableCell, cell.Value, exportOpts.RichTableCells); attrViewRichErr != nil {
+									return ast.WalkStop
+								}
+								continue
+							}
 							val = cell.Value.Block.Content
 							if !exportOpts.WYSIWYG {
 								val = string(lex.EscapeProtyleMarkers([]byte(val)))
@@ -4216,6 +4236,15 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 							}
 
 							if av.KeyTypeBlock == v.Type && nil != v.Block {
+								if v.Block.Rich != nil {
+									if attrViewRichErr = appendAttributeViewPrimaryRichExport(mdTableCell, v, exportOpts.RichTableCells); attrViewRichErr != nil {
+										return ast.WalkStop
+									}
+									if i < len(cell.Value.Relation.Contents)-1 {
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
+									}
+									continue
+								}
 								val = v.Block.Content
 								if !exportOpts.WYSIWYG {
 									val = string(lex.EscapeProtyleMarkers([]byte(val)))
@@ -4257,6 +4286,15 @@ func exportTree(tree *parse.Tree, exportOpts treeExportOptions) (ret *parse.Tree
 
 							if av.KeyTypeBlock == v.Type {
 								if nil != v.Block {
+									if v.Block.Rich != nil {
+										if attrViewRichErr = appendAttributeViewPrimaryRichExport(mdTableCell, v, exportOpts.RichTableCells); attrViewRichErr != nil {
+											return ast.WalkStop
+										}
+										if i < len(cell.Value.Rollup.Contents)-1 {
+											mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
+										}
+										continue
+									}
 									val = v.Block.Content
 									if !exportOpts.WYSIWYG {
 										val = string(lex.EscapeProtyleMarkers([]byte(val)))

@@ -60,6 +60,7 @@ func TestListConversionFrontendTransactions(t *testing.T) {
 				value.IsDetached, value.Block.ID = false, id
 				value.Block.RefSubtype = "d"
 				value.Block.Content = treenode.GetNodeInTree(tree, id).Text()
+				refreshAttributeViewPrimarySource(value, treenode.GetNodeInTree(tree, id), view.ID)
 			}
 			if _, err = filesys.WriteTree(tree); err != nil {
 				t.Fatal(err)

@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {showMessage} from "../../dialog/message";
@@ -323,10 +323,12 @@ export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
             let confirmed = false;
             try {
                 confirmed = await new Promise<boolean>((resolve) => {
-                    mobileConfirmDialog(`⚠️ ${window.siyuan.languages.undo}`,
-                        `<div data-undo-confirmation="true">${window.siyuan.languages.undoCrossDocConfirm}<div style="margin-top: 8px;">${names.map(n => `• ${n}`).join("<br>")}</div></div>`,
-                        () => resolve(true),
-                        () => resolve(false));
+                    confirmDialog({
+                        title: `⚠️ ${window.siyuan.languages.undo}`,
+                        text: `<div data-undo-confirmation="true">${window.siyuan.languages.undoCrossDocConfirm}<div style="margin-top: 8px;">${names.map(n => `• ${n}`).join("<br>")}</div></div>`,
+                        confirm: () => resolve(true),
+                        cancel: () => resolve(false),
+                    });
                 });
             } finally {
                 protyle.wysiwyg.element.removeEventListener("keydown", blockInput, true);

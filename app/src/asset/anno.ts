@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {setPosition} from "../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -9,7 +9,7 @@ import {focusByRange} from "../protyle/util/selectionOffsets";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "../util/functions";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {filesize} from "filesize";
 import md5 from "blueimp-md5";
@@ -565,7 +565,7 @@ const setRelation = (pdf: any) => {
     if (!configItem.ids) {
         configItem.ids = [];
     }
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: window.siyuan.languages.relation,
         content: `<div class="b3-dialog__content">
     <div class="fn__flex">
@@ -1064,7 +1064,7 @@ const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement 
                     msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", content + ".png")
                         .replace("${y}", filesize(imageData.blob.size, {standard: "iec"}));
                 }
-                mobileConfirmDialog(msg ? window.siyuan.languages.upload : "", msg, async () => {
+                const capture = async () => {
                     if (!await canCopy()) {
                         return false;
                     }
@@ -1092,7 +1092,17 @@ const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement 
                         return true;
                     }
                     return false;
-                }, undefined, false, undefined, undefined, {awaitConfirm: true});
+                };
+                // 没有超限提示时不必打断用户，直接截图并写入引用
+                if (!msg) {
+                    void capture();
+                    return;
+                }
+                confirmDialog({
+                    title: window.siyuan.languages.upload,
+                    text: msg,
+                    confirm: capture,
+                });
             }).catch((error) => {
                 if (isActive()) {
                     console.error(error);
@@ -1186,9 +1196,12 @@ const removeAnno = (pdf: any, element: HTMLElement, id: string) => {
         }
         const count = response.data.refDefs.length;
         if (count > 0) {
-            mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm,
-                window.siyuan.languages.pdfAnnotationDeleteRefConfirm.replace("${x}", count.toString()), remove,
-                undefined, true);
+            confirmDialog({
+                title: window.siyuan.languages.deleteOpConfirm,
+                text: window.siyuan.languages.pdfAnnotationDeleteRefConfirm.replace("${x}", count.toString()),
+                confirm: remove,
+                isDelete: true,
+            });
         } else {
             remove();
         }

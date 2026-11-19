@@ -21,12 +21,21 @@ var previewTagRemoval = contractHandler(apicontract.PreviewTagRemoval,
 
 var removeTagWithCollections = contractHandler(apicontract.RemoveTagWithCollections,
 	func(c *gin.Context, request apicontract.RemoveTagWithCollectionsRequest) apicontract.Response[apicontract.Null] {
-		tx, err := model.RemoveTagWithCollections(request)
-		if err != nil {
-			return apicontract.Failure[apicontract.Null](-1, err.Error())
-		}
-		if len(tx.DoOperations) > 0 {
-			pushTransactions("", "", []*model.Transaction{tx})
-		}
-		return apicontract.Success(apicontract.Null{})
+		return commitTagRemoval(request)
 	})
+
+var batchRemoveTag = contractHandler(apicontract.BatchRemoveTag,
+	func(c *gin.Context, request apicontract.BatchRemoveTagRequest) apicontract.Response[apicontract.Null] {
+		return commitTagRemoval(apicontract.RemoveTagWithCollectionsRequest{Labels: request.Labels, Collections: request.Collections})
+	})
+
+func commitTagRemoval(request apicontract.RemoveTagWithCollectionsRequest) apicontract.Response[apicontract.Null] {
+	tx, err := model.RemoveTagWithCollections(request)
+	if err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	if len(tx.DoOperations) > 0 {
+		pushTransactions("", "", []*model.Transaction{tx})
+	}
+	return apicontract.Success(apicontract.Null{})
+}

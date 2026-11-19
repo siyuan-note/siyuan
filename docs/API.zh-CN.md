@@ -1058,6 +1058,7 @@ if (response.code === 0 && response.data) {
 
       常规情况下建议用第一种，统一保存在工作空间资源文件夹下，因为写入子目录有一些副作用，请参考用户指南资源文件章节。
     * `file[]`：上传的文件列表
+    * `excludeFromCleanup`：可选表单文本，仅接受 `"true"` 或 `"false"`，省略时为 false。为 true 时，将成功上传或复用的普通资源加入清理排除规则；规则保存失败的文件不作为成功返回。该选项不支持加密笔记本资源
 * 返回值
 
   ```json
@@ -2300,6 +2301,7 @@ if (response.code === 0 && response.data) {
         "group": null,
         "pageSize": 50,
         "showIcon": true,
+        "showRelationIcon": true,
         "wrapField": false,
         "groupFolded": false,
         "groupHidden": 0,
@@ -2352,7 +2354,7 @@ if (response.code === 0 && response.data) {
   }
   ```
 
-    * `data.view`: 渲染后的视图实例。结构随 `viewType` 而变：`table` 和 `list` 返回 `columns`/`rows`/`rowCount`，`gallery` 和 `kanban` 返回 `fields`/`cards`/`cardCount`。启用分组时，`groups` 包含各分组的视图实例，每个实例含 `groupKey`/`groupValue`。`view` 还包含 `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden`。注意：启用的过滤或分组可能使条目列表为空，即使条目总数大于 0
+    * `data.view`: 渲染后的视图实例。结构随 `viewType` 而变：`table` 和 `list` 返回 `columns`/`rows`/`rowCount`，`gallery` 和 `kanban` 返回 `fields`/`cards`/`cardCount`。启用分组时，`groups` 包含各分组的视图实例，每个实例含 `groupKey`/`groupValue`。`view` 还包含 `filters`/`sorts`/`group`/`showIcon`/`showRelationIcon`/`wrapField`/`groupFolded`/`groupHidden`。`showIcon` 控制主键内容图标；`showRelationIcon` 控制关联、汇总内容图标，已保存的布局缺少该设置时沿用 `showIcon`。注意：启用的过滤或分组可能使条目列表为空，即使条目总数大于 0
     * `data.view.columns[]`: 每列含 `id`/`name`/`type`/`icon`/`wrap`/`hidden`/`desc`/`calc`/`numberFormat`/`template`/`renderTemplate`/`pin`/`width`；`select`/`mSelect` 列还额外包含 `options`。画廊和看板字段在 `data.view.fields[]` 中返回相同的字段元数据
     * `data.view.columns[].renderTemplate`: 普通字段可选的显示模板，仅改变显示内容，字段原有类型的存储值保持不变
     * `data.view.rows[].id`: 表格行的**条目 ID**（`itemID`），也等于该行主键单元格的 `value.blockID`。对于绑定行，绑定块 ID 位于主键单元格的 `value.block.id`；二者是不同概念，不能假设相等
@@ -2663,9 +2665,11 @@ if (response.code === 0 && response.data) {
 
 > ⚠️ `itemID` 是**条目 ID**，即[渲染](#渲染)返回的条目 `id`：表格和列表为 `rows[].id`，卡片和看板为 `cards[].id`，启用分组时位于 `groups[]` 的对应视图实例中。它也等于主键值的 `value.blockID`。对于绑定条目，绑定块 ID 位于主键值的 `value.block.id`；二者是不同概念，不能假设相等。传入错误的 ID 会把值存为孤儿数据，不会出现在渲染后的单元格中。
 
-对于富文本，`text.rich.content` 是权威的 Kramdown 源。内核会校验其受支持的结构并派生 `text.content` 纯文本投影；调用方提供的纯文本投影会被忽略。为兼容现有 API 客户端，省略 `text.rich` 时，如果 `text.content` 未改变则保留已存储的富文本载荷，如果 `text.content` 改变则以纯文本替换。即使纯文本投影未改变，也可以发送 `"rich": null` 明确移除富文本格式。包含富文本的数据库使用存储规范 9，无法由仅支持更早数据库规范的内核打开。
+对于富文本，`text.rich.content` 是权威的 Kramdown 源。内核会校验其受支持的结构并派生 `text.content` 纯文本投影；调用方提供的纯文本投影会被忽略。为兼容现有 API 客户端，省略 `text.rich` 时，如果 `text.content` 未改变则保留已存储的富文本载荷，如果 `text.content` 改变则以纯文本替换。即使纯文本投影未改变，也可以发送 `"rich": null` 明确移除富文本格式。富文本字段要求存储规范 9 或更高版本。在文本字段中保存行内图片（如 `![照片](assets/photo.png)`）要求规范 17。旧内核无法打开使用更高规范的数据库。
 
 `location` 的 `name` 可选。`latitude` 和 `longitude` 必须同时缺省或为 null，或者同时为有限数值，范围分别为 [-90, 90] 和 [-180, 180]；零是有效坐标。所有坐标隐式使用 WGS84，保存时不自动转换。位置值不接受显式坐标系属性，字段不提供默认坐标系设置。`originalInput` 保留来源文本，不参与筛选和排序。更新时省略成员会保留已有值；清空位置可发送 `{"location":null}`，或显式清空名称并将两个坐标都设为 null。坐标变化时，省略的 `originalInput` 会自动清空；显式提供的来源文本会被保留。文本筛选使用 `{"type":"location","text":{"content":"查询词"}}`，匹配名称和坐标。位置字段使用数据库存储版本 13，旧版内核无法打开；未使用位置字段的数据库保留原有存储版本。
+
+主键（`block`）通过 `block.rich` 保存第 1 版 `kramdown` 源，块结构与文本字段一致，并支持图片。已有第 1 版 `inline-ast` 源继续可读，不自动转换。`block.richBlockDOM` 是运行时渲染片段，单元格更新接口校验受支持的块片段后将编辑内容转换为存储源；同时提交两种形式时内容必须一致。`block.content` 是派生的纯文本投影。省略富文本字段且投影未变时保留源；以普通文字替换富文本主键须明确传 `block.rich: null`，并省略 `richBlockDOM`。编辑绑定主键设置静态锚文本，不改写来源文档；清空普通文字后恢复动态来源。保存 Kramdown 主键要求数据库规范 16，旧行级源要求规范 15；未编辑的数据库保留原版本。旧客户端无法打开格式 16 数据库，回退须恢复升级前的完整快照。
 
 * `/api/av/setAttributeViewBlockAttr`
 * 参数

@@ -62,8 +62,8 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
     getAnchorRect();
     const avID = options.data?.id || options.blockElement.getAttribute("data-av-id");
     const avPageSize = getPageSize(options.blockElement);
-    // 字段编辑仅加载配置，日期和选项编辑从单元格读取当前值，避免计算整库模板与汇总。
-    const ignoreRows = ["config", "properties", "sorts", "filters", "contextFilter", "switcher", "select", "date", "edit"].includes(options.type);
+    // 字段编辑仅加载配置，资源、日期和选项面板从单元格读取当前值，避免计算整库模板与汇总。
+    const ignoreRows = ["config", "properties", "sorts", "filters", "contextFilter", "switcher", "select", "date", "asset", "edit"].includes(options.type);
     const fetchPayload = {
         id: avID,
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
@@ -96,7 +96,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
             }
             const operation = (filters: IAVFilter[]): IOperation => ({
                 action: options.filterOperation?.action || "setAttrViewFilters",
-                avID,
+                avID: options.filterOperation?.avID || avID,
                 keyID: options.filterOperation?.keyID,
                 data: filters,
                 blockID,
@@ -307,7 +307,10 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
                         closeCB?.();
                         avPanelElement.remove();
                         setTimeout(() => {
-                            if (!options.anchorElement) {
+                            // 提交可能已打开下一格，延迟恢复仅在没有新的编辑目标时执行。
+                            if (!options.anchorElement && options.blockElement.isConnected &&
+                                options.blockElement.getClientRects().length > 0 && document.activeElement === document.body &&
+                                !document.querySelector(".av__mask, .av__panel, [data-av-location-editor]")) {
                                 focusBlock(options.blockElement);
                             }
                         }, Constants.TIMEOUT_TRANSITION);  // 单选使用 enter 修改选项后会滚动

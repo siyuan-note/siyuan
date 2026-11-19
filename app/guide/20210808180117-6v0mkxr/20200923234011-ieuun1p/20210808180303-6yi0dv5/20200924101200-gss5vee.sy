@@ -196,7 +196,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select Focus from the block menu to focus the editor on that content block"
+									"Data": "Select Focus from the block menu to focus the editor on that content block. When you select embedded content, the editor breadcrumb stops at the embed block. You can focus the embed block itself or open the source document"
 								}
 							]
 						}
@@ -295,7 +295,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to show the notebook and parent documents before the current document and its block path in one breadcrumb at the top of the desktop editor. This setting is disabled by default. On mobile, the breadcrumb menu shows the same hierarchy."
+					"Data": " to show the notebook and parent documents before the current document and its block path in one breadcrumb at the top of the desktop editor. This setting is disabled by default. On mobile, the breadcrumb menu shows the same hierarchy. Turn on "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Hide breadcrumb icons"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to hide icons next to text in the desktop breadcrumb bar and the mobile breadcrumb menu. This setting works in both regular and global breadcrumbs and is disabled by default. Icon-only entries, expand arrows, and icons in submenus remain visible. On desktop, hover over a document or block with a hidden icon to preview it."
 				}
 			]
 		},

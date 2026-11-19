@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {fetchPost} from "../../util/fetch";
 import {registerBuiltinSlashHint} from "./builtinSlash";
 import {canPickIOSPhotos} from "../upload/iosPhotos";
@@ -242,12 +242,12 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         filter: [window.siyuan.languages.horizontalSuperBlock, window.siyuan.languages.superBlock, "horizontal super block", "columns", "layout", "横向超级块", "hengxiangchaojikuai", "hx", "超级块", "chaojikuai", "cjk", "分栏", "fenlan", "fl"],
         id: "horizontalSuperBlock",
         value: getSuperBlockCommand("col"),
-        icon: "iconSuper",
+        icon: "iconSplitLR",
     }, {
         filter: [window.siyuan.languages.verticalSuperBlock, window.siyuan.languages.superBlock, "vertical super block", "columns", "layout", "纵向超级块", "zongxiangchaojikuai", "zx", "超级块", "chaojikuai", "cjk", "分栏", "fenlan", "fl"],
         id: "verticalSuperBlock",
         value: getSuperBlockCommand("row"),
-        icon: "iconSuper",
+        icon: "iconSplitTB",
     }, {
         filter: [window.siyuan.languages.tabs, "tabs", "页签", "yeqian", "yq"],
         id: "tabs",
@@ -925,12 +925,17 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
         const docTreePlan = response.data.docTreePlan;
         if (docTreePlan?.id) {
             hideElements(["util"], protyle);
-            mobileConfirmDialog(window.siyuan.languages.template, genTemplateDocTreePlanHTML(docTreePlan, window.siyuan.languages.newSubDoc), () => {
-                insertTemplate(docTreePlan.id);
-            }, () => {
-                if (isCurrent()) {
-                    focusByRange(range);
-                }
+            confirmDialog({
+                title: window.siyuan.languages.template,
+                text: genTemplateDocTreePlanHTML(docTreePlan, window.siyuan.languages.newSubDoc),
+                confirm: () => {
+                    insertTemplate(docTreePlan.id);
+                },
+                cancel: () => {
+                    if (isCurrent()) {
+                        focusByRange(range);
+                    }
+                },
             });
         } else {
             insertTemplate();

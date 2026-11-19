@@ -116,6 +116,8 @@ func TestRenderGroupViewWithSourceReusesCardLayouts(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			view := test.newView("view")
+			view.GetBaseLayout().ShowIcon = false
+			view.GetBaseLayout().ShowRelationIcon = new(true)
 			group := test.newView("group")
 			group.GroupItemIDs = []string{"b", "a", "b"}
 			items := []av.Item{test.newTestItem("a"), test.newTestItem("b")}
@@ -128,6 +130,9 @@ func TestRenderGroupViewWithSourceReusesCardLayouts(t *testing.T) {
 			}
 
 			groupViewable := RenderGroupViewWithSource(attrView, view, group, "", source, false)
+			if group.GetBaseLayout().ShowIcon || !group.GetBaseLayout().EffectiveShowRelationIcon() {
+				t.Fatal("group icons differ from parent")
+			}
 			groupItems := test.getItems(groupViewable)
 			if 2 != len(groupItems) || "a" != groupItems[0].GetID() || "b" != groupItems[1].GetID() {
 				t.Fatalf("unexpected grouped items: %+v", groupItems)

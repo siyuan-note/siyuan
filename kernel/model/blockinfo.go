@@ -67,7 +67,7 @@ func getDocInfoByTree(blockID string, tree *parse.Tree) (ret *BlockInfo) {
 	boxID := tree.Box
 	title := treenode.ReadDocumentTitle(tree.Root).Text
 	ret = &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
-	ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
+	ret.IAL = filterHandlerIALAttrs(parse.IAL2Map(tree.Root.KramdownIAL))
 	scrollData := ret.IAL["scroll"]
 	if 0 < len(scrollData) {
 		// scroll 属性值在持久化时会被 html.EscapeAttrVal() 进行 HTML 转义（如 " 变为 &quot;），
@@ -185,7 +185,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 		}
 		title := treenode.ReadDocumentTitle(tree.Root).Text
 		ret := &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
-		ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
+		ret.IAL = filterHandlerIALAttrs(parse.IAL2Map(tree.Root.KramdownIAL))
 		scrollData := ret.IAL["scroll"]
 		if 0 < len(scrollData) {
 			// scroll 属性值在持久化时会被 html.EscapeAttrVal() 进行 HTML 转义（如 " 变为 &quot;），
@@ -378,6 +378,34 @@ func getNodeAvBlockRefSubtype(node *ast.Node, avID string) av.BlockRefSubtype {
 	return av.BlockRefSubtypeDynamic
 }
 
+// stripInlineMemoContent 返回去掉行级备注文本的节点副本，没有备注时返回原节点。
+func stripInlineMemoContent(node *ast.Node) *ast.Node {
+	if nil == node {
+		return nil
+	}
+
+	hasMemo := false
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.IsTextMarkType("inline-memo") && "" != n.TextMarkInlineMemoContent {
+			hasMemo = true
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	if !hasMemo {
+		return node
+	}
+
+	clone := cloneRenderNode(node)
+	ast.Walk(clone, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.IsTextMarkType("inline-memo") {
+			n.TextMarkInlineMemoContent = ""
+		}
+		return ast.WalkContinue
+	})
+	return clone
+}
+
 func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 	switch node.Type {
 	case ast.NodeBlockQueryEmbed:
@@ -406,24 +434,8 @@ func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 		node = treenode.FirstLeafBlock(node)
 	}
 	if nil != node && ast.NodeDocument != node.Type {
-		hasMemo := false
-		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if entering && n.IsTextMarkType("inline-memo") && "" != n.TextMarkInlineMemoContent {
-				hasMemo = true
-				return ast.WalkStop
-			}
-			return ast.WalkContinue
-		})
-		if hasMemo {
-			// 锚文本只保留可见文字，在副本上过滤备注以保留源块内容。
-			node = cloneRenderNode(node)
-			ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if entering && n.IsTextMarkType("inline-memo") {
-					n.TextMarkInlineMemoContent = ""
-				}
-				return ast.WalkContinue
-			})
-		}
+		// 锚文本只保留可见文字，在副本上过滤备注以保留源块内容。
+		node = stripInlineMemoContent(node)
 	}
 	ret := renderBlockText(node, nil, removeLineBreak)
 	if maxLen < utf8.RuneCountInString(ret) {
@@ -749,7 +761,7 @@ func hasBlockBreadcrumbChildren(node *ast.Node) (ret bool) {
 
 func buildBlockBreadcrumbChild(node *ast.Node, excludeTypes []string) (ret *BlockPath) {
 	maxNameLen := 1024
-	fc := treenode.FirstLeafBlock(node)
+	fc := stripInlineMemoContent(treenode.FirstLeafBlock(node))
 	name := node.IALAttr("name")
 	if ast.NodeAttributeView == node.Type {
 		name, _ = av.GetAttributeViewName(node.AttributeViewID)
@@ -760,7 +772,7 @@ func buildBlockBreadcrumbChild(node *ast.Node, excludeTypes []string) (ret *Bloc
 			ast.NodeBlockquote == node.Type || ast.NodeCallout == node.Type {
 			name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes, true), maxNameLen)
 		} else {
-			name = gulu.Str.SubStr(renderBlockText(node, excludeTypes, true), maxNameLen)
+			name = gulu.Str.SubStr(renderBlockText(stripInlineMemoContent(node), excludeTypes, true), maxNameLen)
 		}
 	}
 	if ast.NodeListItem == node.Type && "" == name {
@@ -806,7 +818,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 			continue
 		}
 		id := parent.ID
-		fc := treenode.FirstLeafBlock(parent)
+		fc := stripInlineMemoContent(treenode.FirstLeafBlock(parent))
 
 		name := parent.IALAttr("name")
 		if ast.NodeDocument == parent.Type {
@@ -824,7 +836,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 				if ast.NodeListItem == parent.Type || ast.NodeList == parent.Type || ast.NodeMindmapItem == parent.Type || ast.NodeMindmap == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type || ast.NodeCallout == parent.Type {
 					name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes, true), maxNameLen)
 				} else {
-					name = gulu.Str.SubStr(renderBlockText(parent, excludeTypes, true), maxNameLen)
+					name = gulu.Str.SubStr(renderBlockText(stripInlineMemoContent(parent), excludeTypes, true), maxNameLen)
 				}
 			}
 			if ast.NodeHeading == parent.Type {
@@ -906,7 +918,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 					continue
 				}
 
-				name = gulu.Str.SubStr(renderBlockText(b, excludeTypes, true), maxNameLen)
+				name = gulu.Str.SubStr(renderBlockText(stripInlineMemoContent(b), excludeTypes, true), maxNameLen)
 				name = util.UnescapeHTML(name)
 				name = util.EscapeHTML(name)
 				ret = append([]*BlockPath{{

@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20261024161816"
+		"updated": "20261117222105"
 	},
 	"Children": [
 		{
@@ -337,6 +337,38 @@
 				{
 					"Type": "NodeText",
 					"Data": ". Leaving it blank disables password login; normal nonlocal access still requires a password or valid OIDC configuration. Configure authentication before making the kernel accessible to other devices."
+				}
+			]
+		},
+		{
+			"ID": "20261117222105-qa4te2k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261117222105-qa4te2k",
+				"updated": "20261117222105"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Follow system lock screen"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is supported only on Windows and macOS. On Linux, select "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Lock Screen"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the workspace menu to lock SiYuan manually before locking the system."
 				}
 			]
 		},

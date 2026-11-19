@@ -4,6 +4,7 @@
 import argparse
 import concurrent.futures
 import hashlib
+import http.client
 import json
 import os
 from pathlib import Path
@@ -17,6 +18,7 @@ import tarfile
 import tempfile
 import time
 import urllib.request
+import urllib.error
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -275,6 +277,10 @@ def download(entry, destination):
                 raise ValueError(f"Size mismatch: {entry['url']}")
             os.replace(temporary, destination)
             return
+        except ValueError:
+            # 完整性错误不能被后续传输失败覆盖，也不能启用旧发布包回退。
+            temporary.unlink(missing_ok=True)
+            raise
         except Exception:
             temporary.unlink(missing_ok=True)
             if attempt == 3:
@@ -348,6 +354,95 @@ def runtime_is_verified(entry, directory):
         return False
 
 
+def is_download_unavailable(error):
+    if isinstance(error, urllib.error.HTTPError):
+        return error.code in (404, 408, 429) or 500 <= error.code < 600
+    return isinstance(error, (urllib.error.URLError, TimeoutError, ConnectionError, http.client.IncompleteRead))
+
+
+def copy_published_runtime(entry, source, directory):
+    if source.is_symlink() or (source / RUNTIME_STAMP).is_symlink() or not runtime_is_verified(entry, source):
+        raise ValueError("Published OCR runtime source or file checksums do not match the current manifest")
+    stamp = json.loads((source / RUNTIME_STAMP).read_text(encoding="utf-8"))
+    if directory.is_symlink():
+        raise ValueError("OCR destination must not be a symbolic link")
+    # 校验标记最后原子写入，中断时不能留下半写入的可信标记。
+    for name in [*stamp["files"], RUNTIME_STAMP]:
+        handle, filename = tempfile.mkstemp(prefix=name + "-", suffix=".tmp", dir=directory)
+        os.close(handle)
+        temporary = Path(filename)
+        try:
+            shutil.copyfile(source / name, temporary)
+            os.replace(temporary, directory / name)
+        finally:
+            temporary.unlink(missing_ok=True)
+    if not runtime_is_verified(entry, directory):
+        raise ValueError("Restored OCR runtime verification failed")
+
+
+def recover_published_runtime(target, entry, directory):
+    recovery = MANIFEST.get("runtimeRecovery", {}).get(target)
+    if recovery is None or recovery.get("runtimeSource") != runtime_source(entry):
+        raise ValueError(f"No matching published OCR recovery package for {target}")
+    path = Path(recovery["path"])
+    if path.is_absolute() or ".." in path.parts:
+        raise ValueError("Unsafe published OCR recovery path")
+    package = CACHE / (recovery["sha256"][:16] + "-" + recovery["url"].rsplit("/", 1)[1])
+    # 安装包使用完整下载和独立摘要，不把已解包库误认为重新校验了上游归档。
+    download({"url": recovery["url"], "sha256": recovery["sha256"]}, package)
+    with tempfile.TemporaryDirectory(prefix="ocr-recovery-", dir=CACHE) as temporary:
+        temporary = Path(temporary)
+        source = temporary / "runtime"
+        source.mkdir()
+        allowed = {entry["library"], "LICENSE", "ThirdPartyNotices.txt", "onnxruntime_providers_shared.dll", RUNTIME_STAMP}
+        if recovery["format"] == "tar.gz":
+            prefix = recovery["path"].rstrip("/") + "/"
+            seen = set()
+            with tarfile.open(package, "r:gz") as archive:
+                for member in archive.getmembers():
+                    if not member.name.startswith(prefix):
+                        continue
+                    name = member.name[len(prefix):]
+                    if name not in allowed:
+                        continue
+                    if name in seen or not member.isfile():
+                        raise ValueError("Unsafe or duplicate published OCR runtime member")
+                    seen.add(name)
+                    with archive.extractfile(member) as stream:
+                        (source / name).write_bytes(stream.read())
+        elif recovery["format"] == "dmg":
+            mount = temporary / "mount"
+            mount.mkdir()
+            subprocess.run(["hdiutil", "attach", "-readonly", "-nobrowse", "-mountpoint", str(mount), str(package)], check=True)
+            try:
+                source = mount / recovery["path"]
+                if not source.resolve().is_relative_to(mount.resolve()):
+                    raise ValueError("Published OCR runtime escapes the mounted package")
+                copy_published_runtime(entry, source, directory)
+            finally:
+                subprocess.run(["hdiutil", "detach", str(mount)], check=True)
+            return
+        elif recovery["format"] == "nsis":
+            sevenzip = shutil.which("7z") or shutil.which("7za")
+            if not sevenzip:
+                raise RuntimeError("7-Zip is required to recover the published Windows OCR runtime")
+            outer = temporary / "installer"
+            subprocess.run([sevenzip, "x", str(package), f"-o{outer}", "$PLUGINSDIR/app-64.7z", "-y"], check=True)
+            inner = outer / "$PLUGINSDIR/app-64.7z"
+            if not inner.is_file() or inner.is_symlink():
+                raise ValueError("Missing published x64 application archive")
+            # 只读取当前架构的 ONNX 文件；CRT 与工作进程由本次构建重新准备。
+            unpacked = temporary / "application"
+            members = [recovery["path"].rstrip("/") + "/" + name for name in sorted(allowed)]
+            subprocess.run([sevenzip, "x", str(inner), f"-o{unpacked}", *members, "-y"], check=True)
+            source = unpacked / recovery["path"]
+            if not source.resolve().is_relative_to(unpacked.resolve()):
+                raise ValueError("Published OCR runtime escapes the application archive")
+        else:
+            raise ValueError("Unsupported published OCR recovery package format")
+        copy_published_runtime(entry, source, directory)
+
+
 def extract_runtime(entry, cache, directory):
     """仅解包主库、共享库和许可证，返回本次归档产出的文件名。"""
     library = entry["library"]
@@ -389,8 +484,15 @@ def prepare_runtime(target, build_worker, prerequisites=None):
         print(f"Reusing verified OCR runtime: {target}")
     else:
         cache = CACHE / entry["url"].rsplit("/", 1)[1]
-        download(entry, cache)
-        record_runtime(entry, directory, extract_runtime(entry, cache, directory))
+        try:
+            download(entry, cache)
+        except Exception as error:
+            if not is_download_unavailable(error) or target not in MANIFEST.get("runtimeRecovery", {}):
+                raise
+            print(f"OCR upstream download unavailable for {target}: {error}; recovering from a SHA-pinned published package")
+            recover_published_runtime(target, entry, directory)
+        else:
+            record_runtime(entry, directory, extract_runtime(entry, cache, directory))
     # 本地依赖每次重新准备，复用归档产物不跳过 CRT 校验或工作进程构建。
     if target.startswith("windows-"):
         prepare_windows_crt(target, directory, prerequisites)

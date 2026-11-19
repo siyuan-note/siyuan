@@ -1697,7 +1697,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Local snapshots support searching by file name; searching makes room for the file list and preview. Outside batch management, you can still select two local snapshots to compare them and use individual actions such as tagging, uploading, downloading, and rolling back."
+					"Data": "Local snapshots support searching by file name; searching makes room for the file list and preview. When you select a document file in snapshot details, the preview shows the title saved in that snapshot above the content. Outside batch management, you can still select two local snapshots to compare them and use individual actions such as tagging, uploading, downloading, and rolling back."
 				}
 			]
 		},
@@ -2559,6 +2559,58 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261110190000-e77fae5",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110190000-e77fae5",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Plugin snapshots"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110190000-4350115",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110190000-4350115",
+				"updated": "20261110190000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data history"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data snapshot"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Plugin snapshots"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ": Switch to Plugin snapshots within the existing snapshot panel. Select an installed plugin, filter the dropdown by its display or package name, or enter the exact package name of an uninstalled plugin. The list shows program and standard data file counts with readable size units. Open data and Open program show only their respective directories, with file previews in the same panel. Restoring automatically disables the plugin and creates a backup snapshot, then replaces both data/plugins/<package>/ and data/storage/petal/<package>/ from the same snapshot, removing files absent from it. Close other clients before restoring, and enable the plugin manually afterwards. Other directories and shared settings are excluded."
 				}
 			]
 		}

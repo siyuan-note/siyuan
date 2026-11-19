@@ -1,0 +1,272 @@
+.date-picker-reminder-dialog {
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+
+  > .b3-dialog__header {
+    flex-shrink: 0;
+  }
+
+  > .b3-dialog__body,
+  .b3-dialog__content {
+    min-height: 0;
+  }
+}
+
+.date-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+
+  &--inline {
+    width: 100%;
+    max-width: 244px;
+    margin-block: 4px;
+    margin-inline: auto;
+    gap: 4px;
+
+    .date-picker__navigation .block__icon {
+      min-width: 24px;
+      min-height: 24px;
+    }
+
+    .date-picker__calendar {
+      font-size: inherit;
+
+      button {
+        min-height: 28px;
+      }
+    }
+
+    [data-frontend="mobile"] &,
+    [data-frontend="browser-mobile"] & {
+      max-width: 320px;
+
+      .date-picker__navigation .block__icon {
+        min-width: 44px;
+        min-height: 44px;
+      }
+    }
+  }
+
+  &__fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__split {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 auto;
+
+    > span,
+    > label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    [data-frontend="mobile"] & input,
+    [data-frontend="browser-mobile"] & input {
+      min-height: 44px;
+    }
+  }
+
+  &__split-date,
+  &__split-time {
+    flex: 1 1 calc(10ch + 16px);
+  }
+
+  &__endpoint {
+    margin-bottom: 8px;
+    padding-inline: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    input {
+      width: 100%;
+      min-width: 0;
+    }
+
+    [data-frontend="mobile"] & input,
+    [data-frontend="browser-mobile"] & input {
+      min-height: 44px;
+    }
+  }
+
+  &--inline > [role="status"] {
+    padding-inline: 8px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 140px;
+    min-width: 0;
+
+    input {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  &__navigation {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__month-toggle {
+    display: block;
+    min-width: 0;
+    margin-inline-end: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__month-editor {
+    display: flex;
+    gap: 8px;
+
+    select {
+      flex: 1;
+      min-width: 0;
+    }
+
+    input {
+      width: 88px;
+      min-width: 0;
+    }
+  }
+
+  &__calendar {
+    width: 100%;
+    table-layout: fixed;
+
+    th {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    button {
+      width: 100%;
+      min-height: 32px;
+
+      &:focus-visible {
+        outline: 2px solid var(--b3-theme-primary);
+        outline-offset: -2px;
+      }
+
+      [data-frontend="mobile"] &,
+      [data-frontend="browser-mobile"] & {
+        min-height: 44px;
+      }
+    }
+  }
+
+  &__heading,
+  &__field--date-only > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  &__weekday-narrow {
+    display: none;
+  }
+
+  &--narrow-weekdays &__weekday-short {
+    display: none;
+  }
+
+  &--narrow-weekdays &__weekday-narrow {
+    display: inline;
+  }
+
+  @media (max-width: 380px) {
+    &__weekday-short {
+      display: none;
+    }
+
+    &__weekday-narrow {
+      display: inline;
+    }
+  }
+
+  &__shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+  }
+}
+
+.date-picker-dialog {
+  .b3-dialog__container {
+    position: absolute;
+    transform: none;
+    max-width: none;
+  }
+
+  .b3-dialog__body {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .b3-dialog__content {
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  .b3-dialog__action {
+    flex-shrink: 0;
+  }
+}
+
+.date-picker-input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.date-picker__reminder {
+  width: 244px;
+  max-width: 100%;
+  margin-inline: auto;
+
+  > label {
+    display: block;
+  }
+
+  .date-picker__split {
+    margin-top: 4px;
+  }
+
+  [data-frontend="mobile"] &,
+  [data-frontend="browser-mobile"] & {
+    width: 320px;
+  }
+}
+
+.date-picker-input[data-date-picker-active="true"] {
+  outline-color: var(--b3-theme-primary);
+}
+
+.mobile-bottom-sheet-dialog .date-picker-actions .mobile-sheet-action-group {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}

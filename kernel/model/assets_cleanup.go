@@ -53,6 +53,14 @@ func beginOrdinaryAssetCleanup() (verify func() error, release func(), err error
 
 func ordinaryAssetCleanupSourceDigest() (string, error) {
 	hash := sha256.New()
+	rules, err := readAssetCleanupIgnore()
+	if err != nil {
+		return "", err
+	}
+	if _, err = compileAssetCleanupIgnore(rules.Content); err != nil {
+		return "", err
+	}
+	fmt.Fprintln(hash, assetCleanupIgnorePath, rules.Revision)
 	walk := func(root string, accept func(string) bool, notebook bool) error {
 		return filepath.WalkDir(root, func(p string, entry fs.DirEntry, walkErr error) error {
 			if walkErr != nil {

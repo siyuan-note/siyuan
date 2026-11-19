@@ -144,6 +144,52 @@
     display: inline-flex;
     flex-direction: column;
     gap: 6px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .av__filter-date-col > span,
+  .av__filter-date-row {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .av__filter-date-row input {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .av__filter-row--date-open {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+
+    .av__filter-rowinner {
+      order: 1;
+      grid-column: 1 / -1;
+      width: 100%;
+      max-width: 244px;
+      margin-inline: auto;
+      flex-wrap: wrap;
+      min-width: 0;
+
+      [data-frontend="mobile"] &,
+      [data-frontend="browser-mobile"] & {
+        max-width: 320px;
+      }
+    }
+
+    .av__filter-date-row,
+    .av__filter-date-row input {
+      width: 100%;
+    }
+
+    .av__filter-date-controls,
+    .av__filter-value {
+      flex-basis: 100%;
+      min-width: 0;
+    }
   }
 
   .av__select-trigger {
@@ -630,7 +676,7 @@
   }
 
   &__views--mobile {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 4px;
     min-width: 0;
 
@@ -652,6 +698,7 @@
       span {
         flex: 1;
         text-align: left;
+        white-space: nowrap;
       }
     }
 
@@ -856,7 +903,9 @@
 
     [data-role="field-mode"],
     input[type="date"],
-    input[type="datetime-local"] {
+    input[type="datetime-local"],
+    input[data-date-picker-type="date"],
+    input[data-date-picker-type="datetime-local"] {
       height: 30px;
       min-width: 0;
     }
@@ -939,7 +988,7 @@
   }
 
   &__richtext-mask {
-    background: rgba(0, 0, 0, .08);
+    background-color: transparent;
   }
 
   &__richtext-editor {
@@ -1063,6 +1112,7 @@
 
     &--footer {
       display: flex;
+      font-size: 87.5%;
       border-top: 1px solid var(--b3-theme-surface-lighter);
       color: var(--b3-theme-on-surface);
       position: relative;
@@ -1073,6 +1123,10 @@
         opacity: 1;
       }
 
+      .av__firstcol {
+        pointer-events: none;
+      }
+
       .av__calc {
         display: flex;
         align-items: center;
@@ -1080,20 +1134,15 @@
         border-right: 1px;
         flex-direction: row-reverse;
         box-sizing: border-box;
+        flex-shrink: 0;
         opacity: 0;
         overflow: hidden;
-        font-size: 87.5%;
         white-space: nowrap;
         line-height: 1.625em;
         cursor: pointer;
 
         &[data-dtype="lineNumber"] {
           cursor: inherit;
-        }
-
-        &:first-child {
-          padding-left: calc(1.625em - 6px);
-          box-sizing: initial;
         }
 
         &.av__calc--ashow {
@@ -1123,6 +1172,10 @@
 
       &--fixed {
         position: fixed;
+
+        > .av__colsticky--freeze {
+          transform: translateX(var(--av-fixed-scroll-left, 0px));
+        }
       }
     }
 
@@ -1632,20 +1685,8 @@
     &[data-wrap="true"] {
       white-space: pre-wrap;
 
-      .av__cell--relation {
-        display: inline-flex;
-        max-width: 100%;
-        vertical-align: top;
-
-        > :first-child {
-          flex-shrink: 0;
-          align-self: flex-start;
-        }
-
-        > .av__celltext {
-          min-width: 0;
-          overflow-wrap: anywhere;
-        }
+      .av__cell--relation > .av__celltext {
+        overflow-wrap: anywhere;
       }
     }
 
@@ -1835,6 +1876,28 @@
     touch-action: none;
   }
 
+  &__cellprimary {
+    display: inline-flex;
+    min-width: 0;
+    max-width: 100%;
+    vertical-align: top;
+
+    > .b3-menu__avemoji {
+      align-self: flex-start;
+      flex-shrink: 0;
+    }
+
+    > .av__celltext {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      text-overflow: ellipsis;
+    }
+
+    > .av__celltext--rich {
+      width: auto;
+    }
+  }
+
   &__celltext {
     overflow: hidden;
 
@@ -1909,6 +1972,12 @@
         max-height: 1.625em;
         white-space: nowrap;
         text-overflow: ellipsis;
+
+        img {
+          max-height: 1.5em;
+          width: auto;
+          vertical-align: middle;
+        }
 
         p,
         h1,
@@ -2005,6 +2074,7 @@
 
   &__body--unfreeze .av__colsticky--freeze {
     position: relative;
+    transform: none;
   }
 
   &__colsticky {
@@ -2103,6 +2173,19 @@
     .b3-menu {
       min-width: 290px;
       max-width: 290px;
+
+      &.av__date-panel:not(.b3-menu--fullscreen) {
+        width: 260px;
+        min-width: 0;
+        max-width: 100vw;
+        display: flex;
+        flex-direction: column;
+
+        > .b3-menu__items {
+          min-height: 0;
+          max-height: none;
+        }
+      }
 
       &.av__conditional-panel:not(.b3-menu--fullscreen) {
         width: 420px;
@@ -2307,7 +2390,10 @@
 
       // “添加筛选条件”按钮：label 按内容宽度，使下拉箭头紧跟文案而非被推到最右
       .av__filter-add-label {
-        flex: none;
+        flex: 0 1 auto;
+        min-width: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
       }
 
       &__item[data-type="nobg"] {
@@ -2572,6 +2658,27 @@ img.av__cellassetimg {
   vertical-align: top;
   font-size: inherit;
   cursor: zoom-in;
+}
+
+.av__cell .av__cell--relation,
+.av__calendar-field .av__cell--relation,
+.custom-attr__avvalue .av__cell--relation {
+  display: inline-flex;
+  max-width: 100%;
+  vertical-align: top;
+
+  > .b3-menu__avemoji {
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+
+  > .av__celltext {
+    min-width: 0;
+  }
+}
+
+.custom-attr__avvalue .av__cell--relation > .av__celltext {
+  overflow-wrap: anywhere;
 }
 
 .av__cell,
@@ -3368,6 +3475,10 @@ img.av__cellassetimg {
     display: flex;
     flex-wrap: wrap;
     align-self: flex-end;
+
+    &.av__automation-template {
+      flex-wrap: nowrap;
+    }
   }
 
   .b3-select,

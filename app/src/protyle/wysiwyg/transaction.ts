@@ -34,6 +34,7 @@ import {processRender} from "../util/processCode";
 import {renderImageDisplay} from "../render/imageDisplay";
 import {highlightRender} from "../render/highlightRender";
 import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
+import {isHandlerIALAttribute} from "../util/ialAttributes";
 import {zoomOut} from "../../menus/protyle";
 import {disabledProtyle, enableProtyle} from "../util/onGet";
 /// #if !MOBILE
@@ -96,7 +97,7 @@ import {prepareListMindmapConversion} from "../render/listMindmap/conversion";
 import {buildCancelListOperations} from "./cancelList";
 import {markMirror, refreshUndoButtons} from "../undo/globalUndo";
 import type {TransactionListConversionResult} from "../../types/api";
-import {getProtyleTransactionOwner} from "../runtimeCapabilities";
+import {getProtyleTransactionOwner, ignoresProtyleEditLock} from "../runtimeCapabilities";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {preserveTabTask} from "../util/tabsCopy";
 import {waitForPendingTransactions} from "../util/transactionQueue";
@@ -181,6 +182,22 @@ const canSyncListFoldInPlace = (embedElement: Element, operation: Extract<IOpera
     // 列表子块已在 DOM 中时只同步折叠属性，展开缺少子块的片段仍需重新查询。
     return items.length > 0 && items.every(item => item.getAttribute("data-type") === "NodeListItem" &&
         (attrs.fold === "1" || item.childElementCount > 3));
+};
+
+// updateAttrs 推送里的属性名可能来自 .sy 导入或历史数据，事件处理器属性写入块元素后会被浏览器执行。
+const applyBlockAttributes = (item: Element, data: {new: Record<string, string>}) => {
+    Object.keys(data.new).forEach(key => {
+        // 设置属性以后不应该给块元素添加 id 属性 No longer add the `id` attribute to block elements after setting the attribute https://github.com/siyuan-note/siyuan/issues/15327
+        if ("id" === key) {
+            return;
+        }
+        // 事件处理器属性名来自 .sy 导入或历史数据，写入块元素后属性值会被浏览器当作脚本执行
+        if (isHandlerIALAttribute(key)) {
+            return;
+        }
+
+        item.setAttribute(key, data.new[key]);
+    });
 };
 
 const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>, protyle?: IProtyle) => {
@@ -1169,7 +1186,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 if (data.new[Constants.CUSTOM_SY_FULLWIDTH] !== data.old[Constants.CUSTOM_SY_FULLWIDTH]) {
                     resize(protyle);
                 }
-                if (data.new[Constants.CUSTOM_SY_READONLY] !== data.old[Constants.CUSTOM_SY_READONLY]) {
+                if (data.new[Constants.CUSTOM_SY_READONLY] !== data.old[Constants.CUSTOM_SY_READONLY] &&
+                    !ignoresProtyleEditLock(protyle)) {
                     let customReadOnly = data.new[Constants.CUSTOM_SY_READONLY];
                     if (!customReadOnly) {
                         customReadOnly = window.siyuan.config.editor.readOnly ? "true" : "false";
@@ -1212,27 +1230,20 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 if (data.new.style && data.new[Constants.CUSTOM_RIFF_DECKS] && data.new[Constants.CUSTOM_RIFF_DECKS] !== data.old[Constants.CUSTOM_RIFF_DECKS]) {
                     data.new.style += ";animation:addCard 450ms linear";
                 }
-                Object.keys(data.new).forEach(key => {
-                    if ("id" === key) {
-                        // 设置属性以后不应该给块元素添加 id 属性 No longer add the `id` attribute to block elements after setting the attribute https://github.com/siyuan-note/siyuan/issues/15327
-                        return;
-                    }
-
-                    item.setAttribute(key, data.new[key]);
-                    if (key === Constants.CUSTOM_RIFF_DECKS &&
-                        data.new[Constants.CUSTOM_RIFF_DECKS] !== data.old[Constants.CUSTOM_RIFF_DECKS]) {
-                        item.style.animation = "addCard 450ms linear";
-                        setTimeout(() => {
-                            if (item.parentElement) {
-                                item.style.animation = "";
-                            } else {
-                                protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((realItem: HTMLElement) => {
-                                    realItem.style.animation = "";
-                                });
-                            }
-                        }, 450);
-                    }
-                });
+                applyBlockAttributes(item, data);
+                if (data.new[Constants.CUSTOM_RIFF_DECKS] &&
+                    data.new[Constants.CUSTOM_RIFF_DECKS] !== data.old[Constants.CUSTOM_RIFF_DECKS]) {
+                    item.style.animation = "addCard 450ms linear";
+                    setTimeout(() => {
+                        if (item.parentElement) {
+                            item.style.animation = "";
+                        } else {
+                            protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((realItem: HTMLElement) => {
+                                realItem.style.animation = "";
+                            });
+                        }
+                    }, 450);
+                }
                 syncBlockDirection(item);
                 // 已渲染数据库的布局类型随新内容一起更新，避免旧内容提前套用新布局样式。
                 if (data["data-av-type"] && !item.querySelector(".av__container")) {
@@ -1587,7 +1598,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             "setAttrViewColRollupFilters", "sortAttrViewKey", "setAttrViewColDesc", "setAttrViewColAttributePanelVisibility",
             "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewCoverFrom", "setAttrViewCoverFromAssetKeyID", "setAttrViewCardCoverPosition",
             "setAttrViewBlockView", "setAttrViewBlockVisibleViews", "setAttrViewContextFilter", "setAttrViewCardSize", "setAttrViewCardWidth", "setAttrViewCardAspectRatio",
-            "setAttrViewConditionalColors", "setAttrViewCalendar", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow", "hideAttrViewName", "setAttrViewShowIcon",
+            "setAttrViewConditionalColors", "setAttrViewCalendar", "setAttrViewCardAspectRatioValue", "setAttrViewCardLayout", "setAttrViewColFullRow", "hideAttrViewName", "setAttrViewShowIcon", "setAttrViewShowRelationIcon",
             "setAttrViewWrapField", "setAttrViewGroup", "removeAttrViewGroup", "hideAttrViewGroup", "sortAttrViewGroup",
             "foldAttrViewGroup", "foldAttrViewGroups", "hideAttrViewAllGroups", "setAttrViewFitImage", "setAttrViewDisplayFieldName", "setAttrViewDisplayEmptyFields",
             "insertAttrViewBlock", "setAttrViewColDateFillSpecificTime", "setAttrViewFillColBackgroundColor", "setAttrViewUpdatedIncludeTime",
@@ -2681,7 +2692,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             const resumeTitleEditingExit = suspendTabTitleEditingExit(
                 focusElement?.closest(".tab-item-title")?.closest<HTMLElement>(".tab-item"));
             const keyboard = !wasDisabled && !wasInert ? preserveMobileEditorKeyboard(element) : undefined;
-            selection.removeAllRanges();
+            // Android 输入法会将清空选区视为结束编辑，临时输入框持有焦点时保留选区。
+            if (!keyboard?.hasFocus()) selection.removeAllRanges();
             element.inert = true;
             const pending: Promise<void> = (async () => {
                 let sourceRestored = false;

@@ -1379,6 +1379,11 @@ var setNetworkProxy = contractHandler(apicontract.SetNetworkProxy, func(c *gin.C
 })
 
 var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	// 注册表用于桌面端存活判断，只接受管理员登记，避免读者占用注册槽位。
+	if !model.IsAdminRoleContext(c) {
+		return apicontract.EmptyHTTPResponse[apicontract.Null](http.StatusOK)
+	}
+
 	pidInt, err := strconv.Atoi(c.Query("pid"))
 	if err != nil || 0 >= pidInt {
 		return apicontract.EmptyHTTPResponse[apicontract.Null](http.StatusOK)
@@ -1421,6 +1426,7 @@ func exitSystem(c *gin.Context, request apicontract.SystemExitRequest) apicontra
 	case 1: // 同步执行失败
 		return apicontract.SystemExit.FailureWithData(1, model.Conf.Language(96)+"<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">"+model.Conf.Language(97)+"</button>", data)
 	case 2: // 提示新安装包
+		data.ReleaseURL = model.GetInstallPackageReleaseURL(installPkgPath)
 		return apicontract.SystemExit.FailureWithData(2, model.Conf.Language(61), data)
 	case 3: // 仍有界面处理退出结果，宿主继续等待。
 		return apicontract.SystemExit.FailureWithData(3, "", data)

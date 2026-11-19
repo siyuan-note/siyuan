@@ -176,6 +176,44 @@ const runCases = async (compiled, mobile) => {
     check.equal(submissions, 1);
     await new Promise(resolve => setTimeout(resolve, 10));
     check.deepEqual(focusCalls, [outside.block]);
+    for (const kind of ["text", "pendingText", "input", "panel", "location"]) {
+        const state = setup();
+        const oldPanel = open(state, "select");
+        oldPanel.dispatchEvent(new CustomEvent("click", {detail: "close"}));
+        check.equal(oldPanel.isConnected, false);
+        const next = document.createElement("div");
+        if (kind === "text" || kind === "pendingText") next.className = "av__mask av__richtext-mask";
+        if (kind === "panel") next.className = "av__panel";
+        if (kind === "location") next.dataset.avLocationEditor = "true";
+        next.innerHTML = kind === "text" || kind === "pendingText" ? '<div contenteditable="true"></div>' : "<input>";
+        document.body.append(next);
+        const input = next.firstElementChild;
+        if (kind !== "pendingText") input.focus();
+        if (kind === "text") {
+            const range = document.createRange();
+            range.selectNodeContents(input);
+            range.collapse(false);
+            getSelection().removeAllRanges();
+            getSelection().addRange(range);
+        }
+        await new Promise(resolve => setTimeout(resolve, 10));
+        check.deepEqual(focusCalls, [], `${kind}: a closed panel must not restore over a newer editor`);
+        check.equal(document.activeElement, kind === "pendingText" ? document.body : input);
+        if (kind === "text") {
+            check.ok(input.contains(getSelection().anchorNode));
+            document.execCommand("insertText", false, "continued");
+            check.equal(input.textContent, "continued");
+        }
+    }
+    for (const kind of ["hidden", "removed"]) {
+        const state = setup();
+        const element = open(state, "date");
+        element.dispatchEvent(new CustomEvent("click", {detail: "close"}));
+        if (kind === "hidden") state.block.parentElement.style.display = "none";
+        else state.block.remove();
+        await new Promise(resolve => setTimeout(resolve, 10));
+        check.deepEqual(focusCalls, [], `${kind}: the closing source must remain available`);
+    }
 };
 
 if (process.versions.electron && process.type === "browser") {
@@ -192,7 +230,7 @@ if (process.versions.electron && process.type === "browser") {
                     (${runCases.toString()})(${JSON.stringify(sources(mobile))}, ${mobile})).then(() => null, error => error.stack || String(error))`);
                 assert.equal(failure, null);
             }
-            console.log("AV panel Escape ownership cases passed");
+            console.log("AV panel focus ownership cases passed");
         } catch (error) {
             console.error(error);
             exitCode = 1;
@@ -202,7 +240,7 @@ if (process.versions.electron && process.type === "browser") {
         }
     })();
 } else {
-    require("node:test").test("database panel Escape restores its owning editor and preserves cancellation", {
+    require("node:test").test("database panel focus restoration preserves ownership and cancellation", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 35000,
     }, async () => {
@@ -212,7 +250,7 @@ if (process.versions.electron && process.type === "browser") {
         try {
             const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
                 require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 30000});
-            assert.match(stdout, /AV panel Escape ownership cases passed/);
+            assert.match(stdout, /AV panel focus ownership cases passed/);
         } finally {
             assert.equal(path.dirname(path.resolve(profile)), path.resolve(os.tmpdir()));
             assert.ok(path.basename(profile).startsWith("siyuan-av-panel-escape-"));

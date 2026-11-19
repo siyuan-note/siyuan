@@ -743,6 +743,7 @@ export class Menu {
     }
 
     private setPopupPosition() {
+        this.element.style.right = "auto";
         const options = this.position;
         const itemsElement = this.element.lastElementChild as HTMLElement;
         itemsElement.style.maxHeight = "";
@@ -779,15 +780,28 @@ export class Menu {
             this.position.h = rect.height;
             this.position.w = rect.width;
         }
-        const scrollPositions = new Map(Array.from(this.element.querySelectorAll<HTMLElement>(".b3-menu__items"),
-            items => [items, items.scrollTop] as const));
+        const scrollPositions = new Map<HTMLElement, {top: number, left: number}>();
+        // 测量时临时放开高度限制会重置内嵌列表的滚动位置，需要和菜单内容容器一起恢复。
+        this.element.querySelectorAll<HTMLElement>("*").forEach(element => {
+            const {scrollTop, scrollLeft} = element;
+            if (scrollTop || scrollLeft || element.classList.contains("b3-menu__items")) {
+                scrollPositions.set(element, {top: scrollTop, left: scrollLeft});
+            }
+        });
         this.setPopupPosition();
+        const restoreScroll = (root: HTMLElement) => {
+            scrollPositions.forEach(({top, left}, element) => {
+                if (root.contains(element)) {
+                    element.scrollTop = top;
+                    element.scrollLeft = left;
+                }
+            });
+        };
         // 父菜单恢复滚动后再测量子菜单的锚点，逐层恢复以定位更深的子菜单。
-        scrollPositions.forEach((top, items) => { items.scrollTop = top; });
+        restoreScroll(this.element);
         this.element.querySelectorAll(".b3-menu__item--show > .b3-menu__submenu").forEach((item: HTMLElement) => {
             this.showSubMenu(item);
-            const itemsElement = item.lastElementChild as HTMLElement;
-            itemsElement.scrollTop = scrollPositions.get(itemsElement) || 0;
+            restoreScroll(item);
         });
     }
 

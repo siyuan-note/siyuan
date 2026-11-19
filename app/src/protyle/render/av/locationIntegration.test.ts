@@ -1,3 +1,4 @@
+import * as entryIcon from "./entryIcon";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
@@ -15,7 +16,7 @@ import * as host from "./host";
 
 // 位置用例不调用这些依赖；新增依赖或意外调用都应立即使测试失败。
 const unusedDependencies = [
-    "./columnWindow", "./continuousInput",
+    "./columnWindow", "./continuousInput", "./primaryRich",
     "./viewType", "./renderData", "../../wysiwyg/transaction", "../../util/hasClosest", "./openMenuPanel",
     "./action", "../../util/compatibility", "../../../util/fetch", "../../util/selection", "../../util/selectionOffsets",
     "dayjs", "../../../emoji", "./col", "./attributeValue", "../../../constants", "../../hint/extend",
@@ -24,12 +25,13 @@ const unusedDependencies = [
     "../../../util/setPosition", "./selectionState", "./color", "./richText", "./richTextEditor", "./virtualScroll",
     "./cellEditor", "./blockIcon", "../../../dialog/anchoredInputPosition", "./locationEditor", "../../../dialog/message",
     "../../../util/hostCapabilities", "../../../plugin/Menu", "../../../util/upDownHint", "./richTextValue",
-    "../../../emoji/fileTreeIcon", "./lunarDate",
+    "../../../emoji/fileTreeIcon", "./lunarDate", "../../../datePicker/inline", "../../../datePicker/binding",
 ];
 
 const loadModule = <T>(file: string, extra: Record<string, unknown> = {}) => {
     const methods = {} as T;
     const modules: Record<string, unknown> = {
+        "./entryIcon": entryIcon,
         ...Object.fromEntries(unusedDependencies.map(name => [name, new Proxy({}, {
             get: (_target, member) => {
                 if (member === "__esModule") return true;

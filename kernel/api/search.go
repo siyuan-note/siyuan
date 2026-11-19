@@ -316,6 +316,10 @@ var searchRefBlock = contractHandler(apicontract.SearchRefBlock, func(c *gin.Con
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+		if params.ExactDocTitle && 0 == len(blocks) {
+			// 过滤后不能再区分“标题命中但不可见”和“标题不存在”
+			newDoc = true
+		}
 	}
 	return apicontract.Success(apicontract.SearchRefBlocks(apicontract.SearchRefResult{SearchRefCorrelation: apicontract.SearchRefCorrelation{ReqID: request.ReqID}, Blocks: searchBlockContracts(blocks), NewDoc: newDoc, K: util.EscapeHTML(keyword)}))
 })

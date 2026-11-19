@@ -25,15 +25,16 @@ func tlsEnforceMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if util.ShouldRedirectToTLS(c.Request) && util.TLSRequired() && util.TLSEnforced() {
 			host := c.Request.Host
-			if "" == host || !util.IsValidRedirectHost(host) {
-				// Host 异常时不能据此拼出跳转地址，直接拒绝明文请求
+			target, targetOK := util.RedirectTarget(c.Request)
+			if "" == host || !util.IsValidRedirectHost(host) || !targetOK {
+				// Host 或请求目标异常时不能据此拼出跳转地址，直接拒绝明文请求
 				c.AbortWithStatus(http.StatusBadRequest)
 				return
 			}
 
 			// 跳转目标取决于 Host，声明 Vary 避免中间缓存串用响应
 			c.Header("Vary", "Host")
-			c.Redirect(http.StatusTemporaryRedirect, "https://"+host+c.Request.URL.RequestURI())
+			c.Redirect(http.StatusTemporaryRedirect, "https://"+host+target)
 			// 必须显式终止链：否则会话中间件仍会在明文响应上保存会话 Cookie
 			c.Abort()
 			return

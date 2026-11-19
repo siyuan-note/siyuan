@@ -139,6 +139,7 @@ func openPDFImages(ctx context.Context, source PDFImageSource, revision string) 
 		return nil, errors.New("PDF changed; list images again before selecting an image")
 	}
 	config := pdfmodel.NewDefaultConfiguration()
+	config.Cmd = pdfmodel.EXTRACTIMAGES
 	pdf, err := api.ReadValidateAndOptimize(bytes.NewReader(data), config)
 	if err != nil {
 		return nil, fmt.Errorf("read PDF failed (damaged, unsupported or password-protected PDF): %w", err)

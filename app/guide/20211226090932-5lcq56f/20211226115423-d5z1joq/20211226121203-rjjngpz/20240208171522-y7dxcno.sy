@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20261109202806"
+		"updated": "20261112174810"
 	},
 	"Children": [
 		{
@@ -373,7 +373,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-ua2g4rk",
-				"updated": "20261024161058"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -382,6 +382,129 @@
 				}
 			],
 			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110134234-au9vwem",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110134234-au9vwem",
+				"updated": "20261110134234"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "數據庫"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中設定 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示主鍵條目圖示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示關聯和匯總條目圖示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。兩項預設開啟，僅在新建資料庫及視圖時生效；修改預設設定不影響既有視圖。"
+				}
+			]
+		},
+		{
+			"ID": "20261110134234-w9u97w6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110134234-w9u97w6",
+				"updated": "20261110134234"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在目前視圖的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "佈局"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選單中，透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示主鍵條目圖示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "顯示關聯和匯總條目圖示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 分別控制兩類圖示。複製視圖或切換版面配置會保留這兩項設定。"
+				}
+			]
+		},
+		{
+			"ID": "20261112174810-b48965e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261112174810-b48965e",
+				"updated": "20261112174810"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在目前視圖的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "欄位"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選單中，可在同一區域內拖曳欄位調整順序，也可跨「顯示欄位」和「隱藏欄位」區域拖曳，同時調整顯示狀態和位置。區域為空時，可拖到區域標題的下半部。已有欄位的區域標題不接受拖放。修改支援復原和重做。表格、列表和日曆視圖的主鍵欄位不能隱藏。"
+				}
+			]
 		},
 		{
 			"ID": "20260613164228-p5ektpr",
@@ -1101,7 +1224,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613164228-rrw0f53",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1130,7 +1253,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613164228-hqf3wj5",
-				"updated": "20261025011511"
+				"updated": "20261111211629"
 			},
 			"Children": [
 				{
@@ -1203,7 +1326,7 @@
 					},
 					"Properties": {
 						"id": "20260613164228-yv431bq",
-						"updated": "20261025011511"
+						"updated": "20261111211629"
 					},
 					"Children": [
 						{
@@ -1211,7 +1334,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613164228-cosafjo",
-								"updated": "20261025011511"
+								"updated": "20261111211629"
 							},
 							"Children": [
 								{
@@ -1244,6 +1367,28 @@
 								{
 									"Type": "NodeText",
 									"Data": "，可在欄位值旁顯示欄位名稱；此選項依視圖儲存，關閉後隱藏欄位名稱"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。在視圖設定的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "欄位"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中隱藏主鍵，可以保留封面預覽並避免重複顯示文字。使用卡片上的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "打開"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 按鈕可打開條目"
 								}
 							]
 						}
@@ -5635,7 +5780,21 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "使用者新增、複製、修改內文或屬性、套用內容範本、全域尋找取代，以及將區塊或文件移入監聽範圍後，都會判斷收集條件。文件樹複製和移動包含子文件。既有條目保留欄位值。Markdown 和 .sy 匯入、同步、歷史復原、復原及重做不會觸發新的收集，可透過預覽手動收集既有內容。自動動作不會連鎖觸發其他規則。來源與目標資料庫須處於同一加密邊界，加密筆記本需先解鎖再預覽或編輯規則。"
+					"Data": "使用者新增、複製、修改內文或屬性、套用內容範本、全域尋找取代，以及將區塊或文件移入監聽範圍後，都會判斷收集條件。文件樹複製和移動包含子文件。既有條目保留欄位值。監聽的筆記本被刪除後，下次編輯檢查到該規則時會正常儲存，並停用該規則。調整監聽範圍後可重新啟用。暫時關閉筆記本不會停用規則。Markdown 和 .sy 匯入、同步、歷史復原、復原及重做不會觸發新的收集，可透過預覽手動收集既有內容。自動動作不會連鎖觸發其他規則。來源與目標資料庫須處於同一加密邊界，加密筆記本需先解鎖再預覽或編輯規則。"
+				}
+			]
+		},
+		{
+			"ID": "20261110124116-e6d8bf8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110124116-e6d8bf8",
+				"updated": "20261110124116"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "刪除最後一個資料庫區塊（包括刪除其所在文件）後，停止自動收集普通區塊；仍有其他鏡像時繼續收集。復原刪除、恢復資料庫區塊後，後續編輯恢復收集，不會自動補收既有內容。資料庫資料和規則設定保留。"
 				}
 			]
 		},
@@ -5909,7 +6068,64 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在表格和清單的文字、數字、網址、電子郵件、電話及未綁定主鍵輸入框中，按 Enter 儲存後立即編輯同組下一列的相同字段，最後一列不會自動新增項目。文字可用 Shift+Enter 換行，需要編輯多段落、清單等複雜富文字時，請開啟項目詳情。輸入法組字與候選選擇維持原有行為，儲存失敗時保留目前草稿。"
+					"Data": "在表格和清單中編輯單個數字、網址、電子郵件、電話或單選儲存格時，按 Enter 儲存並選取同組下一列的相同字段，再按一次 Enter 即可編輯該儲存格。多選字段按 Enter 後可在目前的儲存格繼續選取選項。最後一列不會自動新增項目。文字和主鍵字段中，Enter 用於編輯段落和清單項目，Shift+Enter 用於行內換行。先框選多個儲存格並按 Enter，可在選取範圍內逐格輸入，依從左至右、再到下一列的順序前進，同欄範圍向下前進，到範圍末尾結束。範圍輸入支援文字、數字、網址、電子郵件、電話、未綁定主鍵和單選字段，略過其他字段。範圍內的文字和主鍵用 Ctrl+Enter（macOS 為 Cmd+Enter）或行動端確認按鈕儲存並繼續。輸入法組字與候選選擇維持原有行為，輸入框儲存失敗時保留目前草稿。"
+				}
+			]
+		},
+		{
+			"ID": "20261110155812-micb6gi",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261110155812-micb6gi",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主鍵富文字"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261110155812-a3bf28j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110155812-a3bf28j",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主鍵與文字字段共用區塊編輯器，支援段落、標題、清單、引述區塊、程式碼區塊和公式區塊，並保留文字樣式、連結、圖片、行內公式和區塊引用。在桌面端編輯主鍵或文字字段時，按兩下行內圖片即可預覽，並可切換檢視同一字段內的其他圖片。Enter 建立新段落或清單項目，Shift+Enter 插入行內換行。範圍輸入時用 Ctrl+Enter（macOS 為 Cmd+Enter）或行動端確認按鈕儲存並繼續。表格、清單、畫廊、看板、日曆、條目詳情、關聯和彙總均顯示完整內容；篩選、排序、搜尋及純文字複製使用文字投影，已有類似 Markdown 的主鍵文字保持字面含義。"
+				}
+			]
+		},
+		{
+			"ID": "20261110155812-xay406g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110155812-xay406g",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編輯綁定主鍵會設定自訂靜態錨文字，不改寫來源文件或區塊，清空後恢復動態來源。動態錨文字跟隨來源文件標題或段落中受支援的行級樣式，只有樣式變化時也會重新整理；靜態錨文字保留自身內容。綁定、換綁和解除綁定保持條目身分。不支援的區塊結構會被拒絕，儲存失敗時保留草稿。"
+				}
+			]
+		},
+		{
+			"ID": "20261110155812-zi8wb82",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261110155812-zi8wb82",
+				"updated": "20261110155812"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新儲存的主鍵富文字與文字字段使用相同結構的 Kramdown 來源，該資料庫升級至格式 16。已有格式 15 的行級來源繼續可讀，未編輯的資料庫不會因此升級。不支援格式 16 的舊客戶端無法開啟升級後的資料庫；回退須還原升級前的完整快照，不能自動降級。圖片與引用遵循資料庫所在筆記本的存取邊界；升級或切換客戶端前請備份工作空間。文字字段也支援貼上行內圖片。首次在文字字段中儲存行內圖片時，該資料庫會升級至格式 17，之後須使用支援格式 17 的用戶端開啟。"
 				}
 			]
 		}

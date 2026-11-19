@@ -5,7 +5,7 @@ const path = require("node:path");
 
 const fixtures = () => {
     const ts = require("typescript");
-    return Object.fromEntries(["mobileConfirmDialog", "mobileInputDialog"].map(name => [name,
+    return Object.fromEntries(["confirmDialog", "inputDialog"].map(name => [name,
         ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/dialog", name + ".ts"), "utf8"), {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
         }).outputText]));
@@ -25,15 +25,15 @@ const runCases = sources => {
         focusWhenReady() {}
         bindInput() {}
     }
-    const dependencies = {MobileDialog: Dialog, isMobile: () => true, Constants: {},
+    const dependencies = {AdaptiveDialog: Dialog, Dialog, isMobile: () => true, Constants: {},
         escapeHtml: value => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")};
     const load = name => {
         const exports = {};
         new Function("require", "exports", sources[name])(() => dependencies, exports);
-        return exports[name];
+        return exports;
     };
-    const confirmDialog = load("mobileConfirmDialog");
-    const inputDialog = load("mobileInputDialog");
+    const confirmDialog = load("confirmDialog").confirmDialog;
+    const inputDialog = load("inputDialog").openInputDialog;
     const theme = {"--b3-theme-primary": "#3366ff", "--b3-theme-on-primary": "#ffffff",
         "--b3-theme-on-surface": "#222222", "--b3-theme-surface-lighter": "#eeeeee", "--b3-theme-error": "#ff3344"};
     for (const [name, value] of Object.entries(theme)) document.body.style.setProperty(name, value);
@@ -61,30 +61,25 @@ const runCases = sources => {
         document.body.style.setProperty("--b3-theme-surface-lighter", dark ? "#333333" : "#eeeeee");
         document.body.style.setProperty("--b3-theme-on-surface", dark ? "#eeeeee" : "#222222");
         for (const width of [280, 390, 560]) {
-            const compact = inputDialog({title: "Rename", value: "", compactActions: true, onConfirm() {}});
-            compact.element.style.width = width + "px";
-            const group = compact.element.querySelector(".mobile-sheet-action-group");
-            const actions = [...group.children];
-            const groupRect = group.getBoundingClientRect();
-            const confirmRect = actions[1].getBoundingClientRect();
-            check(Math.abs(confirmRect.right - groupRect.right) < 1, "compact actions align to the right");
+            const rename = inputDialog({title: "Rename", value: "", onConfirm() {}});
+            const actions = geometry(rename, width, width < 300);
             for (const action of actions) {
                 const rect = action.getBoundingClientRect();
-                check(rect.height >= 48, "compact actions preserve touch height");
-                check(rect.width < groupRect.width / 2, "short labels do not stretch across the sheet");
-                check(getComputedStyle(action).fontSize === "16px", "compact actions preserve readable font size");
+                check(rect.height >= 48, "rename actions preserve touch height");
+                check(rect.width >= 140, "rename actions fill the shared responsive columns");
+                check(getComputedStyle(action).fontSize === "16px", "rename actions preserve readable font size");
             }
             actions[1].textContent = "A very long translated confirmation label with several words andaverylongunbrokentoken";
-            check(actions[1].scrollWidth <= actions[1].clientWidth, "long compact labels wrap without overflow");
+            check(actions[1].scrollWidth <= actions[1].clientWidth, "long rename labels wrap without overflow");
             check(actions[0].hasAttribute("data-input-cancel") && actions[1].hasAttribute("data-input-confirm"), "focus order remains cancel then confirm");
             for (const action of actions) {
-                check(action.tabIndex === 0, "compact actions remain in the keyboard focus order");
+                check(action.tabIndex === 0, "rename actions remain in the keyboard focus order");
                 action.focus();
-                check(document.activeElement === action, "long compact labels remain keyboard focusable");
+                check(document.activeElement === action, "long rename labels remain keyboard focusable");
             }
-            compact.element.remove();
+            rename.element.remove();
         }
-        for (const make of [() => confirmDialog("Title", "Text"),
+        for (const make of [() => confirmDialog({title: "Title", text: "Text"}),
             () => inputDialog({title: "Name", value: "", onConfirm() {}})]) {
             const dialog = make();
             const buttons = geometry(dialog, 390, false);
@@ -100,8 +95,12 @@ const runCases = sources => {
             dialog.element.remove();
         }
     }
-    const danger = confirmDialog("Delete", "Text", undefined, undefined, true,
-        {label: "Extra", callback() {}});
+    const danger = confirmDialog({
+        title: "Delete",
+        text: "Text",
+        isDelete: true,
+        extraAction: {label: "Extra", callback() {}},
+    });
     const buttons = geometry(danger, 390, true);
     check(getComputedStyle(buttons[2]).color === "rgb(255, 51, 68)", "danger remains red");
     check(danger.element.querySelector("[data-type=sheet-expand]") === null, "no expansion control is injected");
@@ -111,8 +110,12 @@ const runCases = sources => {
     extra.element.remove();
 
     for (const height of [200, 140, 100]) {
-        for (const make of [() => confirmDialog("Title", "Content", undefined, undefined, false,
-            {label: "An additional translated action with a long label", callback() {}}, "Confirm changes"),
+        for (const make of [() => confirmDialog({
+            title: "Title",
+            text: "Content",
+            extraAction: {label: "An additional translated action with a long label", callback() {}},
+            confirmLabel: "Confirm changes",
+        }),
         () => inputDialog({title: "Name", value: "", confirmText: "Confirm changes", onConfirm() {},
             actions: [{text: "An additional translated action with a long label", onClick() {}}]})]) {
             const dialog = make();

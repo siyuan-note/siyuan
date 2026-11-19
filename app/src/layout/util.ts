@@ -1194,29 +1194,24 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             };
 
             const applyResize = (currentCoordinate: number) => {
-                const delta = currentCoordinate - x;
+                let delta = currentCoordinate - x;
+                if (!isCenterResize) {
+                    let previousMinimum = 8;
+                    let nextMinimum = nextElement.classList.contains("layout__center") ? 148 : 8;
+                    if (window.siyuan.layout.leftDock?.layout.element === previousElement) {
+                        previousMinimum = getMinSize(previousElement);
+                    }
+                    if (window.siyuan.layout.rightDock?.layout.element === nextElement) {
+                        nextMinimum = getMinSize(nextElement);
+                    }
+                    if (window.siyuan.layout.bottomDock?.layout.element === nextElement) {
+                        nextMinimum = 64;
+                    }
+                    delta = Math.max(Math.min(previousMinimum, previousSize) - previousSize,
+                        Math.min(delta, nextSize - Math.min(nextMinimum, nextSize)));
+                }
                 const previousNowSize = previousSize + delta;
                 const nextNowSize = nextSize - delta;
-                if (!isCenterResize && (previousNowSize < 8 || nextNowSize < 8)) {
-                    return;
-                }
-                if (window.siyuan.layout.leftDock && window.siyuan.layout.leftDock.layout.element === previousElement &&
-                    previousNowSize < getMinSize(previousElement) &&
-                    // https://github.com/siyuan-note/siyuan/issues/10506
-                    previousNowSize < previousSize) {
-                    return;
-                }
-                if (window.siyuan.layout.rightDock && window.siyuan.layout.rightDock.layout.element === nextElement &&
-                    nextNowSize < getMinSize(nextElement) && nextNowSize < nextSize) {
-                    return;
-                }
-                if (window.siyuan.layout.bottomDock && window.siyuan.layout.bottomDock.layout.element === nextElement &&
-                    nextNowSize < 64 && nextNowSize < nextSize) {
-                    return;
-                }
-                if (nextElement.classList.contains("layout__center") && nextNowSize <= 148) {
-                    return;
-                }
                 if (responsiveDock && !responsiveResizePrepared &&
                     (previousNowSize !== previousSize || nextNowSize !== nextSize)) {
                     responsiveDock.prepareForManualResize();

@@ -42,15 +42,22 @@ func storageModelValues(values map[string]apicontract.JSONValue) (result map[str
 	return
 }
 
-func recentDocContracts(values []*model.RecentDoc) []*apicontract.RecentDoc {
+// recentDocContracts 转换最近文档响应；只读角色不含工作区活动时间，避免向发布读者泄露浏览、打开和关闭时间
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rxmp-mffv-3g79
+func recentDocContracts(values []*model.RecentDoc, includeActivity bool) []*apicontract.RecentDoc {
 	if values == nil {
 		return nil
 	}
 	result := make([]*apicontract.RecentDoc, len(values))
 	for i, value := range values {
-		if value != nil {
-			result[i] = &apicontract.RecentDoc{RootID: value.RootID, Icon: value.Icon, Title: value.Title, ViewedAt: value.ViewedAt, ClosedAt: value.ClosedAt, OpenAt: value.OpenAt}
+		if value == nil {
+			continue
 		}
+		doc := &apicontract.RecentDoc{RootID: value.RootID, Icon: value.Icon, Title: value.Title}
+		if includeActivity {
+			doc.ViewedAt, doc.ClosedAt, doc.OpenAt = value.ViewedAt, value.ClosedAt, value.OpenAt
+		}
+		result[i] = doc
 	}
 	return result
 }

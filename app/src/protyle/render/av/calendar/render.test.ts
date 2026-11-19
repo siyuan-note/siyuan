@@ -1,3 +1,4 @@
+import * as entryIcon from "../entryIcon";
 import * as capabilities from "../capabilities";
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
@@ -30,6 +31,7 @@ test("calendar refreshes the current view after composition and captures the lat
     const block = {dataset: {}, removeAttribute() {}, querySelector: (selector: string) =>
         selector === ".av__calendar" ? root : input};
     const modules: Record<string, unknown> = {
+        "../entryIcon": entryIcon,
         "./date": dates,
         "./state": {getCalendarState: () => ({anchor: range.start, mode: "month", rowLimit: 3}), getCalendarRequestRange: () => range},
         "../render": {
@@ -105,6 +107,7 @@ test("calendar field names preserve titles, empty fields, zero, unchecked boxes 
     const api = {} as typeof import("./render");
     const state = {anchor: start, mode: "week", rowLimit: 3, expandedWeeks: new Set()};
     const modules: Record<string, unknown> = {
+        "../entryIcon": entryIcon,
         "./date": dates,
         "./state": {getCalendarState: () => state, getCalendarRequestRange: () => range},
         "./settings": {isCalendarDateColumn: () => true},
@@ -166,6 +169,7 @@ test("calendar without a date field renders its setup instead of reading an abse
     let html = "";
     const exports = {} as typeof import("./render");
     const modules: Record<string, unknown> = {
+        "../entryIcon": entryIcon,
         "./date": dates,
         "./state": {getCalendarState: () => state, getCalendarRequestRange: () => range},
         "./settings": {getCalendarSettingsHTML: () => "date-field-settings"},
@@ -219,6 +223,7 @@ test("calendar refresh keeps selected event segments and blank clicks dismiss th
         },
     };
     const modules: Record<string, unknown> = {
+        "../entryIcon": entryIcon,
         "./date": dates,
         "./state": {getCalendarState: () => state, getCalendarRequestRange: () => range},
         "./settings": {getCalendarSettingsHTML: () => "", bindCalendarSettings() {}},
@@ -285,6 +290,7 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
             },
         };
         const modules: Record<string, unknown> = {
+        "../entryIcon": entryIcon,
             "./date": dates,
             "./state": {getCalendarState: () => ({anchor: start, mode: "week", rowLimit: 3}), getCalendarRequestRange: () => range},
             "./settings": {isCalendarDateColumn: () => true, bindCalendarSettings() {}},
@@ -411,6 +417,7 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
         } as unknown as IProtyle;
         const calendar = {} as typeof import("./render");
         const modules: Record<string, unknown> = {
+        "../entryIcon": entryIcon,
             "./date": dates,
             "./state": {getCalendarState: () => state, getCalendarRequestRange: () => range},
             "./settings": {isCalendarDateColumn: () => true},

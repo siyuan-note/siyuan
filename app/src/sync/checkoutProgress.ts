@@ -33,7 +33,7 @@ const blockEditing = (event: Event) => {
     const root = document.getElementById("sync-checkout-progress");
     if (!root || !state?.blocking) return;
     if (event.type === "keydown" && (event as KeyboardEvent).key === "Tab") {
-        const controls = Array.from(root.querySelectorAll<HTMLButtonElement>("button")).filter(button => !button.disabled);
+        const controls = Array.from(root.querySelectorAll<HTMLButtonElement>("button:not(:disabled):not(.fn__none)"));
         const index = controls.indexOf(document.activeElement as HTMLButtonElement);
         const backwards = (event as KeyboardEvent).shiftKey;
         const next = index < 0 ? (backwards ? controls.length - 1 : 0) :
@@ -73,6 +73,7 @@ const render = () => {
         setEditingGuard(false);
         return;
     }
+    const noticeMessage = window.siyuan.languages._kernel[436];
     let root = document.getElementById("sync-checkout-progress");
     if (!root) {
         root = document.createElement("div");
@@ -83,7 +84,7 @@ const render = () => {
         root.innerHTML = `<div class="b3-dialog__scrim sync-checkout__scrim"></div>
 <div class="sync-checkout__panel b3-dialog__loading" role="dialog" aria-label="${escapeHtml(window.siyuan.languages.sync)}">
     <div class="sync-checkout__details">${getProgressContentHTML()}</div>
-    <div class="sync-checkout__notice ft__smaller">${escapeHtml(window.siyuan.languages._kernel[436])}</div>
+    <div class="sync-checkout__notice ft__smaller">${escapeHtml(noticeMessage)}</div>
     <div class="fn__flex sync-checkout__actions">
         <button class="b3-button b3-button--cancel b3-button--wrap" data-action="toggle"><span></span></button>
         <button class="b3-button b3-button--cancel b3-button--wrap" data-action="cancel">${escapeHtml(window.siyuan.languages.cancel)}</button>
@@ -123,18 +124,31 @@ const render = () => {
         statePoll = window.setInterval((): void => { void reconcileSyncCheckout(); }, 1500);
     }
     const panel = root.querySelector<HTMLElement>(".sync-checkout__panel");
+    const toggle = root.querySelector<HTMLButtonElement>('[data-action="toggle"]');
+    const cancel = root.querySelector<HTMLButtonElement>('[data-action="cancel"]');
+    const compact = state.blocking && state.compact;
+    const repeatsNotice = state.message === noticeMessage;
+    const showToggle = !compact || !repeatsNotice || state.total > 0;
+    const activeElement = document.activeElement as HTMLElement;
     panel.setAttribute("aria-modal", String(state.blocking));
     root.classList.toggle("sync-checkout--background", !state.blocking);
-    root.classList.toggle("sync-checkout--compact", state.compact || !state.blocking);
-    root.querySelector(".sync-checkout__notice").classList.toggle("fn__none", !state.blocking || state.compact);
-    updateProgressContent(root, state.compact && state.total > 0 ? window.siyuan.languages._kernel[81] : state.message,
+    root.classList.toggle("sync-checkout--compact", compact || !state.blocking);
+    root.querySelector(".sync-checkout__notice").classList.toggle("fn__none", !state.blocking || compact || repeatsNotice);
+    updateProgressContent(root, compact && state.total > 0 ? window.siyuan.languages._kernel[81] : state.message,
         state.current, state.total, "percent");
-    root.querySelector('[data-action="toggle"] span').textContent = state.compact ?
+    toggle.classList.toggle("fn__none", !showToggle);
+    toggle.firstElementChild.textContent = compact ?
         window.siyuan.languages.expand : window.siyuan.languages.collapseSyncDetails;
-    root.querySelector<HTMLButtonElement>('[data-action="cancel"]').disabled = state.canceling;
-    if (state.blocking && !root.contains(document.activeElement)) {
-        previousFocus ||= document.activeElement as HTMLElement;
-        root.querySelector<HTMLButtonElement>('[data-action="toggle"]').focus();
+    cancel.disabled = state.canceling;
+    const focusTarget = showToggle ? toggle : cancel.disabled ? panel : cancel;
+    if (focusTarget === panel) panel.tabIndex = -1;
+    else panel.removeAttribute("tabindex");
+    if (state.blocking) {
+        const focusOutside = !root.contains(activeElement);
+        if (focusOutside) previousFocus ||= activeElement;
+        if (focusOutside || activeElement === panel || activeElement.matches("button:disabled, button.fn__none")) {
+            focusTarget.focus();
+        }
     }
 };
 

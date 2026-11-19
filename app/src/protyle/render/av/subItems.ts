@@ -1,5 +1,5 @@
 import {Constants} from "../../../constants";
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {fetchSyncPost} from "../../../util/fetch";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
@@ -46,7 +46,7 @@ const openParentPicker = (protyle: IProtyle, blockElement: HTMLElement, srcIDs: 
     const endSession = beginAVEditorSession(blockElement);
     const valid = () => editable(protyle, blockElement) && blockElement.dataset.avId === context.avID && blockElement.dataset.nodeId === context.blockID &&
         blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) === context.viewID;
-    const dialog = new MobileDialog({title: window.siyuan.languages.avChangeParent, width: isMobile() ? "100vw" : "480px",
+    const dialog = new AdaptiveDialog({title: window.siyuan.languages.avChangeParent, width: isMobile() ? "100vw" : "480px",
         content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" aria-label="${window.siyuan.languages.search}" placeholder="${window.siyuan.languages.search}"><div class="fn__hr"></div><div data-results></div><button class="b3-button fn__block" data-more>${window.siyuan.languages.loadMore}</button></div>`,
         destroyCallback: () => {
             request++;

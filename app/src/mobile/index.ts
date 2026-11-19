@@ -1,4 +1,6 @@
 import {addScript} from "../protyle/util/addScript";
+import {registerColorPickerWindow} from "../colorPicker/panel";
+import {registerDatePickerWindow} from "../datePicker/panel";
 import {ensureLute} from "../protyle/util/lute";
 import {completeStartup, guardStartup, reportStartupError, setStartupLanguage, setStartupStage} from "../boot/startupError";
 import {Constants} from "../constants";
@@ -96,6 +98,8 @@ class App {
             completeStartup();
             return;
         }
+        registerColorPickerWindow();
+        registerDatePickerWindow();
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
         initHarmonyTextSelectionMenu();
@@ -232,12 +236,12 @@ class App {
             setStartupStage("storage");
             getLocalStorage(guardStartup<void>(() => {
                 setStartupStage("language");
-                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, guardStartup<IObject>(async (languages) => {
+                void loadLanguages(window.siyuan.config.appearance.lang, Constants.SIYUAN_VERSION, guardStartup(async (languages) => {
                     setStartupStage("interface");
                     window.siyuan.languages = languages;
                     void initializeEnglishCommandTranslations(
                         window.siyuan.config.appearance.lang,
-                        languages as Record<string, string>,
+                        languages,
                         Constants.SIYUAN_VERSION,
                     );
                     window.siyuan.menus = new Menus(this);

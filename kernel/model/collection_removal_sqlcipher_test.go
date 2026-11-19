@@ -76,6 +76,9 @@ func setupEncryptedCollectionRemovalTest(t *testing.T) (*fileOperationTestFixtur
 	if err = av.SaveAttributeView(view); err != nil {
 		t.Fatal(err)
 	}
+	for _, node := range source.Root.ChildrenByType(ast.NodeAttributeView) {
+		av.UpsertBlockRel(node.AttributeViewID, node.ID)
+	}
 	if err = os.Remove(filepath.Join(util.DataDir, "storage", "av", view.ID+".json")); err != nil {
 		t.Fatal(err)
 	}

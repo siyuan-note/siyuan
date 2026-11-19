@@ -98,10 +98,10 @@ const runCases = sources => {
     assert.equal(keyboardList.querySelectorAll('[data-relation-type="selected"]').length, 2);
     const {deselect} = load("./relationSelection");
     const selectionMenu = document.createElement("div");
-    selectionMenu.innerHTML = `<div data-relation-type="selectedRows"><div data-relation-type="selected" data-row-id="one" draggable="true">
+    selectionMenu.innerHTML = `<div class="b3-menu__items"><div data-relation-type="selectedRows"><div data-relation-type="selected" data-row-id="one" draggable="true">
 <span class="av__relation-table-check"><svg><use xlink:href="#iconCheck"></use></svg></span>
 <span class="av__relation-table-primary"><svg class="fn__grab"></svg><span class="b3-menu__label" data-content="One">One</span></span>
-</div></div><div data-relation-type="candidateRows"><div data-relation-type="candidate" data-row-id="two">Two</div></div>`;
+</div></div><div data-relation-type="candidateRows"><div data-relation-type="candidate" data-row-id="two">Two</div></div></div>`;
     document.body.replaceChildren(selectionMenu);
     const deselectedRow = selectionMenu.querySelector('[data-row-id="one"]');
     let refreshed = false;
@@ -299,6 +299,8 @@ const runElectron = async () => {
         const sources = Object.fromEntries(["cell", "cellValue", "attributeValue", "blockIcon", "relationLayout", "relationKeyboard", "capabilities", "capabilities.generated"].map(name => ["./" + name,
             ts.transpileModule(readFileSync(path.join(__dirname, `../src/protyle/render/av/${name}.ts`), "utf8"),
                 {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText]));
+        sources["./relationScrollPosition"] = ts.transpileModule(readFileSync(path.join(__dirname, "../src/protyle/render/av/relationPosition.ts"), "utf8"),
+            {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         const relationSource = readFileSync(path.join(__dirname, "../src/protyle/render/av/relation.ts"), "utf8");
         const keyboardStart = relationSource.indexOf('    inputElement.addEventListener("keydown", (event) => {');
         const keyboardEnd = relationSource.indexOf('    inputElement.addEventListener("input",', keyboardStart);
@@ -326,11 +328,12 @@ export const renderRow = genRelationRowHTML;`,
             avCSS.indexOf(".av__option-colors {"))).css;
         const valueStart = relationSource.indexOf("const getRelationValue =");
         const valueEnd = relationSource.indexOf("const genCreatedRelationRowHTML =", valueStart);
-        const deselectStart = relationSource.indexOf('            target.dataset.relationType = "candidate";');
+        const deselectStart = relationSource.indexOf("            const restorePosition = preserveRelationPosition(");
         const deselectEnd = relationSource.indexOf("        } else if (rowId)", deselectStart);
         assert.ok(valueStart > 0 && valueEnd > valueStart && deselectStart > 0 && deselectEnd > deselectStart);
         sources["./relationSelection"] = ts.transpileModule(
-            `${relationSource.slice(valueStart, valueEnd)}
+            `const {preserveRelationPosition} = require("./relationScrollPosition");
+${relationSource.slice(valueStart, valueEnd)}
 export const deselect = (target, menuElement, updateCellsValue) => { const protyle = {}, nodeElement = {}, cellElements = [];
 ${relationSource.slice(deselectStart, deselectEnd)} };`,
             {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
@@ -339,6 +342,7 @@ ${relationSource.slice(deselectStart, deselectEnd)} };`,
         assert.ok(positionStart > 0 && positionEnd > positionStart);
         sources["./relationPosition"] = ts.transpileModule(
             `export const createPosition = (options, resetPosition, setPosition) => { let positionInitialized = false;
+const getCurrentBlock = () => options.blockElement;
 ${relationSource.slice(positionStart, positionEnd)} return positionMenu; };`,
             {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         await win.loadURL("data:text/html,<html><body></body></html>");

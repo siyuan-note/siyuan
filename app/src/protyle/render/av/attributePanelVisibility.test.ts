@@ -8,7 +8,7 @@ import {promisify} from "node:util";
 import {ScriptTarget, transpileModule} from "typescript";
 import {compileString} from "sass";
 
-const browserCases = async (source: string, css: string, columnSource: string, blockSource: string, menuSource: string, calendarSource: string, escapeSource: string) => {
+const browserCases = async (source: string, css: string, columnSource: string, blockSource: string, menuSource: string, fieldMenuSource: string, escapeSource: string) => {
     const check: typeof assert = require("node:assert/strict");
     const config = {editor: {databaseAttrShow: true, databaseAttrHideEmpty: false, databaseAttrViewMode: 0, databaseAttrUseTabs: false}};
     const dialogs: {element: HTMLElement, destroy: () => void}[] = [];
@@ -149,17 +149,17 @@ const browserCases = async (source: string, css: string, columnSource: string, b
         public addItem(item: IMenu) { mobileChoices.push(item); }
         public open() {}
     }
-    const bindCalendar = new Function("MenuItem", "Menu", "isMobile", "setDateFieldFormat",
-        calendarSource + "\nreturn bindDateCalendarMenu;")(Item, MobileMenu, () => mobile,
+    const bindFieldMenus = new Function("MenuItem", "Menu", "isMobile", "getLabelByDateFormat", "formatDateDisplay", "setDateFieldFormat",
+        fieldMenuSource + "\nreturn bindFieldMenus;")(Item, MobileMenu, () => mobile, (format: string) => format, () => "Today",
         (_protyle: IProtyle, avID: string, id: string, type: string, format: string, oldFormat: string) => {
             transactions.push([[{action: "setAttrViewColDateFormat", avID, id, type, format}],
                 [{action: "setAttrViewColDateFormat", avID, id, type, format: oldFormat}]]);
         });
-    const columns = new Function("getFieldsByData", "escapeAttr", "escapeHtml", "escapeAriaLabel", "bindRollupData", "transaction", "MenuItem", "Menu", "isMobile", "bindDateCalendarMenu", "getLabelByDateFormat", "fetchSyncPost",
+    const columns = new Function("getFieldsByData", "escapeAttr", "escapeHtml", "escapeAriaLabel", "bindRollupData", "transaction", "MenuItem", "Menu", "isMobile", "bindFieldMenus", "getLabelByDateFormat", "fetchSyncPost",
         columnSource + "\nreturn {getEditHTML, bindEditEvent};")(
         (data: IAV) => (data.view as IAVTable).columns, escape, escape, escape, () => {},
         (_protyle: IProtyle, operations: IOperation[], undo: IOperation[]) => transactions.push([operations, undo]),
-        Item, MobileMenu, () => mobile, bindCalendar, (format: string) => format,
+        Item, MobileMenu, () => mobile, bindFieldMenus, (format: string) => format,
         async () => ({code: 0, data: {allowed: false}}));
     for (const visibility of [undefined, "always", "hide-empty", "hide"]) {
         const field = {id: "key", name: "Notes", type: "text", attributePanelVisibility: visibility};
@@ -239,6 +239,10 @@ const browserCases = async (source: string, css: string, columnSource: string, b
             const options = {data, colId: field.id, isCustomAttr: true, menuElement};
             menuElement.innerHTML = columns.getEditHTML(options);
             columns.bindEditEvent(options);
+            for (const name of ["fillCreated", "fillSpecificTime"]) {
+                const label = menuElement.querySelector(`[data-type="${name}"]`).closest("label");
+                check.equal(label.firstElementChild.className, "b3-menu__icon", "date defaults align with field menu labels");
+            }
             const parent = menuElement.querySelector<HTMLButtonElement>('[data-type="dateCalendar"]');
             check.equal(parent.querySelector("select"), null);
             const buttons = Array.from(parent.querySelectorAll<HTMLButtonElement>(".b3-menu__submenu .b3-menu__item"));
@@ -411,7 +415,7 @@ const browserCases = async (source: string, css: string, columnSource: string, b
     return "Attribute panel visibility cases passed";
 };
 
-test("attribute panel field rules preserve global defaults, reveal hidden fields, and escape database names", {
+test("attribute panel field rules and date menus preserve defaults, alignment, and escaped database names", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -437,7 +441,7 @@ test("attribute panel field rules preserve global defaults, reveal hidden fields
     const menuSource = transpileModule(readFileSync("src/menus/Menu.ts", "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
-    const calendarSource = transpileModule(readFileSync(path.resolve(__dirname, "dateCalendarMenu.ts"), "utf8")
+    const fieldMenuSource = transpileModule(readFileSync(path.resolve(__dirname, "fieldMenu.ts"), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const escapeSource = transpileModule(readFileSync("src/util/escape.ts", "utf8")
@@ -445,7 +449,7 @@ test("attribute panel field rules preserve global defaults, reveal hidden fields
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-panel-visibility-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + "," + JSON.stringify(menuSource) + "," + JSON.stringify(calendarSource) + "," + JSON.stringify(escapeSource) + ")";
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + "," + JSON.stringify(css) + "," + JSON.stringify(columnSource) + "," + JSON.stringify(blockSource) + "," + JSON.stringify(menuSource) + "," + JSON.stringify(fieldMenuSource) + "," + JSON.stringify(escapeSource) + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async () => {

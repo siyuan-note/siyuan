@@ -70,6 +70,7 @@ import {openMobileFileById} from "../../mobile/editor";
 import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
+import {bgFade} from "../../util/highlightById";
 import {isInAndroid, isNotCtrl, isOnlyMeta} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
@@ -145,6 +146,7 @@ export class Hint {
     private refCloseContext?: {range: Range; text: string; notebookID: string; rootID: string};
     // 选中候选项时是否一并替换光标后自动补全的闭合符
     private consumeCloseKey = false;
+    private blockHintQuery?: {blockID: string; prefix: string; query: string; tail: string; suffix: string};
     public lastIndex = -1;
     public hashTagSearchElement?: HTMLElement;
     private source: THintSource;
@@ -322,16 +324,18 @@ export class Hint {
             const caretOffset = getWholeTextOffset(textNode, protyle.toolbar.range.startOffset);
             textAfterCaret = textNode.wholeText.substring(caretOffset);
         }
-        const key = this.getKey(currentLineValue, textAfterCaret, protyle.options.hint.extend);
+        let key = this.getKey(currentLineValue, textAfterCaret, protyle.options.hint.extend);
         if (typeof key === "undefined" ||
             hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "code") ||
             hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "NodeCodeBlock") ||
             (["/", "、"].includes(this.splitChar) &&
                 hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "tag"))) {
+            this.blockHintQuery = undefined;
             this.element.classList.add("fn__none");
             clearTimeout(this.timeId);
             return;
         }
+        key = this.trackBlockHintQuery(protyle.toolbar.range, currentLineValue, textAfterCaret, key);
 
         // https://github.com/siyuan-note/siyuan/issues/7933
         if (this.splitChar === "#") {
@@ -535,6 +539,54 @@ export class Hint {
         protyle.toolbar.range = context.range.cloneRange();
         this.lastIndex = context.range.startOffset;
         this.fill(value, protyle, false);
+    }
+
+    private trackBlockHintQuery(range: Range, textBeforeCaret: string, textAfterCaret: string, key: string) {
+        const previous = this.blockHintQuery;
+        this.blockHintQuery = undefined;
+        if (!Constants.BLOCK_HINT_KEYS.includes(this.splitChar) || !range.collapsed || range.startContainer.nodeType !== 3) {
+            return key;
+        }
+        const block = hasClosestBlock(range.startContainer);
+        if (!block) {
+            return key;
+        }
+        const blockID = block.dataset.nodeId;
+        const prefix = textBeforeCaret.substring(0, this.lastIndex + this.splitChar.length);
+        let suffix = "";
+        // 查询尾部由此前输入的查询识别，光标右侧原有的正文不参与替换。
+        if (!this.closeKeyTyped && previous?.blockID === blockID && previous.prefix === prefix &&
+            textAfterCaret.endsWith(previous.tail)) {
+            const candidate = textAfterCaret.slice(0, textAfterCaret.length - previous.tail.length);
+            if (previous.query.endsWith(candidate) && key.length + candidate.length < Constants.SIZE_TITLE) {
+                suffix = candidate;
+            }
+        }
+        this.blockHintQuery = {blockID, prefix, query: key + suffix, tail: textAfterCaret.slice(suffix.length), suffix};
+        return this.blockHintQuery.query;
+    }
+
+    private extendBlockHintQuery(range: Range) {
+        const query = this.blockHintQuery;
+        this.blockHintQuery = undefined;
+        if (!query?.suffix || range.endContainer.nodeType !== 3 ||
+            range.toString() !== this.splitChar + query.query.slice(0, -query.suffix.length)) {
+            return;
+        }
+        let textNode = range.endContainer as Text;
+        const caretOffset = getWholeTextOffset(textNode, range.endOffset);
+        const block = hasClosestBlock(textNode);
+        if (!block || block.dataset.nodeId !== query.blockID ||
+            (range.startContainer as Text).data.substring(0, range.startOffset + this.splitChar.length) !== query.prefix ||
+            textNode.wholeText.substring(caretOffset) !== query.suffix + query.tail) {
+            return;
+        }
+        let end = range.endOffset + query.suffix.length;
+        while (end > textNode.length && textNode.nextSibling?.nodeType === 3) {
+            end -= textNode.length;
+            textNode = textNode.nextSibling as Text;
+        }
+        range.setEnd(textNode, end);
     }
 
     private consumeRefBracketClose(range: Range) {
@@ -1216,6 +1268,9 @@ ${genHintItemHTML(item)}
         }
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
+            if (this.source === "hint" && Constants.BLOCK_HINT_KEYS.includes(this.splitChar)) {
+                this.extendBlockHintQuery(range);
+            }
             focusByRange(range);
         }
         // 自动闭合时，光标后的闭合符随查询一起被替换
@@ -1675,6 +1730,12 @@ ${genHintItemHTML(item)}
                     });
                 } else {
                     focusByWbr(nodeElement, range);
+                    if (superBlockLayout) {
+                        // 新建超级块后临时高亮各子块，提示刚插入的布局范围
+                        nodeElement.querySelectorAll(":scope > [data-node-id]").forEach((childElement: HTMLElement) => {
+                            bgFade(childElement);
+                        });
+                    }
                     if (isMindmap && nodeElement.dataset.type === "NodeMindmap") {
                         mountNewListMindmap(protyle, nodeElement);
                     }

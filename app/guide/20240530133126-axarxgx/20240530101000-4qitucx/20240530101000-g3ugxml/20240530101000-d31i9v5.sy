@@ -935,6 +935,61 @@
 			]
 		},
 		{
+			"ID": "20261118183342-w3t8s5f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118183342-w3t8s5f",
+				"updated": "20261118183342"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップの PDF エクスポートプレビューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ページ分割"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をオンにし、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "見出しを新しいページから開始"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で見出しレベルを選択します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "サブドキュメントをマージ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にすると、直前のドキュメントが見出しで終わる場合でも、タイトルが選択したレベルに該当するサブドキュメントは新しいページから始まります。同じドキュメント内で本文を挟まない連続した見出しは同じページに配置されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261111230000-3iqsxc7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261111230000-3iqsxc7",
+				"updated": "20261111230000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PDF をエクスポートするたびに、デスクトップのプレビューウィンドウまたはモバイルの印刷設定で、ブロック参照とブロックリンクの出力方法を選択できます。初期値は全体のエクスポート設定に従います。アンカーテキストのみを選択すると、参照先の内容を展開せずに参照名を残せます。変更は今回のエクスポートにのみ適用され、全体の設定は変更されません。デスクトップでは選択を変更するとプレビューが更新されます。"
+				}
+			]
+		},
+		{
 			"ID": "20261104002100-jypua0f",
 			"Type": "NodeParagraph",
 			"Properties": {

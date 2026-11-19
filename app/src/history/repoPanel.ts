@@ -1,5 +1,5 @@
 import {toggleMenu} from "../menus/menuToggle";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
@@ -7,6 +7,7 @@ import {removeSelectedRepoTags, repoSelectionKey, RepoSource, RepoTagSelection} 
 import {canPurgeRepo} from "./repoPurge";
 import {repoDateRange, RepoTimeRange} from "./repoRange";
 import {MenuItem} from "../menus/Menu";
+import {bindDatePicker} from "../datePicker/binding";
 
 interface RepoPanelState {
     selected: Map<string, RepoTagSelection>;
@@ -14,6 +15,7 @@ interface RepoPanelState {
     busy: boolean;
     tagged: boolean;
     range: RepoTimeRange;
+    datePickers?: ReturnType<typeof bindDatePicker>[];
 }
 
 const states = new WeakMap<Element, RepoPanelState>();
@@ -85,7 +87,9 @@ export const updateRepoSelection = (pane: Element) => {
     });
 };
 
-export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: number) => void) => {
+export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: number) => void,
+                             mountPlugins?: (container: HTMLElement, setRestoring: (busy: boolean) => void) => {destroy(): void, canClose(): boolean}) => {
+    states.get(root)?.datePickers?.forEach(picker => picker.destroy());
     const lang = window.siyuan.languages;
     const state: RepoPanelState = {selected: new Map(), managing: false, busy: false, tagged: false, range: {}};
     states.set(root, state);
@@ -94,9 +98,11 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     root.classList.toggle("history__snapshots--narrow", isMobile());
     root.dataset.source = "local";
     const template = root.innerHTML;
+    let plugins: ReturnType<NonNullable<typeof mountPlugins>>;
     root.innerHTML = `<form class="history__snapshot-toolbar" data-role="date-range">
     <button type="button" class="b3-button b3-button--text" data-action="normal" aria-pressed="true">${lang.dataSnapshot}</button>
     <button type="button" class="b3-button b3-button--text" data-action="tagged" aria-pressed="false">${lang.repoTaggedSnapshots}</button>
+    ${mountPlugins ? `<button type="button" class="b3-button b3-button--text" data-action="plugin-snapshots" aria-pressed="false">${lang.pluginSnapshots}</button>` : ""}
     <span class="fn__flex-1"></span>
     <button type="button" class="b3-button b3-button--text history__snapshot-mobile-control" data-action="filters" aria-expanded="false">${lang.filter}</button>
     <div class="history__snapshot-date-controls">
@@ -111,6 +117,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     <button type="button" class="b3-button b3-button--outline fn__none" data-action="manage">${lang.repoBatchManage}</button>
 </form>
 <div class="history__snapshot-columns"></div>
+<div class="history__plugin-panel fn__none" data-role="plugins"></div>
 <div class="history__snapshot-toolbar fn__none" data-role="batch">
     <span data-role="selection" aria-live="polite"></span><span class="fn__flex-1"></span>
     <button class="b3-button b3-button--outline" data-action="clear">${lang.repoBatchClear}</button>
@@ -118,6 +125,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
 </div>
 <div class="history__snapshot-message fn__none" data-role="result" aria-live="polite"></div>`;
     const columns = root.querySelector(".history__snapshot-columns");
+    const pluginPanel = root.querySelector<HTMLElement>('[data-role="plugins"]');
     for (const source of ["local", "cloud"] as const) {
         const pane = document.createElement("div");
         pane.className = "history__repo history__snapshot-pane";
@@ -166,6 +174,8 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     const refresh = () => panes().forEach(pane => render(pane, 1));
     const startDate = root.querySelector<HTMLInputElement>('[data-range="start"]');
     const endDate = root.querySelector<HTMLInputElement>('[data-range="end"]');
+    const datePickers = [startDate, endDate].map(input => bindDatePicker(input));
+    state.datePickers = datePickers;
     const dateForm = root.querySelector<HTMLFormElement>('[data-role="date-range"]');
     const updateDateLimits = () => {
         startDate.max = endDate.value || "9999-12-31";
@@ -229,7 +239,16 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         }
         event.stopPropagation();
         const action = button.dataset.action;
-        if (action === "filters") {
+        if (action === "plugin-snapshots") {
+            state.managing = false;
+            state.selected.clear();
+            updateRepoSelection(panes()[0]);
+            root.classList.add("history__snapshots--plugins");
+            pluginPanel.classList.remove("fn__none");
+            root.querySelectorAll("[data-action=normal], [data-action=tagged], [data-action=plugin-snapshots]")
+                .forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+            plugins ||= mountPlugins?.(pluginPanel, setBusy);
+        } else if (action === "filters") {
             const expanded = root.classList.toggle("history__snapshots--filters");
             button.setAttribute("aria-expanded", String(expanded));
         } else if (action === "source-more") {
@@ -260,10 +279,12 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
             updateDateLimits();
             applyRange();
         } else if (action === "normal" || action === "tagged") {
+            root.classList.remove("history__snapshots--plugins");
+            pluginPanel.classList.add("fn__none");
             state.tagged = action === "tagged";
             state.managing = false;
             state.selected.clear();
-            root.querySelectorAll("[data-action=normal], [data-action=tagged]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+            root.querySelectorAll("[data-action=normal], [data-action=tagged], [data-action=plugin-snapshots]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
             panes().forEach(pane => {
                 pane.querySelector<HTMLInputElement>(".b3-text-field").value = "";
                 const compare = pane.querySelector('[data-type="compare"]');
@@ -286,30 +307,35 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
             const summary = lang.repoBatchSelection.replace("${x}", String(items.filter(item => item.source === "local").length)).replace("${y}", String(items.filter(item => item.source === "cloud").length));
             const details = `<p>${summary}</p>` + ["local", "cloud"].map(source => `<div>${source === "local" ? lang.localSnapshot : lang.cloudSnapshot}</div><ul>${items.filter(item => item.source === source).map(item => `<li>${escapeHtml(item.tag)}</li>`).join("")}</ul>`).join("");
             const completed = new Set<string>();
-            mobileConfirmDialog(lang.deleteOpConfirm, `${details}<p>${lang.repoRemoveTagsTip}</p>`, async () => {
-                setBusy(true);
-                try {
-                    const removed = await removeSelectedRepoTags(items.filter(item => !completed.has(repoSelectionKey(item))), async item => {
-                        const response = await fetchSyncPost(item.source === "local" ? "/api/repo/removeRepoTagSnapshot" : "/api/repo/removeCloudRepoTagSnapshot", {tag: item.tag});
-                        return response.code === 0;
-                    }, async source => {
-                        const response = await fetchSyncPost(source === "local" ? "/api/repo/getRepoTagSnapshots" : "/api/repo/getCloudRepoTagSnapshots", {});
-                        if (response.code !== 0) {
-                            throw new Error(response.msg);
-                        }
-                        return response.data.snapshots;
-                    });
-                    removed.forEach(key => {
-                        completed.add(key);
-                        state.selected.delete(key);
-                    });
-                    message(lang.repoBatchResult.replace("${x}", String(completed.size)).replace("${y}", String(items.length - completed.size)));
-                    refresh();
-                    return completed.size === items.length;
-                } finally {
-                    setBusy(false);
-                }
-            }, undefined, true, undefined, undefined, {awaitConfirm: true});
+            confirmDialog({
+                title: lang.deleteOpConfirm,
+                text: `${details}<p>${lang.repoRemoveTagsTip}</p>`,
+                confirm: async () => {
+                    setBusy(true);
+                    try {
+                        const removed = await removeSelectedRepoTags(items.filter(item => !completed.has(repoSelectionKey(item))), async item => {
+                            const response = await fetchSyncPost(item.source === "local" ? "/api/repo/removeRepoTagSnapshot" : "/api/repo/removeCloudRepoTagSnapshot", {tag: item.tag});
+                            return response.code === 0;
+                        }, async source => {
+                            const response = await fetchSyncPost(source === "local" ? "/api/repo/getRepoTagSnapshots" : "/api/repo/getCloudRepoTagSnapshots", {});
+                            if (response.code !== 0) {
+                                throw new Error(response.msg);
+                            }
+                            return response.data.snapshots;
+                        });
+                        removed.forEach(key => {
+                            completed.add(key);
+                            state.selected.delete(key);
+                        });
+                        message(lang.repoBatchResult.replace("${x}", String(completed.size)).replace("${y}", String(items.length - completed.size)));
+                        refresh();
+                        return completed.size === items.length;
+                    } finally {
+                        setBusy(false);
+                    }
+                },
+                isDelete: true,
+            });
         } else if (action === "purge") {
             const pane = button.closest<HTMLElement>("[data-repo-source]");
             const source = pane.dataset.repoSource as RepoSource;
@@ -319,23 +345,27 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
                 return;
             }
             const local = source === "local";
-            mobileConfirmDialog(local ? lang.dataRepoPurge : lang.cloudStoragePurge, local ? lang.dataRepoPurgeConfirm : lang.cloudStoragePurgeConfirm, async () => {
-                if (!local && (provider !== window.siyuan.config.sync.provider || !canPurgeRepo(source, window.siyuan.config.sync.provider))) {
-                    updateRepoSelection(pane);
-                    return false;
-                }
-                setBusy(true);
-                try {
-                    const response = await fetchSyncPost(local ? "/api/repo/purgeRepo" : "/api/repo/purgeCloudRepo", {});
-                    return response.code === 0;
-                } catch (error) {
-                    message(String(error));
-                    return false;
-                } finally {
-                    setBusy(false);
-                    render(pane, 1);
-                }
-            }, undefined, false, undefined, undefined, {awaitConfirm: true});
+            confirmDialog({
+                title: local ? lang.dataRepoPurge : lang.cloudStoragePurge,
+                text: local ? lang.dataRepoPurgeConfirm : lang.cloudStoragePurgeConfirm,
+                confirm: async () => {
+                    if (!local && (provider !== window.siyuan.config.sync.provider || !canPurgeRepo(source, window.siyuan.config.sync.provider))) {
+                        updateRepoSelection(pane);
+                        return false;
+                    }
+                    setBusy(true);
+                    try {
+                        const response = await fetchSyncPost(local ? "/api/repo/purgeRepo" : "/api/repo/purgeCloudRepo", {});
+                        return response.code === 0;
+                    } catch (error) {
+                        message(String(error));
+                        return false;
+                    } finally {
+                        setBusy(false);
+                        render(pane, 1);
+                    }
+                },
+            });
         }
     });
     const observer = new ResizeObserver(entries => {
@@ -348,5 +378,11 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         }
     });
     observer.observe(root);
-    return () => observer.disconnect();
+    const destroy = () => {
+        observer.disconnect();
+        datePickers.forEach(picker => picker.destroy());
+        plugins?.destroy();
+    };
+    destroy.canClose = () => plugins?.canClose() !== false;
+    return destroy;
 };

@@ -474,6 +474,8 @@ export const getPadding = (protyle: IProtyle) => {
         const padding = getEditorHorizontalPadding(protyle.element.clientWidth, isFullWidth !== "false");
         left = padding.left;
         right = padding.right;
+        left = Math.max(left, parseFloat(getComputedStyle(protyle.element)
+            .getPropertyValue("--b3-protyle-min-padding-left")) || 0);
     }
     return {
         left, right, bottom, top: 16

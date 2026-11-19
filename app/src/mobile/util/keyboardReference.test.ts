@@ -86,12 +86,12 @@ test("mobile toolbar entries initialize before an editor exists", () => {
 test("document titles hide line breaks and block movement while body and other fragments retain them", () => {
     for (const title of [true, false]) {
         for (const lite of [true, false]) {
-            const protyle = {lite, wysiwyg: {element: {contains: () => true}}};
+            const protyle = {lite, wysiwyg: {element: {contains: () => true,
+                closest: (selector: string) => title && selector === ".protyle-title__rich" ? {} : null}}};
             const apply = runInNewContext(compile(entriesSource), {
                 getCurrentEditor: () => ({protyle}),
                 getSelection: () => ({rangeCount: 1, getRangeAt: () => ({})}),
                 hasClosestBlock: () => ({classList: {contains: () => false}}),
-                hasClosestByClassName: (_element: unknown, name: string) => title && name === "protyle-title__rich",
                 stripSemanticMarkersFromRangeText: () => "",
                 Constants: {ZWSP: "\u200b"}, getEntryOrder: (): string[] => [], isEntryVisible: () => true,
                 getMobileToolbarContextPath, MOBILE_TOOLBAR_NAMES: [], MOBILE_TOOLBAR_ACTION_NAMES: [],

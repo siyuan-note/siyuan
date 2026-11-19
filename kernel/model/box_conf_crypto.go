@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"maps"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -129,6 +130,10 @@ func prepareBoxConfForSave(boxID string, boxConf *conf.BoxConf) (*conf.BoxConf, 
 	}
 	persisted := *boxConf
 	persisted.BoxCrypt = DeepCopyBoxEncryption(boxConf.BoxCrypt)
+	persisted.Extra = maps.Clone(boxConf.Extra)
+	for name, value := range persisted.Extra {
+		persisted.Extra[name] = bytes.Clone(value)
+	}
 	if persisted.Encrypted {
 		forgetRuntimeNormalBox(boxID)
 	}

@@ -62,7 +62,7 @@ const createHarness = async (mode: MarkdownEditorMode = "wysiwyg") => {
     const pending: boolean[] = [];
     const normalize = (content: string) => content.replace(/^- {2,}/gm, "- ");
     const instance = {
-        version: "4.0.2-alpha.8",
+        version: "4.0.2-alpha.9",
         vditor: {
             ...surfaces,
             lute: {GetEmojis: () => ({})},
@@ -81,6 +81,7 @@ const createHarness = async (mode: MarkdownEditorMode = "wysiwyg") => {
         setPreviewMode() {},
         setTheme() { settings.input(value); },
         focus() {},
+        openFind() {},
         destroy() {},
     };
     for (const next of ["ir", "wysiwyg", "sv"] as const) {

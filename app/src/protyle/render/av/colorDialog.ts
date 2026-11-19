@@ -1,5 +1,5 @@
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {showMessage} from "../../../dialog/message";
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../../dialog/themeColorEditor";
 import {isMobile} from "../../../util/functions";
@@ -47,13 +47,14 @@ export const openAVCustomColorDialog = (options: {
     const draft = cloneCustomColors(getAVCustomColors());
     let orderDraft = [...getAVColorOrder()];
     const builtinDraft = cloneInlineStyles();
+    const baseline = JSON.stringify({av: {colors: cloneCustomColors(draft), order: normalizeAVColorOrder(orderDraft, draft)}, builtin: builtinDraft.builtin});
     const modifiedBuiltinIndexes = new Set<number>();
     const usedIndexes = new Set(options.data.usedCustomColorIndexes || []);
     const properties = getProperties("av");
     let editingColorIndex: number | undefined;
     let editingBuiltinKey: string | undefined;
     let saving = false;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: window.siyuan.languages.manageColors,
         width: isMobile() ? "92vw" : "600px",
         content: `<div class="b3-dialog__content" style="max-height:70vh">
@@ -184,14 +185,17 @@ export const openAVCustomColorDialog = (options: {
 
     const confirmEditor = () => {
         if (editingBuiltinKey) {
-            writeBuiltinDraft(builtinEditor.commit(getBuiltinEntry(editingBuiltinKey)));
+            const entry = builtinEditor.commit(getBuiltinEntry(editingBuiltinKey));
+            if (!entry) { return; }
+            writeBuiltinDraft(entry);
             showList();
             return;
         }
         if (typeof editingColorIndex !== "number") {
             return;
         }
-        const value = themeColorEditor.getValue("style1");
+        const value = themeColorEditor.commitDraft("style1");
+        if (!value) { return; }
         const previous = findCustomColor(editingColorIndex);
         const color: IAVCustomColor = {
             index: editingColorIndex,
@@ -285,11 +289,16 @@ export const openAVCustomColorDialog = (options: {
                 showMessage(window.siyuan.languages.invalid, 6000, "error");
                 return;
             }
-            mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
-                draft.splice(draft.indexOf(color), 1);
-                orderDraft = orderDraft.filter(item => item !== key);
-                renderList();
-            }, undefined, true);
+            confirmDialog({
+                title: window.siyuan.languages.deleteOpConfirm,
+                text: window.siyuan.languages.confirmDelete,
+                confirm: () => {
+                    draft.splice(draft.indexOf(color), 1);
+                    orderDraft = orderDraft.filter(item => item !== key);
+                    renderList();
+                },
+                isDelete: true,
+            });
         } else if (action === "cancelEdit") {
             showList();
         } else if (action === "confirmEdit") {
@@ -304,6 +313,10 @@ export const openAVCustomColorDialog = (options: {
                     colors: cloneCustomColors(draft),
                     order: normalizeAVColorOrder(orderDraft, draft),
                 };
+                if (JSON.stringify({av: builtinDraft.av, builtin: builtinDraft.builtin}) === baseline) {
+                    dialog.destroy();
+                    return;
+                }
                 const response = await saveWorkspaceAVPalette(builtinDraft.av,
                     Array.from(modifiedBuiltinIndexes).map(index => {
                         const color = builtinDraft.builtin.colors.find(item => item.index === index);

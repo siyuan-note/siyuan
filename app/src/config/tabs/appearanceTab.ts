@@ -1,5 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {toggleMenu} from "../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../menus/Menu";
 /// #if !BROWSER
@@ -29,6 +28,7 @@ import {genStackHtml} from "../render/render";
 import {controlBoolean} from "../setting/control";
 import {editorConfigApi} from "./editorRuntime";
 import {appearanceConfigApi, appearanceThemeModeValue, saveThemeMode} from "./appearanceRuntime";
+import {bindAppearanceFontInput, type FontFamiliesConfigKey, syncAppearanceFontInputs} from "./appearanceFontSettings";
 import {upDownHint} from "../../util/upDownHint";
 import {isThemeFrontendSupported} from "../../util/themeCompatibility";
 import {setEditorFontSize} from "../../util/editorFontSize";
@@ -64,7 +64,6 @@ interface IBootAppearanceListData {
     current: IBootAppearanceSelection;
 }
 
-type FontFamiliesConfigKey = "globalFontFamilies" | "fontFamilies" | "codeFontFamilies";
 type FontConfig = Pick<Config.IEditor, "fontFamilies" | "codeFontFamilies"> &
     Pick<Config.IAppearance, "globalFontFamilies">;
 
@@ -186,11 +185,13 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
     });
 };
 
+const fontCheckedHtml = '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>';
+
 const genFontListItemHtml = (item: IFontItem, checked: boolean) => {
     const searchText = [item.family, item.displayName, ...(item.aliases || [])].join("\n").toLowerCase();
     return `<div class="b3-list-item b3-list-item--narrow" data-id="${escapeAttr(item.id || "")}">
     <span class="b3-menu__label" data-family="${escapeAttr(item.family)}" data-name="${escapeAttr(item.displayName)}" data-search="${escapeAttr(searchText)}" data-spacing="${escapeAttr(item.spacing || "")}" data-weight="${item.weight || 400}">${escapeHtml(item.displayName)}</span>
-    ${checked ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
+    ${checked ? fontCheckedHtml : ""}
     ${item.id && !window.siyuan.config.readonly ? `<svg class="b3-menu__action b3-menu__action--show fn__flex-shrink ariaLabel" data-type="delete-font" aria-label="${escapeAttr(window.siyuan.languages.delete)}"><use xlink:href="#iconTrashcan"></use></svg>` : ""}
 </div>`;
 };
@@ -310,8 +311,6 @@ const bindSelectedFontList = (element: HTMLElement, getFonts: () => IFontItem[],
     });
 };
 
-const mountedFontConfigUpdaters = new WeakMap<HTMLElement, (config: FontConfig) => void>();
-
 const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesConfigKey) => {
     const fontConfigElement = root.querySelector<HTMLElement>(`[data-font-config-key="${configKey}"]`);
     const fontFamiliesElement = fontConfigElement?.querySelector<HTMLInputElement>(
@@ -335,30 +334,22 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         fontFamiliesElement.value = getEditorFontDisplay(selectedFonts) || window.siyuan.languages.default;
     };
     const persistFonts = (fonts: IFontItem[]) => {
-        const globalFont = configKey === "globalFontFamilies";
         const configuredFonts = fonts.map((font) => ({
             family: font.family,
             weight: font.weight,
             displayName: font.displayName,
         }));
-        const refreshFonts = () => {
-            const config = getFontConfig();
-            selectedFonts = getConfiguredFonts(config, configKey);
-            renderSelectedFonts();
-            refreshMountedFontConfigs(config, fontConfigElement);
-            refreshOpenMenu?.();
-        };
-        if (globalFont) {
-            void appearanceConfigApi.patch("globalFontFamilies", configuredFonts, refreshFonts);
+        if (configKey === "globalFontFamilies") {
+            void appearanceConfigApi.patch(configKey, configuredFonts);
         } else {
-            void editorConfigApi.patch(configKey, configuredFonts, refreshFonts);
+            void editorConfigApi.patch(configKey, configuredFonts, () => syncAppearanceFontInputs(configKey));
         }
     };
     bindSelectedFontList(selectedListElement, () => selectedFonts, persistFonts, (chip, index, event) => {
         openFontWeightMenu(chip, index, event);
     });
-    mountedFontConfigUpdaters.set(fontConfigElement, updateFontInput);
-    updateFontInput(getFontConfig());
+    bindAppearanceFontInput(fontConfigElement, updateFontInput);
+    updateFontInput();
     fontFamiliesElement.addEventListener("click", async (event) => {
         await toggleMenu({
             target: fontFamiliesElement,
@@ -425,22 +416,42 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                         const listElement = element.querySelector<HTMLElement>('[data-type="available-fonts"]');
                         const inputElement = element.querySelector<HTMLInputElement>('[data-type="font-search"]');
                         let showAllFonts = configKey !== "codeFontFamilies";
-                        const refreshFontMenu = () => {
-                            listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach((item) => {
-                                const label = item.querySelector<HTMLElement>(".b3-menu__label");
-                                const checked = selectedFonts.some((font) =>
-                                    font.family === label.dataset.family && font.weight === parseInt(label.dataset.weight, 10));
-                                item.querySelector(".b3-menu__checked")?.remove();
-                                if (checked) {
-                                    item.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>');
-                                }
-                            });
+                        let searchTerm = "";
+                        const labels = listElement.querySelectorAll<HTMLElement>(".b3-list-item .b3-menu__label");
+                        const updateVisibility = (label: HTMLElement, selected: boolean) => {
+                            const visible = (showAllFonts || selected || isCodeFont({spacing: label.dataset.spacing})) &&
+                                (!searchTerm || label.dataset.search.includes(searchTerm));
+                            label.parentElement.classList.toggle("fn__none", !visible);
+                        };
+                        const focusClass = "b3-list-item--focus";
+                        const focusItem = (item?: Element | null) => {
+                            const current = listElement.querySelector("." + focusClass);
+                            if (current === item) return;
+                            current?.classList.remove(focusClass);
+                            item?.classList.add(focusClass);
                         };
                         refreshOpenMenu = () => {
-                            refreshFontMenu();
-                            filterFontList();
+                            const focused = listElement.querySelector("." + focusClass);
+                            labels.forEach((label) => {
+                                const item = label.parentElement;
+                                const checked = selectedFonts.some((font) =>
+                                    font.family === label.dataset.family && font.weight === parseInt(label.dataset.weight, 10));
+                                const check = item.querySelector(".b3-menu__checked");
+                                if (checked === !!check) return;
+                                if (check) {
+                                    check.remove();
+                                } else {
+                                    label.insertAdjacentHTML("afterend", fontCheckedHtml);
+                                }
+                                if (!showAllFonts) updateVisibility(label, checked);
+                            });
+                            if (focused && !focused.classList.contains("fn__none")) return;
+                            let nextItem = focused?.nextElementSibling;
+                            while (nextItem?.classList.contains("fn__none")) nextItem = nextItem.nextElementSibling;
+                            let previousItem = focused?.previousElementSibling;
+                            while (!nextItem && previousItem?.classList.contains("fn__none")) previousItem = previousItem.previousElementSibling;
+                            focusItem(nextItem || previousItem || listElement.querySelector(".b3-list-item:not(.fn__none)"));
                         };
-                        refreshFontMenu();
                         cleanupFontPreview = observeFontPreview(listElement, (label, item) => {
                             const customFont = item.dataset.id ? customFontsByID.get(item.dataset.id) : undefined;
                             if (customFont) {
@@ -450,28 +461,24 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                             label.style.fontWeight = label.dataset.weight;
                         });
                         function filterFontList() {
-                            const value = inputElement.value.toLowerCase().trim();
-                            listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
-                            listElement.querySelectorAll<HTMLElement>(".b3-list-item .b3-menu__label").forEach((item) => {
-                                const name = item.dataset.name;
-                                const selected = selectedFonts.some((font) =>
-                                    font.family === item.dataset.family && font.weight === parseInt(item.dataset.weight, 10));
-                                const codeFontVisible = showAllFonts || selected || isCodeFont({spacing: item.dataset.spacing});
-                                const searchVisible = !value || item.dataset.search.includes(value);
-                                item.parentElement.classList.toggle("fn__none", !(codeFontVisible && searchVisible));
-                                const idx = name.toLowerCase().indexOf(value);
-                                item.replaceChildren(document.createTextNode(name));
-                                if (idx !== -1 && value) {
+                            searchTerm = inputElement.value.toLowerCase().trim();
+                            labels.forEach((label) => {
+                                const name = label.dataset.name;
+                                updateVisibility(label, !!label.parentElement.querySelector(".b3-menu__checked"));
+                                const idx = name.toLowerCase().indexOf(searchTerm);
+                                if (idx !== -1 && searchTerm) {
                                     const markElement = document.createElement("mark");
-                                    markElement.textContent = name.slice(idx, idx + value.length);
-                                    item.replaceChildren(
+                                    markElement.textContent = name.slice(idx, idx + searchTerm.length);
+                                    label.replaceChildren(
                                         document.createTextNode(name.slice(0, idx)),
                                         markElement,
-                                        document.createTextNode(name.slice(idx + value.length))
+                                        document.createTextNode(name.slice(idx + searchTerm.length))
                                     );
+                                } else {
+                                    label.textContent = name;
                                 }
                             });
-                            listElement.querySelector(".b3-list-item:not(.fn__none)")?.classList.add("b3-list-item--focus");
+                            focusItem(listElement.querySelector(".b3-list-item:not(.fn__none)"));
                         }
                         filterFontList();
                         element.querySelector<HTMLElement>('[data-type="show-all-fonts"]')?.addEventListener("click", (event) => {
@@ -538,12 +545,12 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                             }
                             if (target.closest('[data-type="delete-font"]')) {
                                 const id = itemElement.dataset.id;
-                                mobileConfirmDialog(
-                                    window.siyuan.languages.deleteOpConfirm,
-                                    window.siyuan.languages.deleteFontConfirm.replace(
+                                confirmDialog({
+                                    title: window.siyuan.languages.deleteOpConfirm,
+                                    text: window.siyuan.languages.deleteFontConfirm.replace(
                                         "${x}", `<b>${escapeHtml(itemEl.dataset.name)}</b>`),
-                                    () => {
-                                        fetchPost("/api/system/removeCustomFont", {id}, (response) => {
+                                    confirm: () => {
+                                        fetchPost("/api/system/removeCustomFont", {id}, async (response) => {
                                             if (response.code !== 0) {
                                                 return;
                                             }
@@ -553,18 +560,18 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                                                 appearanceConfigApi.apply(response.data.appearance);
                                             }
                                             if (response.data.editor) {
-                                                editorConfigApi.apply(response.data.editor);
+                                                await editorConfigApi.apply(response.data.editor);
+                                                syncAppearanceFontInputs("fontFamilies");
+                                                syncAppearanceFontInputs("codeFontFamilies");
                                             }
-                                            updateFontInput(getFontConfig());
-                                            refreshMountedFontConfigs(getFontConfig(), fontConfigElement);
-                                            fontMenu.close();
+                                            if (!closed) fontMenu.close();
                                         });
                                     },
-                                    undefined,
-                                    true
-                                );
+                                    isDelete: true,
+                                });
                                 return;
                             }
+                            focusItem(itemElement);
                             toggleEditorFont(fontItemFromElement(itemEl));
                         });
 
@@ -659,43 +666,13 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         });
     }
 
-    function updateFontInput(data: FontConfig) {
-        selectedFonts = getConfiguredFonts(data, configKey);
+    function updateFontInput() {
+        selectedFonts = getConfiguredFonts(getFontConfig(), configKey);
         fontFamiliesElement.style.removeProperty("font-family");
         fontFamiliesElement.style.removeProperty("font-weight");
         renderSelectedFonts();
+        refreshOpenMenu?.();
     }
-};
-
-const refreshMountedFontConfigs = (config: FontConfig, currentElement?: HTMLElement) => {
-    document.querySelectorAll<HTMLElement>("[data-font-config-key]").forEach((fontConfigElement) => {
-        if (fontConfigElement === currentElement) {
-            return;
-        }
-        const updateMountedFontConfig = mountedFontConfigUpdaters.get(fontConfigElement);
-        if (updateMountedFontConfig) {
-            updateMountedFontConfig(config);
-            return;
-        }
-        const configKey = fontConfigElement.dataset.fontConfigKey as FontFamiliesConfigKey;
-        const fonts = getConfiguredFonts(config, configKey);
-        const selectedListElement = fontConfigElement.querySelector<HTMLElement>('[data-type="selected-fonts"]');
-        const fontFamiliesElement = fontConfigElement.querySelector<HTMLInputElement>(
-            `#${CSS.escape(getFontConfigPath(configKey))}`);
-        if (!selectedListElement || !fontFamiliesElement) {
-            return;
-        }
-        selectedListElement.innerHTML = genSelectedFontListHtml(fonts);
-        selectedListElement.classList.toggle("fn__none", fonts.length === 0);
-        selectedListElement.querySelectorAll<HTMLElement>(".b3-chip").forEach((chip) => {
-            const textElement = chip.querySelector<HTMLElement>(".config-font-family__text");
-            if (textElement) {
-                textElement.style.fontFamily = CSS.escape(chip.dataset.family);
-                textElement.style.fontWeight = chip.dataset.weight;
-            }
-        });
-        fontFamiliesElement.value = getEditorFontDisplay(fonts) || window.siyuan.languages.default;
-    });
 };
 
 const fontItemFromElement = (item: HTMLElement): IFontItem => ({
@@ -1137,11 +1114,11 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         icon: "iconUndo",
         afterMount: (root) => {
             root.querySelector("#resetLayout")?.addEventListener("click", () => {
-                confirmDialog(
-                    "⚠️ " + window.siyuan.languages.reset,
-                    window.siyuan.languages.appearance6,
-                    resetLayout
-                );
+                confirmDialog({
+                    title: "⚠️ " + window.siyuan.languages.reset,
+                    text: window.siyuan.languages.appearance6,
+                    confirm: resetLayout,
+                });
             });
         },
     });
@@ -1211,7 +1188,7 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
             }
             return true;
         };
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             mobileSheet: {beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
@@ -1273,7 +1250,7 @@ const mountAppearanceSetNotifications = (root: HTMLElement) => {
             }
             return true;
         };
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             mobileSheet: {beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",

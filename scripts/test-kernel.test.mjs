@@ -97,6 +97,39 @@ test("compilation records its interval and logs the end even when the process fa
     assert.equal(messages.filter(message => message.startsWith("compile: END ")).length, 3);
 });
 
+test("compilation retries interrupted module downloads without repeating test execution", async t => {
+    const directory = temporary(t);
+    const counter = join(directory, "attempts");
+    const diagnostic = 'heif/internal/h265heic/color.go:4:2: github.com/gen2brain/h265@v0.1.1: read "https://proxy.golang.org/github.com/gen2brain/h265/@v/v0.1.1.zip": stream error: stream ID 431; INTERNAL_ERROR; received from peer';
+    const script = `const fs = require("node:fs");
+        const path = ${JSON.stringify(counter)};
+        const count = fs.existsSync(path) ? Number(fs.readFileSync(path)) + 1 : 1;
+        fs.writeFileSync(path, String(count));
+        if (count === 1) { console.error(${JSON.stringify(diagnostic)}); process.exitCode = 1; }`;
+    await runCompilation(["-e", script], directory, process.execPath);
+    assert.equal(readFileSync(counter, "utf8"), "2");
+});
+
+test("compilation bounds persistent download retries and never retries permanent failures", async t => {
+    const directory = temporary(t);
+    for (const [diagnostic, attempts] of [
+        ['read "https://proxy.golang.org/example.org/module/@v/v1.0.0.zip": stream error: stream ID 1; INTERNAL_ERROR; received from peer', 3],
+        ['read "https://proxy.golang.org/example.org/module/@v/v1.0.0.zip": 404 Not Found', 1],
+        ["verifying module: checksum mismatch", 1],
+        ["model/example.go:1:1: undefined: missingSymbol", 1],
+        ["test server: connection reset by peer", 1],
+    ]) {
+        const counter = join(directory, "attempts");
+        writeFileSync(counter, "0");
+        const script = `const fs = require("node:fs");
+            const path = ${JSON.stringify(counter)};
+            fs.writeFileSync(path, String(Number(fs.readFileSync(path)) + 1));
+            console.error(${JSON.stringify(diagnostic)}); process.exitCode = 1;`;
+        await assert.rejects(runCompilation(["-e", script], directory, process.execPath), /compilation failed: 1/);
+        assert.equal(Number(readFileSync(counter, "utf8")), attempts, diagnostic);
+    }
+});
+
 test("each model process has isolated relative writes while retaining repository fixtures", t => {
     const directory = temporary(t);
     const repository = join(directory, "repository");

@@ -47,6 +47,7 @@ const browserCases = async (source: string, css: string) => {
             const view = new api.ListMindmapView({host, model, onExit: () => {},
                 colors: () => Array.from({length: 13}, (_, i) => ({label: `Color ${i}`, value: `rgb(${i}, 0, 0)`})),
                 onManageLineColors: () => {},
+                onRelationMenu: () => {},
                 onNodeWidths: async () => true});
             const inspector = host.querySelector<HTMLElement>(".mindmap-view__inspector");
             const panel = host.querySelector<HTMLElement>(".mindmap-view__inspector-popover");
@@ -222,6 +223,26 @@ const browserCases = async (source: string, css: string) => {
             stage = "relation";
             await settle();
             visible(inspector);
+            check.equal(inspector.querySelector('[aria-label="listMindmapManageLineColors"] use')?.getAttribute("xlink:href"),
+                "#iconSettings");
+            check.equal(inspector.querySelector('[aria-label="listMindmapRelationAppearance"] use')?.getAttribute("xlink:href"),
+                "#iconLine", "palette management and relation appearance use distinct icons on desktop and mobile");
+            const relationPalette = inspector.querySelector(".mindmap-view__palette");
+            const relationColors = Array.from(relationPalette.children).slice(0, 5);
+            const [paletteRow, ...relationActions] = Array.from(inspector.children);
+            const relationControls = [...relationColors, paletteRow.lastElementChild, ...relationActions]
+                .map(control => control.getBoundingClientRect());
+            for (let i = 1; i < relationControls.length; i++) {
+                const gap = relationControls[i].left - relationControls[i - 1].right;
+                check.ok(Math.abs(gap / scale - 4) < .1, `relation control ${i} has a ${gap / scale}px gap`);
+            }
+            if (mobile) {
+                check.ok(inspector.scrollWidth > inspector.clientWidth, "the narrow toolbar scrolls horizontally");
+                inspector.scrollLeft = inspector.scrollWidth;
+                check.ok(relationActions.at(-1).getBoundingClientRect().right <= inspector.getBoundingClientRect().right,
+                    "scrolling exposes the last relation action");
+                inspector.scrollLeft = 0;
+            }
             await checkPalette(5);
             view.selectedRelation = undefined;
             view.model.metadata.relations = [];
@@ -394,12 +415,12 @@ test("mindmap node widths support mouse and touch drags, cancellation and clippe
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const source = ["../av/richTextValue.ts", "summary.ts", "connectors.ts", "appearance.ts", "model.ts", "fold.ts", "routing.ts", "pan.ts", "view.ts"]
+    const source = ["../av/richTextValue.ts", "summary.ts", "connectors.ts", "appearance.ts", "relationGeometry.ts", "model.ts", "fold.ts", "routing.ts", "pan.ts", "view.ts"]
         .map(file => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""), {
             compilerOptions: {target: ScriptTarget.ES2021},
         }).outputText).join("\n");
-    const css = ["business/_block.scss", "business/_color.scss", "component/_svg.scss", "protyle/_mindmap-view.scss"]
+    const css = ["business/_block.scss", "business/_color.scss", "component/_select.scss", "component/_svg.scss", "protyle/_mindmap-view.scss"]
         .map(file => require("sass").compile(path.resolve(__dirname, "../../../assets/scss", file),
             {logger: require("sass").Logger.silent}).css).join("\n");
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-mindmap-inspector-"));

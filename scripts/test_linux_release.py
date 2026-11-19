@@ -4,12 +4,13 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 
 
 @unittest.skipUnless(os.name == 'posix' and shutil.which('setsid'), 'Linux process groups required')
 class LinuxReleaseTests(unittest.TestCase):
-    def run_build(self, fail=False, fail_harmony=False):
+    def run_build(self, fail=False, fail_harmony=False, wait_for_windows=False):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
@@ -36,6 +37,12 @@ if [[ "$FAIL_ARCH" == "$GOARCH" ]]; then exit 9; fi
 echo "$GOARCH-end" >> "$EVENTS"
 ''')
         executable(root / 'bin/pnpm', '''
+if [[ "$1" == install ]]; then
+ echo dependencies-installed >> "$EVENTS"
+fi
+if [[ "$2" == install:electron ]]; then
+ echo frontend-start >> "$EVENTS"
+fi
 if [[ "$2" == dist-linux* ]]; then
  [[ "$ELECTRON_BUILDER_COMPRESSION_LEVEL" == 5 ]] || exit 11
  echo "package-start" >> "$EVENTS"
@@ -54,10 +61,30 @@ echo harmony-end >> "$EVENTS"
         env = dict(os.environ, PATH=str(root / 'bin') + ':' + os.environ['PATH'], HOME=str(root),
                    EVENTS=str(root / 'events'), FAIL_ARCH='arm64' if fail else '',
                    FAIL_HARMONY='1' if fail_harmony else '', ELECTRON_BUILDER_COMPRESSION_LEVEL='9')
-        result = subprocess.run(['bash', str(root / 'scripts/linux-build.sh'), '--with-harmony-kernel',
-                                 '--harmony-ready-file=' + str(root / 'ready'),
-                                 '--process-id-file=' + str(root / 'pid')],
-                                cwd=root, env=env, capture_output=True, text=True, timeout=10)
+        command = ['bash', str(root / 'scripts/linux-build.sh'), '--with-harmony-kernel',
+                   '--harmony-ready-file=' + str(root / 'ready'), '--process-id-file=' + str(root / 'pid')]
+        if wait_for_windows:
+            windows_ready = root / 'windows-ready'
+            command.append('--windows-ready-file=' + str(windows_ready))
+            log = root / 'stdout'
+            with log.open('w') as out, subprocess.Popen(command, cwd=root, env=env, stdout=out,
+                                                        stderr=subprocess.STDOUT) as process:
+                try:
+                    waiting = 'Frontend dependencies installed; waiting for Windows packaging'
+                    deadline = time.monotonic() + 5
+                    while waiting not in log.read_text() and process.poll() is None and time.monotonic() < deadline:
+                        time.sleep(0.02)
+                    self.assertIn(waiting, log.read_text())
+                    self.assertEqual((root / 'events').read_text().splitlines(),
+                                     ['toolchain-ready', 'dependencies-installed'])
+                    windows_ready.touch()
+                    process.wait(timeout=10)
+                finally:
+                    if process.poll() is None:
+                        process.kill()
+            result = subprocess.CompletedProcess(command, process.returncode, log.read_text(), '')
+        else:
+            result = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True, timeout=10)
         self.assertTrue((root / 'pid').read_text().strip().isdigit())
         self.assertEqual((root / 'ready').exists(), not fail and not fail_harmony)
         self.assertEqual((root / 'ready.failed').exists(), fail_harmony)
@@ -71,6 +98,12 @@ echo harmony-end >> "$EVENTS"
                         min(events.index('amd64-end'), events.index('arm64-end')))
         self.assertLess(events.index('harmony-start'), events.index('package-end'))
         self.assertLess(events.index('package-start'), events.index('harmony-end'))
+
+    def test_dependencies_install_once_before_waiting_for_windows(self):
+        result, events = self.run_build(wait_for_windows=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(events.count('dependencies-installed'), 1)
+        self.assertLess(events.index('dependencies-installed'), events.index('frontend-start'))
 
     def test_failed_kernel_prevents_packaging(self):
         result, events = self.run_build(fail=True)

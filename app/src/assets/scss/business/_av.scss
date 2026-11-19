@@ -1973,6 +1973,12 @@
         white-space: nowrap;
         text-overflow: ellipsis;
 
+        img {
+          max-height: 1.5em;
+          width: auto;
+          vertical-align: middle;
+        }
+
         p,
         h1,
         h2,

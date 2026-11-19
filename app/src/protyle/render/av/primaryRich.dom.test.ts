@@ -187,8 +187,38 @@ const cases = async (sources: Record<string, string>, styles: Record<string, str
     check.equal(template.content.querySelector("[contenteditable]"), null);
     const style = document.createElement("style");
     document.head.append(style);
-    for (const css of Object.values(styles)) {
+    const imageCanvas = document.createElement("canvas");
+    imageCanvas.width = 480;
+    imageCanvas.height = 640;
+    const imageSource = imageCanvas.toDataURL();
+    const textWithImage = {type: "text", text: {content: "First\nSecond\nThird",
+        rich: {spec: 1, format: "kramdown", content: "First\n\nSecond ![photo](assets/photo.png) after\n\nThird"}}};
+    for (const [entry, css] of Object.entries(styles)) {
         style.textContent = css;
+        for (const view of ["table", "calendar"] as const) {
+            for (const fontSize of [16, 24]) {
+                const host = document.createElement("div");
+                host.className = "protyle-wysiwyg";
+                host.style.fontSize = `${fontSize}px`;
+                host.innerHTML = `<div class="av" data-av-type="${view}"><div class="av__row"><div class="${view === "calendar" ? "av__calendar-field" : "av__cell"}" data-dtype="text" data-wrap="false" style="width:200px">${cell.renderCell(textWithImage, 0, false, view, undefined, "", undefined, false)}</div></div></div>`;
+                document.body.append(host);
+                const preview = host.querySelector<HTMLElement>(".av__celltext--rich");
+                const image = preview.querySelector("img");
+                image.src = imageSource;
+                await image.decode();
+                const line = document.createRange();
+                line.selectNodeContents(preview.firstElementChild);
+                const bounds = preview.getBoundingClientRect();
+                check.ok(line.getBoundingClientRect().bottom <= bounds.bottom,
+                    `${entry}/${view}/${fontSize}: the image must leave the first line visible with wrapping off`);
+                check.ok(image.getBoundingClientRect().height <= bounds.height,
+                    `${entry}/${view}/${fontSize}: the image fits the single-line preview`);
+                preview.parentElement.dataset.wrap = "true";
+                check.ok(image.getBoundingClientRect().height > bounds.height,
+                    `${entry}/${view}/${fontSize}: wrapping allows the image to grow`);
+                host.remove();
+            }
+        }
         const emptyHost = document.createElement("div");
         emptyHost.className = "protyle-wysiwyg";
         emptyHost.contentEditable = "true";
@@ -261,7 +291,7 @@ const cases = async (sources: Record<string, string>, styles: Record<string, str
     style.remove();
 };
 
-test("primary rich text preserves inline elements and supports empty legacy editing and plain text paste", async () => {
+test("database rich text renders primary and text previews and supports legacy primary editing and paste", async () => {
     const profile = mkdtempSync(join(tmpdir(), "siyuan-primary-rich-"));
     const env = {...process.env}; delete env.ELECTRON_RUN_AS_NODE;
     try {

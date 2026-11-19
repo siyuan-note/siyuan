@@ -5354,6 +5354,13 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 
 		view.GroupItemIDs = masterView.GroupItemIDs
 		regenAttrViewGroups(attrView)
+		foldedGroups := make(map[string]bool, len(masterView.Groups))
+		for _, group := range masterView.Groups {
+			foldedGroups[group.GetGroupValue()] = group.GroupFolded
+		}
+		for _, group := range view.Groups {
+			group.GroupFolded = foldedGroups[group.GetGroupValue()]
+		}
 	}
 
 	if err = avSaveView(attrView, operation.BlockID); err != nil {

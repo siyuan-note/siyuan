@@ -1,4 +1,5 @@
 import type {MarkdownEditorSnapshot} from "./contracts";
+import {createMarkdownCapabilityToken} from "./identity";
 import {MARKDOWN_DOCUMENT_BYTES, MARKDOWN_RENDER_BYTES, MARKDOWN_RECOVERY_BYTES, markdownByteLength} from "./limits";
 import {markdownLinkDestination} from "./link";
 import {createMarkdownPanelAnimation} from "./panelAnimation";
@@ -125,6 +126,24 @@ const renderedMethods = new Set(["Md2VditorDOM", "Md2VditorIRDOM", "SpinVditorDO
     "HTML2VditorDOM", "HTML2VditorIRDOM", "Md2HTML", "VditorDOM2HTML", "VditorIRDOM2HTML"]);
 const htmlInputMethods = new Set(["SpinVditorDOM", "SpinVditorIRDOM", "HTML2VditorDOM", "HTML2VditorIRDOM",
     "VditorDOM2Md", "VditorIRDOM2Md", "HTML2Md", "VditorDOM2HTML", "VditorIRDOM2HTML"]);
+
+const serializeWysiwygMarkdown = (document: Document, html: string, serialize: (html: string) => string): string => {
+    if (!/>(?:\s|\u200b|&nbsp;|<br>|<wbr>)*<\/h[1-6]>/i.test(html)) return serialize(html);
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    const headings = Array.from(template.content.querySelectorAll("h1, h2, h3, h4, h5, h6")).filter(heading =>
+        heading.hasAttribute("data-block") && Array.from(heading.childNodes).every(node =>
+            node.nodeName === "BR" || node.nodeName === "WBR" ||
+            (node.nodeType === Node.TEXT_NODE && /^[\s\u200b]*$/.test(node.textContent))
+        )
+    );
+    if (headings.length === 0) return serialize(html);
+
+    // Lute 只序列化带正文的所见即所得标题，临时正文让空标题也能参与保存和撤销。
+    const marker = createMarkdownCapabilityToken();
+    headings.forEach(heading => heading.textContent = marker);
+    return serialize(template.innerHTML).replaceAll(marker, "");
+};
 
 export const createMarkdownEditor = async (options: MarkdownEditorOptions,
     factory: MarkdownVditorFactory = createVditor,
@@ -572,7 +591,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 after: () => queueMicrotask(() => {
                     try {
                         if (destroyed) return;
-                        if (instance.version !== "4.0.2-alpha.9") throw new Error("Unsupported Markdown editor version");
+                        if (instance.version !== "4.0.2-alpha.10") throw new Error("Unsupported Markdown editor version");
                         if (element.id) instance.vditor.outline.element.id = `${element.id}-outline`;
                         outlineAnimation = createMarkdownPanelAnimation({
                             element: instance.vditor.outline.element,
@@ -628,6 +647,9 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                             if (typeof original !== "function") return;
                             lute[name] = (...args: string[]) => {
                                 if (htmlInputMethods.has(name)) args[0] = policy.restore(args[0]);
+                                if (name === "VditorDOM2Md") {
+                                    return serializeWysiwygMarkdown(document, args[0], html => original.call(lute, html));
+                                }
                                 const result = original.apply(lute, args);
                                 return renderedMethods.has(name) ? policy.sanitize(result) : result;
                             };

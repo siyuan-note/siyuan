@@ -567,6 +567,24 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
             editor.redo(); await tick();
             check.equal(editor.flush().content, keyboardEdit.content, `keyboard redo in ${mode}`);
 
+            editor.setValue("###\n\n### Next\n");
+            await new Promise(resolve => setTimeout(resolve, 350));
+            placeCaret(richSurface.querySelector("h3"));
+            const headingBackspace = new KeyboardEvent("keydown", {key: "Backspace", bubbles: true, cancelable: true});
+            richSurface.dispatchEvent(headingBackspace);
+            check.equal(headingBackspace.defaultPrevented, true, `Vditor handles empty heading Backspace in ${mode}`);
+            const paragraph = richSurface.firstElementChild;
+            check.equal(paragraph.tagName, "P");
+            check.ok(paragraph.contains(getSelection().anchorNode));
+            check.deepEqual(editor.flush(), {content: "### Next\n", edited: true, composing: false},
+                `empty heading replacement flushes in ${mode}`);
+            await new Promise(resolve => setTimeout(resolve, 350));
+            check.equal(edits.at(-1).content, "### Next\n");
+            editor.undo(); await tick();
+            check.match(editor.flush().content, /^### ?\n\n### Next\n$/, `empty heading undo in ${mode}`);
+            editor.redo(); await tick();
+            check.equal(editor.flush().content, "### Next\n");
+
             editor.setValue(keyboardSource);
             await new Promise(resolve => setTimeout(resolve, 350));
             placeCaret(richSurface.querySelectorAll("li")[1]);
@@ -728,7 +746,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     return "Markdown editor DOM cases passed";
 };
 
-test("Vditor 4.0.2-alpha.9 adapter preserves content and isolates programmatic, input, composition and preview events", {
+test("Vditor 4.0.2-alpha.10 adapter preserves content and isolates programmatic, input, composition and preview events", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

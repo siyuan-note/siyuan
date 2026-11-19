@@ -944,7 +944,7 @@
 
 .agent-session-popup {
   width: 280px;
-  max-height: 360px;
+  max-height: min(360px, var(--agent-session-viewport-height, 360px));
   display: flex;
   flex-direction: column;
 }

@@ -11,6 +11,7 @@ const compiled = transpileModule(readFileSync("src/layout/dock/agent/AgentSessio
 for (const scenario of [
     {name: "desktop", mobile: false, phablet: false, focus: 1, closes: 1, positions: 1},
     {name: "tablet desktop layout", mobile: false, phablet: true, focus: 0, closes: 0, positions: 2},
+    {name: "tablet with desktop UA", mobile: false, phablet: false, touchViewport: true, focus: 0, closes: 0, positions: 3},
     {name: "phone", mobile: true, phablet: true, focus: 0, closes: 0, positions: 0},
 ]) {
     test(`session search survives keyboard resizing on ${scenario.name}`, async () => {
@@ -22,7 +23,8 @@ for (const scenario of [
         const input = {addEventListener() {}, focus() { focused++; }};
         const list = {addEventListener() {}};
         const popup = {
-            style: {},
+            style: {top: "", setProperty() {}},
+            getBoundingClientRect: () => ({top: 240, height: 160}),
             querySelector: (selector: string) => selector === ".b3-list" ? list : input,
             addEventListener() {},
             animate() {},
@@ -48,6 +50,9 @@ for (const scenario of [
                 return {};
             },
             window: {
+                matchMedia: () => ({matches: !!scenario.touchViewport}),
+                visualViewport: scenario.touchViewport ? {height: 300, offsetTop: 15,
+                    addEventListener: (type: string, handler: () => void) => listeners.set("visual-" + type, handler)} : null,
                 siyuan: {languages: {}, zIndex: 10},
                 addEventListener: (type: string, handler: () => void) => listeners.set(type, handler),
             },
@@ -63,6 +68,10 @@ for (const scenario of [
         await panel.render();
         closes = 0;
         listeners.get("resize")?.();
+        listeners.get("visual-resize")?.();
+        if (scenario.touchViewport) {
+            assert.equal(popup.style.top, "155px");
+        }
         assert.equal(focused, scenario.focus);
         assert.equal(closes, scenario.closes);
         assert.equal(positions, scenario.positions);

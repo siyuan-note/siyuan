@@ -130,6 +130,7 @@ Readers validate the original source envelope before tolerant AST repair. `spec`
 - The **root ID** comes from the filename and is **not** regenerated.
 - **Child block IDs** are newly generated with the above scheme; never copy literal IDs from examples or templates.
 - `Properties.updated` is the same 14-digit timestamp; semantics: "last updated time".
+- `Properties.custom-sy-tag-created` is an optional, kernel-managed JSON string mapping complete tag names to their addition times in Unix milliseconds. On a document root it covers document tags. On a content block it covers inline tags owned by that block. A missing entry represents an unknown addition time.
 - When changing block content or structure, refresh `Properties.updated` on the changed block, its block-level ancestors, applicable preceding headings, and the document root.
 - When you change any block's `ID`, you must **sync** `Properties.id`. Its `Properties.updated` must be no earlier than the creation time encoded by the new ID.
 - Compatible historical input may lack `updated`; however, canonical new writes should always include it on block nodes.

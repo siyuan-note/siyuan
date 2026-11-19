@@ -187,7 +187,8 @@ func (e Endpoint[Request, Data]) Definition() Definition { return e.definition }
 func Definitions() []Definition { return append([]Definition(nil), definitions...) }
 
 var (
-	Version       = define[EmptyRequest, string]("version", "/api/system/version", PublicAccess, NoBody, ResponseOptions{}, "GET", "POST")
+	Version = define[EmptyRequest, string]("version", "/api/system/version", PublicAccess, NoBody, ResponseOptions{}, "GET", "POST")
+	// custom-sy-tag-created 存在时为内核维护的 JSON 字符串，键为完整标签名，值为关联创建时的 Unix 毫秒数；缺失表示时间未知。
 	GetBlockAttrs = define[BlockIDRequest, map[string]string]("getBlockAttrs", "/api/attr/getBlockAttrs", AuthenticatedAccess, JSONBody, ResponseOptions{NonNullable: true}, "POST")
 	SetBlockAttrs = define[SetBlockAttrsRequest, Null]("setBlockAttrs", "/api/attr/setBlockAttrs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	SearchTag     = define[SearchTagRequest, SearchTagData]("searchTag", "/api/search/searchTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -347,6 +348,8 @@ var (
 	// 精确匹配标签及其子标签前缀，通过单笔可撤销事务改名并广播编辑操作；成功仍返回 null。
 	// 无匹配时不写入；源快照变化时拒绝提交，保留并发编辑。自动收集保留已有条目和字段。
 	RenameTag = define[RenameTagRequest, Null]("renameTag", "/api/tag/renameTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	// 按未转义的完整标签路径移动同级标签，允许虚拟父标签。保存手动排序，其他排序方式不受影响。
+	ReorderTag = define[ReorderTagRequest, Null]("reorderTag", "/api/tag/reorderTag", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
 )
 
 var (
@@ -358,7 +361,9 @@ var (
 	ReindexHistory            = define[EmptyRequest, Null]("reindexHistory", "/api/history/reindexHistory", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	ClearWorkspaceHistory     = define[EmptyRequest, Null]("clearWorkspaceHistory", "/api/history/clearWorkspaceHistory", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	BatchSetBlockAttrs        = define[BatchSetBlockAttrsRequest, Null]("batchSetBlockAttrs", "/api/attr/batchSetBlockAttrs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	GetTag                    = define[GetTagRequest, []*TagData]("getTag", "/api/tag/getTag", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "tag", Mode: SettingSilent}}, "POST")
+	// sort 为 6 时读取同级手动顺序，为 16 时按最新可见关联的添加时间降序排列同级标签。无记录的标签使用名称自然顺序。
+	// ignoreMaxListHint 为 true 时返回完整标签树。
+	GetTag = define[GetTagRequest, []*TagData]("getTag", "/api/tag/getTag", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "tag", Mode: SettingSilent}}, "POST")
 )
 
 var (

@@ -12,6 +12,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
@@ -63,7 +64,8 @@ func renameTag(oldLabel, newLabel string, beforeCommit func()) (*Transaction, er
 			}
 			changed[span.BlockID] = true
 		}
-		tx := &Transaction{fromAPI: true, Timestamp: time.Now().UnixMilli(), tagMutationSources: sources}
+		tx := &Transaction{fromAPI: true, Timestamp: time.Now().UnixMilli(), tagMutationSources: sources,
+			tagDateRename: [2]string{oldLabel, newLabel}}
 		tx.appendTagMutationOperations(before, after, changed)
 		if len(tx.DoOperations) == 0 {
 			return result{tx: tx}
@@ -73,6 +75,9 @@ func renameTag(oldLabel, newLabel string, beforeCommit func()) (*Transaction, er
 		}
 		if err := execute(tx); err != nil {
 			return result{err: err}
+		}
+		if err := renameTagSort(oldLabel, newLabel); err != nil {
+			logging.LogErrorf("rename tag order failed: %s", err)
 		}
 		return result{tx: tx}
 	})

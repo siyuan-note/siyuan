@@ -1800,16 +1800,10 @@ func FilterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags
 }
 
 func filterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags *Tags, spans []*sql.Span) (ret *Tags) {
-	publishInvisible := GetInvisiblePublishAccess(publishAccess)
-	publishDisable := GetDisablePublishAccess(publishAccess)
+	visible := TagPublishVisibility(c, publishAccess)
 	labelCounts := make(map[string]int)
 	for _, span := range spans {
-		if !CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishInvisible) ||
-			!CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishDisable) {
-			continue
-		}
-		passwordID, password := GetPathPasswordByPublishAccess(span.Box, span.Path, publishAccess)
-		if password != "" && !CheckPublishAuthCookie(c, passwordID, password) {
+		if !visible(span.Box, span.Path) {
 			continue
 		}
 		label := util.UnescapeHTML(span.Content)
@@ -1824,6 +1818,19 @@ func filterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags
 		}
 	}
 	return
+}
+
+func TagPublishVisibility(c *gin.Context, access PublishAccess) func(string, string) bool {
+	invisible := GetInvisiblePublishAccess(access)
+	disabled := GetDisablePublishAccess(access)
+	return func(box, path string) bool {
+		if !CheckPathAccessableByPublishIgnore(box, path, invisible) ||
+			!CheckPathAccessableByPublishIgnore(box, path, disabled) {
+			return false
+		}
+		id, password := GetPathPasswordByPublishAccess(box, path, access)
+		return password == "" || CheckPublishAuthCookie(c, id, password)
+	}
 }
 
 func reassignTagCounts(tag *Tag, counts map[string]int) (ret *Tag) {

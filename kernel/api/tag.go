@@ -6,6 +6,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -31,8 +32,14 @@ var getTag = contractHandler(apicontract.GetTag, func(c *gin.Context, request ap
 	if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
 		model.UpdateTagConf(func(s *conf.Tag) { s.Sort = int(request.Sort) })
 	}
-	tags := model.BuildTags(request.IgnoreMaxListHint, request.App, int(request.Sort))
-	if model.IsReadOnlyRoleContext(c) {
+	sort := int(request.Sort)
+	readonly := model.IsReadOnlyRoleContext(c)
+	var visible func(string, string) bool
+	if readonly && sort == util.SortModeTagCreatedDESC {
+		visible = model.TagPublishVisibility(c, model.GetPublishAccess())
+	}
+	tags := model.BuildTags(request.IgnoreMaxListHint, request.App, sort, visible)
+	if readonly && visible == nil {
 		tags = model.FilterTagsByPublishAccess(c, model.GetPublishAccess(), tags)
 	}
 	if tags == nil {
@@ -48,6 +55,14 @@ var renameTag = contractHandler(apicontract.RenameTag, func(c *gin.Context, requ
 	}
 	if len(tx.DoOperations) > 0 {
 		pushTransactions("", "", []*model.Transaction{tx})
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+
+var reorderTag = contractHandler(apicontract.ReorderTag, func(_ *gin.Context, request apicontract.ReorderTagRequest) apicontract.Response[apicontract.Null] {
+	if err := model.ReorderTag(request.Label, request.Target, request.Position); err != nil {
+		logging.LogWarnf("reorder tag failed: %s", err)
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, model.Conf.Language(258), 5000)
 	}
 	return apicontract.Success(apicontract.Null{})
 })

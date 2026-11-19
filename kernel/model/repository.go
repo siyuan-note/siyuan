@@ -2098,7 +2098,7 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 	if len(decisions) > 0 {
 		err = indexRepoForSourceDecision(repo, false)
 	} else {
-		_, _, err = indexRepoBeforeCloudSync0(repo)
+		_, _, err = indexRepoBeforeCloudSync0(checkoutTask.indexContext(context.Background()), repo)
 	}
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
@@ -2202,7 +2202,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 	if len(decisions) > 0 {
 		err = indexRepoForSourceDecision(repo, true)
 	} else {
-		_, _, err = indexRepoBeforeCloudSync(repo)
+		_, _, err = indexRepoBeforeCloudSync(checkoutTask.indexContext(context.Background()), repo)
 	}
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
@@ -2300,7 +2300,7 @@ func bootSyncRepo(complete func(error)) (scheduled bool, err error) {
 		defer logging.Recover()
 
 		start := time.Now()
-		_, _, indexErr = indexRepoBeforeCloudSync(repo)
+		_, _, indexErr = indexRepoBeforeCloudSync(context.Background(), repo)
 		logging.LogInfof("boot index repo elapsed [%.2fs]", time.Since(start).Seconds())
 	})
 	var cloudLatest *entity.Index
@@ -2383,7 +2383,7 @@ func bootSyncRepo(complete func(error)) (scheduled bool, err error) {
 			logging.LogInfof("syncing prepared boot data repo [device=%s, kernel=%s, provider=%d]", Conf.System.Load().ID, KernelID, confSyncSnapshot.Provider)
 			syncStart := time.Now()
 			indexStart := time.Now()
-			_, _, syncErr = indexRepoBeforeCloudSync(repo)
+			_, _, syncErr = indexRepoBeforeCloudSync(context.Background(), repo)
 			indexElapsed := time.Since(indexStart)
 			if nil == syncErr {
 				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, syncStart, indexElapsed, prefetchTraffic)
@@ -2437,6 +2437,7 @@ func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished
 	if !exit {
 		checkoutTask := startSyncCheckout(repo)
 		defer checkoutTask.finish(repo, &err)
+		ctx = checkoutTask.indexContext(ctx)
 	} else {
 		hooks, finish := exitSyncHooks(repo, ctx)
 		repo.SetCheckoutHooks(hooks)
@@ -2444,7 +2445,7 @@ func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished
 	}
 	start := time.Now()
 	indexStart := time.Now()
-	_, _, err = indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync(ctx, repo)
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		recordAutoSyncFailure(err)
@@ -2568,6 +2569,14 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	elapsed time.Duration, immediateIndex bool, previousNotebookConfs map[string][]byte) {
 	memorySyncSourcesChanged(mergeResult)
 	reloadSyncedDAV(mergeResult, &calendars, &contacts)
+	if !exit {
+		for _, files := range [][]*entity.File{mergeResult.Upserts, mergeResult.Removes} {
+			if slices.ContainsFunc(files, func(file *entity.File) bool { return file.Path == "/"+tagSortPath }) {
+				ReloadTag()
+				break
+			}
+		}
+	}
 	confSyncSnapshot := Conf.LoadSync()
 
 	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s, pfc=%d, pcc=%d, pb=%s, pf=%d] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
@@ -3152,15 +3161,15 @@ func needFullReindex(upsertTrees int) bool {
 
 var promotedPurgeDataRepo bool
 
-func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
+func indexRepoBeforeCloudSync(ctx context.Context, repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
 	if err = checkRepositoryPasswordMigration(); err != nil {
 		return
 	}
-	return indexRepoBeforeCloudSync0(repo)
+	return indexRepoBeforeCloudSync0(ctx, repo)
 }
 
 // Download-only recovery keeps the existing local safety index, without publishing it.
-func indexRepoBeforeCloudSync0(repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
+func indexRepoBeforeCloudSync0(ctx context.Context, repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
 	start := time.Now()
 
 	beforeIndex, _ = repo.Latest()
@@ -3177,9 +3186,8 @@ func indexRepoBeforeCloudSync0(repo *dejavu.Repo) (beforeIndex, afterIndex *enti
 
 	afterIndex, err = repo.Index("[Sync] Cloud sync", checkChunks, newSyncContext())
 	if errors.Is(err, dejavu.ErrIndexFileChanged) {
-		// 索引期间工作空间文件被修改属于瞬时竞态，重试一次以避免同步无谓中止
 		logging.LogWarnf("index data repo before cloud sync aborted because files changed, retry once: %s", err)
-		afterIndex, err = repo.Index("[Sync] Cloud sync", checkChunks, newSyncContext())
+		afterIndex, err = retrySyncIndex(ctx, repo, checkChunks)
 	}
 	if err != nil {
 		logging.LogErrorf("index data repo before cloud sync failed: %s", err)

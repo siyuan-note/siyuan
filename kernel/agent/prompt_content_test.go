@@ -62,6 +62,26 @@ func TestSourceContentPromptRespectsAvailableCapabilities(t *testing.T) {
 	}
 }
 
+func TestUserGuidePromptOpensAnUnlistedGuide(t *testing.T) {
+	for _, instruction := range []string{
+		"If the guide is absent from the list or closed, call notebook.open with its built-in ID",
+		"Once open, use search.fulltext with the guide ID in the notebook argument",
+	} {
+		if !strings.Contains(systemPrompt, instruction) {
+			t.Errorf("missing guide instruction %q", instruction)
+		}
+	}
+	for _, name := range []string{"notebook", "search"} {
+		set := &capabilitySet{registrations: map[string]*capabilityRegistration{
+			name: {ModelName: name},
+		}}
+		prompt := filterSystemPromptByCapabilities(systemPrompt, set)
+		if strings.Contains(prompt, "If the guide is absent from the list") {
+			t.Errorf("guide workflow exposed with only the %s capability", name)
+		}
+	}
+}
+
 func TestTurnContextIdentifiesPreviewsAndPrioritizesReads(t *testing.T) {
 	var references []Reference
 	if err := json.Unmarshal([]byte(`[{"id":"20261105000000-ref0001","title":"An incomplete anchor..."}]`), &references); err != nil {

@@ -957,7 +957,7 @@ export const resizeTopBar = () => {
 
     let beforeDragElement = dragElement.previousElementSibling as HTMLElement;
     while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2 &&
-        beforeDragElement && beforeDragElement.id !== "barWorkspace") {
+        beforeDragElement && beforeDragElement.id !== Constants.MENU_BAR_MAIN_MENU) {
         if (!beforeDragElement.classList.contains("fn__none") &&
             beforeDragElement.getAttribute("data-entry-hidden") !== "true" &&
             beforeDragElement.getAttribute("data-topbar-empty") !== "true") {

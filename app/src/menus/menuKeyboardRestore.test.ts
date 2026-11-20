@@ -12,12 +12,11 @@ const compiled = transpileModule(declaration.getText(source), {
     compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
 }).outputText;
 
-it("main menu plugin events keep the name declared in Petal", () => {
+it("plugin events report the main menu identifier on open and close", () => {
     const emitted: [string, string | null][] = [];
     const exports = {} as {Menu: typeof Menu};
     runInNewContext(compiled, {
         exports,
-        Constants: {MENU_BAR_MAIN_MENU: "barMainMenu"},
         forEachPluginSubscriber: (_type: string, callback: (subscriber: {
             emit: (type: string, detail: {name: string | null}) => void
         }) => void) => callback({emit: (type, detail) => emitted.push([type, detail.name])}),
@@ -28,8 +27,8 @@ it("main menu plugin events keep the name declared in Petal", () => {
     menu["emitCommonMenu"]("common-menu-closed", {name: "barMainMenu", from: null});
     menu["emitCommonMenu"]("common-menu-open", {name: "barZoom", from: null, mode: "popup"});
     assert.deepEqual(emitted, [
-        ["common-menu-open", "barWorkspace"],
-        ["common-menu-closed", "barWorkspace"],
+        ["common-menu-open", "barMainMenu"],
+        ["common-menu-closed", "barMainMenu"],
         ["common-menu-open", "barZoom"],
     ]);
 });

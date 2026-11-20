@@ -304,7 +304,7 @@ test("top bar catalog includes a fixed drag boundary in built-in DOM order", () 
     assert.equal(isEntryCatalogNodeConfigurable(drag), false);
     assert.equal(getEntryPaths().includes("topBar.drag"), false);
     assert.equal(getEntryOrderParents().includes(TOP_BAR_ROOT_PATH), true);
-    assert.equal(getEntryCatalogNode("topBar.barWorkspace"), undefined);
+    assert.equal(getEntryCatalogNode("topBar.barMainMenu"), undefined);
     assert.equal(getEntryCatalogNode("topBar.barMore"), undefined);
     assert.equal(getEntryCatalogNode("topBar.windowControls"), undefined);
 });

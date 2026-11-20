@@ -128,7 +128,11 @@ test("native shortcut sources open panels without toggling while menu commands r
     const compiled = parse(sourceFile("boot/globalEvent/command/global.ts").text,
         {MOBILE: false, BROWSER: true}, false, true);
     const {globalCommand} = evaluate(compiled, {require: () => new Proxy(handlers, {get: (target, key) =>
-        target[key] || (() => false)}), document: {querySelector: () => ({getBoundingClientRect: () => ({})})}});
+        key === "Constants" ? {MENU_BAR_MAIN_MENU: "barMainMenu"} : target[key] || (() => false)}),
+    document: {getElementById: id => {
+        assert.equal(id, "barMainMenu");
+        return {getBoundingClientRect: () => ({})};
+    }}});
     for (const command of ["mainMenu", "recentDocs", "dataHistory", "riffCard"]) {
         assert.equal(globalCommand(command, {}, undefined, true), true);
         const call = dispatches.at(-1);

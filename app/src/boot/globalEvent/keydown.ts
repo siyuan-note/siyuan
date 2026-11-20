@@ -1598,7 +1598,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.mainMenu, event)) {
-        const target = document.querySelector("#barWorkspace");
+        const target = document.getElementById(Constants.MENU_BAR_MAIN_MENU);
         mainMenu(app, target.getBoundingClientRect(), true, target);
         event.preventDefault();
         return;

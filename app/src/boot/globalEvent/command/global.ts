@@ -161,7 +161,7 @@ export const globalCommand = (command: string, app: App, range?: Range, openOnly
             return true;
         case "mainMenu":
             if (!isWindow()) {
-                const target = document.querySelector("#barWorkspace");
+                const target = document.getElementById(Constants.MENU_BAR_MAIN_MENU);
                 mainMenu(app, target.getBoundingClientRect(), openOnly, target);
             }
             return true;

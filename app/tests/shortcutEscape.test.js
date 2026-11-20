@@ -230,7 +230,7 @@ const cases = async compiled => {
         editor.focus();
         const menuElement = document.createElement("div");
         const bar = document.createElement("button");
-        bar.id = "barWorkspace";
+        bar.id = "barMainMenu";
         document.body.append(bar);
         menuElement.className = "b3-menu fn__none";
         menuElement.innerHTML = '<div></div><div class="b3-menu__items"><button class="b3-menu__item" style="display: none">Hidden</button><button class="b3-menu__item b3-menu__item--readonly">Readonly</button><button class="b3-menu__item" disabled>Disabled</button><button class="b3-menu__item" id="firstAction">First</button><button class="b3-menu__item" id="nextAction">Next</button></div>';

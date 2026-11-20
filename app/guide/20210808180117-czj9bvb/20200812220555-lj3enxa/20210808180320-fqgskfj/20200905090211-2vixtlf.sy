@@ -2011,7 +2011,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "固定表头"
+					"TextMarkTextContent": "固定标题行"
 				},
 				{
 					"Type": "NodeText",

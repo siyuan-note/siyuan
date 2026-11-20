@@ -1998,7 +1998,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "固定表頭"
+					"TextMarkTextContent": "固定標題列"
 				},
 				{
 					"Type": "NodeText",

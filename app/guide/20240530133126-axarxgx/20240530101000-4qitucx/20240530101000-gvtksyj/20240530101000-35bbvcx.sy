@@ -2070,7 +2070,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "テーブルヘッダーを固定"
+					"TextMarkTextContent": "見出し行を固定"
 				},
 				{
 					"Type": "NodeText",

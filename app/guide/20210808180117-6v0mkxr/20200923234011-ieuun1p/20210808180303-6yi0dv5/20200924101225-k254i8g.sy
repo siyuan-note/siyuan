@@ -1971,7 +1971,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Pin Table Head"
+					"TextMarkTextContent": "Pin Header Row"
 				},
 				{
 					"Type": "NodeText",

@@ -599,22 +599,49 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 	return false
 }
 
-func newPublishAccessItemFilter(c *gin.Context, publishAccess PublishAccess) attributeViewItemFilter {
+func newPublishAccessItemFilter(c *gin.Context, publishAccess PublishAccess) *attributeViewItemFilter {
 	itemAccessCache := map[*av.AttributeView]map[string]bool{}
-	return func(attrView *av.AttributeView, itemID string) bool {
-		itemAccess := itemAccessCache[attrView]
-		if nil == itemAccess {
-			itemAccess = map[string]bool{}
-			itemAccessCache[attrView] = itemAccess
-		}
-		if accessable, ok := itemAccess[itemID]; ok {
-			return accessable
-		}
+	nestedBlockAccessCache := map[string]bool{}
+	return &attributeViewItemFilter{
+		item: func(attrView *av.AttributeView, itemID string) bool {
+			itemAccess := itemAccessCache[attrView]
+			if nil == itemAccess {
+				itemAccess = map[string]bool{}
+				itemAccessCache[attrView] = itemAccess
+			}
+			if accessable, ok := itemAccess[itemID]; ok {
+				return accessable
+			}
 
-		accessable := checkAttributeViewItemIDAccessableByPublishAccess(c, publishAccess, attrView, itemID)
-		itemAccess[itemID] = accessable
-		return accessable
+			accessable := checkAttributeViewItemIDAccessableByPublishAccess(c, publishAccess, attrView, itemID)
+			itemAccess[itemID] = accessable
+			return accessable
+		},
+		nested: func(value *av.Value) bool {
+			blockID := attributeViewNestedValueBlockID(value)
+			if "" == blockID {
+				return nil != value && value.IsDetached
+			}
+			if accessable, ok := nestedBlockAccessCache[blockID]; ok {
+				return accessable
+			}
+
+			accessable := CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockID)
+			nestedBlockAccessCache[blockID] = accessable
+			return accessable
+		},
 	}
+}
+
+// attributeViewNestedValueBlockID 返回嵌套值绑定的块 ID；非绑定行或缺少绑定信息时返回空串。
+func attributeViewNestedValueBlockID(value *av.Value) string {
+	if nil == value || value.IsDetached {
+		return ""
+	}
+	if nil != value.Block && "" != value.Block.ID {
+		return value.Block.ID
+	}
+	return value.BlockID
 }
 
 func checkAssetPathAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, assetPath, boxID, ownerAbsPath string) bool {
@@ -1862,7 +1889,7 @@ func FilterLocalStorageByPublishAccess(localStorage map[string]any) (ret map[str
 	return
 }
 
-// DocAssetsForPublishAccess 返回发布读者可见的文档资源，属性视图行按其绑定文档的发布访问过滤。
+// DocAssetsForPublishAccess 返回发布读者可见的文档资源，属性视图行及其关联、汇总内容按其绑定文档的发布访问过滤。
 func DocAssetsForPublishAccess(c *gin.Context, publishAccess PublishAccess, rootID string, retainQueryStr bool) ([]string, error) {
 	return docAssets(rootID, retainQueryStr, newPublishAccessItemFilter(c, publishAccess))
 }

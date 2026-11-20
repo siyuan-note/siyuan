@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "固定标题列",
+	"unpinTableHeaderColumn": "取消固定标题列",
 	"markdownLinkUnavailable": "无法打开 Markdown 链接",
 	"tagRecentlyAdded": "最近添加",
 	"confirmActionFailed": "操作失败，请重试",

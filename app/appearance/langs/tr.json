@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "Başlık sütununu sabitle",
+	"unpinTableHeaderColumn": "Başlık sütununun sabitlemesini kaldır",
 	"markdownLinkUnavailable": "Markdown bağlantısı açılamadı",
 	"tagRecentlyAdded": "Son eklenenler",
 	"confirmActionFailed": "İşlem başarısız oldu. Lütfen tekrar deneyin",

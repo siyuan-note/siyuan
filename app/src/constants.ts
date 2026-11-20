@@ -20,6 +20,8 @@ export const TAG_SORT_CREATED_DESC = 16;
 export abstract class Constants {
     public static readonly TABLE_CORNERS = "data-table-corners";
     public static readonly TABLE_CELL_CORNER = "data-table-cell-corner";
+    public static readonly TABLE_PINNED_COLUMN_CELL = "data-table-pinned-column-cell";
+    public static readonly TABLE_PINNED_COLUMN_ACTIVE = "data-table-pinned-column-active";
     public static readonly SIYUAN_VERSION: string = _SIYUAN_VERSION;
     public static readonly NODE_ENV: string = _NODE_ENV;
     public static readonly SIYUAN_APPID: string = Math.random().toString(36).substring(8);
@@ -105,6 +107,7 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_TABLE_RICH: string = "custom-sy-table-rich";
     public static readonly CUSTOM_SY_TABLE_HEADER_ROW: string = "custom-sy-table-header-row";
     public static readonly CUSTOM_SY_TABLE_HEADER_COLUMN: string = "custom-sy-table-header-column";
+    public static readonly CUSTOM_SY_TABLE_PIN_COLUMN: string = "custom-sy-table-pin-column";
     public static readonly CUSTOM_SY_AV_STATIC_TEXT: string = "custom-sy-av-s-text-";
     public static readonly CUSTOM_SY_LIVE_PHOTO: string = "custom-sy-live-photo";
     public static readonly CUSTOM_SY_LIVE_PHOTO_VIDEO: string = "custom-sy-live-photo-video";

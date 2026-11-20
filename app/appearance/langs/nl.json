@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "Kopkolom vastzetten",
+	"unpinTableHeaderColumn": "Kopkolom losmaken",
 	"markdownLinkUnavailable": "De Markdown-link kan niet worden geopend",
 	"tagRecentlyAdded": "Onlangs toegevoegd",
 	"confirmActionFailed": "De bewerking is mislukt. Probeer het opnieuw",

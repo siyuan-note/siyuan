@@ -1025,6 +1025,11 @@ test("table catalog follows the menu arrays and conditional declarations", () =>
         assert.equal(keys.indexOf("insertTableHeaderRow") + 1, keys.indexOf("insertRowAbove"));
         assert.equal(getEntryCatalogNode(`${parent}.insertTableHeaderRow`).type, "entry");
     }
+    for (const parent of ["gutter.single.table", "inline.text.more"]) {
+        const column = getEntryCatalogNode(`${parent}.pinTableHeaderColumn`);
+        assert.equal(column.type, "entry");
+        assert.equal(column.simple, getEntryCatalogNode(`${parent}.pinTableHead`).simple);
+    }
     const source = readFileSync(resolve(process.cwd(), "src/menus/protyle.ts"), "utf8");
     const table = source.slice(source.indexOf("export const tableMenu ="));
     const pushedIDs = (array: string) => Array.from(table.matchAll(

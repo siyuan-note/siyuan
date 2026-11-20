@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "הצמד עמודת כותרת",
+	"unpinTableHeaderColumn": "בטל הצמדה של עמודת הכותרת",
 	"markdownLinkUnavailable": "לא ניתן לפתוח את קישור ה‑Markdown",
 	"tagRecentlyAdded": "נוספו לאחרונה",
 	"confirmActionFailed": "הפעולה נכשלה. יש לנסות שוב",

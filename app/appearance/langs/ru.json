@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "Закрепить столбец заголовка",
+	"unpinTableHeaderColumn": "Открепить столбец заголовка",
 	"markdownLinkUnavailable": "Не удалось открыть ссылку Markdown",
 	"tagRecentlyAdded": "Недавно добавленные",
 	"confirmActionFailed": "Не удалось выполнить операцию. Попробуйте ещё раз",

@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "ตรึงคอลัมน์ส่วนหัว",
+	"unpinTableHeaderColumn": "เลิกตรึงคอลัมน์ส่วนหัว",
 	"markdownLinkUnavailable": "ไม่สามารถเปิดลิงก์ Markdown ได้",
 	"tagRecentlyAdded": "เพิ่มล่าสุด",
 	"confirmActionFailed": "การดำเนินการล้มเหลว โปรดลองอีกครั้ง",

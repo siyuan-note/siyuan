@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "固定標題欄",
+	"unpinTableHeaderColumn": "取消固定標題欄",
 	"markdownLinkUnavailable": "無法開啟 Markdown 連結",
 	"tagRecentlyAdded": "最近新增",
 	"confirmActionFailed": "操作失敗，請重試",

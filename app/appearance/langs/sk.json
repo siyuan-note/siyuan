@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "Pripnúť stĺpec hlavičky",
+	"unpinTableHeaderColumn": "Odopnúť stĺpec hlavičky",
 	"markdownLinkUnavailable": "Odkaz Markdown sa nepodarilo otvoriť",
 	"tagRecentlyAdded": "Nedávno pridané",
 	"confirmActionFailed": "Operácia zlyhala. Skúste to znova",

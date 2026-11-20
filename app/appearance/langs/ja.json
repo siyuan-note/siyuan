@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "見出し列を固定",
+	"unpinTableHeaderColumn": "見出し列の固定を解除",
 	"markdownLinkUnavailable": "Markdown リンクを開けません",
 	"tagRecentlyAdded": "最近追加",
 	"confirmActionFailed": "操作に失敗しました。もう一度お試しください",

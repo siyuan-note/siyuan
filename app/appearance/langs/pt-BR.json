@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "Fixar coluna de cabeçalho",
+	"unpinTableHeaderColumn": "Desafixar coluna de cabeçalho",
 	"markdownLinkUnavailable": "Não foi possível abrir o link Markdown",
 	"tagRecentlyAdded": "Adicionadas recentemente",
 	"confirmActionFailed": "Falha na operação. Tente novamente",

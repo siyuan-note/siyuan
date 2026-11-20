@@ -2481,6 +2481,21 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         checked: isTableHeaderEnabled(nodeElement, "column"),
         click: () => toggleTableHeader(protyle, nodeElement, "column")
     });
+    const pinColumn = nodeElement.getAttribute(Constants.CUSTOM_SY_TABLE_PIN_COLUMN) === "true";
+    otherMenus.push({
+        id: "pinTableHeaderColumn",
+        icon: pinColumn ? "iconUnpin" : "iconPin",
+        label: pinColumn ? window.siyuan.languages.unpinTableHeaderColumn : window.siyuan.languages.pinTableHeaderColumn,
+        click: () => {
+            const html = nodeElement.outerHTML;
+            if (pinColumn) {
+                nodeElement.removeAttribute(Constants.CUSTOM_SY_TABLE_PIN_COLUMN);
+            } else {
+                nodeElement.setAttribute(Constants.CUSTOM_SY_TABLE_PIN_COLUMN, "true");
+            }
+            updateTransaction(protyle, nodeElement, html);
+        }
+    });
     otherMenus.push({
         id: "title",
         icon: "iconHeadings",

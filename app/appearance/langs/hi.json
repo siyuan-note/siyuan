@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "शीर्षलेख स्तंभ पिन करें",
+	"unpinTableHeaderColumn": "शीर्षलेख स्तंभ अनपिन करें",
 	"markdownLinkUnavailable": "Markdown लिंक नहीं खोला जा सका",
 	"tagRecentlyAdded": "हाल ही में जोड़े गए",
 	"confirmActionFailed": "कार्रवाई विफल रही। कृपया दोबारा प्रयास करें",

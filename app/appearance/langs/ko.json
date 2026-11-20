@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "머리글 열 고정",
+	"unpinTableHeaderColumn": "머리글 열 고정 해제",
 	"markdownLinkUnavailable": "Markdown 링크를 열 수 없음",
 	"tagRecentlyAdded": "최근 추가됨",
 	"confirmActionFailed": "작업에 실패했습니다. 다시 시도해 주세요",

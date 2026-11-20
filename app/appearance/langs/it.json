@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "Blocca la colonna di intestazione",
+	"unpinTableHeaderColumn": "Sblocca la colonna di intestazione",
 	"markdownLinkUnavailable": "Impossibile aprire il collegamento Markdown",
 	"tagRecentlyAdded": "Aggiunti di recente",
 	"confirmActionFailed": "Operazione non riuscita. Riprova",

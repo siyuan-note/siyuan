@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "Pin Header Column",
+	"unpinTableHeaderColumn": "Unpin Header Column",
 	"markdownLinkUnavailable": "Unable to open the Markdown link",
 	"tagRecentlyAdded": "Recently added",
 	"confirmActionFailed": "Operation failed. Please try again",

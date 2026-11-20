@@ -1,4 +1,6 @@
 {
+	"pinTableHeaderColumn": "Kopfspalte anheften",
+	"unpinTableHeaderColumn": "Kopfspalte lösen",
 	"markdownLinkUnavailable": "Markdown-Link konnte nicht geöffnet werden",
 	"tagRecentlyAdded": "Kürzlich hinzugefügt",
 	"confirmActionFailed": "Vorgang fehlgeschlagen. Bitte erneut versuchen",

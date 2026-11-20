@@ -21,6 +21,7 @@ import {getPageSize} from "./groups";
 import {applyAVColorPalette, getAVCustomColors} from "./color";
 import {setAVCellPanelTarget} from "./panelTarget";
 import {setSelectMenuPosition} from "./selectPosition";
+import {setAVCellPanelPosition} from "./cellPanelPosition";
 import {getAVHostIdentity, getAVRelationHost} from "./host";
 import {showMessage} from "../../../dialog/message";
 import {isAVRenderData} from "./renderData";
@@ -244,7 +245,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
                 if (options.type === "select") {
                     setSelectMenuPosition(menuElement, lastElement || options.cellElements[options.cellElements.length - 1]);
                 } else {
-                    setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+                    setAVCellPanelPosition(menuElement, cellRect);
                 }
             }
         } else {

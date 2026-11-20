@@ -1,5 +1,5 @@
 import { getAssetHTML, bindAssetEvent, addAssetLink, updateAssetCell, editAssetItem, previewAVAssetImages } from "../asset";
-import { setPosition } from "../../../../util/setPosition";
+import { setAVCellPanelPosition } from "../cellPanelPosition";
 import { Constants } from "../../../../constants";
 import { assetMenu } from "../../../../menus/protyle";
 import { getAssetExtension } from "../../../../util/pathName";
@@ -18,9 +18,12 @@ export const assetPanel: IAVPanelDescriptor = {
             cellElements: context.options.cellElements,
             blockElement: context.options.blockElement
         });
+        setAVCellPanelPosition(context.menuElement, context.cellRect);
         setTimeout(() => {
-            setPosition(context.menuElement, context.cellRect.left, context.cellRect.bottom, context.cellRect.height, 0, true);
-        }, Constants.TIMEOUT_LOAD); // 等待加载
+            if (context.menuElement.isConnected) {
+                setAVCellPanelPosition(context.menuElement, context.cellRect);
+            }
+        }, Constants.TIMEOUT_LOAD); // 等待图片加载
     },
     actions: {
         "addAssetLink": (context, action) => {

@@ -93,8 +93,8 @@ for (const mobile of [false, true]) {
             assert.equal(h.requests[0].url, "/api/av/renderAttributeView");
             assert.equal(h.requests[0].data.ignoreRows, true);
             assert.equal(h.context.options.cellElements, h.options.cellElements);
-            if (type !== "asset") {
-                assert.ok(h.calls.includes(type === "select" ? "setSelectMenuPosition" : "setPosition"));
+            if (type === "select" || type === "date") {
+                assert.ok(h.calls.includes(type === "select" ? "setSelectMenuPosition" : "setAVCellPanelPosition"));
             }
             assert.ok(!h.calls.includes("resize.bind"));
         });

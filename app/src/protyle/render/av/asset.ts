@@ -9,7 +9,7 @@ import {pathPosix} from "../../../util/pathName";
 import {openMenu} from "../../../menus/commonMenuItem";
 import {MenuItem} from "../../../menus/Menu";
 import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "../../../menus/util";
-import {setPosition} from "../../../util/setPosition";
+import {setAVCellPanelPosition} from "./cellPanelPosition";
 import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
 import {previewAttrViewImages, previewImages} from "../../preview/image";
 import {showMessage} from "../../../dialog/message";
@@ -296,9 +296,10 @@ export const updateAssetCell = (options: {
             options.blockElement.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`);
         if (!anchor) return;
         const cellRect = anchor.getBoundingClientRect();
+        setAVCellPanelPosition(menuElement, cellRect);
         setTimeout(() => {
             if (!isAssetCellMenuCurrent(menuElement, options.blockElement, options.cellElements)) return;
-            setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+            setAVCellPanelPosition(menuElement, cellRect);
         }, Constants.TIMEOUT_LOAD);  // 等待图片加载
     }
 };

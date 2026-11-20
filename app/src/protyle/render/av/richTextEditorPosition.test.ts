@@ -54,7 +54,7 @@ describe("attribute view rich-text editor positioning", () => {
         });
         Object.defineProperty(globalThis, "document", {
             configurable: true,
-            value: {getElementById: (id: string) => id === "sidebar" ? {} : null},
+            value: {getElementById: (): null => null, querySelector: (): null => null},
         });
     });
 
@@ -71,28 +71,28 @@ describe("attribute view rich-text editor positioning", () => {
         }
     });
 
-    it("opens above a low cell when the panel does not fit below it", () => {
+    it("moves up just enough to fit while still covering a low cell", () => {
         const panel = createPanel(240);
         const anchor = createAnchor({left: 551, top: 412, width: 199, height: 32});
 
         positionAVRichTextEditor(panel as unknown as HTMLElement, anchor);
 
         assert.equal(panel.style.left, "551px");
-        assert.equal(panel.style.top, "172px");
+        assert.equal(panel.style.top, "292px");
         assert.equal(panel.style.width, "420px");
         assert.equal(panel.style.maxHeight, "480px");
-        assert.equal(panel.getBoundingClientRect().bottom, anchor.getBoundingClientRect().top);
+        assert.equal(panel.getBoundingClientRect().bottom, 532);
     });
 
-    it("opens immediately below the cell when it fits", () => {
+    it("aligns with the top of the cell when it fits", () => {
         Object.assign(window, {innerWidth: 1000, innerHeight: 800});
         const panel = createPanel(240);
         const anchor = createAnchor({left: 100, top: 100, width: 150, height: 32});
 
         positionAVRichTextEditor(panel as unknown as HTMLElement, anchor);
 
-        assert.equal(panel.style.top, "132px");
-        assert.equal(panel.getBoundingClientRect().top, anchor.getBoundingClientRect().bottom);
+        assert.equal(panel.style.top, "100px");
+        assert.equal(panel.getBoundingClientRect().top, anchor.getBoundingClientRect().top);
     });
 
     it("keeps horizontal margins and follows changes to the measured panel height", () => {
@@ -102,11 +102,11 @@ describe("attribute view rich-text editor positioning", () => {
 
         positionAVRichTextEditor(panel as unknown as HTMLElement, anchor);
         assert.equal(panel.style.left, "172px");
-        assert.equal(panel.style.top, "172px");
+        assert.equal(panel.style.top, "292px");
 
         panel.height = 300;
         positionAVRichTextEditor(panel as unknown as HTMLElement, anchor);
-        assert.equal(panel.style.top, "112px");
-        assert.equal(panel.getBoundingClientRect().bottom, anchor.getBoundingClientRect().top);
+        assert.equal(panel.style.top, "232px");
+        assert.equal(panel.getBoundingClientRect().bottom, 532);
     });
 });

@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
-import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, forEachChild, isCallExpression, isVariableStatement, Node, ScriptTarget, transpileModule} from "typescript";
 import * as gutterVisibility from "../../protyle/ui/gutterVisibility";
 import * as touchSelection from "./touchSelection";
 
@@ -82,4 +82,52 @@ test("keyboard cleanup resumes after the gutter gesture and leaves other editors
     assert.ok(f.calls.includes("clear-selection"));
     f.removeEditor();
     assert.equal(f.hide(true), touchSelection.KeyboardHideResult.Cleanup);
+});
+
+test("mobile emoji insertion replaces the insert menu without restoring the keyboard", async () => {
+    let handler: string;
+    const visit = (node: Node) => {
+        if (isCallExpression(node) && node.expression.getText(source) === "toolbarElement.addEventListener" &&
+            node.arguments[0].getText(source).includes('"touchend"')) {
+            handler = node.arguments[1].getText(source);
+        }
+        forEachChild(node, visit);
+    };
+    visit(source);
+    assert.ok(handler);
+    const code = transpileModule(`(${handler})`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    for (const lite of [false, true]) {
+        const calls: string[] = [];
+        const button = {
+            dataset: {slashEntryKey: "emoji"},
+            getAttribute: (name: string) => ({"data-value": "emoji", "data-focus": "true"})[name] ?? null,
+        };
+        const body = {};
+        const protyle = {
+            toolbar: {range: {}}, wysiwyg: {element: {}},
+            hint: {fillCommand: (value: string, owner: unknown, updateRange: boolean, entryKey: string) => {
+                assert.equal(owner, protyle);
+                assert.deepEqual([value, updateRange, entryKey], ["emoji", false, "emoji"]);
+                calls.push("open emoji panel");
+            }},
+        };
+        const click = runInNewContext(code, {
+            takeMenuKeyboard() {}, moved: false, getCurrentEditor: () => ({protyle}),
+            hasClosestByClassName: () => button, Constants: {ZWSP: "\u200b"},
+            hideKeyboardToolbarUtil: (restoreKeyboard = false) => calls.push(restoreKeyboard ? "wait for keyboard" : "close insert menu"),
+            hideKeyboardToolbar: (keyboardClosed: boolean) => {
+                assert.equal(keyboardClosed, false);
+                calls.push("hide toolbar");
+            },
+            getSelection: () => ({rangeCount: 0}), getEditorFocusRange: () => protyle.toolbar.range,
+            document: {body, activeElement: body},
+            restoreKeyboardToolbarRange: () => calls.push("restore keyboard"),
+            showKeyboardToolbar: () => calls.push("show toolbar"),
+        });
+        await click({
+            target: {closest: (selector: string) => lite && selector.startsWith(".keyboard__util ") ? button : null},
+            preventDefault() {}, stopPropagation() {},
+        });
+        assert.deepEqual(calls, ["close insert menu", "open emoji panel", "hide toolbar"], lite ? "lite menu" : "regular menu");
+    }
 });

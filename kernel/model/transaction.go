@@ -2777,6 +2777,7 @@ type Operation struct {
 	blockSwapUndo                 bool
 	documentTitleState            *documentTitleUndoState
 	documentTitleUndo             bool
+	tagDatesReplay                bool // 仅内核生成，用于随编辑事务恢复标签添加时间
 	listConversion                *listConversionState
 	listConversionUndo            bool
 	attributeViewItems            *attributeViewItemsSnapshot

@@ -9,7 +9,9 @@ test("task snapshots cannot undo newer notifications and concurrent tasks remain
     const api = loadModule<{applySettingTask?: (data: object) => void; syncSettingTasks?: (data: object) => void}>(
         "src/config/setting/taskBlocker.ts", {
             window: {addEventListener: (_type: string, callback: (event: Event) => void) => interceptors.push(callback)},
-            require: () => ({progressLoading: (data: {code: number}, id: string) => {
+            require: () => ({progressLoading: (data: {code: number}, id: string, action: unknown, scrim: string) => {
+                assert.equal(action, undefined);
+                assert.equal(scrim, "standard");
                 if (data.code === 2) active.delete(id); else active.add(id);
             }}),
         }, ScriptTarget.ES2021);

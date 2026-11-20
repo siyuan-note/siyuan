@@ -20,7 +20,7 @@ const applyTask = (data: {id: string; active: boolean; message: string}) => {
         });
     }
     progressLoading({cmd: "progress", code: data.active ? 1 : 2, msg: data.message,
-        data: {current: 1, total: 1}}, "setting-task-" + data.id);
+        data: {current: 1, total: 1}}, "setting-task-" + data.id, undefined, "standard");
 };
 
 export const applySettingTask = (data: {id: string; active: boolean; message: string; revision: number}) => {

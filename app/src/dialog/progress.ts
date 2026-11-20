@@ -19,7 +19,8 @@ export const updateProgressContent = (element: Element, message: string, current
     element.querySelector('[data-type="message"]').textContent = message;
 };
 
-export const progressLoading = (data: IWebSocketData, id = "progress", action?: {label: string, callback: () => void}) => {
+export const progressLoading = (data: IWebSocketData, id = "progress", action?: {label: string, callback: () => void},
+                                scrim: "frosted" | "standard" = "frosted") => {
     let progressElement = document.getElementById(id);
     // 关闭时只移除对应任务的遮罩。
     if (data.code === 2) {
@@ -36,16 +37,17 @@ export const progressLoading = (data: IWebSocketData, id = "progress", action?: 
     }
     progressElement.toggleAttribute("data-reindex-progress", data.code === 1 &&
         data.msg === window.siyuan.languages?._kernel?.[35]);
+    const scrimHTML = `<div class="b3-dialog__scrim b3-dialog__scrim--progress${scrim === "frosted" ? " b3-dialog__scrim--frosted" : ""}" style="opacity: 1"></div>`;
     // code 0: 有进度；1: 无进度；2: 关闭
     if (data.code === 0) {
-        progressElement.innerHTML = `<div class="b3-dialog__scrim b3-dialog__scrim--progress" style="opacity: 1"></div>
+        progressElement.innerHTML = `${scrimHTML}
 <div class="b3-dialog__loading">${getProgressContentHTML()}</div>`;
         updateProgressContent(progressElement.lastElementChild, data.msg, data.data.current, data.data.total);
     } else if (data.code === 1) {
         if (progressElement.lastElementChild) {
             progressElement.querySelector('[data-type="message"]').textContent = data.msg;
         } else {
-            progressElement.innerHTML = `<div class="b3-dialog__scrim b3-dialog__scrim--progress" style="opacity: 1"></div>
+            progressElement.innerHTML = `${scrimHTML}
 <div class="b3-dialog__loading">${getProgressContentHTML()}</div>`;
             updateProgressContent(progressElement.lastElementChild, data.msg);
         }

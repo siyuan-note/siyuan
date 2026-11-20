@@ -1762,7 +1762,8 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         if (cellValue?.isDetached) {
             text = `${renderAVBlockIcon(cellValue, showIcon)}<div class="av__celltext${primaryClass}"${primaryAttributes}>${primaryContent}</div>`;
         } else {
-            text = `${renderAVBlockIcon(cellValue, showIcon)}<div data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref${primaryClass}"${primaryAttributes}>${primaryContent}</div>`;
+            const tag = cellValue.block.richBlockDOM ? "div" : "span";
+            text = `${renderAVBlockIcon(cellValue, showIcon)}<${tag} data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref${primaryClass}"${primaryAttributes}>${primaryContent}</${tag}>`;
         }
         text = `<div class="av__cellprimary">${text}</div>`;
     } else if (cellValue.type === "number") {

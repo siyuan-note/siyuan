@@ -416,6 +416,7 @@ export abstract class Constants {
         sr: "20210808180117-6v0mkxr",
         tr: "20210808180117-6v0mkxr",
         uk: "20210808180117-6v0mkxr",
+        vi: "20210808180117-6v0mkxr",
         "zh-TW": "20211226090932-5lcq56f",
         "zh-CN": "20210808180117-czj9bvb",
     };

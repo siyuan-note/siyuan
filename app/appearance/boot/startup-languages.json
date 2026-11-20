@@ -319,6 +319,22 @@
 		"startupCopyFailed": "Не вдалося скопіювати. Виділіть і скопіюйте відомості про помилку",
 		"copied": "Скопійовано"
 	},
+	"vi": {
+		"startupFailed": "Không thể khởi động SiYuan",
+		"startupStage": "Lỗi ở bước ${stage}",
+		"startupReload": "Tải lại",
+		"startupCopy": "Sao chép thông tin lỗi",
+		"startupTimeout": "Đã hết thời gian khởi động",
+		"startupStagePage": "Tải trang",
+		"startupStageConfiguration": "Tải cấu hình",
+		"startupStageEngine": "Khởi tạo bộ xử lý",
+		"startupStagePlugins": "Tải tiện ích mở rộng",
+		"startupStageStorage": "Tải dữ liệu đã lưu",
+		"startupStageLanguage": "Tải ngôn ngữ",
+		"startupStageInterface": "Khởi tạo giao diện",
+		"startupCopyFailed": "Không thể sao chép. Hãy chọn rồi sao chép thông tin lỗi",
+		"copied": "Đã sao chép"
+	},
 	"zh-CN": {
 		"startupFailed": "思源启动失败",
 		"startupStage": "失败阶段：${stage}",

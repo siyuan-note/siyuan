@@ -70,7 +70,7 @@ test("startup translations match every bundled language", () => {
         const pack = JSON.parse(readFileSync(`appearance/langs/${language}.json`, "utf8"));
         for (const [key, value] of Object.entries(strings)) assert.equal(value, pack[key], `${language}: ${key}`);
     }
-    for (const [preferred, expected] of [["zh-Hant-HK", "zh-TW"], ["zh-Hans", "zh-CN"], ["pt-PT", "pt-BR"], ["de-DE", "de"], ["unknown", "en"]]) {
+    for (const [preferred, expected] of [["zh-Hant-HK", "zh-TW"], ["zh-Hans", "zh-CN"], ["pt-PT", "pt-BR"], ["de-DE", "de"], ["vi-VN", "vi"], ["unknown", "en"]]) {
         assert.equal(resolveStartupLanguage([preferred]), expected);
     }
 });

@@ -23,7 +23,7 @@ const menuOf = (menu: unknown): MenuItemNode[] => menu as MenuItemNode[];
 
 
 test("startup editing menu uses requested or system language and preserves native roles", () => {
-    for (const [requested, system, expected] of [["zh-CN", "en", "zh-CN"], ["", "zh-Hant", "zh-TW"], ["", "en-US", "en"]]) {
+    for (const [requested, system, expected] of [["zh-CN", "en", "zh-CN"], ["", "zh-Hant", "zh-TW"], ["", "en-US", "en"], ["", "vi-VN", "vi"]]) {
         const language = resolveStartupMenuLanguage({
             argLang: requested, workspaceDir: "", isRemote: false, systemLanguages: [system],
         });

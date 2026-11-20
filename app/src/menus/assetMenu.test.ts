@@ -1,10 +1,11 @@
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {join} from "node:path";
+import {join, posix} from "node:path";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 import {escapeHtmlTextAndAttr} from "../util/escape";
+import {highlightSearchText} from "../util/searchHighlight";
 
 const source = createSourceFile("protyle.ts", readFileSync(join(__dirname, "protyle.ts"), "utf8"), ScriptTarget.Latest);
 const declarations = ["renderAssetPreview", "renderAssetList"].map(name => {
@@ -33,9 +34,12 @@ const fixture = (mobile: boolean) => {
     }).outputText, {
         isMobile: () => mobile,
         escapeHtmlTextAndAttr,
+        highlightSearchText,
+        getAssetExtension: posix.extname,
+        getAssetName: (path: string) => posix.basename(path, posix.extname(path)).replace(/-\d{14}-\w{7}$/, ""),
         fetchPost: (_url: string, _data: unknown, callback: typeof responses[number]) => responses.push(callback),
         renderAssetsPreview: (path: string) => { previews.push(path); return path; },
-        window: {siyuan: {languages: {emptyContent: "Empty"}, menus: {menu: {
+        window: {siyuan: {config: {search: {caseSensitive: false}}, languages: {emptyContent: "Empty"}, menus: {menu: {
             fullscreen: () => calls.push("fullscreen"), popup: () => calls.push("popup"),
         }}}},
     });
@@ -77,6 +81,14 @@ test("desktop asset searches keep popup positioning and empty-query selection", 
 });
 
 for (const mobile of [false, true]) {
+    test(`asset search highlights the filename and preserves the selection path (mobile=${mobile})`, () => {
+        const f = fixture(mobile);
+        f.search("ep14");
+        f.respond([{path: "assets/240319_ep14_p1-20261120000000-example.jpg", hName: "240319_<mark>ep14</mark>_p1.jpg"}]);
+        assert.ok(f.list.innerHTML.includes('class="b3-list-item__text">240319_<mark>ep14</mark>_p1.jpg</div>'));
+        assert.ok(f.list.innerHTML.includes('data-value="assets/240319_ep14_p1-20261120000000-example.jpg"'));
+    });
+
     test(`asset previews reuse the same resource and reset after empty results (mobile=${mobile})`, () => {
         const f = fixture(mobile);
         f.search("", true);
@@ -95,11 +107,10 @@ for (const mobile of [false, true]) {
 
 test("asset rows escape imported filenames in text and in the value attribute", () => {
     const f = fixture(false);
-    const path = "assets/cover\" onmouseover=\"window.__row=1.png";
-    const hName = "cover<img src=y onerror=\"window.__asset=1\">.png";
-    f.search("");
-    f.respond([{path, hName}]);
-    assert.equal(f.list.innerHTML,
-        "<div data-value=\"assets/cover&quot; onmouseover=&quot;window.__row=1.png\" class=\"b3-list-item b3-list-item--focus\"><div class=\"b3-list-item__text\">cover&lt;img src=y onerror=&quot;window.__asset=1&quot;&gt;.png</div></div>");
+    const path = 'assets/cover<mark>&<img src=x onerror="handler">.png';
+    f.search("cover");
+    f.respond([{path, hName: "<mark>cover</mark>&lt;mark&gt;&amp;&lt;img src=x onerror=&quot;handler&quot;&gt;.png"}]);
+    assert.ok(f.list.innerHTML.includes('data-value="assets/cover&lt;mark&gt;&amp;&lt;img src=x onerror=&quot;handler&quot;&gt;.png"'));
+    assert.ok(f.list.innerHTML.includes('class="b3-list-item__text"><mark>cover</mark>&lt;mark>&amp;&lt;img src=x onerror="handler">.png</div>'));
     assert.ok(!f.list.innerHTML.includes("<img"));
 });

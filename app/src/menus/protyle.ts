@@ -1,6 +1,7 @@
 import {createImageOCRMenu} from "./imageOCRMenu";
 import {toggleMenu, IMenuSession} from "./menuToggle";
 import {escapeHtmlTextAndAttr} from "../util/escape";
+import {highlightSearchText} from "../util/searchHighlight";
 import {getBlockLinkID} from "../util/nodeID";
 import type {FileTreeGetDocRequestInput} from "../types/api";
 import {
@@ -83,7 +84,7 @@ import {hideTooltip} from "../dialog/tooltip";
 import {base64ToURL, showBase64ImageSizeLimit} from "../protyle/upload/base64";
 import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
-import {isEncryptedBox} from "../util/pathName";
+import {getAssetExtension, getAssetName, isEncryptedBox} from "../util/pathName";
 import {getHTMLAssetIFrameSrc, isLocalHTMLAssetPath} from "../asset/html";
 import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities";
 import {
@@ -121,8 +122,10 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
             return;
         }
         let searchHTML = "";
-        response.data.forEach((item: { path: string, hName: string }, index: number) => {
-            searchHTML += `<div data-value="${escapeHtmlTextAndAttr(item.path)}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${escapeHtmlTextAndAttr(item.hName)}</div></div>`;
+        response.data.forEach((item, index) => {
+            const name = getAssetName(item.path) + getAssetExtension(item.path);
+            const label = highlightSearchText(name, k, window.siyuan.config.search.caseSensitive);
+            searchHTML += `<div data-value="${escapeHtmlTextAndAttr(item.path)}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${label}</div></div>`;
         });
 
         const listElement = element.querySelector(".b3-list");

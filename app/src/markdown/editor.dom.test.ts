@@ -418,6 +418,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         '```echarts\n{"title":{"text":"static diagram"}}\n```\n\n:doge: 🐶 👨‍👩‍👧‍👦\n\nEnd\n';
     const imageURL = URL.createObjectURL(new Blob([new Uint8Array([137, 80, 78, 71])], {type: "image/png"}));
     const links: string[] = [];
+    const documentLinks: string[] = [];
     for (const mode of ["ir", "wysiwyg", "sv"] as const) {
         const element = document.createElement("div");
         element.style.height = "600px";
@@ -429,7 +430,8 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         const editor = await api.createMarkdownEditor({element, initialValue: source, mode, cdn, lutePath, lang: "en-US",
             resolveResource: reference => reference === "assets/photo.png" ? imageURL : undefined,
             onEdit: snapshot => edits.push(snapshot), onEditPending: value => pending.push(value),
-            onModeChange: value => modes.push(value), onLink: url => links.push(url), onHistoryChange: state => history.push(state)});
+            onModeChange: value => modes.push(value), onLink: url => links.push(url),
+            onDocumentLink: reference => documentLinks.push(reference), onHistoryChange: state => history.push(state)});
         check.equal(element.querySelector<HTMLElement>(".vditor-toolbar").hidden, true);
         if (mode === "sv") check.ok(element.querySelector(".vditor-preview .vditor-reset").textContent.includes("End"), "initial source preview is ready before revealing the editor");
         check.deepEqual(editor.flush(), {content: source, edited: false, composing: false});
@@ -523,6 +525,17 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         await new Promise(resolve => setTimeout(resolve, 850));
         check.deepEqual(editor.flush(), {content: "Reloaded\n", edited: false, composing: false});
         check.equal(edits.length, afterReload);
+        editor.setMode(mode);
+        const relativeSource = "| File |\n| --- |\n| [Next](docs/next.md) |\n\nOutside\n";
+        editor.setValue(relativeSource);
+        const relativeLink = () => element.querySelector(mode === "ir" ? '.vditor-ir [data-type="a"]' :
+            mode === "wysiwyg" ? ".vditor-wysiwyg a" : ".vditor-preview a");
+        await waitFor(() => Boolean(relativeLink()), `relative document link in ${mode}`);
+        const linksBefore = documentLinks.length;
+        relativeLink().dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+        check.equal(documentLinks.length, linksBefore + 1, `one relative document open request in ${mode}`);
+        check.equal(documentLinks.at(-1), "docs/next.md");
+        check.deepEqual(editor.flush(), {content: relativeSource, edited: false, composing: false});
         if (mode !== "sv") {
             editor.setMode(mode);
             const keyboardSource = "- first\n- second\n";

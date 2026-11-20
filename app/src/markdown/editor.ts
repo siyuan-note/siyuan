@@ -1,7 +1,7 @@
 import type {MarkdownEditorSnapshot} from "./contracts";
 import {createMarkdownCapabilityToken} from "./identity";
 import {MARKDOWN_DOCUMENT_BYTES, MARKDOWN_RENDER_BYTES, MARKDOWN_RECOVERY_BYTES, markdownByteLength} from "./limits";
-import {markdownLinkDestination} from "./link";
+import {externalMarkdownLink, markdownLinkDestination} from "./link";
 import {createMarkdownPanelAnimation} from "./panelAnimation";
 import {createMarkdownResourcePolicy, isRelativeMarkdownResource, MarkdownResourceResolver} from "./resourcePolicy";
 
@@ -80,6 +80,7 @@ export interface MarkdownEditorOptions {
     onHistoryChange?(state: {canUndo: boolean; canRedo: boolean}): void;
     onOutlineChange?(state: MarkdownOutlineState): void;
     onLink?(url: string): void;
+    onDocumentLink?(reference: string): void;
     resolveResource?: MarkdownResourceResolver;
     onResourceUnavailable?(reference?: string): void;
 }
@@ -366,7 +367,9 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
 
     const followLink = (link: Element) => {
         const destination = markdownLinkDestination(link, policy.originalAttribute);
-        if (destination) options.onLink?.(destination);
+        if (!destination) return;
+        if (externalMarkdownLink(destination)) options.onLink?.(destination);
+        else options.onDocumentLink?.(destination);
     };
 
     // 输入监听只登记意图，合并序列化开销；关闭与另存为可同步 flush 最新已提交内容。

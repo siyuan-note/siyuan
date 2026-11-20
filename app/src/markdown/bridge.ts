@@ -1,6 +1,6 @@
 import type {MarkdownFormat, MarkdownHost, MarkdownTarget} from "./contracts";
 import type {MarkdownSessionState} from "./session";
-import type {MarkdownTreeBridge} from "./treeContracts";
+import type {MarkdownTreeBridge, MarkdownTreeOpen} from "./treeContracts";
 import type {SidebarKeymap} from "../util/dockKeymap";
 import type {MarkdownResourceDirectory} from "./resourceDirectories";
 
@@ -81,6 +81,7 @@ export interface MarkdownBridge {
     insertImage(): Promise<{kind: "inserted"; reference: string} | {kind: "cancelled" | "blocked"}>;
     resolveResource(reference: string): Promise<string | undefined>;
     openLink(url: string): Promise<void>;
+    prepareDocumentLink?(reference: string): Promise<MarkdownTreeOpen>;
     preferences(patch: Partial<MarkdownPreferences>): Promise<MarkdownPreferences>;
     systemFonts?(): Promise<MarkdownSystemFont[]>;
     appearance?(patch?: MarkdownAppearancePatch): Promise<MarkdownAppearance>;

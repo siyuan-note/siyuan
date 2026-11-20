@@ -8,7 +8,7 @@ import {markdownErrorKey} from "./errors";
 const source = readFileSync(path.join(__dirname, "index.ts"), "utf8");
 const section = (start: string, end: string) => source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start)));
 const initialize = section("    const initializeDocument =", '    try {\n        if (!("inert"');
-const complete = section("    const completeSwitch =", "    const openTreeFile =");
+const complete = section("    const completeSwitch =", "    const openDocumentTarget =");
 const actions = section("    const runAction =", "    const action =");
 const command = section("    const command =", "    unsubscribeInitialization();");
 
@@ -20,6 +20,7 @@ const setup = (withAppearance = false) => {
     const responses: boolean[] = [];
     const preferenceWrites: unknown[] = [];
     const openedLinks: string[] = [];
+    const documentLinks: string[] = [];
     let failEditor = false;
     let resolveResource: (value: string) => void;
     const resource = new Promise<string>(resolve => {resolveResource = resolve;});
@@ -40,6 +41,8 @@ const setup = (withAppearance = false) => {
     const deps = {
         sidebarShortcuts: {update() {}}, updateSidebarShortcutHints() {},
         MarkdownSession: Session, bridge, renders, callbacks, URL, clearTimeout,
+        prepareDocumentLink: async (reference: string) => {documentLinks.push(reference);},
+        openDocumentTarget: (prepare: () => Promise<unknown>) => prepare(),
         location: {href: "https://editor.invalid/"},
         createMarkdownEditor: async (options: Record<string, (...args: any[]) => any>) => {
             callbacks.push(options);
@@ -77,7 +80,7 @@ const setup = (withAppearance = false) => {
             state: () => ({editor, session, pendingSwitch, frozen, documentGeneration, history, outline, resourceUnavailable, preferences, activeMode, actionMessage, switchFailed})};
     `, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const lifecycle = new Function("deps", `with (deps) { ${body} }`)(deps);
-    return {lifecycle, callbacks, editors, renders, responses, bridge, resolveResource, preferenceWrites, openedLinks, appliedAppearances,
+    return {lifecycle, callbacks, editors, renders, responses, bridge, resolveResource, preferenceWrites, openedLinks, documentLinks, appliedAppearances,
         failEditor(value: boolean) {failEditor = value;}};
 };
 const snapshot = (sessionId: string) => ({sessionId, content: sessionId + "\n", lang: "en", preferences: {mode: "ir", theme: "light"}});
@@ -206,17 +209,26 @@ test("automatic source fallback stays local while explicit mode choices become t
     assert.equal(preferenceWrites.length, 1);
 });
 
-test("only the active Markdown editor forwards clicked links to the system host", async () => {
-    const {lifecycle, callbacks, openedLinks} = setup();
+test("only the active Markdown editor forwards external and document links", async () => {
+    const {lifecycle, callbacks, openedLinks, documentLinks} = setup();
     await lifecycle.initializeDocument(snapshot("first"));
     callbacks[0].onLink("https://example.com/first");
+    callbacks[0].onDocumentLink("first.md");
+    await Promise.resolve();
+    callbacks[0].onDocumentLink("queued-before-replacement.md");
     await lifecycle.initializeDocument(snapshot("second"));
     callbacks[0].onLink("https://example.com/stale");
     callbacks[1].onLink("https://example.com/second");
+    callbacks[0].onDocumentLink("stale.md");
+    callbacks[1].onDocumentLink("second.md");
+    await Promise.resolve();
     assert.deepEqual(openedLinks, ["https://example.com/first", "https://example.com/second"]);
     lifecycle.dispose();
     callbacks[1].onLink("https://example.com/closed");
+    callbacks[1].onDocumentLink("closed.md");
+    await Promise.resolve();
     assert.equal(openedLinks.length, 2);
+    assert.deepEqual(documentLinks, ["first.md", "second.md"]);
 });
 
 test("document replacement invalidates old editor callbacks, resources and session renders", async () => {

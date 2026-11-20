@@ -12,6 +12,9 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
         DocTreeModel: join(__dirname, "docTree/DocTreeModel.ts"),
         escape: join(__dirname, "../../util/escape.ts"),
         treeItemTail: join(__dirname, "../../util/treeItemTail.ts"),
+        touchDragBridge: join(__dirname, "../../util/touchDragBridge.ts"),
+        touchDragBridgeCore: join(__dirname, "../../util/touchDragBridgeCore.ts"),
+        tagSortMenu: join(__dirname, "tagSortMenu.ts"),
     });
     const stylesheet = (file: string) => compile(join(__dirname, "../../assets/scss", file), {logger: {warn() {}}}).css;
     const baseCSS = stylesheet("base.scss");
@@ -45,7 +48,13 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
                 const activated: string[] = [];
                 let full = true;
                 const modules: Record<string, unknown> = {
-                    constants: {Constants: {SIYUAN_APPID: "test"}, TAG_SORT_MANUAL: 6},
+                    constants: {Constants: {SIYUAN_APPID: "test", SIZE_DRAG_THRESHOLD: 5, TIMEOUT_LONGPRESS: 460,
+                        SIYUAN_DROP_GUTTER: "gutter"}, TAG_SORT_MANUAL: 6, TAG_SORT_CREATED_DESC: 11},
+                    dragover: {stopScrollAnimation() {}},
+                    compatibility: {isInAndroid: () => false, isInHarmony: () => false},
+                    functions: {isMobile: () => mobile},
+                    gutterVisibility: {setGutterTouchDragging() {}},
+                    electron: {ipcRenderer: {on() {}}},
                     types: {},
                     fetch: {fetchSyncPost: async (url: string, request: {ignoreMaxListHint?: boolean; label?: string; target?: string; position?: string}) => {
                         if (url === "/api/tag/getTag") {
@@ -68,10 +77,24 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
                     return module.exports;
                 };
                 Object.assign(window, {
-                    siyuan: {config: {tag: {sort: 6}, readonly: false}, languages: {customSort: "Custom Sorting", emptyContent: "Empty"}},
+                    siyuan: {config: {tag: {sort: 6}, readonly: false}, zIndex: 100,
+                        languages: {customSort: "Custom Sorting", emptyContent: "Empty"}},
                     Lute: {UnEscapeHTMLStr: (value: string) => value},
                 });
                 ["tagFilter", "DocTreeModel", "escape", "treeItemTail"].forEach(load);
+                if (mobile) {
+                    load("touchDragBridgeCore");
+                    (load("touchDragBridge") as typeof import("../../util/touchDragBridge")).initTouchDragBridge();
+                }
+                const menuItems: IMenu[] = [];
+                modules.Menu = {MenuItem: class {
+                    public element: IMenu;
+                    constructor(item: IMenu) { this.element = item; }
+                }};
+                Object.assign(window.siyuan, {menus: {menu: {append: (item: IMenu) => menuItems.push(item)}}});
+                (load("tagSortMenu") as typeof import("./tagSortMenu")).appendTagSortMenu(() => {});
+                const checkedSort = menuItems.filter(item => item.checked).map(item => item.label);
+                const leadingCheck = menuItems.some(item => item.icon === "iconSelect");
                 const {TagTree} = load("TagTree") as typeof import("./TagTree");
                 const tree = new TagTree({element: panel, input, mobile, open: label => activated.push(label), menu() {}, setLoading() {}});
                 const waitForPaint = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -83,7 +106,7 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
                 const collapsed = !row("Project/A");
                 input.value = "Project/B";
                 tree.filter();
-                const filtered = !!row("Project/B") && !panel.querySelector("[data-tag-drag]");
+                const filtered = !!row("Project/B") && !panel.querySelector('[draggable="true"]');
                 input.value = "";
                 tree.filter();
                 const restored = !row("Project/A");
@@ -98,7 +121,7 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
 
                 Object.assign(window, {tagTest: {
                     points(target: string) {
-                        const source = row("Project/B").querySelector("[data-tag-drag]").getBoundingClientRect();
+                        const source = row("Project/B").querySelector(".b3-list-item__text").getBoundingClientRect();
                         const destination = row(target).getBoundingClientRect();
                         return {start: {x: source.x + source.width / 2, y: source.y + source.height / 2},
                             end: {x: destination.x + destination.width / 2, y: destination.y + destination.height / 4}};
@@ -109,8 +132,9 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
                         const order = Array.from(panel.querySelectorAll("li[data-label]")).slice(0, 3).map(item => item.getAttribute("data-label"));
                         window.siyuan.config.readonly = true;
                         await tree.update();
-                        const readOnly = !panel.querySelector("[data-tag-drag]");
-                        return {full, firstCount, collapsed, filtered, restored, last, lastCount, activated, requests, order, readOnly};
+                        const readOnly = !panel.querySelector('[draggable="true"]');
+                        return {full, firstCount, collapsed, filtered, restored, last, lastCount, activated, requests, order,
+                            readOnly, checkedSort, leadingCheck};
                     }
                 }});
                 return "ready";
@@ -127,10 +151,12 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
                         const {start, end} = await win.webContents.executeJavaScript("tagTest.points(" + JSON.stringify(target) + ")");
                         if (mobile) {
                             await driver.sendCommand("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [{...start, id: 1}]});
+                            await new Promise(resolve => setTimeout(resolve, 500));
                             await driver.sendCommand("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: [{...end, id: 1}]});
                         } else {
                             await driver.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", ...start});
                             await driver.sendCommand("Input.dispatchMouseEvent", {type: "mousePressed", ...start, button: "left", buttons: 1, clickCount: 1});
+                            await driver.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", x: start.x + 12, y: start.y, button: "left", buttons: 1});
                             await driver.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", ...end, button: "left", buttons: 1});
                         }
                         const indicator = await win.webContents.executeJavaScript("tagTest.indicator() || ''");
@@ -158,6 +184,8 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
             assert.equal(report.crossGroup, "");
             assert.equal(report.sibling, "Project/A");
             assert.equal(report.readOnly, true);
+            assert.deepEqual(report.checkedSort, ["Custom Sorting"]);
+            assert.equal(report.leadingCheck, false);
         });
     }
 });

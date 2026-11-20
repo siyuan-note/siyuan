@@ -1,5 +1,5 @@
 import {Constants, TAG_SORT_MANUAL} from "../../constants";
-import {escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
+import {escapeHtml} from "../../util/escape";
 import {fetchSyncPost} from "../../util/fetch";
 import {getTreeItemTailHTML} from "../../util/treeItemTail";
 import {getDocTreeWindow} from "./docTree/DocTreeModel";
@@ -37,7 +37,7 @@ export class TagTree {
     private moving = false;
     private disposed = false;
     private selected: string;
-    private drag: {pointer: number; source: ITagRow; x: number; y: number};
+    private drag: {source: ITagRow; x: number; y: number; ghost?: HTMLElement};
     private drop: ITagDrop;
     private dragFrame = 0;
 
@@ -61,11 +61,11 @@ export class TagTree {
         element.addEventListener("click", this.click);
         element.addEventListener("contextmenu", this.contextMenu);
         element.addEventListener("keydown", this.keydown);
-        element.addEventListener("pointerdown", this.startDrag);
-        element.addEventListener("pointermove", this.moveDrag);
-        element.addEventListener("pointerup", this.endDrag);
-        element.addEventListener("pointercancel", this.cancelDrag);
-        element.addEventListener("lostpointercapture", this.cancelDrag);
+        element.addEventListener("dragstart", this.startDrag);
+        element.addEventListener("dragover", this.moveDrag);
+        element.addEventListener("dragleave", this.leaveDrag);
+        element.addEventListener("drop", this.endDrag);
+        element.addEventListener("dragend", this.cancelDrag);
         this.render();
     }
 
@@ -178,7 +178,10 @@ export class TagTree {
         const labels = new Set(this.rows.slice(start, end).map(row => row.label));
 
         for (const [label, node] of this.nodes) {
-            if (!labels.has(label)) {
+            const outside = !labels.has(label);
+            const retained = outside && this.drag?.source.label === label;
+            node.classList.toggle("tag-tree__drag-source", retained);
+            if (outside && !retained) {
                 node.remove();
                 this.nodes.delete(label);
             }
@@ -244,10 +247,14 @@ export class TagTree {
         const expandable = !!item.children?.length;
         const open = expandable && !this.folded.has(label);
         const sortable = this.canReorder && siblings.length > 1;
-        node.classList.toggle("b3-list-item--hide-action", !mobile && !sortable);
-        const handle = sortable
-            ? '<button type="button" class="b3-list-item__action tag-tree__handle" data-tag-drag aria-label="' +
-                escapeHtmlTextAndAttr(window.siyuan.languages.customSort) + '"><svg><use xlink:href="#iconDrag"></use></svg></button>' : "";
+        node.classList.toggle("b3-list-item--hide-action", !mobile);
+        if (sortable && !node.hasAttribute("tabindex")) {
+            node.draggable = true;
+            node.tabIndex = 0;
+        } else if (!sortable) {
+            node.removeAttribute("draggable");
+            node.removeAttribute("tabindex");
+        }
         const menu = window.siyuan.config.readonly ? "" :
             '<span class="b3-list-item__action" data-tag-menu><svg><use xlink:href="#iconMore"></use></svg></span>';
         const count = item.count ? '<span class="counter">' + item.count + "</span>" : "";
@@ -256,7 +263,7 @@ export class TagTree {
         const html = '<span class="b3-list-item__toggle' + (expandable ? " b3-list-item__toggle--hl" : " fn__hidden") + '">' +
             '<svg class="' + arrowClass + '"><use xlink:href="#iconRight"></use></svg></span>' +
             '<svg class="b3-list-item__graphic"><use xlink:href="#iconTag"></use></svg>' +
-            text + getTreeItemTailHTML(count, handle + menu, mobile);
+            text + getTreeItemTailHTML(count, menu, mobile);
         if (this.markup.get(node) !== html) {
             node.innerHTML = html;
             this.markup.set(node, html);
@@ -276,7 +283,7 @@ export class TagTree {
     private click = (event: MouseEvent) => {
         const target = event.target as Element;
         const node = this.getRow(target);
-        if (!node || target.closest("[data-tag-drag]")) {
+        if (!node) {
             return;
         }
         const label = node.dataset.label;
@@ -314,12 +321,13 @@ export class TagTree {
             return;
         }
         const target = event.target as Element;
-        if (!this.canReorder || !target.closest("[data-tag-drag]") || !["ArrowUp", "ArrowDown"].includes(event.key)) {
+        const node = this.getRow(target);
+        if (!this.canReorder || node !== target || !node?.hasAttribute("tabindex") || !["ArrowUp", "ArrowDown"].includes(event.key)) {
             return;
         }
         event.preventDefault();
         event.stopPropagation();
-        const source = this.byLabel.get(this.getRow(target)?.dataset.label);
+        const source = this.byLabel.get(node.dataset.label);
         const before = event.key === "ArrowUp";
         const sibling = source?.siblings[source.index + (before ? -1 : 1)];
         if (sibling) {
@@ -327,28 +335,57 @@ export class TagTree {
         }
     };
 
-    private startDrag = (event: PointerEvent) => {
-        const target = event.target as Element;
-        if (this.drag || this.moving || !this.canReorder || !event.isPrimary || event.button !== 0 || !target.closest("[data-tag-drag]")) {
+    private startDrag = (event: DragEvent) => {
+        const node = this.getRow(event.target as Element);
+        if (this.drag || this.moving || !this.canReorder || !node?.draggable || !event.dataTransfer) {
+            event.preventDefault();
             return;
         }
-        const source = this.byLabel.get(this.getRow(target)?.dataset.label);
-        if (source) {
-            this.drag = {pointer: event.pointerId, source, x: event.clientX, y: event.clientY};
-            this.options.element.setPointerCapture(event.pointerId);
+        this.drag = {source: this.byLabel.get(node.dataset.label), x: event.clientX, y: event.clientY};
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("application/x-siyuan-tag", node.dataset.label);
+        window.getSelection()?.removeAllRanges();
+        if (window.siyuan.touchDragActive) {
+            const ghost = document.createElement("ul");
+            ghost.className = this.list.className;
+            ghost.style.cssText = `position: fixed; top: -10000px; width: ${node.offsetWidth}px`;
+            const preview = node.cloneNode(true) as HTMLElement;
+            preview.removeAttribute("draggable");
+            preview.removeAttribute("tabindex");
+            ghost.append(preview);
+            document.body.append(ghost);
+            this.drag.ghost = ghost;
+            window.siyuan.touchDragGhost = ghost;
+            this.updateDrop();
+            this.dragFrame = requestAnimationFrame(this.scrollDrag);
         }
     };
 
-    private moveDrag = (event: PointerEvent) => {
-        if (this.drag?.pointer !== event.pointerId) {
+    private moveDrag = (event: DragEvent) => {
+        if (!this.drag) {
             return;
         }
         this.drag.x = event.clientX;
         this.drag.y = event.clientY;
         this.updateDrop();
+        event.stopPropagation();
+        if (this.drop && this.canReorder) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+        }
         if (!this.dragFrame) {
             this.dragFrame = requestAnimationFrame(this.scrollDrag);
         }
+    };
+
+    private leaveDrag = (event: DragEvent) => {
+        if (!this.drag || this.options.element.contains(event.relatedTarget as Node)) {
+            return;
+        }
+        cancelAnimationFrame(this.dragFrame);
+        this.dragFrame = 0;
+        this.drop = undefined;
+        this.render();
     };
 
     private scrollDrag = () => {
@@ -391,8 +428,8 @@ export class TagTree {
         }
     }
 
-    private endDrag = (event: PointerEvent) => {
-        if (this.drag?.pointer !== event.pointerId) {
+    private endDrag = (event: DragEvent) => {
+        if (!this.drag) {
             return;
         }
         this.moveDrag(event);
@@ -400,22 +437,20 @@ export class TagTree {
         const drop = this.drop;
         this.cancelDrag();
         if (drop) {
+            event.preventDefault();
             void this.commitMove(source.label, drop);
         }
     };
 
-    private cancelDrag = (event?: PointerEvent) => {
-        const pointer = this.drag?.pointer;
-        if (pointer === undefined || (event && event.pointerId !== pointer)) {
+    private cancelDrag = () => {
+        if (!this.drag) {
             return;
         }
+        this.drag.ghost?.remove();
         this.drag = undefined;
         this.drop = undefined;
         cancelAnimationFrame(this.dragFrame);
         this.dragFrame = 0;
-        if (this.options.element.hasPointerCapture(pointer)) {
-            this.options.element.releasePointerCapture(pointer);
-        }
         this.render();
     };
 
@@ -432,7 +467,7 @@ export class TagTree {
                 if (position >= 0 && !this.nodes.has(label)) {
                     this.render(position * this.rowHeight);
                 }
-                this.nodes.get(label)?.querySelector<HTMLElement>("[data-tag-drag]")?.focus();
+                this.nodes.get(label)?.focus();
             }
         } finally {
             this.moving = false;

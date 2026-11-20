@@ -251,7 +251,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to drag tags by the handle at the same level. The custom order is saved with your workspace data. Clear the tag filter before reordering."
+					"Data": " to reorder sibling tags by dragging their rows. On mobile, touch and hold a row before dragging it. The custom order is saved with your workspace data. Clear the tag filter before reordering."
 				}
 			]
 		},

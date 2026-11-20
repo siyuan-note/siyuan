@@ -12,9 +12,11 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-.tag-tree__handle {
-  cursor: grab;
-  touch-action: none;
+.tag-tree__drag-source {
+  position: absolute;
+  inset-block-start: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .file-tree__row {

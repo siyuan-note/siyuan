@@ -15,7 +15,7 @@ const tagSortModes = [
 export const appendTagSortMenu = (update: () => void) => {
     tagSortModes.forEach(([sort, label]) => {
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: window.siyuan.config.tag.sort === sort ? "iconSelect" : undefined,
+            checked: window.siyuan.config.tag.sort === sort,
             label: window.siyuan.languages[label],
             click: () => {
                 window.siyuan.config.tag.sort = sort;

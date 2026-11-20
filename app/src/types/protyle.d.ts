@@ -151,13 +151,16 @@ declare class Viewer {
     constructor(element: Element, options: {
         title: [number, (image: HTMLImageElement, imageData: IObject) => string],
         button: boolean,
+        className?: string,
         initialViewIndex?: number,
         magnifier?: boolean,
         navigation?: boolean,
+        rotateOnTouch?: boolean,
+        rotateOnGesture?: boolean,
         transition: boolean,
         hidden: () => void,
         ready?: (this: HTMLElement, event: CustomEvent) => void,
-        view?: (this: HTMLElement, event: CustomEvent) => void,
+        view?: (this: HTMLElement, event: CustomEvent<{index: number, image: HTMLImageElement}>) => void,
         viewed?: (this: HTMLElement, event: CustomEvent) => void,
         toolbar: {
             zoomIn: boolean,

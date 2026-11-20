@@ -9,11 +9,12 @@ import {promisify} from "node:util";
 import {transpileModule, ModuleKind, ScriptTarget} from "typescript";
 import {compileString} from "sass";
 
-test("image gallery scopes database images, shows copy results above the preview, and releases Live Photos", async () => {
+test("image gallery handles source scopes, copy feedback, Live Photos, and mobile controls", async () => {
     const root = realpathSync(tmpdir());
     const temporary = mkdtempSync(path.join(root, "siyuan-live-photo-gallery-"));
     const css = compileString(readFileSync("src/assets/scss/viewerjs/_viewer.scss", "utf8") +
-        readFileSync("src/assets/scss/component/_snackbar.scss", "utf8")).css;
+        readFileSync("src/assets/scss/component/_snackbar.scss", "utf8") +
+        ".fn__none { display: none !important; }").css;
     const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
     const server = createServer((request, response) => {
         if (request.url?.startsWith("/stage/protyle/js/viewerjs/viewer.js")) {
@@ -24,7 +25,7 @@ test("image gallery scopes database images, shows copy results above the preview
             response.end(Buffer.from(png, "base64"));
         } else {
             response.writeHead(200, {"Content-Type": "text/html"});
-            response.end(`<!doctype html><title>Gallery verification</title><style>${css}</style><body><div id="message" class="b3-snackbars"><div class="fn__flex-1"></div></div><script>${readFileSync("appearance/icons/litheness/icon.js", "utf8")}</script>`);
+            response.end(`<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1"><title>Gallery verification</title><style>${css}</style><body><div id="message" class="b3-snackbars"><div class="fn__flex-1"></div></div><script>${readFileSync("appearance/icons/litheness/icon.js", "utf8")}</script>`);
         }
     });
     try {
@@ -66,19 +67,24 @@ test("image gallery scopes database images, shows copy results above the preview
             const requests = [];
             const require = () => ({
                 ...escapeAPI,
+                isMobile: () => Boolean(document.getElementById("sidebar")),
                 Constants:{PROTYLE_CDN:"/stage/protyle"},
                 addScript: src => new Promise((resolve,reject) => {
                     if (window.Viewer) {resolve();return;}
                     const script=document.createElement("script");script.src=src;script.onload=resolve;script.onerror=reject;document.head.append(script);
                 }),
                 fetchPost: (url,data,callback) => {requests.push({url,data});callback({data:entries});},
-                createLivePhotoPlayer: (_host,video) => {
+                createLivePhotoPlayer: (host,video) => {
                     const current=phase;
+                    const overlay=document.createElement("div");
+                    overlay.className="live-photo-preview";
+                    host.append(overlay);
                     active[current]=true;
                     starts.push(video);
-                    return () => {stopped++;closed.push(current);active[current]=false;};
+                    return () => {overlay.remove();stopped++;closed.push(current);active[current]=false;};
                 },
                 isEncryptedBox: () => false,
+                writeAssetToClipboard: () => ({ignore:false}),
                 writeClipboardData: async ({textPlain}) => {
                     copiedURLs.push(textPlain);
                     if (rejectCopy) throw new Error("Clipboard denied");
@@ -95,6 +101,10 @@ test("image gallery scopes database images, shows copy results above the preview
             exports.previewDocImage(image,"document","assets/second.mov");
             await wait(()=>window.siyuan.viewer?.viewed);
             const viewer=window.siyuan.viewer;
+            if (getComputedStyle(viewer.navigation).display==="none" || viewer.toolbar.querySelector(".viewer-next") ||
+                !viewer.options.rotateOnTouch || !viewer.options.rotateOnGesture) {
+                throw new Error("Desktop gallery controls changed");
+            }
             const checkCount = expected => {
                 if (!viewer.title.textContent.startsWith(expected + " ")) {
                     throw new Error("gallery count mismatch: " + viewer.title.textContent);
@@ -177,6 +187,88 @@ test("image gallery scopes database images, shows copy results above the preview
             const singleGallery=window.siyuan.viewer;
             const single=Array.from(singleGallery.images, item=>item.getAttribute("src"));
             singleGallery.destroy();
+            window.checkMobileImagePreview = async (width) => {
+                const sidebar = document.createElement("div");
+                sidebar.id = "sidebar";
+                document.body.append(sidebar);
+                document.documentElement.style.setProperty("--b3-font-size", "22px");
+                document.documentElement.style.setProperty("--mobile-bottom-bar-safe-area", "20px");
+                const images = entries.map((entry, index) => ({...entry, src: "/assets/mobile-" + index + ".png"}));
+                const previousGallery = window.siyuan.viewer;
+                exports.previewImages(images, images[1].src, undefined, "assets/second.mov");
+                await wait(() => window.siyuan.viewer !== previousGallery && window.siyuan.viewer.viewed);
+                const mobile = window.siyuan.viewer;
+                const footer = mobile.viewer.querySelector(".viewer-footer");
+                const canvas = mobile.viewer.querySelector(".viewer-canvas");
+                const buttons = [...mobile.toolbar.querySelectorAll("li")].filter(item => item.getClientRects().length);
+                const positions = buttons.map(item => item.getBoundingClientRect());
+                const next = mobile.toolbar.querySelector(".viewer-next");
+                const previous = mobile.toolbar.querySelector(".viewer-prev");
+                const reset = mobile.toolbar.querySelector(".viewer-reset");
+                if (innerWidth !== width || getComputedStyle(mobile.navigation).display !== "none" ||
+                    getComputedStyle(footer).paddingBottom !== "20px" ||
+                    next.getBoundingClientRect().left - previous.getBoundingClientRect().right < 4 ||
+                    next.getBoundingClientRect().top !== previous.getBoundingClientRect().top ||
+                    new Set(positions.map(rect => rect.top)).size < 2 ||
+                    positions.some(rect => rect.width < 44 || rect.height < 44 || rect.left < 0 || rect.right > innerWidth) ||
+                    canvas.getBoundingClientRect().bottom > footer.getBoundingClientRect().top) {
+                    throw new Error("Mobile gallery buttons do not fit below the image");
+                }
+                if (Math.abs(mobile.imageData.y - (canvas.clientHeight - mobile.imageData.height) / 2) > 1) {
+                    throw new Error("Mobile image was centered before all toolbar controls were laid out");
+                }
+                for (const [button, label] of [[next, "Next"], [previous, "Previous"], [reset, "Reset"]]) {
+                    const rect = button.getBoundingClientRect();
+                    if (button.getAttribute("aria-label") !== label ||
+                        !button.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2))) {
+                        throw new Error("Mobile gallery action is obscured or unlabeled: " + label);
+                    }
+                }
+                const point = (type, pointerId, clientX, clientY) => canvas.dispatchEvent(new PointerEvent(type, {
+                    bubbles: true, cancelable: true, pointerType: "touch", pointerId, clientX, clientY,
+                }));
+                const startingRatio = mobile.imageData.ratio;
+                point("pointerdown", 1, 30, 60);
+                point("pointerdown", 2, 130, 60);
+                point("pointermove", 2, 180, 69);
+                point("pointerup", 1, 30, 60);
+                point("pointerup", 2, 180, 69);
+                if (mobile.imageData.ratio <= startingRatio || mobile.imageData.rotate !== 0) {
+                    throw new Error("Mobile pinch must zoom without rotating");
+                }
+                const ratioAfterPinch = mobile.imageData.ratio;
+                for (const [type, scale, rotation] of [["gesturestart", 1, 0], ["gesturechange", 1.5, 3], ["gestureend", 1.5, 3]]) {
+                    mobile.viewer.dispatchEvent(Object.assign(new Event(type, {cancelable: true}), {scale, rotation}));
+                }
+                if (mobile.imageData.ratio <= ratioAfterPinch || mobile.imageData.rotate !== 0) {
+                    throw new Error("WebKit gesture must zoom without rotating");
+                }
+                mobile.toolbar.querySelector(".viewer-rotate-right").click();
+                if (mobile.imageData.rotate !== 90) { throw new Error("Mobile manual rotation is unavailable"); }
+                reset.click();
+                if (mobile.imageData.rotate !== 0 || mobile.imageData.ratio !== startingRatio) {
+                    throw new Error("Mobile reset did not restore the image");
+                }
+                mobile.toolbar.querySelector(".viewer-live-photo").click();
+                const overlay = mobile.viewer.querySelector(".live-photo-preview");
+                if (!overlay || overlay.getBoundingClientRect().bottom > footer.getBoundingClientRect().top) {
+                    throw new Error("Mobile Live Photo overlaps the toolbar");
+                }
+                next.click();
+                await wait(() => mobile.index === 2 && mobile.viewed);
+                previous.click();
+                await wait(() => mobile.index === 1 && mobile.viewed);
+                if (overlay.isConnected) { throw new Error("Switching from a Live Photo left its overlay open"); }
+                mobile.destroy();
+                exports.previewImages([image]);
+                await wait(() => window.siyuan.viewer !== mobile && window.siyuan.viewer.viewed);
+                const single = window.siyuan.viewer;
+                if (single.toolbar.querySelector(".viewer-prev, .viewer-next")) {
+                    throw new Error("Single mobile images show redundant navigation");
+                }
+                single.destroy();
+                sidebar.remove();
+            };
             return {starts,stopped,hidden,closed,requests,fieldImages,selected,previous,single};
         })()`;
         const script = path.join(temporary, "main.cjs");
@@ -193,6 +285,12 @@ test("image gallery scopes database images, shows copy results above the preview
                         viewSize:{width:800,height:600},deviceScaleFactor:1,scale:1});
                 }
                 const result=await window.webContents.executeJavaScript(${JSON.stringify(browserCase)},true);
+                for (const width of [320,360]) {
+                    const size={width,height:640};
+                    window.webContents.enableDeviceEmulation({screenPosition:"mobile",screenSize:size,
+                        viewSize:size,deviceScaleFactor:1,scale:1});
+                    await window.webContents.executeJavaScript("window.checkMobileImagePreview("+width+")",true);
+                }
                 process.stdout.write(JSON.stringify(result)+"\\n");
                 app.exit(0);
             }).catch(error=>{process.stderr.write(error.stack);app.exit(1);});

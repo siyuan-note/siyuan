@@ -187,7 +187,7 @@ test("crypto backup import trims passwords and rejects whitespace-only input", a
             requests.push(data);
             return {code: 0};
         },
-        mobileInputDialog: (options: {awaitConfirm: boolean, onConfirm: (value: string) => Promise<boolean>}) => {
+        openInputDialog: (options: {awaitConfirm: boolean, onConfirm: (value: string) => Promise<boolean>}) => {
             assert.equal(options.awaitConfirm, true);
             confirm = (value, dialog) => options.onConfirm(value).then(success => { if (success) dialog.destroy(); });
         },

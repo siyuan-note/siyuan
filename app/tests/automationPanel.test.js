@@ -103,7 +103,7 @@ const runCases = async (sources, css, mobile) => {
         "dialog/moveResize": {moveResize() {}},
         "dialog/anchoredInput": {getAnchoredInputMask() {}},
         "block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
-        "dialog/mobileInputDialog": {mobileInputDialog: options => { collectionTypeInput = options; }},
+        "dialog/inputDialog": {openInputDialog: options => { collectionTypeInput = options; }},
         "block/Panel": {BlockPanel: class {constructor(options) {scopePreviews.push(options);}}},
         "util/pathName": {movePathTo: options => scopeRequests.push(options)},
         "util/fetch": {fetchSyncPost: async (url, request) => {
@@ -1175,7 +1175,7 @@ if (process.versions.electron && process.type === "browser") {
             sources["menus/aliasInput"] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/menus/aliasInput.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
             }).outputText;
-            for (const name of ["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline", "datePicker/runtime", "datePicker/index", "datePicker/binding", "datePicker/panel", "datePicker/owners", "datePicker/position", "menus/menuPosition", "menus/overlayOwnership", "dialog/index", "dialog/confirmDialog", "dialog/mobileConfirmDialog", "dialog/mobileDialog",
+            for (const name of ["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline", "datePicker/runtime", "datePicker/index", "datePicker/binding", "datePicker/panel", "datePicker/owners", "datePicker/position", "menus/menuPosition", "menus/overlayOwnership", "dialog/index", "dialog/confirmDialog", "dialog/adaptiveDialog",
                 "mobile/util/keyboardSheetState", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/mobileSheetLayout",
                 "protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu",
                 "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetOpen", "menus/sheetActions"]) {

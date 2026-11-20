@@ -50,7 +50,7 @@ const setup = (unmatched = 1) => {
     runInNewContext(compiled, {
         exports: methods, window: {siyuan: {languages}},
         require: (name: string) => ({
-            "../../../dialog/mobileDialog": {MobileDialog: class {
+            "../../../dialog/adaptiveDialog": {AdaptiveDialog: class {
                 element = root;
                 async runPending(task: () => Promise<boolean>, options: {close: boolean; disableButtons: boolean}) {
                     assert.equal(options.close, false);
@@ -58,7 +58,7 @@ const setup = (unmatched = 1) => {
                     try { return await task(); } catch { return false; }
                 }
             }},
-            "../../../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _text: string, confirm: () => Promise<void>, cancel: () => void) => confirmations.push({confirm, cancel})},
+            "../../../dialog/confirmDialog": {confirmDialog: ({confirm, cancel}: {confirm: () => Promise<void>, cancel: () => void}) => confirmations.push({confirm, cancel})},
             "../../../util/functions": {isMobile: () => true},
             "../../../util/escape": {escapeAttr: String, escapeHtml: (value: string) => value.replace(/</g, "&lt;")},
             "../../util/transactionQueue": {waitForPendingTransactions: async () => {}},

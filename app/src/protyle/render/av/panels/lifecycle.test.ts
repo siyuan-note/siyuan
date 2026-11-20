@@ -79,7 +79,7 @@ const createPanel = (mobile = false) => {
 };
 
 for (const mobile of [false, true]) {
-    for (const type of ["select", "date", "edit"] as const) {
+    for (const type of ["select", "date", "asset", "edit"] as const) {
         test(`${type} editors load metadata without moving the cell panel on resize (${mobile ? "mobile" : "desktop"})`, () => {
             const h = createPanel(mobile);
             h.options.type = type;
@@ -93,7 +93,9 @@ for (const mobile of [false, true]) {
             assert.equal(h.requests[0].url, "/api/av/renderAttributeView");
             assert.equal(h.requests[0].data.ignoreRows, true);
             assert.equal(h.context.options.cellElements, h.options.cellElements);
-            assert.ok(h.calls.includes(type === "select" ? "setSelectMenuPosition" : "setPosition"));
+            if (type !== "asset") {
+                assert.ok(h.calls.includes(type === "select" ? "setSelectMenuPosition" : "setPosition"));
+            }
             assert.ok(!h.calls.includes("resize.bind"));
         });
     }

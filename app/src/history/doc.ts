@@ -1,7 +1,7 @@
-import {MobileDialog} from "../dialog/mobileDialog";
-import {mobileInputDialog} from "../dialog/mobileInputDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {showMessage} from "../dialog/message";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
 import {Protyle} from "../protyle";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
@@ -67,7 +67,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string, readon
         pageNumElement.textContent = currentPage.toString();
         const pageInfoElement = nextElement.nextElementSibling.nextElementSibling;
         pageInfoElement.classList.remove("fn__none");
-        pageInfoElement.textContent = window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount);
+        pageInfoElement.textContent = window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", String(response.data.pageCount)).replace("${y}", String(response.data.totalCount));
         const histories = response.data.histories || [];
         if (histories.length === 0) {
             listElement.innerHTML = `${genCurrentVersionItem()}<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
@@ -261,7 +261,7 @@ export const openDocHistory = (options: {
         </div>
     </div>
 </div>`;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {mode: "expanded"},
         title: escapeHtml(options.pathString),
         content: contentHTML,
@@ -462,12 +462,16 @@ export const openDocHistory = (options: {
                     isLoading = false;
                     const confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", escapeHtml(item.title))
                         .replace("${time}", historyItemElement.querySelector(".b3-list-item__text").textContent.trim());
-                    mobileConfirmDialog("⚠️ " + window.siyuan.languages.rollback, confirmTip, async () => {
-                        const response = await fetchSyncPost("/api/history/rollbackDocHistory", {
-                            historyPath: dataPath
-                        });
-                        return response.code === 0;
-                    }, undefined, false, undefined, undefined, {awaitConfirm: true});
+                    confirmDialog({
+                        title: "⚠️ " + window.siyuan.languages.rollback,
+                        text: confirmTip,
+                        confirm: async () => {
+                            const response = await fetchSyncPost("/api/history/rollbackDocHistory", {
+                                historyPath: dataPath
+                            });
+                            return response.code === 0;
+                        },
+                    });
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -521,15 +525,15 @@ export const openDocHistory = (options: {
                 break;
             } else if (type === "jumpRepoPage") {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
-                mobileInputDialog({
-                    title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                openInputDialog({
+                    title: window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)),
                     value: String(pageNumElement.textContent),
                     type: "number",
                     min: "1",
                     max: String(totalPage),
                     onConfirm: (value, dialog) => {
                         if (!Number.isFinite(parseInt(value))) {
-                            showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
+                            showMessage(window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)));
                             return;
                         }
                         renderDoc(fileElement, Math.max(1, Math.min(parseInt(value), totalPage)), options.id, readonly);
@@ -545,15 +549,15 @@ export const openDocHistory = (options: {
                 break;
             } else if (type === "jumpSnapshotPage") {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
-                mobileInputDialog({
-                    title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                openInputDialog({
+                    title: window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)),
                     value: String(target.textContent),
                     type: "number",
                     min: "1",
                     max: String(totalPage),
                     onConfirm: (value, dialog) => {
                         if (!Number.isFinite(parseInt(value))) {
-                            showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
+                            showMessage(window.siyuan.languages.jumpToPage.replace("${x}", String(totalPage)));
                             return;
                         }
                         renderRepo(repoElement, Math.max(1, Math.min(parseInt(value), totalPage)), options.id, readonly);

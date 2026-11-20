@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {config as configApi} from "../util/configApi";
 import {fetchSyncPost} from "../../util/fetch";
 import {escapeHtml} from "../../util/escape";
@@ -38,8 +38,13 @@ const setSyncProvider = async (provider: Config.ISync["provider"]) => {
     let started = false;
     try {
         const confirmed = await new Promise<boolean>((resolve) => {
-            mobileConfirmDialog(window.siyuan.languages.syncProvider, window.siyuan.languages.syncProviderChangeConfirm,
-                () => resolve(true), () => resolve(false), false, undefined, window.siyuan.languages.syncProviderChangeContinue);
+            confirmDialog({
+                title: window.siyuan.languages.syncProvider,
+                text: window.siyuan.languages.syncProviderChangeConfirm,
+                confirm: () => resolve(true),
+                cancel: () => resolve(false),
+                confirmLabel: window.siyuan.languages.syncProviderChangeContinue,
+            });
         });
         if (!confirmed) {
             return;

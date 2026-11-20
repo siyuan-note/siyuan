@@ -342,6 +342,7 @@ ${relationSource.slice(deselectStart, deselectEnd)} };`,
         assert.ok(positionStart > 0 && positionEnd > positionStart);
         sources["./relationPosition"] = ts.transpileModule(
             `export const createPosition = (options, resetPosition, setPosition) => { let positionInitialized = false;
+const getCurrentBlock = () => options.blockElement;
 ${relationSource.slice(positionStart, positionEnd)} return positionMenu; };`,
             {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
         await win.loadURL("data:text/html,<html><body></body></html>");

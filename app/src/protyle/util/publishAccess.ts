@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {isMobile} from "../../util/functions";
 import {setPosition} from "../../util/setPosition";
 import {fetchPost} from "../../util/fetch";
@@ -67,7 +67,7 @@ export const getPublishAccessLevel = (visible: boolean, password: string, disabl
 };
 
 export const openPublishAccessDialog = (id: string, position: IPosition, callback: (access: IPublishAccessItem) => void) => {
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         disableAnimation: true,
         transparent: true,
         hideCloseIcon: true,

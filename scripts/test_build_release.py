@@ -10,6 +10,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 import warnings
@@ -566,6 +567,67 @@ const {getFileMatchers, copyFiles} = require(path.join(library, "fileMatcher.js"
         with patch.object(self.builder, "wsl") as wsl, patch.object(self.builder, "collect"):
             self.builder.linux()
         self.assertEqual(wsl.call_args.args[0][:3], ["setsid", "--wait", "bash"])
+        self.assertFalse(any(arg.startswith("--windows-ready-file=") for arg in wsl.call_args.args[0]))
+
+    def test_linux_dependency_install_overlaps_windows_and_android_waits(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["windows", "linux", "android"]
+        dependencies_started = threading.Event()
+        windows_ready = self.builder.wsl_root / ".cache/work.windows-ready"
+
+        def windows():
+            self.assertTrue(dependencies_started.wait(3))
+            self.assertFalse(windows_ready.exists())
+
+        def wsl(command):
+            self.assertIn("--windows-ready-file=/home/d/88250/siyuan/.cache/work.windows-ready", command)
+            dependencies_started.set()
+            deadline = time.monotonic() + 3
+            while not windows_ready.exists() and time.monotonic() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(windows_ready.exists())
+
+        def android(assets):
+            self.assertTrue(windows_ready.exists())
+
+        with patch.object(self.builder, "windows", side_effect=windows), \
+                patch.object(self.builder, "wsl", side_effect=wsl), patch.object(self.builder, "collect"), \
+                patch.object(self.builder, "android", side_effect=android) as build_android:
+            self.builder.parallel_platforms(self.root / "assets.zip")
+        build_android.assert_called_once_with(self.root / "assets.zip")
+        self.assertFalse(windows_ready.exists())
+
+    def test_linux_dependency_failure_reaps_windows_compiler(self):
+        self.builder.wsl_root = self.root / "wsl"
+        self.args.platforms = ["windows", "linux", "android"]
+        launched = threading.Event()
+        original = build.subprocess.Popen
+        command = [sys.executable, "-c", "import time; time.sleep(30)"]
+        compilers = []
+
+        def launch(args, **kwargs):
+            process = original(args, **kwargs)
+            if args == command:
+                compilers.append(process)
+                launched.set()
+            return process
+
+        def windows():
+            build.compile_kernels([("amd64", command, self.root, None)], self.root / "logs")
+
+        def linux():
+            self.assertTrue(launched.wait(3))
+            raise build.BuildError("dependency install failed")
+
+        with patch.object(self.builder, "windows", side_effect=windows), \
+                patch.object(self.builder, "linux", side_effect=linux), patch.object(self.builder, "android") as android, \
+                patch.object(build.subprocess, "Popen", side_effect=launch), \
+                self.assertRaisesRegex(build.BuildError, "dependency install failed"):
+            self.builder.parallel_platforms(self.root / "assets.zip")
+        self.assertEqual(len(compilers), 1)
+        self.assertIsNotNone(compilers[0].poll())
+        self.assertFalse(build.BUILD_PROCESSES)
+        android.assert_not_called()
 
     def test_mobile_packaging_overlaps_linux_and_harmony_waits_for_ready(self):
         import threading
@@ -899,29 +961,43 @@ class RecordTests(unittest.TestCase):
                 build.create_record(self.args, "3.8.4")
 
     def test_execution_records_partial_windows_success(self):
+        linux_started = threading.Event()
+
+        def preflight(builder):
+            builder.wsl_root = self.root / "wsl"
+
         def windows_arch(builder, arch, config):
             if arch == "arm64":
+                self.assertTrue(linux_started.wait(3))
                 raise build.BuildError("ARM64 build failed")
             package = builder.work / "windows.exe"
             package.write_bytes(b"package")
             builder.collect([package], "Windows", time.time())
 
+        def linux(builder):
+            linux_started.set()
+            self.assertTrue(build.BUILD_CANCEL.wait(3))
+            self.assertFalse(Path(str(builder.parallel_marker) + ".windows-ready").exists())
+            raise build.BuildError("Linux dependency install cancelled")
+
         with contextlib.redirect_stdout(io.StringIO()), patch.object(build.tempfile, "tempdir", str(self.root)), \
-                patch.object(build.Builder, "preflight"), patch.object(build.Builder, "build_ui"), \
+                patch.object(build.Builder, "preflight", preflight), patch.object(build.Builder, "build_ui"), \
                 patch.object(build.Builder, "windows_tools"), \
                 patch.object(build.Builder, "windows_arch", windows_arch), \
-                patch.object(build.Builder, "linux") as linux, self.assertRaises(build.BuildError):
+                patch.object(build.Builder, "linux", linux), self.assertRaisesRegex(build.BuildError, "ARM64 build failed"):
             with self.record.session():
                 build.execute_build(self.args, "3.8.4", self.record)
         stages = {stage["id"]: stage for stage in self.progress()["stages"]}
         self.assertEqual(stages["windows_amd64"]["status"], "succeeded")
         self.assertEqual(stages["windows_amd64"]["artifacts"], [str(self.args.output / "windows.exe")])
         self.assertEqual(stages["windows_arm64"]["status"], "failed")
-        self.assertEqual(stages["linux"]["status"], "pending")
+        self.assertEqual(stages["linux"]["status"], "failed")
         self.assertNotIn("verification", stages)
-        linux.assert_not_called()
 
     def test_complete_execution_persists_progress_without_validation(self):
+        def preflight(builder):
+            builder.wsl_root = self.root / "wsl"
+
         def windows_arch(builder, arch, config):
             package = builder.work / f"siyuan-3.8.4-win-{arch}.exe"
             package.write_bytes(b"package")
@@ -933,7 +1009,7 @@ class RecordTests(unittest.TestCase):
             builder.collect([package], "Linux", time.time())
 
         with contextlib.redirect_stdout(io.StringIO()), patch.object(build.tempfile, "tempdir", str(self.root)), \
-                patch.object(build.Builder, "preflight"), patch.object(build.Builder, "build_ui"), \
+                patch.object(build.Builder, "preflight", preflight), patch.object(build.Builder, "build_ui"), \
                 patch.object(build.Builder, "windows_tools"), \
                 patch.object(build.Builder, "windows_arch", windows_arch), patch.object(build.Builder, "linux", linux), \
                 patch.object(build.VERIFY, "verify") as verify:

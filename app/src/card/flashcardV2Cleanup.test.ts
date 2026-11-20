@@ -50,7 +50,9 @@ const harness = () => {
                     controls.get(selector.slice(6, -1))};
                 constructor(value: typeof options) { options = value; }
             }}; }
-            if (name.endsWith("confirmDialog")) { return {confirmDialog: (_a: string, _b: string, fn: () => Promise<void>) => { confirm = fn; }}; }
+            if (name.endsWith("confirmDialog")) {
+                return {confirmDialog: (options: {confirm: () => Promise<void>}) => { confirm = options.confirm; }};
+            }
             if (name.endsWith("escape")) { return {escapeHtml: (s: string) => s.replace(/</g, "&lt;"), escapeAttr: (s: string) => s}; }
             return {fetchPost: (url: string, payload: {operationID: string}, callback: (response: {data: unknown}) => void, _error?: unknown, _fail?: unknown, _headers?: unknown, timeout?: number) =>
                 new Promise<void>((resolve, reject) => {

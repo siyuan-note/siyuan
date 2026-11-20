@@ -1,8 +1,8 @@
 import {toggleMenu} from "./menuToggle";
 import {MenuItem} from "./Menu";
-import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {copySubMenu} from "./commonMenuItem";
 import {Bookmark} from "../layout/dock/Bookmark";
@@ -57,22 +57,27 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
                     label: window.siyuan.languages.remove,
                     click: () => {
                         const bookmarkText = element.querySelector(".b3-list-item__text").textContent;
-                        confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeBookmark.replace("${x}", `<b>${escapeHtml(bookmarkText)}</b>`), () => {
-                            if (id) {
-                                fetchPost("/api/attr/setBlockAttrs", {id, attrs: {bookmark: ""}}, () => {
-                                    bookmarkObj.update();
-                                });
-                                document.querySelectorAll(`.protyle-wysiwyg [data-node-id="${id}"]`).forEach((item) => {
-                                    item.setAttribute("bookmark", "");
-                                    const bookmarkElement = item.querySelector(".protyle-attr--bookmark");
-                                    if (bookmarkElement) {
-                                        bookmarkElement.remove();
-                                    }
-                                });
-                            } else {
-                                fetchPost("/api/bookmark/removeBookmark", {bookmark: bookmarkText});
-                            }
-                        }, undefined, true);
+                        confirmDialog({
+                            title: window.siyuan.languages.deleteOpConfirm,
+                            text: window.siyuan.languages.removeBookmark.replace("${x}", `<b>${escapeHtml(bookmarkText)}</b>`),
+                            confirm: () => {
+                                if (id) {
+                                    fetchPost("/api/attr/setBlockAttrs", {id, attrs: {bookmark: ""}}, () => {
+                                        bookmarkObj.update();
+                                    });
+                                    document.querySelectorAll(`.protyle-wysiwyg [data-node-id="${id}"]`).forEach((item) => {
+                                        item.setAttribute("bookmark", "");
+                                        const bookmarkElement = item.querySelector(".protyle-attr--bookmark");
+                                        if (bookmarkElement) {
+                                            bookmarkElement.remove();
+                                        }
+                                    });
+                                } else {
+                                    fetchPost("/api/bookmark/removeBookmark", {bookmark: bookmarkText});
+                                }
+                            },
+                            isDelete: true,
+                        });
                     }
                 }).element);
             }

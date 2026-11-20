@@ -407,7 +407,8 @@ var getDocsInfo = contractHandler(apicontract.GetDocsInfo, func(c *gin.Context, 
 
 var getRecentUpdatedBlocks = contractHandler(apicontract.GetRecentUpdatedBlocks, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.SearchBlock] {
 	var blocks []*model.Block
-	if model.IsReadOnlyRoleContext(c) {
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	if isReadOnlyRole {
 		denyAll, excludeBoxIDs, excludeDocIDs := model.GetPublishAccessSearchExclusion(c)
 		if denyAll {
 			return apicontract.Success([]*apicontract.SearchBlock{})
@@ -416,10 +417,19 @@ var getRecentUpdatedBlocks = contractHandler(apicontract.GetRecentUpdatedBlocks,
 	} else {
 		blocks = model.RecentUpdatedBlocks(nil, nil)
 	}
-	return apicontract.Success(searchBlockContracts(blocks))
+	var contracts []*apicontract.SearchBlock
+	if isReadOnlyRole {
+		contracts = searchReaderBlockContracts(blocks)
+	} else {
+		contracts = searchBlockContracts(blocks)
+	}
+	return apicontract.Success(contracts)
 })
 
 var getContentWordCount = contractHandler(apicontract.GetContentWordCount, func(c *gin.Context, request apicontract.ContentWordCountRequest) apicontract.Response[apicontract.WordCountData] {
+	if err := filesys.ValidateContentStatContent(request.Content); nil != err {
+		return apicontract.Failure[apicontract.WordCountData](-1, err.Error())
+	}
 	return apicontract.Success(apicontract.WordCountData{ReqID: request.ReqID, Stat: blockStatContract(filesys.ContentStat(request.Content))})
 })
 

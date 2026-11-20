@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {escapeHtmlTextAndAttr} from "../util/escape";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
@@ -27,6 +28,7 @@ for (const mobile of [true, false]) {
             const dependencies: Record<string, unknown> = {
                 "../util/functions": {isMobile: () => mobile},
                 "../constants": {Constants: {}},
+                "../util/escape": {escapeHtmlTextAndAttr},
                 "../dialog": {Dialog: class {
                     element = element;
                     constructor() { calls.push("dialog"); }
@@ -89,6 +91,7 @@ for (const mobile of [true, false]) {
             const dependencies: Record<string, unknown> = {
                 "../util/functions": {isMobile: () => mobile},
                 "../constants": {Constants: {}},
+                "../util/escape": {escapeHtmlTextAndAttr},
                 "../dialog": {Dialog: class {element = element; destroy() {}}},
                 "./aliasInput": {bindAliasInput: (_element: unknown, _value: string, options: {readonly: boolean}) => {
                     assert.equal(options.readonly, true);
@@ -121,3 +124,52 @@ for (const mobile of [true, false]) {
         });
     }
 }
+
+test("custom attribute rows escape imported IAL key names", () => {
+    let content = "";
+    const fields = ["bookmark", "name", "memo"].map(name => ({
+        value: "",
+        getAttribute: () => name,
+        focus() {},
+        addEventListener() {},
+    }));
+    const element = {
+        contains: () => false,
+        setAttribute() {},
+        addEventListener() {},
+        querySelector: (selector: string) => fields.find(field => selector.includes(`"${field.getAttribute()}"`)),
+        querySelectorAll: (): Element[] => [],
+    };
+    const dependencies: Record<string, unknown> = {
+        "../util/functions": {isMobile: () => false},
+        "../constants": {Constants: {}},
+        "../util/escape": {escapeHtmlTextAndAttr},
+        "../dialog": {Dialog: class {
+            element = element;
+            constructor(options: {content: string}) { content = options.content; }
+            destroy() {}
+        }},
+        "./aliasInput": {bindAliasInput: () => ({focus() {}})},
+        "../mobile/util/keyboardToolbar": {activeBlur() {}},
+        "../mobile/util/bindBottomSheetDialog": {bindBottomSheetDialog: () => () => {}},
+    };
+    const source = parse(readFileSync("src/menus/commonMenuItem.ts", "utf8"),
+        {MOBILE: false, BROWSER: true}, false, true, "commonMenuItem.ts");
+    const code = transpileModule(source, {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    const exports: {openFileAttr?: (attrs: object, focusName: string, protyle: object) => void} = {};
+    runInNewContext(code, {
+        exports, require: (name: string) => dependencies[name] || {},
+        document: {activeElement: {blur() {}}},
+        getSelection: () => ({rangeCount: 0}),
+        window: {siyuan: {languages: {}, config: {readonly: false, editor: {spellcheck: false}}}},
+    });
+    const imgKey = "custom-x<img src=y onerror=\"window.__attr=1\">";
+    const quoteKey = "custom-q\" onfocus=\"window.__q=1";
+    exports.openFileAttr({id: "doc", [imgKey]: "v", [quoteKey]: "v"}, "bookmark", {});
+    assert.ok(content.includes("data-name=\"custom-x&lt;img src=y onerror=&quot;window.__attr=1&quot;&gt;\""));
+    assert.ok(content.includes("data-name=\"custom-q&quot; onfocus=&quot;window.__q=1\""));
+    assert.ok(content.includes("x&lt;img src=y onerror=&quot;window.__attr=1&quot;&gt;"));
+    assert.ok(!content.includes("<img"));
+});

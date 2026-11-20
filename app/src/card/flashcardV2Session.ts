@@ -1506,13 +1506,15 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                                         requestPending = false;
                                         return;
                                     }
-                                    confirmDialog(window.siyuan.languages.flashcardSuspendSource,
-                                        `${window.siyuan.languages.flashcardSourceActionTip}<div>${window.siyuan.languages.riffCard} ${cardIDs.length}</div>`,
-                                        () => {
+                                    confirmDialog({
+                                        title: window.siyuan.languages.flashcardSuspendSource,
+                                        text: `${window.siyuan.languages.flashcardSourceActionTip}<div>${window.siyuan.languages.riffCard} ${cardIDs.length}</div>`,
+                                        confirm: () => {
                                             if (isCurrent() && !requestPending) {
                                                 manageAndSkip(cardIDs, "suspend", {}, "sourceSuspended");
                                             }
-                                        });
+                                        },
+                                    });
                                 }, undefined, undefined, undefined, 30000).then(() => {
                                     if (!queried) {
                                         requestPending = false;
@@ -1525,13 +1527,16 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                             icon: "iconRefresh",
                             label: window.siyuan.languages.reset,
                             click: () => {
-                                confirmDialog(window.siyuan.languages.reset,
-                                    window.siyuan.languages.resetCardTip.replace("${x}", "1"), () => {
+                                confirmDialog({
+                                    title: window.siyuan.languages.reset,
+                                    text: window.siyuan.languages.resetCardTip.replace("${x}", "1"),
+                                    confirm: () => {
                                         if (!sessionFinished && dialog.element.isConnected && !requestPending &&
                                             queue[index]?.card.id === current.card.id) {
                                             manageAndSkip([current.card.id], "reset", {}, "userReset");
                                         }
-                                    });
+                                    },
+                                });
                             },
                         });
                         menu.addItem({

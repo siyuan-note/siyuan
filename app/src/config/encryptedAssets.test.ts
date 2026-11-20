@@ -2,11 +2,33 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
+import {parseFragment, type DefaultTreeAdapterMap} from "parse5";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 
 const compiled = transpileModule(readFileSync("src/config/encryptedAssets.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
+
+type Child = DefaultTreeAdapterMap["childNode"];
+type Element = DefaultTreeAdapterMap["element"];
+
+const isElement = (node: Child): node is Element => "tagName" in node;
+
+// 与浏览器一致的片段解析：属性名大小写、实体解码后再断言，避免只比较转义后的字符串。
+const parseRows = (html: string) => parseFragment(html).childNodes.filter(isElement)
+    .filter(row => row.tagName === "div")
+    .map(row => {
+        const input = row.childNodes.filter(isElement).find(node => node.tagName === "input");
+        const button = row.childNodes.filter(isElement).find(node => node.tagName === "button");
+        return {
+            attributes: input.attrs.filter(attr => !attr.namespace),
+            buttonText: button.childNodes.map(node => "value" in node ? node.value : "").join(""),
+        };
+    });
+
+const attribute = (attributes: Element["attrs"], name: string) =>
+    attributes.find(attr => attr.name === name)?.value;
 
 class Control {
     checked = false;
@@ -29,8 +51,15 @@ class Control {
     querySelectorAll() { return this.inputs; }
     closest() { return this; }
     addEventListener(name: string, handler: (event?: unknown) => unknown) { this.listeners.set(name, handler); }
-    dispatch(name: string) { return this.listeners.get(name)?.(); }
+    dispatch(name: string, event?: unknown) { return this.listeners.get(name)?.(event); }
 }
+
+const fixtures = [
+    {item: "assets/a.png", name: "<private name>.png"},
+    {item: "assets/b.png", name: "private-b.png"},
+    {item: "assets/c.png", name: '资料 "终稿" & <附图>.png'},
+    {item: "assets/d.png", name: 'report.png" autofocus onfocus="void 0" x=".png'},
+].map(({item, name}) => ({item, name, path: `${item}?box=secret`}));
 
 const setup = (mobile = false) => {
     const controls = Object.fromEntries(["list", "all", "delete", "refresh", "preview", "cancel", "count"]
@@ -39,10 +68,7 @@ const setup = (mobile = false) => {
     const requests: Array<{url: string, data: {notebook: string, paths?: string[]}}> = [];
     const callbacks: Array<() => void> = [];
     let current: {element: {isConnected: boolean, dataset: Record<string, string>}, destroy: () => void};
-    let response = {code: 0, data: [
-        {item: "assets/a.png", name: "<private name>.png", path: "assets/a.png?box=secret"},
-        {item: "assets/b.png", name: "private-b.png", path: "assets/b.png?box=secret"},
-    ]};
+    let response = {code: 0, data: fixtures};
     let releaseScan: (() => void) | undefined;
     let delay = false;
     let maintenanceFailure = false;
@@ -52,7 +78,7 @@ const setup = (mobile = false) => {
         languages: {loading: "Loading", emptyContent: "Empty", clearAll: "Confirm cleanup"}};
     const exports = {} as typeof import("./encryptedAssets");
     const dependencies = {
-        MobileDialog: class {
+        AdaptiveDialog: class {
             element = {isConnected: true, dataset: {} as Record<string, string>,
                 querySelector: (selector: string) => controls[selector.match(/data-type="([^"]+)"/)[1]]};
             constructor(private options: {destroyCallback: () => void}) {
@@ -75,11 +101,12 @@ const setup = (mobile = false) => {
             }
             return response;
         },
-        mobileConfirmDialog: (_title: string, _content: string, confirm: () => void) => { callbacks.push(confirm); },
+        confirmDialog: ({confirm}: {confirm: () => void}) => { callbacks.push(confirm); },
         showMessage: () => {},
         trackNotebookHistoryDialog: () => {},
         forgetNotebookHistoryDialog: () => {},
-        escapeHtml: (text: string) => text.replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
+        escapeHtml,
+        escapeHtmlTextAndAttr,
         getNotebookName: () => "Private notebook",
         isMobile: () => mobile,
         runSettingsMaintenance: (action: () => Promise<unknown>) => {
@@ -104,6 +131,12 @@ const setup = (mobile = false) => {
     };
 };
 
+const previewTarget = (index: number) => {
+    const row = {dataset: {index: String(index)}};
+    const target = {closest: (selector: string) => selector === "[data-index]" ? row : target};
+    return target;
+};
+
 for (const mobile of [false, true]) {
     test(`${mobile ? "mobile" : "desktop"} cleanup previews and deletes only explicitly confirmed selections`, async () => {
         const state = setup(mobile);
@@ -111,8 +144,18 @@ for (const mobile of [false, true]) {
         await state.settle();
         assert.equal(state.requests.length, 1);
         assert.equal(state.requests[0].data.notebook, "secret");
-        assert.ok(state.controls.list.html.includes("&lt;private name&gt;"));
+        const rows = parseRows(state.controls.list.html);
+        assert.equal(rows.length, fixtures.length);
+        rows.forEach((row, index) => {
+            assert.deepEqual(row.attributes.map(attr => attr.name).sort(), ["aria-label", "class", "type"]);
+            assert.equal(attribute(row.attributes, "aria-label"), fixtures[index].name);
+            assert.equal(row.buttonText, fixtures[index].name);
+        });
+        assert.ok(state.controls.list.html.includes("&quot;"));
+        assert.ok(state.controls.list.html.includes("&lt;private name>.png"));
         assert.equal(state.controls.delete.disabled, true);
+        state.controls.list.dispatch("click", {target: previewTarget(2)});
+        assert.deepEqual(state.previews.at(-1), ["assets/c.png?box=secret", "secret/assets/c.png"]);
         state.controls.list.inputs[1].checked = true;
         state.controls.list.dispatch("change");
         assert.equal(state.controls.delete.disabled, false);

@@ -1040,7 +1040,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", so that SiYuan will automatically download The latest version of the installation package and prompts to install. The update prompt shown on exit includes the release announcement link for the version about to be installed"
+									"Data": ", so that SiYuan automatically downloads the latest installer and prompts you to install it. When you exit, you can open the release announcement, then choose Install now or Not now"
 								}
 							]
 						}

@@ -140,7 +140,7 @@ const browserCases = async (sources: Record<string, string>, libraries: Record<s
             suspendedColumns.add(element);
             return () => check.equal(suspendedColumns.delete(element), true);
         }},
-        "../../dialog/mobileDialog": {MobileDialog: ExportDialog},
+        "../../dialog/adaptiveDialog": {AdaptiveDialog: ExportDialog},
         "../../dialog/message": {showMessage: (text: string) => messages.push(text), hideMessage: () => {}},
         "../../util/fetch": {fetchPost: (url: string, data: {file: File}, callback: (response: unknown) => void) => {
             if (url === "/api/export/exportPreviewHTML") {

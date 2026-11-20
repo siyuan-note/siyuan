@@ -254,12 +254,17 @@ export const processTemplateHTTPEvent = (cmd: string, data: HTTPEvent) => {
     };
     const escape = (value: string) => value.replace(/[&<>"']/g, character =>
         ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"})[character]);
-    const {mobileConfirmDialog}: typeof import("../dialog/mobileConfirmDialog") = require("../dialog/mobileConfirmDialog");
-    execution.dialog = mobileConfirmDialog(lang.templateHTTPConfirm,
-        `${escape(lang.templateHTTPTemplateWarning)}<br>${escape(data.sourceLabel || "")}<br><br><code>${escape(data.method || "GET")} ${escape(data.url || "")}</code>` +
+    const {confirmDialog}: typeof import("../dialog/confirmDialog") = require("../dialog/confirmDialog");
+    execution.dialog = confirmDialog({
+        title: lang.templateHTTPConfirm,
+        text: `${escape(lang.templateHTTPTemplateWarning)}<br>${escape(data.sourceLabel || "")}<br><br><code>${escape(data.method || "GET")} ${escape(data.url || "")}</code>` +
         (data.headerNames?.length ? `<br><code>${escape(data.headerNames.join(", "))}</code>` : ""),
-        () => respond(true), () => respond(false), false, data.canPersist ? {
+        confirm: () => respond(true),
+        cancel: () => respond(false),
+        extraAction: data.canPersist ? {
             label: lang.templateHTTPAllowAlways, callback: () => respond(true, "template"),
-        } : undefined, lang.templateHTTPAllowOnce);
+        } : undefined,
+        confirmLabel: lang.templateHTTPAllowOnce,
+    });
     execution.dialog.element.querySelector("#extraDialogConfirmBtn")?.classList.add("b3-button--wrap");
 };

@@ -7,7 +7,7 @@ import {
 import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {goBack, goForward} from "../util/backForward";
 import {syncGuide} from "../sync/syncGuide";
-import {workspaceMenu} from "../menus/workspace";
+import {mainMenu} from "../menus/mainMenu";
 import {initTopBarMenu} from "../menus/topBar";
 import {MenuItem} from "../menus/Menu";
 import {hideTooltip} from "../dialog/tooltip";
@@ -81,7 +81,7 @@ export const updateBarModeIcon = () => {
 export const initBar = (app: App) => {
     const toolbarElement = document.getElementById("toolbar");
     toolbarElement.innerHTML = `
-<div id="barWorkspace" class="ariaLabel toolbar__item" aria-label="${window.siyuan.languages.mainMenu} ${updateHotkeyTip(window.siyuan.config.keymap.general.mainMenu.custom)}">
+<div id="${Constants.MENU_BAR_MAIN_MENU}" class="ariaLabel toolbar__item" aria-label="${window.siyuan.languages.mainMenu} ${updateHotkeyTip(window.siyuan.config.keymap.general.mainMenu.custom)}">
     <span class="toolbar__text">${getWorkspaceName()}</span>
     <svg class="toolbar__svg"><use xlink:href="#iconDown"></use></svg>
 </div>
@@ -206,8 +206,8 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
                 syncGuide(app);
                 event.stopPropagation();
                 break;
-            } else if (targetId === "barWorkspace") {
-                workspaceMenu(app, target.getBoundingClientRect(), false, target);
+            } else if (targetId === Constants.MENU_BAR_MAIN_MENU) {
+                mainMenu(app, target.getBoundingClientRect(), false, target);
                 event.stopPropagation();
                 break;
             } else if (targetId === "barExit") {

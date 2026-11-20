@@ -33,7 +33,7 @@ function setup(fetch: (url: string, data: unknown) => Promise<unknown>) {
             })},
             "./escape": {escapeHtml: (text: string) => text},
             "../dialog/message": {showMessage: (text: string) => messages.push(text)},
-            "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _message: string, yes: () => void, no: () => void) => {
+            "../dialog/confirmDialog": {confirmDialog: ({confirm: yes, cancel: no}: {confirm: () => void, cancel: () => void}) => {
                 const dialog = {yes, no, destroyed: false, destroy() { this.destroyed = true; }};
                 dialogs.push(dialog);
                 return dialog;

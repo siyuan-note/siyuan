@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import type {SettingTabBuilder} from "../setting/builder";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -133,7 +133,7 @@ const mountAboutVersionSlot = (root: HTMLElement) => {
             }
             /// #endif
             const text = lines.join("\n");
-            const dialog = new MobileDialog({
+            const dialog = new AdaptiveDialog({
                 title: window.siyuan.languages.runtimeInfo,
                 width: "min(720px, 92vw)",
                 content: `<div class="b3-dialog__content">

@@ -11,6 +11,7 @@ import sys
 import tarfile
 import tempfile
 import unittest
+import urllib.error
 from unittest.mock import patch
 import zipfile
 
@@ -491,6 +492,183 @@ class CompilerTests(unittest.TestCase):
                 with patch.object(prepare.subprocess, "check_output", return_value="unexpected\n"):
                     with self.assertRaisesRegex(RuntimeError, "Unexpected OCR compiler version"):
                         prepare.linux_worker_zig()
+
+
+class PublishedRecoveryTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.entry = {"url": "https://example.invalid/onnx.tgz", "sha256": "a" * 64,
+                      "size": 10, "library": "libonnxruntime.so"}
+        self.prefix = "published/resources/stage/ocr/runtime/linux-amd64"
+        self.package = self.root / "published.tar.gz"
+        self.contents = b"verified original library"
+        self.stamp = {"version": 1, "archive": prepare.runtime_source(self.entry),
+                      "files": {self.entry["library"]: hashlib.sha256(self.contents).hexdigest()}}
+        self.cache = self.root / "cache"
+        self.cache.mkdir()
+        self.stage = self.root / "stage"
+        self.destination = self.stage / "runtime/linux-amd64"
+        self.destination.mkdir(parents=True)
+
+    def archive(self, stamp=None, symlink=False, duplicate=False):
+        with tarfile.open(self.package, "w:gz") as archive:
+            for name, data in [("libonnxruntime.so", self.contents),
+                               (prepare.RUNTIME_STAMP, json.dumps(stamp or self.stamp).encode()),
+                               ("siyuan-ocr", b"old worker must not be reused"),
+                               ("vc-runtime-files.json", b"old CRT must not be reused")]:
+                member = tarfile.TarInfo(self.prefix + "/" + name)
+                member.size = len(data)
+                if symlink and name == "libonnxruntime.so":
+                    member.type = tarfile.SYMTYPE
+                    member.linkname = "../../outside"
+                archive.addfile(member, io.BytesIO(data))
+                if duplicate and name == "libonnxruntime.so":
+                    archive.addfile(member, io.BytesIO(data))
+        recovery = {"url": self.package.as_uri(), "sha256": prepare.digest(self.package),
+                    "format": "tar.gz", "path": self.prefix,
+                    "runtimeSource": prepare.runtime_source(self.entry)}
+        return {"runtime": {"linux-amd64": self.entry}, "runtimeRecovery": {"linux-amd64": recovery}}
+
+    def test_published_archive_preserves_origin_and_only_copies_onnx_files(self):
+        manifest = self.archive()
+        with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "CACHE", self.cache):
+            prepare.recover_published_runtime("linux-amd64", self.entry, self.destination)
+        self.assertTrue(prepare.runtime_is_verified(self.entry, self.destination))
+        self.assertEqual({p.name for p in self.destination.iterdir()}, {"libonnxruntime.so", prepare.RUNTIME_STAMP})
+
+    def test_changed_runtime_identity_refuses_old_package_before_download(self):
+        manifest = self.archive()
+        for field, value in [("sha256", "b" * 64), ("size", 11), ("library", "other.so")]:
+            changed = {**self.entry, field: value}
+            with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "download") as download:
+                with self.assertRaisesRegex(ValueError, "No matching"):
+                    prepare.recover_published_runtime("linux-amd64", changed, self.destination)
+                download.assert_not_called()
+
+    def test_package_checksum_failure_and_invalid_stamp_fail_closed(self):
+        manifest = self.archive()
+        manifest["runtimeRecovery"]["linux-amd64"]["sha256"] = "0" * 64
+        with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "CACHE", self.cache), \
+                patch.object(prepare.time, "sleep"):
+            with self.assertRaisesRegex(ValueError, "Checksum mismatch"):
+                prepare.recover_published_runtime("linux-amd64", self.entry, self.destination)
+        bad_stamp = {**self.stamp, "files": {"libonnxruntime.so": "0" * 64}}
+        manifest = self.archive(stamp=bad_stamp)
+        with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "CACHE", self.cache):
+            with self.assertRaisesRegex(ValueError, "checksums"):
+                prepare.recover_published_runtime("linux-amd64", self.entry, self.destination)
+        self.assertFalse((self.destination / prepare.RUNTIME_STAMP).exists())
+
+    def test_package_rejects_links_duplicates_and_path_escape(self):
+        for options in [{"symlink": True}, {"duplicate": True}]:
+            manifest = self.archive(**options)
+            with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "CACHE", self.cache):
+                with self.assertRaisesRegex(ValueError, "Unsafe or duplicate"):
+                    prepare.recover_published_runtime("linux-amd64", self.entry, self.destination)
+        manifest = self.archive()
+        manifest["runtimeRecovery"]["linux-amd64"]["path"] = "../outside"
+        with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "download") as download:
+            with self.assertRaisesRegex(ValueError, "Unsafe"):
+                prepare.recover_published_runtime("linux-amd64", self.entry, self.destination)
+            download.assert_not_called()
+
+    def test_original_integrity_failures_and_unconfigured_targets_do_not_recover(self):
+        for error in [ValueError("Checksum mismatch"), ValueError("Size mismatch"),
+                      PermissionError("Permission denied"), urllib.error.HTTPError("url", 401, "Unauthorized", {}, None)]:
+            with patch.object(prepare, "MANIFEST", self.archive()), patch.object(prepare, "STAGE", self.stage), \
+                    patch.object(prepare, "download", side_effect=error), patch.object(prepare, "recover_published_runtime") as recover:
+                with self.assertRaises(type(error)):
+                    prepare.prepare_runtime("linux-amd64", False, {})
+                recover.assert_not_called()
+        manifest = self.archive()
+        manifest.pop("runtimeRecovery")
+        with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "STAGE", self.stage), \
+                patch.object(prepare, "download", side_effect=urllib.error.URLError("offline")), \
+                patch.object(prepare, "recover_published_runtime") as recover:
+            with self.assertRaises(urllib.error.URLError):
+                prepare.prepare_runtime("linux-amd64", False, {})
+            recover.assert_not_called()
+
+    def test_unavailable_origin_recovers_and_current_linux_worker_is_still_built(self):
+        manifest = self.archive()
+        real_download = prepare.download
+        def download(entry, destination):
+            if entry is self.entry:
+                raise urllib.error.HTTPError(entry["url"], 404, "Not Found", {}, None)
+            return real_download(entry, destination)
+        with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "CACHE", self.cache), \
+                patch.object(prepare, "STAGE", self.stage), patch.object(prepare, "download", side_effect=download), \
+                patch.object(prepare.subprocess, "run") as run, patch.object(prepare, "verify_linux_glibc") as verify:
+            prepare.prepare_runtime("linux-amd64", True, {"CC": "current compiler"})
+            self.assertEqual(run.call_args.args[0][-1], "./ocr/cmd/ocr-worker")
+            self.assertEqual(run.call_args.kwargs["env"], {"CC": "current compiler"})
+            self.assertEqual(verify.call_count, 2)
+
+    def test_recovery_network_failure_is_reported_without_recursive_fallback(self):
+        manifest = self.archive()
+        with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "STAGE", self.stage), \
+                patch.object(prepare, "download", side_effect=urllib.error.URLError("offline")) as download:
+            with self.assertRaises(urllib.error.URLError):
+                prepare.prepare_runtime("linux-amd64", False, {})
+            self.assertEqual(download.call_count, 2)
+
+    def test_integrity_failure_is_not_hidden_by_later_transport_failure(self):
+        manifest = self.archive()
+        with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "STAGE", self.stage), \
+                patch.object(prepare, "CACHE", self.cache), \
+                patch.object(prepare.urllib.request, "urlopen", side_effect=[
+                    io.BytesIO(b"corrupted"), urllib.error.URLError("offline")]) as request, \
+                patch.object(prepare, "recover_published_runtime") as recover:
+            with self.assertRaisesRegex(ValueError, "Checksum mismatch"):
+                prepare.prepare_runtime("linux-amd64", False, {})
+            self.assertEqual(request.call_count, 1)
+            recover.assert_not_called()
+
+    def test_copy_failure_does_not_write_new_stamp(self):
+        source = self.root / "source"
+        source.mkdir()
+        (source / self.entry["library"]).write_bytes(self.contents)
+        (source / prepare.RUNTIME_STAMP).write_text(json.dumps(self.stamp))
+        with patch.object(prepare.shutil, "copyfile", side_effect=OSError("interrupted")):
+            with self.assertRaises(OSError):
+                prepare.copy_published_runtime(self.entry, source, self.destination)
+        self.assertFalse((self.destination / prepare.RUNTIME_STAMP).exists())
+        self.assertEqual(list(self.destination.iterdir()), [])
+
+    def test_dmg_failure_still_detaches_read_only_mount(self):
+        manifest = self.archive()
+        manifest["runtimeRecovery"]["linux-amd64"]["format"] = "dmg"
+        with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "CACHE", self.cache), \
+                patch.object(prepare.subprocess, "run") as run, \
+                patch.object(prepare, "copy_published_runtime", side_effect=ValueError("invalid stamp")):
+            with self.assertRaisesRegex(ValueError, "invalid stamp"):
+                prepare.recover_published_runtime("linux-amd64", self.entry, self.destination)
+            self.assertIn("-readonly", run.call_args_list[0].args[0])
+            self.assertEqual(run.call_args_list[-1].args[0][:2], ["hdiutil", "detach"])
+
+    def test_windows_recovery_still_prepares_current_crt(self):
+        manifest = self.archive()
+        manifest["runtime"]["windows-amd64"] = self.entry
+        manifest["runtimeRecovery"]["windows-amd64"] = manifest["runtimeRecovery"]["linux-amd64"]
+        with patch.object(prepare, "MANIFEST", manifest), patch.object(prepare, "STAGE", self.stage), \
+                patch.object(prepare, "download", side_effect=urllib.error.URLError("offline")), \
+                patch.object(prepare, "recover_published_runtime") as recover, \
+                patch.object(prepare, "windows_crt_directory", return_value=self.root / "current-crt") as crt_dir, \
+                patch.object(prepare, "prepare_windows_crt") as crt:
+            prepare.prepare_runtime("windows-amd64", False, self.root / "current-crt")
+            recover.assert_called_once()
+            crt_dir.assert_not_called()
+            crt.assert_called_once_with("windows-amd64", self.stage / "runtime/windows-amd64", self.root / "current-crt")
+
+    def test_successful_origin_does_not_use_recovery(self):
+        with patch.object(prepare, "MANIFEST", self.archive()), patch.object(prepare, "STAGE", self.stage), \
+                patch.object(prepare, "download"), patch.object(prepare, "extract_runtime", return_value={}), \
+                patch.object(prepare, "record_runtime") as record, patch.object(prepare, "recover_published_runtime") as recover:
+            prepare.prepare_runtime("linux-amd64", False, {})
+            record.assert_called_once()
+            recover.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -395,18 +395,23 @@ const activateFlashcardV2 = (callback: () => void, readiness?: IFlashcardV2Readi
             return;
         }
         const details = `${window.siyuan.languages.flashcardMigrationConfirm}<br><br>${summary}`;
-        confirmDialog(window.siyuan.languages.dataMigration, details, () => {
-            if (readiness && !readiness.isCurrent()) {
-                readiness.cancelled();
-                return;
-            }
-            let activated = false;
-            fetchPost("/api/flashcard/activateMigration", {
-                migrationID: previewResponse.data.migrationID,
-                recordDigest: previewResponse.data.recordDigest,
-            }, () => { activated = true; callback(); }, undefined, readiness?.failed, undefined, readiness ? 30000 : 0)
-                .finally(() => { if (!activated) readiness?.cancelled(); });
-        }, readiness?.cancelled);
+        confirmDialog({
+            title: window.siyuan.languages.dataMigration,
+            text: details,
+            confirm: () => {
+                if (readiness && !readiness.isCurrent()) {
+                    readiness.cancelled();
+                    return;
+                }
+                let activated = false;
+                fetchPost("/api/flashcard/activateMigration", {
+                    migrationID: previewResponse.data.migrationID,
+                    recordDigest: previewResponse.data.recordDigest,
+                }, () => { activated = true; callback(); }, undefined, readiness?.failed, undefined, readiness ? 30000 : 0)
+                    .finally(() => { if (!activated) readiness?.cancelled(); });
+            },
+            cancel: readiness?.cancelled,
+        });
     }, undefined, readiness?.failed, undefined, readiness ? 30000 : 0)
         .finally(() => { if (!previewReceived) readiness?.cancelled(); });
 };
@@ -884,21 +889,26 @@ export const openFlashcardV2Presets = () => {
                     return;
                 }
                 if (target.dataset.type === "delete") {
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
-                        fetchPost("/api/flashcard/mutateEntities", {
-                            operationID: genUUID(),
-                            mutations: [{
-                                entityType: "schedulerPreset",
-                                entityID: revisions[index].entityID,
-                                expectedRevisionID: revisions[index].revisionID,
-                                updatedAt: Date.now(),
-                                deleted: true,
-                            }],
-                        }, () => {
-                            revisions.splice(index, 1);
-                            item.remove();
-                        });
-                    }, undefined, true);
+                    confirmDialog({
+                        title: window.siyuan.languages.deleteOpConfirm,
+                        text: window.siyuan.languages.confirmDelete,
+                        confirm: () => {
+                            fetchPost("/api/flashcard/mutateEntities", {
+                                operationID: genUUID(),
+                                mutations: [{
+                                    entityType: "schedulerPreset",
+                                    entityID: revisions[index].entityID,
+                                    expectedRevisionID: revisions[index].revisionID,
+                                    updatedAt: Date.now(),
+                                    deleted: true,
+                                }],
+                            }, () => {
+                                revisions.splice(index, 1);
+                                item.remove();
+                            });
+                        },
+                        isDelete: true,
+                    });
                 }
             });
         });
@@ -2376,9 +2386,12 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                         }
                     };
                     if (action === "reset") {
-                        confirmDialog(window.siyuan.languages.reset,
-                            window.siyuan.languages.resetCardTip.replace("${x}", selected.length.toString()),
-                            () => { void execute(); }, release);
+                        confirmDialog({
+                            title: window.siyuan.languages.reset,
+                            text: window.siyuan.languages.resetCardTip.replace("${x}", selected.length.toString()),
+                            confirm: () => { void execute(); },
+                            cancel: release,
+                        });
                     } else {
                         void execute();
                     }
@@ -2557,9 +2570,11 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                         changedAt: Date.now(),
                     }, reloadPage);
                     if (action === "delete") {
-                        confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                            `${window.siyuan.languages.confirmDelete}<br>${window.siyuan.languages.flashcardSourceActionTip}`,
-                            execute);
+                        confirmDialog({
+                            title: window.siyuan.languages.deleteOpConfirm,
+                            text: `${window.siyuan.languages.confirmDelete}<br>${window.siyuan.languages.flashcardSourceActionTip}`,
+                            confirm: execute,
+                        });
                     } else {
                         execute();
                     }
@@ -2701,8 +2716,11 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     }
                 });
                 if (action === "reset") {
-                    confirmDialog(window.siyuan.languages.reset,
-                        window.siyuan.languages.resetCardTip.replace("${x}", "1"), execute);
+                    confirmDialog({
+                        title: window.siyuan.languages.reset,
+                        text: window.siyuan.languages.resetCardTip.replace("${x}", "1"),
+                        confirm: execute,
+                    });
                 } else {
                     void execute();
                 }
@@ -2969,14 +2987,19 @@ export const openFlashcardV2ReviewSets = (app: App) => {
                         return;
                     }
                     if (type === "delete" && item) {
-                        confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
-                            fetchPost("/api/flashcard/deleteReviewSet", {
-                                operationID: genUUID(),
-                                reviewSetID: item.dataset.id,
-                                expectedRevisionID: item.dataset.revision,
-                                deletedAt: Date.now(),
-                            }, () => item.remove());
-                        }, undefined, true);
+                        confirmDialog({
+                            title: window.siyuan.languages.deleteOpConfirm,
+                            text: window.siyuan.languages.confirmDelete,
+                            confirm: () => {
+                                fetchPost("/api/flashcard/deleteReviewSet", {
+                                    operationID: genUUID(),
+                                    reviewSetID: item.dataset.id,
+                                    expectedRevisionID: item.dataset.revision,
+                                    deletedAt: Date.now(),
+                                }, () => item.remove());
+                            },
+                            isDelete: true,
+                        });
                         return;
                     }
                     if (item && (type === "cards" || (!type && !actionTarget))) {

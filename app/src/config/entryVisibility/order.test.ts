@@ -180,8 +180,8 @@ test("missing table and image actions merge into saved orders while preserving p
     [
         {path: "gutter.single.table", added: ["insertTableHeaderRow"]},
         {path: "inline.text", added: ["insertTableHeaderRow"]},
-        {path: "gutter.single.table", added: ["cancelMerged", "transposeTable"]},
-        {path: "inline.text.more", added: ["cancelMerged"]},
+        {path: "gutter.single.table", added: ["cancelMerged", "transposeTable", "pinTableHeaderColumn", "unpinTableHeaderColumn"]},
+        {path: "inline.text.more", added: ["cancelMerged", "pinTableHeaderColumn", "unpinTableHeaderColumn"]},
         {path: "inline.image", added: ["openBy"]},
         {path: "gutter.single.copy", added: ["copyMirror"]},
         {path: "gutter.single.blockEmbed", added: ["refPopover", "embedHeadingLevel", "embedBlockBreadcrumbParentPath"]},

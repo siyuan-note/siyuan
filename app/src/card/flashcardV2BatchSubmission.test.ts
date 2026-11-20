@@ -28,8 +28,8 @@ const harness = () => {
         genUUID: () => `operation-${++serial}`, Date, Symbol, escapeHtml,
         window: {siyuan: {languages: {reset: "reset", resetCardTip: "Reset ${x}", flashcardSaveFailed: "failed"}}},
         reloadPage: () => { refreshed++; }, showMessage: (message: string) => { errors++; messages.push(message); },
-        confirmDialog: (_title: string, _text: string, accept: () => void, cancel: () => void) => {
-            confirms.push({accept, cancel});
+        confirmDialog: ({confirm, cancel}: {confirm: () => void, cancel: () => void}) => {
+            confirms.push({accept: confirm, cancel});
         },
         withFetchTimeout: (request: () => Promise<unknown>, _signal: unknown, timeout: number) => {
             assert.equal(timeout, 30000);

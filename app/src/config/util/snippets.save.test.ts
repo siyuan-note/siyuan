@@ -71,15 +71,14 @@ const browserCases = async (source: string) => {
                 settingsWrites++;
                 Object.assign(window.siyuan.config.snippet, value);
             }},
-            MobileDialog: FakeDialog, isMobile: () => mobile,
+            AdaptiveDialog: FakeDialog, isMobile: () => mobile,
             Constants: {DIALOG_SNIPPETS: "snippets"},
             objEquals: (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b),
-            mobileConfirmDialog: (_title: string, _text: string, confirm: () => void, cancel?: () => void,
-                                 _remove?: boolean, _extra?: unknown, _confirmLabel?: string,
-                                 options?: {mobileSheet?: {beforeClose?: (reason: string) => boolean}}) => {
+            confirmDialog: ({confirm, cancel, mobileSheet}: {confirm: () => void, cancel?: () => void,
+                                 mobileSheet?: {beforeClose?: (reason: string) => boolean}}) => {
                 if (closeDecision === "save") confirm();
                 else {
-                    options?.mobileSheet?.beforeClose?.(closeDecision);
+                    mobileSheet?.beforeClose?.(closeDecision);
                     cancel?.();
                 }
             },

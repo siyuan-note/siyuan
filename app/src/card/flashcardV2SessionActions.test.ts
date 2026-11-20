@@ -25,7 +25,10 @@ const harness = (id: string) => {
         window: {siyuan: {languages: {reset: "Reset", resetCardTip: "Reset ${x}",
             flashcardSuspendSource: "Suspend source", flashcardSourceActionTip: "All cards from this source", riffCard: "Cards"}}},
         menu: {addItem: (value: typeof item) => { item = value; }},
-        confirmDialog: (_title: string, text: string, callback: () => void) => { message = text; confirm = callback; },
+        confirmDialog: (options: {text: string, confirm: () => void}) => {
+            message = options.text;
+            confirm = options.confirm;
+        },
         manageAndSkip: (ids: string[], action: string) => mutations.push({ids, action}),
         fetchPost: (_url: string, payload: typeof queryData, callback: typeof query) => {
             queryData = payload; query = callback; return Promise.resolve();

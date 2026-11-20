@@ -58,7 +58,8 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         return range;
     };
     const constants = new Proxy<Record<string, string | number>>({ZWSP: "\u200b", TIMEOUT_LONGPRESS: 20,
-        SIZE_DRAG_THRESHOLD: 5}, {get: (target, key: string) => target[key] || key});
+        SIZE_DRAG_THRESHOLD: 5, TABLE_PINNED_COLUMN_ACTIVE: "data-table-pinned-column-active",
+        TABLE_PINNED_COLUMN_CELL: "data-table-pinned-column-cell"}, {get: (target, key: string) => target[key] || key});
     const stubs: Record<string, object | (() => object)> = {
         "src/constants.ts": {Constants: constants},
         "src/menus/menuToggle.ts": {toggleMenu: (options: {build: (menu: object, session: object) => void}) => {
@@ -1131,6 +1132,35 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         context.prepareTableCellMenuItems([item], () => false);
         item.click(undefined, undefined);
         check.equal(ran, false, "unfinished composition blocks structural menu actions");
+    }
+    for (const useTouch of [true, false]) {
+        mobile = useTouch;
+        const f = fixture();
+        const viewport = f.table.parentElement;
+        const cell = f.cell(0, 0);
+        viewport.style.width = "200px";
+        f.table.style.margin = "0";
+        f.table.style.width = "270px";
+        f.table.setAttribute("data-table-pinned-column-active", "");
+        cell.setAttribute("data-table-pinned-column-cell", "");
+        cell.style.position = "sticky";
+        cell.style.left = "0";
+        viewport.scrollLeft = 65;
+        const rect = cell.getBoundingClientRect();
+        check.ok(f.table.querySelector("col").getBoundingClientRect().left < rect.left);
+        if (useTouch) {
+            f.core.startTouchSelection(cell, "column");
+            check.equal(f.invoke("getTouchState").column.left, rect.left);
+            check.equal(f.invoke("getTouchState").column.right, rect.right);
+        } else {
+            Reflect.set(f.core, "hoverCell", cell);
+            Reflect.set(f.core, "hoverType", "cell");
+            f.render();
+            const handle = f.touch("[data-type='column']");
+            check.ok(!handle.classList.contains("fn__none"));
+            check.equal(parseFloat(handle.style.left), Math.round(rect.left + rect.width / 2));
+        }
+        f.dispose();
     }
     mobile = false;
     for (const pinned of [false, true]) {

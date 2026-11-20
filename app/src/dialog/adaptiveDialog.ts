@@ -8,30 +8,32 @@ import {scrollInputIntoView} from "../mobile/util/visibleViewport";
 import {isNotCtrl} from "../protyle/util/compatibility";
 import {showMessage} from "./message";
 
-export type MobileDialogCloseReason = "confirm" | "cancel" | "scrim" | "drag" | "back" | "escape" | "programmatic" | "invalidate";
+export type DialogCloseReason = "confirm" | "cancel" | "scrim" | "drag" | "back" | "escape" | "programmatic" | "invalidate";
 export type MobileSheetOptions = {
     mode?: MobileSheetMode,
-    beforeClose?: (reason: MobileDialogCloseReason) => boolean | Promise<boolean>
+    beforeClose?: (reason: DialogCloseReason) => boolean | Promise<boolean>
 };
-const passive = (reason: MobileDialogCloseReason) => ["scrim", "drag", "back", "escape"].includes(reason);
+const passive = (reason: DialogCloseReason) => ["scrim", "drag", "back", "escape"].includes(reason);
 
 // 内部业务显式接入；不改变插件导出的 Dialog 或桌面默认行为。
 const adaptedDialogs = new WeakSet<Dialog>();
 
-type MobileDialogOptions = ConstructorParameters<typeof Dialog>[0] & {mobileSheet?: MobileSheetOptions};
+type AdaptiveDialogOptions = ConstructorParameters<typeof Dialog>[0] & {mobileSheet?: MobileSheetOptions};
 
-export interface MobileDialog extends Dialog {
-    requestClose(reason: MobileDialogCloseReason, options?: IObject): Promise<boolean>;
+type TPendingOptions = {close?: boolean, disableButtons?: boolean, failureMessage?: string};
+
+export interface AdaptiveDialog extends Dialog {
+    requestClose(reason: DialogCloseReason, options?: IObject): Promise<boolean>;
     // 调用前先清除敏感内容；跳过保存/脏数据守卫，最终执行 destroyCallback 资源清理。
     invalidate(options?: IObject): void;
-    runPending(task: () => Promise<boolean>, options?: {close?: boolean, disableButtons?: boolean}): Promise<boolean>;
+    runPending(task: () => Promise<boolean>, options?: TPendingOptions): Promise<boolean>;
     focusWhenReady(target: () => HTMLElement, options?: {select?: boolean, showKeyboard?: boolean}): void;
     bindInput(input: HTMLInputElement | HTMLTextAreaElement, enter?: () => void, bindEnter?: boolean, focus?: boolean): void;
     setSheetMode(mode: MobileSheetMode): void;
 }
 
-const createMobileDialogClass = () => {
-    class MobileDialogImplementation extends Dialog {
+const createAdaptiveDialogClass = () => {
+    class AdaptiveDialogImplementation extends Dialog {
         private mobile = isMobile();
         private sheetOptions: MobileSheetOptions;
         private blocked: boolean;
@@ -41,13 +43,13 @@ const createMobileDialogClass = () => {
         private disposed = false;
         private ready = false;
         private focusTask: () => void;
-        private reason: MobileDialogCloseReason;
+        private reason: DialogCloseReason;
         private closeTask: Promise<boolean>;
         private disposeSheet: ReturnType<typeof bindBottomSheetDialog>;
         private disposeEvents: () => void;
 
         constructor(options: ConstructorParameters<typeof Dialog>[0] & {mobileSheet?: MobileSheetOptions}) {
-            const state: {owner?: MobileDialogImplementation} = {};
+            const state: {owner?: AdaptiveDialogImplementation} = {};
             const mobile = isMobile();
             super(mobile ? {
                 ...options, width: "100vw", height: "auto",
@@ -110,7 +112,7 @@ const createMobileDialogClass = () => {
             return window.siyuan.dialogs[window.siyuan.dialogs.length - 1] === this;
         }
 
-        public requestClose(reason: MobileDialogCloseReason, options?: IObject): Promise<boolean> {
+        public requestClose(reason: DialogCloseReason, options?: IObject): Promise<boolean> {
             if (!this.mobile) {
                 this.destroy(options);
                 return Promise.resolve(true);
@@ -201,7 +203,7 @@ const createMobileDialogClass = () => {
             };
         }
 
-        public async runPending(task: () => Promise<boolean>, options: {close?: boolean, disableButtons?: boolean} = {}) {
+        public async runPending(task: () => Promise<boolean>, options: TPendingOptions = {}) {
             if (this.pending || this.checking || this.disposed || this.element.dataset.dialogClosing === "true") return false;
             this.pending = true;
             const release = this.lockEditing(options.disableButtons !== false);
@@ -210,7 +212,7 @@ const createMobileDialogClass = () => {
                 success = await task() === true;
             } catch (error) {
                 console.error(error);
-                if (!this.disposed) showMessage(window.siyuan.languages.settingsPendingSaveError);
+                if (!this.disposed) showMessage(options.failureMessage || window.siyuan.languages.settingsPendingSaveError);
             } finally {
                 this.pending = false;
                 release();
@@ -260,19 +262,19 @@ const createMobileDialogClass = () => {
             });
         }
     }
-    return MobileDialogImplementation;
+    return AdaptiveDialogImplementation;
 };
 
-let implementation: new(options: MobileDialogOptions) => MobileDialog;
+let implementation: new(options: AdaptiveDialogOptions) => AdaptiveDialog;
 // Dialog 的依赖也会导入业务入口；延迟继承，避免模块初始化期间读取尚未导出的基类。
 // 此内部构造器不是可继承的公共基类；业务组合生命周期，不派生子类。
-export const MobileDialog = function(options: MobileDialogOptions) {
-    implementation ||= createMobileDialogClass();
+export const AdaptiveDialog = function(options: AdaptiveDialogOptions) {
+    implementation ||= createAdaptiveDialogClass();
     return new implementation(options);
-} as unknown as new(options: MobileDialogOptions) => MobileDialog;
+} as unknown as new(options: AdaptiveDialogOptions) => AdaptiveDialog;
 
-export const requestMobileDialogClose = (dialog: Dialog, reason: MobileDialogCloseReason) => {
-    if (adaptedDialogs.has(dialog)) return (dialog as MobileDialog).requestClose(reason);
+export const requestDialogClose = (dialog: Dialog, reason: DialogCloseReason) => {
+    if (adaptedDialogs.has(dialog)) return (dialog as AdaptiveDialog).requestClose(reason);
     dialog.destroy();
     return Promise.resolve(dialog.element.dataset.dialogClosing === "true");
 };

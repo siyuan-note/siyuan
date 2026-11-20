@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {toggleMenu} from "../../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../../menus/Menu";
 import {escapeHtmlTextAndAttr} from "../../../util/escape";
@@ -193,13 +193,12 @@ const saveProviders = (root: HTMLElement, providers: Config.IProvider[], onAppli
 };
 
 const showDeleteProviderConfirm = (root: HTMLElement, provider: Config.IProvider) => {
-    mobileConfirmDialog(
-        window.siyuan.languages.deleteOpConfirm,
-        window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHTML(getProviderTitle(provider))),
-        () => saveProviders(root, window.siyuan.config.ai.providers.filter((item) => item.id !== provider.id)),
-        undefined,
-        true,
-    );
+    confirmDialog({
+        title: window.siyuan.languages.deleteOpConfirm,
+        text: window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHTML(getProviderTitle(provider))),
+        confirm: () => saveProviders(root, window.siyuan.config.ai.providers.filter((item) => item.id !== provider.id)),
+        isDelete: true,
+    });
 };
 
 const openProviderCatalog = (root: HTMLElement) => {
@@ -803,11 +802,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
 
     const closeDetail = () => {
         if (JSON.stringify(draft) !== initialJSON || headersInput.value !== initialHeadersText) {
-            mobileConfirmDialog(
-                window.siyuan.languages.confirm,
-                window.siyuan.languages.discardUnsavedChanges,
-                leaveDetail,
-            );
+            confirmDialog({
+                title: window.siyuan.languages.confirm,
+                text: window.siyuan.languages.discardUnsavedChanges,
+                confirm: leaveDetail,
+            });
             return;
         }
         leaveDetail();

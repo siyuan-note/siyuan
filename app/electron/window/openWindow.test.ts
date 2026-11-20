@@ -111,6 +111,7 @@ test("新窗口创建时使用保存边界，不被鼠标所在显示器覆盖",
     assert.equal(f.options.show, false);
     // 独立文档窗口首帧按面板高度预留窗口按钮区，不落到系统的默认标题栏高度
     assert.equal(f.options.titleBarOverlay.height, 42);
+    assert.deepEqual(f.options.webPreferences.additionalArguments, ["--siyuan-window-controls-overlay"]);
     assert.deepEqual(f.calls, []);
     f.win.emit("ready-to-show");
     assert.deepEqual(f.calls, ["maximize", "show"]);

@@ -60,9 +60,22 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
         check.equal(document.documentElement.classList.contains("window-controls-overlay"), false);
         return "Window controls overlay cases passed";
     }
-    controls.initWindowControls(container, () => { closed++; });
-    check.equal(container.children.length, 0, "native controls replace the self-drawn buttons");
     const api = (navigator as Navigator & {windowControlsOverlay: import("./windowControlsOverlay").IWindowControlsOverlay}).windowControlsOverlay;
+    Object.defineProperty(api, "visible", {value: false, configurable: true});
+    try {
+        controls.initWindowControls(container, () => { closed++; });
+        check.equal(container.children.length, 0, "native windows never add self-drawn buttons while geometry is pending");
+        check.ok(document.documentElement.classList.contains("window-controls-overlay--hidden"));
+        check.equal(container.getBoundingClientRect().width, 0);
+    } finally {
+        Reflect.deleteProperty(api, "visible");
+    }
+    api.dispatchEvent(new Event("geometrychange"));
+    for (let attempt = 0; attempt < 20 && container.getBoundingClientRect().width === 0; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    check.ok(container.getBoundingClientRect().width > 0, "late native geometry reserves the caption space");
+    check.equal(container.children.length, 0);
     const colors = [
         {css: "oklch(70% .15 150)", rgba: [76, 184, 106, 1]},
         {css: "oklab(0.6 0 0)", rgba: [128, 128, 128, 1]},
@@ -201,11 +214,11 @@ test("native Windows captions reserve geometry, preserve legacy controls and kee
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText, "utf8");
     writeFileSync(html, "<!doctype html><html><head></head><body></body></html>", "utf8");
     writeFileSync(script, `const {app,BrowserWindow,ipcMain}=require("electron");
-const {updateTitleBarOverlay}=require(${JSON.stringify(overlayModule)});
+ const {updateTitleBarOverlay,withWindowControlsOverlay}=require(${JSON.stringify(overlayModule)});
 app.setPath("userData",${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async()=>{
  const win=new BrowserWindow({show:false,width:800,height:600,frame:false,titleBarStyle:"hidden",
- titleBarOverlay:{color:"#00000000"},webPreferences:{nodeIntegration:true,contextIsolation:false,backgroundThrottling:false}});
+  ...withWindowControlsOverlay({color:"#00000000"},{nodeIntegration:true,contextIsolation:false,backgroundThrottling:false})});
  const nativeSet=win.setTitleBarOverlay.bind(win);
  const state={updates:0,rejections:0,height:undefined,symbolColor:undefined};let rejectColor=false;
  win.setTitleBarOverlay=style=>{

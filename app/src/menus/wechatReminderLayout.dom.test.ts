@@ -28,7 +28,7 @@ test("compact reminder dialogs fit their real fields, translations and three act
                 current = this.element;
             }
         }
-        const fallback = {MobileDialog: Dialog, isMobile: () => false, isEncryptedBox: () => false, getEditorRange: () => ({}),
+        const fallback = {AdaptiveDialog: Dialog, isMobile: () => false, isEncryptedBox: () => false, getEditorRange: () => ({}),
             Constants: {CUSTOM_REMINDER_WECHAT: "reminder", DIALOG_WECHATREMINDER: "wechat"},
             fetchPost: (_url: string, _body: unknown, callback: (data: unknown) => void) => callback({data: {ial: {}}})};
         for (const name of ["model", "yearInput", "field", "inline", "menu"]) {

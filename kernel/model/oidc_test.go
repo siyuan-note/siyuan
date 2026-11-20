@@ -284,6 +284,74 @@ func TestCompletedWebAndMobileTransactionsAreRetainedBriefly(t *testing.T) {
 	}
 }
 
+// TestCompletedOIDCTransactionsDoNotExhaustCapacity 校验完成记录不再占用待完成容量，且完成记录本身仍有界。
+func TestCompletedOIDCTransactionsDoNotExhaustCapacity(t *testing.T) {
+	setupOIDCTest(t)
+	for i := 0; i < oidcTransactionMax; i++ {
+		state := fmt.Sprintf("completed-%d", i)
+		transaction := &oidcTransaction{State: state, Flow: oidcFlowWeb, ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()),
+			ExpiresAt: time.Now().Add(time.Minute)}
+		if err := storeOIDCTransaction(transaction); err != nil {
+			t.Fatalf("store completed OIDC transaction %d failed: %v", i, err)
+		}
+		completeOIDCTransaction(state, false, "provider error")
+	}
+	fresh := &oidcTransaction{State: "fresh-start", Flow: oidcFlowWeb, ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()),
+		ExpiresAt: time.Now().Add(time.Minute)}
+	if err := storeOIDCTransaction(fresh); err != nil {
+		t.Fatalf("completed OIDC transactions blocked a new login: %v", err)
+	}
+	oidcTransactions.Lock()
+	deleteOIDCTransactionLocked(fresh.State)
+	oidcTransactions.Unlock()
+
+	// 待完成容量仍按上限限制，使用不同客户端地址和绑定避免先触发单客户端配额
+	for i := 0; i < oidcTransactionMax; i++ {
+		transaction := &oidcTransaction{State: fmt.Sprintf("pending-%d", i), Flow: oidcFlowWeb,
+			ClientIP: fmt.Sprintf("203.0.113.%d", i%200+1), Binding: fmt.Sprintf("binding-%d", i),
+			ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()), ExpiresAt: time.Now().Add(time.Minute)}
+		if err := storeOIDCTransaction(transaction); err != nil {
+			t.Fatalf("store pending OIDC transaction %d failed: %v", i, err)
+		}
+	}
+	overflow := &oidcTransaction{State: "pending-overflow", Flow: oidcFlowWeb, ClientIP: "198.51.100.7",
+		Binding: "binding-overflow", ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()), ExpiresAt: time.Now().Add(time.Minute)}
+	if err := storeOIDCTransaction(overflow); err == nil {
+		t.Fatal("pending OIDC transaction capacity was not enforced")
+	}
+
+	// 完成记录超出上限时淘汰最早记录，避免内存无界增长
+	oidcTransactions.Lock()
+	oidcTransactions.byState = map[string]*oidcTransaction{}
+	oidcTransactions.byPoll = map[string]string{}
+	oidcTransactions.Unlock()
+	for i := 0; i < oidcCompletedMax+10; i++ {
+		state := fmt.Sprintf("bounded-%d", i)
+		transaction := &oidcTransaction{State: state, Flow: oidcFlowWeb, ConfigVersion: oidcConfigurationVersion(Conf.GetOIDC()),
+			ExpiresAt: time.Now().Add(time.Minute)}
+		if err := storeOIDCTransaction(transaction); err != nil {
+			t.Fatalf("store bounded completed OIDC transaction %d failed: %v", i, err)
+		}
+		completeOIDCTransaction(state, false, "provider error")
+	}
+	oidcTransactions.Lock()
+	completed := 0
+	for _, transaction := range oidcTransactions.byState {
+		if transaction.Completed {
+			completed++
+		}
+	}
+	oldestEvicted := oidcTransactions.byState["bounded-0"] == nil && oidcTransactions.byState["bounded-9"] == nil
+	newestRetained := oidcTransactions.byState[fmt.Sprintf("bounded-%d", oidcCompletedMax+9)] != nil
+	oidcTransactions.Unlock()
+	if completed != oidcCompletedMax {
+		t.Fatalf("completed OIDC transactions were not bounded: %d", completed)
+	}
+	if !oldestEvicted || !newestRetained {
+		t.Fatalf("completed OIDC transactions were not evicted oldest first: oldest_evicted=%v newest_retained=%v", oldestEvicted, newestRetained)
+	}
+}
+
 func TestActivateOIDCValidationAppliesCandidateOnce(t *testing.T) {
 	setupOIDCTest(t)
 	previousReadOnly := util.ReadOnly

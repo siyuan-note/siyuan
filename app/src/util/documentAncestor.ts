@@ -1,10 +1,11 @@
-import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeHtml} from "./escape";
 import {movePathTo} from "./pathName";
 import {documentParentID} from "./documentCreate";
 import {fetchSyncPost} from "./fetch";
 import {showMessage} from "../dialog/message";
-import type {MobileDialog as Dialog} from "../dialog/mobileDialog";
+import type {Dialog} from "../dialog";
+import type {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {isMobile} from "./functions";
 import type {DocumentAncestorAmbiguity, DocumentPath} from "../types/api";
 
@@ -72,23 +73,28 @@ export const selectDocumentAncestor = (notebook: string, ambiguity: DocumentAnce
             finish();
         }
     };
-    current = confirmDialog(window.siyuan.languages.newFile,
-        `<label>${escapeHtml(window.siyuan.languages.documentAncestorAmbiguous)}
+    current = confirmDialog({
+        title: window.siyuan.languages.newFile,
+        text: `<label>${escapeHtml(window.siyuan.languages.documentAncestorAmbiguous)}
 <div class="fn__hr"></div><select class="b3-select fn__block" data-ancestor-select>
 ${ambiguity.candidates.map((candidate, index) =>
             `<option value="${index}">${escapeHtml(candidate.displayPath)} [${escapeHtml(candidate.id)}]</option>`).join("")}
-</select></label>`, () => {
+</select></label>`,
+        confirm: () => {
             const value = current.element.querySelector<HTMLSelectElement>("[data-ancestor-select]").value;
             finish(value === "" ? undefined : ambiguity.candidates[Number(value)]);
-        }, () => finish(), false, {
+        },
+        cancel: () => finish(),
+        extraAction: {
             label: window.siyuan.languages.documentAncestorMore,
             callback: chooseOther,
-        });
+        },
+    });
     lifecycle.open(current);
     const select = current.element.querySelector<HTMLSelectElement>("[data-ancestor-select]");
     const confirm = current.element.querySelector<HTMLButtonElement>("#confirmDialogConfirmBtn");
     select.value = ambiguity.candidates.length ? "0" : "";
     confirm.disabled = ambiguity.candidates.length === 0;
-    if (isMobile()) current.focusWhenReady(() => select);
+    if (isMobile()) (current as AdaptiveDialog).focusWhenReady(() => select);
     else select.focus();
 });

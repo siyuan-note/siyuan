@@ -45,6 +45,8 @@ type oauthFlow struct {
 	Issuer  string
 	Result  chan oauthCallbackResult
 	Expires time.Time
+	// RequireIssuerParameter 记录授权服务器元数据的 RFC 9207 声明，为 true 时回调必须携带 iss。
+	RequireIssuerParameter bool
 }
 
 var oauthFlows = struct {
@@ -349,10 +351,11 @@ func (h *mcpOAuthHandler) Authorize(ctx context.Context, req *http.Request, resp
 		oauth2.SetAuthURLParam("resource", prm.Resource))
 
 	flow := &oauthFlow{
-		State:   state,
-		Issuer:  asm.Issuer,
-		Result:  make(chan oauthCallbackResult, 1),
-		Expires: time.Now().Add(oauthAuthorizationTimeout),
+		State:                  state,
+		Issuer:                 asm.Issuer,
+		Result:                 make(chan oauthCallbackResult, 1),
+		Expires:                time.Now().Add(oauthAuthorizationTimeout),
+		RequireIssuerParameter: asm.AuthorizationResponseIssParameterSupported,
 	}
 	oauthFlows.Lock()
 	oauthFlows.items[flowID] = flow
@@ -582,6 +585,10 @@ func CompleteMCPOAuth(flowID, code, state, callbackError, issuer string) error {
 	if state != flow.State {
 		oauthFlows.Unlock()
 		return fmt.Errorf("OAuth state mismatch")
+	}
+	if issuer == "" && flow.RequireIssuerParameter {
+		oauthFlows.Unlock()
+		return fmt.Errorf("OAuth issuer parameter missing")
 	}
 	if issuer != "" && issuer != flow.Issuer {
 		oauthFlows.Unlock()

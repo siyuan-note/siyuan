@@ -1,4 +1,4 @@
-import {MobileDialog as Dialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog as Dialog} from "../dialog/adaptiveDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import {escapeHtml} from "../util/escape";

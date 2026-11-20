@@ -35,7 +35,7 @@ const browserCases = async (source: string) => {
     const noop = () => {};
     const dependencies: Record<string, unknown> = {
         "./SessionStore": {SessionStore: store},
-        "../../../util/escape": {escapeHtml: (value: string) => value},
+        "../../../util/escape": {escapeHtml: (value: string) => value, escapeHtmlTextAndAttr: (value: string) => value},
         "../../../util/setPosition": {setPosition: noop},
         "../../../protyle/util/hasClosest": {hasClosestByClassName: (element: Element, name: string) => element.closest("." + name)},
         "../../../protyle/util/compatibility": {isInMobileApp: () => false, isPhablet: () => false},

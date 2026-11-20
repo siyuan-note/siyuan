@@ -43,7 +43,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 }
             }
             const dependencies: Record<string, unknown> = {
-                "../dialog/mobileDialog": {MobileDialog: Dialog},
+                "../dialog/adaptiveDialog": {AdaptiveDialog: Dialog},
                 "../dialog/message": {showMessage: (message: string) => messages.push(message)},
                 "../util/escape": {escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")},
                 "../util/needSubscribe": {needSubscribe: () => false, isPaidUser: () => true},
@@ -52,7 +52,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 "../constants": {Constants: {DIALOG_SYNCCHOOSEDIR: "choose-dir", DIALOG_SETPASSWORD: "set-password"}},
                 "../util/hostCapabilities": {sanitizeKernelHTML: (value: string) => value},
                 "../dialog/processSystem": {processSync() {}},
-                "../dialog/mobileConfirmDialog": {mobileConfirmDialog: (_title: string, _text: string, confirm: () => void) =>
+                "../dialog/confirmDialog": {confirmDialog: ({confirm}: {confirm: () => void}) =>
                     confirmations.push(confirm)},
                 "../util/fetch": {fetchPost: (url: string, data: unknown, reply: (response: unknown) => void) =>
                     requests.push({url, data, reply}), fetchSyncPost: (url: string, data: unknown) =>

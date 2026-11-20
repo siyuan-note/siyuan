@@ -1,3 +1,4 @@
+import {Constants} from "../../constants";
 import {toggleMenu} from "../../menus/menuToggle";
 import {MenuItem} from "../../menus/Menu";
 import {getTableGridRect, TableGridCache} from "./tableGridCache";
@@ -500,6 +501,7 @@ export class TableControl {
             }
             const pinnedTableSelector = '[data-type="NodeTable"][custom-pinthead="true"]';
             if (mutations.some(mutation => mutation.type === "attributes" ?
+                mutation.attributeName === Constants.TABLE_PINNED_COLUMN_ACTIVE ||
                 mutation.attributeName === "custom-pinthead" || mutation.attributeName === "style" &&
                 mutation.target instanceof Element && mutation.target.contains(this.protyle.element) :
                 (mutation.target instanceof Element && !!mutation.target.closest(pinnedTableSelector)) ||
@@ -512,7 +514,7 @@ export class TableControl {
             }
         });
         this.observer.observe(this.wysiwygElement, {
-            attributeFilter: ["custom-pinthead", "style"],
+            attributeFilter: ["custom-pinthead", "style", Constants.TABLE_PINNED_COLUMN_ACTIVE],
             attributes: true,
             childList: true,
             characterData: true,
@@ -1601,6 +1603,12 @@ export class TableControl {
     }
 
     private getColumnRect(table: HTMLTableElement, grid: ITableGrid, index: number) {
+        if (index === 0 && table.hasAttribute(Constants.TABLE_PINNED_COLUMN_ACTIVE)) {
+            const pinned = grid.cellInfos.find(({cell}) => cell.isConnected && cell.hasAttribute(Constants.TABLE_PINNED_COLUMN_CELL));
+            if (pinned) {
+                return pinned.cell.getBoundingClientRect();
+            }
+        }
         const column = table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col")[index];
         const columnRect = column?.getBoundingClientRect();
         const tableRect = table.getBoundingClientRect();
@@ -2003,12 +2011,14 @@ export class TableControl {
                 const startRect = this.getColumnRect(this.selection.table, grid, group.start);
                 const endRect = this.getColumnRect(this.selection.table, grid, group.end);
                 if (startRect && endRect) {
+                    const left = Math.min(startRect.left, endRect.left);
+                    const right = Math.max(startRect.right, endRect.right);
                     this.appendSelectionRect({
-                        left: startRect.left,
+                        left,
                         top: selectionGridRect.top,
-                        right: endRect.right,
+                        right,
                         bottom: selectionGridRect.bottom,
-                        width: endRect.right - startRect.left,
+                        width: right - left,
                         height: selectionGridRect.height,
                     }, selectionViewportRect, selectionGridRect);
                 }

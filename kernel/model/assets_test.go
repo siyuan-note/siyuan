@@ -782,9 +782,9 @@ func TestGetAttributeViewAssetsLinkDestsFiltersItems(t *testing.T) {
 		}},
 	}
 
-	filter := func(_ *av.AttributeView, itemID string) bool {
+	filter := &attributeViewItemFilter{item: func(_ *av.AttributeView, itemID string) bool {
 		return "public-item" == itemID
-	}
+	}}
 	want := []string{
 		"assets/public.png",
 		"assets/public-url.png",
@@ -815,6 +815,52 @@ func TestGetAttributeViewAssetsLinkDestsFiltersItems(t *testing.T) {
 	}
 	if got := getAttributeViewAssetsLinkDests(attrView, false, nil); !reflect.DeepEqual(got, want) {
 		t.Fatalf("get unfiltered attribute view asset links: got %v, want %v", got, want)
+	}
+}
+
+func TestGetAttributeViewAssetsLinkDestsFiltersNestedValues(t *testing.T) {
+	const (
+		privatePath = "assets/private-nested.png"
+		publicPath  = "assets/public-nested.png"
+	)
+	attrView := &av.AttributeView{
+		KeyValues: []*av.KeyValues{{
+			Key: &av.Key{Type: av.KeyTypeRollup},
+			Values: []*av.Value{{
+				BlockID: "outer-row",
+				Relation: &av.ValueRelation{Contents: []*av.Value{{
+					BlockID: "hidden-row",
+					URL:     &av.ValueURL{Content: privatePath},
+				}}},
+				Rollup: &av.ValueRollup{Contents: []*av.Value{
+					{
+						BlockID: "hidden-row",
+						MAsset:  []*av.ValueAsset{{Type: av.AssetTypeImage, Content: privatePath}},
+					},
+					{
+						BlockID: "visible-row",
+						MAsset:  []*av.ValueAsset{{Type: av.AssetTypeImage, Content: publicPath}},
+					},
+				}},
+			}},
+		}},
+	}
+
+	filter := &attributeViewItemFilter{
+		item: func(_ *av.AttributeView, itemID string) bool {
+			return "outer-row" == itemID
+		},
+		nested: func(value *av.Value) bool {
+			return "hidden-row" != value.BlockID
+		},
+	}
+	if got := getAttributeViewAssetsLinkDests(attrView, false, filter); !reflect.DeepEqual(got, []string{publicPath}) {
+		t.Fatalf("get filtered nested attribute view asset links: got %v, want %v", got, []string{publicPath})
+	}
+
+	if got := getAttributeViewAssetsLinkDests(attrView, false, nil); !reflect.DeepEqual(got,
+		[]string{privatePath, publicPath}) {
+		t.Fatalf("get unfiltered nested attribute view asset links: got %v", got)
 	}
 }
 

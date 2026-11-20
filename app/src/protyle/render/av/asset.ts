@@ -14,7 +14,7 @@ import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
 import {previewAttrViewImages, previewImages} from "../../preview/image";
 import {showMessage} from "../../../dialog/message";
 import {hasClosestByClassName} from "../../util/hasClosest";
-import {getAVHost as hasClosestBlock, getAVHostIdentity, getAVRelationHost} from "./host";
+import {getAVHost, getAVHostIdentity, getAVRelationHost} from "./host";
 import {
     genCellValueByElement,
     getTypeByCellElement,
@@ -818,7 +818,7 @@ export const captureAVAssetUploadHandler = (protyle: IProtyle, blockElement: HTM
 
 export const dragUpload = (files: ILocalFiles[], protyle: IProtyle, cellElement: HTMLElement,
                            position?: IAssetUploadPosition) => {
-    const blockElement = hasClosestBlock(cellElement);
+    const blockElement = getAVHost(cellElement);
     if (!blockElement) {
         return;
     }
@@ -831,7 +831,7 @@ export const dragUpload = (files: ILocalFiles[], protyle: IProtyle, cellElement:
 
 export const uploadFilesToAssetCell = (files: FileList | File[], protyle: IProtyle, cellElement: HTMLElement,
                                        options: { source: TAssetUploadSource, position?: IAssetUploadPosition }) => {
-    const blockElement = hasClosestBlock(cellElement);
+    const blockElement = getAVHost(cellElement);
     if (!blockElement) {
         return;
     }

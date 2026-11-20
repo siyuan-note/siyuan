@@ -1,4 +1,4 @@
-import {MobileDialog} from "../dialog/mobileDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Dialog} from "../dialog";
 import {Protyle} from "../protyle";
@@ -12,7 +12,7 @@ import type {App} from "../index";
 import {pathPosix} from "../util/pathName";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {resizeSide} from "./resizeSide";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {showDocVersionDiff} from "./docDiff";
 import {pairSnapshotFilesByPath} from "./snapshotDiffCore";
 
@@ -439,7 +439,7 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
         expanded: new Set(),
     };
 
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         mobileSheet: {mode: "expanded"},
         title: window.siyuan.languages.compare,
         content: "",
@@ -524,12 +524,14 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                 event.stopPropagation();
                 break;
             } else if (target.getAttribute("data-type") == "rollback") {
-                mobileConfirmDialog("⚠️ " + window.siyuan.languages.rollback,
-                    window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(target.parentElement.dataset.title)).replace("${time}", dayjs(parseInt(target.parentElement.dataset.created)).format("YYYY-MM-DD HH:mm:ss")),
-                    async () => {
+                confirmDialog({
+                    title: "⚠️ " + window.siyuan.languages.rollback,
+                    text: window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(target.parentElement.dataset.title)).replace("${time}", dayjs(parseInt(target.parentElement.dataset.created)).format("YYYY-MM-DD HH:mm:ss")),
+                    confirm: async () => {
                         const response = await fetchSyncPost("/api/repo/rollbackRepoSnapshotFile", {id: target.parentElement.dataset.id});
                         return response.code === 0;
-                    }, undefined, false, undefined, undefined, {awaitConfirm: true});
+                    },
+                });
                 event.preventDefault();
                 event.stopPropagation();
                 break;

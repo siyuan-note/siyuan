@@ -100,7 +100,7 @@ test("snapshot creation sends full checks, closes completed checks and retains u
                 window: {siyuan: {languages: {snapshotMemo: "Memo", fullCheckSnapshotTip: "Read all local files"}}},
                 Constants: {DIALOG_SNAPSHOTMEMO: "snapshot-memo"},
                 isMobile: () => false,
-                mobileInputDialog: (value: typeof options) => { options = value; return dialog; },
+                openInputDialog: (value: typeof options) => { options = value; return dialog; },
                 renderRepo: (_element: unknown, page: number) => refreshed.push(page),
                 fetchPost: async (path: string, body: unknown, callback: (response: unknown) => void) => {
                     requests.push({path, body});
@@ -133,7 +133,7 @@ test("a failed full snapshot check retains the memo and releases the busy contro
     const dependencies = {
         window: {siyuan: {languages: {}}}, Constants: {},
         isMobile: () => false,
-                mobileInputDialog: (value: typeof options) => { options = value; return dialog; },
+                openInputDialog: (value: typeof options) => { options = value; return dialog; },
         fetchPost: async () => { throw new Error("read failed"); },
     };
     const open = new Function(...Object.keys(dependencies), extract("openSnapshotMemo") + "\nreturn openSnapshotMemo;")(...Object.values(dependencies));
@@ -151,7 +151,7 @@ test("mobile snapshot memo only reports success after the API accepts the save",
     let refreshed = 0;
     const dependencies = {
         window: {siyuan: {languages: {}}}, Constants: {}, isMobile: () => true,
-        mobileInputDialog: (value: typeof options) => { options = value; return dialog; },
+        openInputDialog: (value: typeof options) => { options = value; return dialog; },
         fetchSyncPost: async () => ({code, data: {created}}),
         renderRepo: () => refreshed++,
     };

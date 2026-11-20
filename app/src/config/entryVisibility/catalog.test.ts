@@ -63,10 +63,10 @@ test("reference creation visibility has stable paths and preserves existing defa
     }
 });
 
-test("the workspace menu has no standalone Markdown entry or configurable application section", () => {
+test("the desktop main menu has no standalone Markdown entry or configurable application section", () => {
     assert.equal(getEntryCatalogNode("application.markdownEditor"), undefined);
     assert.equal(getEntryCatalogSection("application"), undefined);
-    const source = readFileSync(resolve(process.cwd(), "src/menus/workspace.ts"), "utf8");
+    const source = readFileSync(resolve(process.cwd(), "src/menus/mainMenu.ts"), "utf8");
     assert.doesNotMatch(source, /id: "markdownEditor"/);
     assert.ok(source.indexOf('id: "workspaceList"') < source.indexOf('id: "layout"'));
 });
@@ -304,7 +304,7 @@ test("top bar catalog includes a fixed drag boundary in built-in DOM order", () 
     assert.equal(isEntryCatalogNodeConfigurable(drag), false);
     assert.equal(getEntryPaths().includes("topBar.drag"), false);
     assert.equal(getEntryOrderParents().includes(TOP_BAR_ROOT_PATH), true);
-    assert.equal(getEntryCatalogNode("topBar.barWorkspace"), undefined);
+    assert.equal(getEntryCatalogNode("topBar.barMainMenu"), undefined);
     assert.equal(getEntryCatalogNode("topBar.barMore"), undefined);
     assert.equal(getEntryCatalogNode("topBar.windowControls"), undefined);
 });
@@ -1025,12 +1025,18 @@ test("table catalog follows the menu arrays and conditional declarations", () =>
         assert.equal(keys.indexOf("insertTableHeaderRow") + 1, keys.indexOf("insertRowAbove"));
         assert.equal(getEntryCatalogNode(`${parent}.insertTableHeaderRow`).type, "entry");
     }
+    for (const parent of ["gutter.single.table", "inline.text.more"]) {
+        for (const action of ["pin", "unpin"]) {
+            const column = getEntryCatalogNode(`${parent}.${action}TableHeaderColumn`);
+            assert.equal(column.type, "entry");
+            assert.equal(column.simple, getEntryCatalogNode(`${parent}.${action}TableHead`).simple);
+        }
+    }
     const source = readFileSync(resolve(process.cwd(), "src/menus/protyle.ts"), "utf8");
     const table = source.slice(source.indexOf("export const tableMenu ="));
     const pushedIDs = (array: string) => Array.from(table.matchAll(
-        new RegExp(`${array}\\.push\\(\\{\\s*id: ("[^" ]+"|isPinHead \\? "unpinTableHead" : "pinTableHead")`, "g"),
-    )).flatMap(match => match[1].startsWith("isPinHead")
-        ? ["pinTableHead", "unpinTableHead"] : [JSON.parse(match[1])]);
+        new RegExp(`${array}\\.push\\(\\{\\s*id: (?:"([^"]+)"|\\w+ \\? "([^"]+)" : "([^"]+)")`, "g"),
+    )).flatMap(([, id, enabled, disabled]) => id ? [id] : [disabled, enabled]);
     const other = pushedIDs("otherMenus");
     const moves = pushedIDs("other2Menus");
     const inserts = pushedIDs("insertMenus");

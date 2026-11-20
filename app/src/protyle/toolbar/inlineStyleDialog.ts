@@ -1,5 +1,5 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {showMessage} from "../../dialog/message";
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../dialog/themeColorEditor";
 import {escapeHtml} from "../../util/escape";
@@ -67,7 +67,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
     const properties = getProperties(initialType);
     let editingKey: string | undefined;
     let editingKind: "builtin" | "custom" | "new" | undefined;
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: window.siyuan.languages.color,
         width: isMobile() ? "92vw" : "600px",
         content: `<div class="b3-dialog__content" style="max-height:70vh">
@@ -318,9 +318,12 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
                 renderList();
             };
             if (persistedStyleIDs.has(style.id)) {
-                mobileConfirmDialog(window.siyuan.languages.deleteOpConfirm,
-                    window.siyuan.languages.deleteCustomColorTip.replace("${name}", `<b>${escapeHtml(style.name)}</b>`),
-                    removeStyle, undefined, true);
+                confirmDialog({
+                    title: window.siyuan.languages.deleteOpConfirm,
+                    text: window.siyuan.languages.deleteCustomColorTip.replace("${name}", `<b>${escapeHtml(style.name)}</b>`),
+                    confirm: removeStyle,
+                    isDelete: true,
+                });
             } else {
                 removeStyle();
             }

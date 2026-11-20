@@ -41,10 +41,10 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     ["menuGroup", "sheetActions", "hasClosest"].forEach(name => load(name));
     const realMenu = load("realMenu", {"../config/entryVisibility/runtime": fallback});
     (window as any).siyuan.menus.menu = new realMenu.Menu(common);
-    const {MobileDialog} = load("mobileDialog", {"./index": modules.dialog});
+    const {AdaptiveDialog} = load("adaptiveDialog", {"./index": modules.dialog});
     modules.panel = {registerDatePickerWindow() {}}; modules.index = {};
     load("binding"); const api = load("index");
-    modules.runtime.registerDatePickerRuntime(document, (options: unknown) => new MobileDialog(options), () => languages);
+    modules.runtime.registerDatePickerRuntime(document, (options: unknown) => new AdaptiveDialog(options), () => languages);
     const {Menu} = load("pluginMenu", {"../menus/Menu": realMenu});
     const nativeSelect = load("nativeSelect", {"../../plugin/Menu": {Menu}, "../../util/escape": {escapeHtml: (value: string) => value}});
     nativeSelect.initMobileSelect();
@@ -142,7 +142,7 @@ test("date picker uses the real mobile sheet and preserves nested menu ownership
     const sources = browserSources({...files, menuPosition: join(__dirname, "../menus/menuPosition.ts"), ...mobile, realMenu: join(__dirname, "../menus/Menu.ts"),
         menuGroup: join(__dirname, "../menus/menuGroup.ts"), sheetActions: join(__dirname, "../menus/sheetActions.ts"),
         hasClosest: join(__dirname, "../protyle/util/hasClosest.ts"), dialog: join(__dirname, "../dialog/index.ts"),
-        mobileDialog: join(__dirname, "../dialog/mobileDialog.ts"), pluginMenu: join(__dirname, "../plugin/Menu.ts"),
+        adaptiveDialog: join(__dirname, "../dialog/adaptiveDialog.ts"), pluginMenu: join(__dirname, "../plugin/Menu.ts"),
         overlayOwnership: join(__dirname, "../menus/overlayOwnership.ts"), sheetOpen: join(__dirname, "../menus/sheetOpen.ts")});
     const css = compile(join(__dirname, "../assets/scss/mobile.scss"), {logger: {warn() {}}}).css;
     const theme = readFileSync(join(__dirname, "../../appearance/themes/daylight/theme.css"), "utf8");

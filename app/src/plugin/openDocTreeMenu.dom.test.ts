@@ -96,7 +96,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
         "protyle/wysiwyg/transaction": {}, "protyle/export/exportMd": {},
         "util/fileTreeSort": {}, "util/hostCapabilities": {getHostCapabilities: () => ({documentImportExport: false})},
         "emoji": {openEmojiPanel: (...args: unknown[]) => icons.push(args), unicode2Emoji: () => '<img src="data:,">'},
-        "mobile/editor": {}, "dialog/message": {}, "dialog/mobileConfirmDialog": {},
+        "mobile/editor": {}, "dialog/message": {}, "dialog/confirmDialog": {},
     };
     for (const name of ["viewType", "subItems", "cell", "action", "view", "col", "row", "openDatabaseRow",
         "columnWidth", "attributeValue", "cellValue", "richText", "blockIcon", "relationLayout", "relationKeyboard", "host"]) {

@@ -12,6 +12,27 @@ const compiled = transpileModule(declaration.getText(source), {
     compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
 }).outputText;
 
+it("plugin events report the main menu identifier on open and close", () => {
+    const emitted: [string, string | null][] = [];
+    const exports = {} as {Menu: typeof Menu};
+    runInNewContext(compiled, {
+        exports,
+        forEachPluginSubscriber: (_type: string, callback: (subscriber: {
+            emit: (type: string, detail: {name: string | null}) => void
+        }) => void) => callback({emit: (type, detail) => emitted.push([type, detail.name])}),
+    });
+    const menu = Object.create(exports.Menu.prototype) as Menu;
+    Object.assign(menu, {element: {id: "commonMenu"}});
+    menu["emitCommonMenu"]("common-menu-open", {name: "barMainMenu", from: null, mode: "popup"});
+    menu["emitCommonMenu"]("common-menu-closed", {name: "barMainMenu", from: null});
+    menu["emitCommonMenu"]("common-menu-open", {name: "barZoom", from: null, mode: "popup"});
+    assert.deepEqual(emitted, [
+        ["common-menu-open", "barMainMenu"],
+        ["common-menu-closed", "barMainMenu"],
+        ["common-menu-open", "barZoom"],
+    ]);
+});
+
 const createElement = () => {
     const classes = new Set<string>();
     const attributes = new Map<string, string>();

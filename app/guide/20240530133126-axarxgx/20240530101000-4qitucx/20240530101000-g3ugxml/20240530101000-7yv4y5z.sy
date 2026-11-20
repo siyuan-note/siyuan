@@ -543,6 +543,20 @@
 			]
 		},
 		{
+			"ID": "20261119012733-f6114a4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261119012733-f6114a4",
+				"updated": "20261119012733"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Windows、macOS、Linux でタブをトップバーに統合している場合は、タブ切り替えボタンと右側のトップバーボタンの間にある空白をドラッグしてウィンドウを移動できます。"
+				}
+			]
+		},
+		{
 			"ID": "20260613204552-u19ss69",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,

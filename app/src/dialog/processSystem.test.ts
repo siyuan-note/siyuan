@@ -30,7 +30,7 @@ const loadDialog = (importExport: boolean, isMobile: boolean, request: () => Pro
             "../protyle/util/compatibility": {saveExportFile: async (url: string) => { saved.push(url); }},
             "./hostQuit": {createHostQuitGuard: () => ({})},
             "./message": {showMessage: (...args: unknown[]) => errors.push(args)},
-            "./mobileDialog": {MobileDialog: class {
+            "./adaptiveDialog": {AdaptiveDialog: class {
                 public element = {
                     isConnected: true,
                     setAttribute() {},

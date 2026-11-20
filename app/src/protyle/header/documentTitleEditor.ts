@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {Constants} from "../../constants";
 import {globalClickHideMenu} from "../../menus/menuClick";
 import {fetchSyncPost} from "../../util/fetch";
@@ -407,7 +407,7 @@ export class DocumentTitleEditor {
             void this.updateConflict?.().catch(error => console.error(error));
             return;
         }
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             title: window.siyuan.languages.rename,
             content: `<div class="b3-dialog__content">${escapeHtml(window.siyuan.languages.documentTitleConflict)}
 <div class="fn__hr"></div><div class="ft__secondary">${escapeHtml(window.siyuan.languages.documentTitleLatest)}</div>

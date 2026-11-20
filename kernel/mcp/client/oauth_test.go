@@ -61,6 +61,30 @@ func TestCompleteMCPOAuth(t *testing.T) {
 	if result.Code != "code" || result.State != "test-state" {
 		t.Fatalf("unexpected callback result: %#v", result)
 	}
+
+	issuerFlowID := "test-flow-issuer-required"
+	issuerFlow := &oauthFlow{
+		State:                  "test-state",
+		Issuer:                 "https://issuer.example",
+		Result:                 make(chan oauthCallbackResult, 1),
+		Expires:                time.Now().Add(time.Minute),
+		RequireIssuerParameter: true,
+	}
+	oauthFlows.Lock()
+	oauthFlows.items[issuerFlowID] = issuerFlow
+	oauthFlows.Unlock()
+	t.Cleanup(func() { removeOAuthFlow(issuerFlowID, issuerFlow) })
+
+	if err := CompleteMCPOAuth(issuerFlowID, "code", "test-state", "", ""); err == nil {
+		t.Fatal("expected missing issuer parameter error")
+	}
+	if err := CompleteMCPOAuth(issuerFlowID, "code", "test-state", "", "https://issuer.example"); err != nil {
+		t.Fatal(err)
+	}
+	result = <-issuerFlow.Result
+	if result.Code != "code" || result.State != "test-state" {
+		t.Fatalf("unexpected callback result: %#v", result)
+	}
 }
 
 func TestRefreshOAuthCredential(t *testing.T) {
@@ -340,6 +364,113 @@ func TestMCPOAuthAuthorizationCodeFlow(t *testing.T) {
 	if !ok || credential.AccessToken != "access-token" || credential.RefreshToken != "refresh-token" ||
 		credential.Endpoint != server.URL+"/mcp" || credential.ResourceMetadataURL != server.URL+"/resource-metadata" {
 		t.Fatalf("unexpected stored credential: %#v", credential)
+	}
+}
+
+func TestMCPOAuthRequiresIssuerParameterWhenDeclared(t *testing.T) {
+	useOAuthTestConf(t)
+	oldServerPort := util.ServerPort
+	util.ServerPort = "6806"
+	t.Cleanup(func() { util.ServerPort = oldServerPort })
+
+	registrationRedirect := make(chan string, 1)
+	tokenRequests := make(chan struct{}, 1)
+	var server *httptest.Server
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/resource-metadata":
+			writeOAuthTestJSON(w, http.StatusOK, map[string]any{
+				"resource":              server.URL + "/mcp",
+				"authorization_servers": []string{server.URL},
+				"scopes_supported":      []string{"todo.read", "offline_access"},
+			})
+		case "/.well-known/oauth-authorization-server":
+			metadata := oauthTestAuthorizationServerMetadata(server.URL)
+			metadata["authorization_response_iss_parameter_supported"] = true
+			writeOAuthTestJSON(w, http.StatusOK, metadata)
+		case "/register":
+			registration := struct {
+				RedirectURIs []string `json:"redirect_uris"`
+			}{}
+			if err := json.NewDecoder(r.Body).Decode(&registration); err != nil {
+				t.Errorf("decode registration: %v", err)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			if len(registration.RedirectURIs) != 1 {
+				t.Errorf("unexpected registration metadata: %#v", registration)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			registrationRedirect <- registration.RedirectURIs[0]
+			writeOAuthTestJSON(w, http.StatusCreated, map[string]any{
+				"client_id":                  "client-id",
+				"token_endpoint_auth_method": "none",
+			})
+		case "/token":
+			tokenRequests <- struct{}{}
+			writeOAuthTestJSON(w, http.StatusOK, map[string]any{
+				"access_token":  "access-token",
+				"refresh_token": "refresh-token",
+				"token_type":    "Bearer",
+				"expires_in":    3600,
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	serverID := "issuer-parameter-server"
+	t.Cleanup(func() {
+		mcpMu.Lock()
+		delete(mcpRuntime, serverID)
+		mcpMu.Unlock()
+	})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	handler := newMCPOAuthHandler(conf.MCPServer{ID: serverID, URL: server.URL + "/mcp"}, true)
+	authorizeResult := make(chan error, 1)
+	go func() {
+		authorizeResult <- handler.Authorize(ctx, httptest.NewRequest(http.MethodPost, server.URL+"/mcp", nil),
+			newOAuthChallengeResponse(server.URL+"/resource-metadata"))
+	}()
+
+	var redirectURL string
+	select {
+	case redirectURL = <-registrationRedirect:
+	case <-time.After(5 * time.Second):
+		t.Fatal("OAuth client registration did not complete")
+	}
+	callback, err := url.Parse(redirectURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	flowID := strings.TrimPrefix(callback.Path, "/api/ai/mcp/oauth/callback/")
+	if flowID == "" || flowID == callback.Path {
+		t.Fatalf("unexpected callback path: %s", callback.Path)
+	}
+	authorizationURL := waitForOAuthAuthorizationURL(t, serverID)
+	authorizationRequest, err := url.Parse(authorizationURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := authorizationRequest.Query().Get("state")
+
+	if err = CompleteMCPOAuth(flowID, "authorization-code", state, "", ""); err == nil {
+		t.Fatal("expected missing issuer parameter error")
+	}
+	select {
+	case <-tokenRequests:
+		t.Fatal("token request was sent without the required issuer parameter")
+	case <-time.After(200 * time.Millisecond):
+	}
+
+	cancel()
+	select {
+	case <-authorizeResult:
+	case <-time.After(5 * time.Second):
+		t.Fatal("OAuth authorization did not stop after cancellation")
 	}
 }
 

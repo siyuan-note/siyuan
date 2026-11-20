@@ -106,9 +106,9 @@ const runCases = async (sources, css, mobile, dark) => {
     };
     const {Dialog} = load("dialog");
     const mobileRuntime = new Function("Dialog", "mobile", "return " + sources.mobileRuntime)(Dialog, mobile);
-    stubs["dialog/mobileDialog"] = mobileRuntime;
-    stubs["dialog/mobileConfirmDialog"] = mobileRuntime;
-    stubs["dialog/mobileInputDialog"] = mobileRuntime;
+    stubs["dialog/adaptiveDialog"] = mobileRuntime;
+    stubs["dialog/confirmDialog"] = mobileRuntime;
+    stubs["dialog/inputDialog"] = mobileRuntime;
     const {initRepoPanel} = load("history/repoPanel");
     const panel = document.createElement("div");
     panel.className = "history__repo fn__block";
@@ -261,7 +261,7 @@ const runCases = async (sources, css, mobile, dark) => {
     const operations = [];
     const queries = [];
     let lastPackage = "";
-    stubs["dialog/mobileConfirmDialog"] = {mobileConfirmDialog: (_title, _tip, callback) => { confirmRestore = callback; }};
+    stubs["dialog/confirmDialog"] = {confirmDialog: ({confirm}) => { confirmRestore = confirm; }};
     stubs["plugin/loader"] = {unloadPlugin: async () => {
         operations.push("unload");
         await new Promise(resolve => { releaseUnload = resolve; });
@@ -456,7 +456,7 @@ if (process.versions.electron && process.type === "browser") {
             const sass = require("sass");
             const sources = {app: path.resolve(__dirname, ".."), icons: fs.readFileSync(path.join(__dirname, "../appearance/icons/litheness/icon.js"), "utf8"), languages: fs.readFileSync(path.join(__dirname, "../appearance/langs/zh-CN.json"), "utf8")};
             sources.snapshotButtons = fs.readFileSync(path.join(__dirname, "../src/history/history.ts"), "utf8").match(/<button class="b3-button b3-button--outline" data-type="genRepo">[\s\S]*?data-type="fullCheckRepo">[^<]*<\/button>/)[0];
-            sources.mobileRuntime = require("./fixtures/mobileDialogRuntime.cjs").mobileDialogRuntimeSource();
+            sources.mobileRuntime = require("./fixtures/dialogRuntime.cjs").dialogRuntimeSource();
             for (const name of ["datePicker/binding", "datePicker/model", "dialog/index", "util/escape", "util/upDownHint", "history/docSnapshots", "history/snapshotDetail", "history/pluginSnapshotPaths", "history/pluginSnapshotSelect", "history/pluginSnapshots", "history/notebookDialogs", "history/repoFile", "history/repoPanel", "history/repoBatch", "history/repoRange", "history/repoPurge"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
             }

@@ -4,7 +4,7 @@ import {getAllModels} from "../layout/getAll";
 /// #endif
 import {getAssetExtension} from "../util/pathName";
 import dayjs from "dayjs";
-import {escapeAttr, escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {getHTMLAssetIFrameSrc, isHTMLFilePath} from "./html";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {getAssetsPreviewPath} from "./previewPath";
@@ -70,17 +70,17 @@ export const genAssetHTML = (type: string, pathString: string, imgName: string, 
         const iframeSrc = escapeAttr(getHTMLAssetIFrameSrc(pathString));
         html = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeIFrame" class="iframe" updated="${dayjs().format("YYYYMMDDHHmmss")}"><div class="iframe-content">${Constants.ZWSP}<iframe sandbox="allow-scripts" src="${iframeSrc}" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe><span class="protyle-action__drag" contenteditable="false"></span></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
     } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
-        html = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeAudio" class="iframe" updated="${dayjs().format("YYYYMMDDHHmmss")}"><div class="iframe-content"><audio controls="controls" src="${pathString}"></audio>${Constants.ZWSP}</div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+        html = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeAudio" class="iframe" updated="${dayjs().format("YYYYMMDDHHmmss")}"><div class="iframe-content"><audio controls="controls" src="${escapeHtmlTextAndAttr(pathString)}"></audio>${Constants.ZWSP}</div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
     } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(type) && isBrowserRenderableImagePath(pathString)) {
         let netHTML = "";
         if (!pathString.startsWith("assets/")) {
             netHTML = '<span class="img__net"><svg><use xlink:href="#iconGlobe"></use></svg></span>';
         }
-        html = `<span contenteditable="false" data-type="img" class="img"><span> </span><span><span class="protyle-action protyle-icons"><span class="protyle-icon protyle-icon--only"><svg><use xlink:href="#iconMore"></use></svg></span></span><img src="${pathString}" data-src="${pathString}" alt="${imgName}" /><span class="protyle-action__drag"></span>${netHTML}<span class="protyle-action__title"></span></span><span> </span></span>`;
+        html = `<span contenteditable="false" data-type="img" class="img"><span> </span><span><span class="protyle-action protyle-icons"><span class="protyle-icon protyle-icon--only"><svg><use xlink:href="#iconMore"></use></svg></span></span><img src="${escapeHtmlTextAndAttr(pathString)}" data-src="${escapeHtmlTextAndAttr(pathString)}" alt="${escapeHtmlTextAndAttr(imgName)}" /><span class="protyle-action__drag"></span>${netHTML}<span class="protyle-action__title"></span></span><span> </span></span>`;
     } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
-        html = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeVideo" class="iframe" updated="${dayjs().format("YYYYMMDDHHmmss")}"><div class="iframe-content">${Constants.ZWSP}<video controls="controls" src="${pathString}"></video><span class="protyle-action__drag" contenteditable="false"></span></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+        html = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeVideo" class="iframe" updated="${dayjs().format("YYYYMMDDHHmmss")}"><div class="iframe-content">${Constants.ZWSP}<video controls="controls" src="${escapeHtmlTextAndAttr(pathString)}"></video><span class="protyle-action__drag" contenteditable="false"></span></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
     } else {
-        html = `<span data-type="a" data-href="${pathString}">${linkName}</span>`;
+        html = `<span data-type="a" data-href="${escapeHtmlTextAndAttr(pathString)}">${escapeHtmlTextAndAttr(linkName)}</span>`;
     }
     return html;
 };

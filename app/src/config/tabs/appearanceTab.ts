@@ -1,5 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {toggleMenu} from "../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../menus/Menu";
 /// #if !BROWSER
@@ -546,11 +545,11 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                             }
                             if (target.closest('[data-type="delete-font"]')) {
                                 const id = itemElement.dataset.id;
-                                mobileConfirmDialog(
-                                    window.siyuan.languages.deleteOpConfirm,
-                                    window.siyuan.languages.deleteFontConfirm.replace(
+                                confirmDialog({
+                                    title: window.siyuan.languages.deleteOpConfirm,
+                                    text: window.siyuan.languages.deleteFontConfirm.replace(
                                         "${x}", `<b>${escapeHtml(itemEl.dataset.name)}</b>`),
-                                    () => {
+                                    confirm: () => {
                                         fetchPost("/api/system/removeCustomFont", {id}, async (response) => {
                                             if (response.code !== 0) {
                                                 return;
@@ -568,9 +567,8 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                                             if (!closed) fontMenu.close();
                                         });
                                     },
-                                    undefined,
-                                    true
-                                );
+                                    isDelete: true,
+                                });
                                 return;
                             }
                             focusItem(itemElement);
@@ -1116,11 +1114,11 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         icon: "iconUndo",
         afterMount: (root) => {
             root.querySelector("#resetLayout")?.addEventListener("click", () => {
-                confirmDialog(
-                    "⚠️ " + window.siyuan.languages.reset,
-                    window.siyuan.languages.appearance6,
-                    resetLayout
-                );
+                confirmDialog({
+                    title: "⚠️ " + window.siyuan.languages.reset,
+                    text: window.siyuan.languages.appearance6,
+                    confirm: resetLayout,
+                });
             });
         },
     });
@@ -1190,7 +1188,7 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
             }
             return true;
         };
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             mobileSheet: {beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",
@@ -1252,7 +1250,7 @@ const mountAppearanceSetNotifications = (root: HTMLElement) => {
             }
             return true;
         };
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             mobileSheet: {beforeClose: save},
             height: "80vh",
             width: isMobile() ? "92vw" : "360px",

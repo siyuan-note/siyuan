@@ -2,8 +2,9 @@ import {toggleMenu} from "./menuToggle";
 import {getKeymapBindings} from "../util/keymapBindings";
 import {bindInlineDatePicker, getInlineDateValue} from "../datePicker/inline";
 import type {BlockQueryRequestInput} from "../types/api";
-import {mobileConfirmDialog as confirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile, isValidCustomAttrName} from "../util/functions";
+import {escapeHtmlTextAndAttr} from "../util/escape";
 import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
@@ -23,8 +24,8 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {loadTemplateDirectories, openTemplateManager} from "../template/manager";
 import {Dialog} from "../dialog";
-import {MobileDialog} from "../dialog/mobileDialog";
-import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {bindAliasInput} from "./aliasInput";
 import {focusBlock, getEditorRange} from "../protyle/util/selection";
 import {focusByRange} from "../protyle/util/selectionOffsets";
@@ -83,7 +84,7 @@ export const openWechatNotify = (nodeElement: Element) => {
     if (reminder) {
         reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
     }
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         width: isMobile() ? "92vw" : "min(300px, 92vw)",
         containerClassName: isMobile() ? undefined : "date-picker-reminder-dialog",
         title: window.siyuan.languages.wechatReminder,
@@ -179,7 +180,7 @@ export const openFileWechatNotify = (id: string, notebookId: string) => {
         if (reminder) {
             reminderFormat = dayjs(reminder).format("YYYY-MM-DD HH:mm");
         }
-        const dialog = new MobileDialog({
+        const dialog = new AdaptiveDialog({
             width: isMobile() ? "92vw" : "min(300px, 92vw)",
             containerClassName: isMobile() ? undefined : "date-picker-reminder-dialog",
             title: window.siyuan.languages.wechatReminder,
@@ -290,11 +291,11 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         } else if (item.indexOf("custom") > -1) {
             customHTML += `<label class="b3-label b3-label--noborder">
      <div class="fn__flex">
-        <span class="fn__flex-1">${item.replace("custom-", "")}</span>
+        <span class="fn__flex-1">${escapeHtmlTextAndAttr(item.replace("custom-", ""))}</span>
         <span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconMin"></use></svg></span>
     </div>
     <div class="fn__hr"></div>
-    <textarea style="resize: vertical;" spellcheck="false" class="b3-text-field fn__block" rows="1" data-name="${item}"></textarea>
+    <textarea style="resize: vertical;" spellcheck="false" class="b3-text-field fn__block" rows="1" data-name="${escapeHtmlTextAndAttr(item)}"></textarea>
 </label>`;
         }
     });
@@ -757,30 +758,38 @@ ${databaseOptions}`,
                                 return true;
                             }
                             if (response.code === 1) {
-                                confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, async () => {
-                                    const result = await fetchSyncPost("/api/template/docSaveAsTemplate", {
-                                        ...requestData, overwrite: true,
-                                    });
-                                    if (result.code !== 0) return false;
-                                    showMessage(window.siyuan.languages.exportTplSucc);
-                                    dialog.destroy();
-                                    return true;
-                                }, undefined, false, undefined, undefined, {awaitConfirm: true});
+                                confirmDialog({
+                                    title: window.siyuan.languages.export,
+                                    text: window.siyuan.languages.exportTplTip,
+                                    confirm: async () => {
+                                        const result = await fetchSyncPost("/api/template/docSaveAsTemplate", {
+                                            ...requestData, overwrite: true,
+                                        });
+                                        if (result.code !== 0) return false;
+                                        showMessage(window.siyuan.languages.exportTplSucc);
+                                        dialog.destroy();
+                                        return true;
+                                    },
+                                });
                             }
                             return false;
                         }
                         fetchPost("/api/template/docSaveAsTemplate", requestData, response => {
                             if (response.code === 1) {
                                 // 重名
-                                confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
-                                    fetchPost("/api/template/docSaveAsTemplate", {
-                                        ...requestData,
-                                        overwrite: true
-                                    }, resp => {
-                                        if (resp.code === 0) {
-                                            showMessage(window.siyuan.languages.exportTplSucc);
-                                        }
-                                    });
+                                confirmDialog({
+                                    title: window.siyuan.languages.export,
+                                    text: window.siyuan.languages.exportTplTip,
+                                    confirm: () => {
+                                        fetchPost("/api/template/docSaveAsTemplate", {
+                                            ...requestData,
+                                            overwrite: true
+                                        }, resp => {
+                                            if (resp.code === 0) {
+                                                showMessage(window.siyuan.languages.exportTplSucc);
+                                            }
+                                        });
+                                    },
                                 });
                                 return;
                             }

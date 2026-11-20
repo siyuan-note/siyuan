@@ -116,6 +116,7 @@ func TestRewriteAttributeViewAssetReferences(t *testing.T) {
 			Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
 			Content: strings.Join([]string{
 				"[Markdown](assets/rich.png)",
+				"![Picture](assets/picture.png)",
 				`<span data-type="a" data-href="assets/rich-text-mark.png">Text mark</span>`,
 				`<<assets/native-20200101000001-bcdefgh.pdf/20200101000002-cdefghi "PDF shorthand">>`,
 				`<span data-type="file-annotation-ref" data-id="assets/span-20200101000003-defghij.pdf/20200101000004-efghijk">PDF text mark</span>`,
@@ -157,6 +158,7 @@ func TestRewriteAttributeViewAssetReferences(t *testing.T) {
 			"assets/url.png":                           "assets/encrypted-url.png",
 			"assets/file.pdf":                          "assets/encrypted-file.pdf",
 			"assets/rich.png":                          "assets/encrypted-rich.png",
+			"assets/picture.png":                       "assets/encrypted-picture.png",
 			"assets/rich-text-mark.png":                "assets/encrypted-rich-text-mark.png",
 			"assets/native-20200101000001-bcdefgh.pdf": "assets/encrypted-native-20200101000011-lmnopqr.pdf",
 			"assets/span-20200101000003-defghij.pdf":   "assets/encrypted-span-20200101000013-nopqrst.pdf",
@@ -183,12 +185,13 @@ func TestRewriteAttributeViewAssetReferences(t *testing.T) {
 
 	wantRichAssets := []string{
 		"assets/encrypted-rich.png?box=" + targetBoxID,
+		"assets/encrypted-picture.png?box=" + targetBoxID,
 		"assets/encrypted-rich-text-mark.png?box=" + targetBoxID,
 		"assets/encrypted-native-20200101000011-lmnopqr.pdf",
 		"assets/encrypted-span-20200101000013-nopqrst.pdf",
 	}
 	assertAttributeViewRichAssets(t, richText, wantRichAssets)
-	if got, want := richText.Content, "Markdown\nText mark\nPDF shorthand\nPDF text mark\nNetwork"; got != want {
+	if got, want := richText.Content, "Markdown\nPicture\nText mark\nPDF shorthand\nPDF text mark\nNetwork"; got != want {
 		t.Fatalf("rich plain projection = %q, want %q", got, want)
 	}
 	assertAttributeViewRichAssets(t, relationRichText,

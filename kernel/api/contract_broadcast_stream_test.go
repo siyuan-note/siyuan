@@ -13,28 +13,13 @@ import (
 	"net/url"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 
-	"github.com/asaskevich/EventBus"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 )
-
-type broadcastTestBus struct {
-	EventBus.Bus
-	subscribed atomic.Int32
-}
-
-func (bus *broadcastTestBus) Subscribe(topic string, handler any) error {
-	err := bus.Bus.Subscribe(topic, handler)
-	if err == nil {
-		bus.subscribed.Add(1)
-	}
-	return err
-}
 
 func broadcastTestWait(t *testing.T, ready func() bool) {
 	t.Helper()
@@ -49,8 +34,7 @@ func broadcastTestWait(t *testing.T, ready func() bool) {
 
 func TestAPIContractBroadcastRawSSE(t *testing.T) {
 	saved := UnifiedSSE
-	bus := &broadcastTestBus{Bus: EventBus.New()}
-	UnifiedSSE = &EventSourceServer{EventBus: bus, WaitGroup: &sync.WaitGroup{}, Subscriber: &EventSourceSubscriber{lock: &sync.Mutex{}}}
+	UnifiedSSE = &EventSourceServer{WaitGroup: &sync.WaitGroup{}, Subscriber: &EventSourceSubscriber{lock: &sync.Mutex{}}}
 	channel := "contract-broadcast\nraw"
 	engine := gin.New()
 	engine.GET("/es/broadcast/subscribe", broadcastSubscribe)
@@ -76,7 +60,9 @@ func TestAPIContractBroadcastRawSSE(t *testing.T) {
 	selected := open("?retry=25&channel=" + url.QueryEscape(channel))
 	all := open("?retry=invalid")
 	broadcastTestWait(t, func() bool {
-		return bus.subscribed.Load() == 2
+		UnifiedSSE.streamsLock.Lock()
+		defer UnifiedSSE.streamsLock.Unlock()
+		return len(UnifiedSSE.streams) == 2
 	})
 	bundle, err := apicontract.BuildBundle()
 	if err != nil {

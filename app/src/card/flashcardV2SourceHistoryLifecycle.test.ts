@@ -51,7 +51,10 @@ const setup = async () => {
         },
         isMobile: () => false, escapeHtml: (s: string) => s, escapeAttr: (s: string) => s,
         renderSourceHistoryConfiguration: () => "", genUUID: () => "operation",
-        confirmDialog: (title: string, _text: string, cb: typeof confirm) => { confirmTitle = title; confirm = cb; },
+        confirmDialog: (options: {title: string, confirm: typeof confirm}) => {
+            confirmTitle = options.title;
+            confirm = options.confirm;
+        },
         changed: () => { changes++; },
     });
     await flush();

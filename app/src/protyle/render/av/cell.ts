@@ -5,7 +5,7 @@ import {ensureAVColumnWindow} from "./columnWindow";
 import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestByClassName} from "../../util/hasClosest";
-import {canEditAVHost, getAVHost as hasClosestBlock, getAVHostBlockID, getAVHostIdentity, getAVRelationHost} from "./host";
+import {canEditAVHost, getAVHost, getAVHostBlockID, getAVHostIdentity, getAVRelationHost} from "./host";
 import {openMenuPanel} from "./openMenuPanel";
 import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
@@ -83,7 +83,7 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
     const relationElement = target.closest<HTMLElement>(".av__cell--relation");
     const relationValue = relationElement?.dataset.relationValue ?
         JSON.parse(decodeURIComponent(relationElement.dataset.relationValue)) as IAVCellValue : undefined;
-    const hostElement = hasClosestBlock(target);
+    const hostElement = getAVHost(target);
     if (hostElement && getAVRelationHost(hostElement) && relationValue) {
         showMessage(window.siyuan.languages._attrView.relatedDatabaseViewSharedTip);
         return;
@@ -102,7 +102,7 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
     if (!isDetached && !blockID) {
         return;
     }
-    const blockElement = hasClosestBlock(target);
+    const blockElement = getAVHost(target);
     if (!blockElement) {
         return;
     }
@@ -146,7 +146,7 @@ export const openAVCellIcon = (protyle: IProtyle, target: HTMLElement) => {
 
 const openAVRelationIcon = async (protyle: IProtyle, target: HTMLElement, relationElement: HTMLElement, value: IAVCellValue) => {
     const sourceCell = relationElement.closest<HTMLElement>('.av__cell[data-dtype="relation"], [data-type="relation"][data-av-id]');
-    const sourceBlock = hasClosestBlock(target);
+    const sourceBlock = getAVHost(target);
     const keyID = sourceCell?.dataset.colId || sourceCell?.dataset.fieldId;
     const rowID = relationElement.dataset.rowId;
     if (!sourceBlock || !keyID || !rowID) {
@@ -304,7 +304,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         cellValue[colType as "date"] = JSON.parse(cellElement.querySelector(".av__celltext").getAttribute("data-value"));
     } else if (colType === "checkbox") {
         cellValue.checkbox = {
-            checked: cellElement.querySelector("use").getAttribute("xlink:href") === "#iconCheck" ? true : false
+            checked: cellElement.querySelector(".av__checkbox use").getAttribute("xlink:href") === "#iconCheck"
         };
     } else if (colType === "relation") {
         const blockIDs: string[] = [];
@@ -657,8 +657,8 @@ const createCellInputTarget = (protyle: IProtyle, blockElement: HTMLElement,
     const avID = blockElement.dataset.avId;
     const hostID = getAVHostIdentity(blockElement);
     const rootID = protyle.block.rootID;
-    const attributeCell = (type === "select" || type === "mSelect" || type === "date") && cellElements.every(element =>
-        element.classList.contains("custom-attr__avvalue") && !element.dataset.avBatchOriginalValue);
+    const attributeCell = (type === "select" || type === "mSelect" || type === "date" || type === "relation") &&
+        cellElements.every(element => element.classList.contains("custom-attr__avvalue") && !element.dataset.avBatchOriginalValue);
     const cellOwner = getAVCellEditorOwner(blockElement);
     const ownerElement = attributeCell ?
         cellOwner.closest<HTMLElement>(".protyle-db-attr, .protyle-db-row, .b3-dialog__container") || cellOwner : cellOwner;
@@ -797,7 +797,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         options?.destroyCallback?.();
         return;
     }
-    const blockElement = hasClosestBlock(cellElements[0]);
+    const blockElement = getAVHost(cellElements[0]);
     if (!blockElement) {
         options?.destroyCallback?.();
         return;

@@ -26,7 +26,7 @@ test("synthetic ordered dialog preserves retry input, focus and safe close/load 
             forceClose(){if(!this.element.isConnected)return;this.element.remove();this.options.destroyCallback?.()}
         }
         const modules={
-            '../dialog':{Dialog}, '../dialog/confirmDialog':{confirmDialog:(_title,_text,accept)=>confirmations.push(accept)},
+            '../dialog':{Dialog}, '../dialog/confirmDialog':{confirmDialog: ({confirm}) => confirmations.push(confirm)},
             '../util/fetch':{fetchPost:(url,data,cb,_headers,fail,signal,timeout)=>new Promise(resolve=>pending.push({url,data:JSON.parse(JSON.stringify(data)),cb,fail,resolve,signal,timeout}))},
             '../util/genID':{genUUID:()=> 'operation-'+(++sequence)}, '../util/functions':{isMobile:()=>false},
             './flashcardV2Contract':{isFlashcardV2Object:value=>value!==null&&typeof value==='object'&&!Array.isArray(value)},

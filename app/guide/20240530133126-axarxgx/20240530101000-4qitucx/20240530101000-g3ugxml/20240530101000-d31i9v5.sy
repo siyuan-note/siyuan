@@ -935,6 +935,47 @@
 			]
 		},
 		{
+			"ID": "20261118183342-w3t8s5f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118183342-w3t8s5f",
+				"updated": "20261118183342"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップの PDF エクスポートプレビューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ページ分割"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をオンにし、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "見出しを新しいページから開始"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で見出しレベルを選択します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "サブドキュメントをマージ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にすると、直前のドキュメントが見出しで終わる場合でも、タイトルが選択したレベルに該当するサブドキュメントは新しいページから始まります。同じドキュメント内で本文を挟まない連続した見出しは同じページに配置されます。"
+				}
+			]
+		},
+		{
 			"ID": "20261111230000-3iqsxc7",
 			"Type": "NodeParagraph",
 			"Properties": {

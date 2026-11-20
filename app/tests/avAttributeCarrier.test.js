@@ -122,7 +122,7 @@ const runCases = async () => {
                 options.init(this);
             }
         },
-        MobileDialog: class {
+        AdaptiveDialog: class {
             constructor(options) {
                 lifecycle = options;
                 this.element = document.createElement("div");

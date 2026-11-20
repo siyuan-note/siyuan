@@ -7,7 +7,7 @@ import {getTitleBarOverlayOptions} from "./windowControlsOverlay";
 import {createResponseHeaderFilter} from "../remote/sessionHeaders";
 import {state as runtimeState, resetRuntimeState, SYSTEM_SHUTDOWN_NONE, configureRuntime, paths as runtimePaths} from "../shared/runtime";
 import type * as electron from "electron";
-import type {App, BrowserWindow as ElectronBrowserWindow, Display, IpcMain, Screen, Session} from "electron";
+import type {App, BrowserWindow as ElectronBrowserWindow, BrowserWindowConstructorOptions, Display, IpcMain, Screen, Session} from "electron";
 import type {BootWindow, KernelTarget} from "../shared/types";
 import type * as nodeFs from "node:fs";
 const assert = require("node:assert/strict");
@@ -35,7 +35,7 @@ const mainWindowSetup = (t: any, {remote = false} = {}) => {
             session: {webRequest: {onBeforeSendHeaders(): void; onHeadersReceived(): void}};
         };
 
-        constructor() {
+        constructor(readonly options: BrowserWindowConstructorOptions = {}) {
             super();
             this.webContents = Object.assign(new EventEmitter(), {id: ++windowId,
                 send: (...args) => { this.messages = [...(this.messages || []), args]; },
@@ -71,7 +71,7 @@ const mainWindowSetup = (t: any, {remote = false} = {}) => {
         path, process: processStub,
         screen: screenStub,
         BrowserWindow: Window, remote: {enable() {}}, bindSpellcheckContextMenu() {}, bindTopBarContextMenu() {},
-        getTitleBarOverlayOptions: getTitleBarOverlayOptions,
+        getTitleBarOverlayOptions: () => getTitleBarOverlayOptions("win32"),
         rememberWindowKernelTarget() {}, installNavigationPolicy() {}, ipcMain,
         net: netStub,
         setStartupApplicationMenu() {}, isOpenAsHidden: () => false,
@@ -149,6 +149,9 @@ test("main windows close their own boot windows in either frontend readiness ord
         });
         assert.equal(context.localKernelStartups.size, 0);
         assert.deepEqual(Array.from(context.workspaces, item => item.workspaceDir), ["workspace-0", "workspace-1"]);
+        for (const {browserWindow} of context.workspaces) {
+            assert.deepEqual(browserWindow.options.webPreferences.additionalArguments, ["--siyuan-window-controls-overlay"]);
+        }
         ipcMain.emit("siyuan-ready-to-show", {sender: {}});
         assert.equal(boots.some(window => window.destroyed), false);
         ipcMain.emit("siyuan-ready-to-show", {sender: context.workspaces[first].browserWindow.webContents});

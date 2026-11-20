@@ -599,22 +599,49 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 	return false
 }
 
-func newPublishAccessItemFilter(c *gin.Context, publishAccess PublishAccess) attributeViewItemFilter {
+func newPublishAccessItemFilter(c *gin.Context, publishAccess PublishAccess) *attributeViewItemFilter {
 	itemAccessCache := map[*av.AttributeView]map[string]bool{}
-	return func(attrView *av.AttributeView, itemID string) bool {
-		itemAccess := itemAccessCache[attrView]
-		if nil == itemAccess {
-			itemAccess = map[string]bool{}
-			itemAccessCache[attrView] = itemAccess
-		}
-		if accessable, ok := itemAccess[itemID]; ok {
-			return accessable
-		}
+	nestedBlockAccessCache := map[string]bool{}
+	return &attributeViewItemFilter{
+		item: func(attrView *av.AttributeView, itemID string) bool {
+			itemAccess := itemAccessCache[attrView]
+			if nil == itemAccess {
+				itemAccess = map[string]bool{}
+				itemAccessCache[attrView] = itemAccess
+			}
+			if accessable, ok := itemAccess[itemID]; ok {
+				return accessable
+			}
 
-		accessable := checkAttributeViewItemIDAccessableByPublishAccess(c, publishAccess, attrView, itemID)
-		itemAccess[itemID] = accessable
-		return accessable
+			accessable := checkAttributeViewItemIDAccessableByPublishAccess(c, publishAccess, attrView, itemID)
+			itemAccess[itemID] = accessable
+			return accessable
+		},
+		nested: func(value *av.Value) bool {
+			blockID := attributeViewNestedValueBlockID(value)
+			if "" == blockID {
+				return nil != value && value.IsDetached
+			}
+			if accessable, ok := nestedBlockAccessCache[blockID]; ok {
+				return accessable
+			}
+
+			accessable := CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockID)
+			nestedBlockAccessCache[blockID] = accessable
+			return accessable
+		},
 	}
+}
+
+// attributeViewNestedValueBlockID 返回嵌套值绑定的块 ID；非绑定行或缺少绑定信息时返回空串。
+func attributeViewNestedValueBlockID(value *av.Value) string {
+	if nil == value || value.IsDetached {
+		return ""
+	}
+	if nil != value.Block && "" != value.Block.ID {
+		return value.Block.ID
+	}
+	return value.BlockID
 }
 
 func checkAssetPathAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, assetPath, boxID, ownerAbsPath string) bool {
@@ -740,22 +767,20 @@ func checkAttributeViewBlockTreesAccessableByPublishAccess(c *gin.Context, publi
 	return false
 }
 
-// FilterBlockAttrsByPublishAccess 返回读者可用的块属性副本，
-// 移除指向读者不可访问属性视图的 custom-avs 绑定。
+// FilterBlockAttrsByPublishAccess 返回读者可读取的块属性副本，移除编辑器专属备注和不可访问属性视图绑定。
 func FilterBlockAttrsByPublishAccess(c *gin.Context, publishAccess PublishAccess, attrs map[string]string) map[string]string {
-	avIDs, ok := attrs[av.NodeAttrNameAvs]
-	if !ok {
-		return attrs
-	}
-	filtered := filterAttributeViewIDsByPublishAccess(c, publishAccess, avIDs)
-	if filtered == avIDs {
-		return attrs
-	}
-
 	ret := make(map[string]string, len(attrs))
 	for name, value := range attrs {
+		if "memo" == name {
+			continue
+		}
 		ret[name] = value
 	}
+	avIDs, ok := ret[av.NodeAttrNameAvs]
+	if !ok {
+		return ret
+	}
+	filtered := filterAttributeViewIDsByPublishAccess(c, publishAccess, avIDs)
 	if "" == filtered {
 		delete(ret, av.NodeAttrNameAvs)
 	} else {
@@ -764,11 +789,18 @@ func FilterBlockAttrsByPublishAccess(c *gin.Context, publishAccess PublishAccess
 	return ret
 }
 
-// FilterBlockIALByPublishAccess 返回移除不可访问属性视图绑定后的 IAL 副本。
+// FilterBlockIALByPublishAccess 返回读者可读取的 IAL 副本，移除编辑器专属备注和不可访问属性视图绑定。
 func FilterBlockIALByPublishAccess(c *gin.Context, publishAccess PublishAccess, ial [][]string) [][]string {
 	ret := make([][]string, 0, len(ial))
 	for _, attr := range ial {
-		if 2 > len(attr) || av.NodeAttrNameAvs != attr[0] {
+		if 2 > len(attr) {
+			ret = append(ret, attr)
+			continue
+		}
+		if "memo" == attr[0] {
+			continue
+		}
+		if av.NodeAttrNameAvs != attr[0] {
 			ret = append(ret, attr)
 			continue
 		}
@@ -1800,16 +1832,10 @@ func FilterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags
 }
 
 func filterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags *Tags, spans []*sql.Span) (ret *Tags) {
-	publishInvisible := GetInvisiblePublishAccess(publishAccess)
-	publishDisable := GetDisablePublishAccess(publishAccess)
+	visible := TagPublishVisibility(c, publishAccess)
 	labelCounts := make(map[string]int)
 	for _, span := range spans {
-		if !CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishInvisible) ||
-			!CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishDisable) {
-			continue
-		}
-		passwordID, password := GetPathPasswordByPublishAccess(span.Box, span.Path, publishAccess)
-		if password != "" && !CheckPublishAuthCookie(c, passwordID, password) {
+		if !visible(span.Box, span.Path) {
 			continue
 		}
 		label := util.UnescapeHTML(span.Content)
@@ -1824,6 +1850,19 @@ func filterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags
 		}
 	}
 	return
+}
+
+func TagPublishVisibility(c *gin.Context, access PublishAccess) func(string, string) bool {
+	invisible := GetInvisiblePublishAccess(access)
+	disabled := GetDisablePublishAccess(access)
+	return func(box, path string) bool {
+		if !CheckPathAccessableByPublishIgnore(box, path, invisible) ||
+			!CheckPathAccessableByPublishIgnore(box, path, disabled) {
+			return false
+		}
+		id, password := GetPathPasswordByPublishAccess(box, path, access)
+		return password == "" || CheckPublishAuthCookie(c, id, password)
+	}
 }
 
 func reassignTagCounts(tag *Tag, counts map[string]int) (ret *Tag) {
@@ -1855,7 +1894,7 @@ func FilterLocalStorageByPublishAccess(localStorage map[string]any) (ret map[str
 	return
 }
 
-// DocAssetsForPublishAccess 返回发布读者可见的文档资源，属性视图行按其绑定文档的发布访问过滤。
+// DocAssetsForPublishAccess 返回发布读者可见的文档资源，属性视图行及其关联、汇总内容按其绑定文档的发布访问过滤。
 func DocAssetsForPublishAccess(c *gin.Context, publishAccess PublishAccess, rootID string, retainQueryStr bool) ([]string, error) {
 	return docAssets(rootID, retainQueryStr, newPublishAccessItemFilter(c, publishAccess))
 }

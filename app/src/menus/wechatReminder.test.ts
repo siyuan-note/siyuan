@@ -56,7 +56,7 @@ const setup = (mobile: boolean) => {
         })},
         require: (name: string) => ({
             "dayjs": dayjs,
-            "../dialog/mobileDialog": {MobileDialog: ReminderDialog},
+            "../dialog/adaptiveDialog": {AdaptiveDialog: ReminderDialog},
             "../datePicker/inline": {getInlineDateValue: (input: Control) => input.value.replace(" ", "T"), bindInlineDatePicker: (_host: unknown, input: Control) => {
                 bound.push(input);
                 const dialog = dialogs.at(-1);

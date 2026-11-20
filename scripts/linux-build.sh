@@ -17,6 +17,7 @@ TARGET='all'
 HARMONY_KERNEL=false
 HARMONY_READY_FILE=''
 PROCESS_ID_FILE=''
+WINDOWS_READY_FILE=''
 validate_target() {
     if [[ -z "$1" ]]; then
         echo 'Error: --target option requires a value'
@@ -38,6 +39,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --process-id-file=*)
             PROCESS_ID_FILE="${1#*=}"
+            shift
+            ;;
+        --windows-ready-file=*)
+            WINDOWS_READY_FILE="${1#*=}"
             shift
             ;;
         --with-harmony-kernel)
@@ -126,6 +131,17 @@ if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     python3 "$PROJECT_ROOT/scripts/prepare-ocr.py" --runtime linux-arm64 --build-worker --check-only
 fi
 
+echo 'Installing frontend dependencies'
+cd "$PROJECT_ROOT/app"
+pnpm install
+
+if [[ -n "$WINDOWS_READY_FILE" && ! -f "$WINDOWS_READY_FILE" ]]; then
+    echo 'Frontend dependencies installed; waiting for Windows packaging'
+    until [[ -f "$WINDOWS_READY_FILE" ]]; do
+        sleep 1
+    done
+fi
+
 echo 'Cleaning Builds'
 rm -rf "$PROJECT_ROOT/app/build" 2>/dev/null || true
 rm -rf "$PROJECT_ROOT/app/kernel-linux" 2>/dev/null || true
@@ -133,8 +149,6 @@ rm -rf "$PROJECT_ROOT/app/kernel-linux-arm64" 2>/dev/null || true
 
 echo
 echo 'Building UI'
-cd "$PROJECT_ROOT/app"
-pnpm install
 pnpm run install:electron
 pnpm run build
 

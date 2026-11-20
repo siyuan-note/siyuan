@@ -1,5 +1,5 @@
 import {escapeHtml} from "../../../util/escape";
-import {MobileDialog} from "../../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
 import {showMessage} from "../../../dialog/message";
 import {isMobile} from "../../../util/functions";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
@@ -113,7 +113,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
 </div>${mobile ? `<div class="b3-dialog__action">
         <button type="button" class="b3-button b3-button--text" data-type="confirm">${escapeHtml(window.siyuan.languages.confirm)}</button>
     </div>` : ""}`;
-    const dialog = mobile ? new MobileDialog({
+    const dialog = mobile ? new AdaptiveDialog({
         title: primary ? window.siyuan.languages._attrView.key : window.siyuan.languages.text,
         content,
         containerClassName: "mobile-av-richtext-sheet",
@@ -156,21 +156,21 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             hint,
         },
         runtimeCapabilities: {
-            upload: primary,
+            upload: true,
             websocket: false,
             lute: createAVRichTextEditorLute(),
             lockedOptions: {toolbar, hint},
             pluginExtensions: false,
             customBlockRender: false,
             sanitizeBlockDOM: blockDOM => sanitizeAVRichTextBlockDOM(blockDOM, primary),
-            getUnsupportedPasteBlocks: blockDOM => getAVRichTextUnsupportedPasteBlocks(blockDOM, primary),
-            richHTMLPaste: primary,
+            getUnsupportedPasteBlocks: blockDOM => getAVRichTextUnsupportedPasteBlocks(blockDOM, true),
+            richHTMLPaste: true,
             restoreLuteMarkdownSyntax: configureAVRichTextEditorLute,
         },
         afterSetContent: (protyle, element) => {
             mathRender(element);
             highlightRender(element);
-            if (primary) { renderImageDisplay(element); }
+            renderImageDisplay(element);
             protyle.undo.clear();
         },
     });
@@ -195,8 +195,12 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             const data = getAVData(options.nodeElement);
             if (data && options.stableCells.some(cell => {
                 const current = resolveAVSelectedCell(data, cell)?.cell.value;
-                return !current || current.type !== "block" || current.isDetached !== options.value.isDetached ||
-                    current.block?.id !== options.value.block?.id;
+                const original = cell.cell.value;
+                if (current?.type !== "block" || Boolean(current.isDetached) !== Boolean(original.isDetached)) {
+                    return true;
+                }
+                // 旧版非绑定条目可能带有块 ID，只有绑定条目才需要核对来源块。
+                return !current.isDetached && current.block?.id !== original.block?.id;
             })) { return false; }
         }
         if (options.anchorElement.isConnected) {

@@ -83,6 +83,10 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.globalBreadcrumb,
         desc: window.siyuan.languages.globalBreadcrumbTip,
     });
+    group.switch("editor.hideBreadcrumbIcons", {
+        title: window.siyuan.languages.hideBreadcrumbIcons,
+        desc: window.siyuan.languages.hideBreadcrumbIconsTip,
+    });
     group.number("editor.dynamicLoadBlocks", {
         title: window.siyuan.languages.dynamicLoadBlocks,
         desc: window.siyuan.languages.dynamicLoadBlocksTip,

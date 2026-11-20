@@ -18,10 +18,12 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -867,8 +869,8 @@ func TestListDocsByPathFiltersSubFileCountForPublishReader(t *testing.T) {
 		forbiddenID = "20260726000004-forbid1"
 	)
 	oldDataDir, oldConf := util.DataDir, model.Conf
-	oldPublishAccess := model.GetPublishAccess()
 	util.DataDir = t.TempDir()
+	oldPublishAccess := model.GetPublishAccess()
 	model.Conf = model.NewAppConf()
 	model.Conf.Sync.Store(conf.NewSync())
 	model.Conf.FileTree.Store(conf.NewFileTree())
@@ -961,5 +963,408 @@ func TestListDocsByPathFiltersSubFileCountForPublishReader(t *testing.T) {
 	}
 	if actual := requestSubFileCount(model.RoleReader); 1 != actual {
 		t.Fatalf("reader subfile count = %d, want only the published one", actual)
+	}
+}
+
+// TestListDocsByPathHidesPasswordMetadataForPublishReader 验证发布读者只能看到未设密码或已通过密码校验文档的
+// 命名、别名、备注和书签，标题、图标与路径仍需保留用于树导航。
+func TestListDocsByPathHidesPasswordMetadataForPublishReader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	const (
+		boxID             = "20261120000000-boxid01"
+		publicID          = "20261120000001-public1"
+		protectedID       = "20261120000002-protect"
+		ancestorID        = "20261120000003-ancesto"
+		childID           = "20261120000004-child01"
+		protectedPassword = "protected-password"
+	)
+	oldDataDir, oldConf := util.DataDir, model.Conf
+	util.DataDir = t.TempDir()
+	oldPublishAccess := model.GetPublishAccess()
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	const testLang = "filetree-password-metadata-test"
+	installAPITestTimeLangs(t, testLang)
+	model.Conf.Lang = testLang
+	t.Cleanup(func() {
+		if err := model.SetPublishAccess(oldPublishAccess); err != nil {
+			t.Errorf("restore publish access failed: %v", err)
+		}
+		util.DataDir, model.Conf = oldDataDir, oldConf
+	})
+	if err := model.SetPublishAccess(model.PublishAccess{
+		{ID: protectedID, Visible: true, Password: protectedPassword},
+		{ID: ancestorID, Visible: true, Password: protectedPassword},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Closed = false
+	if err := (&model.Box{ID: boxID}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	boxDir := filepath.Join(util.DataDir, boxID)
+	if err := os.MkdirAll(filepath.Join(boxDir, ancestorID), 0755); err != nil {
+		t.Fatal(err)
+	}
+	writeDoc := func(dir, id string) {
+		t.Helper()
+		content := `{"Properties":{"id":"` + id + `","title":"` + id + `","name":"name-` + id +
+			`","alias":"alias-` + id + `","memo":"memo-` + id + `","bookmark":"bookmark-` + id + `"}}`
+		if err := os.WriteFile(filepath.Join(boxDir, dir, id+".sy"), []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeDoc(".", publicID)
+	writeDoc(".", protectedID)
+	writeDoc(".", ancestorID)
+	writeDoc(ancestorID, childID)
+
+	requestFiles := func(role model.Role, cookie *http.Cookie, listPath string) map[string]*model.File {
+		t.Helper()
+
+		engine := gin.New()
+		engine.Use(func(c *gin.Context) {
+			c.Set(model.RoleContextKey, role)
+			c.Next()
+		})
+		engine.POST("/api/filetree/listDocsByPath", listDocsByPath)
+
+		recorder := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(
+			http.MethodPost,
+			"/api/filetree/listDocsByPath",
+			strings.NewReader(`{"notebook":"`+boxID+`","path":"`+listPath+`"}`),
+		)
+		httpRequest.Header.Set("Content-Type", "application/json")
+		if nil != cookie {
+			httpRequest.AddCookie(cookie)
+		}
+		engine.ServeHTTP(recorder, httpRequest)
+		requireAPIContract(t, http.MethodPost, "/api/filetree/listDocsByPath", recorder)
+
+		response := &struct {
+			Code int    `json:"code"`
+			Msg  string `json:"msg"`
+			Data struct {
+				Files []*model.File `json:"files"`
+			} `json:"data"`
+		}{}
+		if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+			t.Fatalf("unmarshal list response failed: %v", err)
+		}
+		if 0 != response.Code {
+			t.Fatalf("list docs by path failed: %s", recorder.Body.String())
+		}
+		files := map[string]*model.File{}
+		for _, file := range response.Data.Files {
+			files[file.ID] = file
+		}
+		return files
+	}
+	requireMetadata := func(files map[string]*model.File, id, path string, wantHidden bool) {
+		t.Helper()
+
+		file := files[id]
+		if nil == file {
+			t.Fatalf("document [%s] not found in response", id)
+		}
+		if file.Name != id || file.Path != path {
+			t.Fatalf("document [%s] title or path changed: %#v", id, file)
+		}
+		wantName1, wantAlias, wantMemo, wantBookmark := "name-"+id, "alias-"+id, "memo-"+id, "bookmark-"+id
+		if wantHidden {
+			wantName1, wantAlias, wantMemo, wantBookmark = "", "", "", ""
+		}
+		if file.Name1 != wantName1 || file.Alias != wantAlias || file.Memo != wantMemo || file.Bookmark != wantBookmark {
+			t.Fatalf("document [%s] metadata = %#v, want name1 %q alias %q memo %q bookmark %q",
+				id, file, wantName1, wantAlias, wantMemo, wantBookmark)
+		}
+	}
+
+	publicPath, protectedPath := "/"+publicID+".sy", "/"+protectedID+".sy"
+	ancestorPath, childPath := "/"+ancestorID+".sy", "/"+ancestorID+"/"+childID+".sy"
+	readerFiles := requestFiles(model.RoleReader, nil, "/")
+	requireMetadata(readerFiles, publicID, publicPath, false)
+	requireMetadata(readerFiles, protectedID, protectedPath, true)
+	requireMetadata(readerFiles, ancestorID, ancestorPath, true)
+	requireMetadata(requestFiles(model.RoleReader, nil, ancestorPath), childID, childPath, true)
+
+	readerFiles = requestFiles(model.RoleReader, &http.Cookie{
+		Name:  "publish-auth-" + protectedID,
+		Value: model.PublishAuthCookieValue(protectedID, protectedPassword),
+	}, "/")
+	requireMetadata(readerFiles, protectedID, protectedPath, false)
+	requireMetadata(readerFiles, ancestorID, ancestorPath, true)
+	requireMetadata(requestFiles(model.RoleReader, nil, ancestorPath), childID, childPath, true)
+
+	administratorFiles := requestFiles(model.RoleAdministrator, nil, "/")
+	for id, p := range map[string]string{
+		publicID: publicPath, protectedID: protectedPath, ancestorID: ancestorPath,
+	} {
+		requireMetadata(administratorFiles, id, p, false)
+	}
+	requireMetadata(requestFiles(model.RoleAdministrator, nil, ancestorPath), childID, childPath, false)
+}
+
+// TestListDocTreeRangeHidesPasswordMetadataForPublishReader 验证文档树范围接口同样不会向未通过密码校验的
+// 发布读者返回命名、别名、备注和书签，标题与路径保持可用。
+func TestListDocTreeRangeHidesPasswordMetadataForPublishReader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	box := documentPathAPIWorkspace(t)
+	// 范围接口会查询加密笔记本，需要独立的语句数据库；前序用例可能已关闭全局数据库
+	oldDBPath, oldQueueDir, oldReadOnly := util.DBPath, util.QueueDir, util.ReadOnly
+	util.DBPath, util.QueueDir, util.ReadOnly = filepath.Join(util.TempDir, "siyuan.db"),
+		filepath.Join(util.TempDir, "queue"), false
+	t.Cleanup(func() { util.DBPath, util.QueueDir, util.ReadOnly = oldDBPath, oldQueueDir, oldReadOnly })
+	sql.InitDatabase(true)
+	t.Cleanup(sql.CloseDatabase)
+
+	const (
+		publicID          = "20261121000001-public1"
+		protectedID       = "20261121000002-protect"
+		protectedPassword = "protected-password"
+	)
+	oldLang := model.Conf.Lang
+	installAPITestTimeLangs(t, "en")
+	model.Conf.Lang = "en"
+	t.Cleanup(func() { model.Conf.Lang = oldLang })
+	oldPublishAccess := model.GetPublishAccess()
+	if err := model.SetPublishAccess(model.PublishAccess{
+		{ID: protectedID, Visible: true, Password: protectedPassword},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := model.SetPublishAccess(oldPublishAccess); err != nil {
+			t.Errorf("restore publish access failed: %v", err)
+		}
+	})
+
+	writeTree := func(id string) {
+		t.Helper()
+		tree := treenode.NewTree(box, "/"+id+".sy", "/"+id, id)
+		for key, value := range map[string]string{
+			"name": "name-" + id, "alias": "alias-" + id, "memo": "memo-" + id, "bookmark": "bookmark-" + id,
+		} {
+			tree.Root.SetIALAttr(key, value)
+		}
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
+	}
+	writeTree(publicID)
+	writeTree(protectedID)
+
+	requestFiles := func(role model.Role, cookie *http.Cookie) map[string]*model.File {
+		t.Helper()
+
+		engine := gin.New()
+		engine.Use(func(c *gin.Context) {
+			c.Set(model.RoleContextKey, role)
+			c.Next()
+		})
+		engine.POST("/api/filetree/listDocTreeRange", boxLeaseMiddleware, listDocTreeRange)
+
+		recorder := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(
+			http.MethodPost,
+			"/api/filetree/listDocTreeRange",
+			strings.NewReader(`{"notebook":"`+box+`","parentID":"","offset":0}`),
+		)
+		httpRequest.Header.Set("Content-Type", "application/json")
+		if nil != cookie {
+			httpRequest.AddCookie(cookie)
+		}
+		engine.ServeHTTP(recorder, httpRequest)
+		requireAPIContract(t, http.MethodPost, "/api/filetree/listDocTreeRange", recorder)
+
+		response := &struct {
+			Code int    `json:"code"`
+			Msg  string `json:"msg"`
+			Data struct {
+				Files []*model.File `json:"files"`
+			} `json:"data"`
+		}{}
+		if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+			t.Fatalf("unmarshal range response failed: %v", err)
+		}
+		if 0 != response.Code {
+			t.Fatalf("list documents by range failed: %s", recorder.Body.String())
+		}
+		files := map[string]*model.File{}
+		for _, file := range response.Data.Files {
+			files[file.ID] = file
+		}
+		return files
+	}
+	requireMetadata := func(files map[string]*model.File, id string, wantHidden bool) {
+		t.Helper()
+
+		file := files[id]
+		if nil == file {
+			t.Fatalf("document [%s] not found in response", id)
+		}
+		if file.Name != id || file.Path != "/"+id+".sy" {
+			t.Fatalf("document [%s] title or path changed: %#v", id, file)
+		}
+		wantName1, wantAlias, wantMemo, wantBookmark := "name-"+id, "alias-"+id, "memo-"+id, "bookmark-"+id
+		if wantHidden {
+			wantName1, wantAlias, wantMemo, wantBookmark = "", "", "", ""
+		}
+		if file.Name1 != wantName1 || file.Alias != wantAlias || file.Memo != wantMemo || file.Bookmark != wantBookmark {
+			t.Fatalf("document [%s] metadata = %#v, want name1 %q alias %q memo %q bookmark %q",
+				id, file, wantName1, wantAlias, wantMemo, wantBookmark)
+		}
+	}
+
+	readerFiles := requestFiles(model.RoleReader, nil)
+	requireMetadata(readerFiles, publicID, false)
+	requireMetadata(readerFiles, protectedID, true)
+
+	readerFiles = requestFiles(model.RoleReader, &http.Cookie{
+		Name:  "publish-auth-" + protectedID,
+		Value: model.PublishAuthCookieValue(protectedID, protectedPassword),
+	})
+	requireMetadata(readerFiles, publicID, false)
+	requireMetadata(readerFiles, protectedID, false)
+
+	administratorFiles := requestFiles(model.RoleAdministrator, nil)
+	requireMetadata(administratorFiles, publicID, false)
+	requireMetadata(administratorFiles, protectedID, false)
+}
+
+// TestSearchDocsClearsNotebookFlashcardCountForPublishReader 验证空关键字闪卡搜索中合成的笔记本行不会把
+// 受密码保护文档的闪卡计数暴露给发布读者，管理员仍得到全量计数。
+func TestSearchDocsClearsNotebookFlashcardCountForPublishReader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	const (
+		boxID             = "20261122000000-boxid01"
+		protectedID       = "20261122000001-protect"
+		protectedPassword = "protected-password"
+		builtinDeckID     = "20230218211946-2kw8jgx"
+		cardID            = "20261122000002-card001"
+	)
+	oldConf, oldDataDir, oldDecks := model.Conf, util.DataDir, model.Decks
+	oldBlockTreeDBPath := util.BlockTreeDBPath
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	oldPublishAccess := model.GetPublishAccess()
+	treenode.InitBlockTree(true)
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.FileTree.Store(conf.NewFileTree())
+	model.Conf.Search.Store(conf.NewSearch())
+	model.Conf.Flashcard.Store(conf.NewFlashcard())
+	model.Decks = map[string]*riff.Deck{}
+	t.Cleanup(func() {
+		if err := model.SetPublishAccess(oldPublishAccess); err != nil {
+			t.Errorf("restore publish access failed: %v", err)
+		}
+		treenode.CloseDatabase()
+		model.Conf, util.DataDir, model.Decks = oldConf, oldDataDir, oldDecks
+		util.BlockTreeDBPath = oldBlockTreeDBPath
+	})
+	if err := model.SetPublishAccess(model.PublishAccess{
+		{ID: protectedID, Visible: true, Password: protectedPassword},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	boxConf := conf.NewBoxConf()
+	boxConf.Name, boxConf.Closed = "Flashcard notebook", false
+	if err := (&model.Box{ID: boxID}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	treenode.IndexBlockTree(&parse.Tree{
+		ID:    protectedID,
+		Box:   boxID,
+		Path:  "/" + protectedID + ".sy",
+		HPath: "/" + protectedID,
+		Root:  &ast.Node{ID: protectedID, Type: ast.NodeDocument},
+	})
+	// 受密码保护文档中的闪卡仍会被 SearchDocs 的全量统计计入笔记本行
+	riffDir := filepath.Join(util.DataDir, "storage", "riff")
+	if err := os.MkdirAll(riffDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	flashcardConf := conf.NewFlashcard()
+	deck, err := riff.LoadDeck(riffDir, builtinDeckID, flashcardConf.RequestRetention, flashcardConf.MaximumInterval, flashcardConf.Weights)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deck.AddCard(cardID, protectedID)
+	model.Decks[builtinDeckID] = deck
+
+	requestNotebookCounts := func(role model.Role) (counts map[string]string) {
+		t.Helper()
+
+		engine := gin.New()
+		engine.Use(func(c *gin.Context) {
+			c.Set(model.RoleContextKey, role)
+			c.Next()
+		})
+		engine.POST("/api/filetree/searchDocs", searchDocs)
+
+		recorder := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(
+			http.MethodPost,
+			"/api/filetree/searchDocs",
+			strings.NewReader(`{"k":"","flashcard":true}`),
+		)
+		httpRequest.Header.Set("Content-Type", "application/json")
+		engine.ServeHTTP(recorder, httpRequest)
+		requireAPIContract(t, http.MethodPost, "/api/filetree/searchDocs", recorder)
+
+		response := &struct {
+			Code int    `json:"code"`
+			Msg  string `json:"msg"`
+			Data []struct {
+				Path              string  `json:"path"`
+				Box               string  `json:"box"`
+				NewFlashcardCount *string `json:"newFlashcardCount"`
+				DueFlashcardCount *string `json:"dueFlashcardCount"`
+				FlashcardCount    *string `json:"flashcardCount"`
+			} `json:"data"`
+		}{}
+		if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+			t.Fatalf("unmarshal search response failed: %v", err)
+		}
+		if 0 != response.Code {
+			t.Fatalf("search docs failed: %s", recorder.Body.String())
+		}
+		for _, doc := range response.Data {
+			if "/" != doc.Path || boxID != doc.Box {
+				continue
+			}
+			if nil == doc.NewFlashcardCount || nil == doc.DueFlashcardCount || nil == doc.FlashcardCount {
+				t.Fatalf("notebook row omitted flashcard counts: %s", recorder.Body.String())
+			}
+			return map[string]string{
+				"newFlashcardCount": *doc.NewFlashcardCount,
+				"dueFlashcardCount": *doc.DueFlashcardCount,
+				"flashcardCount":    *doc.FlashcardCount,
+			}
+		}
+		t.Fatalf("notebook row not found: %s", recorder.Body.String())
+		return nil
+	}
+
+	readerCounts := requestNotebookCounts(model.RoleReader)
+	for _, key := range []string{"newFlashcardCount", "dueFlashcardCount", "flashcardCount"} {
+		if "0" != readerCounts[key] {
+			t.Fatalf("reader notebook flashcard counts = %v, want all zero", readerCounts)
+		}
+	}
+	administratorCounts := requestNotebookCounts(model.RoleAdministrator)
+	for _, key := range []string{"newFlashcardCount", "dueFlashcardCount", "flashcardCount"} {
+		if "1" != administratorCounts[key] {
+			t.Fatalf("administrator notebook flashcard counts = %v, want all one", administratorCounts)
+		}
 	}
 }

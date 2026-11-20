@@ -16,6 +16,7 @@ const fixture = () => {
     let menuVisible = false;
     let dialogOpen = false;
     const opened = [];
+    const mainMenuTargets = [];
     const menu = {
         data: undefined,
         element: {classList: {contains: name => name === "fn__none" ? !menuVisible : false}},
@@ -61,6 +62,7 @@ const fixture = () => {
             entries.set(id, {
                 id,
                 closest: () => null,
+                getBoundingClientRect: () => ({}),
                 setAttribute() {},
                 classList: {contains: () => false},
                 parentElement: toolbar,
@@ -95,7 +97,9 @@ const fixture = () => {
     const base = {
         ...toggleExports,
         commandPanel,
-        Constants: {LOCAL_ZOOM: "local-zoom", SIZE_ZOOM: [], SIYUAN_TOPBAR_CONTEXT_MENU: "topbar"},
+        Constants: {LOCAL_ZOOM: "local-zoom", SIZE_ZOOM: [], SIYUAN_TOPBAR_CONTEXT_MENU: "topbar",
+            MENU_BAR_MAIN_MENU: "barMainMenu"},
+        mainMenu: (_app, _rect, _openOnly, target) => mainMenuTargets.push(target.id),
         isInMobileApp: () => false,
         isBrowser: () => false,
         isWindow: () => false,
@@ -128,6 +132,8 @@ const fixture = () => {
     return {
         menu,
         opened,
+        markup: toolbar.innerHTML,
+        mainMenuTargets,
         click: id => listeners.click({target: entry(id), detail: 1, stopPropagation() {}}),
         closePanel: () => {
             dialogOpen = false;
@@ -135,6 +141,13 @@ const fixture = () => {
         isPanelOpen: () => dialogOpen,
     };
 };
+
+test("the desktop main menu button opens the menu with the shared identifier", () => {
+    const f = fixture();
+    assert.match(f.markup, /id="barMainMenu"/);
+    f.click("barMainMenu");
+    assert.deepEqual(f.mainMenuTargets, ["barMainMenu"]);
+});
 
 test("the command panel button reopens after the panel is closed elsewhere", () => {
     const f = fixture();

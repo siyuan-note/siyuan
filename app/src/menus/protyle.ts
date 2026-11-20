@@ -122,7 +122,7 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
         }
         let searchHTML = "";
         response.data.forEach((item: { path: string, hName: string }, index: number) => {
-            searchHTML += `<div data-value="${item.path}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${item.hName}</div></div>`;
+            searchHTML += `<div data-value="${escapeHtmlTextAndAttr(item.path)}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}"><div class="b3-list-item__text">${escapeHtmlTextAndAttr(item.hName)}</div></div>`;
         });
 
         const listElement = element.querySelector(".b3-list");
@@ -2480,6 +2480,21 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         label: window.siyuan.languages.tableHeaderColumn,
         checked: isTableHeaderEnabled(nodeElement, "column"),
         click: () => toggleTableHeader(protyle, nodeElement, "column")
+    });
+    const pinColumn = nodeElement.getAttribute(Constants.CUSTOM_SY_TABLE_PIN_COLUMN) === "true";
+    otherMenus.push({
+        id: pinColumn ? "unpinTableHeaderColumn" : "pinTableHeaderColumn",
+        icon: pinColumn ? "iconUnpin" : "iconPin",
+        label: pinColumn ? window.siyuan.languages.unpinTableHeaderColumn : window.siyuan.languages.pinTableHeaderColumn,
+        click: () => {
+            const html = nodeElement.outerHTML;
+            if (pinColumn) {
+                nodeElement.removeAttribute(Constants.CUSTOM_SY_TABLE_PIN_COLUMN);
+            } else {
+                nodeElement.setAttribute(Constants.CUSTOM_SY_TABLE_PIN_COLUMN, "true");
+            }
+            updateTransaction(protyle, nodeElement, html);
+        }
     });
     otherMenus.push({
         id: "title",

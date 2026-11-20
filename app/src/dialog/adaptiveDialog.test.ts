@@ -4,7 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const source = transpileModule(readFileSync("src/dialog/mobileDialog.ts", "utf8"), {
+const source = transpileModule(readFileSync("src/dialog/adaptiveDialog.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 const setup = (mobile = true) => {
@@ -53,7 +53,7 @@ const setup = (mobile = true) => {
 };
 test("explicit mobile geometry binds once; desktop is untouched", () => {
     const mobile = setup();
-    const dialog = new mobile.MobileDialog({content: ""});
+    const dialog = new mobile.AdaptiveDialog({content: ""});
     assert.equal(dialog.options.height, "auto");
     dialog.setSheetMode("expanded");
     assert.equal(mobile.stats().mode, "expanded");
@@ -61,19 +61,19 @@ test("explicit mobile geometry binds once; desktop is untouched", () => {
     const desktop = setup(false);
     const original = {content: "", height: "350px", disableClose: true,
         mobileSheet: {mode: "expanded"}};
-    const desktopDialog = new desktop.MobileDialog(original);
+    const desktopDialog = new desktop.AdaptiveDialog(original);
     assert.equal(desktopDialog.options, original);
     assert.equal(desktop.stats().bindings, 0);
 });
 test("mobile sheets preserve their initial mode and drag eligibility", () => {
     const mobile = setup();
-    new mobile.MobileDialog({content: "", mobileSheet: {mode: "expanded"}});
+    new mobile.AdaptiveDialog({content: "", mobileSheet: {mode: "expanded"}});
     assert.equal(mobile.stats().sheetOptions.mode, "expanded");
     assert.equal(mobile.canDrag(), true);
 });
 test("pending false and rejection retain input; only explicit true closes and disposes once", async () => {
     const f = setup();
-    const dialog = new f.MobileDialog({content: ""});
+    const dialog = new f.AdaptiveDialog({content: ""});
     assert.equal(await dialog.runPending(async () => false), false);
     assert.equal(await dialog.runPending(async () => { throw Error("failed"); }), false);
     let resolve: (value: boolean) => void;
@@ -91,7 +91,7 @@ test("pending false and rejection retain input; only explicit true closes and di
 test("legacy guard rejection does not freeze and invalidate still performs callback cleanup", async () => {
     const f = setup();
     let cleanup = 0;
-    const dialog = new f.MobileDialog({content: "", beforeClose: () => false, destroyCallback: () => cleanup++});
+    const dialog = new f.AdaptiveDialog({content: "", beforeClose: () => false, destroyCallback: () => cleanup++});
     assert.equal(await dialog.requestClose("cancel"), false);
     assert.equal(f.stats().freezes, 0);
     dialog.invalidate();
@@ -101,7 +101,7 @@ test("legacy guard rejection does not freeze and invalidate still performs callb
 
 test("pending content navigation preserves button states changed by the action", async () => {
     const f = setup();
-    const dialog = new f.MobileDialog({content: ""});
+    const dialog = new f.AdaptiveDialog({content: ""});
     const button = {disabled: false, isConnected: true};
     dialog.buttons.push(button);
     let finish: (value: boolean) => void;
@@ -118,8 +118,8 @@ test("pending content navigation preserves button states changed by the action",
 });
 test("passive close respects disableClose and nested topmost; explicit confirmation remains available", async () => {
     const f = setup();
-    const parent = new f.MobileDialog({content: ""});
-    const child = new f.MobileDialog({content: "", disableClose: true});
+    const parent = new f.AdaptiveDialog({content: ""});
+    const child = new f.AdaptiveDialog({content: "", disableClose: true});
     assert.equal(await parent.requestClose("scrim"), false);
     assert.equal(await child.requestClose("back"), false);
     assert.equal(await child.requestClose("drag"), false);
@@ -127,10 +127,10 @@ test("passive close respects disableClose and nested topmost; explicit confirmat
 });
 test("virtual destroy can open a nested confirmation without falsely reporting parent closure", async () => {
     const f = setup();
-    const parent = new f.MobileDialog({content: ""});
+    const parent = new f.AdaptiveDialog({content: ""});
     const destroy = parent.destroy.bind(parent);
     let approved = false;
-    parent.destroy = () => { if (approved) destroy(); else new f.MobileDialog({content: ""}); };
+    parent.destroy = () => { if (approved) destroy(); else new f.AdaptiveDialog({content: ""}); };
     assert.equal(await parent.requestClose("cancel"), false);
     assert.equal(f.stats().freezes, 0);
     f.window.siyuan.dialogs.pop();
@@ -141,7 +141,7 @@ test("async close guard is deduplicated, false retains the sheet and retry prese
     const f = setup();
     const reasons: string[] = [];
     let resolve: (value: boolean) => void;
-    const dialog = new f.MobileDialog({content: "", mobileSheet: {beforeClose: (reason: string) => {
+    const dialog = new f.AdaptiveDialog({content: "", mobileSheet: {beforeClose: (reason: string) => {
         reasons.push(reason);
         return new Promise<boolean>(done => { resolve = done; });
     }}});
@@ -159,7 +159,7 @@ test("async close guard is deduplicated, false retains the sheet and retry prese
 });
 test("focus waits for reveal, latest initial target wins, close and nested dialogs reject late focus", () => {
     const f = setup();
-    const dialog = new f.MobileDialog({content: ""});
+    const dialog = new f.AdaptiveDialog({content: ""});
     let focused = 0;
     const input = {isConnected: true, closest: (): null => null, focus: () => focused++, select() {}};
     dialog.focusWhenReady(() => input);
@@ -167,7 +167,7 @@ test("focus waits for reveal, latest initial target wins, close and nested dialo
     assert.equal(focused, 0);
     f.open();
     assert.equal(focused, 1);
-    const other = new f.MobileDialog({content: ""});
+    const other = new f.AdaptiveDialog({content: ""});
     other.focusWhenReady(() => input);
     other.destroy();
     f.open();
@@ -179,7 +179,7 @@ test("focus waits for reveal, latest initial target wins, close and nested dialo
 for (const mobile of [false, true]) {
     test(`${mobile ? "mobile" : "desktop"} input binding can retain keyboard handling without initial focus`, () => {
         const f = setup(mobile);
-        const dialog = new f.MobileDialog({content: ""});
+        const dialog = new f.AdaptiveDialog({content: ""});
         let focused = 0;
         let confirmed = 0;
         let keydown: (event: any) => void;
@@ -218,7 +218,7 @@ for (const mobile of [false, true]) {
 
     test(`${mobile ? "mobile" : "desktop"} default input binding still focuses the input`, () => {
         const f = setup(mobile);
-        const dialog = new f.MobileDialog({content: ""});
+        const dialog = new f.AdaptiveDialog({content: ""});
         let focused = 0;
         const input = {isConnected: true, closest: (): null => null, focus: () => focused++, addEventListener() {}};
         dialog.bindInput(input);
@@ -232,12 +232,12 @@ test("the adapter module can load before the cyclic Dialog module exports its ba
     const exports: any = {};
     const dependencies: any = {};
     assert.doesNotThrow(() => runInNewContext(source, {exports, require: () => dependencies}));
-    assert.equal(typeof exports.MobileDialog, "function");
+    assert.equal(typeof exports.AdaptiveDialog, "function");
 });
 
 test("native keyboard is requested once only after the requested input really receives focus", () => {
     const f = setup();
-    const dialog = new f.MobileDialog({content: ""});
+    const dialog = new f.AdaptiveDialog({content: ""});
     const input = {isConnected: true, closest: (): null => null, focus: () => { f.document.activeElement = input; }};
     dialog.focusWhenReady(() => input, {showKeyboard: true});
     assert.equal(f.stats().keyboard, 0);
@@ -251,7 +251,7 @@ test("native keyboard is requested once only after the requested input really re
 
 test("keyboard viewport updates scroll the current input without refocusing or touching closed sheets", () => {
     const f = setup();
-    const dialog = new f.MobileDialog({content: ""});
+    const dialog = new f.AdaptiveDialog({content: ""});
     f.document.activeElement = {};
     f.resize();
     assert.equal(f.stats().scrolled, 0);
@@ -266,7 +266,7 @@ test("keyboard viewport updates scroll the current input without refocusing or t
 
 test("drag binding preserves close result and blocks pending and covered sheets", async () => {
     const f = setup();
-    const dialog = new f.MobileDialog({content: "", mobileSheet: {beforeClose: () => false}});
+    const dialog = new f.AdaptiveDialog({content: "", mobileSheet: {beforeClose: () => false}});
     assert.equal(f.canDrag(), true);
     assert.equal(await f.drag(), false);
     let finish: (value: boolean) => void;

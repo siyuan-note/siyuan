@@ -25,12 +25,14 @@ const installPackageMetadataVersion = 1
 
 // installPackageMetadata 记录线上取得的校验信息，仅在安装包校验成功后持久化。
 type installPackageMetadata struct {
-	FormatVersion int    `json:"formatVersion"`
-	Version       string `json:"version"`
-	Channel       string `json:"channel"`
-	FileName      string `json:"fileName"`
-	Checksum      string `json:"checksum"`
-	Signature     string `json:"signature,omitempty"`
+	FormatVersion            int    `json:"formatVersion"`
+	Version                  string `json:"version"`
+	Channel                  string `json:"channel"`
+	FileName                 string `json:"fileName"`
+	Checksum                 string `json:"checksum"`
+	MainlandReleaseURL       string `json:"mainlandReleaseURL,omitempty"`
+	MainlandReleaseSignature string `json:"mainlandReleaseSignature,omitempty"`
+	Signature                string `json:"signature,omitempty"`
 }
 
 func validInstallPackageMetadata(metadata *installPackageMetadata) bool {
@@ -48,11 +50,22 @@ func validInstallPackageMetadata(metadata *installPackageMetadata) bool {
 func installPackageMetadataMAC(metadata *installPackageMetadata, key string) []byte {
 	unsigned := *metadata
 	unsigned.Signature = ""
+	unsigned.MainlandReleaseURL = ""
+	unsigned.MainlandReleaseSignature = ""
 	data, _ := json.Marshal(unsigned)
 	mac := hmac.New(sha256.New, []byte(key))
 	mac.Write([]byte("siyuan-install-package-v1\x00"))
 	mac.Write(data)
 	return mac.Sum(nil)
+}
+
+// 公告签名单独验证，旧版本仍可读取安装包校验记录。
+func installPackageMainlandReleaseSignature(metadata *installPackageMetadata, key string) string {
+	mac := hmac.New(sha256.New, []byte(key))
+	mac.Write([]byte("siyuan-install-package-mainland-release-v1\x00"))
+	mac.Write([]byte(metadata.Signature))
+	mac.Write([]byte(metadata.MainlandReleaseURL))
+	return hex.EncodeToString(mac.Sum(nil))
 }
 
 func saveInstallPackageMetadata(installDir string, metadata *installPackageMetadata, key string) error {
@@ -61,6 +74,9 @@ func saveInstallPackageMetadata(installDir string, metadata *installPackageMetad
 	}
 	signed := *metadata
 	signed.Signature = hex.EncodeToString(installPackageMetadataMAC(metadata, key))
+	if signed.MainlandReleaseURL != "" {
+		signed.MainlandReleaseSignature = installPackageMainlandReleaseSignature(&signed, key)
+	}
 	data, err := json.Marshal(signed)
 	if err != nil {
 		return err
@@ -89,6 +105,11 @@ func readInstallPackageMetadata(path, key string) (*installPackageMetadata, erro
 	if err != nil || key == "" || !validInstallPackageMetadata(metadata) ||
 		!hmac.Equal(signature, installPackageMetadataMAC(metadata, key)) {
 		return nil, errors.New("install package metadata authentication failed")
+	}
+	if metadata.MainlandReleaseURL != "" && !hmac.Equal([]byte(metadata.MainlandReleaseSignature),
+		[]byte(installPackageMainlandReleaseSignature(metadata, key))) {
+		metadata.MainlandReleaseURL = ""
+		metadata.MainlandReleaseSignature = ""
 	}
 	return metadata, nil
 }

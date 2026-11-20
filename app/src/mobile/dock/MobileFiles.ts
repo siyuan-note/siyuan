@@ -28,7 +28,7 @@ import {newFileInTree} from "../../util/newFile";
 import {MenuItem} from "../../menus/Menu";
 import type {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
-import {mobileConfirmDialog as confirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
@@ -190,13 +190,18 @@ export class MobileFiles extends Model {
                 if (type === "refresh") {
                     if (!target.getAttribute("disabled")) {
                         target.setAttribute("disabled", "disabled");
-                        confirmDialog(window.siyuan.languages.rebuildDataIndex, window.siyuan.languages.rebuildDataIndexTip, () => {
-                            refreshFileTree(() => {
+                        confirmDialog({
+                            title: window.siyuan.languages.rebuildDataIndex,
+                            text: window.siyuan.languages.rebuildDataIndexTip,
+                            confirm: () => {
+                                refreshFileTree(() => {
+                                    target.removeAttribute("disabled");
+                                    this.init(false);
+                                });
+                            },
+                            cancel: () => {
                                 target.removeAttribute("disabled");
-                                this.init(false);
-                            });
-                        }, () => {
-                            target.removeAttribute("disabled");
+                            },
                         });
                     }
                     event.preventDefault();

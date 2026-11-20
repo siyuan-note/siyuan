@@ -1,4 +1,4 @@
-import {MobileDialog} from "../../dialog/mobileDialog";
+import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {isMobile} from "../../util/functions";
 
 export const openPdfMobileOverlay = (element: HTMLElement, onClose: () => void) => {
@@ -13,7 +13,7 @@ export const openPdfMobileOverlay = (element: HTMLElement, onClose: () => void) 
     actions?.remove();
     let resolveClosed: () => void;
     const closed = new Promise<void>(resolve => { resolveClosed = resolve; });
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         content: "",
         destroyCallback: () => {
             if (actions) {

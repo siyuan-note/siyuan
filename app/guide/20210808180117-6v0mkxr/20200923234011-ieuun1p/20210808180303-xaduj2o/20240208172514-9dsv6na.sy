@@ -6357,7 +6357,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Primary keys share the text field block editor, supporting paragraphs, headings, lists, blockquotes, code and math blocks while retaining text styles, links, images, inline formulas and block references. Enter creates paragraphs or list items; Shift+Enter inserts an inline line break. During range entry, use Ctrl+Enter (Cmd+Enter on macOS) or the mobile Confirm button to save and continue. Table, list, gallery, kanban, calendar, entry details, relations and rollups display the complete source. Filtering, sorting, search and plain-text copying use the text projection; existing Markdown-looking primary keys remain literal."
+					"Data": "Primary keys share the text field block editor, supporting paragraphs, headings, lists, blockquotes, code and math blocks while retaining text styles, links, images, inline formulas and block references. On desktop, double-click an inline image while editing a primary key or text field to preview it and browse the other images in that field. Enter creates paragraphs or list items; Shift+Enter inserts an inline line break. During range entry, use Ctrl+Enter (Cmd+Enter on macOS) or the mobile Confirm button to save and continue. Table, list, gallery, kanban, calendar, entry details, relations and rollups display the complete source. Filtering, sorting, search and plain-text copying use the text projection; existing Markdown-looking primary keys remain literal."
 				}
 			]
 		},
@@ -6385,7 +6385,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Newly saved rich primary keys use the same Kramdown source structure as text fields and upgrade that database to format 16. Existing format 15 inline sources remain readable; unedited databases are not upgraded by this feature. Older clients without format 16 support cannot open an upgraded database. Rolling back requires restoring a complete pre-upgrade snapshot; automatic downgrading is not supported. Images and references follow the database notebook access boundary. Back up the workspace before upgrading or switching clients."
+					"Data": "Newly saved rich primary keys use the same Kramdown source structure as text fields and upgrade that database to format 16. Existing format 15 inline sources remain readable; unedited databases are not upgraded by this feature. Older clients without format 16 support cannot open an upgraded database. Rolling back requires restoring a complete pre-upgrade snapshot; automatic downgrading is not supported. Images and references follow the database notebook access boundary. Back up the workspace before upgrading or switching clients. Text fields also accept pasted inline images. Saving the first inline image in a text field upgrades the database to format 17. Use a client that supports format 17 to open it."
 				}
 			]
 		}

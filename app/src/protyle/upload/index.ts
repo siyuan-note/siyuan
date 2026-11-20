@@ -1,4 +1,3 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
 import {isSameOriginAPIRequest, SIYUAN_APP_ID_HEADER} from "../../util/fetchAppId";
 import {insertHTML} from "../util/insertHTML";
 import {hideMessage, showMessage} from "../../dialog/message";
@@ -351,7 +350,7 @@ const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "loc
         assetPaths.push(item.path);
     });
 
-    confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
+    const upload = () => {
         void (async () => {
             let msgId: string | undefined;
             try {
@@ -408,8 +407,19 @@ const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "loc
                 }
             }
         })();
-    }, () => {
-        finishUpload(task, callbacks, {status: "canceled"});
+    };
+    // 没有超限提示时不必打断用户，直接开始上传
+    if (!msg) {
+        upload();
+        return;
+    }
+    confirmDialog({
+        title: window.siyuan.languages.upload,
+        text: msg,
+        confirm: upload,
+        cancel: () => {
+            finishUpload(task, callbacks, {status: "canceled"});
+        },
     });
 };
 
@@ -490,7 +500,7 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
     } else {
         formData.append("id", options.document.rootID);
     }
-    mobileConfirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
+    const upload = () => {
         try {
             if (!callbacks.isTargetAvailable()) {
                 hideMessage(validateResult.msgId);
@@ -580,14 +590,25 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
                 console.error(messageError);
             }
         }
-    }, () => {
-        try {
-            hideMessage(validateResult.msgId);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            finishUpload(task, callbacks, {status: "canceled"});
-        }
+    };
+    // 没有超限提示时不必打断用户，直接开始上传
+    if (!msg) {
+        upload();
+        return;
+    }
+    confirmDialog({
+        title: window.siyuan.languages.upload,
+        text: msg,
+        confirm: upload,
+        cancel: () => {
+            try {
+                hideMessage(validateResult.msgId);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                finishUpload(task, callbacks, {status: "canceled"});
+            }
+        },
     });
 };
 

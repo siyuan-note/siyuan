@@ -6,6 +6,8 @@ package filesys
 
 import (
 	"bytes"
+	"errors"
+	"strings"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
@@ -14,6 +16,93 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// 字数统计的输入上限：BlockDOM 嵌套越深，解析耗时增长越快，需要在进入解析器前拦截。
+const (
+	maxContentStatBytes = 8 << 20
+	maxContentStatDepth = 256
+)
+
+var (
+	errContentStatTooLarge = errors.New("content is too large")
+	errContentStatTooDeep  = errors.New("content is too deeply nested")
+
+	voidBlockDOMElements = map[string]bool{
+		"area": true, "base": true, "br": true, "col": true, "embed": true, "hr": true, "img": true,
+		"input": true, "link": true, "meta": true, "param": true, "source": true, "track": true, "wbr": true,
+	}
+)
+
+// ValidateContentStatContent 校验字数统计输入的长度与 BlockDOM 嵌套深度，超限时返回错误。
+func ValidateContentStatContent(content string) error {
+	if maxContentStatBytes < len(content) {
+		return errContentStatTooLarge
+	}
+	if maxContentStatDepth < blockDOMDepth(content) {
+		return errContentStatTooDeep
+	}
+	return nil
+}
+
+// blockDOMDepth 按标签开合统计 BlockDOM 的最大嵌套深度，忽略注释、声明、自闭合标签与 void 元素。
+func blockDOMDepth(content string) (maxDepth int) {
+	depth := 0
+	for i := 0; i < len(content); i++ {
+		if '<' != content[i] {
+			continue
+		}
+
+		rest := content[i:]
+		if strings.HasPrefix(rest, "<!--") {
+			end := strings.Index(rest, "-->")
+			if 0 > end {
+				return
+			}
+			i += end + 2
+			continue
+		}
+
+		end := strings.IndexByte(rest, '>')
+		if 0 > end {
+			return
+		}
+		i += end
+		if 2 > end {
+			continue
+		}
+
+		switch rest[1] {
+		case '!', '?':
+			continue
+		case '/':
+			if 0 < depth {
+				depth--
+			}
+			continue
+		}
+
+		if '/' == rest[end-1] {
+			continue
+		}
+
+		name := rest[1:end]
+		if k := strings.IndexAny(name, " \t\r\n/>"); 0 <= k {
+			name = name[:k]
+		}
+		if voidBlockDOMElements[strings.ToLower(name)] {
+			continue
+		}
+
+		depth++
+		if maxDepth < depth {
+			maxDepth = depth
+			if maxContentStatDepth < maxDepth {
+				return
+			}
+		}
+	}
+	return
+}
 
 func ContentStat(content string) (ret *util.BlockStatResult) {
 	luteEngine := util.NewLute()

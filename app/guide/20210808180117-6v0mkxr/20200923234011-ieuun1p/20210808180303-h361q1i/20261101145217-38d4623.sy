@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261113111930"
+		"updated": "20261120092311"
 	},
 	"Children": [
 		{
@@ -398,7 +398,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101171827-eb329f4",
-				"updated": "20261105091714"
+				"updated": "20261120092311"
 			},
 			"Children": [
 				{
@@ -458,7 +458,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101171827-d330cb9",
-				"updated": "20261101171827"
+				"updated": "20261120092311"
 			},
 			"Children": [
 				{
@@ -481,7 +481,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to choose another navigation root without changing the document. Your chosen root stays selected even when the current document is outside it. Save As keeps the root when the new file is inside it and follows the new parent folder when it is outside."
+					"Data": " to choose another navigation root without changing the document. Your chosen root stays selected even when the current document is outside it. Save As keeps the root when the new file is inside it and follows the new parent folder when it is outside. On desktop, a relative link such as docs/next.md opens a Markdown file in the same editor. Links resolve from the current document’s folder, and the destination must be inside the file-tree root. If the file is missing or outside the root, the status bar shows that the link could not be opened."
 				}
 			]
 		},

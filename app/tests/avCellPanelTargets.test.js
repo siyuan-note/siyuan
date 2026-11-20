@@ -147,7 +147,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         canEditAVHost: (_block, editor) => !editor.disabled && !window.siyuan.config.readonly &&
             !window.siyuan.isPublish && !editor.options.history?.created && !editor.options.history?.snapshot &&
             (!state.relationHost || state.relationHost.active && state.relationHost.available && !state.relationHost.readonly()),
-        hasClosestBlock: cell => block.contains(cell) ? block : null,
+        getAVHost: cell => block.contains(cell) ? block : null,
         hasClosestByClassName: (cell, name) => name === "b3-menu" ? menu :
             name === "custom-attr" && cell.dataset.avId ? {} : null,
         getColId: cell => cell.dataset.colId,
@@ -165,7 +165,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         escapeAriaLabel: value => value, escapeHtml: value => value,
         applyAVColorPalette() {}, getAVCustomColors: () => [], getAVColorGridHTML: () => "",
         getAVColorOrder: () => [], AV_MANAGE_CUSTOM_COLORS_TYPE: "manage",
-        mobileConfirmDialog: (_title, _text, callback) => {state.confirm = callback;},
+        confirmDialog: ({confirm}) => {state.confirm = confirm;},
         Menu: class {
             constructor(_id, callback) {
                 this.items = [];
@@ -238,9 +238,9 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
     const unmount = () => cells.forEach(cell => {cell.isConnected = false;});
     const select = () => api.addColOptionOrCell(protyle, state.data, cells,
         element({name: "new", color: "1"}), menu, block);
-    const selectRelation = async () => {
-        const target = element({rowId: "new", relationType: "candidate"}, ["b3-menu__item"]);
-        const label = element({content: "New relation"});
+    const selectRelation = async (id = "new") => {
+        const target = element({rowId: id, relationType: "candidate"}, ["b3-menu__item"]);
+        const label = element({content: id});
         const primary = element();
         target.querySelector = selector => selector === ".b3-menu__label" ? label : primary;
         await api.setRelationCell(protyle, block, target, cells);
@@ -519,7 +519,7 @@ const attributePanelFixture = (type = "mSelect") => {
                 selector.includes(`[data-${name}="${currentCell.getAttribute(`data-${name}`)}"]`)) ? currentCell : null;
     };
     bindCell();
-    f.context.hasClosestBlock = target => currentBlock.contains(target) ? currentBlock : null;
+    f.context.getAVHost = target => currentBlock.contains(target) ? currentBlock : null;
     f.context.updateAttrViewCellInOtherElements = (_protyle, _avID, _rowID, _colID, value, cell) => {
         assert.equal(cell, currentCell);
         cell.dataset.cellValue = encodeURIComponent(JSON.stringify(value));
@@ -688,6 +688,20 @@ test("attribute multi-select does not follow an in-place change to another attri
     f.current().block.dataset.attributeId = "other";
     f.save();
     assert.equal(f.transactions.length, 0);
+});
+
+test("attribute relation writes and undo use the current field across panel replacements", async () => {
+    const f = attributePanelFixture("relation");
+    await f.save("first");
+    f.repaint();
+    await f.save("second");
+    f.repaint();
+    const first = f.menu.querySelectorAll('[data-relation-type="selected"]')[0];
+    await f.api.setRelationCell(f.protyle, f.block, first, f.cells);
+    assert.deepEqual(f.transactions.map(transaction => plain(transaction.operations[0].data.relation.blockIDs)),
+        [["first"], ["first", "second"], ["second"]]);
+    assert.deepEqual(plain(f.transactions[2].undo[0].data.relation.blockIDs), ["first", "second"]);
+    assert.equal(f.cells[0], f.current().cell);
 });
 
 test("attribute multi-select uses refreshed concurrent values for edits and undo", () => {

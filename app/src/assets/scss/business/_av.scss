@@ -988,7 +988,7 @@
   }
 
   &__richtext-mask {
-    background: rgba(0, 0, 0, .08);
+    background-color: transparent;
   }
 
   &__richtext-editor {
@@ -1682,21 +1682,6 @@
       color: var(--b3-protyle-inline-blockref-color);
     }
 
-    .av__cell--relation {
-      display: inline-flex;
-      max-width: 100%;
-      vertical-align: top;
-
-      > .b3-menu__avemoji {
-        flex-shrink: 0;
-        align-self: flex-start;
-      }
-
-      > .av__celltext {
-        min-width: 0;
-      }
-    }
-
     &[data-wrap="true"] {
       white-space: pre-wrap;
 
@@ -1987,6 +1972,12 @@
         max-height: 1.625em;
         white-space: nowrap;
         text-overflow: ellipsis;
+
+        img {
+          max-height: 1.5em;
+          width: auto;
+          vertical-align: middle;
+        }
 
         p,
         h1,
@@ -2667,6 +2658,27 @@ img.av__cellassetimg {
   vertical-align: top;
   font-size: inherit;
   cursor: zoom-in;
+}
+
+.av__cell .av__cell--relation,
+.av__calendar-field .av__cell--relation,
+.custom-attr__avvalue .av__cell--relation {
+  display: inline-flex;
+  max-width: 100%;
+  vertical-align: top;
+
+  > .b3-menu__avemoji {
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+
+  > .av__celltext {
+    min-width: 0;
+  }
+}
+
+.custom-attr__avvalue .av__cell--relation > .av__celltext {
+  overflow-wrap: anywhere;
 }
 
 .av__cell,

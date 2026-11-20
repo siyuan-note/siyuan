@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {fetchSyncPost} from "../../util/fetch";
 import {getAllEditor, getAllModels} from "../../layout/getAll";
 import {setNativeSettingTask} from "./taskBlocker";
@@ -109,9 +109,11 @@ export const confirmResetSettings = () => {
     /// #if !BROWSER
     exit = getHostCapabilities().ownsKernel;
     /// #endif
-    mobileConfirmDialog(window.siyuan.languages.resetSettings,
-        window.siyuan.languages.resetSettingsConfirm + "<br><br>" +
-        window.siyuan.languages[exit ? "resetSettingsExit" : "resetSettingsReload"], async () => {
+    confirmDialog({
+        title: window.siyuan.languages.resetSettings,
+        text: window.siyuan.languages.resetSettingsConfirm + "<br><br>" +
+        window.siyuan.languages[exit ? "resetSettingsExit" : "resetSettingsReload"],
+        confirm: async () => {
             try {
                 const response = await fetchSyncPost("/api/setting/resetSettings", {exit});
                 if (response.code !== 0) return;
@@ -119,5 +121,6 @@ export const confirmResetSettings = () => {
                 console.error(error);
                 showMessage(window.siyuan.languages.settingsPendingSaveError, 6000, "error");
             }
-        });
+        },
+    });
 };

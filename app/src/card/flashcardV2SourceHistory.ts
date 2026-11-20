@@ -211,29 +211,33 @@ ${renderSourceHistoryConfiguration(item.revision.payload.generationConfig, ids, 
             openHistory(window.siyuan.ws.app);
         } else if (target.dataset.action === "restore" && selected && !restore.disabled) {
             const revisionID = selected.revision.revisionID;
-            confirmDialog(lang.flashcardSourceRestore, lang.flashcardSourceRestoreConfirm, async () => {
-                if (!alive() || restoring || selected?.revision.revisionID !== revisionID || restore.disabled) {
-                    return;
-                }
-                restoring = true;
-                clearRetry();
-                refreshControls();
-                if (!restoreRequests.has(revisionID)) {
-                    restoreRequests.set(revisionID, {
-                        operationID: genUUID(), sourceID, revisionID,
-                        expectedRevisionID: current.revision.revisionID, updatedAt: Date.now(),
-                    });
-                }
-                const result = await requestData<ISourceRevision>("/api/flashcard/restoreSourceHistory", restoreRequests.get(revisionID));
-                restoring = false;
-                if (result) {
-                    if (alive()) {
-                        dialog.destroy();
+            confirmDialog({
+                title: lang.flashcardSourceRestore,
+                text: lang.flashcardSourceRestoreConfirm,
+                confirm: async () => {
+                    if (!alive() || restoring || selected?.revision.revisionID !== revisionID || restore.disabled) {
+                        return;
                     }
-                    changed();
-                } else if (alive()) {
+                    restoring = true;
+                    clearRetry();
                     refreshControls();
-                }
+                    if (!restoreRequests.has(revisionID)) {
+                        restoreRequests.set(revisionID, {
+                            operationID: genUUID(), sourceID, revisionID,
+                            expectedRevisionID: current.revision.revisionID, updatedAt: Date.now(),
+                        });
+                    }
+                    const result = await requestData<ISourceRevision>("/api/flashcard/restoreSourceHistory", restoreRequests.get(revisionID));
+                    restoring = false;
+                    if (result) {
+                        if (alive()) {
+                            dialog.destroy();
+                        }
+                        changed();
+                    } else if (alive()) {
+                        refreshControls();
+                    }
+                },
             });
         }
     });

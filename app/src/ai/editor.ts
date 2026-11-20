@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchAIEditorSSE, IAIEditorMessage, TAIEditorSSEEvent} from "./editorSSE";
 import {genUUID} from "../util/genID";
 import {
@@ -731,7 +731,7 @@ const beginTask = (protyle: IProtyle, source: IAIEditorSource) => {
         start();
         return;
     }
-    mobileConfirmDialog(window.siyuan.languages.aiEdit, window.siyuan.languages.aiReplaceCurrentTask, start);
+    confirmDialog({title: window.siyuan.languages.aiEdit, text: window.siyuan.languages.aiReplaceCurrentTask, confirm: start});
 };
 
 export const startAIEditorAction = (protyle: IProtyle, elements: HTMLElement[], range: Range | undefined,

@@ -145,7 +145,7 @@ test("management reuses its dialog and keeps grouped actions behind the explicit
     assert.doesNotMatch(management, /<select data-type="batchAction"/);
     assert.match(management, /label: lang\.flashcardReviewState, submenu:/);
     assert.match(management, /label: lang\.flashcardPreset, submenu:/);
-    assert.match(management, /if \(action === "reset"\) \{\s*confirmDialog\(window\.siyuan\.languages\.reset,/);
+    assert.match(management, /if \(action === "reset"\) \{\s*confirmDialog\(\{\s*title: window\.siyuan\.languages\.reset,/);
 });
 
 test("batch reset waits for confirmation and only submits cards selected on the current page", () => {
@@ -166,9 +166,9 @@ test("batch reset waits for confirmation and only submits cards selected on the 
         cards: [{card: {id: "selected"}}, {card: {id: "not-selected"}}],
         window: {siyuan: {languages: {reset: "Reset", resetCardTip: "Reset ${x}"}}},
         genUUID: () => "operation", reloadPage: (): void => {},
-        confirmDialog: (_title: string, message: string, callback: () => void) => {
-            assert.equal(message, "Reset 1");
-            confirm = callback;
+        confirmDialog: (options: {text: string, confirm: () => void}) => {
+            assert.equal(options.text, "Reset 1");
+            confirm = options.confirm;
         },
         withFetchTimeout: (request: () => Promise<unknown>) => request(),
         fetchSyncPost: async (_url: string, payload: unknown) => { requests.push(payload); return {code: 0}; },

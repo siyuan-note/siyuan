@@ -1,8 +1,8 @@
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
-import {MobileDialog} from "../dialog/mobileDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {showMessage} from "../dialog/message";
 import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "../history/notebookDialogs";
-import {escapeHtml} from "../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../util/escape";
 import {fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {getNotebookName} from "../util/pathName";
@@ -21,7 +21,7 @@ export const openEncryptedAssetsCleanup = (notebook: string) => {
     let busy = false;
     let disposed = false;
     let items: AssetUnusedItem[] = [];
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: `${escapeHtml(getNotebookName(notebook))} - ${lang.cleanUnusedAssets}`,
         width: isMobile() ? "92vw" : "720px",
         height: "72vh",
@@ -87,7 +87,7 @@ export const openEncryptedAssetsCleanup = (notebook: string) => {
             }
             items = response.data;
             list.innerHTML = items.length ? items.map((item, index) => `<div class="b3-list-item" data-index="${index}">
-    <input class="b3-switch" type="checkbox" aria-label="${escapeHtml(item.name)}"><span class="fn__space"></span>
+    <input class="b3-switch" type="checkbox" aria-label="${escapeHtmlTextAndAttr(item.name)}"><span class="fn__space"></span>
     <button class="b3-button b3-button--text fn__flex-1" data-type="preview-item">${escapeHtml(item.name)}</button>
 </div>`).join("") : `<div class="b3-list--empty">${lang.emptyContent}</div>`;
         } catch (error) {
@@ -126,23 +126,27 @@ export const openEncryptedAssetsCleanup = (notebook: string) => {
         if (!paths.length) {
             return;
         }
-        mobileConfirmDialog(lang.deleteOpConfirm, `${escapeHtml(getNotebookName(notebook))} - ${lang.clearAll}`, () => {
-            if (!active() || busy) {
-                return;
-            }
-            busy = true;
-            update();
-            void runSettingsMaintenance(async () => {
-                const response = await fetchSyncPost("/api/asset/removeUnusedEncryptedBoxAssets", {notebook, paths});
-                if (response.code === 0 && active()) {
-                    showMessage(lang.deleted);
+        confirmDialog({
+            title: lang.deleteOpConfirm,
+            text: `${escapeHtml(getNotebookName(notebook))} - ${lang.clearAll}`,
+            confirm: () => {
+                if (!active() || busy) {
+                    return;
                 }
-            }).finally(async () => {
-                busy = false;
-                if (active()) {
-                    await scan();
-                }
-            });
+                busy = true;
+                update();
+                void runSettingsMaintenance(async () => {
+                    const response = await fetchSyncPost("/api/asset/removeUnusedEncryptedBoxAssets", {notebook, paths});
+                    if (response.code === 0 && active()) {
+                        showMessage(lang.deleted);
+                    }
+                }).finally(async () => {
+                    busy = false;
+                    if (active()) {
+                        await scan();
+                    }
+                });
+            },
         });
     });
     void runSettingsMaintenance(scan);

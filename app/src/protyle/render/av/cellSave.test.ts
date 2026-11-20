@@ -205,7 +205,7 @@ test("location editor saves await cell persistence and preserve the original tar
     }}).outputText, {exports,
         document: {querySelector: (): null => null}, getComputedStyle: () => ({}),
         window: {siyuan: {config: {}, menus: {menu: {remove() {}}}}},
-        hasClosestBlock: () => block, hasClosestByClassName: () => ({}),
+        getAVHost: () => block, hasClosestByClassName: () => ({}),
         getAVHostIdentity,
         isTableLikeView: () => true, cellScrollIntoView() {},
         getStoredCellValueByElement: () => previous,

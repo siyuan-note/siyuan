@@ -100,49 +100,53 @@ ${source.reason === "missing" ? `<input type="checkbox" data-id="${escapeAttr(so
     scanButton.addEventListener("click", () => { void scan(); });
     remove.addEventListener("click", () => {
         const selection = selected();
-        confirmDialog(lang.deleteOpConfirm, `${lang.flashcardCleanupTip}<br>${escapeHtml(dialog.element.querySelector("[data-summary]").textContent)}`, async () => {
-            if (closed || busy) { return; }
-            busy = true;
-            let succeeded = false;
-            result.textContent = "";
-            refresh();
-            const identity = selection.map(({sourceID, revisionID, blockIDs, cardCount, reason}) =>
-                ({sourceID, revisionID, blockIDs, cardCount, reason}))
-                .sort((a, b) => a.sourceID.localeCompare(b.sourceID));
-            try {
-                await fetchPost("/api/flashcard/deleteInvalidSources", {
-                    operationID: operationFor(identity).operationID,
-                    sources: selection,
-                }, (response) => {
-                    succeeded = true;
-                    const deleted = new Set<string>(response.data.deleted);
-                    if (deleted.size > 0) {
+        confirmDialog({
+            title: lang.deleteOpConfirm,
+            text: `${lang.flashcardCleanupTip}<br>${escapeHtml(dialog.element.querySelector("[data-summary]").textContent)}`,
+            confirm: async () => {
+                if (closed || busy) { return; }
+                busy = true;
+                let succeeded = false;
+                result.textContent = "";
+                refresh();
+                const identity = selection.map(({sourceID, revisionID, blockIDs, cardCount, reason}) =>
+                    ({sourceID, revisionID, blockIDs, cardCount, reason}))
+                    .sort((a, b) => a.sourceID.localeCompare(b.sourceID));
+                try {
+                    await fetchPost("/api/flashcard/deleteInvalidSources", {
+                        operationID: operationFor(identity).operationID,
+                        sources: selection,
+                    }, (response) => {
+                        succeeded = true;
+                        const deleted = new Set<string>(response.data.deleted);
+                        if (deleted.size > 0) {
+                            changed = true;
+                            if (closed) { notifyChanged(); }
+                        }
+                        if (closed) { return; }
+                        sources = sources.filter((source) => !deleted.has(source.sourceID));
+                        list.querySelectorAll<HTMLInputElement>("input").forEach((input) => {
+                            if (deleted.has(input.dataset.id)) { input.closest("li").remove(); }
+                            input.checked = false;
+                        });
+                        result.textContent = lang.flashcardCleanupResult.replace("${deleted}", deleted.size.toString())
+                            .replace("${skipped}", response.data.skipped.length.toString());
+                    }, undefined, undefined, undefined, 30000);
+                } catch (error) {
+                    console.warn(error);
+                } finally {
+                    busy = false;
+                    if (!succeeded) {
+                        // 超时不代表服务端未删除，关闭后重新读取实际状态。
                         changed = true;
                         if (closed) { notifyChanged(); }
                     }
-                    if (closed) { return; }
-                    sources = sources.filter((source) => !deleted.has(source.sourceID));
-                    list.querySelectorAll<HTMLInputElement>("input").forEach((input) => {
-                        if (deleted.has(input.dataset.id)) { input.closest("li").remove(); }
-                        input.checked = false;
-                    });
-                    result.textContent = lang.flashcardCleanupResult.replace("${deleted}", deleted.size.toString())
-                        .replace("${skipped}", response.data.skipped.length.toString());
-                }, undefined, undefined, undefined, 30000);
-            } catch (error) {
-                console.warn(error);
-            } finally {
-                busy = false;
-                if (!succeeded) {
-                    // 超时不代表服务端未删除，关闭后重新读取实际状态。
-                    changed = true;
-                    if (closed) { notifyChanged(); }
+                    if (!closed) {
+                        if (!succeeded) { result.textContent = `${lang.flashcardCleanupUnknown} · ${lang.refresh}`; }
+                        refresh();
+                    }
                 }
-                if (!closed) {
-                    if (!succeeded) { result.textContent = `${lang.flashcardCleanupUnknown} · ${lang.refresh}`; }
-                    refresh();
-                }
-            }
+            },
         });
     });
     void scan();

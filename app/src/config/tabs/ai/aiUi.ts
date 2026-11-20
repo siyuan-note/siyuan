@@ -1,5 +1,5 @@
-import {MobileDialog} from "../../../dialog/mobileDialog";
-import {mobileConfirmDialog} from "../../../dialog/mobileConfirmDialog";
+import {AdaptiveDialog} from "../../../dialog/adaptiveDialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import {Constants} from "../../../constants";
 import {isMobile} from "../../../util/functions";
@@ -321,19 +321,15 @@ export const getModelPickerKeywords = (group: ModelPickerGroup): string[] => {
 };
 
 const showDeleteConfirm = (title: string, onConfirm: () => Promise<unknown>) => {
-    mobileConfirmDialog(
-        window.siyuan.languages.deleteOpConfirm,
-        window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
-        async () => {
+    confirmDialog({
+        title: window.siyuan.languages.deleteOpConfirm,
+        text: window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtmlTextAndAttr(title)),
+        confirm: async () => {
             await onConfirm();
             return true;
         },
-        undefined,
-        true,
-        undefined,
-        undefined,
-        {awaitConfirm: true},
-    );
+        isDelete: true,
+    });
 };
 
 export const getMcpServersBlockKeywords = (): string[] => [
@@ -552,14 +548,17 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
         if (type === "disconnectAiMcpOAuth") {
             const serverID = getMcpServerID(actionEl);
             if (serverID) {
-                mobileConfirmDialog(window.siyuan.languages.mcpDisconnectAuthorization,
-                    window.siyuan.languages.mcpDisconnectAuthorizationConfirm, () => {
+                confirmDialog({
+                    title: window.siyuan.languages.mcpDisconnectAuthorization,
+                    text: window.siyuan.languages.mcpDisconnectAuthorizationConfirm,
+                    confirm: () => {
                         fetchPost("/api/ai/mcpOAuthDisconnect", {id: serverID}, (response) => {
                             if (response.code !== 0) {
                                 showMessage(response.msg);
                             }
                         });
-                    });
+                    },
+                });
             }
             event.preventDefault();
             event.stopPropagation();
@@ -753,7 +752,7 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         ? ""
         : JSON.stringify(initialServer.headers, null, 2);
 
-    const dialog = new MobileDialog({
+    const dialog = new AdaptiveDialog({
         title: isNew ? window.siyuan.languages.addAiMcpServer : window.siyuan.languages.aiMcpServerSettings,
         width: isMobile() ? "92vw" : "520px",
         height: "80vh",

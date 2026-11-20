@@ -1,4 +1,4 @@
-import {mobileConfirmDialog} from "../../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {fetchPost} from "../../util/fetch";
 import {registerBuiltinSlashHint} from "./builtinSlash";
 import {canPickIOSPhotos} from "../upload/iosPhotos";
@@ -925,12 +925,17 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
         const docTreePlan = response.data.docTreePlan;
         if (docTreePlan?.id) {
             hideElements(["util"], protyle);
-            mobileConfirmDialog(window.siyuan.languages.template, genTemplateDocTreePlanHTML(docTreePlan, window.siyuan.languages.newSubDoc), () => {
-                insertTemplate(docTreePlan.id);
-            }, () => {
-                if (isCurrent()) {
-                    focusByRange(range);
-                }
+            confirmDialog({
+                title: window.siyuan.languages.template,
+                text: genTemplateDocTreePlanHTML(docTreePlan, window.siyuan.languages.newSubDoc),
+                confirm: () => {
+                    insertTemplate(docTreePlan.id);
+                },
+                cancel: () => {
+                    if (isCurrent()) {
+                        focusByRange(range);
+                    }
+                },
             });
         } else {
             insertTemplate();

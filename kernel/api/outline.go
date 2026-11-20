@@ -40,7 +40,8 @@ var getDocOutline = contractHandler(apicontract.GetDocOutline, func(c *gin.Conte
 	if err != nil {
 		return apicontract.Failure[[]*apicontract.SearchPath](1, err.Error())
 	}
-	if model.IsReadOnlyRoleContext(c) {
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	if isReadOnlyRole {
 		publishAccess := model.GetPublishAccess()
 		bt := treenode.GetBlockTree(rootID)
 		if bt != nil {
@@ -54,7 +55,13 @@ var getDocOutline = contractHandler(apicontract.GetDocOutline, func(c *gin.Conte
 			}
 		}
 	}
-	return apicontract.Success(searchPathContracts(headings))
+	var paths []*apicontract.SearchPath
+	if isReadOnlyRole {
+		paths = searchReaderPathContracts(headings)
+	} else {
+		paths = searchPathContracts(headings)
+	}
+	return apicontract.Success(paths)
 })
 
 var getDocHeadingNumbers = contractHandler(apicontract.GetDocHeadingNumbers, func(c *gin.Context, request apicontract.HeadingNumbersRequest) apicontract.Response[map[string]string] {

@@ -1,6 +1,6 @@
 import {importConfiguration} from "../config/util/resourceConfig";
-import {mobileInputDialog as openInputDialog} from "../dialog/mobileInputDialog";
-import {MobileDialog as Dialog} from "../dialog/mobileDialog";
+import {openInputDialog} from "../dialog/inputDialog";
+import {AdaptiveDialog as Dialog} from "../dialog/adaptiveDialog";
 import {Constants} from "../constants";
 import {escapeHtml} from "../util/escape";
 import {fetchPost, fetchSyncPost} from "../util/fetch";

@@ -47737,6 +47737,30 @@
       },
       "additionalProperties": false
     },
+    "ReorderTagRequestInput": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string",
+          "enum": [
+            "before",
+            "after"
+          ]
+        },
+        "target": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "position",
+        "target"
+      ],
+      "additionalProperties": false
+    },
     "RepoCloudSnapshotsData": {
       "type": "object",
       "properties": {
@@ -52178,6 +52202,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hideBreadcrumbIcons": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -56679,6 +56713,9 @@
         "headingNumberFormat": {
           "type": "string"
         },
+        "hideBreadcrumbIcons": {
+          "type": "boolean"
+        },
         "historyRetentionDays": {
           "type": "integer"
         },
@@ -56818,6 +56855,7 @@
         "headingEmbedMode",
         "headingNumber",
         "headingNumberFormat",
+        "hideBreadcrumbIcons",
         "historyRetentionDays",
         "justify",
         "katexMacros",
@@ -57476,6 +57514,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hideBreadcrumbIcons": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"
@@ -200942,6 +200990,86 @@
       "body": "json",
       "request": {
         "$ref": "#/$defs/RenameTagRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/tag/reorderTag",
+      "handler": "reorderTag",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/ReorderTagRequestInput"
       },
       "response": {
         "anyOf": [

@@ -56,7 +56,7 @@ const setup = async (previewData: unknown = {noteTypes: [], decks: [], unsupport
                 this.element.isConnected = false;
             }
         },
-        confirmDialog: (_title: string, _content: string, yes: () => void, no: () => void) => confirmations.push({yes, no}),
+        confirmDialog: ({confirm, cancel}: {confirm: () => void, cancel: () => void}) => confirmations.push({yes: confirm, no: cancel}),
         isMobile: () => false, statisticsItem: () => "", escapeHtml,
         escapeAttr, showMessage: (message: string) => messages.push(message),
         fetchPost: (url: string, data: Record<string, unknown>, success: (response: unknown) => void,

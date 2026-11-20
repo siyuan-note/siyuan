@@ -1045,7 +1045,8 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 	if err = av.ValidateLayouts(); nil != err {
 		return
 	}
-	if err = av.NormalizeRichText(); nil != err {
+	var richTextSpec int
+	if err = av.normalizeRichText(&richTextSpec); nil != err {
 		logging.LogErrorf("normalize attribute view [%s] rich text failed: %s", av.ID, err)
 		return
 	}
@@ -1055,6 +1056,7 @@ func saveAttributeView(av *AttributeView, original []byte) (err error) {
 		return
 	}
 	UpgradeSpec(av)
+	av.Spec = max(av.Spec, richTextSpec)
 
 	// 值去重
 	blockValues := av.GetBlockKeyValues()

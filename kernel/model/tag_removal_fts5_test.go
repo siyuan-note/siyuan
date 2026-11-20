@@ -55,14 +55,20 @@ func TestTagRemovalBatchFinalStateAndUndo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	count := 0
+	tagWrites := 0
 	for _, op := range tx.DoOperations {
 		if op.ID == fixture.sourceID && op.Action == "setAttrs" {
-			count++
+			var attrs map[string]string
+			if err = json.Unmarshal([]byte(op.Data.(string)), &attrs); err != nil {
+				t.Fatal(err)
+			}
+			if _, ok := attrs["tags"]; ok {
+				tagWrites++
+			}
 		}
 	}
-	if count != 1 {
-		t.Fatalf("document final attribute operations = %d", count)
+	if tagWrites != 1 {
+		t.Fatalf("document tag update operations = %d", tagWrites)
 	}
 	tree, err := LoadTreeByBlockID(fixture.sourceID)
 	if err != nil || tree.Root.IALAttr("tags") != "todo/child,xtodo" {

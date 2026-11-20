@@ -210,8 +210,8 @@ for (const field of ["statusBar", "notifications"] as const) {
         runInNewContext(transpileModule(source, {compilerOptions: {module: ModuleKind.CommonJS}}).outputText, {
             exports, CSS: {escape: (value: string) => value},
             window: {siyuan: {config: {appearance: config}, languages: new Proxy({}, {get: () => ({})})}},
-            require: (name: string) => name === "../../dialog/mobileDialog" ? {
-                MobileDialog: class {
+            require: (name: string) => name === "../../dialog/adaptiveDialog" ? {
+                AdaptiveDialog: class {
                     element = {querySelector: (selector: string) => inputs.get(selector.slice(1))};
                     constructor(value: typeof options) { options = value; }
                 },

@@ -422,6 +422,7 @@ func settingEditorPayload(value *conf.Editor) *apicontract.SettingEditor {
 	result.ReadOnly = value.ReadOnly
 	result.EmbedBlockBreadcrumb = value.EmbedBlockBreadcrumb
 	result.GlobalBreadcrumb = value.GlobalBreadcrumb
+	result.HideBreadcrumbIcons = value.HideBreadcrumbIcons
 	result.EmbedBlockBreadcrumbParentPath = value.EmbedBlockBreadcrumbParentPath
 	result.ListLogicalOutdent = value.ListLogicalOutdent
 	result.ListItemDotNumberClickFocus = value.ListItemDotNumberClickFocus

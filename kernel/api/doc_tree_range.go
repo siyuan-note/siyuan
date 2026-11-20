@@ -46,6 +46,7 @@ var listDocTreeRange = contractHandler(apicontract.ListDocTreeRange, func(c *gin
 	if err != nil {
 		return apicontract.Failure[apicontract.FileTreeRangeData](-1, err.Error())
 	}
+	clearFileTreePublishPasswordMetadata(c, rangeData.Box, rangeData.Files)
 	return apicontract.Success(apicontract.FileTreeRangeData{Box: rangeData.Box, ParentID: rangeData.ParentID,
 		Path: rangeData.Path, Files: fileTreeFileContracts(rangeData.Files), Total: rangeData.Total, Offset: rangeData.Offset,
 		Limit: rangeData.Limit, EffectiveSortMode: rangeData.SortMode, Revision: rangeData.Revision, Stale: rangeData.Stale})

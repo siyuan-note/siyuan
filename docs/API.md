@@ -1550,6 +1550,8 @@ Block insert, prepend, append and update operations validate block IDs throughou
   }
   ```
 
+When present, `data["custom-sy-tag-created"]` is a JSON string mapping complete tag names to Unix milliseconds. Each value records when the tag was added to this block. Missing entries have an unknown addition time.
+
 ## SQL
 
 ### Execute SQL query
@@ -1757,6 +1759,8 @@ Without a live interactive window, `httpGet` returns `interaction_required` and 
 ### Put file
 
 * `/api/file/putFile`
+
+When sync retries local snapshot indexing after detecting a file change, writes to files included in sync may wait after the form has been received. Canceling a request while it waits leaves its destination untouched.
 
 For `.sy` document paths composed of notebook and document IDs, both the incoming content and any existing document are checked. Unknown formats, invalid document sources, or slash-containing titles without the required Spec 6 declaration return `code: -1`, preserving the original file and modification time. Successful writes retain the request bytes without normalizing titles. Files ending in `.sy` inside asset or plugin directories are not parsed as documents.
 
@@ -2669,7 +2673,7 @@ Updates a single cell (one field of one row). This is the primary write endpoint
 
 For `mAsset`, each item uses `type: "image"` to render an image or `type: "file"` to render a file link. Updating the value replaces the entire `mAsset` array, so append operations must include the existing items.
 
-For rich text, `text.rich.content` is the authoritative Kramdown source. The kernel validates its supported structure and derives `text.content` as the plain-text projection; a caller-provided plain-text projection is ignored. For compatibility with existing API clients, omitting `text.rich` preserves the stored rich-text payload when `text.content` is unchanged, but replaces it with plain text when `text.content` changes. Send `"rich": null` to explicitly remove rich formatting even when the plain-text projection is unchanged. Attribute views containing rich text use storage spec 9 and cannot be opened by kernels that only support earlier attribute-view specs.
+For rich text, `text.rich.content` is the authoritative Kramdown source. The kernel validates its supported structure and derives `text.content` as the plain-text projection; a caller-provided plain-text projection is ignored. For compatibility with existing API clients, omitting `text.rich` preserves the stored rich-text payload when `text.content` is unchanged, but replaces it with plain text when `text.content` changes. Send `"rich": null` to explicitly remove rich formatting even when the plain-text projection is unchanged. Rich text fields require storage spec 9 or later. Saving an inline image such as `![Photo](assets/photo.png)` in a text field requires spec 17. Older kernels cannot open a database whose storage spec they do not support.
 
 For `location`, `name` is optional. `latitude` and `longitude` must both be absent/null or both be finite numbers in [-90, 90] and [-180, 180], respectively; zero is valid. All coordinates implicitly use WGS84 and are stored without conversion. Explicit coordinate-system properties on location values are rejected; field-level coordinate-system settings are not provided. `originalInput` retains source text and is excluded from filtering and sorting. Omitted update members preserve existing values; to clear a location send `{"location":null}`, or explicitly clear the name and set both coordinates to null. When coordinates change, omitted `originalInput` is cleared automatically; an explicitly supplied source is retained. Text filters use `{"type":"location","text":{"content":"query"}}` and match the name and coordinates. Location fields use attribute-view storage spec 13; older kernels cannot open them. Unrelated databases retain their existing storage spec.
 

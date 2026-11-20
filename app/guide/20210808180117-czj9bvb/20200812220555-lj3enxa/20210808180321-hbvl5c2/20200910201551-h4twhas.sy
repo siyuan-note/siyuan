@@ -224,6 +224,70 @@
 			]
 		},
 		{
+			"ID": "20261118205131-bd54f93",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118205131-bd54f93",
+				"updated": "20261118205131"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在标签面板中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自定义排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可直接拖动标签行调整同级顺序。移动端请长按标签行后拖动。自定义顺序随工作空间数据保存。筛选标签时，请先清除筛选条件再排序。"
+				}
+			]
+		},
+		{
+			"ID": "20261118220329-7cb10bd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118220329-7cb10bd",
+				"updated": "20261118220329"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在标签面板中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "最近添加"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可按标签最近一次添加到文档或内容块的时间排列同级标签。添加时间未知的标签排在末尾。"
+				}
+			]
+		},
+		{
 			"ID": "20261116215152-8d44f6e",
 			"Type": "NodeParagraph",
 			"Properties": {

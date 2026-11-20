@@ -30,7 +30,7 @@ const setup = () => {
     }
     const exports: any = {};
     runInNewContext(source, {exports,
-        require: () => ({MobileDialog: MockDialog, escapeAttr: (value: string) => value}),
+        require: () => ({AdaptiveDialog: MockDialog, escapeAttr: (value: string) => value}),
         document: {body: {}}, window: {siyuan: {languages: {cancel: "Cancel", confirm: "Confirm"}}},
         MutationObserver: class {constructor(callback: () => void) { observe = callback; } observe() {} disconnect() {}},
     });

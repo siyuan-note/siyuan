@@ -31,7 +31,7 @@ type Asset struct {
 	Hash    string
 }
 
-func docTagSpans(n *ast.Node) (ret []*Span) {
+func docTagSpans(n *ast.Node, boxID, path string) (ret []*Span) {
 	if tagsVal := n.IALAttr("tags"); "" != tagsVal {
 		tags := strings.SplitSeq(tagsVal, ",")
 		for tag := range tags {
@@ -41,8 +41,8 @@ func docTagSpans(n *ast.Node) (ret []*Span) {
 				ID:       ast.NewNodeID(),
 				BlockID:  n.ID,
 				RootID:   n.ID,
-				Box:      n.Box,
-				Path:     n.Path,
+				Box:      boxID,
+				Path:     path,
 				Content:  tag,
 				Markdown: markdown,
 				Type:     "tag",

@@ -538,6 +538,20 @@
 			]
 		},
 		{
+			"ID": "20261119012733-83ff6f1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261119012733-83ff6f1",
+				"updated": "20261119012733"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On Windows, macOS, and Linux, when tabs are merged into the top bar, drag the gap between the tab switcher and the top bar buttons on its right to move the window."
+				}
+			]
+		},
+		{
 			"ID": "20260613204526-buhhsds",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,

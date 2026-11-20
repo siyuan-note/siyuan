@@ -23,7 +23,7 @@ const createExport = (copyOnly = false, failRendering = false) => {
         (loading ? {remove: () => { loading = false; }} : null) : control(selector)};
     const deps = new Proxy({
         getHostCapabilities: () => ({documentImportExport: true}), Constants: {LOCAL_EXPORTIMG: "image"},
-        MobileDialog: class {element = element; destroy() { connected = false; }},
+        AdaptiveDialog: class {element = element; destroy() { connected = false; }},
         fetchPost: (url, data, callback) => {
             let resolve;
             const promise = new Promise(done => { resolve = done; });

@@ -14,9 +14,14 @@ const getFunctionKey = () => {
     return fData;
 };
 
+export const TAG_SORT_MANUAL = 6;
+export const TAG_SORT_CREATED_DESC = 16;
+
 export abstract class Constants {
     public static readonly TABLE_CORNERS = "data-table-corners";
     public static readonly TABLE_CELL_CORNER = "data-table-cell-corner";
+    public static readonly TABLE_PINNED_COLUMN_CELL = "data-table-pinned-column-cell";
+    public static readonly TABLE_PINNED_COLUMN_ACTIVE = "data-table-pinned-column-active";
     public static readonly SIYUAN_VERSION: string = _SIYUAN_VERSION;
     public static readonly NODE_ENV: string = _NODE_ENV;
     public static readonly SIYUAN_APPID: string = Math.random().toString(36).substring(8);
@@ -102,6 +107,7 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_TABLE_RICH: string = "custom-sy-table-rich";
     public static readonly CUSTOM_SY_TABLE_HEADER_ROW: string = "custom-sy-table-header-row";
     public static readonly CUSTOM_SY_TABLE_HEADER_COLUMN: string = "custom-sy-table-header-column";
+    public static readonly CUSTOM_SY_TABLE_PIN_COLUMN: string = "custom-sy-table-pin-column";
     public static readonly CUSTOM_SY_AV_STATIC_TEXT: string = "custom-sy-av-s-text-";
     public static readonly CUSTOM_SY_LIVE_PHOTO: string = "custom-sy-live-photo";
     public static readonly CUSTOM_SY_LIVE_PHOTO_VIDEO: string = "custom-sy-live-photo-video";
@@ -299,7 +305,7 @@ export abstract class Constants {
     public static readonly DIALOG_SAVEWORKSPACE = "dialog-saveworkspace"; // 保存工作空间
 
     // menu
-    public static readonly MENU_BAR_WORKSPACE = "barWorkspace"; // 顶栏主菜单
+    public static readonly MENU_BAR_MAIN_MENU = "barMainMenu"; // 顶栏主菜单
     public static readonly MENU_BAR_PLUGIN = "topBarPlugin"; // 顶栏插件菜单
     public static readonly MENU_BAR_ZOOM = "barZoom"; // 顶栏缩放菜单
     public static readonly MENU_BAR_MODE = "barmode"; // 顶栏外观菜单

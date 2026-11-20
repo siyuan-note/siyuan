@@ -13,6 +13,7 @@ import {unmountWorkspaceStorage} from "../../config/tabs/workspaceStorage";
 import {watchSettingTabInteractions} from "../../config/setting/mount";
 import {isInIOS} from "../../protyle/util/compatibility";
 import {getVisibleViewportBounds, scrollInputIntoView} from "../util/visibleViewport";
+import {Constants} from "../../constants";
 
 /** 卸载设置页中持有全局状态的模块，避免容器被替换后残留副作用 */
 export const unmountSettingTab = (root: HTMLElement, tabId: TSettingTab) => {
@@ -35,19 +36,25 @@ export const unmountSettingTab = (root: HTMLElement, tabId: TSettingTab) => {
 export const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>,
                                returnCallback?: () => void) => {
     let root: HTMLElement | undefined;
+    let keyboardLayoutTimer: number;
     const viewport = isInIOS() ? window.visualViewport : undefined;
     const resizeForKeyboard = () => {
         if (!root?.isConnected) {
             return;
         }
         const {top, bottom} = getVisibleViewportBounds();
-        if (bottom === window.innerHeight && top === 0) {
-            root.style.maxHeight = "";
-            return;
-        }
-        root.style.maxHeight = `${Math.max(0, bottom - Math.max(top, root.getBoundingClientRect().top))}px`;
+        root.style.maxHeight = bottom === window.innerHeight && top === 0 ? "" :
+            `${Math.max(0, bottom - Math.max(top, root.getBoundingClientRect().top))}px`;
         if (root.contains(document.activeElement)) {
             scrollInputIntoView(document.activeElement);
+        }
+    };
+    const updateForKeyboard = () => {
+        resizeForKeyboard();
+        window.clearTimeout(keyboardLayoutTimer);
+        // WebKit 可能在变更视口后再次调整滚动位置。
+        if (root?.contains(document.activeElement)) {
+            keyboardLayoutTimer = window.setTimeout(resizeForKeyboard, Constants.TIMEOUT_TRANSITION);
         }
     };
     openModel({
@@ -58,9 +65,10 @@ export const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettin
         bindEvent(modelMainElement: HTMLElement) {
             root = modelMainElement.firstElementChild as HTMLElement;
             if (viewport) {
-                viewport.addEventListener("resize", resizeForKeyboard);
-                viewport.addEventListener("scroll", resizeForKeyboard);
-                root.addEventListener("focusin", resizeForKeyboard);
+                window.addEventListener("resize", updateForKeyboard);
+                viewport.addEventListener("resize", updateForKeyboard);
+                viewport.addEventListener("scroll", updateForKeyboard);
+                root.addEventListener("focusin", updateForKeyboard);
                 resizeForKeyboard();
             }
             watchSettingTabInteractions();
@@ -75,10 +83,14 @@ export const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettin
             });
         },
         destroyCallback() {
-            viewport?.removeEventListener("resize", resizeForKeyboard);
-            viewport?.removeEventListener("scroll", resizeForKeyboard);
+            if (viewport) {
+                window.clearTimeout(keyboardLayoutTimer);
+                window.removeEventListener("resize", updateForKeyboard);
+                viewport.removeEventListener("resize", updateForKeyboard);
+                viewport.removeEventListener("scroll", updateForKeyboard);
+            }
             if (root) {
-                if (viewport) root.removeEventListener("focusin", resizeForKeyboard);
+                if (viewport) root.removeEventListener("focusin", updateForKeyboard);
                 unmountSettingTab(root, settingTabDef.id);
                 root.remove();
             }

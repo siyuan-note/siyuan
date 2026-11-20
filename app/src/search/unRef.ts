@@ -132,7 +132,7 @@ ${getAttr(item)}
             element.querySelector(".search__drag")?.classList.add("fn__none");
         }
         element.querySelector("#searchUnRefResult").innerHTML = `${page}/${response.data.pageCount || 1}<span class="fn__space"></span>
-<span class="ft__on-surface">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>`;
+<span class="ft__on-surface">${window.siyuan.languages.findInDoc.replace("${x}", String(response.data.matchedRootCount)).replace("${y}", String(response.data.matchedBlockCount))}</span>`;
         element.querySelector("#searchUnRefList").innerHTML = resultHTML || `<div class="search__empty">
     ${window.siyuan.languages.emptyContent}
 </div>`;

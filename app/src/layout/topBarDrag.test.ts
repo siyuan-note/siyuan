@@ -213,14 +213,14 @@ class TestDocument extends TestEventTarget {
 const createToolbar = () => {
     const documentSelf = new TestDocument();
     const toolbar = new TestElement(documentSelf, "toolbar");
-    const workspace = new TestElement(documentSelf, "barWorkspace", undefined, {left: 0, top: 0, width: 20, height: 24});
+    const mainMenu = new TestElement(documentSelf, "barMainMenu", undefined, {left: 0, top: 0, width: 20, height: 24});
     const left = new TestElement(documentSelf, "barBack", "back", {left: 20, top: 0, width: 24, height: 24});
     const drag = new TestElement(documentSelf, "drag", undefined, {left: 44, top: 0, width: 100, height: 24});
     const right = new TestElement(documentSelf, "barSearch", "search", {left: 144, top: 0, width: 24, height: 24});
     const more = new TestElement(documentSelf, "barMore", undefined, {left: 168, top: 0, width: 24, height: 24});
     const controls = new TestElement(documentSelf, "windowControls", undefined, {left: 192, top: 0, width: 80, height: 24});
-    [workspace, left, drag, right, more, controls].forEach((item) => toolbar.appendChild(item));
-    return {controls, documentSelf, drag, left, more, right, toolbar, workspace};
+    [mainMenu, left, drag, right, more, controls].forEach((item) => toolbar.appendChild(item));
+    return {controls, documentSelf, drag, left, more, right, toolbar, mainMenu};
 };
 
 const getPlaceholder = (toolbar: TestElement) => toolbar.children.find((item) =>
@@ -230,7 +230,7 @@ describe("top bar drag", () => {
     it("reads only direct configurable entries and the fixed drag key", () => {
         const toolbar = {
             children: [
-                createOrderElement("barWorkspace"),
+                createOrderElement("barMainMenu"),
                 createOrderElement("barBack", "back"),
                 createOrderElement("drag"),
                 createOrderElement("barSearch", "search"),
@@ -245,7 +245,7 @@ describe("top bar drag", () => {
     it("keeps fixed edge targets on their respective side", () => {
         const rect = {left: 100, width: 40} as DOMRect;
 
-        assert.equal(topBarDrag.resolveTopBarDropSide("barWorkspace", 1000, rect), "after");
+        assert.equal(topBarDrag.resolveTopBarDropSide("barMainMenu", 1000, rect), "after");
         assert.equal(topBarDrag.resolveTopBarDropSide("barMore", 0, rect), "before");
         assert.equal(topBarDrag.resolveTopBarDropSide("windowControls", 110, rect), undefined);
     });

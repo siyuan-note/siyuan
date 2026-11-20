@@ -46,12 +46,11 @@ const loadSyncGuide = (mobile: boolean, provider: number, activeCheckout = false
         require: (name: string) => {
             if (name === "../dialog/message") return {showMessage: (message: string) => messages.push(message)};
             if (name === "../constants") return {Constants: {DIALOG_SYNCADDCLOUDDIR: "add-cloud"}};
-            if (name === "../dialog/mobileInputDialog") return {mobileInputDialog: (options: {onConfirm: typeof confirmCreate}) => {
+            if (name === "../dialog/inputDialog") return {openInputDialog: (options: {onConfirm: typeof confirmCreate}) => {
                 confirmCreate = options.onConfirm;
                 return {element: {setAttribute() {}}};
             }};
-            if (name === "../dialog/mobileConfirmDialog") return {mobileConfirmDialog: (_title: string, _text: string,
-                confirm: () => Promise<boolean>) => {confirmations.push(confirm);}};
+            if (name === "../dialog/confirmDialog") return {confirmDialog: ({confirm}: {confirm: () => Promise<boolean>}) => {confirmations.push(confirm);}};
             if (name === "./checkoutProgress") return {openSyncCheckoutProgress: () => activeCheckout};
             if (name === "../config/util/configApi") {
                 return {config: {set: (_path: string, value: unknown, applied?: () => void) => new Promise<void>((resolve, reject) => {

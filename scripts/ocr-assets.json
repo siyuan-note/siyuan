@@ -78,5 +78,55 @@
       "library": "libonnxruntime.dylib",
       "size": 11676322
     }
+  },
+  "runtimeRecovery": {
+    "linux-amd64": {
+      "url": "https://github.com/siyuan-note/siyuan/releases/download/v3.8.11-rc.1/siyuan-3.8.11-rc.1-linux.tar.gz",
+      "sha256": "3970072750eafe9883e6efd2230df360ee91047b0a6ebb19aa41d9fe65ae920b",
+      "format": "tar.gz",
+      "path": "siyuan-3.8.11-rc.1-linux/resources/stage/ocr/runtime/linux-amd64",
+      "runtimeSource": {
+        "algorithm": "sha256",
+        "digest": "4c436a280d650f8bf32c921a2bf4de7c42cc32884c51c90e47de991708bbb5a4",
+        "size": 8150413,
+        "library": "libonnxruntime.so"
+      }
+    },
+    "darwin-amd64": {
+      "url": "https://github.com/siyuan-note/siyuan/releases/download/v3.8.11-rc.1/siyuan-3.8.11-rc.1-mac.dmg",
+      "sha256": "8da9718a3b559ede1d3f589b3a834a113c1e7c0a90a3cc32e2e8e7f555946066",
+      "format": "dmg",
+      "path": "SiYuan.app/Contents/Resources/stage/ocr/runtime/darwin-amd64",
+      "runtimeSource": {
+        "algorithm": "sha256",
+        "digest": "d10359e16347b57d9959f7e80a225a5b4a66ed7d7e007274a15cae86836485a6",
+        "size": 11676322,
+        "library": "libonnxruntime.dylib"
+      }
+    },
+    "darwin-arm64": {
+      "url": "https://github.com/siyuan-note/siyuan/releases/download/v3.8.11-rc.1/siyuan-3.8.11-rc.1-mac-arm64.dmg",
+      "sha256": "3ca837af7e8d8ca56228543c1b9abc5f1bc70379260ca5e1d2a7cedd1a81a4da",
+      "format": "dmg",
+      "path": "SiYuan.app/Contents/Resources/stage/ocr/runtime/darwin-arm64",
+      "runtimeSource": {
+        "algorithm": "sha256",
+        "digest": "c255663d40755f84b1b86373bdb9870bb65f3a2c3d779b3d7ae31aaa00cebb4f",
+        "size": 30381891,
+        "library": "libonnxruntime.dylib"
+      }
+    },
+    "windows-amd64": {
+      "url": "https://github.com/siyuan-note/siyuan/releases/download/v3.8.11-rc.1/siyuan-3.8.11-rc.1-win.exe",
+      "sha256": "cb3a5cf9d1e75477ee0a8e9a7150a2ca62db69e1ef9d37b301e8bee3eae37247",
+      "format": "nsis",
+      "path": "resources/stage/ocr/runtime/windows-amd64",
+      "runtimeSource": {
+        "algorithm": "sha256",
+        "digest": "4fbfb85d0e9de9bb6fb8a9866a7cb477cbad404d889b236931bf3f5d547e5f48",
+        "size": 74397435,
+        "library": "onnxruntime.dll"
+      }
+    }
   }
 }

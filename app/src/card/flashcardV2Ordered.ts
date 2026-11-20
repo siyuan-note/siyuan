@@ -116,8 +116,15 @@ export const openFlashcardV2Ordered = (sourceID: string, reload: () => void, par
     };
     refresh.addEventListener("click", () => {
         if (state.busy) { return; }
-        if (state.dirty) { confirmDialog(language.refresh, language.flashcardReorderDiscard, () => { if (connected()) { void load(); } }); }
-        else { void load(); }
+        if (state.dirty) {
+            confirmDialog({
+                title: language.refresh,
+                text: language.flashcardReorderDiscard,
+                confirm: () => { if (connected()) { void load(); } },
+            });
+        } else {
+            void load();
+        }
     });
     cancel.addEventListener("click", () => dialog.destroy());
     save.addEventListener("click", async () => {

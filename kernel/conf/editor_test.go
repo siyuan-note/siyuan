@@ -25,6 +25,32 @@ func TestEditorGlobalBreadcrumbDefaults(t *testing.T) {
 	}
 }
 
+func TestEditorBreadcrumbIcons(t *testing.T) {
+	if NewEditor().HideBreadcrumbIcons {
+		t.Fatal("breadcrumb icons must be visible by default")
+	}
+	for _, entry := range []struct {
+		input string
+		want  bool
+	}{
+		{`{}`, false},
+		{`{"hideBreadcrumbIcons":null}`, false},
+		{`{"hideBreadcrumbIcons":true}`, true},
+		{`{"hideBreadcrumbIcons":false}`, false},
+		{`{"hideGlobalBreadcrumbIcons":true}`, false},
+		{`{"hideGlobalBreadcrumbIcons":true,"hideBreadcrumbIcons":false}`, false},
+	} {
+		var editor Editor
+		if err := json.Unmarshal([]byte(entry.input), &editor); err != nil {
+			t.Fatal(err)
+		}
+		NormalizeEditor(&editor)
+		if editor.HideBreadcrumbIcons != entry.want {
+			t.Fatalf("unexpected breadcrumb icon preference for %s", entry.input)
+		}
+	}
+}
+
 func TestEditorEmbedBreadcrumbParentPathDefaults(t *testing.T) {
 	for _, input := range []string{`{}`, `{"embedBlockBreadcrumbParentPath":null}`, `{"embedBlockBreadcrumbParentPath":true}`, `{"embedBlockBreadcrumbParentPath":false}`} {
 		var editor Editor

@@ -61,7 +61,7 @@ for (const [file, name, marker, args] of [
         const window = {siyuan: {config: {}, dialogs: [item], menus: {menu: {element, remove: () => closes++}}}};
         const source = sourceFile(file);
         const subject = prefix(source, arrow(source, name), marker, {window,
-            Constants: {DIALOG_RECENTDOCS: "panel", DIALOG_OPENCARD: "panel", MENU_BAR_WORKSPACE: "panel"},
+            Constants: {DIALOG_RECENTDOCS: "panel", DIALOG_OPENCARD: "panel"},
             hideElements: () => closes++});
         await subject(...args(true));
         assert.equal(closes, 0);
@@ -70,13 +70,13 @@ for (const [file, name, marker, args] of [
     });
 }
 
-test("workspaceMenu retains the open panel for shortcuts and toggles for its mouse anchor", async () => {
+test("mainMenu retains the open panel for shortcuts and toggles for its mouse anchor", async () => {
     let closes = 0;
     const anchor = {closest: () => null, setAttribute() {}};
     const window = {siyuan: {menus: {menu: {data: anchor,
         element: {...hiddenElement(false), getAttribute: () => "panel"}, remove: () => closes++}}}};
-    const source = sourceFile("menus/workspace.ts");
-    const subject = ownedPrefix(source, arrow(source, "workspaceMenu"), {window, Constants: {MENU_BAR_WORKSPACE: "panel"}});
+    const source = sourceFile("menus/mainMenu.ts");
+    const subject = ownedPrefix(source, arrow(source, "mainMenu"), {window, Constants: {MENU_BAR_MAIN_MENU: "panel"}});
     await subject({}, {}, true, anchor);
     assert.equal(closes, 0);
     await subject({}, {}, false, anchor);
@@ -123,16 +123,20 @@ test("native shortcut sources open panels without toggling while menu commands r
         assert.equal(calls.at(-1)[3], !["menu", "api", "commandPanel"].includes(commandSource));
     }
     const dispatches = [];
-    const handlers = Object.fromEntries(["workspaceMenu", "openRecentDocs", "openHistory", "openCard"]
+    const handlers = Object.fromEntries(["mainMenu", "openRecentDocs", "openHistory", "openCard"]
         .map(name => [name, (...args) => dispatches.push({name, args})]));
     const compiled = parse(sourceFile("boot/globalEvent/command/global.ts").text,
         {MOBILE: false, BROWSER: true}, false, true);
     const {globalCommand} = evaluate(compiled, {require: () => new Proxy(handlers, {get: (target, key) =>
-        target[key] || (() => false)}), document: {querySelector: () => ({getBoundingClientRect: () => ({})})}});
+        key === "Constants" ? {MENU_BAR_MAIN_MENU: "barMainMenu"} : target[key] || (() => false)}),
+    document: {getElementById: id => {
+        assert.equal(id, "barMainMenu");
+        return {getBoundingClientRect: () => ({})};
+    }}});
     for (const command of ["mainMenu", "recentDocs", "dataHistory", "riffCard"]) {
         assert.equal(globalCommand(command, {}, undefined, true), true);
         const call = dispatches.at(-1);
-        assert.equal(call.name === "workspaceMenu" ? call.args[2] : call.args.at(-1), true);
+        assert.equal(call.name === "mainMenu" ? call.args[2] : call.args.at(-1), true);
     }
 });
 

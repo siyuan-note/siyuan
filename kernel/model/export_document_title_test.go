@@ -7,11 +7,13 @@
 package model
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -95,5 +97,52 @@ func TestExportDocumentTitleInlines(t *testing.T) {
 	markdown := exportMarkdownContent0(source.ID, merged, markdownExportOptions{Config: config, Ext: ".md"})
 	if strings.Count(markdown, "ChildStyled") != 1 || !strings.Contains(markdown, "**ChildStyled**") || !strings.Contains(markdown, "assets/child.png") {
 		t.Fatalf("merged child document lost or duplicated rich title: %s", markdown)
+	}
+}
+
+func TestExportMergedPDFSubdocumentTitles(t *testing.T) {
+	if !documentTitleFeatureTestProcess(t) {
+		return
+	}
+	boxID := prepareDocumentTitleFeatureBox(t)
+	parent := newHPathTestDoc(t, boxID, "/", "Parent", 1)
+	child := newHPathTestDoc(t, boxID, parent.Path, "Child", 1)
+	grandchild := newHPathTestDoc(t, boxID, child.Path, "Grandchild", 1)
+	section := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeHeading, HeadingLevel: 2}
+	section.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Section")})
+	child.Root.AppendChild(section)
+	saveDocumentTitleFeatureTree(t, child)
+
+	for _, test := range []struct {
+		name, mode              string
+		merge, mark             bool
+		childLevel, nestedLevel string
+	}{
+		{name: "flat PDF", mode: MergeDocHeadingModeFlat, merge: true, mark: true, childLevel: "h1", nestedLevel: "h1"},
+		{name: "tree PDF", mode: MergeDocHeadingModeTree, merge: true, mark: true, childLevel: "h2", nestedLevel: "h3"},
+		{name: "ordinary merged preview", mode: MergeDocHeadingModeTree, merge: true},
+		{name: "single PDF", mark: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			_, dom, node := ExportPreviewHTMLWithTitle(parent.ID, false, test.merge, true, "", false, false, nil,
+				MergeHeadingOptions{DocHeadingMode: test.mode, MarkSubdocumentTitles: test.mark})
+			document, err := goquery.NewDocumentFromReader(strings.NewReader(dom))
+			if err != nil || node == nil || document.Find(fmt.Sprintf(`[data-node-id="%s"]`, parent.ID)).Length() != 1 {
+				t.Fatalf("missing parent document title: %v, %s", err, dom)
+			}
+			marked := document.Find(`[data-export-subdocument-title="true"]`)
+			if !test.merge || !test.mark {
+				if marked.Length() != 0 {
+					t.Fatalf("unexpected marked headings: %s", dom)
+				}
+				return
+			}
+			childHeading := marked.Filter(fmt.Sprintf(`[data-node-id="%s"][data-subtype="%s"]`, child.ID, test.childLevel))
+			nestedHeading := marked.Filter(fmt.Sprintf(`[data-node-id="%s"][data-subtype="%s"]`, grandchild.ID, test.nestedLevel))
+			if marked.Length() != 2 || childHeading.Length() != 1 || nestedHeading.Length() != 1 ||
+				document.Find(fmt.Sprintf(`[data-node-id="%s"][data-subtype="h2"]`, section.ID)).Length() != 1 {
+				t.Fatalf("expected only the merged document titles to be marked: %s", dom)
+			}
+		})
 	}
 }

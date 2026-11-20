@@ -44,8 +44,8 @@ const fixture = (responses: any[], accept: boolean | "move" = false,
             },
             showMessage: (...args: unknown[]) => messages.push(args),
             processMessage: (response: unknown) => processed.push(response),
-            mobileConfirmDialog: (_title: string, _text: string, confirm: () => void, cancel: () => void,
-                            _isDelete: boolean, extraAction?: {callback: () => void}) => {
+            confirmDialog: ({confirm, cancel, extraAction}: {confirm: () => void, cancel: () => void,
+                            extraAction?: {callback: () => void}}) => {
                 confirmations++;
                 extraActions.push(!!extraAction);
                 assert.equal(requests[requests.length - 1].preview, true);

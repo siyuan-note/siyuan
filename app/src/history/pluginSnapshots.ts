@@ -1,6 +1,6 @@
 import type {App} from "../index";
 import type {PluginSnapshot} from "../types/api";
-import {mobileConfirmDialog} from "../dialog/mobileConfirmDialog";
+import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {unloadPlugin} from "../plugin/loader";
 import {escapeHtml} from "../util/escape";
@@ -55,28 +55,32 @@ export const mountPluginSnapshots = (app: App, root: HTMLElement, setRestoring: 
     };
     const restore = (snapshot: PluginSnapshot, packageName: string) => {
         if (busy || !active() || window.siyuan.config.readonly) { return; }
-        mobileConfirmDialog(lang.rollback, lang.pluginSnapshotRestoreTip.replace("${name}", () => escapeHtml(packageName)), async () => {
-            if (!active() || busy || window.siyuan.config.readonly) { return false; }
-            restoring = true;
-            setBusy(true);
-            setRestoring(true);
-            try {
-                if (app.plugins.some(plugin => plugin.name === packageName)) {
-                    const disabled = await fetchSyncPost("/api/petal/setPetalEnabled", {packageName, enabled: false, app: app.appId});
-                    if (disabled.code !== 0) { return false; }
+        confirmDialog({
+            title: lang.rollback,
+            text: lang.pluginSnapshotRestoreTip.replace("${name}", () => escapeHtml(packageName)),
+            confirm: async () => {
+                if (!active() || busy || window.siyuan.config.readonly) { return false; }
+                restoring = true;
+                setBusy(true);
+                setRestoring(true);
+                try {
+                    if (app.plugins.some(plugin => plugin.name === packageName)) {
+                        const disabled = await fetchSyncPost("/api/petal/setPetalEnabled", {packageName, enabled: false, app: app.appId});
+                        if (disabled.code !== 0) { return false; }
+                    }
+                    await unloadPlugin(app, packageName);
+                    if (!active()) { return false; }
+                    const response = await fetchSyncPost("/api/repo/restorePluginSnapshot", {name: packageName, id: snapshot.id});
+                    if (response.code !== 0) { return false; }
+                    if (!disposed) { result.textContent = lang.pluginSnapshotRestored.replace("${id}", response.data.backupID); }
+                    return true;
+                } finally {
+                    restoring = false;
+                    setRestoring(false);
+                    if (!disposed) { setBusy(false); }
                 }
-                await unloadPlugin(app, packageName);
-                if (!active()) { return false; }
-                const response = await fetchSyncPost("/api/repo/restorePluginSnapshot", {name: packageName, id: snapshot.id});
-                if (response.code !== 0) { return false; }
-                if (!disposed) { result.textContent = lang.pluginSnapshotRestored.replace("${id}", response.data.backupID); }
-                return true;
-            } finally {
-                restoring = false;
-                setRestoring(false);
-                if (!disposed) { setBusy(false); }
-            }
-        }, undefined, false, undefined, undefined, {awaitConfirm: true});
+            },
+        });
     };
     const open = (snapshot: PluginSnapshot, packageName: string, part: TPluginSnapshotPart) => {
         if (busy || !active()) { return; }

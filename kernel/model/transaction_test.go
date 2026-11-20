@@ -51,6 +51,7 @@ func TestTransactionTreeLoadErrors(t *testing.T) {
 			case "doUpdateUpdated":
 				txErr = tx.doUpdateUpdated(op)
 			case "setAttrs":
+				op.Data = `{"custom-review":"value"}`
 				txErr = tx.doSetAttrs(op)
 			case "largeInsert":
 				op.ID = "20261020000000-new0001"

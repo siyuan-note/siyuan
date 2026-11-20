@@ -1665,6 +1665,49 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
     for (const [styleName, style] of Object.entries(layoutStyles)) {
         layoutStyle.textContent = style;
         mobile = styleName.startsWith("mobile/");
+        for (const scaled of [false, true]) {
+            const f = fixture(scaled);
+            let table = f.table;
+            const scroller = table.parentElement;
+            const action = table.nextElementSibling as HTMLElement;
+            const offsetParent = action.offsetParent;
+            const node = table.closest("[data-node-id]");
+            const context = `${styleName}/rounded-corners/${scaled}`;
+            table.style.cssText = "border-collapse:separate;width:480px";
+            scroller.style.cssText = "max-height:92px;width:216px;border:2px solid transparent";
+            node.setAttribute("custom-pinthead", "true");
+            const insets = () => {
+                const clip = action.style.getPropertyValue("--b3-table-frame-clip");
+                check.match(clip, /^inset\(/, context);
+                check.notEqual(getComputedStyle(action, "::before").clipPath, "none", context);
+                check.equal(getComputedStyle(action).clipPath, "none", context);
+                return clip.slice(6, -1).split(" ").map(parseFloat);
+            };
+            await frames(4);
+            check.ok(scroller.scrollHeight > scroller.clientHeight && scroller.scrollWidth > scroller.clientWidth, context);
+            const [top, right, bottom, left] = insets();
+            check.ok(top <= 1 && left <= 1 && right > 40 && bottom > 40, context + " masks corners outside the scrollport");
+            const replacement = table.cloneNode(true) as HTMLTableElement;
+            table.replaceWith(replacement);
+            table = replacement;
+            await frames(4);
+            check.deepEqual(insets(), [top, right, bottom, left], context + " replacing the table keeps the shared decoration");
+            const height = table.offsetHeight;
+            scroller.style.maxHeight = "120px";
+            await frames(4);
+            check.equal(table.offsetHeight, height, context);
+            check.ok(Math.abs(bottom - insets()[2] - 28) <= 1, context + " resizing just the viewport updates clipping");
+            scroller.scrollTo(scroller.scrollWidth, scroller.scrollHeight);
+            await frames(4);
+            const [scrolledTop, scrolledRight, scrolledBottom, scrolledLeft] = insets();
+            check.ok(scrolledTop > 40 && scrolledLeft > 40 && scrolledRight <= 1 && scrolledBottom <= 1,
+                context + " real bottom corner remains visible at the scroll end");
+            check.equal(action.offsetParent, offsetParent, context + " resize controls keep their positioning context");
+            node.removeAttribute("custom-pinthead");
+            await frames(3);
+            check.equal(action.style.getPropertyValue("--b3-table-frame-clip"), "", context);
+            f.dispose();
+        }
         for (const width of [280, 360]) {
             for (const fontSize of [16, 28]) {
                 for (const pinned of [false, true]) {

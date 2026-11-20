@@ -359,7 +359,8 @@ export class TableControl {
     private bypassClipboardEvent = false;
     private observer: MutationObserver;
     private pinnedTableResizeObserver: ResizeObserver;
-    private pinnedTableActions = new Map<HTMLTableElement, HTMLElement>();
+    private pinnedTableActions = new Set<HTMLElement>();
+    private pinnedTableResizeTargets = new Set<HTMLElement>();
     private abortController = new AbortController();
     private touch: TableTouchControl;
     private dragCleanup?: () => void;
@@ -550,6 +551,7 @@ export class TableControl {
         this.pinnedTableResizeObserver.disconnect();
         this.pinnedTableActions.forEach(action => this.clearPinnedTableFrame(action));
         this.pinnedTableActions.clear();
+        this.pinnedTableResizeTargets.clear();
         cancelAnimationFrame(this.frame);
         this.element.remove();
     }
@@ -1809,13 +1811,14 @@ export class TableControl {
 
     private clearPinnedTableFrame(action: HTMLElement) {
         ["--b3-table-frame-left", "--b3-table-frame-top", "--b3-table-frame-width",
-            "--b3-table-frame-height"].forEach(name => action.style.removeProperty(name));
+            "--b3-table-frame-height", "--b3-table-frame-clip"].forEach(name => action.style.removeProperty(name));
     }
 
     private renderPinnedTableFrames() {
-        const actions = new Map<HTMLTableElement, HTMLElement>();
+        const actions = new Set<HTMLElement>();
+        const resizeTargets = new Set<HTMLElement>();
         this.wysiwygElement.querySelectorAll<HTMLTableElement>(
-            '[data-type="NodeTable"][custom-pinthead="true"] table').forEach(table => {
+            '[data-type="NodeTable"][custom-pinthead="true"] > div:first-child > table').forEach(table => {
             if (table.closest(".protyle-custom, .mindmap-view__preview-block")) {
                 return;
             }
@@ -1823,33 +1826,47 @@ export class TableControl {
             if (!action?.classList.contains("protyle-action__table")) {
                 return;
             }
-            const previousAction = this.pinnedTableActions.get(table);
-            if (previousAction !== action) {
-                if (previousAction) {
-                    this.clearPinnedTableFrame(previousAction);
-                } else {
-                    this.pinnedTableResizeObserver.observe(table);
-                }
-            }
-            actions.set(table, action);
+            const viewport = table.parentElement;
+            actions.add(action);
+            resizeTargets.add(table);
+            resizeTargets.add(viewport);
             const tableRect = table.getBoundingClientRect();
             const actionRect = action.getBoundingClientRect();
-            action.style.setProperty("--b3-table-frame-left",
-                `${tableRect.left + table.clientLeft - actionRect.left}px`);
-            action.style.setProperty("--b3-table-frame-top",
-                `${tableRect.top + table.clientTop - actionRect.top}px`);
-            action.style.setProperty("--b3-table-frame-width", `${table.clientWidth}px`);
-            action.style.setProperty("--b3-table-frame-height", `${table.clientHeight}px`);
+            const viewportRect = viewport.getBoundingClientRect();
+            const scaleX = tableRect.width / (table.offsetWidth || tableRect.width) || 1;
+            const scaleY = tableRect.height / (table.offsetHeight || tableRect.height) || 1;
+            const left = (tableRect.left - actionRect.left) / scaleX + table.clientLeft;
+            const top = (tableRect.top - actionRect.top) / scaleY + table.clientTop;
+            const width = table.clientWidth;
+            const height = table.clientHeight;
+            // 按绘制比例将滚动视口内沿换算为相对遮罩的坐标。
+            const viewportLeft = (viewportRect.left - tableRect.left) / scaleX + viewport.clientLeft - table.clientLeft;
+            const viewportTop = (viewportRect.top - tableRect.top) / scaleY + viewport.clientTop - table.clientTop;
+            const clip = [viewportTop, width - viewportLeft - viewport.clientWidth,
+                height - viewportTop - viewport.clientHeight, viewportLeft];
+            action.style.setProperty("--b3-table-frame-left", `${left}px`);
+            action.style.setProperty("--b3-table-frame-top", `${top}px`);
+            action.style.setProperty("--b3-table-frame-width", `${width}px`);
+            action.style.setProperty("--b3-table-frame-height", `${height}px`);
+            action.style.setProperty("--b3-table-frame-clip", `inset(${clip.map(inset => `${Math.max(0, inset)}px`).join(" ")})`);
         });
-        this.pinnedTableActions.forEach((action, table) => {
-            if (actions.get(table) !== action) {
+        this.pinnedTableActions.forEach(action => {
+            if (!actions.has(action)) {
                 this.clearPinnedTableFrame(action);
-                if (!actions.has(table)) {
-                    this.pinnedTableResizeObserver.unobserve(table);
-                }
+            }
+        });
+        this.pinnedTableResizeTargets.forEach(target => {
+            if (!resizeTargets.has(target)) {
+                this.pinnedTableResizeObserver.unobserve(target);
+            }
+        });
+        resizeTargets.forEach(target => {
+            if (!this.pinnedTableResizeTargets.has(target)) {
+                this.pinnedTableResizeObserver.observe(target);
             }
         });
         this.pinnedTableActions = actions;
+        this.pinnedTableResizeTargets = resizeTargets;
     }
 
     private renderRowBoundary() {

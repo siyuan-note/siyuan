@@ -149,7 +149,7 @@ const cases = async (source: string, css: string, formulas: string[]) => {
     check.equal(api.getCell(tablePreview.querySelector("td")), undefined);
     check.equal(api.getTableNode(tablePreview.querySelector("td")), undefined);
     const controls = Object.assign(new api.TablePreviewControl(), {
-        wysiwygElement: tablePreview, pinnedTableActions: new Map(),
+        wysiwygElement: tablePreview, pinnedTableActions: new Set(), pinnedTableResizeTargets: new Set(),
         pinnedTableResizeObserver: {observe: () => check.fail("Preview registered a pinned table control")},
         getTableGridRect: () => check.fail("Preview registered table resize handles"),
     });

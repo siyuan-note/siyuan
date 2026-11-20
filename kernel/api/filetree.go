@@ -445,6 +445,21 @@ func filterFileTreeBlockIDsByPublishDiscoverability(c *gin.Context, ids []string
 	return
 }
 
+// clearFileTreePublishPasswordMetadata 清除发布读者未通过密码校验的文档元数据，保留树导航所需的标题、图标与路径。
+func clearFileTreePublishPasswordMetadata(c *gin.Context, boxID string, files []*model.File) {
+	if !model.IsReadOnlyRoleContext(c) {
+		return
+	}
+
+	publishAccess := model.GetPublishAccess()
+	for _, file := range files {
+		passwordID, password := model.GetPathPasswordByPublishAccess(boxID, file.Path, publishAccess)
+		if "" != password && !model.CheckPublishAuthCookie(c, passwordID, password) {
+			file.Name1, file.Alias, file.Memo, file.Bookmark = "", "", "", ""
+		}
+	}
+}
+
 var moveDocs = contractHandler(apicontract.MoveDocs, moveDocsContract)
 
 func moveDocsContract(c *gin.Context, request apicontract.FileTreeMoveRequest) apicontract.Response[apicontract.Null] {
@@ -1062,6 +1077,15 @@ func searchDocsContract(c *gin.Context, request apicontract.FileTreeSearchReques
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		docs = model.FilterSearchDocsByPublishAccess(c, publishAccess, docs)
+		// 合成笔记本行的闪卡计数聚合了读者不可见的文档，与笔记本列表的读者口径一致清零
+		for _, doc := range docs {
+			if "/" != doc["path"] {
+				continue
+			}
+			if _, ok := doc["flashcardCount"]; ok {
+				doc["newFlashcardCount"], doc["dueFlashcardCount"], doc["flashcardCount"] = "0", "0", "0"
+			}
+		}
 	}
 	return apicontract.Success(fileTreeSearchContracts(docs))
 }
@@ -1133,6 +1157,7 @@ func listDocsByPathContract(c *gin.Context, request apicontract.FileTreeListRequ
 		}
 		files = tempFiles
 	}
+	clearFileTreePublishPasswordMetadata(c, notebook, files)
 	if maxListCount < totals {
 		// API `listDocsByPath` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/10290
 		ignoreHint, app, hintErr := request.HintOptions()

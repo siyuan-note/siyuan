@@ -442,6 +442,10 @@
 
     > .viewer-canvas {
       position: relative;
+
+      > img {
+        pointer-events: auto;
+      }
     }
 
     > .viewer-footer {

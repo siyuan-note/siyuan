@@ -186,6 +186,31 @@ const showImageGallery = (sources: Array<ImageSource & {url: string}>, initialVi
             viewed: () => {
                 viewer.toolbar.querySelector(".viewer-copy-file").classList.toggle("fn__none", !getCopyFileMenu(viewer.image.src));
             },
+            zoom: mobile ? event => {
+                const originalEvent = event.detail.originalEvent;
+                // 预览器用第二次触摸抬起事件合成双击。
+                if (!originalEvent || !["dblclick", "pointerup", "touchend", "pointercancel", "touchcancel"].includes(originalEvent.type)) {
+                    return;
+                }
+                event.preventDefault();
+                if (originalEvent.type.endsWith("cancel")) {
+                    return;
+                }
+                const point = "changedTouches" in originalEvent ? originalEvent.changedTouches[0] : originalEvent;
+                if (!point) {
+                    return;
+                }
+                const initialRatio = viewer.initialImageData.ratio;
+                if (event.detail.oldRatio > initialRatio) {
+                    viewer.reset();
+                    return;
+                }
+                const bounds = viewer.viewer.getBoundingClientRect();
+                viewer.zoomTo(initialRatio * 2, false, {
+                    x: point.clientX - bounds.left,
+                    y: point.clientY - bounds.top,
+                });
+            } : undefined,
             toolbar: {
                 prev: mobileNavigation,
                 next: mobileNavigation,

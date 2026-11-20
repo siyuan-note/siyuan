@@ -147,6 +147,7 @@ declare class Viewer {
     public image: HTMLImageElement;
     public viewed: boolean;
     public toolbar: HTMLElement;
+    public initialImageData: {ratio: number};
 
     constructor(element: Element, options: {
         title: [number, (image: HTMLImageElement, imageData: IObject) => string],
@@ -162,6 +163,7 @@ declare class Viewer {
         ready?: (this: HTMLElement, event: CustomEvent) => void,
         view?: (this: HTMLElement, event: CustomEvent<{index: number, image: HTMLImageElement}>) => void,
         viewed?: (this: HTMLElement, event: CustomEvent) => void,
+        zoom?: (this: HTMLElement, event: CustomEvent<{oldRatio: number, originalEvent: MouseEvent | TouchEvent | null}>) => void,
         toolbar: {
             zoomIn: boolean,
             zoomOut: boolean,
@@ -185,6 +187,10 @@ declare class Viewer {
     public show(): void
 
     public hide(): void
+
+    public reset(): void
+
+    public zoomTo(ratio: number, showTooltip: boolean, origin: {x: number, y: number}): void
 }
 
 declare class Lute {

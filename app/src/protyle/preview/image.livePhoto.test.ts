@@ -8,6 +8,7 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {transpileModule, ModuleKind, ScriptTarget} from "typescript";
 import {compileString} from "sass";
+import sharp from "sharp";
 
 test("image gallery handles source scopes, copy feedback, Live Photos, and mobile controls", async () => {
     const root = realpathSync(tmpdir());
@@ -16,13 +17,14 @@ test("image gallery handles source scopes, copy feedback, Live Photos, and mobil
         readFileSync("src/assets/scss/component/_snackbar.scss", "utf8") +
         ".fn__none { display: none !important; }").css;
     const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
+    const mobilePng = await sharp({create: {width: 480, height: 320, channels: 3, background: "#fff"}}).png().toBuffer();
     const server = createServer((request, response) => {
         if (request.url?.startsWith("/stage/protyle/js/viewerjs/viewer.js")) {
             response.writeHead(200, {"Content-Type": "text/javascript"});
             response.end(readFileSync("stage/protyle/js/viewerjs/viewer.js"));
         } else if (request.url?.startsWith("/assets/")) {
             response.writeHead(200, {"Content-Type": "image/png"});
-            response.end(Buffer.from(png, "base64"));
+            response.end(request.url.startsWith("/assets/mobile-") ? mobilePng : Buffer.from(png, "base64"));
         } else {
             response.writeHead(200, {"Content-Type": "text/html"});
             response.end(`<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1"><title>Gallery verification</title><style>${css}</style><body><div id="message" class="b3-snackbars"><div class="fn__flex-1"></div></div><script>${readFileSync("appearance/icons/litheness/icon.js", "utf8")}</script>`);
@@ -43,6 +45,7 @@ test("image gallery handles source scopes, copy feedback, Live Photos, and mobil
         }).outputText;
         const languages = JSON.parse(readFileSync("appearance/langs/en.json", "utf8"));
         const browserCase = `(async () => {
+            document.documentElement.ontouchstart = null;
             const starts = [];
             const copiedURLs = [];
             const messages = [];
@@ -224,10 +227,44 @@ test("image gallery handles source scopes, copy feedback, Live Photos, and mobil
                         throw new Error("Mobile gallery action is obscured or unlabeled: " + label);
                     }
                 }
-                const point = (type, pointerId, clientX, clientY) => canvas.dispatchEvent(new PointerEvent(type, {
+                const point = (type, pointerId, clientX, clientY, target = canvas) => target.dispatchEvent(new PointerEvent(type, {
                     bubbles: true, cancelable: true, pointerType: "touch", pointerId, clientX, clientY,
                 }));
                 const startingRatio = mobile.imageData.ratio;
+                const startImage = mobile.image.getBoundingClientRect();
+                const tapX = startImage.x + startImage.width / 4;
+                const tapY = startImage.y + startImage.height / 4;
+                if (document.elementFromPoint(tapX, tapY) !== mobile.image) {
+                    throw new Error("The mobile preview image cannot receive taps");
+                }
+                const tap = pointerId => {
+                    point("pointerdown", pointerId, tapX, tapY, mobile.image);
+                    point("pointerup", pointerId, tapX, tapY, mobile.image);
+                };
+                tap(1);
+                if (mobile.imageData.ratio !== startingRatio || !mobile.viewed) {
+                    throw new Error("A single tap changed or closed the mobile image");
+                }
+                tap(2);
+                await wait(() => mobile.imageData.ratio === startingRatio * 2);
+                const zoomedImage = mobile.image.getBoundingClientRect();
+                if (Math.abs(zoomedImage.x + zoomedImage.width / 4 - tapX) > 1 ||
+                    Math.abs(zoomedImage.y + zoomedImage.height / 4 - tapY) > 1) {
+                    throw new Error("Mobile double-tap did not zoom around the touch point");
+                }
+                point("pointerdown", 5, tapX, tapY, mobile.image);
+                point("pointermove", 5, tapX + 12, tapY, mobile.image);
+                point("pointerup", 5, tapX + 12, tapY, mobile.image);
+                if (mobile.image.getBoundingClientRect().x <= zoomedImage.x || mobile.imageData.ratio !== startingRatio * 2) {
+                    throw new Error("Dragging a zoomed image must move it without changing the zoom");
+                }
+                tap(3);
+                tap(4);
+                await wait(() => mobile.imageData.ratio === startingRatio);
+                const restoredImage = mobile.image.getBoundingClientRect();
+                if (restoredImage.x !== startImage.x || restoredImage.y !== startImage.y) {
+                    throw new Error("The second double-tap did not restore the initial view");
+                }
                 point("pointerdown", 1, 30, 60);
                 point("pointerdown", 2, 130, 60);
                 point("pointermove", 2, 180, 69);
@@ -266,7 +303,8 @@ test("image gallery handles source scopes, copy feedback, Live Photos, and mobil
                 if (single.toolbar.querySelector(".viewer-prev, .viewer-next")) {
                     throw new Error("Single mobile images show redundant navigation");
                 }
-                single.destroy();
+                single.viewer.querySelector(".viewer-canvas").click();
+                await wait(() => single.destroyed);
                 sidebar.remove();
             };
             return {starts,stopped,hidden,closed,requests,fieldImages,selected,previous,single};

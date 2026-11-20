@@ -117,7 +117,7 @@ func TestReaderSearchWithoutBlockMemo(t *testing.T) {
 		} `json:"data"`
 	}
 
-	post := func(role model.Role, path, body string, handler gin.HandlerFunc) memoResponse {
+	call := func(role model.Role, path, body string, handler gin.HandlerFunc) map[string]any {
 		t.Helper()
 		gin.SetMode(gin.TestMode)
 		engine := gin.New()
@@ -130,14 +130,36 @@ func TestReaderSearchWithoutBlockMemo(t *testing.T) {
 		request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
 		request.Header.Set("Content-Type", "application/json")
 		engine.ServeHTTP(recorder, request)
-		var response memoResponse
+		var response map[string]any
 		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
 			t.Fatalf("%s: invalid response %q: %v", path, recorder.Body.String(), err)
 		}
-		if response.Code != 0 {
+		if response["code"] != float64(0) {
 			t.Fatalf("%s failed: %s", path, recorder.Body.String())
 		}
 		return response
+	}
+
+	post := func(role model.Role, path, body string, handler gin.HandlerFunc) memoResponse {
+		t.Helper()
+		encoded, err := json.Marshal(call(role, path, body, handler))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var response memoResponse
+		if err = json.Unmarshal(encoded, &response); err != nil {
+			t.Fatalf("%s: invalid response: %v", path, err)
+		}
+		return response
+	}
+
+	dataOf := func(response map[string]any, path string) map[string]any {
+		t.Helper()
+		data, ok := response["data"].(map[string]any)
+		if !ok {
+			t.Fatalf("%s returned no data object: %#v", path, response)
+		}
+		return data
 	}
 
 	blockOf := func(response memoResponse, path string) (string, string) {
@@ -165,5 +187,77 @@ func TestReaderSearchWithoutBlockMemo(t *testing.T) {
 	}
 	if memo, ialMemo := blockOf(post(model.RoleAdministrator, "/api/search/fullTextSearchBlock", fullTextBody, fullTextSearchBlock), "administrator fullTextSearchBlock"); memoCanary != memo || memoCanary != ialMemo {
 		t.Fatalf("administrator lost the block memo from fullTextSearchBlock: memo=%q ial=%q", memo, ialMemo)
+	}
+
+	blockBody := fmt.Sprintf(`{"id":%q}`, blockID)
+	attrOf := func(role model.Role, label string) map[string]any {
+		t.Helper()
+		return dataOf(call(role, "/api/attr/getBlockAttrs", blockBody, getBlockAttrs), label)
+	}
+	readerAttrs := attrOf(model.RoleReader, "reader getBlockAttrs")
+	if memo, ok := readerAttrs["memo"]; ok {
+		t.Fatalf("reader received the block memo attribute: %#v", memo)
+	}
+	if blockID != readerAttrs["id"] {
+		t.Fatalf("reader getBlockAttrs lost the block id: %#v", readerAttrs)
+	}
+	adminAttrs := attrOf(model.RoleAdministrator, "administrator getBlockAttrs")
+	if memoCanary != adminAttrs["memo"] || blockID != adminAttrs["id"] {
+		t.Fatalf("administrator getBlockAttrs lost the block id or memo: %#v", adminAttrs)
+	}
+
+	batchBody := fmt.Sprintf(`{"ids":[%q]}`, blockID)
+	batchAttrsOf := func(role model.Role, label string) map[string]any {
+		t.Helper()
+		data := dataOf(call(role, "/api/attr/batchGetBlockAttrs", batchBody, batchGetBlockAttrs), label)
+		attrs, ok := data[blockID].(map[string]any)
+		if !ok {
+			t.Fatalf("%s returned no attrs for %s: %#v", label, blockID, data)
+		}
+		return attrs
+	}
+	if memo, ok := batchAttrsOf(model.RoleReader, "reader batchGetBlockAttrs")["memo"]; ok {
+		t.Fatalf("reader received the block memo from batchGetBlockAttrs: %#v", memo)
+	}
+	if memo := batchAttrsOf(model.RoleAdministrator, "administrator batchGetBlockAttrs")["memo"]; memoCanary != memo {
+		t.Fatalf("administrator lost the block memo from batchGetBlockAttrs: %#v", memo)
+	}
+
+	const kramdownPath = "/api/block/getBlockKramdown"
+	kramdownOf := func(role model.Role, label string) string {
+		t.Helper()
+		data := dataOf(call(role, kramdownPath, blockBody, getBlockKramdown), label)
+		kramdown, ok := data["kramdown"].(string)
+		if !ok {
+			t.Fatalf("%s returned no kramdown: %#v", label, data)
+		}
+		return kramdown
+	}
+	readerKramdown := kramdownOf(model.RoleReader, "reader getBlockKramdown")
+	if strings.Contains(readerKramdown, memoCanary) {
+		t.Fatalf("reader received the block memo in kramdown: %s", readerKramdown)
+	}
+	if !strings.Contains(readerKramdown, "broken reference") {
+		t.Fatalf("reader kramdown lost visible content: %s", readerKramdown)
+	}
+	adminKramdown := kramdownOf(model.RoleAdministrator, "administrator getBlockKramdown")
+	if !strings.Contains(adminKramdown, memoCanary) || !strings.Contains(adminKramdown, "broken reference") {
+		t.Fatalf("administrator kramdown lost visible content or memo: %s", adminKramdown)
+	}
+
+	kramdownsOf := func(role model.Role, label string) string {
+		t.Helper()
+		data := dataOf(call(role, "/api/block/getBlockKramdowns", batchBody, getBlockKramdowns), label)
+		kramdown, ok := data[blockID].(string)
+		if !ok {
+			t.Fatalf("%s returned no kramdown for %s: %#v", label, blockID, data)
+		}
+		return kramdown
+	}
+	if readerKramdowns := kramdownsOf(model.RoleReader, "reader getBlockKramdowns"); strings.Contains(readerKramdowns, memoCanary) || !strings.Contains(readerKramdowns, "broken reference") {
+		t.Fatalf("reader getBlockKramdowns content is wrong: %s", readerKramdowns)
+	}
+	if adminKramdowns := kramdownsOf(model.RoleAdministrator, "administrator getBlockKramdowns"); !strings.Contains(adminKramdowns, memoCanary) || !strings.Contains(adminKramdowns, "broken reference") {
+		t.Fatalf("administrator getBlockKramdowns content is wrong: %s", adminKramdowns)
 	}
 }

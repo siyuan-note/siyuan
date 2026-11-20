@@ -1475,8 +1475,23 @@ func getBlockKramdown0(tree *parse.Tree, id, mode string, luteEngine *lute.Lute)
 
 func getBlockKramdown0Filtered(tree *parse.Tree, id, mode string, luteEngine *lute.Lute, filterIAL func([][]string) [][]string) (ret string) {
 	if nil != filterIAL {
+		// 就地过滤目标子树，避免导出父块时子块 IAL 仍带出编辑器专属备注；调用方需传入独立解析的树
 		if node := treenode.GetNodeInTree(tree, id); nil != node {
-			node.KramdownIAL = filterIAL(node.KramdownIAL)
+			ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering {
+					return ast.WalkContinue
+				}
+				if ast.NodeKramdownBlockIAL == n.Type {
+					if ial := parse.Tokens2IAL(n.Tokens); nil != ial {
+						n.Tokens = parse.IAL2Tokens(filterIAL(ial))
+					}
+					return ast.WalkContinue
+				}
+				if nil != n.KramdownIAL {
+					n.KramdownIAL = filterIAL(n.KramdownIAL)
+				}
+				return ast.WalkContinue
+			})
 		}
 	}
 	addCanonicalBlockIALNodes(tree, false)

@@ -767,22 +767,20 @@ func checkAttributeViewBlockTreesAccessableByPublishAccess(c *gin.Context, publi
 	return false
 }
 
-// FilterBlockAttrsByPublishAccess 返回读者可用的块属性副本，
-// 移除指向读者不可访问属性视图的 custom-avs 绑定。
+// FilterBlockAttrsByPublishAccess 返回读者可读取的块属性副本，移除编辑器专属备注和不可访问属性视图绑定。
 func FilterBlockAttrsByPublishAccess(c *gin.Context, publishAccess PublishAccess, attrs map[string]string) map[string]string {
-	avIDs, ok := attrs[av.NodeAttrNameAvs]
-	if !ok {
-		return attrs
-	}
-	filtered := filterAttributeViewIDsByPublishAccess(c, publishAccess, avIDs)
-	if filtered == avIDs {
-		return attrs
-	}
-
 	ret := make(map[string]string, len(attrs))
 	for name, value := range attrs {
+		if "memo" == name {
+			continue
+		}
 		ret[name] = value
 	}
+	avIDs, ok := ret[av.NodeAttrNameAvs]
+	if !ok {
+		return ret
+	}
+	filtered := filterAttributeViewIDsByPublishAccess(c, publishAccess, avIDs)
 	if "" == filtered {
 		delete(ret, av.NodeAttrNameAvs)
 	} else {
@@ -791,11 +789,18 @@ func FilterBlockAttrsByPublishAccess(c *gin.Context, publishAccess PublishAccess
 	return ret
 }
 
-// FilterBlockIALByPublishAccess 返回移除不可访问属性视图绑定后的 IAL 副本。
+// FilterBlockIALByPublishAccess 返回读者可读取的 IAL 副本，移除编辑器专属备注和不可访问属性视图绑定。
 func FilterBlockIALByPublishAccess(c *gin.Context, publishAccess PublishAccess, ial [][]string) [][]string {
 	ret := make([][]string, 0, len(ial))
 	for _, attr := range ial {
-		if 2 > len(attr) || av.NodeAttrNameAvs != attr[0] {
+		if 2 > len(attr) {
+			ret = append(ret, attr)
+			continue
+		}
+		if "memo" == attr[0] {
+			continue
+		}
+		if av.NodeAttrNameAvs != attr[0] {
 			ret = append(ret, attr)
 			continue
 		}

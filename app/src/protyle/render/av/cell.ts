@@ -337,9 +337,9 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             }
             const isImg = item.classList.contains("av__cellassetimg");
             mAsset.push({
-                type: isImg ? "image" : "file",
-                content: isImg ? removeCompressURL(decodeURI(item.getAttribute("src"))) : item.getAttribute("data-url"),
-                name: isImg ? "" : item.getAttribute("data-name")
+                type: isImg || item.getAttribute("data-asset-type") === "image" ? "image" : "file",
+                content: item.getAttribute("data-url") ?? (isImg ? removeCompressURL(decodeURI(item.getAttribute("src"))) : ""),
+                name: item.getAttribute("data-name") ?? ""
             });
         });
         cellValue.mAsset = mAsset;
@@ -1804,10 +1804,11 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         text = `<span class="av__celltext" data-value='${rowIndex + 1}'>${rowIndex + 1}</span>`;
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
+            const assetAttributes = `data-name="${escapeHtmlTextAndAttr(item.name ?? "")}" data-url="${escapeHtmlTextAndAttr(item.content)}"`;
             if (item.type === "image" && isBrowserRenderableImagePath(item.content)) {
-                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" src="${escapeAttr(getCompressURL(item.content))}">`;
+                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" ${assetAttributes} src="${escapeAttr(getCompressURL(item.content))}">`;
             } else {
-                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAriaLabel(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${escapeHtml(item.name || item.content)}</span>`;
+                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAriaLabel(item.content)}" data-asset-type="${item.type === "image" ? "image" : "file"}" ${assetAttributes}>${escapeHtml(item.name || item.content)}</span>`;
             }
         });
     } else if (cellValue.type === "checkbox") {

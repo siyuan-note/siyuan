@@ -23,7 +23,7 @@ import {
     updateCellsValue
 } from "./cell";
 import {writeText} from "../../util/compatibility";
-import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {renameAsset} from "../../../editor/rename";
 import dayjs from "dayjs";
 import {getColId} from "./col";
@@ -120,7 +120,7 @@ export const getAssetHTML = (cellElements: HTMLElement[]) => {
             contentHTML = `<span data-type="openAssetItem" class="fn__ellipsis b3-menu__label ariaLabel" aria-label="${escapeAriaLabel(item.content)}" style="max-width: 360px">${escapeHtml(item.name || item.content)}</span>`;
         }
 
-        html += `<button class="b3-menu__item" draggable="true" data-index="${index}" data-name="${escapeAttr(item.name)}" data-type="${item.type}" data-content="${escapeAttr(item.content)}">
+        html += `<button class="b3-menu__item" draggable="true" data-index="${index}" data-name="${escapeHtmlTextAndAttr(item.name ?? "")}" data-type="${item.type}" data-content="${escapeHtmlTextAndAttr(item.content)}">
 <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
 ${contentHTML}
 ${batchMode === "replace" ? '<svg class="b3-menu__action" data-type="editAssetItem"><use xlink:href="#iconEdit"></use></svg>' : ""}

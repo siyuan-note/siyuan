@@ -50,3 +50,31 @@ test("表格资源单元格保留已编码路径和查询串", () => {
 
     assert.match(html, /src="assets\/%E6%B5%8B%E8%AF%95\.png\?box=1&style=thumb"/);
 });
+
+test("资源单元格保留原始图片地址和上传文件名", () => {
+    const content = "assets/%E6%B5%8B%E8%AF%95.png?text=&quot;";
+    const value = assetCell(content);
+    value.mAsset[0].name = "截图 & 新文件.png";
+
+    for (const view of ["table", "gallery", "kanban"] as const) {
+        const html = cell.renderCell(value, 0, false, view);
+        assert.ok(html.includes('data-name="截图 &amp; 新文件.png"'));
+        assert.ok(html.includes('data-url="assets/%E6%B5%8B%E8%AF%95.png?text=&amp;quot;"'));
+    }
+
+    const attrs = new Map([
+        ["data-url", content],
+        ["data-name", value.mAsset[0].name],
+        ["src", "assets/resized.png?style=thumb"],
+    ]);
+    const element = {
+        dataset: {id: "asset"},
+        querySelector: (): null => null,
+        children: [{
+            classList: {contains: (name: string) => name === "av__cellassetimg"},
+            getAttribute: (name: string) => attrs.get(name) ?? null,
+        }],
+    } as unknown as HTMLElement;
+
+    assert.deepEqual(JSON.parse(JSON.stringify(cell.genCellValueByElement("mAsset", element).mAsset)), value.mAsset);
+});

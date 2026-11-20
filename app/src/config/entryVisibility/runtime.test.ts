@@ -34,7 +34,7 @@ test("obsolete application preferences preserve the desktop main menu's fixed sl
         querySelector: (): undefined => undefined,
         remove() { this.removed = true; },
     }));
-    const menu = {dataset: {name: "barWorkspace"}, querySelector: () => ({children})};
+    const menu = {dataset: {name: "barMainMenu"}, querySelector: () => ({children})};
     runtime.applyMenuEntryVisibility(menu as unknown as HTMLElement);
     assert.deepEqual(children.filter(item => !item.removed).map(item => item.id), ids);
 });

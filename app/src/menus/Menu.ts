@@ -651,6 +651,8 @@ export class Menu {
             eventBus.emit(type, {
                 menu: this.element,
                 ...detail,
+                // 菜单事件沿用 Petal 公开的主菜单名称。
+                name: detail.name === Constants.MENU_BAR_MAIN_MENU ? "barWorkspace" : detail.name,
             });
         });
     }

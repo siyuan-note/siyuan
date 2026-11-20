@@ -302,7 +302,7 @@ export abstract class Constants {
     public static readonly DIALOG_SAVEWORKSPACE = "dialog-saveworkspace"; // 保存工作空间
 
     // menu
-    public static readonly MENU_BAR_MAIN_MENU = "barWorkspace"; // 顶栏主菜单
+    public static readonly MENU_BAR_MAIN_MENU = "barMainMenu"; // 顶栏主菜单
     public static readonly MENU_BAR_PLUGIN = "topBarPlugin"; // 顶栏插件菜单
     public static readonly MENU_BAR_ZOOM = "barZoom"; // 顶栏缩放菜单
     public static readonly MENU_BAR_MODE = "barmode"; // 顶栏外观菜单

@@ -209,7 +209,7 @@ const cases = async compiled => {
         secondaryEditors.unregisterMobileSecondaryEditor(editor);
     }
     // 快捷键将焦点移到可操作菜单项，方向键不再被编辑器截获。
-    const menuConstants = {MENU_BAR_MAIN_MENU: "barWorkspace", KEYCODELIST: {38: "↑", 40: "↓", 220: "\\"}};
+    const menuConstants = {MENU_BAR_MAIN_MENU: "barMainMenu", KEYCODELIST: {38: "↑", 40: "↓", 220: "\\"}};
     const menuBindings = new Function("window", "Constants", "toggleMenu", compiled.menu +
         "\nreturn {mainMenu, bindMenuKeydown};")(window, menuConstants, load(compiled.menuToggle, {}).toggleMenu);
     const keymap = load(compiled.keymap, {});
@@ -238,7 +238,7 @@ const cases = async compiled => {
         let opens = 0;
         const menu = {element: menuElement, popup: () => {
             opens++;
-            menuElement.setAttribute("data-name", "barWorkspace");
+            menuElement.setAttribute("data-name", menuConstants.MENU_BAR_MAIN_MENU);
             menuElement.classList.remove("fn__none");
         },
             remove() {this.removeCB?.(); this.removeCB = undefined; menuElement.classList.add("fn__none");}};

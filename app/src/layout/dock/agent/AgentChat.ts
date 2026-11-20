@@ -478,7 +478,10 @@ export class AgentChat extends Model {
         panel.innerHTML = '<div class="block__icons fn__hidescrollbar">' +
             (this.host.mobile && !this.host.mobileSidebar ? '<span data-type="back" class="block__icon ariaLabel" aria-label="' + L.back + '">' +
                 '<svg><use xlink:href="#iconLeft"></use></svg></span>' : "") +
-            '<div class="block__logo fn__flex-1 agent-chat__title">' + (L.agentChat || "Agent") + "</div>" +
+            '<div class="block__logo fn__flex-1">' +
+            '<span class="agent-chat__title fn__ellipsis">' + (L.agentChat || "Agent") + "</span>" +
+            '<span class="fn__space--small"></span>' +
+            '<span class="b3-chip b3-chip--small b3-chip--info fn__flex-shrink">' + escapeHtml(L.aiGeneratedContent) + "</span></div>" +
             '<span data-type="new-session" class="block__icon ariaLabel" data-position="north" aria-label="' + (L.agentNewSession || "New Session") + '">' +
             '<svg><use xlink:href="#iconAdd"></use></svg>' +
             "</span>" +

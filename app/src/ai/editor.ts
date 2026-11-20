@@ -600,7 +600,12 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
     panel.setAttribute("contenteditable", "false");
     panel.style.zIndex = (++window.siyuan.zIndex).toString();
     panel.innerHTML = `<div class="ai-editor-panel__header">
-    <span class="fn__flex-1 fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}<span class="ai-editor-panel__model"></span></span>
+    <div class="fn__flex fn__flex-1">
+        <span class="fn__ellipsis fn__flex-center">${escapeHtml(window.siyuan.languages.aiEdit)}</span>
+        <span class="fn__space--small"></span>
+        <span class="b3-chip b3-chip--small b3-chip--info fn__flex-center fn__flex-shrink">${escapeHtml(window.siyuan.languages.aiGeneratedContent)}</span>
+        <span class="ai-editor-panel__model fn__ellipsis fn__flex-center"></span>
+    </div>
     <span class="ai-editor-panel__status"></span>
     <button class="ai-editor-panel__stop agent-chat__stop b3-button b3-button--icon b3-button--cancel ariaLabel" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.agentStop)}"><svg><use xlink:href="#iconSquareStop"></use></svg></button>
     <button class="block__icon block__icon--show ariaLabel ai-editor-panel__close" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.close)}"><svg><use xlink:href="#iconClose"></use></svg></button>

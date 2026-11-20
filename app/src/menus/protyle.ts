@@ -2483,7 +2483,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     });
     const pinColumn = nodeElement.getAttribute(Constants.CUSTOM_SY_TABLE_PIN_COLUMN) === "true";
     otherMenus.push({
-        id: "pinTableHeaderColumn",
+        id: pinColumn ? "unpinTableHeaderColumn" : "pinTableHeaderColumn",
         icon: pinColumn ? "iconUnpin" : "iconPin",
         label: pinColumn ? window.siyuan.languages.unpinTableHeaderColumn : window.siyuan.languages.pinTableHeaderColumn,
         click: () => {

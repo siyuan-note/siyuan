@@ -204,7 +204,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		if err = checkTreeFile(filePath); err != nil {
 			return
 		}
-		ret, err = loadTreeByDataInMode(raw, boxID, p, luteEngine, mode)
+		ret, err = loadTreeByDataWithParentRecovery(raw, boxID, p, luteEngine, mode, true, !encrypted)
 		return
 	}
 
@@ -228,7 +228,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		return
 	}
 
-	ret, err = loadTreeByDataInMode(data, boxID, p, luteEngine, mode)
+	ret, err = loadTreeByDataWithParentRecovery(data, boxID, p, luteEngine, mode, true, !encrypted)
 	if nil == err {
 		cache.SetTreeDataFromReadInBox(rootID, boxID, data, readVersion)
 	}
@@ -271,12 +271,12 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 }
 
 func loadTreeByDataInMode(data []byte, boxID, p string, luteEngine *lute.Lute, mode int) (ret *parse.Tree, err error) {
-	return loadTreeByDataWithParentRecovery(data, boxID, p, luteEngine, mode, true)
+	return loadTreeByDataWithParentRecovery(data, boxID, p, luteEngine, mode, true, false)
 }
 
 func loadTreeByDataWithParentRecovery(data []byte, boxID, p string, luteEngine *lute.Lute, mode int,
-	recoverParents bool) (ret *parse.Tree, err error) {
-	ret, err = parseJSON2TreeInMode(boxID, p, data, luteEngine, mode)
+	recoverParents, cacheSpec bool) (ret *parse.Tree, err error) {
+	ret, err = parseJSON2TreeWithSpecCache(boxID, p, data, luteEngine, cacheSpec)
 	if nil != err {
 		logging.LogErrorf("parse tree [%s] failed: %s", p, err)
 		return
@@ -929,11 +929,16 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 }
 
 func parseJSON2TreeInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lute, mode int) (ret *parse.Tree, err error) {
+	return parseJSON2TreeWithSpecCache(boxID, p, jsonData, luteEngine, false)
+}
+
+func parseJSON2TreeWithSpecCache(boxID, p string, jsonData []byte, luteEngine *lute.Lute, cacheSpec bool) (ret *parse.Tree, err error) {
 	jsonData = bytes.TrimPrefix(jsonData, []byte("\xef\xbb\xbf"))
-	if err = treenode.CheckSpecJSON(jsonData); nil != err {
-		return
+	parseSource := treenode.ParseJSON
+	if cacheSpec {
+		parseSource = treenode.ParseJSONWithSpecCache
 	}
-	ret, _, err = treenode.ParseJSON(jsonData, luteEngine.ParseOptions)
+	ret, _, err = parseSource(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
 		err = fmt.Errorf("parse json [%s] to tree failed: %w", boxID+p, err)

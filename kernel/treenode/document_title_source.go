@@ -6,14 +6,22 @@ package treenode
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 )
+
+var documentSpecCache, _ = ristretto.NewCache(&ristretto.Config{
+	NumCounters: 16384,
+	MaxCost:     256 * 1024,
+	BufferItems: 64,
+})
 
 // documentTitleSourceJSON 在节点容错解析之前拒绝重复源、未知格式及空载荷。
 type documentTitleSourceJSON struct {
@@ -51,6 +59,23 @@ func ParseJSON(data []byte, options *parse.Options) (*parse.Tree, bool, error) {
 	if err := CheckSpecJSON(data); err != nil {
 		return nil, false, err
 	}
+	return parseValidatedJSON(data, options)
+}
+
+// ParseJSONWithSpecCache 仅供普通笔记本加载，按完整源字节和当前版本复用成功的格式检查。
+func ParseJSONWithSpecCache(data []byte, options *parse.Options) (*parse.Tree, bool, error) {
+	digest := sha256.Sum256(data)
+	key := CurrentSpec + string(digest[:])
+	if _, ok := documentSpecCache.Get(key); !ok {
+		if err := CheckSpecJSON(data); err != nil {
+			return nil, false, err
+		}
+		documentSpecCache.Set(key, true, int64(len(key)))
+	}
+	return parseValidatedJSON(data, options)
+}
+
+func parseValidatedJSON(data []byte, options *parse.Options) (*parse.Tree, bool, error) {
 	tree, fixed, err := dataparser.ParseJSON(data, options)
 	if err == nil {
 		err = restoreDocumentTitleSource(data, tree)

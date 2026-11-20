@@ -83,7 +83,7 @@ func TestTreeSnapshotReuseMatchesReparsedSource(t *testing.T) {
 					if err != nil || wantFix != repair {
 						t.Fatalf("unexpected compatibility repair: %t %v", wantFix, err)
 					}
-					want, err := loadTreeByDataWithParentRecovery(fixed, box, tree.Path, engine, mode, false)
+					want, err := loadTreeByDataWithParentRecovery(fixed, box, tree.Path, engine, mode, false, false)
 					if err != nil {
 						t.Fatal(err)
 					}

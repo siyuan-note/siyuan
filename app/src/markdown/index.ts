@@ -31,7 +31,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     const prepareDocumentLink = bridge.prepareDocumentLink;
     let preferences = bootstrap.preferences;
     let appearance = bridge.appearance ? bootstrap.appearance : undefined;
-    const fontAppearance = createMarkdownFontAppearance(root);
+    const fontAppearance = createMarkdownFontAppearance(root.ownerDocument.body);
     const appearanceTheme = () => appearance?.theme ?? preferences.theme ?? "system";
     let activeMode = preferences.mode;
     let systemDark = bootstrap.dark;

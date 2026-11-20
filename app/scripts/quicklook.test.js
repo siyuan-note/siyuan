@@ -34,7 +34,10 @@ test("Quick Look builds a self-contained resource manifest with the installed Lu
     assert.ok(!bundle.includes("/api/"));
     assert.ok(!bundle.includes("ipcRenderer"));
     const languages = JSON.parse(fs.readFileSync(path.join(root, "languages.json"), "utf8"));
-    assert.equal(Object.keys(languages).length, 22);
+    const bundledLocales = fs.readdirSync(path.join(__dirname, "../appearance/langs"))
+        .filter(file => file.endsWith(".json")).map(file => file.slice(0, -5)).sort();
+    assert.ok(bundledLocales.includes("en") && bundledLocales.includes("vi"));
+    assert.deepEqual(Object.keys(languages).sort(), bundledLocales);
     for (const text of Object.values(languages)) assert.ok(text.limit && text.encoding && text.timeout && text.resource);
 });
 

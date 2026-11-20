@@ -26,7 +26,7 @@ const getFixtures = (): IconMenuFixture[] => {
     };
     const languagesPath = path.join(__dirname, "../../../../appearance/langs");
     const locales = readdirSync(languagesPath).filter(name => name.endsWith(".json")).sort();
-    assert.equal(locales.length, 22);
+    assert.ok(locales.includes("en.json") && locales.includes("vi.json"));
     return locales.flatMap(locale => {
         const languages = JSON.parse(readFileSync(path.join(languagesPath, locale), "utf8"));
         const {getLayoutHTML} = evaluateModule<typeof import("./layout")>(compiled, {

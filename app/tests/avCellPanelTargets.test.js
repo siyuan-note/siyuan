@@ -139,6 +139,7 @@ const fixture = (type, {count = 1, batch = "", groups = false, cached = true, re
         ...load("capabilities"), ...load("cellValue"), ...load("batchValue"), ...load("dragFillValue"),
         ...load("viewType"), ...load("dateSubmit"), ...load("selectionState"), ...load("panelTarget"),
         ...load("assetUploadTarget"), ...load("relationPosition"),
+        escapeHtmlTextAndAttr: load("../../../util/escape").escapeHtmlTextAndAttr,
         document, window, CustomEvent, setTimeout,
         cellValues: plain(values),
         getAVData: () => state.data,

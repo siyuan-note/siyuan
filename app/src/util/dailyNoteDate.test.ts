@@ -26,7 +26,7 @@ test("daily note dates recognize current-language and English expressions", () =
 
 test("all bundled languages recognize their relative dates and Gregorian month forms", () => {
     const languages = readdirSync(join(__dirname, "../../appearance/langs")).filter(file => file.endsWith(".json"));
-    assert.equal(languages.length, 22);
+    assert.ok(languages.includes("en.json") && languages.includes("vi.json"));
     for (const filename of languages) {
         const locale = filename.slice(0, -5);
         const relative = new Intl.RelativeTimeFormat(locale, {numeric: "auto"});

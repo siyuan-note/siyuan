@@ -601,10 +601,13 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
     panel.setAttribute("contenteditable", "false");
     panel.style.zIndex = (++window.siyuan.zIndex).toString();
     panel.innerHTML = `<div class="ai-editor-panel__header">
-    ${mobile ? `<span class="fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}</span>
+    ${mobile ? `<span class="ai-editor-panel__title fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}</span>
     <span class="b3-chip b3-chip--middle b3-chip--info fn__flex-shrink">${escapeHtml(window.siyuan.languages.aiGeneratedContent)}</span>
-    <span class="ai-editor-panel__model fn__flex-1 fn__ellipsis"></span>` : `<span class="fn__flex-1 fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}<span class="ai-editor-panel__model"></span></span>`}
-    <span class="ai-editor-panel__status"></span>
+    <span class="ai-editor-panel__details fn__flex fn__flex-1">
+        <span class="ai-editor-panel__model fn__ellipsis"></span>
+        <span class="ai-editor-panel__status"></span>
+    </span>` : `<span class="fn__flex-1 fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}<span class="ai-editor-panel__model"></span></span>
+    <span class="ai-editor-panel__status"></span>`}
     <button class="ai-editor-panel__stop agent-chat__stop b3-button b3-button--icon b3-button--cancel ariaLabel" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.agentStop)}"><svg><use xlink:href="#iconSquareStop"></use></svg></button>
     <button class="block__icon block__icon--show ariaLabel ai-editor-panel__close" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.close)}"><svg><use xlink:href="#iconClose"></use></svg></button>
 </div>

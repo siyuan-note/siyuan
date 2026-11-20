@@ -15,6 +15,7 @@ import {openLink} from "../../../editor/openLink";
 import {previewImages} from "../../../protyle/preview/image";
 import {getDiagramBlock, previewDiagram} from "../../../protyle/preview/diagram";
 import {removeCompressURL} from "../../../util/image";
+import {isMobile} from "../../../util/functions";
 import {writeClipboardData} from "../../../protyle/util/compatibility";
 /// #if !MOBILE
 import {openGlobalSearch} from "../../../search/util";
@@ -60,7 +61,7 @@ export const renderWelcomeHTML = (hasModel = true, greetingKey = ""): string => 
             '<div class="agent-welcome__no-model-title">' + (L.agentNoModel || "No model configured") + "</div>" +
             '<div class="agent-welcome__no-model-tip">' + L.agentNoModelTip + "</div>" +
             '<button class="b3-button agent-welcome__go-setting" data-type="go-ai-setting">' + (L.agentGoToSetting || "Go to Settings") + "</button>" +
-            '<div class="fn__hr"></div><button class="b3-button b3-button--outline" data-type="go-chatgpt">' + L.chatGPTConnect + "</button>" +
+            (isMobile() ? "" : '<div class="fn__hr"></div><button class="b3-button b3-button--outline" data-type="go-chatgpt">' + L.chatGPTConnect + "</button>") +
             "</div>" +
             "</div>";
     }

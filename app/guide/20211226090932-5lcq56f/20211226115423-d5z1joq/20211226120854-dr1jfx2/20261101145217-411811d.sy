@@ -6,7 +6,7 @@
 		"id": "20261101145217-411811d",
 		"title": "獨立 Markdown 編輯器",
 		"type": "doc",
-		"updated": "20261113111930"
+		"updated": "20261120092311"
 	},
 	"Children": [
 		{
@@ -398,7 +398,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101171827-62b5f30",
-				"updated": "20261105091714"
+				"updated": "20261120092311"
 			},
 			"Children": [
 				{
@@ -458,7 +458,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101171827-261349c",
-				"updated": "20261101171827"
+				"updated": "20261120092311"
 			},
 			"Children": [
 				{

@@ -6,7 +6,7 @@
 		"id": "20261101145217-93b3519",
 		"title": "独立した Markdown エディタ",
 		"type": "doc",
-		"updated": "20261113111930"
+		"updated": "20261120092311"
 	},
 	"Children": [
 		{
@@ -394,7 +394,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101171827-75ca5fd",
-				"updated": "20261105091714"
+				"updated": "20261120092311"
 			},
 			"Children": [
 				{
@@ -454,7 +454,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101171827-efa0c2b",
-				"updated": "20261101171827"
+				"updated": "20261120092311"
 			},
 			"Children": [
 				{

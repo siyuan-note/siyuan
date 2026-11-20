@@ -3,6 +3,39 @@ const {readFileSync, mkdtempSync, rmSync} = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 
+const runPinnedHeader = () => {
+    const check = require("node:assert/strict");
+    const root = document.createElement("div");
+    root.className = "protyle-wysiwyg";
+    root.innerHTML = '<div class="table" data-node-id="table" custom-pinthead="true"><div style="width:240px;max-height:140px">' +
+        '<table style="width:480px"><thead><tr><th>Left</th><th>Right</th></tr></thead><tbody>' +
+        '<tr><td>1</td><td>2</td></tr>'.repeat(16) + '</tbody></table><div class="protyle-action__table"></div></div></div>';
+    document.body.append(root);
+    try {
+        const table = root.querySelector("table");
+        const viewport = table.parentElement;
+        const head = table.tHead;
+        const border = getComputedStyle(head, "::after");
+        check.equal(getComputedStyle(table).borderTopWidth, "0px");
+        check.equal(border.borderTopWidth, "1px");
+        check.equal(border.pointerEvents, "none");
+        check.equal(border.borderTopLeftRadius, getComputedStyle(table).borderTopLeftRadius);
+        check.equal(border.borderTopRightRadius, getComputedStyle(table).borderTopRightRadius);
+        const cornerOverlay = getComputedStyle(table.nextElementSibling, "::before");
+        check.equal(cornerOverlay.backgroundPosition, "0% 100%, 100% 100%");
+        for (const [left, top] of [[0, 0], [0, 70], [90, 70], [0, 0]]) {
+            viewport.scrollTo(left, top);
+            const rect = viewport.getBoundingClientRect();
+            check.equal(viewport.scrollTop, top);
+            check.equal(viewport.scrollLeft, left);
+            check.equal(head.getBoundingClientRect().top, rect.top);
+            check.equal(table.getBoundingClientRect().top, rect.top - top);
+        }
+    } finally {
+        root.remove();
+    }
+};
+
 const runCases = async (preview) => {
     const check = require("node:assert/strict");
     const {renderTableCorners, observeTableCorners, destroyTableCorners} = window.corners;
@@ -135,6 +168,9 @@ const runElectron = async () => {
                 for (const preview of [false, true]) {
                     await win.webContents.executeJavaScript(`(${runCases.toString()})(${preview})`);
                 }
+                if (entry !== "export") {
+                    await win.webContents.executeJavaScript(`(${runPinnedHeader.toString()})()`);
+                }
                 await win.webContents.removeInsertedCSS(themeKey);
             }
             await win.webContents.removeInsertedCSS(cssKey);
@@ -155,7 +191,7 @@ if (process.versions.electron && process.type === "browser") {
         require("electron").app.exit(1);
     });
 } else {
-    require("node:test").it("renders merged table corners across editor, mobile, preview and export styles", {
+    require("node:test").it("renders merged corners and pinned header borders with editor, mobile, preview and export styles", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 60000,
     }, async () => {

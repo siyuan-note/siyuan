@@ -639,6 +639,7 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
       }
 
       table {
+        border-top: 0;
         border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
         box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
       }
@@ -649,6 +650,17 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         z-index: 2;
         box-shadow: 0 -1px 0 var(--b3-border-color) inset;
         background-color: var(--b3-parent-background);
+
+        &::after {
+          content: "";
+          position: absolute;
+          inset: 0 0 auto -1px;
+          z-index: 2;
+          height: var(--b3-border-radius-s);
+          border-top: 1px solid var(--b3-theme-surface-lighter);
+          border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) 0 0;
+          pointer-events: none;
+        }
 
         th {
           border-top: 0;

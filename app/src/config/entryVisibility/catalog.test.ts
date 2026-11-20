@@ -1026,16 +1026,17 @@ test("table catalog follows the menu arrays and conditional declarations", () =>
         assert.equal(getEntryCatalogNode(`${parent}.insertTableHeaderRow`).type, "entry");
     }
     for (const parent of ["gutter.single.table", "inline.text.more"]) {
-        const column = getEntryCatalogNode(`${parent}.pinTableHeaderColumn`);
-        assert.equal(column.type, "entry");
-        assert.equal(column.simple, getEntryCatalogNode(`${parent}.pinTableHead`).simple);
+        for (const action of ["pin", "unpin"]) {
+            const column = getEntryCatalogNode(`${parent}.${action}TableHeaderColumn`);
+            assert.equal(column.type, "entry");
+            assert.equal(column.simple, getEntryCatalogNode(`${parent}.${action}TableHead`).simple);
+        }
     }
     const source = readFileSync(resolve(process.cwd(), "src/menus/protyle.ts"), "utf8");
     const table = source.slice(source.indexOf("export const tableMenu ="));
     const pushedIDs = (array: string) => Array.from(table.matchAll(
-        new RegExp(`${array}\\.push\\(\\{\\s*id: ("[^" ]+"|isPinHead \\? "unpinTableHead" : "pinTableHead")`, "g"),
-    )).flatMap(match => match[1].startsWith("isPinHead")
-        ? ["pinTableHead", "unpinTableHead"] : [JSON.parse(match[1])]);
+        new RegExp(`${array}\\.push\\(\\{\\s*id: (?:"([^"]+)"|\\w+ \\? "([^"]+)" : "([^"]+)")`, "g"),
+    )).flatMap(([, id, enabled, disabled]) => id ? [id] : [disabled, enabled]);
     const other = pushedIDs("otherMenus");
     const moves = pushedIDs("other2Menus");
     const inserts = pushedIDs("insertMenus");

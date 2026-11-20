@@ -1188,6 +1188,10 @@
     pointer-events: none;
   }
 
+  .protyle-wysiwyg[data-readonly="false"] & .protyle-action--task {
+    pointer-events: auto;
+  }
+
   .protyle-icons,
   .protyle-icon,
   .protyle-action__language {

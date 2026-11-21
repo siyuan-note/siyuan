@@ -254,7 +254,11 @@ const runInteractionCases = async () => {
         await f.settle();
     };
     const installedHTML = bazaar.element.querySelector("#configBazaarDownloaded").innerHTML;
+    const searchPlaceholder = window.siyuan.languages.bazaarSearchPlaceholder;
+    assert.ok(searchPlaceholder);
+    assert.equal(bazaar.element.querySelector('[data-type="downloaded-filter"]').placeholder, searchPlaceholder);
     for (const type of types) {
+        assert.equal(panel(type).querySelector(".b3-text-field").placeholder, searchPlaceholder);
         activate(type);
         response(type, packages);
         assert.equal(panel(type).querySelectorAll("[data-bazaar-filter]").length, 0);

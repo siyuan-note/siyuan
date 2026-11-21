@@ -343,7 +343,7 @@ export const bazaar = {
                         <option ${localSort.downloadedPlugin === "6" ? "selected" : ""} data-plugin-only="true" value="6">${window.siyuan.languages.sortByDisabledFirst}</option>
                     </select>
                 </div>
-                <input spellcheck="false" data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
+                <input spellcheck="false" data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${escapeAttr(window.siyuan.languages.bazaarSearchPlaceholder)}">
                 <div class="fn__flex config-bazaar__actions">
                     <label class="block__icon block__icon--show config-bazaar__local-package ariaLabel" data-type="install-local-package" data-position="north" aria-label="${window.siyuan.languages.installLocalBazaarPackage}">
                         <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>

@@ -3788,6 +3788,7 @@
 		"469": "Authenticatie mislukt: dit verzoek heeft de controles voor lokale toegang niet doorstaan. VPN’s, proxy’s of netwerkfilterapps kunnen lokale toegang beïnvloeden; schakel ze tijdelijk uit en probeer het opnieuw. Stel bij toegang via een niet-lokaal adres eerst een wachtwoord voor schermvergrendeling in",
 		"470": "Het maximumaantal rondes met hulpmiddelaanroepen is bereikt. Ik ben gestopt met het gebruik van hulpmiddelen; deze taak is mogelijk nog niet voltooid",
 		"471": "Herhaalde hulpmiddelaanroepen leverden hetzelfde resultaat op. Ik ben gestopt met het gebruik van hulpmiddelen; deze taak is mogelijk nog niet voltooid",
-		"472": "De oude mindmap kon niet worden geconverteerd, open het document opnieuw en probeer het nogmaals"
+		"472": "De oude mindmap kon niet worden geconverteerd, open het document opnieuw en probeer het nogmaals",
+		"473": "Er is een onverwachte fout opgetreden bij het verwerken van het verzoek. Controleer het systeemlogboek"
 	}
 }

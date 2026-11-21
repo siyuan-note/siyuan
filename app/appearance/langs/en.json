@@ -3788,6 +3788,7 @@
 		"469": "Authentication failed: this request did not pass the local access checks. VPNs, proxies or network filtering apps may affect local access; try temporarily disabling them and retrying. When accessing through a non-local address, set a lock screen password first",
 		"470": "Tool call round limit reached. I have stopped using tools; this task may still be incomplete",
 		"471": "Repeated tool calls returned the same result. I have stopped using tools; this task may still be incomplete",
-		"472": "Failed to convert the legacy mind map, please reopen the document and try again"
+		"472": "Failed to convert the legacy mind map, please reopen the document and try again",
+		"473": "An unexpected error occurred while processing the request. Check the system log"
 	}
 }

@@ -3788,6 +3788,7 @@
 		"469": "Kimlik doğrulama başarısız: bu istek yerel erişim denetimlerinden geçemedi. VPN, proxy veya ağ filtreleme uygulamaları yerel erişimi etkileyebilir; bunları geçici olarak devre dışı bırakıp yeniden deneyin. Yerel olmayan bir adres üzerinden erişirken önce bir ekran kilidi parolası belirleyin",
 		"470": "Araç çağrısı tur sınırına ulaşıldı. Araç kullanmayı durdurdum; bu görev hâlâ tamamlanmamış olabilir",
 		"471": "Tekrarlanan araç çağrıları aynı sonucu döndürdü. Araç kullanmayı durdurdum; bu görev hâlâ tamamlanmamış olabilir",
-		"472": "Eski zihin haritası dönüştürülemedi, lütfen belgeyi yeniden açıp tekrar deneyin"
+		"472": "Eski zihin haritası dönüştürülemedi, lütfen belgeyi yeniden açıp tekrar deneyin",
+		"473": "İstek işlenirken beklenmeyen bir hata oluştu. Sistem günlüğünü kontrol edin"
 	}
 }

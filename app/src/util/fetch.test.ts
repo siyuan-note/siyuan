@@ -51,7 +51,7 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
         FormData,
         location: {port: "6806"},
         console: {warn: () => {}},
-        window: {siyuan: {ws: interactive ? {ws: {}} : undefined, languages: {transactionSaveUnconfirmed: "Save unconfirmed"}}},
+        window: {siyuan: {reqIds: {}, ws: interactive ? {ws: {}} : undefined, languages: {transactionSaveUnconfirmed: "Save unconfirmed"}}},
     });
     return {fetchPost: exports.fetchPost, fetchSyncPost: exports.fetchSyncPost, sends, timeouts, notifications, scheduled,
         kernelChecks: () => kernelChecks};
@@ -139,6 +139,21 @@ it("keeps positive business errors in the callback and filters negative errors",
         const received: IWebSocketData[] = [];
         await fetchPost("/api/block/getBlockInfo", {id: "id"}, (response: IWebSocketData) => received.push(response));
         assert.deepEqual(received, code < 0 ? [] : [payload]);
+    }
+});
+
+it("reports JSON server errors without request IDs on routes that discard stale results", async () => {
+    const payload: {code: number; msg: string; data: null} = {code: -1, msg: "Internal error", data: null};
+    for (const url of ["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph"]) {
+        const processed: IWebSocketData[] = [];
+        const {fetchPost} = loadFetchPost(async () => new Response(JSON.stringify(payload), {
+            status: 500, headers: {"Content-Type": "application/json"},
+        }), response => {
+            processed.push(response);
+            return false;
+        });
+        await fetchPost(url, {}, () => assert.fail("server error reached the success callback"));
+        assert.deepEqual(processed, [payload]);
     }
 });
 

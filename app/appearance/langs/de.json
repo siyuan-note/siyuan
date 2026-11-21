@@ -3788,6 +3788,7 @@
 		"469": "Authentifizierung fehlgeschlagen: Diese Anfrage hat die Prüfungen für den lokalen Zugriff nicht bestanden. VPNs, Proxys oder Netzwerkfilter-Apps können den lokalen Zugriff beeinträchtigen; deaktivieren Sie diese vorübergehend und versuchen Sie es erneut. Richten Sie beim Zugriff über eine nicht lokale Adresse zuerst ein Sperrbildschirm-Passwort ein",
 		"470": "Die maximale Anzahl an Werkzeugaufrufrunden wurde erreicht. Ich habe die Verwendung von Werkzeugen beendet; diese Aufgabe ist möglicherweise noch nicht abgeschlossen",
 		"471": "Wiederholte Werkzeugaufrufe lieferten dasselbe Ergebnis. Ich habe die Verwendung von Werkzeugen beendet; diese Aufgabe ist möglicherweise noch nicht abgeschlossen",
-		"472": "Die alte Mindmap konnte nicht konvertiert werden. Bitte öffne das Dokument erneut und versuche es noch einmal"
+		"472": "Die alte Mindmap konnte nicht konvertiert werden. Bitte öffne das Dokument erneut und versuche es noch einmal",
+		"473": "Bei der Verarbeitung der Anfrage ist ein unerwarteter Fehler aufgetreten. Prüfen Sie das Systemprotokoll"
 	}
 }

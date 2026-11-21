@@ -3788,6 +3788,7 @@
 		"469": "Uwierzytelnianie nie powiodło się: to żądanie nie przeszło kontroli dostępu lokalnego. Sieci VPN, serwery proxy lub aplikacje filtrujące sieć mogą wpływać na dostęp lokalny; spróbuj je tymczasowo wyłączyć i ponowić próbę. Przy dostępie przez adres inny niż lokalny najpierw ustaw hasło blokady ekranu",
 		"470": "Osiągnięto limit rund wywołań narzędzi. Przestałem używać narzędzi; to zadanie może nadal być nieukończone",
 		"471": "Powtarzane wywołania narzędzi zwracały ten sam wynik. Przestałem używać narzędzi; to zadanie może nadal być nieukończone",
-		"472": "Nie udało się przekonwertować starej mapy myśli, otwórz ponownie dokument i spróbuj jeszcze raz"
+		"472": "Nie udało się przekonwertować starej mapy myśli, otwórz ponownie dokument i spróbuj jeszcze raz",
+		"473": "Podczas przetwarzania żądania wystąpił nieoczekiwany błąd. Sprawdź dziennik systemowy"
 	}
 }

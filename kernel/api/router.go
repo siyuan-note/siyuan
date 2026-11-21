@@ -11,7 +11,7 @@ import (
 )
 
 func ServeAPI(ginServer *gin.Engine) {
-	ginServer.Use(boxLeaseMiddleware)
+	ginServer.Use(boxLeaseMiddleware, recoverAPI)
 	registerOauthRoutes(ginServer)
 	registerMcpRoutes(ginServer)
 	registerSystemRoutes(ginServer)

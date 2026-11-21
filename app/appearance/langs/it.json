@@ -3788,6 +3788,7 @@
 		"469": "Autenticazione non riuscita: questa richiesta non ha superato i controlli di accesso locale. VPN, proxy o app di filtraggio della rete possono influire sull’accesso locale; prova a disattivarli temporaneamente e riprova. Per accedere tramite un indirizzo non locale, imposta prima una password di blocco schermo",
 		"470": "È stato raggiunto il limite di turni di chiamata agli strumenti. Ho smesso di usare gli strumenti; questa attività potrebbe essere ancora incompleta",
 		"471": "Le chiamate ripetute agli strumenti hanno restituito lo stesso risultato. Ho smesso di usare gli strumenti; questa attività potrebbe essere ancora incompleta",
-		"472": "Impossibile convertire la mappa mentale precedente, riapri il documento e riprova"
+		"472": "Impossibile convertire la mappa mentale precedente, riapri il documento e riprova",
+		"473": "Si è verificato un errore imprevisto durante l’elaborazione della richiesta. Controlla il registro di sistema"
 	}
 }

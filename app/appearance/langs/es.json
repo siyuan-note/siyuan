@@ -3788,6 +3788,7 @@
 		"469": "Error de autenticación: esta solicitud no superó las comprobaciones de acceso local. Las VPN, los proxies o las aplicaciones de filtrado de red pueden afectar al acceso local; prueba a desactivarlos temporalmente y vuelve a intentarlo. Para acceder mediante una dirección no local, configura primero una contraseña de bloqueo de pantalla",
 		"470": "Se ha alcanzado el límite de rondas de llamadas a herramientas. He dejado de usar herramientas; esta tarea puede seguir incompleta",
 		"471": "Las llamadas repetidas a herramientas devolvieron el mismo resultado. He dejado de usar herramientas; esta tarea puede seguir incompleta",
-		"472": "No se pudo convertir el mapa mental antiguo, vuelve a abrir el documento e inténtalo de nuevo"
+		"472": "No se pudo convertir el mapa mental antiguo, vuelve a abrir el documento e inténtalo de nuevo",
+		"473": "Se produjo un error inesperado al procesar la solicitud. Consulta el registro del sistema"
 	}
 }

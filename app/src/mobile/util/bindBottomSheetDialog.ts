@@ -1,11 +1,10 @@
 import type {Dialog} from "../../dialog";
 import {bindBottomSheetDrag} from "./bindBottomSheetDrag";
 import {waitForSheetViewport} from "../../menus/sheetOpen";
-import type {MobileSheetMode} from "./mobileSheetLayout";
 import {bindKeyboardSheetState} from "./keyboardSheetState";
 
 export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void | boolean>, afterResize?: () => void,
-                                     afterOpen?: () => void, layoutOptions?: {mode?: MobileSheetMode, fitContent?: boolean, canStart?: () => boolean}) => {
+                                     afterOpen?: () => void, layoutOptions?: {canStart?: () => boolean}) => {
     dialog.element.classList.add("mobile-bottom-sheet-dialog");
     const sheet = dialog.element.querySelector<HTMLElement>(".b3-dialog__container");
     sheet.querySelector(".b3-dialog__close")?.remove();
@@ -53,8 +52,8 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     const disposeKeyboardState = bindKeyboardSheetState(sheet);
     const dragState: {cancel?: () => void} = {};
     const layout = (require("./mobileSheetLayout") as typeof import("./mobileSheetLayout")).bindMobileSheetLayout(dialog.element.querySelector<HTMLElement>(".b3-dialog"),
-        sheet, {...layoutOptions, onResize: afterResize, onGeometryChange: () => dragState.cancel?.()});
-    // 底部面板由抓手调整高度，不参与通用对话框的移动和缩放。
+        sheet, {onResize: afterResize, onGeometryChange: () => dragState.cancel?.()});
+    // 底部抽屉通过抓手展开或收起，禁用通用对话框的移动和缩放。
     sheet.querySelector(".b3-dialog__header")?.classList.remove("resize__move");
     sheet.querySelectorAll(":scope > .resize__rd, :scope > .resize__ld, :scope > .resize__lt, :scope > .resize__rt, " +
         ":scope > .resize__r, :scope > .resize__d, :scope > .resize__t, :scope > .resize__l")
@@ -110,10 +109,7 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     updateOpen();
     const disposeDrag = bindBottomSheetDrag(sheet, dialog.element.querySelector(".b3-dialog__scrim"), close, {
         grip: handle,
-        getBounds: layout.getBounds,
-        resize: height => {
-            layout.setPreferredHeight(height);
-        },
+        expand: () => layout.setMode("expanded"),
         canStart: () => {
             const body = sheet.querySelector<HTMLElement>(":scope > .b3-dialog__body");
             return window.siyuan.dialogs?.[window.siyuan.dialogs.length - 1] === dialog &&
@@ -134,6 +130,5 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
         handle.remove();
     };
     dispose.freeze = () => layout.freeze();
-    dispose.setMode = layout.setMode;
     return dispose;
 };

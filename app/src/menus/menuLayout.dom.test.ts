@@ -871,7 +871,6 @@ const browserCases = async (sources: Record<string, string>, css: string,
     keyboardToolbar.style.cssText = "position:fixed;bottom:0;height:40px;width:100%";
     document.body.append(keyboardToolbar);
     const sheet = createMenu();
-    sheet.element.classList.add("b3-menu--fit");
     addItems(sheet, 2);
     sheet.fullscreen("bottom", undefined, {preserveKeyboard: true});
     await settle();
@@ -886,8 +885,8 @@ const browserCases = async (sources: Record<string, string>, css: string,
     pointer(sheetItems, .3);
     pointer(sheetItems, .7);
     check.equal(sheetItems.scrollTop, 0, "Mobile sheets ignore mouse-follow scrolling even with a saved preference");
-    check.ok(sheet.element.getBoundingClientRect().height > sheetHeight);
-    check.ok(sheet.element.getBoundingClientRect().height <= innerHeight * .9 + .5);
+    check.equal(sheet.element.getBoundingClientRect().height, sheetHeight);
+    check.ok(sheet.element.getBoundingClientRect().height <= innerHeight / 2 + .5);
     check.equal(sheetResets, 1);
     await settle();
     check.equal(sheetResets, 1, "Sheet title updates must not cause a layout loop");

@@ -30,7 +30,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
     }, (response) => {
         pageCount = Math.max(response.data.pageCount, 1);
         const dialog = new AdaptiveDialog({
-            mobileSheet: {mode: "expanded", beforeClose: createMobileSecondaryEditorCloseGuard(() => edit)},
+            mobileSheet: {beforeClose: createMobileSecondaryEditorCloseGuard(() => edit)},
             hideCloseIcon: true,
             positionId: Constants.DIALOG_VIEWCARDS,
             content: `<div class="fn__flex-column" style="height: 100%">

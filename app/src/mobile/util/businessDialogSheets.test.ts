@@ -61,11 +61,6 @@ test("existing editable sheets reuse standard geometry without a second construc
         let bound = 0;
         const visit = (node: import("typescript").Node) => {
             if (isCallExpression(node) && node.expression.getText(source) === "bindBottomSheetDialog") {
-                assert.match(node.arguments[4].getText(source), /mode:\s*"standard"/);
-                assert.doesNotMatch(node.arguments[4].getText(source), /expandable:/);
-                if (file === "menus/commonMenuItem.ts") {
-                    assert.match(node.arguments[4].getText(source), /fitContent:\s*false/);
-                }
                 bound++;
             }
             if (isNewExpression(node) && node.expression.getText(source) === "MobileEditorDialog") {

@@ -105,14 +105,13 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     common.className = "b3-menu fn__none";
     common.innerHTML = '<div class="b3-menu__title"><span class="b3-menu__label"></span></div>' +
         '<div class="b3-menu__items"><button class="b3-menu__item">Database</button></div>';
-    common.dataset.sheetExpandable = "true";
     document.body.append(common);
     const parent = new Menu(common);
     parent.addItem({label: "A long database property label that needs more than one line", submenu: [{label: "Option"}]});
     window.siyuan.menus.menu = parent;
     parent.fullscreen();
     await settle();
-    check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight * .56) < 1);
+    check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight / 2) < 1);
     (common.lastElementChild.lastElementChild as HTMLElement).click();
     await settle();
     const title = common.firstElementChild;
@@ -122,7 +121,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     check.equal(common.querySelector('[data-type="sheet-expand"]'), null);
     common.dispatchEvent(new CustomEvent("click", {detail: "back"}));
     await settle();
-    check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight * .56) < 1);
+    check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight / 2) < 1);
 
     const block = document.createElement("div");
     block.className = "av";
@@ -140,11 +139,11 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     const menu = panel.lastElementChild as HTMLElement;
     const back = menu.querySelector<HTMLButtonElement>('[data-type="sheet-back"]');
     check.equal(back.classList.contains("fn__none"), false);
-    check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight * .56) < 1);
+    check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight / 2) < 1);
     check.equal(menu.querySelector('[data-type="sheet-expand"]'), null);
     const touch = (type: string, y: number, target: Element = menu.firstElementChild) => {
         const event = new Event(type, {bubbles: true, cancelable: true});
-        Object.assign(event, {touches: [{clientX: 80, clientY: y}], changedTouches: [{clientX: 80, clientY: y}]});
+        Object.assign(event, {touches: [{identifier: 1, clientX: 80, clientY: y}], changedTouches: [{identifier: 1, clientX: 80, clientY: y}]});
         target.dispatchEvent(event);
     };
     touch("touchstart", menu.getBoundingClientRect().top + 8);
@@ -192,30 +191,6 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     touch("touchmove", 280);
     touch("touchend", 280);
     await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 180)) < 1,
-        `drag height ${menu.getBoundingClientRect().height}, expected ${innerHeight - 180}`);
-    touch("touchstart", 200);
-    touch("touchmove", 60);
-    touch("touchend", 60);
-    await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 40)) < 1,
-        `resized height ${menu.getBoundingClientRect().height}, expected ${innerHeight - 40}`);
-    Object.assign(viewport, {height: innerHeight - 300});
-    viewport.dispatchEvent(new Event("resize"));
-    await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 300)) < 1);
-    Object.assign(viewport, {height: innerHeight});
-    viewport.dispatchEvent(new Event("resize"));
-    await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 40)) < 1,
-        "keyboard dismissal restores the manually selected height");
-    await new Promise(resolve => setTimeout(resolve, 310));
-    check.equal(menu.querySelector('[data-type="sheet-close"]'), null);
-    menu.classList.remove("b3-menu--expanded");
-    touch("touchstart", 100);
-    touch("touchmove", innerHeight + 300);
-    touch("touchend", innerHeight + 300);
-    await settle();
     check.equal(saves, 1);
     check.equal(panel.isConnected, false);
     check.equal(common.classList.contains("fn__none"), false);
@@ -223,7 +198,6 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     common.dispatchEvent(new CustomEvent("click", {detail: "back"}));
     await settle();
     check.equal(common.classList.contains("fn__none"), true);
-    check.equal(common.hasAttribute("data-sheet-expandable"), false);
     check.equal(common.querySelector(".b3-menu__actions"), null);
     parent.append(document.createElement("button"));
     parent.fullscreen();

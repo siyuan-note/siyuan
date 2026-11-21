@@ -196,7 +196,7 @@ export const openAVLocationEditor = (options: AVLocationEditorOptions) => {
     root.querySelector('[data-action="save"]').addEventListener("click", () => void submit());
     if (mobile) {
         disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy(), undefined, undefined,
-            {mode: "standard", canStart: () => !saving && !closing});
+            {canStart: () => !saving && !closing});
     } else {
         nameInput.focus();
     }

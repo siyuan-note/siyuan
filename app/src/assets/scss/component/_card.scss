@@ -144,3 +144,11 @@
     overflow: auto;
   }
 }
+
+.mobile-bottom-sheet .b3-cover__tabs {
+  box-sizing: border-box;
+  flex: 0 1 auto;
+  max-height: 40%;
+  min-height: 0;
+  overflow: auto;
+}

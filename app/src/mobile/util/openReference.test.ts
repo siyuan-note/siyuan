@@ -275,38 +275,32 @@ test("bottom sheet readiness runs after reveal and is cancelled on dismissal or 
     }
 });
 
-test("drawers omit expansion controls while preserving mode, business footers and viewport cleanup", () => {
-    for (const mode of ["standard", "expanded"] as const) {
-        for (const existingFooter of [false, true]) {
-            const fixture = setup(false, true);
-            const dialog = new fixture.Dialog({});
-            const sheet = dialog.element.querySelector(".b3-dialog__container");
-            const footer = new ElementMock();
-            if (existingFooter) sheet.children.set(":scope > .b3-dialog__body > .b3-dialog__action", footer);
-            let opened = 0;
-            const dispose = fixture.bindBottomSheetDialog(dialog as any, async () => {}, undefined, () => { opened++; }, {mode});
-            assert.equal(sheet.style.height, mode === "expanded" ? "800px" : "auto");
-            assert.equal(fixture.canDrag(dialog), true);
-            assert.equal(sheet.querySelector('[data-type="sheet-expand"]'), undefined);
-            assert.equal(sheet.children.has("actions"), false);
-            assert.equal(footer.children.size, 0);
-            assert.equal(footer.isConnected, true);
-            dispose.setMode("standard");
-            assert.equal(sheet.style.height, "auto");
-            dispose.setMode("expanded");
-            assert.equal(sheet.style.height, "800px");
-            fixture.viewport.bottom = 400;
-            fixture.window.visualViewport.dispatch("resize");
-            assert.equal(sheet.style.height, "400px");
-            dispose();
-            fixture.finishSheetOpen();
-            assert.equal(opened, 0);
-            assert.equal(fixture.window.listenerCount(), 0);
-            assert.equal(fixture.window.visualViewport.listenerCount(), 0);
-            assert.equal(fixture.disposedBindings(), 1);
-            assert.equal(sheet.children.get("handle").isConnected, false);
-            assert.equal(footer.isConnected, true);
-        }
+test("drawers open at half height and preserve business footers and viewport cleanup", () => {
+    for (const existingFooter of [false, true]) {
+        const fixture = setup(false, true);
+        const dialog = new fixture.Dialog({});
+        const sheet = dialog.element.querySelector(".b3-dialog__container");
+        const footer = new ElementMock();
+        if (existingFooter) sheet.children.set(":scope > .b3-dialog__body > .b3-dialog__action", footer);
+        let opened = 0;
+        const dispose = fixture.bindBottomSheetDialog(dialog as any, async () => {}, undefined, () => { opened++; });
+        assert.equal(sheet.style.height, "400px");
+        assert.equal(fixture.canDrag(dialog), true);
+        assert.equal(sheet.querySelector('[data-type="sheet-expand"]'), undefined);
+        assert.equal(sheet.children.has("actions"), false);
+        assert.equal(footer.children.size, 0);
+        assert.equal(footer.isConnected, true);
+        fixture.viewport.bottom = 300;
+        fixture.window.visualViewport.dispatch("resize");
+        assert.equal(sheet.style.height, "300px");
+        dispose();
+        fixture.finishSheetOpen();
+        assert.equal(opened, 0);
+        assert.equal(fixture.window.listenerCount(), 0);
+        assert.equal(fixture.window.visualViewport.listenerCount(), 0);
+        assert.equal(fixture.disposedBindings(), 1);
+        assert.equal(sheet.children.get("handle").isConnected, false);
+        assert.equal(footer.isConnected, true);
     }
 });
 
@@ -685,8 +679,8 @@ test("viewport changes preserve the original scroll and all resize listeners are
     const dialog = fixture.dialogs[0];
     const container = dialog.element.querySelector(".b3-dialog");
     assert.equal(dialog.options.height, undefined);
-    assert.equal(dialog.element.querySelector(".b3-dialog__container").style.height, "auto");
-    assert.ok(Math.abs(parseFloat(dialog.element.querySelector(".b3-dialog__container").style.maxHeight) - 448) < .001);
+    assert.equal(dialog.element.querySelector(".b3-dialog__container").style.height, "400px");
+    assert.ok(Math.abs(parseFloat(dialog.element.querySelector(".b3-dialog__container").style.maxHeight) - 400) < .001);
     assert.equal(container.style.bottom, "0px");
     assert.equal(container.style.height, "auto");
     const sheet = dialog.element.querySelector(".b3-dialog__container");
@@ -767,7 +761,7 @@ test("reference drawer CSS respects the shared full-height cap and keyboard view
               for (const height of [800, 350, 250, 600]) {
                 container.style.height = height + 'px';
                 container.style.top = '90px';
-                const cap = Math.min(800 * .56, height);
+                const cap = Math.min(800 / 2, height);
                 sheet.style.maxHeight = cap + 'px';
                 const rect = sheet.getBoundingClientRect();
                 results.push(rect.height <= cap + 1 && rect.height > 0 &&

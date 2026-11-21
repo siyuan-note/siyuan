@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {getMobileSheetBounds} from "./mobileSheetGesture";
+import {getMobileSheetHeight} from "./mobileSheetGesture";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
@@ -9,7 +9,7 @@ const source = transpileModule(readFileSync("src/mobile/util/mobileSheetLayout.t
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const setup = (options: {fitContent?: boolean} = {}) => {
+const setup = (options: {standalone?: boolean} = {}) => {
     const listeners = new Map<string, Set<() => void>>();
     const target = (prefix: string) => ({
         addEventListener: (name: string, callback: () => void) => {
@@ -25,8 +25,8 @@ const setup = (options: {fitContent?: boolean} = {}) => {
         siyuan: {mobile: {size: {isLandscape: false, portrait: {height1: 800}, landscape: {height1: 390}}}},
     };
     const viewport = {top: 0, bottom: 800};
-    const toolbar = {hidden: true, top: 752, classList: {contains: () => toolbar.hidden},
-        getBoundingClientRect: () => ({top: toolbar.top})};
+    const toolbar = {hidden: true, top: 752, height: 48, classList: {contains: () => toolbar.hidden},
+        getBoundingClientRect: () => ({top: toolbar.top, height: toolbar.height})};
     const classes = () => {
         const values = new Set<string>();
         return {add: (value: string) => values.add(value), contains: (value: string) => values.has(value),
@@ -48,7 +48,7 @@ const setup = (options: {fitContent?: boolean} = {}) => {
             observe() { connected = true; }
             disconnect() { connected = false; }
         },
-        require: () => ({getMobileSheetBounds, getVisibleViewportBounds: () => viewport,
+        require: () => ({getMobileSheetHeight, getVisibleViewportBounds: () => viewport,
             isMobileLandscape: () => window.screen.orientation.type.startsWith("landscape")}),
     });
     let notifications = 0;
@@ -60,38 +60,25 @@ const setup = (options: {fitContent?: boolean} = {}) => {
         observed: () => connected};
 };
 
-test("content-independent sheets keep their standard height through content and viewport changes", () => {
-    const s = setup({fitContent: false});
-    const height = s.sheet.getBoundingClientRect().height;
-    assert.ok(height > s.sheet.contentHeight);
-    s.sheet.contentHeight = 80;
-    s.layout.resize();
-    assert.equal(s.sheet.getBoundingClientRect().height, height);
-    s.layout.setPreferredHeight(600);
-    s.layout.resize();
-    assert.equal(s.sheet.getBoundingClientRect().height, 600);
-    s.viewport.bottom = 300;
-    s.layout.resize();
-    assert.ok(s.sheet.getBoundingClientRect().height <= 300);
-    s.viewport.bottom = 800;
-    s.layout.resize();
-    assert.equal(s.sheet.getBoundingClientRect().height, 600);
-    s.layout.dispose();
-});
-
-test("standard sheets use natural content height below a shared full-viewport upper limit", () => {
+test("standard sheets keep half height through content changes and keyboard recovery", () => {
     const s = setup();
-    assert.equal(s.sheet.style.height, "auto");
-    assert.ok(Math.abs(parseFloat(s.sheet.style.maxHeight) - 448) < .001);
-    assert.equal(s.sheet.getBoundingClientRect().height, 120);
+    assert.equal(s.sheet.getBoundingClientRect().height, 400);
     s.sheet.contentHeight = 1000;
-    assert.ok(Math.abs(s.sheet.getBoundingClientRect().height - 448) < .001);
-    s.window.innerHeight = 300;
+    s.layout.resize();
+    assert.equal(s.sheet.getBoundingClientRect().height, 400);
     s.viewport.bottom = 300;
     s.emit("visual:resize");
     assert.equal(s.sheet.getBoundingClientRect().height, 300);
-    s.sheet.contentHeight = 120;
-    assert.equal(s.sheet.getBoundingClientRect().height, 120, "the keyboard never expands short content");
+    s.viewport.bottom = 800;
+    s.emit("visual:resize");
+    assert.equal(s.sheet.getBoundingClientRect().height, 400);
+    s.layout.dispose();
+});
+
+test("standalone progress panels still fit short content", () => {
+    const s = setup({standalone: true});
+    assert.equal(s.sheet.style.height, "auto");
+    assert.equal(s.sheet.getBoundingClientRect().height, 120);
 });
 
 test("unclipped sheets anchor to the CSS viewport bottom instead of rounding its height", () => {
@@ -133,6 +120,10 @@ test("toolbar, visible offset and safe areas clip the upper limit once", () => {
     s.toolbar.top = 900;
     s.resizeToolbar();
     assert.equal(s.sheet.style.maxHeight, "270px", "an offscreen toolbar cannot extend the visible region");
+    s.toolbar.top = 0;
+    s.toolbar.height = 0;
+    s.resizeToolbar();
+    assert.equal(s.sheet.style.maxHeight, "270px", "a hidden toolbar reserves no viewport space");
     s.viewport.bottom = 10;
     s.layout.resize();
     assert.equal(s.sheet.style.maxHeight, "0px");
@@ -145,20 +136,25 @@ test("direction changes use their own cache even before the toolbar direction fl
     s.viewport.bottom = 390;
     s.emit("orientation:change");
     assert.equal(s.window.siyuan.mobile.size.isLandscape, false);
-    assert.ok(Math.abs(parseFloat(s.sheet.style.maxHeight) - 218.4) < .001);
+    assert.ok(Math.abs(parseFloat(s.sheet.style.maxHeight) - 195) < .001);
     s.window.innerHeight = 180;
     s.viewport.bottom = 180;
     s.emit("window:orientationchange");
     assert.equal(s.sheet.style.maxHeight, "180px");
 });
 
-test("expanded mode explicitly occupies the available region and can return to natural size", () => {
+test("full height follows the visible region and can return to half screen", () => {
     const s = setup();
     s.layout.setMode("expanded");
     assert.equal(s.sheet.style.height, "800px");
+    s.viewport.bottom = 220;
+    s.emit("visual:resize");
+    assert.equal(s.sheet.style.height, "220px");
+    s.viewport.bottom = 800;
+    s.emit("visual:resize");
+    assert.equal(s.sheet.style.height, "800px");
     s.layout.setMode("standard");
-    assert.equal(s.sheet.style.height, "auto");
-    assert.equal(s.sheet.getBoundingClientRect().height, 120);
+    assert.equal(s.sheet.style.height, "400px");
 });
 
 test("exit freezes actual clipped height while viewport updates continue", () => {
@@ -193,78 +189,6 @@ test("all viewport changes notify the caller and disposal removes listeners and 
 });
 
 
-test("manual height survives content changes and expand collapse while keyboard clips only rendering", () => {
-    const s = setup();
-    s.layout.setPreferredHeight(650);
-    assert.equal(s.sheet.style.height, "650px");
-    s.sheet.contentHeight = 900;
-    s.layout.resize();
-    assert.equal(s.sheet.style.height, "650px");
-    s.layout.setMode("expanded");
-    assert.equal(s.sheet.style.height, "800px");
-    s.layout.setMode("standard");
-    assert.equal(s.sheet.style.height, "650px");
-    s.viewport.bottom = 220;
-    s.emit("visual:resize");
-    assert.equal(s.sheet.style.height, "220px");
-    s.viewport.bottom = 800;
-    s.emit("visual:resize");
-    assert.equal(s.sheet.style.height, "650px");
-});
-
-test("minimum measurement restores manual size and remains natural for short content", () => {
-    const s = setup();
-    s.layout.setPreferredHeight(650);
-    assert.equal(s.layout.getBounds().min, 120);
-    assert.equal(s.sheet.style.height, "650px");
-});
-
-
-test("new minimum clamps rendered manual height without replacing its preferred height", () => {
-    const s = setup();
-    s.layout.setPreferredHeight(130);
-    assert.equal(s.sheet.style.height, "130px");
-    s.sheet.contentHeight = 900;
-    s.layout.resize();
-    assert.equal(s.sheet.style.height, "160px");
-    s.sheet.contentHeight = 120;
-    s.layout.resize();
-    assert.equal(s.sheet.style.height, "130px");
-});
-
-
-test("footer or header growth raises the rendered minimum without destroying the chosen size", () => {
-    const s = setup();
-    s.sheet.contentHeight = 900;
-    s.layout.setPreferredHeight(300);
-    s.sheet.chromeHeight = 240;
-    s.layout.resize();
-    assert.equal(s.sheet.style.height, "360px");
-    s.sheet.chromeHeight = 40;
-    s.layout.resize();
-    assert.equal(s.sheet.style.height, "300px");
-});
-
-
-test("landscape initial cap below readable minimum does not grow on the first tiny downward resize", () => {
-    const s = setup();
-    s.window.screen.orientation.type = "landscape-primary";
-    s.window.innerHeight = 390;
-    s.viewport.bottom = 390;
-    s.sheet.contentHeight = 900;
-    s.sheet.chromeHeight = 160;
-    s.layout.resize();
-    const initial = s.sheet.getBoundingClientRect().height;
-    assert.ok(initial < 280);
-    assert.equal(s.layout.getBounds().min, initial);
-    s.layout.setPreferredHeight(initial);
-    assert.equal(s.sheet.getBoundingClientRect().height, initial);
-    s.sheet.chromeHeight = 240;
-    s.layout.resize();
-    assert.equal(s.sheet.getBoundingClientRect().height, 240, "essential chrome stays visible when it grows beyond the standard cap");
-});
-
-
 test("visual viewport constraints activate compact chrome even when layout viewport stays tall", () => {
     const s = setup();
     s.viewport.bottom = 100;
@@ -276,17 +200,14 @@ test("visual viewport constraints activate compact chrome even when layout viewp
     assert.equal(s.sheet.classList.contains("mobile-sheet-panel--compact"), false);
 });
 
-test("drag height updates reuse measured bounds until geometry changes", () => {
+test("a short half-height drawer uses compact chrome until expanded", () => {
     const s = setup();
-    let scans = 0;
-    s.sheet.querySelectorAll = () => { scans++; return []; };
-    s.layout.getBounds();
-    assert.equal(scans, 1);
-    for (let height = 300; height < 400; height++) s.layout.setPreferredHeight(height);
-    assert.equal(scans, 1);
-    assert.equal(s.sheet.style.height, "399px");
+    s.window.innerHeight = 300;
+    s.window.siyuan.mobile.size.portrait.height1 = 300;
+    s.viewport.bottom = 300;
     s.layout.resize();
-    assert.equal(scans, 2);
-    s.layout.setPreferredHeight(350);
-    assert.equal(scans, 2);
+    assert.equal(s.sheet.style.height, "150px");
+    assert.equal(s.sheet.classList.contains("mobile-sheet-panel--compact"), true);
+    s.layout.setMode("expanded");
+    assert.equal(s.sheet.classList.contains("mobile-sheet-panel--compact"), false);
 });

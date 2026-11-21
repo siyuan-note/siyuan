@@ -1,59 +1,24 @@
 import {getVisibleViewportBounds} from "./visibleViewport";
-import {getMobileSheetBounds} from "./mobileSheetGesture";
+import {getMobileSheetHeight} from "./mobileSheetGesture";
 import {isMobileLandscape} from "./orientation";
 
-export type MobileSheetMode = "standard" | "expanded";
-
-export const getMobileSheetMaxHeight = (fullHeight: number, availableHeight: number, mode: MobileSheetMode) =>
-    Math.min(Math.max(0, availableHeight), mode === "expanded" ? Math.max(0, availableHeight) : Math.max(0, fullHeight) * .56);
+type MobileSheetMode = "standard" | "expanded";
 
 export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
-                                     options: {mode?: MobileSheetMode, fitContent?: boolean, onResize?: () => void, onGeometryChange?: () => void, standalone?: boolean} = {}) => {
-    let mode = options.mode || "standard";
-    let preferred: number;
-    let available = 0;
-    let standardMax = 0;
+                                     options: {onResize?: () => void, onGeometryChange?: () => void, standalone?: boolean} = {}) => {
+    let mode: MobileSheetMode = "standard";
     let geometry: string;
     let frozen = false;
     let disposed = false;
-    let bounds: {min: number, max: number};
     const toolbar = document.getElementById("keyboardToolbar");
     overlay.classList.add("mobile-sheet-layout");
     if (options.standalone) overlay.classList.add("mobile-sheet-layout--standalone");
     sheet.classList.add("mobile-sheet-panel");
-    const getBounds = () => {
-        // 自然高度测量会展开滚动区域，须在恢复约束后恢复其原有位置。
-        const positions = [sheet, ...Array.from(sheet.querySelectorAll<HTMLElement>("*"))]
-            .filter(element => element.scrollTop !== 0 || element.scrollLeft !== 0)
-            .map(element => ({element, top: element.scrollTop, left: element.scrollLeft}));
-        const height = sheet.style.height;
-        const maxHeight = sheet.style.maxHeight;
-        const body = sheet.querySelector<HTMLElement>(":scope > .b3-dialog__body, :scope > .b3-menu__items");
-        const flex = body?.style.flex;
-        sheet.style.height = "auto";
-        sheet.style.maxHeight = "none";
-        if (body) body.style.flex = "none";
-        const natural = sheet.getBoundingClientRect().height;
-        const footer = body?.querySelector<HTMLElement>(":scope > .b3-dialog__action");
-        const chrome = Math.max(0, natural - (body?.getBoundingClientRect().height || 0)) +
-            (footer?.getBoundingClientRect().height || 0);
-        if (body) body.style.flex = flex;
-        sheet.style.height = height;
-        sheet.style.maxHeight = maxHeight;
-        positions.forEach(({element, top, left}) => {
-            element.scrollTop = top;
-            element.scrollLeft = left;
-        });
-        bounds = getMobileSheetBounds(natural, chrome, available);
-        bounds.min = Math.min(bounds.min, Math.max(chrome, standardMax));
-        return bounds;
-    };
     const resize = () => {
         if (disposed || !overlay.isConnected) return;
-        bounds = undefined;
         const viewport = getVisibleViewportBounds();
-        const bottom = toolbar && !toolbar.classList.contains("fn__none") ?
-            Math.min(viewport.bottom, toolbar.getBoundingClientRect().top) : viewport.bottom;
+        const toolbarRect = toolbar && !toolbar.classList.contains("fn__none") ? toolbar.getBoundingClientRect() : undefined;
+        const bottom = toolbarRect && toolbarRect.height !== 0 ? Math.min(viewport.bottom, toolbarRect.top) : viewport.bottom;
         overlay.style.top = `${viewport.top}px`;
         // 整个视口可用时直接贴住布局底边，避免整数高度截断设备像素后露出背景。
         const fullViewport = bottom === window.innerHeight;
@@ -65,19 +30,16 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
             const fullHeight = Math.max(window.innerHeight, direction?.height1 || 0);
             const style = getComputedStyle(overlay);
             // 安全区只由容器 padding 占位，裁限后的面板高度不再额外扣减。
-            available = Math.max(0, bottom - viewport.top -
+            const available = Math.max(0, bottom - viewport.top -
                 (parseFloat(style.paddingTop) || 0) - (parseFloat(style.paddingBottom) || 0));
-            sheet.classList.toggle("mobile-sheet-panel--compact", available <= 160);
-            standardMax = getMobileSheetMaxHeight(fullHeight, available, "standard");
+            const height = getMobileSheetHeight(fullHeight, available, mode === "expanded");
+            sheet.classList.toggle("mobile-sheet-panel--compact", height <= 160);
             const nextGeometry = `${viewport.top}:${bottom}:${available}:${isMobileLandscape()}`;
             if (geometry !== undefined && geometry !== nextGeometry) options.onGeometryChange?.();
             geometry = nextGeometry;
-            const maxHeight = `${preferred === undefined || mode === "expanded" ?
-                getMobileSheetMaxHeight(fullHeight, available, mode) : available}px`;
+            const maxHeight = `${height}px`;
             sheet.style.maxHeight = maxHeight;
-            sheet.style.height = mode === "expanded" ? maxHeight : preferred === undefined ?
-                (options.fitContent === false ? maxHeight : "auto") :
-                `${Math.max(getBounds().min, Math.min(preferred, available))}px`;
+            sheet.style.height = options.standalone && mode === "standard" ? "auto" : maxHeight;
         }
         options.onResize?.();
     };
@@ -101,16 +63,6 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
     resize();
     return {
         resize,
-        getBounds,
-        setPreferredHeight: (height: number) => {
-            if (disposed || frozen || !overlay.isConnected) return;
-            const limits = bounds || getBounds();
-            preferred = height;
-            mode = "standard";
-            sheet.style.maxHeight = `${available}px`;
-            sheet.style.height = `${Math.max(limits.min, Math.min(height, limits.max))}px`;
-            options.onResize?.();
-        },
         freeze: () => {
             if (frozen || disposed) return;
             const height = `${sheet.getBoundingClientRect().height}px`;
@@ -118,7 +70,11 @@ export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
             sheet.style.maxHeight = height;
             frozen = true;
         },
-        setMode: (next: MobileSheetMode) => { mode = next; resize(); },
+        setMode: (next: MobileSheetMode) => {
+            if (mode === next) return;
+            mode = next;
+            resize();
+        },
         dispose: () => {
             if (disposed) return;
             disposed = true;

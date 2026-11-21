@@ -16,8 +16,6 @@ const setup = (mobile = true) => {
     let freezes = 0;
     let disposals = 0;
     let bindings = 0;
-    let mode: string;
-    let sheetOptions: {mode?: string};
     let keyboard = 0;
     const document = {activeElement: undefined as unknown};
     const window = {siyuan: {dialogs: [] as any[], languages: {settingsPendingSaveError: "failed"}}};
@@ -37,38 +35,32 @@ const setup = (mobile = true) => {
     }
     const dependencies = {Dialog: Base, isMobile: () => mobile,
         bindBottomSheetDialog: (_dialog: any, _close: any, _resize: any, open: () => void,
-            options: {canStart: () => boolean, mode?: string}) => {
+            options: {canStart: () => boolean}) => {
             drag = _close; canDrag = options.canStart;
-            sheetOptions = options;
             bindings++; opened = open; resized = _resize;
             const dispose = () => { disposals++; };
             dispose.freeze = () => { freezes++; };
-            dispose.setMode = (value: string) => { mode = value; };
             return dispose;
         },
         scrollInputIntoView: () => { scrolled++; }, callMobileAppShowKeyboard: () => { keyboard++; }, setSheetExpanded() {}, Constants: {TIMEOUT_INPUT: 10}, isNotCtrl: () => true, showMessage() {}};
     const exports: any = {};
     runInNewContext(source, {exports, require: () => dependencies, window, document, console: {error() {}}});
-    return {...exports, window, document, Base, drag: () => drag(), canDrag: () => canDrag(), resize: () => resized(), open: () => opened(), stats: () => ({freezes, disposals, bindings, mode, keyboard, scrolled, sheetOptions})};
+    return {...exports, window, document, Base, drag: () => drag(), canDrag: () => canDrag(), resize: () => resized(), open: () => opened(), stats: () => ({freezes, disposals, bindings, keyboard, scrolled})};
 };
 test("explicit mobile geometry binds once; desktop is untouched", () => {
     const mobile = setup();
     const dialog = new mobile.AdaptiveDialog({content: ""});
     assert.equal(dialog.options.height, "auto");
-    dialog.setSheetMode("expanded");
-    assert.equal(mobile.stats().mode, "expanded");
     assert.equal(mobile.stats().bindings, 1);
     const desktop = setup(false);
-    const original = {content: "", height: "350px", disableClose: true,
-        mobileSheet: {mode: "expanded"}};
+    const original = {content: "", height: "350px", disableClose: true};
     const desktopDialog = new desktop.AdaptiveDialog(original);
     assert.equal(desktopDialog.options, original);
     assert.equal(desktop.stats().bindings, 0);
 });
-test("mobile sheets preserve their initial mode and drag eligibility", () => {
+test("the top mobile sheet accepts drag gestures", () => {
     const mobile = setup();
-    new mobile.AdaptiveDialog({content: "", mobileSheet: {mode: "expanded"}});
-    assert.equal(mobile.stats().sheetOptions.mode, "expanded");
+    new mobile.AdaptiveDialog({content: ""});
     assert.equal(mobile.canDrag(), true);
 });
 test("pending false and rejection retain input; only explicit true closes and disposes once", async () => {

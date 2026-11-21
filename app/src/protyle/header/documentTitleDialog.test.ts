@@ -143,7 +143,7 @@ const setup = (mobile: boolean, deferDestroy = false) => {
         isMobileLandscape: () => window.screen.orientation.type.startsWith("landscape"),
         callMobileAppShowKeyboard: () => { keyboardShows++; },
         bindBottomSheetDialog: (dialog: DialogMock, close: () => Promise<void>, resize: () => void, open: () => void,
-                               options: {mode: string, canStart: () => boolean}) => {
+                               options: {canStart: () => boolean}) => {
             canDrag = options.canStart;
             const layout = (dependencies.bindMobileSheetLayout as any)(dialog.viewport, dialog.sheet, options);
             sheetClose = close;
@@ -387,9 +387,9 @@ test("mobile title drawer follows keyboard viewport changes and keeps failed dra
     const dialog = state.open();
     assert.equal(dialog.options.width, "100vw");
     assert.equal(dialog.options.height, "auto");
-    assert.equal(dialog.sheet.style.height, "auto");
-    assert.ok(Math.abs(parseFloat(dialog.sheet.style.maxHeight) - 448) < .001);
-    assert.equal(dialog.sheet.getBoundingClientRect().height, 180, "short titles use their natural height");
+    assert.equal(dialog.sheet.style.height, "400px");
+    assert.ok(Math.abs(parseFloat(dialog.sheet.style.maxHeight) - 400) < .001);
+    assert.equal(dialog.sheet.getBoundingClientRect().height, 400, "title drawers open at half height");
     assert.equal(dialog.options.containerClassName, "mobile-document-title-sheet");
     assert.equal(dialog.options.hideCloseIcon, true);
     assert.ok(dialog.classes.has("mobile-document-title-dialog"));
@@ -402,7 +402,7 @@ test("mobile title drawer follows keyboard viewport changes and keeps failed dra
     assert.equal(dialog.viewport.style.top, "50px");
     assert.equal(dialog.viewport.style.height, "300px");
     assert.equal(parseFloat(dialog.sheet.style.maxHeight), 300,
-        "the keyboard clips the upper limit without expanding a short title");
+        "the keyboard clips the half-height drawer");
     assert.equal(state.toolbarObserved(), true);
     state.keyboardToolbar.hidden = false;
     state.keyboardToolbar.top = 302;
@@ -438,7 +438,7 @@ test("mobile title height cap uses the current screen direction before the keybo
     state.viewport.bottom = 390;
     state.resizeSheet();
     assert.equal(state.window.siyuan.mobile.size.isLandscape, false);
-    assert.ok(Math.abs(parseFloat(dialog.sheet.style.maxHeight) - 218.4) < .001);
+    assert.ok(Math.abs(parseFloat(dialog.sheet.style.maxHeight) - 195) < .001);
     state.window.innerHeight = 180;
     state.viewport.bottom = 180;
     state.resizeSheet();
@@ -447,7 +447,7 @@ test("mobile title height cap uses the current screen direction before the keybo
     state.window.innerHeight = 800;
     state.viewport.bottom = 800;
     state.resizeSheet();
-    assert.ok(Math.abs(parseFloat(dialog.sheet.style.maxHeight) - 448) < .001);
+    assert.ok(Math.abs(parseFloat(dialog.sheet.style.maxHeight) - 400) < .001);
 });
 
 test("mobile title height remains fixed while its closing keyboard viewport recovers", async () => {
@@ -656,7 +656,7 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
     document.body.style.cssText = "--b3-font-size:16px;--b3-font-size-editor:16px;--mobile-top-safe-area:0px";
     document.body.innerHTML = `<div class="mobile-document-title-dialog mobile-bottom-sheet-dialog b3-dialog--open">
 <div class="b3-dialog"><div class="b3-dialog__scrim"></div>
-<div class="b3-dialog__container mobile-bottom-sheet mobile-sheet-panel mobile-document-title-sheet" style="width:100vw;height:auto;max-height:448px;transition:none">
+<div class="b3-dialog__container mobile-bottom-sheet mobile-sheet-panel mobile-document-title-sheet" style="width:100vw;height:auto;max-height:400px;transition:none">
 <div class="b3-menu__title b3-menu__title--root"></div><div class="b3-dialog__header">Rename</div>
 <div class="b3-dialog__body"><div class="document-title-dialog protyle">
 <div class="protyle-content"><div class="protyle-top"><div class="protyle-title">
@@ -702,12 +702,12 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
             for (const long of [false, true]) {
                 editable.innerHTML = long ? "<strong>Rich title </strong><em>with styles </em>".repeat(50) : "Untitled document";
                 check.equal(getComputedStyle(editable).fontSize, "16px", "the mobile rename field uses the UI font size");
-                sheet.style.maxHeight = `${Math.min(448, height)}px`;
+                sheet.style.maxHeight = `${Math.min(400, height)}px`;
                 const rect = sheet.getBoundingClientRect();
                 const button = action.getBoundingClientRect();
                 const editor = host.getBoundingClientRect();
                 const context = JSON.stringify({height, large, long, sheet: rect.toJSON(), button: button.toJSON()});
-                check.ok(rect.height > 0 && rect.height <= Math.min(448, height) + 1, context);
+                check.ok(rect.height > 0 && rect.height <= Math.min(400, height) + 1, context);
                 check.ok(rect.height < 250, "single-line titles keep a compact natural height: " + context);
                 check.ok(Math.abs(rect.bottom - (30 + height)) < 1, context);
                 check.ok(button.top >= rect.top && button.bottom <= rect.bottom + 1 && button.height >= 30, context);
@@ -729,9 +729,9 @@ const checkDrawerLayout = async (css: string, toolbarSource: string, paddingSour
     container.style.paddingBottom = "30px";
     for (const height of [800, 350, 220]) {
         container.style.height = `${height}px`;
-        sheet.style.maxHeight = `${Math.min(448, height - 50)}px`;
+        sheet.style.maxHeight = `${Math.min(400, height - 50)}px`;
         const rect = sheet.getBoundingClientRect();
-        check.ok(rect.height <= Math.min(448, height - 50) + 1,
+        check.ok(rect.height <= Math.min(400, height - 50) + 1,
             "safe areas clip the upper limit once through the container content box");
         check.ok(Math.abs(rect.bottom - (30 + height - 30)) < 1,
             "the sheet ends at the usable bottom boundary");

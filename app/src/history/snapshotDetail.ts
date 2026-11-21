@@ -12,7 +12,6 @@ import {isPluginSnapshotPath, TPluginSnapshotPart} from "./pluginSnapshotPaths";
 
 export const openSnapshotDetail = async (app: App, reference: DocHistorySnapshot, notebook: string) => {
     const dialog = new AdaptiveDialog({
-        mobileSheet: {mode: "expanded"},
         title: escapeHtml(reference.tags.join(" / ")),
         content: "",
         width: isMobile() ? "100vw" : "85vw",

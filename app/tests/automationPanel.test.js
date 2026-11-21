@@ -36,7 +36,7 @@ const runCases = async (sources, css, mobile) => {
     if (mobile) {
         menu.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
         // 与移动端数据库底部面板的初始高度一致，内容通过面板内部滚动访问。
-        menu.style.height = "56vh";
+        menu.style.height = "50vh";
     }
     const lang = sources.languages;
     const currentCondition = {column: "status", operator: "=", value: {type: "select", mSelect: [{content: "Done"}]}};
@@ -86,7 +86,7 @@ const runCases = async (sources, css, mobile) => {
                 if (mobile) {
                     this.element.style.top = "auto";
                     this.element.style.bottom = "0";
-                    this.element.style.height = "56vh";
+                    this.element.style.height = "50vh";
                     this.element.style.transform = "translateY(0)";
                 }
                 document.body.append(this.element);
@@ -1176,7 +1176,7 @@ if (process.versions.electron && process.type === "browser") {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
             }).outputText;
             for (const name of ["datePicker/model", "datePicker/yearInput", "datePicker/field", "datePicker/inline", "datePicker/runtime", "datePicker/index", "datePicker/binding", "datePicker/panel", "datePicker/owners", "datePicker/position", "menus/menuPosition", "menus/overlayOwnership", "dialog/index", "dialog/confirmDialog", "dialog/adaptiveDialog",
-                "mobile/util/keyboardSheetState", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/mobileSheetLayout",
+                "mobile/util/keyboardSheetState", "mobile/util/bindBottomSheetDialog", "mobile/util/bindBottomSheetDrag", "mobile/util/mobileSheetLayout", "mobile/util/mobileSheetGesture",
                 "protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu",
                 "mobile/util/visibleViewport", "mobile/util/orientation", "menus/sheetOpen", "menus/sheetActions"]) {
                 sources[name] = ts.transpileModule(fs.readFileSync(path.join(__dirname,

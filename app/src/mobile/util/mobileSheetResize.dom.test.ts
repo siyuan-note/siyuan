@@ -81,72 +81,32 @@ const browserCases = async (sources: string[]) => {
 <div class="b3-dialog__action"><button class="b3-button">Confirm</button></div></div></div></div></div>`;
     const markup = document.body.innerHTML;
     const sheet = document.querySelector<HTMLElement>(".b3-dialog__container");
-    const body = sheet.querySelector<HTMLElement>(".b3-dialog__body");
     const content = sheet.querySelector<HTMLElement>(".b3-dialog__content");
     const footer = sheet.querySelector<HTMLElement>(".b3-dialog__action");
     const layout = dependencies.bindMobileSheetLayout(document.querySelector(".b3-dialog"), sheet);
-    const natural = sheet.getBoundingClientRect().height;
-    layout.setPreferredHeight(650);
-    const bounds = layout.getBounds();
-    check.ok(bounds.min <= natural + 1, "a stretched flex body must not inflate the natural minimum");
-    check.equal(bounds.max, 750, "safe regions are subtracted once");
-    check.equal(sheet.getBoundingClientRect().height, 650);
-    check.equal(body.style.flex, "");
-    layout.setPreferredHeight(bounds.min);
+    check.equal(sheet.getBoundingClientRect().height, Math.max(innerHeight, 800) / 2);
     check.ok(footer.getBoundingClientRect().bottom <= sheet.getBoundingClientRect().bottom + 1);
     content.innerHTML = "<div style='height:1200px'>Long content</div>";
-    layout.setPreferredHeight(650);
-    layout.resize();
-    check.equal(sheet.getBoundingClientRect().height, 650, "content mutation preserves the manual height");
     content.scrollTop = 300;
     check.equal(content.scrollTop, 300);
-    layout.getBounds();
-    check.equal(content.scrollTop, 300, "natural height measurement preserves the scrolled settings");
-    layout.setPreferredHeight(600);
-    check.equal(content.scrollTop, 300, "dragging the grip preserves the scrolled settings");
-    content.firstElementChild.append(document.createTextNode("Updated setting"));
-    await settle();
-    check.equal(content.scrollTop, 300, "setting content mutation preserves the scrolled settings");
-    const nested = document.createElement("div");
-    nested.style.cssText = "width:200px;height:100px;overflow:auto";
-    nested.innerHTML = "<div style='width:1000px;height:400px'>Nested settings</div>";
-    content.firstElementChild.append(nested);
-    await settle();
-    nested.scrollTop = 80;
-    nested.scrollLeft = 100;
-    check.equal(nested.scrollLeft, 100);
-    layout.getBounds();
-    check.equal(nested.scrollTop, 80, "nested scrolling is preserved");
-    check.equal(nested.scrollLeft, 100, "horizontal scrolling is preserved");
-    check.equal(content.scrollTop, 300, "nested scrolling does not displace the outer content");
+    layout.setMode("expanded");
+    check.equal(sheet.getBoundingClientRect().height, 750, "full height subtracts the safe regions once");
+    check.equal(content.scrollTop, 300, "expanding a long sheet keeps the scroll position");
     const settingInput = document.createElement("input");
     settingInput.value = "plugin setting";
-    content.firstElementChild.append(settingInput);
-    await settle();
+    content.firstElementChild.prepend(settingInput);
     settingInput.focus({preventScroll: true});
     settingInput.setSelectionRange(2, 5);
-    layout.getBounds();
-    check.equal(document.activeElement, settingInput);
-    check.equal(settingInput.selectionStart, 2);
-    check.equal(settingInput.selectionEnd, 5);
-    check.equal(content.scrollTop, 300, "measurement preserves the focused setting without moving it");
-    settingInput.blur();
-    layout.setPreferredHeight(650);
-    const longBounds = layout.getBounds();
-    check.ok(longBounds.min > bounds.min && longBounds.min < 650);
-    layout.setMode("expanded");
-    check.equal(sheet.getBoundingClientRect().height, 750);
-    layout.setMode("standard");
-    check.equal(sheet.getBoundingClientRect().height, 650);
     viewport.bottom = 300;
     layout.resize();
     check.equal(sheet.getBoundingClientRect().height, 250);
     viewport.bottom = 800;
     layout.resize();
-    check.equal(sheet.getBoundingClientRect().height, 650, "keyboard recovery restores the preferred height");
-    content.innerHTML = "Short settings";
-    await settle();
-    check.equal(content.scrollTop, 0, "shortened content clamps scrolling to the valid range");
+    check.equal(sheet.getBoundingClientRect().height, 750, "keyboard recovery restores full height");
+    check.equal(content.scrollTop, 300);
+    check.equal(document.activeElement, settingInput);
+    check.equal(settingInput.selectionStart, 2);
+    check.equal(settingInput.selectionEnd, 5);
     layout.dispose();
     document.body.classList.add("body--ios");
     for (const safeArea of [34, 21, 0]) {
@@ -213,13 +173,17 @@ const browserCases = async (sources: string[]) => {
         block(false);
         touch("touchstart", 0);
         touch("touchmove", -100);
-        const resized = panel.getBoundingClientRect().height;
-        check.ok(resized > initial, gate + " allows the owning ready dialog");
+        check.equal(panel.getBoundingClientRect().height, initial, gate + " defers expansion until release");
         block(true);
         touch("touchend", -200);
-        check.equal(panel.getBoundingClientRect().height, resized, gate + " blocks active completion");
+        check.equal(panel.getBoundingClientRect().height, initial, gate + " blocks active completion");
         if (gate === "closing") check.equal(panel.style.transform, "translateY(100%)");
         check.equal(closes, 0);
+        block(false);
+        touch("touchstart", 0);
+        touch("touchmove", -100);
+        touch("touchend", -100);
+        check.equal(panel.getBoundingClientRect().height, 750, gate + " allows a fresh grip gesture");
         dispose();
     }
     viewport.bottom = window.innerHeight;
@@ -296,7 +260,7 @@ const browserCases = async (sources: string[]) => {
 
 const headless = process.env.SIYUAN_TEST_HEADLESS === "1";
 
-test("real sheet geometry keeps short minimums and footer visible across manual and keyboard resizing", {
+test("real sheet geometry preserves its selected height, safe areas and guarded dismissal", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !headless,
     // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
     timeout: 45000,

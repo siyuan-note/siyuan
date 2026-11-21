@@ -1,7 +1,7 @@
 import {updateMenuItemGroupClasses} from "../../../menus/menuGroup";
 import {getVisibleSheetViewport, waitForSheetViewport} from "../../../menus/sheetOpen";
 import {setSheetExpanded} from "../../../menus/sheetActions";
-import {getMobileSheetBounds, moveSheetGesture, SheetGesture} from "../../../mobile/util/mobileSheetGesture";
+import {getMobileSheetDragAction, getMobileSheetHeight} from "../../../mobile/util/mobileSheetGesture";
 import {escapeAttr} from "../../../util/escape";
 
 export const getMobileAVPanelBackTarget = (menuElement: HTMLElement) =>
@@ -14,20 +14,32 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
     menuElement.setAttribute("data-prevent-swipe", "true");
     menuElement.style.maxHeight = "";
     const scrimElement = panelElement.querySelector<HTMLElement>(".b3-dialog__scrim");
-    let preferredHeight: number;
-    let resize: SheetGesture;
-    const getResizeBounds = () => getMobileSheetBounds(menuElement.scrollHeight,
-        menuElement.firstElementChild.getBoundingClientRect().height,
-        getVisibleSheetViewport(window.innerHeight, window.visualViewport).height);
+    let start: {x: number, y: number, time: number, id: number, fromGrip: boolean};
+    let dragging = false;
+    let suppressClickUntil = 0;
+    let geometry: string;
+    const reset = () => {
+        start = undefined;
+        dragging = false;
+        menuElement.style.transform = "";
+        menuElement.style.transition = "";
+        scrimElement.style.opacity = "";
+    };
+    const cancelDrag = () => {
+        if (dragging) suppressClickUntil = performance.now() + 300;
+        if (start) reset();
+    };
     const updateHeight = () => {
         const size = window.siyuan.mobile.size;
         const orientation = size.isLandscape ? size.landscape : size.portrait;
         const viewport = getVisibleSheetViewport(window.innerHeight, window.visualViewport);
         const fullHeight = Math.max(window.innerHeight, orientation?.height1 || 0);
+        const nextGeometry = `${window.innerWidth}:${viewport.height}:${viewport.bottomOffset}`;
+        if (geometry !== undefined && geometry !== nextGeometry) cancelDrag();
+        geometry = nextGeometry;
         menuElement.style.maxHeight = `min(${viewport.height}px, calc(100dvh - env(safe-area-inset-top)))`;
-        menuElement.style.height = (preferredHeight !== undefined ? Math.min(preferredHeight, viewport.height) :
-            menuElement.classList.contains("b3-menu--expanded") ? viewport.height :
-                Math.min(fullHeight * .56, viewport.height)) + "px";
+        const expanded = menuElement.classList.contains("b3-menu--expanded");
+        menuElement.style.height = getMobileSheetHeight(fullHeight, viewport.height, expanded) + "px";
         menuElement.style.setProperty("--b3-menu-sheet-bottom", viewport.bottomOffset + "px");
     };
     const updateContent = () => {
@@ -105,19 +117,8 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
         }
     });
 
-    let start: {x: number, y: number, time: number, height: number, canExpand: boolean};
-    let dragging = false;
-    let suppressClickUntil = 0;
-    const reset = () => {
-        start = undefined;
-        resize = undefined;
-        dragging = false;
-        menuElement.style.transform = "";
-        menuElement.style.transition = "";
-        scrimElement.style.opacity = "";
-    };
     menuElement.addEventListener("touchstart", (event) => {
-        reset();
+        cancelDrag();
         const target = event.target as HTMLElement;
         // 可排序条目的触摸由拖拽桥接处理，避免向下排序时同时拖动整个面板。
         if (event.touches.length !== 1 ||
@@ -134,94 +135,52 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
             element = element.parentElement;
         }
         const touch = event.touches[0];
-        if (target.closest(".b3-menu__title--actions")) {
-            const bounds = getResizeBounds();
-            resize = {height: menuElement.getBoundingClientRect().height, ...bounds, offset: 0, time: performance.now()};
-        }
-        start = {x: touch.clientX, y: touch.clientY, time: performance.now(), height: menuElement.clientHeight,
-            canExpand: !!target.closest(".b3-menu__title--actions") && !menuElement.classList.contains("b3-menu--expanded")};
+        start = {x: touch.clientX, y: touch.clientY, time: performance.now(), id: touch.identifier,
+            fromGrip: !!target.closest(".b3-menu__title--actions")};
     }, {passive: true});
     menuElement.addEventListener("touchmove", (event) => {
-        if (!start || event.touches.length !== 1) {
+        if (!start) return;
+        const touch = event.touches[0];
+        if (event.touches.length !== 1 || touch.identifier !== start.id || menuElement.querySelector(".av__select-dropdown")) {
+            cancelDrag();
             return;
         }
-        const touch = event.touches[0];
         const offset = touch.clientY - start.y;
-        if (resize) {
-            if (Math.abs(touch.clientX - start.x) > Math.max(4, Math.abs(offset))) {
-                reset();
-                updateHeight();
+        if (!dragging) {
+            const xDiff = Math.abs(touch.clientX - start.x);
+            if (Math.max(xDiff, Math.abs(offset)) < 4) return;
+            if (xDiff > Math.abs(offset) || (!start.fromGrip && offset <= 0)) {
+                cancelDrag();
                 return;
             }
-            if (!dragging && Math.abs(offset) < 4) return;
-            dragging = true;
-            menuElement.style.transition = "none";
-            Object.assign(resize, getResizeBounds());
-            const result = moveSheetGesture(resize, offset, performance.now());
-            preferredHeight = result.height;
-            setSheetExpanded(menuElement, result.height >= resize.max);
-            updateHeight();
-            menuElement.style.transform = `translateY(${result.excess}px)`;
-            scrimElement.style.opacity = Math.max(0, 1 - result.excess / Math.max(1, result.height)).toString();
-            if (event.cancelable) event.preventDefault();
-            return;
-        }
-        if (!dragging && ((offset <= 0 && !start.canExpand) || Math.abs(touch.clientX - start.x) > Math.abs(offset))) {
-            start = undefined;
-            return;
         }
         dragging = true;
         menuElement.style.transition = "none";
-        if (offset < 0) {
-            menuElement.style.height = Math.min(window.innerHeight, start.height - offset) + "px";
-        } else {
-            menuElement.style.transform = `translateY(${offset}px)`;
-        }
-        scrimElement.style.opacity = Math.max(0, 1 - Math.max(0, offset) / menuElement.clientHeight).toString();
-        if (event.cancelable) {
-            event.preventDefault();
-        }
+        const downward = Math.max(0, offset);
+        menuElement.style.transform = `translateY(${downward}px)`;
+        scrimElement.style.opacity = Math.max(0, 1 - downward / Math.max(menuElement.clientHeight, 1)).toString();
+        if (event.cancelable) event.preventDefault();
     }, {passive: false});
     menuElement.addEventListener("touchend", (event) => {
-        if (!start || !dragging) {
-            reset();
+        const touch = event.changedTouches[0];
+        if (!start || !dragging || !touch || touch.identifier !== start.id || menuElement.querySelector(".av__select-dropdown")) {
+            cancelDrag();
             return;
         }
-        const offset = event.changedTouches[0].clientY - start.y;
-        if (resize) {
-            Object.assign(resize, getResizeBounds());
-            const result = moveSheetGesture(resize, offset, performance.now());
-            preferredHeight = result.height;
-            setSheetExpanded(menuElement, result.height >= resize.max);
-            suppressClickUntil = performance.now() + 300;
-            reset();
-            updateHeight();
-            if (result.close) {
-                panelElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
-            }
-            return;
-        }
-        const velocity = Math.abs(offset) / Math.max(1, performance.now() - start.time);
-        const shouldExpand = start.canExpand && (offset < -40 || (offset < -20 && velocity > .6));
-        const shouldClose = offset > Math.min(120, start.height * .25) || (offset > 20 && velocity > .6);
+        const action = getMobileSheetDragAction(touch.clientY - start.y, performance.now() - start.time,
+            menuElement.clientHeight, start.fromGrip);
         suppressClickUntil = performance.now() + 300;
+        void menuElement.offsetHeight;
         reset();
-        if (shouldExpand) {
-            preferredHeight = undefined;
+        if (action === "expand") {
             setSheetExpanded(menuElement, true);
-        } else if (shouldClose && menuElement.classList.contains("b3-menu--expanded")) {
-            preferredHeight = undefined;
-            setSheetExpanded(menuElement, false);
-        } else if (shouldClose) {
-            // 复用关闭入口，确保日期、关联等编辑值提交及嵌套菜单关闭顺序一致
+            updateHeight();
+        } else if (action === "close") {
+            // 由数据库面板提交编辑值并处理嵌套菜单的关闭顺序。
             panelElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
         }
-        updateHeight();
     });
-    menuElement.addEventListener("touchcancel", () => {
-        reset();
-        updateHeight();
-    });
+    menuElement.addEventListener("touchcancel", cancelDrag);
     menuElement.addEventListener("click", (event) => {
         if (performance.now() < suppressClickUntil && typeof event.detail === "number") {
             event.preventDefault();

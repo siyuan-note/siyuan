@@ -879,7 +879,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     }
     const state: {editor?: Protyle, loading: boolean} = {loading: true};
     const dialog = new AdaptiveDialog({
-        mobileSheet: {mode: "expanded", beforeClose: createMobileSecondaryEditorCloseGuard(() => state.editor, () => !state.loading)},
+        mobileSheet: {beforeClose: createMobileSecondaryEditorCloseGuard(() => state.editor, () => !state.loading)},
         hideCloseIcon: true,
         positionId: Constants.DIALOG_OPENCARD,
         content: genCardHTML({id, cardType, cardsData, isTab: false}),

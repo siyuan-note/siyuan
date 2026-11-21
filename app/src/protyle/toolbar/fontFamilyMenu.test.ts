@@ -157,13 +157,12 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     check.equal(menuElement.querySelector('[data-action="fontFamilyBack"]'), null);
     check.equal(menuElement.querySelector('[data-type="sheet-expand"]'), null, "font sheet has no fullscreen button");
     check.equal(menuElement.querySelector('[data-type="sheet-close"]'), null, "font sheet has no close button");
-    check.equal(menuElement.getAttribute("data-sheet-expandable"), "true", "gesture and viewport behavior remain enabled");
     check.ok(util.contains(button), "font list opens outside the original appearance panel");
     check.notEqual(document.activeElement, search(), "opening does not summon the search keyboard");
     const sheetBounds = menuElement.getBoundingClientRect();
     const toolbarTop = toolbar.getBoundingClientRect().top;
     check.ok(Math.abs(sheetBounds.bottom - toolbarTop) <= 1, "font sheet stays above the keyboard toolbar");
-    check.ok(Math.abs(sheetBounds.height - Math.min(innerHeight * .56, toolbarTop)) <= 1,
+    check.ok(Math.abs(sheetBounds.height - Math.min(innerHeight / 2, toolbarTop)) <= 1,
         "font sheet uses the standard height within the available viewport");
     await swipeDown();
     check.ok(menuElement.classList.contains("fn__none"), "a downward touch gesture closes the font sheet");
@@ -269,7 +268,6 @@ const browserCases = async (sources: Record<string, string>, toolbarSource: stri
     check.equal(document.activeElement, button, "desktop Escape returns focus to the dropdown");
     check.ok(menuElement.classList.contains("fn__none"));
     mobile = true;
-    menuElement.setAttribute("data-sheet-expandable", "true");
     menu.addItem({label: "Other menu"});
     menu.fullscreen("bottom");
     await settle();

@@ -2,9 +2,9 @@
 // 本机请求（localKernelRequest）、启动预算（kernelBootBudget）与启动诊断（kernelDiagnostics）各自独立，
 // 本文件只保留编排；内建依赖与协作者按组注入，入口只传会变化的部分。
 import {
-    BOOT_ANIMATION_SETTLE_MS, BOOT_TIMEOUT_MS, LOCK_RETRY_DEADLINE_MS, PROGRESS_FAILURE_LIMIT,
+    BOOT_ANIMATION_SETTLE_MS, BOOT_PROGRESS_TIMEOUT_MS, LOCK_RETRY_DEADLINE_MS, PROGRESS_FAILURE_LIMIT,
     PROGRESS_POLL_INTERVAL_MS, PROGRESS_RETRY_INTERVAL_MS, VERSION_RETRY_INTERVAL_MS,
-    bootTimedOut, canRetryProgress, exhaustedVersionAttempts, isLocalKernelRequestTimeout, lockRetryExpired,
+    bootProgressTimedOut, canRetryProgress, exhaustedVersionAttempts, isLocalKernelRequestTimeout, lockRetryExpired,
 } from "./kernelBootBudget";
 import {describeKernelExit} from "./kernelExitCodes";
 import {collectWindowsTCPConfig} from "./kernelDiagnostics";
@@ -411,13 +411,15 @@ const createKernelBoot = ({
     const waitForBootProgress = async (attempt: KernelAttempt): Promise<void> => {
         const {startup, kernelPort} = attempt;
         let progressFailures = 0;
-        const bootShowStart = now();
+        let lastProgressAt = now();
+        let lastProgress = 0;
+        let lastDetails = "";
         for (; ;) {
             if (settleIfCanceled(attempt)) {
                 return;
             }
-            if (bootTimedOut(now(), bootShowStart)) {
-                writeLog("boot progress timeout after " + BOOT_TIMEOUT_MS + "ms, exiting boot");
+            if (bootProgressTimedOut(now(), lastProgressAt)) {
+                writeLog("boot progress unchanged for " + BOOT_PROGRESS_TIMEOUT_MS + "ms, exiting boot");
                 showStaticMessage(bootTimeoutMessage, {emoji: "⚠️", logPath: getWorkspaceLogPath(path, startup.workspace)});
                 startup.window.destroy();
                 attempt.settle(false);
@@ -429,11 +431,20 @@ const createKernelBoot = ({
                     return;
                 }
                 progressFailures = 0;
-                if (progressData.data.progress >= 100) {
+                const {progress, details} = progressData.data;
+                if (progress >= 100) {
                     // 内核完成后等待动画快进收尾再进入主窗口。
                     await sleep(BOOT_ANIMATION_SETTLE_MS);
                     attempt.settle(bootCanceled(attempt) ? false : kernelPort);
                     return;
+                }
+                // 索引逐篇更新详情，百分比可能因整数粒度保持不变。
+                const nextProgress = Number.isFinite(progress) ? Math.max(lastProgress, progress) : lastProgress;
+                const nextDetails = typeof details === "string" && details !== "" ? details : lastDetails;
+                if (nextProgress !== lastProgress || nextDetails !== lastDetails) {
+                    lastProgressAt = now();
+                    lastProgress = nextProgress;
+                    lastDetails = nextDetails;
                 }
                 await sleep(PROGRESS_POLL_INTERVAL_MS);
             } catch (e) {
@@ -441,7 +452,7 @@ const createKernelBoot = ({
                 if (settleIfCanceled(attempt)) {
                     return;
                 }
-                // 只读启动查询在证书、网络配置变化或本机请求超时后有限重试，不延长总启动期限。
+                // 证书、网络配置变化和本机请求超时允许有限重试，只有收到新进展才重新计时。
                 if (canRetryProgress(e, ++progressFailures)) {
                     writeLog("retrying boot progress [attempt=" + progressFailures + "/" +
                         (PROGRESS_FAILURE_LIMIT - 1) + "]");

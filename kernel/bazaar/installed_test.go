@@ -129,9 +129,9 @@ func TestInstalledPackageSizeCacheAndInvalidation(t *testing.T) {
 
 	const pkgType = "plugins"
 	const packageName = "size-cache-test"
-	RemoveInstalledPackageSizeCache(pkgType, packageName)
+	InvalidateInstalledPackageSizeCache(pkgType, packageName)
 	t.Cleanup(func() {
-		RemoveInstalledPackageSizeCache(pkgType, packageName)
+		InvalidateInstalledPackageSizeCache(pkgType, packageName)
 	})
 
 	firstSize, firstHSize, err := GetInstalledPackageSize(pkgType, packageName, installPath)
@@ -153,7 +153,7 @@ func TestInstalledPackageSizeCacheAndInvalidation(t *testing.T) {
 		t.Fatalf("expected cached size %d, got %d", firstSize, cachedSize)
 	}
 
-	RemoveInstalledPackageSizeCache(pkgType, packageName)
+	InvalidateInstalledPackageSizeCache(pkgType, packageName)
 	refreshedSize, _, err := GetInstalledPackageSize(pkgType, packageName, installPath)
 	if err != nil {
 		t.Fatal(err)

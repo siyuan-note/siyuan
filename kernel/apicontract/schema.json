@@ -58502,6 +58502,9 @@
         "cloudName": {
           "type": "string"
         },
+        "configured": {
+          "type": "boolean"
+        },
         "enabled": {
           "type": "boolean"
         },
@@ -58573,6 +58576,7 @@
       "required": [
         "assetDownloadMode",
         "cloudName",
+        "configured",
         "enabled",
         "generateConflictDoc",
         "interval",

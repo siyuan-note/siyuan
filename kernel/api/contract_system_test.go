@@ -91,6 +91,53 @@ func TestAPIContractSystemCompleteConfiguration(t *testing.T) {
 	compareSettingPayload(t, "", systemCustomFontPayload)
 }
 
+func TestAPIContractSystemGetConfSyncConfigured(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = model.NewAppConf()
+	model.Conf.System.Store(&conf.System{})
+	t.Cleanup(func() { model.Conf = previousConf })
+
+	for _, tc := range []struct {
+		name       string
+		role       model.Role
+		configured bool
+		want       bool
+	}{
+		{"local administrator", model.RoleAdministrator, false, false},
+		{"paused administrator", model.RoleAdministrator, true, true},
+		{"paused reader", model.RoleReader, true, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			sync := conf.NewSync()
+			sync.Configured = tc.configured
+			model.Conf.Sync.Store(sync)
+			handler := func(c *gin.Context) {
+				c.Set(model.RoleContextKey, tc.role)
+				getConf(c)
+			}
+			recorder := systemContractRequest(t, "POST", "getConf", handler, strings.NewReader(`{}`))
+			var response struct {
+				Code int `json:"code"`
+				Data struct {
+					Conf struct {
+						Sync struct {
+							Configured *bool `json:"configured"`
+							Enabled    bool  `json:"enabled"`
+						} `json:"sync"`
+					} `json:"conf"`
+				} `json:"data"`
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+				t.Fatal(err)
+			}
+			projected := response.Data.Conf.Sync
+			if response.Code != 0 || projected.Configured == nil || *projected.Configured != tc.want || projected.Enabled {
+				t.Fatalf("getConf returned the wrong sync association for %s: %s", tc.name, recorder.Body.String())
+			}
+		})
+	}
+}
+
 func TestAPIContractSystemDownloadUpdate(t *testing.T) {
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()

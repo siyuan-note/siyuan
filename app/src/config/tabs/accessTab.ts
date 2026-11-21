@@ -842,7 +842,7 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
 };
 
 const isEncryptedNotebookDisableBlockedBySync = () => {
-    const sync: Window["siyuan"]["config"]["sync"] & {configured?: boolean} = window.siyuan.config.sync;
+    const sync = window.siyuan.config.sync;
     const cloudName = sync?.cloudName?.trim();
     return Boolean(sync?.configured || sync?.enabled || sync?.synced || sync?.lastResult || (cloudName && cloudName !== "main") ||
         (sync?.s3?.endpoint?.trim() && sync.s3.bucket?.trim()) || sync?.webdav?.endpoint?.trim() || sync?.local?.endpoint?.trim());

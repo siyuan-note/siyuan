@@ -122,6 +122,85 @@ func TestLegacySyncAssociationSurvivesRepoReplacement(t *testing.T) {
 	}
 }
 
+func TestNotebookArchiveLocalAllowsRemovalAndNewKeys(t *testing.T) {
+	notebookArchiveTestWorkspace(t)
+	Conf.System.Store(conf.NewSystem())
+	Conf.Repo.Store(conf.NewRepo())
+	Conf.Repo.Load().Key = []byte("0123456789abcdef0123456789abcdef")
+	if err := EnableEncryptedNotebook("original-password"); err != nil {
+		t.Fatal(err)
+	}
+	oldSalt := bytes.Clone(Conf.NotebookCrypto.MasterSalt)
+	kek, err := deriveKEK("original-password")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer zeroAndClear(kek)
+	id := "20260925120101-archive"
+	notebookArchiveTestBox(t, id, kek)
+	repo, err := newRepository()
+	if err != nil {
+		t.Fatal(err)
+	}
+	index, err := repo.Index("local encrypted snapshot", true, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = os.Stat(filepath.Join(util.RepoDir, "refs", "latest-sync")); !os.IsNotExist(err) {
+		t.Fatalf("local snapshot unexpectedly left sync evidence: %v", err)
+	}
+
+	if EncryptedNotebookDisableBlockedBySync() {
+		t.Fatal("workspace without a sync association was blocked")
+	}
+	archiveID, _, err := PrepareNotebookArchive([]string{id})
+	if err != nil {
+		t.Fatal(err)
+	}
+	directory, err := notebookArchiveDirectory(archiveID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	archivePath := filepath.Join(directory, "archive.zip")
+	manifest, err := readNotebookArchive(archivePath, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, exists := manifest.Files["snapshots/"+index.ID+"/"+id+"/"+id+".sy"]; !exists {
+		t.Fatal("local repository ciphertext missing from archive")
+	}
+	before, err := os.ReadFile(archivePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = CommitNotebookArchive(archiveID, true); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = os.Stat(filepath.Join(util.DataDir, id)); !os.IsNotExist(err) {
+		t.Fatalf("confirmed archive did not remove selected notebook: %v", err)
+	}
+	if err = DisableEncryptedNotebook(); err != nil {
+		t.Fatalf("cannot retire local keys after archiving: %v", err)
+	}
+	if err = EnableEncryptedNotebook("new-password"); err != nil {
+		t.Fatalf("cannot enable independent local keys after archiving: %v", err)
+	}
+	newSalt := Conf.NotebookCrypto.MasterSalt
+	if len(newSalt) == 0 || bytes.Equal(newSalt, oldSalt) {
+		t.Fatal("reenabling encryption did not create fresh key material")
+	}
+	if err = DisableEncryptedNotebook(); err != nil {
+		t.Fatalf("archived snapshot incorrectly blocked retiring new local keys: %v", err)
+	}
+	if _, err = repo.GetIndex(index.ID); err != nil {
+		t.Fatalf("local repository snapshot was removed: %v", err)
+	}
+	after, err := os.ReadFile(archivePath)
+	if err != nil || !bytes.Equal(before, after) {
+		t.Fatalf("retiring local keys changed the saved archive: %v", err)
+	}
+}
+
 func TestNotebookArchiveSyncAllowsRemovalButBlocksDisable(t *testing.T) {
 	notebookArchiveTestWorkspace(t)
 	if err := EnableEncryptedNotebook("synthetic-password"); err != nil {

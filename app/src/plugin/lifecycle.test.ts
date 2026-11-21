@@ -174,12 +174,20 @@ describe("plugin lifecycle coordinator", () => {
     });
 
     it("disposal during asynchronous teardown does not duplicate cleanup or invoke uninstall", async () => {
+        const clock = new FakeClock();
+        const unloadStarted = deferred<void>();
         const unloading = deferred<void>();
-        const {coordinator, events} = createHarness({onunload: () => unloading.promise});
+        const {coordinator, events} = createHarness({
+            onunload: () => {
+                unloadStarted.resolve();
+                return unloading.promise;
+            },
+        }, 20, {now: () => clock.now, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout});
         coordinator.start();
         await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
         const removed = coordinator.requestUninstall("sample");
-        await new Promise(resolve => setImmediate(resolve));
+        await unloadStarted.promise;
+        assert.equal(coordinator.getState("sample"), "unloading");
         coordinator.dispose();
         unloading.resolve();
         await removed;

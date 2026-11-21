@@ -1,7 +1,6 @@
 {
 	"manageColorsDesc": "テキスト、背景、エディターのスタイルに使うカスタム色を管理します",
 	"importNotebookCryptoBackupDesc": "対応するマスターパスワードを使って、暗号化ノートブックのキーバックアップをインポートします",
-	"bazaarSearchPlaceholder": "キーワードを入力して Enter キーで検索",
 	"aiGeneratedContent": "AI 生成",
 	"pinTableHeaderColumn": "見出し列を固定",
 	"unpinTableHeaderColumn": "見出し列の固定を解除",

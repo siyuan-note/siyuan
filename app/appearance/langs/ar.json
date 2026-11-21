@@ -1,7 +1,6 @@
 {
 	"manageColorsDesc": "إدارة الألوان المخصصة للنص والخلفيات وتنسيقات المحرر",
 	"importNotebookCryptoBackupDesc": "استيراد نسخة احتياطية من مفتاح دفاتر الملاحظات المشفرة باستخدام كلمة المرور الرئيسية المطابقة",
-	"bazaarSearchPlaceholder": "أدخل كلمة بحث ثم اضغط على Enter",
 	"aiGeneratedContent": "مولّد بـ AI",
 	"pinTableHeaderColumn": "تثبيت عمود الرأس",
 	"unpinTableHeaderColumn": "إلغاء تثبيت عمود الرأس",

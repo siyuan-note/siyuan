@@ -6,8 +6,10 @@ package bazaar
 
 import (
 	"html"
+	"maps"
 	"os"
 	"path"
+	"slices"
 	"strings"
 	"sync"
 	"unicode"
@@ -125,6 +127,58 @@ type Package struct {
 	Modes                 *[]string `json:"modes,omitempty"`                 // Theme：支持的模式列表
 }
 
+// ClonePackage 复制集市包及其引用字段，用于把缓存中的原型交给调用方就地写入展示字段。
+// 调用方会覆盖 Preferred*、Installed、IconURL 等字段，因此 Package 新增切片、映射或指针字段时
+// 必须同步加入这里的克隆，否则缓存原型会被并发请求改写。
+func ClonePackage(pkg *Package) *Package {
+	if nil == pkg {
+		return nil
+	}
+	ret := *pkg
+	ret.DisplayName = maps.Clone(pkg.DisplayName)
+	ret.Description = maps.Clone(pkg.Description)
+	ret.Readme = maps.Clone(pkg.Readme)
+	ret.DeprecatedReason = maps.Clone(pkg.DeprecatedReason)
+	ret.Kernels = slices.Clone(pkg.Kernels)
+	ret.Backends = slices.Clone(pkg.Backends)
+	ret.Frontends = slices.Clone(pkg.Frontends)
+	ret.BootAppearances = slices.Clone(pkg.BootAppearances)
+	ret.Keywords = slices.Clone(pkg.Keywords)
+	ret.Choices = slices.Clone(pkg.Choices)
+	ret.Icon = clonePointer(pkg.Icon)
+	ret.Preview = clonePointer(pkg.Preview)
+	ret.Funding = cloneFunding(pkg.Funding)
+	ret.Rating = clonePointer(pkg.Rating)
+	ret.Modes = cloneSlicePointer(pkg.Modes)
+	return &ret
+}
+
+func clonePointer[T any](source *T) *T {
+	if nil == source {
+		return nil
+	}
+	value := *source
+	return &value
+}
+
+func cloneSlicePointer[T any](source *[]T) *[]T {
+	if nil == source {
+		return nil
+	}
+	cloned := slices.Clone(*source)
+	return &cloned
+}
+
+func cloneFunding(source *Funding) *Funding {
+	if nil == source {
+		return nil
+	}
+	ret := *source
+	ret.Custom = slices.Clone(source.Custom)
+	ret.Links = slices.Clone(source.Links)
+	return &ret
+}
+
 const (
 	PackageInvalidReasonMissingManifest = "missing-manifest"
 	PackageInvalidReasonInvalidManifest = "invalid-manifest"
@@ -191,6 +245,11 @@ func ParsePackageJSON(filePath string) (ret *Package, err error) {
 		logging.LogErrorf("read [%s] failed: %s", filePath, err)
 		return
 	}
+	return parsePackageJSONData(filePath, data)
+}
+
+// parsePackageJSONData 解析清单内容，并清除只能由在线集市索引提供的字段。
+func parsePackageJSONData(filePath string, data []byte) (ret *Package, err error) {
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("parse [%s] failed: %s", filePath, err)
 		return

@@ -1,7 +1,6 @@
 {
 	"manageColorsDesc": "Manage custom colors for text, backgrounds and editor styles",
 	"importNotebookCryptoBackupDesc": "Import a key backup for encrypted notebooks using its corresponding master password",
-	"bazaarSearchPlaceholder": "Type a keyword, then press Enter",
 	"aiGeneratedContent": "AI-generated",
 	"pinTableHeaderColumn": "Pin Header Column",
 	"unpinTableHeaderColumn": "Unpin Header Column",

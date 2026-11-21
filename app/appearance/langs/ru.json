@@ -1,7 +1,6 @@
 {
 	"manageColorsDesc": "Настройте пользовательские цвета текста, фона и стилей редактора",
 	"importNotebookCryptoBackupDesc": "Импортируйте резервную копию ключа зашифрованных блокнотов с соответствующим мастер-паролем",
-	"bazaarSearchPlaceholder": "Введите запрос и нажмите Enter",
 	"aiGeneratedContent": "Создано ИИ",
 	"pinTableHeaderColumn": "Закрепить столбец заголовка",
 	"unpinTableHeaderColumn": "Открепить столбец заголовка",

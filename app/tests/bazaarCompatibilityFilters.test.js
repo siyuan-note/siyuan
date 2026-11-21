@@ -254,7 +254,7 @@ const runInteractionCases = async () => {
         await f.settle();
     };
     const installedHTML = bazaar.element.querySelector("#configBazaarDownloaded").innerHTML;
-    const searchPlaceholder = window.siyuan.languages.bazaarSearchPlaceholder;
+    const searchPlaceholder = window.siyuan.languages.searchPlaceholder;
     assert.ok(searchPlaceholder);
     assert.equal(bazaar.element.querySelector('[data-type="downloaded-filter"]').placeholder, searchPlaceholder);
     for (const type of types) {

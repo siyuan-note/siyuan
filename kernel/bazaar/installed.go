@@ -301,7 +301,9 @@ func RetainInstalledPackageCaches(pkgType string, installPaths []string) {
 		}
 	}
 	installedManifestCacheMu.Unlock()
-	retainInstalledPackageReadmeCache(installPaths)
+	if layout, ok := GetPackageLayout(pkgType); ok {
+		retainInstalledPackageReadmeCache(filepath.Clean(layout.BasePath), installPaths)
+	}
 }
 
 // InvalidateInstalledPackageCaches 在安装、卸载或外观同步后丢弃该包的全部派生缓存。

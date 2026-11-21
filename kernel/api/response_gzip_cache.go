@@ -145,7 +145,7 @@ func gzipJSONCache() gin.HandlerFunc {
 		}
 		writer := &bufferedJSONResponseWriter{ResponseWriter: c.Writer}
 		c.Writer = writer
-		// 处理函数 panic 时外层只记录日志，这里恢复真实写入器，避免后续写入落在未刷新的缓冲区
+		// 恢复真实写入器，供外层在处理函数 panic 时写入错误响应。
 		defer func() { c.Writer = writer.ResponseWriter }()
 		c.Next()
 		writer.writeCompressed()
@@ -242,7 +242,7 @@ func (w *bufferedJSONResponseWriter) writeCompressed() {
 	}
 	if compressed := nil != payload; compressed {
 		header.Set("Content-Encoding", "gzip")
-		header.Set("Vary", "Accept-Encoding")
+		header.Add("Vary", "Accept-Encoding")
 	} else {
 		payload = body
 	}

@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"path"
@@ -172,19 +173,12 @@ func installedReadmeCacheKey(installPath, localRootURL, repoURL, repoRef string,
 		strconv.FormatInt(cacheVersion, 10) + "\x00" + util.Lang
 }
 
-// lookupInstalledPackageReadme 返回仍然有效的渲染结果，README 文件被改写后自然未命中。
-func lookupInstalledPackageReadme(key string) (string, bool) {
+func lookupInstalledPackageReadme(key, readmePath string) (string, bool) {
 	installedReadmeCache.mu.Lock()
 	entry, ok := installedReadmeCache.entries[key]
 	installedReadmeCache.mu.Unlock()
-	if !ok {
-		return "", false
-	}
 	// 文件校验放在锁外，避免文件系统调用阻塞其他调用方
-	if !manifestStampMatches(entry.readmePath, entry.stamp) {
-		installedReadmeCache.mu.Lock()
-		deleteInstalledReadmeCacheEntryLocked(key)
-		installedReadmeCache.mu.Unlock()
+	if !ok || entry.readmePath != readmePath || !manifestStampMatches(readmePath, entry.stamp) {
 		return "", false
 	}
 	return entry.html, true
@@ -243,8 +237,7 @@ func InvalidateInstalledPackageReadmeCache(installPath string) {
 	}
 }
 
-// retainInstalledPackageReadmeCache 只保留本次扫描到的安装目录。
-func retainInstalledPackageReadmeCache(installPaths []string) {
+func retainInstalledPackageReadmeCache(basePath string, installPaths []string) {
 	keep := make(map[string]struct{}, len(installPaths))
 	for _, installPath := range installPaths {
 		keep[installPath] = struct{}{}
@@ -252,33 +245,47 @@ func retainInstalledPackageReadmeCache(installPaths []string) {
 	installedReadmeCache.mu.Lock()
 	defer installedReadmeCache.mu.Unlock()
 	for key := range installedReadmeCache.entries {
-		if _, ok := keep[installedReadmeCacheInstallPath(key)]; !ok {
+		installPath := installedReadmeCacheInstallPath(key)
+		if filepath.Dir(installPath) != basePath {
+			continue
+		}
+		if _, ok := keep[installPath]; !ok {
 			deleteInstalledReadmeCacheEntryLocked(key)
 		}
 	}
 }
 
-// getInstalledPackageREADME 获取集市包的本地 README，渲染结果按文件版本缓存。
+func readInstalledPackageReadme(readmePath string) (data []byte, info os.FileInfo, err error) {
+	file, err := os.Open(readmePath)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	// 使用读取内容的文件句柄取属性，避免文件被替换时混用两个版本。
+	info, _ = file.Stat()
+	data, err = io.ReadAll(file)
+	return
+}
+
 func getInstalledPackageREADME(installPath, localRootURL, repoURL, repoRef string, cacheVersion int64,
 	readme LocaleStrings) (ret string) {
 	cacheKey := installedReadmeCacheKey(installPath, localRootURL, repoURL, repoRef, cacheVersion)
-	if cached, ok := lookupInstalledPackageReadme(cacheKey); ok {
-		return cached
-	}
-
 	candidates := getReadmeFileCandidates(readme)
 	var errMsgs []string
 	for _, name := range candidates {
 		readmePath := filepath.Join(installPath, name)
-		readmeData, readErr := os.ReadFile(readmePath)
+		if cached, ok := lookupInstalledPackageReadme(cacheKey, readmePath); ok {
+			return cached
+		}
+		readmeData, info, readErr := readInstalledPackageReadme(readmePath)
 		if readErr == nil {
 			remoteRoot := packageRemoteRootURL(repoURL, repoRef, false)
 			linkBase := readmeDirectoryURL(localRootURL, name)
 			ret = installedReadmeRenderer(linkBase, readmeData, func(src string) string {
 				return resolvePackageREADMEImage(src, installPath, localRootURL, remoteRoot, name, cacheVersion)
 			})
-			// 取不到属性时仍然返回结果，只是不写入缓存
-			if info, statErr := os.Stat(readmePath); nil == statErr {
+			if info != nil {
 				storeInstalledPackageReadme(cacheKey, readmePath,
 					installedManifestStamp{size: info.Size(), modTime: info.ModTime().UnixNano()}, ret)
 			}

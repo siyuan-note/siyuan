@@ -631,7 +631,9 @@ const bindBazaarSearchEvents = (
         .forEach((inputElement: HTMLInputElement) => {
             let pending: number | undefined;
             let inFlight: AbortController | undefined;
-            const search = () => {
+            let downloadedSearchID = 0;
+            const isCurrent = () => controller.element?.isConnected && controller._isMountCurrent(mount);
+            const search = async () => {
                 const keyword = inputElement.value.trim();
                 const type = (hasClosestByClassName(inputElement, "config-bazaar__panel") as HTMLElement)
                     .getAttribute("data-type");
@@ -650,6 +652,13 @@ const bindBazaarSearchEvents = (
                         controller._onBazaar(response, bazaarType, request);
                     }, undefined, undefined, abortController.signal);
                 } else if (type === "downloaded") {
+                    const searchID = ++downloadedSearchID;
+                    while (controller._downloadedRequest) {
+                        await controller._downloadedRequest;
+                        if (searchID !== downloadedSearchID || pending !== undefined || !isCurrent()) {
+                            return;
+                        }
+                    }
                     const activeType = inputElement.closest(".config-bazaar__title")
                         ?.querySelector('.b3-button[data-type^="my"]:not(.b3-button--outline)')
                         ?.getAttribute("data-type");
@@ -667,10 +676,9 @@ const bindBazaarSearchEvents = (
             };
             const submit = () => {
                 cancelPending();
-                if (!controller.element?.isConnected) {
-                    return;
+                if (isCurrent()) {
+                    void search();
                 }
-                search();
             };
             const schedule = () => {
                 cancelPending();

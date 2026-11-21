@@ -153,25 +153,56 @@ func TestInvalidateInstalledPackageReadmeCache(t *testing.T) {
 	}
 }
 
-func TestRetainInstalledPackageCachesDropsReadmeEntries(t *testing.T) {
+func TestRetainInstalledPackageCachesDropsReadmeEntriesInScannedCategory(t *testing.T) {
 	resetInstalledReadmeCache(t)
 	renders := countReadmeRenders(t)
-	root := t.TempDir()
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+
 	readme := LocaleStrings{"default": "README.md"}
-	kept, removed := filepath.Join(root, "kept"), filepath.Join(root, "removed")
+	kept := filepath.Join(util.DataDir, "plugins", "kept")
+	removed := filepath.Join(util.DataDir, "plugins", "removed")
+	widget := filepath.Join(util.DataDir, "widgets", "example")
 	writeReadmePackage(t, kept)
 	writeReadmePackage(t, removed)
+	writeReadmePackage(t, widget)
 
 	getInstalledPackageREADME(kept, "/plugins/kept/", "", "", 1000, readme)
 	getInstalledPackageREADME(removed, "/plugins/removed/", "", "", 1000, readme)
+	getInstalledPackageREADME(widget, "/widgets/example/", "", "", 1000, readme)
 
+	RetainInstalledPackageCaches("templates", nil)
 	RetainInstalledPackageCaches("plugins", []string{kept})
+	getInstalledPackageREADME(widget, "/widgets/example/", "", "", 1000, readme)
 	getInstalledPackageREADME(kept, "/plugins/kept/", "", "", 1000, readme)
-	if 2 != *renders {
+	if 3 != *renders {
 		t.Fatalf("retained readme was rendered again: %d", *renders)
 	}
 	getInstalledPackageREADME(removed, "/plugins/removed/", "", "", 1000, readme)
-	if 3 != *renders {
+	if 4 != *renders {
 		t.Fatalf("dropped readme was not rendered again: %d", *renders)
+	}
+}
+
+func TestInstalledPackageReadmeFollowsCandidatePriority(t *testing.T) {
+	resetInstalledReadmeCache(t)
+	dir := filepath.Join(t.TempDir(), "demo")
+	writeReadmePackage(t, dir)
+	readme := LocaleStrings{"default": "Preferred.md"}
+	getReadme := func(readme LocaleStrings) string {
+		return getInstalledPackageREADME(dir, "/plugins/demo/", "", "", 1000, readme)
+	}
+	if html := getReadme(readme); !strings.Contains(html, "<strong>README</strong>") {
+		t.Fatalf("unexpected fallback readme: %q", html)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "Preferred.md"), []byte("# Preferred\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if html := getReadme(readme); !strings.Contains(html, "Preferred") {
+		t.Fatalf("new preferred readme was ignored: %q", html)
+	}
+	if html := getReadme(LocaleStrings{"default": "README.md"}); !strings.Contains(html, "<strong>README</strong>") {
+		t.Fatalf("changed manifest selection was ignored: %q", html)
 	}
 }

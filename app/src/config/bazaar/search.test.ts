@@ -3,7 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-test("marketplace searching is debounced while typing, submits immediately on Enter, and aborts the previous request", () => {
+test("marketplace searching is debounced while typing, submits immediately on Enter, and aborts the previous request", async () => {
     const input = Object.assign(new EventTarget(), {value: "", closest: () => ({
         querySelector: () => ({getAttribute: () => "myPlugin"}),
     })});
@@ -55,7 +55,18 @@ test("marketplace searching is debounced while typing, submits immediately on En
     }).outputText;
     new Function("exports", "require", "window", source)(api, (id: string) => mocks[id] || {}, fakeWindow);
     const mount = {element: root as unknown as HTMLElement, generation: 1};
-    const controller = {element: root, _beginBazaarRequest: () => mount, _genMyHTML: () => calls.push("downloaded")};
+    let generation = mount.generation;
+    const downloadedKeywords: string[] = [];
+    const controller = {
+        element: root,
+        _beginBazaarRequest: () => mount,
+        _downloadedRequest: undefined as Promise<void> | undefined,
+        _genMyHTML: () => {
+            calls.push("downloaded");
+            downloadedKeywords.push(input.value);
+        },
+        _isMountCurrent: (snapshot: typeof mount) => snapshot.generation === generation,
+    };
     api.bindBazaarEvents(controller as unknown as Parameters<typeof api.bindBazaarEvents>[0], undefined, mount);
     const type = (value: string, isComposing = false) => {
         input.value = value;
@@ -103,4 +114,26 @@ test("marketplace searching is debounced while typing, submits immediately on En
     assert.deepEqual(calls, ["plugin", "theme", "ni", ""]);
     flushTimers();
     assert.deepEqual(calls, ["plugin", "theme", "ni", "", "downloaded"]);
+
+    let resolveLoading: () => void;
+    const loading = new Promise<void>(resolve => {
+        resolveLoading = resolve;
+    });
+    const currentRequest = loading.then(() => {
+        controller._downloadedRequest = undefined;
+    });
+    controller._downloadedRequest = currentRequest;
+    type("while loading");
+    flushTimers();
+    type("latest");
+    flushTimers();
+    assert.deepEqual(downloadedKeywords, ["theme"]);
+    resolveLoading();
+    await currentRequest;
+    assert.deepEqual(downloadedKeywords, ["theme", "latest"]);
+
+    type("previous view");
+    generation++;
+    flushTimers();
+    assert.deepEqual(downloadedKeywords, ["theme", "latest"]);
 });

@@ -20,6 +20,7 @@ import (
 func newGzipCacheTestEngine(payload string) *gin.Engine {
 	engine := gin.New()
 	engine.POST(JSONGzipCachePaths[0], withGzipJSONCache([]gin.HandlerFunc{func(c *gin.Context) {
+		c.Writer.Header().Add("Vary", "Origin")
 		c.JSON(http.StatusOK, gin.H{"msg": payload})
 	}})...)
 	return engine
@@ -51,8 +52,8 @@ func TestGzipJSONCacheReusesCompressedPayload(t *testing.T) {
 		if "gzip" != writer.Header().Get("Content-Encoding") {
 			t.Fatalf("bazaar list was not compressed: %v", writer.Header())
 		}
-		if "Accept-Encoding" != writer.Header().Get("Vary") {
-			t.Fatalf("missing Vary header: %v", writer.Header())
+		if vary := writer.Header().Values("Vary"); len(vary) != 2 || vary[0] != "Origin" || vary[1] != "Accept-Encoding" {
+			t.Fatalf("unexpected Vary values: %v", vary)
 		}
 		if strconv.Itoa(writer.Body.Len()) != writer.Header().Get("Content-Length") {
 			t.Fatalf("content length does not match the gzip payload: %v", writer.Header())

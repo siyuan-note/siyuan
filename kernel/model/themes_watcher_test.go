@@ -15,7 +15,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestWatchThemesCurrentThemeOnly(t *testing.T) {
+func setupThemesWatchTest(t *testing.T) string {
+	t.Helper()
 	originalConf, originalThemesPath := Conf, util.ThemesPath
 	originalAppearancePath, originalMode := util.AppearancePath, util.Mode
 	CloseWatchThemes()
@@ -36,6 +37,11 @@ func TestWatchThemesCurrentThemeOnly(t *testing.T) {
 	}
 	Conf = NewAppConf()
 	Conf.Appearance.Store(conf.NewAppearance())
+	return themesDir
+}
+
+func TestWatchThemesCurrentThemeOnly(t *testing.T) {
+	themesDir := setupThemesWatchTest(t)
 
 	WatchThemes()
 	assertThemesWatchList(t, themesDir, util.AppearancePackagePath("themes", "daylight"))

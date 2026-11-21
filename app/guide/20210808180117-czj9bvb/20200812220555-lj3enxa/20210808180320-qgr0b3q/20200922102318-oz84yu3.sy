@@ -1748,7 +1748,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "内核通常会监听 theme.css 的修改并自动刷新；如果没有自动刷新，请使用 "
+									"Data": "修改当前主题的 theme.css 通常会自动刷新主题，主题目录为符号链接或 Windows 目录联接时也适用。如果没有自动刷新，请使用 "
 								},
 								{
 									"Type": "NodeTextMark",

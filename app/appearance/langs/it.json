@@ -1,4 +1,5 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "La creazione di un archivio non rimuove dati. Dopo la conferma, la rimozione viene propagata tramite la sincronizzazione",
 	"manageColorsDesc": "Gestisci i colori personalizzati per il testo, gli sfondi e gli stili dell’editor",
 	"importNotebookCryptoBackupDesc": "Importa un backup della chiave per i taccuini crittografati usando la password principale corrispondente",
 	"aiGeneratedContent": "Generato dall’IA",
@@ -3788,6 +3789,7 @@
 		"470": "È stato raggiunto il limite di turni di chiamata agli strumenti. Ho smesso di usare gli strumenti; questa attività potrebbe essere ancora incompleta",
 		"471": "Le chiamate ripetute agli strumenti hanno restituito lo stesso risultato. Ho smesso di usare gli strumenti; questa attività potrebbe essere ancora incompleta",
 		"472": "Impossibile convertire la mappa mentale precedente, riapri il documento e riprova",
-		"473": "Si è verificato un errore imprevisto durante l’elaborazione della richiesta. Controlla il registro di sistema"
+		"473": "Si è verificato un errore imprevisto durante l’elaborazione della richiesta. Controlla il registro di sistema",
+		"474": "Non è possibile disattivare i taccuini crittografati in uno spazio di lavoro collegato alla sincronizzazione, anche se è in pausa"
 	}
 }

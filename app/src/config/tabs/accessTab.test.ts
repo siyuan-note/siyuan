@@ -224,6 +224,7 @@ test("key backup actions have their own settings search entry", () => {
         importNotebookCryptoBackup: "导入密钥",
         importNotebookCryptoBackupDesc: "使用对应的主密码导入加密笔记本的密钥备份",
         restoreEncryptedNotebooksTip: "请在独立工作区恢复",
+        _kernel: {"474": "同步工作区不能停用"},
     };
     const slots = new Map<string, {key: string; keywords: string[]; html: () => string}>();
     const buttons = new Map<string, string>();
@@ -248,16 +249,21 @@ test("key backup actions have their own settings search entry", () => {
     assert.ok(buttons.get("restoreEncryptedNotebooks").includes("独立"));
 });
 
-test("recovery-required key configuration can be disabled and cannot import another archive", () => {
+test("synced workspaces cannot disable notebook encryption, including when key recovery is required", () => {
     const compiled = transpileModule(readFileSync("src/config/tabs/accessTab.ts", "utf8") +
         "\nexport {refreshEncryptedNotebookStatus};", {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
-    const controls = new Map<string, {checked: boolean, disabled: boolean, classList: {toggle: () => void, remove: () => void}}>();
+    const createControl = () => ({
+        checked: false, disabled: false,
+        setAttribute: () => {}, removeAttribute: () => {},
+        classList: {toggle: () => {}, remove: () => {}},
+    });
+    const controls = new Map<string, ReturnType<typeof createControl>>();
     const root = {
         querySelector: (selector: string) => {
             if (!controls.has(selector)) {
-                controls.set(selector, {checked: false, disabled: false, classList: {toggle: () => {}, remove: () => {}}});
+                controls.set(selector, createControl());
             }
             return controls.get(selector);
         },
@@ -268,18 +274,98 @@ test("recovery-required key configuration can be disabled and cannot import anot
         fetchPost: (url: string, data: object, callback: (response: unknown) => void) => {
             assert.equal(url, "/api/notebook/getEncryptedNotebookStatus");
             assert.equal(Object.keys(data).length, 0);
-            callback({data: {state, migrationPending: false}});
+            callback({code: 0, data: {state, migrationPending: false}});
         },
     };
-    const config = {notebookCrypto: {enabled: false}};
+    const config = {notebookCrypto: {enabled: false}, sync: {configured: false, enabled: false, synced: 0, cloudName: "main"}};
     const exports = {} as {refreshEncryptedNotebookStatus: (element: typeof root) => void};
     runInNewContext(compiled, {exports, require: () => dependencies, window: {siyuan: {config}}});
     exports.refreshEncryptedNotebookStatus(root);
     assert.equal(root.querySelector("#encryptedNotebookSwitch").checked, true);
     assert.equal(root.querySelector("#restoreEncryptedNotebooks").disabled, true);
     assert.equal(config.notebookCrypto.enabled, false);
+    assert.equal(root.querySelector("#encryptedNotebookSwitch").disabled, false);
+    config.sync.enabled = true;
+    exports.refreshEncryptedNotebookStatus(root);
+    assert.equal(root.querySelector("#encryptedNotebookSwitch").disabled, true);
+    config.sync.enabled = false;
+    config.sync.synced = 1;
+    state = "Enabled";
+    exports.refreshEncryptedNotebookStatus(root);
+    assert.equal(root.querySelector("#encryptedNotebookSwitch").checked, true);
+    assert.equal(root.querySelector("#encryptedNotebookSwitch").disabled, true);
+    assert.equal(config.notebookCrypto.enabled, true);
+    config.sync.synced = 0;
+    config.sync.configured = true;
+    exports.refreshEncryptedNotebookStatus(root);
+    assert.equal(root.querySelector("#encryptedNotebookSwitch").disabled, true);
     state = "Disabled";
     exports.refreshEncryptedNotebookStatus(root);
     assert.equal(root.querySelector("#encryptedNotebookSwitch").checked, false);
+    assert.equal(root.querySelector("#encryptedNotebookSwitch").disabled, false);
     assert.equal(root.querySelector("#restoreEncryptedNotebooks").disabled, false);
+});
+
+test("backend rejection restores the checked encryption switch when sync evidence is only server-side", async () => {
+    const compiled = transpileModule(readFileSync("src/config/tabs/accessTab.ts", "utf8") +
+        "\nexport {mountEncryptedNotebook};", {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    const listeners = new Map<string, () => Promise<void>>();
+    const createControl = (selector: string) => ({
+        checked: false, disabled: false,
+        setAttribute: () => {}, removeAttribute: () => {},
+        querySelector: (child: string): unknown => root.querySelector(child),
+        addEventListener: (_event: string, callback: () => Promise<void>) => listeners.set(selector, callback),
+        classList: {toggle: () => {}, remove: () => {}},
+    });
+    const controls = new Map<string, ReturnType<typeof createControl>>();
+    const root = {
+        querySelector: (selector: string) => {
+            if (!controls.has(selector)) {
+                controls.set(selector, createControl(selector));
+            }
+            return controls.get(selector);
+        },
+    };
+    const requests: string[] = [];
+    const messages: string[] = [];
+    let transportFailure = false;
+    const status = {code: 0, data: {state: "Enabled", count: 0, hasHistoryDependency: false}};
+    const config = {notebookCrypto: {enabled: true}, sync: {enabled: false, synced: 0, cloudName: "main"}};
+    const exports = {} as {mountEncryptedNotebook: (element: typeof root) => void};
+    runInNewContext(compiled, {exports, require: () => ({
+        getHostCapabilities: () => ({importExport: true}),
+        fetchPost: (_url: string, _data: object, callback: (value: typeof status) => void) => callback(status),
+        fetchSyncPost: async (url: string) => {
+            requests.push(url);
+            if (requests.length === 1) {
+                return status;
+            }
+            if (transportFailure) {
+                throw new Error("connection lost");
+            }
+            return {code: 9};
+        },
+        showMessage: (message: string) => messages.push(message),
+    }), window: {siyuan: {config, languages: {confirmActionFailed: "request failed"}}}});
+    exports.mountEncryptedNotebook(root);
+    const switchElement = root.querySelector("#encryptedNotebookSwitch");
+    assert.equal(switchElement.checked, true);
+    switchElement.checked = false;
+    const pending = listeners.get("#encryptedNotebookSwitch")();
+    assert.equal(switchElement.disabled, true);
+    await listeners.get("#encryptedNotebookSwitch")();
+    await pending;
+    assert.equal(switchElement.disabled, false);
+    assert.deepEqual(requests, ["/api/notebook/getEncryptedNotebookStatus", "/api/notebook/disableEncryptedNotebooks"]);
+    assert.equal(switchElement.checked, true);
+    assert.equal(config.notebookCrypto.enabled, true);
+    assert.deepEqual(messages, []);
+    requests.length = 0;
+    transportFailure = true;
+    switchElement.checked = false;
+    await listeners.get("#encryptedNotebookSwitch")();
+    assert.equal(switchElement.checked, true);
+    assert.deepEqual(messages, ["request failed"]);
 });

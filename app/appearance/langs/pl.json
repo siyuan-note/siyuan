@@ -1,4 +1,5 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Utworzenie archiwum nie usuwa danych. Po potwierdzeniu usunięcie zostanie rozpropagowane przez synchronizację",
 	"manageColorsDesc": "Zarządzaj niestandardowymi kolorami tekstu, tła i stylów edytora",
 	"importNotebookCryptoBackupDesc": "Zaimportuj kopię zapasową klucza zaszyfrowanych notatników za pomocą odpowiedniego hasła głównego",
 	"aiGeneratedContent": "Generacja AI",
@@ -3788,6 +3789,7 @@
 		"470": "Osiągnięto limit rund wywołań narzędzi. Przestałem używać narzędzi; to zadanie może nadal być nieukończone",
 		"471": "Powtarzane wywołania narzędzi zwracały ten sam wynik. Przestałem używać narzędzi; to zadanie może nadal być nieukończone",
 		"472": "Nie udało się przekonwertować starej mapy myśli, otwórz ponownie dokument i spróbuj jeszcze raz",
-		"473": "Podczas przetwarzania żądania wystąpił nieoczekiwany błąd. Sprawdź dziennik systemowy"
+		"473": "Podczas przetwarzania żądania wystąpił nieoczekiwany błąd. Sprawdź dziennik systemowy",
+		"474": "Nie można wyłączyć szyfrowanych notatników w obszarze roboczym powiązanym z synchronizacją, nawet gdy jest ona wstrzymana"
 	}
 }

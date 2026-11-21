@@ -86,7 +86,11 @@ func onboardingSectionSpec() *SectionSpec[*conf.Onboarding] {
 
 // syncSectionSpec 在连接信息改变或同步关闭时清除当前来源的索引读取提示。
 func syncSectionSpec() *SectionSpec[*conf.Sync] {
-	return newSectionSpec("sync", &Conf.Sync, conf.NormalizeSync, Reaction[*conf.Sync]{
+	return newSectionSpec("sync", &Conf.Sync, func(next *conf.Sync) *conf.Sync {
+		next = conf.NormalizeSync(next)
+		next.Configured = next.Configured || Conf.Sync.Load().HasConfiguredSync()
+		return next
+	}, Reaction[*conf.Sync]{
 		Name: "cloud-index-notice", Changed: func(old, next *conf.Sync) bool {
 			return !next.Enabled || old.Provider != next.Provider || old.CloudName != next.CloudName ||
 				(old.Provider == conf.ProviderS3 && !reflect.DeepEqual(old.S3, next.S3)) ||

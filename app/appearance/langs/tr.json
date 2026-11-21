@@ -1,4 +1,5 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Arşiv oluşturmak verileri kaldırmaz. Kaldırma onaylandıktan sonra eşitlemeyle yayılır",
 	"manageColorsDesc": "Metin, arka plan ve düzenleyici stillerinin özel renklerini yönetin",
 	"importNotebookCryptoBackupDesc": "Şifreli not defterlerinin anahtar yedeğini ilgili ana parolayla içe aktarın",
 	"aiGeneratedContent": "YZ üretimi",
@@ -3788,6 +3789,7 @@
 		"470": "Araç çağrısı tur sınırına ulaşıldı. Araç kullanmayı durdurdum; bu görev hâlâ tamamlanmamış olabilir",
 		"471": "Tekrarlanan araç çağrıları aynı sonucu döndürdü. Araç kullanmayı durdurdum; bu görev hâlâ tamamlanmamış olabilir",
 		"472": "Eski zihin haritası dönüştürülemedi, lütfen belgeyi yeniden açıp tekrar deneyin",
-		"473": "İstek işlenirken beklenmeyen bir hata oluştu. Sistem günlüğünü kontrol edin"
+		"473": "İstek işlenirken beklenmeyen bir hata oluştu. Sistem günlüğünü kontrol edin",
+		"474": "Eşitlemeye bağlı bir çalışma alanında, eşitleme duraklatılmış olsa bile şifreli not defterleri devre dışı bırakılamaz"
 	}
 }

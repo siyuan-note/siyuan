@@ -1,4 +1,5 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Creating an archive does not remove data. Confirming removal makes it propagate through sync",
 	"manageColorsDesc": "Manage custom colors for text, backgrounds and editor styles",
 	"importNotebookCryptoBackupDesc": "Import a key backup for encrypted notebooks using its corresponding master password",
 	"aiGeneratedContent": "AI-generated",
@@ -3788,6 +3789,7 @@
 		"470": "Tool call round limit reached. I have stopped using tools; this task may still be incomplete",
 		"471": "Repeated tool calls returned the same result. I have stopped using tools; this task may still be incomplete",
 		"472": "Failed to convert the legacy mind map, please reopen the document and try again",
-		"473": "An unexpected error occurred while processing the request. Check the system log"
+		"473": "An unexpected error occurred while processing the request. Check the system log",
+		"474": "Encrypted notebooks cannot be disabled in a workspace linked to sync, even while sync is paused"
 	}
 }

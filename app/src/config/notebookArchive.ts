@@ -20,7 +20,7 @@ export const openNotebookArchiveDialog = async (refresh: () => void) => {
         title: lang.archiveEncryptedNotebooks,
         width: isMobile() ? "92vw" : "560px",
         content: `<div class="b3-dialog__content">
-    <div class="ft__secondary">${lang.archiveEncryptedNotebooksTip}</div>
+    <div class="ft__secondary">${lang.archiveEncryptedNotebooksTip}<br>${lang.archiveEncryptedNotebooksSyncTip}</div>
     <div class="fn__hr"></div>
     <div data-type="notebooks">${response.data.notebooks.map((item) => `<label class="b3-label fn__flex">
         <input class="b3-switch" type="checkbox" value="${escapeHtml(item.id)}">

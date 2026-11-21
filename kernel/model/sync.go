@@ -661,7 +661,9 @@ func SetSyncGenerateConflictDoc(b bool) {
 }
 
 func SetSyncEnable(b bool) {
+	lockSync()
 	UpdateSyncConf(func(s *conf.Sync) { s.Enabled = b })
+	unlockSync()
 	refreshLANSyncManager()
 }
 

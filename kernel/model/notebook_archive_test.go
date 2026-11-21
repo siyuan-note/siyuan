@@ -422,14 +422,11 @@ func TestNotebookArchiveHistoryAndRepositorySnapshots(t *testing.T) {
 	if _, err = repo.GetIndex(index.ID); err != nil {
 		t.Fatalf("repository snapshot removed: %v", err)
 	}
-	if err = DisableEncryptedNotebook(); err != nil {
-		t.Fatalf("archived dependencies still block reset: %v", err)
+	if err = DisableEncryptedNotebook(); err == nil {
+		t.Fatal("archiving incorrectly allowed retiring shared sync keys")
 	}
-	if err = EnableEncryptedNotebook("new-key-domain"); err != nil {
-		t.Fatal(err)
-	}
-	if err = DisableEncryptedNotebook(); err != nil {
-		t.Fatalf("archived snapshots blocked an unrelated key domain: %v", err)
+	if _, err = os.Stat(dataCryptoBackupPath()); err != nil {
+		t.Fatalf("shared sync keys were removed: %v", err)
 	}
 	t.Run("restore current notebook and both histories", func(t *testing.T) {
 		notebookArchiveTestWorkspace(t)

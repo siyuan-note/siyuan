@@ -1,4 +1,5 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Tạo bản lưu trữ không xóa dữ liệu. Sau khi xác nhận, việc xóa sẽ được áp dụng qua đồng bộ",
 	"manageColorsDesc": "Quản lý màu tùy chỉnh cho văn bản, nền và kiểu trình soạn thảo",
 	"importNotebookCryptoBackupDesc": "Nhập bản sao lưu khóa cho sổ tay mã hóa bằng mật khẩu chính tương ứng",
 	"aiGeneratedContent": "Do AI tạo",
@@ -3788,6 +3789,7 @@
 		"470": "Đã đạt đến giới hạn vòng gọi công cụ. Tôi đã ngừng sử dụng các công cụ; nhiệm vụ này có thể vẫn chưa hoàn thành",
 		"471": "Các lần gọi công cụ liên tiếp trả về cùng một kết quả. Tôi đã ngừng gọi công cụ; tác vụ này có thể chưa hoàn thành.",
 		"472": "Không thể chuyển đổi sơ đồ tư duy kiểu cũ. Hãy mở lại tài liệu rồi thử lại.",
-		"473": "Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu. Hãy kiểm tra nhật ký hệ thống"
+		"473": "Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu. Hãy kiểm tra nhật ký hệ thống",
+		"474": "Không thể tắt sổ tay mã hóa trong không gian làm việc được liên kết với đồng bộ, kể cả khi đang tạm dừng đồng bộ"
 	}
 }

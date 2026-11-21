@@ -1,4 +1,5 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Прављење архиве не уклања податке. Након потврде, уклањање се преноси синхронизацијом",
 	"manageColorsDesc": "Upravljajte prilagođenim bojama teksta, pozadine i stilova uređivača",
 	"importNotebookCryptoBackupDesc": "Uvezite rezervnu kopiju ključa za šifrovane beležnice pomoću odgovarajuće glavne lozinke",
 	"aiGeneratedContent": "Генерисано ВИ",
@@ -3788,6 +3789,7 @@
 		"470": "Достигнуто је ограничење броја кругова позива алата. Престао сам да користим алате; овај задатак можда још није завршен",
 		"471": "Поновљени позиви алата вратили су исти резултат. Престао сам да користим алате; овај задатак можда још није завршен",
 		"472": "Претварање старе мапе ума није успело, поново отворите документ и покушајте поново",
-		"473": "Došlo je do neočekivane greške pri obradi zahteva. Proverite sistemski dnevnik"
+		"473": "Došlo je do neočekivane greške pri obradi zahteva. Proverite sistemski dnevnik",
+		"474": "Шифроване бележнице се не могу искључити у радном простору повезаном са синхронизацијом, чак ни када је паузирана"
 	}
 }

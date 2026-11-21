@@ -1,4 +1,5 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Créer une archive ne supprime aucune donnée. Une fois confirmée, la suppression est propagée par la synchronisation",
 	"manageColorsDesc": "Gérer les couleurs personnalisées du texte, des arrière-plans et des styles de l’éditeur",
 	"importNotebookCryptoBackupDesc": "Importer une sauvegarde de clé pour les carnets chiffrés avec le mot de passe maître correspondant",
 	"aiGeneratedContent": "Généré par IA",
@@ -3788,6 +3789,7 @@
 		"470": "La limite de cycles d’appels aux outils a été atteinte. J’ai cessé d’utiliser les outils ; cette tâche est peut-être encore inachevée",
 		"471": "Les appels répétés aux outils ont renvoyé le même résultat. J’ai cessé d’utiliser les outils ; cette tâche est peut-être encore inachevée",
 		"472": "Impossible de convertir la carte mentale héritée, veuillez rouvrir le document et réessayer",
-		"473": "Une erreur inattendue est survenue lors du traitement de la demande. Consultez le journal système"
+		"473": "Une erreur inattendue est survenue lors du traitement de la demande. Consultez le journal système",
+		"474": "Les carnets chiffrés ne peuvent pas être désactivés dans un espace de travail lié à la synchronisation, même si celle-ci est en pause"
 	}
 }

@@ -4,10 +4,12 @@ import { Constants } from "../../../../constants";
 import { clearSelect } from "../../../util/clear";
 import { transaction } from "../../../wysiwyg/transaction";
 import { locateRequests } from "../locateState";
+import {switchAVView} from "../action";
 import type { IAVPanelDescriptor } from "./types";
 export const switcherPanel: IAVPanelDescriptor = {
     render: context => {
-        context.html = getSwitcherHTML(context.data.views, context.data.viewID, context.options.blockElement);
+        context.html = getSwitcherHTML(context.data.views, context.data.viewID, context.options.blockElement,
+            context.options.protyle.disabled);
         return true;
     },
     bind: context => {
@@ -54,7 +56,13 @@ export const switcherPanel: IAVPanelDescriptor = {
             return "handled";
         },
         "av-view-switch": (context, action) => {
-            if (!action.target.parentElement.classList.contains("b3-menu__item--current")) {
+            if (context.options.protyle.disabled) {
+                const viewElement = action.target.closest<HTMLElement>(".b3-menu__item");
+                if (viewElement.dataset.id !== context.data.viewID) {
+                    switchAVView(context.options.protyle, context.options.blockElement as HTMLElement, viewElement);
+                }
+                context.avPanelElement.remove();
+            } else if (!action.target.parentElement.classList.contains("b3-menu__item--current")) {
                 locateRequests.delete(context.options.blockElement as HTMLElement);
                 const previousViewID = context.data.viewID;
                 context.data.viewID = action.target.parentElement.dataset.id;

@@ -258,6 +258,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
         bindAVPanelDrag(context);
         bindAVPanelInputs(context);
         let suppressSelectClick = false;
+        const switcherReadonly = options.type === "switcher" && options.protyle.disabled;
 
         avPanelElement.addEventListener("click", async (event: MouseEvent) => {
             let type: string;
@@ -322,6 +323,15 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                }
+                if (type && options.type === "switcher") {
+                    if (options.protyle.disabled !== switcherReadonly) {
+                        avPanelElement.remove();
+                        break;
+                    }
+                    if (switcherReadonly && type !== "av-view-switch") {
+                        break;
+                    }
                 }
                 const actionResult = dispatchAVPanelAction(context, {type, target, event});
                 const result = typeof actionResult === "string" ? actionResult : await actionResult;

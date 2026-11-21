@@ -117,7 +117,14 @@ test("progress overlays cover dialogs, isolate mobile gestures and preserve scro
     const css = compileString(readFileSync("src/assets/scss/component/_dialog.scss", "utf8")).css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-progress-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(progress)}, ${JSON.stringify(touch)}, ${JSON.stringify(back)}, ${JSON.stringify(css)})`;
+    const code = `(() => {
+        const __name = value => value;
+        try {
+            return {result: (${browserCases.toString()})(${JSON.stringify(progress)}, ${JSON.stringify(touch)}, ${JSON.stringify(back)}, ${JSON.stringify(css)})};
+        } catch (error) {
+            return {error: String(error.stack || error)};
+        }
+    })()`;
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
@@ -126,7 +133,12 @@ app.whenReady().then(async () => {
         webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
     try {
         await win.loadURL("about:blank");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
+        win.webContents.enableDeviceEmulation({screenPosition: "desktop", screenSize: {width: 384, height: 808},
+            viewPosition: {x: 0, y: 0}, viewSize: {width: 384, height: 808}, deviceScaleFactor: 1, scale: 1});
+        await win.webContents.executeJavaScript("new Promise(requestAnimationFrame)");
+        const {result, error} = await win.webContents.executeJavaScript(${JSON.stringify(code)});
+        if (error) throw new Error(error);
+        console.log(result);
         win.destroy(); app.exit(0);
     } catch (error) {
         console.error(error); win.destroy(); app.exit(1);

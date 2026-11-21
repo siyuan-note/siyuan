@@ -34,6 +34,10 @@ export const updateAVCachedCellValue = (view: IAVView, rowID: string, colID: str
 
 export const getAVBlockRefSubtype = (value?: IAVCellValue): "s" | "d" => value?.block?.refSubtype === "d" ? "d" : "s";
 
+// 绑定候选尚未写入数据库值，按内核规则由静态锚文本属性推导引用类型，避免绑定瞬间先渲染成另一种类型。
+export const getAVBindingCandidateSubtype = (ial: Record<string, string> | undefined, staticTextKey: string): "s" | "d" =>
+    staticTextKey && ial?.[staticTextKey] ? "s" : "d";
+
 export const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string) => ({
     type,
     keyID,

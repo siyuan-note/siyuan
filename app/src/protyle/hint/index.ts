@@ -79,6 +79,7 @@ import {getAVBindingCell, getAVBindingOperations} from "../render/av/binding";
 import {bindCreatedAVDocument} from "../render/av/bindCreatedDocument";
 import {isRangeInEditor} from "../../util/newFileSelection";
 import {genCellValueByElement} from "../render/av/cell";
+import {getAVBindingCandidateSubtype} from "../render/av/cellValue";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
@@ -1019,15 +1020,18 @@ export class Hint {
 <span class="b3-list-item__text">${window.siyuan.languages.newFileAtPath} <mark>${response.k}</mark></span></div></button>`;
                     }
                 }
+                const avStaticTextKey = "av" === source && nodeElement ?
+                    Constants.CUSTOM_SY_AV_STATIC_TEXT + (nodeElement.getAttribute("data-av-id") || "") : "";
                 response.blocks.forEach((item: IBlock, index: number) => {
                     let blockRefHTML;
                     if (source === "av") {
                         // av 搜索时需要获取值 https://github.com/siyuan-note/siyuan/issues/12020
                         let refText = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replaceAll(Constants.ZWSP, "");
-                        if (nodeElement) {
-                            refText = escapeHtml(item.ial[Constants.CUSTOM_SY_AV_STATIC_TEXT + nodeElement.getAttribute("data-av-id")] || "") || refText;
+                        const staticText = avStaticTextKey ? item.ial?.[avStaticTextKey] : "";
+                        if (staticText) {
+                            refText = escapeHtml(staticText);
                         }
-                        blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
+                        blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="${getAVBindingCandidateSubtype(item.ial, avStaticTextKey)}">${refText}</span>`;
                     } else {
                         blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
                     }
@@ -1190,8 +1194,9 @@ ${genHintItemHTML(item)}
                         JSON.stringify(genCellValueByElement("block", cellElement)) === savedPrimaryValue,
                 });
                 if (bound) {
+                    // 新建文档绑定时内核固定写入动态引用，预览保持一致避免回退成静态引用。
                     updatePreview({type: "block", isDetached: false,
-                        block: {content: title, id, icon: previousValue.block?.icon}});
+                        block: {content: title, id, icon: previousValue.block?.icon, refSubtype: "d"}});
                 }
             };
             if (value.startsWith("((newFileAtPath ") && value.endsWith(`${Lute.Caret}'))`)) {
@@ -1239,6 +1244,8 @@ ${genHintItemHTML(item)}
                     newFileByRefHint(protyle, realFileName, bindNewDoc, newID);
                 }
             } else {
+                // 候选已按静态锚文本推导引用类型，预览沿用该值，避免绑定事务返回前闪成另一种类型。
+                const refSubtype = tempElement.getAttribute("data-subtype") === "s" ? "s" : "d";
                 const sourceId = tempElement.getAttribute("data-id");
                 const operations = getAVBindingOperations(avID, previousID, sourceId, nodeElement.dataset.nodeId,
                     previousValue, {protyleID: protyle.id});
@@ -1248,7 +1255,8 @@ ${genHintItemHTML(item)}
                     isDetached: false,
                     block: {
                         content: tempElement.textContent,
-                        id: sourceId
+                        id: sourceId,
+                        refSubtype
                     }
                 });
             }

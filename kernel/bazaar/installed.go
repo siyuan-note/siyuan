@@ -285,29 +285,32 @@ func InvalidateInstalledPackageManifestCache(pkgType, packageName string) {
 	delete(installedManifestCache[pkgType], filepath.Join(layout.BasePath, packageName))
 }
 
-// RetainInstalledPackageManifestCache 只保留本次扫描到的安装目录，卸载后的清单不再驻留缓存。
-func RetainInstalledPackageManifestCache(pkgType string, installPaths []string) {
+// RetainInstalledPackageCaches 只保留本次扫描到的安装目录，卸载后的派生缓存不再驻留。
+func RetainInstalledPackageCaches(pkgType string, installPaths []string) {
 	installedManifestCacheMu.Lock()
-	defer installedManifestCacheMu.Unlock()
 	cached := installedManifestCache[pkgType]
-	if nil == cached {
-		return
-	}
-	keep := make(map[string]struct{}, len(installPaths))
-	for _, installPath := range installPaths {
-		keep[installPath] = struct{}{}
-	}
-	for installPath := range cached {
-		if _, ok := keep[installPath]; !ok {
-			delete(cached, installPath)
+	if nil != cached {
+		keep := make(map[string]struct{}, len(installPaths))
+		for _, installPath := range installPaths {
+			keep[installPath] = struct{}{}
+		}
+		for installPath := range cached {
+			if _, ok := keep[installPath]; !ok {
+				delete(cached, installPath)
+			}
 		}
 	}
+	installedManifestCacheMu.Unlock()
+	retainInstalledPackageReadmeCache(installPaths)
 }
 
 // InvalidateInstalledPackageCaches 在安装、卸载或外观同步后丢弃该包的全部派生缓存。
 func InvalidateInstalledPackageCaches(pkgType, packageName string) {
 	InvalidateInstalledPackageSizeCache(pkgType, packageName)
 	InvalidateInstalledPackageManifestCache(pkgType, packageName)
+	if layout, ok := GetPackageLayout(pkgType); ok {
+		InvalidateInstalledPackageReadmeCache(filepath.Join(layout.BasePath, packageName))
+	}
 }
 
 // Add marketplace package config item `minAppVersion` https://github.com/siyuan-note/siyuan/issues/8330

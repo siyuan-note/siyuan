@@ -330,7 +330,7 @@ func scanInstalledPackageInfos(pkgType string) (scan installedPackageScan) {
 		return
 	}
 	// 目录列表是缓存的存活范围，卸载后对应清单不再驻留
-	bazaar.RetainInstalledPackageManifestCache(pkgType, installPathsOf(scan.basePath, dirs))
+	bazaar.RetainInstalledPackageCaches(pkgType, installPathsOf(scan.basePath, dirs))
 	if len(dirs) == 0 {
 		return
 	}

@@ -138,7 +138,7 @@ func TestRetainInstalledPackageManifestCacheDropsRemovedDirectories(t *testing.T
 		t.Fatalf("manifest was parsed %d times, want 2", *parses)
 	}
 
-	RetainInstalledPackageManifestCache("plugins", []string{keptDir})
+	RetainInstalledPackageCaches("plugins", []string{keptDir})
 	if _, err := LoadInstalledPackageManifest("plugins", keptDir, keptManifest); err != nil {
 		t.Fatal(err)
 	}

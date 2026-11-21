@@ -7,6 +7,7 @@ import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
 import {openEmbedBlock} from "../gutter/embedOpenMenu";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
+import {bindAVCellTyping} from "../render/av/cellTyping";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
 import {normalizeInlineElementBoundaries, prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {renderLongTextRuns} from "../util/longTextWrap";
@@ -578,6 +579,7 @@ export class WYSIWYG {
         }
         /// #endif
         if (!isMobile()) {
+            bindAVCellTyping(protyle, this.element);
             this.disposeTouchBlockDragSelect = bindTouchBlockDragSelect(this.element,
                 () => !protyle.disabled && !window.siyuan.touchDragActive &&
                     !protyle.toolbar.isMultiSelectMode(), protyle.element);

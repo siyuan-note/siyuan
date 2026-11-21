@@ -624,6 +624,9 @@ export const getTypeByCellElement = (cellElement: Element) => {
     return scrollElement.querySelector(".av__row--header").querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
 };
 
+export const hasAVPrimaryTemplate = (cell: HTMLElement) => cell.matches(".av__celltext--template") ||
+    Boolean(cell.querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template"));
+
 const getStableTextCells = (cellElements: HTMLElement[], blockElement: HTMLElement, type: "text" | "block") => {
     const viewType = blockElement.dataset.avType as TAVView;
     const stableCells: IAVSelectedCell[] = [];
@@ -779,6 +782,7 @@ export const captureAVCellInput = (protyle: IProtyle, blockElement: HTMLElement,
 };
 
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol, options?: {
+    initialInput?: string;
     scrollIntoView?: boolean;
     data?: IAV;
     destroyCallback?: () => void;
@@ -866,9 +870,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         });
         return;
     }
-    const hasRenderedTemplate = cellElements[0].matches(".av__celltext--template") ||
-        Boolean(cellElements[0].querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template"));
-    if (type === "text" || (type === "block" && !hasRenderedTemplate)) {
+    if (type === "text" || (type === "block" && !hasAVPrimaryTemplate(cellElements[0]))) {
         const stableCells = getStableTextCells(cellElements, blockElement, type);
         if (stableCells.length > 0) {
             if (!options?.keepMenuOpen) {
@@ -880,6 +882,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 anchorElement: cellElements[0],
                 value: stableCells[0].cell.value,
                 stableCells,
+                initialInput: options?.initialInput,
                 onSave: async (value, nodeElement, selectedCells) => {
                     await updateCellsValue(protyle, nodeElement, value, undefined, undefined, undefined,
                         false, false, false, selectedCells, true, true);
@@ -891,6 +894,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             return;
         }
     }
+    if (options?.initialInput) return;
     let style = `font-family:${cssStyle.fontFamily};font-size:${cssStyle.fontSize};line-height:${cssStyle.lineHeight};padding:${cssStyle.padding};position:absolute;`;
     if (options?.positionByMenu) {
         style += `height:${cellRect.height}px;width:${Math.max(cellRect.width, 200)}px;left:${cellRect.left}px;top:${cellRect.bottom}px;`;

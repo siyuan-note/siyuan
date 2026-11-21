@@ -5,7 +5,7 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {clampGroupTableVirtualData, getGroupTableRenderPlan, getTableRowBudget, GROUP_TABLE_INITIAL_ROW_BUDGET} from "./groupTableVirtual";
 
-const setup = () => {
+const setup = (mobile = false) => {
     const constants = {CUSTOM_SY_AV_VIEW: "view", ATTRIBUTE_V_SCROLL: "v-scroll", DIALOG_ATTR: "attr"};
     const attributes = new Map([["view", "first"], ["v-scroll", "true"], ["data-sub-items", ""], ["data-av-type", "table"]]);
     const body = {dataset: {groupId: "group", rootPage: "2", pageSize: "50", avLocateWindow: "true"},
@@ -31,6 +31,7 @@ const setup = () => {
     const locateRequests = new WeakMap();
     let onRender = () => {};
     let focused = false;
+    let selected = false;
     const dependencies: Record<string, unknown> = {
         "../../../constants": {Constants: constants},
         "../../../util/pathName": {isEncryptedBox: () => false},
@@ -73,7 +74,14 @@ const setup = () => {
         window: {setTimeout: (callback: () => void) => callback()}, document: {querySelector: (): null => null},
         inspectAVInsertedItem() {}, removeAVPasteSkeleton() {}, isTableLikeView: () => true,
         genCellValueByElement: () => ({block: {content: ""}}), scrollAddingCellIntoView() {},
-        waitForAddingCellPosition: async () => ({cellElement: cell}), popTextCell: () => { focused = true; },
+        waitForAddingCellPosition: async () => ({blockElement: block, cellElement: cell}),
+        isMobile: () => mobile, popTextCell: () => { focused = true; },
+        selectNewAVPrimary: (owner: HTMLElement, selectedBlock: HTMLElement, selectedCell: HTMLElement) => {
+            assert.equal(owner, protyle);
+            assert.equal(selectedBlock, block);
+            assert.equal(selectedCell, cell);
+            selected = true;
+        },
         avRender: (_block: HTMLElement, _protyle: IProtyle, callback?: () => void) => {
             onRender();
             renderTable(data, block, attributes.has("v-scroll") ? {renderedStart: 350, renderedEnd: 449, topSpacerHeight: 12600} : undefined);
@@ -81,7 +89,7 @@ const setup = () => {
         },
     });
     return {state, api, body, block: block as unknown as HTMLElement, protyle: protyle as unknown as IProtyle,
-        attributes, requests, mounted, rows, data, focused: () => focused, refresh, renderTable, extract, constants,
+        attributes, requests, mounted, rows, data, focused: () => focused, selected: () => selected, refresh, renderTable, extract, constants,
         locateRequests, onRender: (callback: () => void) => { onRender = callback; }};
 };
 
@@ -118,16 +126,19 @@ test("structural refresh follows the visible item identity and corrects its scro
     assert.equal(h.protyle.contentElement.scrollTop, 9964);
 });
 
-test("adding a child from page 2 locates the returned item before opening its name editor without a ghost", async () => {
-    const h = setup();
-    h.state.getSubItemsState(h.block, "first").childPaging = {"group/parent": {page: 2, pageSize: 200}};
-    h.refresh(h.protyle, {action: "insertAttrViewBlock", avID: "db", blockID: "carrier", groupID: "group", parentID: "parent",
-        srcs: [{itemID: "requested", id: "block", isDetached: true, content: ""}], retData: {insertedItemIDs: ["inserted"], existingItemIDs: []}});
-    assert.equal((h.requests[0] as {itemID: string}).itemID, "inserted");
-    assert.equal((h.requests[0] as {groupID: string}).groupID, "group");
-    await Promise.resolve();
-    assert.equal(h.focused(), true);
-});
+for (const mobile of [false, true]) {
+    test(`adding a child from page 2 locates it and ${mobile ? "opens its name editor on mobile" : "selects its primary cell on desktop"}`, async () => {
+        const h = setup(mobile);
+        h.state.getSubItemsState(h.block, "first").childPaging = {"group/parent": {page: 2, pageSize: 200}};
+        h.refresh(h.protyle, {action: "insertAttrViewBlock", avID: "db", blockID: "carrier", groupID: "group", parentID: "parent",
+            srcs: [{itemID: "requested", id: "block", isDetached: true, content: ""}], retData: {insertedItemIDs: ["inserted"], existingItemIDs: []}});
+        assert.equal((h.requests[0] as {itemID: string}).itemID, "inserted");
+        assert.equal((h.requests[0] as {groupID: string}).groupID, "group");
+        await Promise.resolve();
+        assert.equal(h.focused(), mobile);
+        assert.equal(h.selected(), !mobile);
+    });
+}
 
 test("deleting the first visible deep row anchors its surviving neighbor instead of returning to row zero", () => {
     const h = setup();

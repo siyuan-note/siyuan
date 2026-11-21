@@ -6,7 +6,7 @@ import {loadModule} from "../../../testSupport/loadModule";
 const continuous = loadModule<typeof import("./continuousInput")>("src/protyle/render/av/continuousInput.ts", {require: () => ({})});
 
 const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; changed?: boolean; flush?: () => Promise<void>; save?: () => Promise<void>;
-    tableInput?: boolean; rangeInput?: boolean; hint?: boolean; primaryValues?: IAVCellValue[]} = {}) => {
+    tableInput?: boolean; rangeInput?: boolean; hint?: boolean; primaryValues?: IAVCellValue[]; initialInput?: string} = {}) => {
     const lifecycle: string[] = [];
     const dialogTitles: string[] = [];
     const masks: Array<{
@@ -23,6 +23,8 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
     const bodyTarget = {};
     const toolbarTarget = {};
     let content = "initial";
+    let focused = false;
+    const saved: IAVCellValue[] = [];
     const createPanel = () => ({
         inert: false,
         classList: {add: () => {}},
@@ -48,7 +50,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         },
         hintElement: {classList: {contains: () => !settings.hint}},
         getBlockHTML: () => content,
-        focus: () => {},
+        focus: () => { focused = true; },
         destroy: () => lifecycle.push("destroy"),
     };
     const primaryValues: IAVCellValue[] = settings.primaryValues || [{type: "block", isDetached: true, block: {content: "initial"}}];
@@ -59,7 +61,8 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         value: settings.primary ? primaryValues[0] :
             {type: "text", text: {content: "initial"}},
         stableCells: [] as import("./selectionState").IAVSelectedCell[],
-        onSave: () => { lifecycle.push("save"); return settings.save?.(); },
+        initialInput: settings.initialInput,
+        onSave: (value: IAVCellValue) => { saved.push(value); lifecycle.push("save"); return settings.save?.(); },
         onDestroy: () => lifecycle.push("callback"),
         prepareNextInput: (_anchor: unknown, rangeOnly = false) =>
             (rangeOnly ? settings.rangeInput : settings.tableInput) ? () => lifecycle.push("next") : undefined,
@@ -146,7 +149,12 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         require: (name: string) => modules[name] || {},
         document: {
             body: {appendChild: () => {}},
-            execCommand: (command: string) => {
+            execCommand: (command: string, _ui: boolean, text: string) => {
+                if (settings.initialInput && command === "insertText") {
+                    assert.ok(focused);
+                    content += text;
+                    return;
+                }
                 assert.equal(command, "insertLineBreak");
                 lifecycle.push("line-break");
             },
@@ -182,7 +190,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         content = "updated";
     }
     return {
-        methods, lifecycle, owner, node, open, fragmentOptions, toolbarTarget, dialogTitles,
+        methods, lifecycle, owner, node, open, fragmentOptions, toolbarTarget, dialogTitles, saved,
         notifyMutation: () => notifyMutation(),
         setCurrentValue: (rowID: string, value: IAVCellValue) => currentValues.set(rowID, value),
         rebind: () => currentValues.set("0", {type: "block", isDetached: false, block: {content: "other"}}),
@@ -212,6 +220,14 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
 
 [false, true].forEach(primary => describe(`database ${primary ? "primary" : "text"} rich editor lifecycle and keyboard input`, () => {
     const createEditor = (settings: Parameters<typeof createEditorFixture>[0] = {}) => createEditorFixture({...settings, primary});
+    it("adds confirmed input to existing content and saves it with the editor", async () => {
+        const editor = createEditor({initialInput: "中文"});
+        assert.equal(editor.saved.length, 0);
+        editor.clickOutside();
+        await editor.settle();
+        assert.equal(editor.saved.length, 1);
+        assert.equal(primary ? editor.saved[0].block.content : editor.saved[0].text.content, "initial中文");
+    });
     it("uses the field-specific mobile dialog title", () => {
         const editor = createEditor({mobile: true});
         assert.deepEqual(editor.dialogTitles, [primary ? "Primary key" : "Text"]);

@@ -626,10 +626,7 @@ const bindBazaarSearchEvents = (
 ) => {
     controller.element.querySelectorAll(".config-bazaar__panel .b3-text-field")
         .forEach((inputElement: HTMLInputElement) => {
-            inputElement.addEventListener("keydown", (event) => {
-                if (event.isComposing || event.key !== "Enter") {
-                    return;
-                }
+            const search = () => {
                 const keyword = inputElement.value.trim();
                 const type = (hasClosestByClassName(inputElement, "config-bazaar__panel") as HTMLElement)
                     .getAttribute("data-type");
@@ -652,7 +649,26 @@ const bindBazaarSearchEvents = (
                         controller._genMyHTML(selectedType, app);
                     }
                 }
-                event.preventDefault();
+            };
+            let wasEmpty = inputElement.value.trim() === "";
+            const resetIfCleared = () => {
+                const isEmpty = inputElement.value.trim() === "";
+                if (isEmpty && !wasEmpty) {
+                    search();
+                }
+                wasEmpty = isEmpty;
+            };
+            inputElement.addEventListener("input", (event: InputEvent) => {
+                if (!event.isComposing) {
+                    resetIfCleared();
+                }
+            });
+            inputElement.addEventListener("compositionend", resetIfCleared);
+            inputElement.addEventListener("keydown", (event) => {
+                if (!event.isComposing && event.key === "Enter") {
+                    search();
+                    event.preventDefault();
+                }
             });
         });
 };

@@ -12,6 +12,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     const check: typeof assert = require("node:assert/strict");
     let saves = 0;
     let backs = 0;
+    let showGroupFields = false;
     const modules: Record<string, {exports: any}> = {};
     const content = () => '<div class="b3-menu__items"><input class="b3-text-field" value="Draft">' +
         '<div style="height:1600px">Database settings</div></div>';
@@ -29,6 +30,12 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         "protyle/render/av/panels/registry": {
             getAVPanelDescriptor: () => ({
                 render: (context: {html: string}) => {
+                    if (showGroupFields) {
+                        const {getGroupsMethodHTML}: typeof import("../protyle/render/av/groups") = load("protyle/render/av/groups");
+                        context.html = getGroupsMethodHTML([{id: "primary", type: "block", name: "Primary key"},
+                            {id: "status", type: "select", name: "Status"}] as IAVColumn[], null, "table");
+                        return true;
+                    }
                     context.html = '<div class="b3-menu__items"><button class="b3-menu__item" data-type="nobg">' +
                         '<span class="block__icon block__icon--menu-back" data-type="go-config"><svg><use xlink:href="#iconLeft"></use></svg></span>' +
                         '<span class="b3-menu__label ft__center">Fields</span></button>' +
@@ -51,7 +58,9 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         "protyle/render/av/cell": {},
         "protyle/ui/hideElements": {}, "protyle/render/av/view": {getFieldsByData: (): IAVColumn[] => []},
         "protyle/util/selection": {focusBlock() {}}, "protyle/render/av/row": {},
-        "protyle/render/av/groups": {getPageSize: () => ({})},
+        "protyle/render/av/capabilities": {hasAVCapability: () => true},
+        "protyle/render/av/col": {getColIconByType: () => "iconKey"},
+        "protyle/render/av/groupResponse": {}, "emoji": {}, "plugin/Menu": {},
         "protyle/render/av/color": {applyAVColorPalette() {}, getAVCustomColors: (): string[] => []},
         "protyle/render/av/panelTarget": {}, "protyle/render/av/selectPosition": {},
         "dialog/message": {showMessage() {}},
@@ -221,16 +230,29 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     await settle();
     check.equal(common.querySelector(".b3-menu__actions"), null);
     parent.remove();
+
+    showGroupFields = true;
+    openMenuPanel({type: "config", data: {} as IAV, blockElement: block, protyle});
+    await settle();
+    const groupChoices = Array.from(document.querySelectorAll('[data-type="setGroupMethod"]'));
+    check.equal(groupChoices.length, 3);
+    const rowHeight = groupChoices[0].getBoundingClientRect().height;
+    for (const choice of groupChoices.slice(1)) {
+        const icon = choice.querySelector(".b3-menu__icon").getBoundingClientRect();
+        check.ok(icon.width > 0 && icon.width <= 20);
+        check.ok(Math.abs(choice.getBoundingClientRect().height - rowHeight) < 1,
+            "Group field icons must fit the same row height as the clear option");
+    }
     return "Database sheets passed";
 };
 
-test("mobile database sheets expand, preserve navigation and edits, and fit the keyboard viewport", {
+test("mobile database sheets fit group field rows, preserve navigation and edits, and fit the keyboard viewport", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuGroup", "menus/menuPosition", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
         "util/escape", "util/setPosition", "protyle/util/hasClosest", "protyle/render/av/openMenuPanel", "protyle/render/av/cellPanelPosition",
-        "protyle/render/av/mobilePanel", "protyle/render/av/host", "protyle/render/av/renderData"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
+        "protyle/render/av/mobilePanel", "protyle/render/av/host", "protyle/render/av/renderData", "protyle/render/av/groups"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText]));
     const css = compile(path.join(__dirname, "../assets/scss/mobile.scss"), {logger: Logger.silent}).css;

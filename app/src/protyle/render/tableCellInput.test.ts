@@ -67,10 +67,12 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, fixTable, isNativeTextSelectionHandleTouch, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
         "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM, finishTableCellEditing, TABLE_DEFAULT_COLUMN_WIDTH, " +
-        "hasClosestBlock, hasClosestByClassName, hasClosestByTag, isInEmbedBlock, getEmbedChildOperationContext, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
+        "hasClosestBlock, hasClosestByClassName, hasClosestByTag, isInEmbedBlock, getEmbedChildOperationContext, " +
+        "setTableCellRichContext, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
         typeof import("../wysiwyg/input") & typeof import("../util/table") & typeof import("./setLute") &
         typeof import("./av/richText") & typeof import("./av/richTextValue") & typeof import("../util/tableCellRichLute") &
         typeof import("../util/tableCellRich") & typeof import("../util/selection") & typeof import("../util/tableVirtualizationDOM") &
+        typeof import("../util/tableCellRichContext") &
         typeof import("../wysiwyg/tableVirtualization") & typeof import("../util/tableCellRichContext") & typeof import("../util/tableCellRichSelection") &
         typeof import("../util/hasClosest") & typeof import("../wysiwyg/getBlock") & typeof import("../wysiwyg/list") &
         typeof import("../wysiwyg/taskListMarker") & typeof import("../wysiwyg/nativeTextMenu") & typeof import("../util/tableColumnWidth") &
@@ -241,6 +243,31 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
         await tick();
     };
+
+    for (const text of ["---", "___", "***", "----", "before\n\n---"]) {
+        const {owner, element, table, range} = fixture();
+        const cell = table.querySelector("td");
+        const host = document.createElement("div");
+        host.className = "protyle-wysiwyg table__cell-editor";
+        host.innerHTML = api.getTableCellRichBlockDOM(cell);
+        cell.replaceChildren(host);
+        const block = host.firstElementChild as HTMLElement;
+        const editable = block.querySelector('[contenteditable="true"]');
+        const cellEditor = {...owner, element: host, lute: api.getTableCellEditorLute(lute)};
+        Object.assign(cellEditor.wysiwyg, {element: host, lastHTMLs: {[block.dataset.nodeId]: block.outerHTML}});
+        api.setTableCellRichContext(cellEditor, {owner, cell, finish: noop});
+        editable.textContent = text;
+        range.selectNodeContents(editable);
+        range.collapse(false);
+        focusByRange(range);
+        await api.input(cellEditor, block, range, true, new InputEvent("input", {inputType: "insertText"}));
+        check.equal(host.querySelector('[data-type="NodeThematicBreak"]'), null, text);
+        api.updateTableCellEditingValue(cell, api.serializeTableCellRich(host.innerHTML));
+        host.remove();
+        api.renderTableCellRich(cell);
+        check.equal(api.getTableCellPlainText(cell), text);
+        await finish(element);
+    }
 
     for (const platform of [false, true]) {
         mobile = platform;
@@ -1316,7 +1343,8 @@ test("table cell editors preserve input, viewport and alignment, and consume tab
         "../wysiwyg/taskListMarker.ts", "../util/tableCellRichLute.ts", "../util/tableCellRichValue.ts", "../util/tableCellRich.ts",
         "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../util/tableColumnWidth.ts",
         "../util/tableSelection.ts", "../util/tableRowHeight.ts", "../wysiwyg/tableVirtualization.ts",
-        "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/input.ts", "../wysiwyg/nativeTextMenu.ts", "tableCellRich.ts"]
+        "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/blockquote.ts",
+        "../wysiwyg/input.ts", "../wysiwyg/nativeTextMenu.ts", "tableCellRich.ts"]
         .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource) + "\n" + compile(taskSource);
     const wysiwyg = createSourceFile("wysiwyg.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);
     const tableControl = createSourceFile("tableControl.ts", read("../util/tableControl.ts"), ScriptTarget.Latest, true);

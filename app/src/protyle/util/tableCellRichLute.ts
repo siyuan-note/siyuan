@@ -35,6 +35,31 @@ export const getTableCellEditorLute = (lute: Lute, enableFullWidthTaskList = fal
             while (html.includes(token)) {
                 token += "X";
             }
+            const spin = (source: string) => {
+                const parsed = target.SpinBlockDOM(source);
+                if (!parsed.includes('data-type="NodeThematicBreak"')) {
+                    return parsed;
+                }
+                // 分隔线标记作为正文保存，能解析为标题的内容沿用正常解析结果。
+                const literal = document.createElement("template");
+                literal.innerHTML = source;
+                const lines: string[] = [];
+                const texts = document.createTreeWalker(literal.content, NodeFilter.SHOW_TEXT);
+                while (texts.nextNode()) {
+                    const text = texts.currentNode as Text;
+                    const element = text.parentElement;
+                    if (element?.closest('[contenteditable="true"]') &&
+                        !element.closest('[data-type="NodeCodeBlock"], [data-type="NodeMathBlock"], .img')) {
+                        text.data = text.data.replace(/^[ \t]*([-*_])(?:[ \t]*\1){2,}[ \t]*$/gm, line => {
+                            const placeholder = `${token}THEMATIC${lines.length}END`;
+                            lines.push(line);
+                            return placeholder;
+                        });
+                    }
+                }
+                return lines.length ? target.SpinBlockDOM(literal.innerHTML)
+                    .replace(new RegExp(`${token}THEMATIC(\\d+)END`, "g"), (_match, index) => lines[Number(index)]) : parsed;
+            };
             let marker = template.content.querySelector("wbr");
             if (!marker && html.includes(Lute.Caret) && html.includes("```")) {
                 // 斜杠菜单使用文本光标，统一为 DOM 光标后再识别围栏和软换行边界。
@@ -115,7 +140,7 @@ export const getTableCellEditorLute = (lute: Lute, enableFullWidthTaskList = fal
                     lineRange.deleteContents();
                     lineRange.insertNode(content);
                 }
-                const candidate = target.SpinBlockDOM(template.innerHTML);
+                const candidate = spin(template.innerHTML);
                 const parsed = document.createElement("template");
                 parsed.innerHTML = candidate;
                 const parsedMarker = parsed.content.querySelector("wbr");
@@ -127,7 +152,7 @@ export const getTableCellEditorLute = (lute: Lute, enableFullWidthTaskList = fal
                     return candidate.split(token).join("&#10;");
                 }
             }
-            return target.SpinBlockDOM(protectedHTML).split(token).join("&#10;");
+            return spin(protectedHTML).split(token).join("&#10;");
         };
     },
 });

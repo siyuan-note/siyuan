@@ -193,6 +193,27 @@ func renameTagSort(oldLabel, newLabel string) error {
 	})
 }
 
+func removeTagSort(labels []string) error {
+	return updateTagSort(func(groups tagSortGroups) (bool, error) {
+		changed := false
+		for _, label := range labels {
+			group := tagSortGroup(label)
+			siblings := groups[group]
+			index := slices.Index(siblings, label)
+			if index < 0 {
+				continue
+			}
+			if len(siblings) == 1 {
+				delete(groups, group)
+			} else {
+				groups[group] = slices.Delete(siblings, index, index+1)
+			}
+			changed = true
+		}
+		return changed, nil
+	})
+}
+
 func renameTagSortGroups(groups tagSortGroups, oldLabel, newLabel string) bool {
 	oldParent, newParent := tagSortGroup(oldLabel), tagSortGroup(newLabel)
 	changed := false

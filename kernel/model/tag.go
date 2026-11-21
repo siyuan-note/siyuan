@@ -123,6 +123,9 @@ func removeTag(label string, beforeCommit func()) (err error) {
 	updateAttributeViewBlockText(updateNodes)
 
 	sql.FlushQueue()
+	if sortErr := removeTagSort([]string{label}); sortErr != nil {
+		logging.LogErrorf("remove tag order failed: %s", sortErr)
+	}
 	util.PushClearProgress()
 	return
 }

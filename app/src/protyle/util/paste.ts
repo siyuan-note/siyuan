@@ -31,6 +31,7 @@ import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
 import {showMessage} from "../../dialog/message";
 import {avRender} from "../render/av/render";
+import {filterPastedAVViewTabs} from "../render/av/viewVisibility";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {captureAVAssetUploadHandler} from "../render/av/asset";
 import {getAVRichTextSafeURL} from "../render/av/richTextValue";
@@ -1293,6 +1294,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
                 pastedIDs.set(originalId, e.getAttribute("data-node-id"));
                 clearBlockElement(e, isCutPaste); // 剪切粘贴保留引用角标
+                if (e.getAttribute("data-type") === "NodeAttributeView" && e.hasAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS)) {
+                    filterPastedAVViewTabs(e);
+                }
             });
             remapTabsDOMIDs(tempElement, pastedIDs);
             remapListMindmapIDs(tempElement, pastedIDs);

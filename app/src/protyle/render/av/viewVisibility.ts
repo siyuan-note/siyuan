@@ -22,6 +22,20 @@ export const getAVVisibleViewIDs = (blockElement: Element, views: IAVView[] | st
     return visibleViewIDs;
 };
 
+export const filterPastedAVViewTabs = (blockElement: Element) => {
+    const header = blockElement.querySelector(":scope > .av__container > .av__header");
+    const allViewIDs = header?.getAttribute("data-view-ids")?.split(",").filter(Boolean);
+    if (!allViewIDs?.length) {
+        return;
+    }
+    const visibleViewIDs = new Set(getAVVisibleViewIDs(blockElement, allViewIDs));
+    header.querySelectorAll(".av__views > .layout-tab-bar > .item[data-id]").forEach(tab => {
+        if (!visibleViewIDs.has(tab.getAttribute("data-id"))) {
+            tab.remove();
+        }
+    });
+};
+
 export const setAVVisibleViewIDs = (blockElement: Element, viewIDs: string[]) => {
     blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, viewIDs.join(","));
 };

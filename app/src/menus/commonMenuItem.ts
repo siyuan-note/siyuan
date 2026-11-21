@@ -383,7 +383,7 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
         destroyDialog(options);
     };
     const disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy(), undefined, undefined,
-        {mode: "standard"});
+        {mode: "standard", fitContent: false});
     /// #endif
     dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);
     dialog.element.querySelectorAll<HTMLElement>(".custom-attr").forEach(item => {

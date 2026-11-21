@@ -8,6 +8,7 @@ import {
     createEmptyAVValue,
     genRelationAVCellValue,
     getAVBlockRefSubtype,
+    getAVBindingCandidateSubtype,
     getConvertedEmptyAVCellValue,
     hasAVRenderTemplateResult,
     updateAVCachedCellValue,
@@ -89,6 +90,19 @@ describe("getAVBlockRefSubtype", () => {
             type: "block",
             block: {content: "Invalid", refSubtype: "invalid"},
         } as unknown as IAVCellValue), "s");
+    });
+});
+
+describe("getAVBindingCandidateSubtype", () => {
+    it("derives the reference subtype from the static anchor text attribute", () => {
+        const key = "custom-sy-av-s-text-database";
+        assert.equal(getAVBindingCandidateSubtype({[key]: "Static anchor"}, key), "s");
+        assert.equal(getAVBindingCandidateSubtype({}, key), "d");
+        assert.equal(getAVBindingCandidateSubtype({[key]: ""}, key), "d");
+        assert.equal(getAVBindingCandidateSubtype({"custom-sy-av-s-text-other": "Other"}, key), "d");
+        assert.equal(getAVBindingCandidateSubtype(undefined, key), "d");
+        assert.equal(getAVBindingCandidateSubtype({[key]: "Static anchor"}, ""), "d",
+            "a missing database identity cannot mark the reference static");
     });
 });
 

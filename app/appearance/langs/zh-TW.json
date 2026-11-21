@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "管理編輯器中的自訂顏色、字型顏色和背景顏色",
+	"importNotebookCryptoBackupDesc": "使用對應的主密碼匯入加密筆記本的金鑰備份",
 	"bazaarSearchPlaceholder": "輸入關鍵字後按回車搜尋",
 	"aiGeneratedContent": "AI 產生",
 	"pinTableHeaderColumn": "固定標題欄",

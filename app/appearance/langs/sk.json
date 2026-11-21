@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "Spravujte vlastné farby textu, pozadia a štýlov editora",
+	"importNotebookCryptoBackupDesc": "Importujte zálohu kľúča šifrovaných zápisníkov pomocou príslušného hlavného hesla",
 	"bazaarSearchPlaceholder": "Zadajte hľadaný výraz a stlačte Enter",
 	"aiGeneratedContent": "Vytvorené AI",
 	"pinTableHeaderColumn": "Pripnúť stĺpec hlavičky",

@@ -215,6 +215,39 @@ test("crypto backup import trims passwords and rejects whitespace-only input", a
     assert.equal(destroyed, 3);
 });
 
+test("key backup actions have their own settings search entry", () => {
+    const compiled = transpileModule(readFileSync("src/config/tabs/accessTab.ts", "utf8") +
+        "\nexport {registerEncryptedNotebookGroup};", {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    const lang = {
+        importNotebookCryptoBackup: "导入密钥",
+        importNotebookCryptoBackupDesc: "使用对应的主密码导入加密笔记本的密钥备份",
+        restoreEncryptedNotebooksTip: "请在独立工作区恢复",
+    };
+    const slots = new Map<string, {key: string; keywords: string[]; html: () => string}>();
+    const buttons = new Map<string, string>();
+    const exports = {} as {registerEncryptedNotebookGroup: (tab: unknown) => void};
+    runInNewContext(compiled, {exports, require: () => ({
+        getHostCapabilities: () => ({importExport: true}),
+        isBrowser: () => true,
+        genConfigItemMainHtml: (title: string, desc: string) => `${title} ${desc}`,
+    }), window: {siyuan: {config: {readonly: false}, languages: lang}}});
+    exports.registerEncryptedNotebookGroup({group: () => ({
+        slot: (spec: {key: string; keywords: string[]; html: () => string}) => slots.set(spec.key, spec),
+        button: (spec: {id: string; desc: string}) => buttons.set(spec.id, spec.desc),
+        number: () => {},
+    })});
+    const status = slots.get("encryptedNotebookStatus");
+    const actions = slots.get("encryptedNotebookActions");
+    assert.doesNotMatch(status.html(), /importCryptoBackupBtn/);
+    assert.ok(actions.html().includes(lang.importNotebookCryptoBackupDesc));
+    assert.ok(actions.keywords.includes(lang.importNotebookCryptoBackup));
+    assert.ok(actions.keywords.includes(lang.importNotebookCryptoBackupDesc));
+    assert.equal(actions.keywords.some(keyword => keyword?.includes("独立")), false);
+    assert.ok(buttons.get("restoreEncryptedNotebooks").includes("独立"));
+});
+
 test("recovery-required key configuration can be disabled and cannot import another archive", () => {
     const compiled = transpileModule(readFileSync("src/config/tabs/accessTab.ts", "utf8") +
         "\nexport {refreshEncryptedNotebookStatus};", {

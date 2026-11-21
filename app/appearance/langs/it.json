@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "Gestisci i colori personalizzati per il testo, gli sfondi e gli stili dell’editor",
+	"importNotebookCryptoBackupDesc": "Importa un backup della chiave per i taccuini crittografati usando la password principale corrispondente",
 	"bazaarSearchPlaceholder": "Digita una parola chiave e premi Invio",
 	"aiGeneratedContent": "Generato dall’IA",
 	"pinTableHeaderColumn": "Blocca la colonna di intestazione",

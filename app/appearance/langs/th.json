@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "จัดการสีที่กำหนดเองสำหรับข้อความ พื้นหลัง และสไตล์ตัวแก้ไข",
+	"importNotebookCryptoBackupDesc": "นำเข้าข้อมูลสำรองของกุญแจสำหรับสมุดบันทึกที่เข้ารหัสโดยใช้รหัสผ่านหลักที่ตรงกัน",
 	"bazaarSearchPlaceholder": "พิมพ์คำค้นหาแล้วกด Enter",
 	"aiGeneratedContent": "สร้างโดย AI",
 	"pinTableHeaderColumn": "ตรึงคอลัมน์ส่วนหัว",

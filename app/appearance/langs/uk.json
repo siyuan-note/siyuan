@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "Керуйте власними кольорами тексту, тла та стилів редактора",
+	"importNotebookCryptoBackupDesc": "Імпортуйте резервну копію ключа зашифрованих блокнотів за допомогою відповідного майстер-пароля",
 	"bazaarSearchPlaceholder": "Введіть запит і натисніть Enter",
 	"aiGeneratedContent": "Згенеровано ШІ",
 	"pinTableHeaderColumn": "Закріпити стовпець заголовка",

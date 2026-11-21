@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "टेक्स्ट, पृष्ठभूमि और संपादक शैलियों के कस्टम रंग प्रबंधित करें",
+	"importNotebookCryptoBackupDesc": "संबंधित मास्टर पासवर्ड का उपयोग करके एन्क्रिप्टेड नोटबुक की कुंजी का बैकअप आयात करें",
 	"bazaarSearchPlaceholder": "खोज शब्द लिखें, फिर Enter दबाएँ",
 	"aiGeneratedContent": "एआई से जनित",
 	"pinTableHeaderColumn": "शीर्षलेख स्तंभ पिन करें",

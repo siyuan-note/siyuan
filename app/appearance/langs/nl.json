@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "Beheer aangepaste kleuren voor tekst, achtergronden en editorstijlen",
+	"importNotebookCryptoBackupDesc": "Importeer een sleutelback-up voor versleutelde notitieboeken met het bijbehorende hoofdwachtwoord",
 	"bazaarSearchPlaceholder": "Typ een zoekterm en druk op Enter",
 	"aiGeneratedContent": "AI-gegenereerd",
 	"pinTableHeaderColumn": "Kopkolom vastzetten",

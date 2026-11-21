@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "Upravljajte prilagođenim bojama teksta, pozadine i stilova uređivača",
+	"importNotebookCryptoBackupDesc": "Uvezite rezervnu kopiju ključa za šifrovane beležnice pomoću odgovarajuće glavne lozinke",
 	"bazaarSearchPlaceholder": "Unesite pojam pa pritisnite Enter",
 	"aiGeneratedContent": "Генерисано ВИ",
 	"pinTableHeaderColumn": "Zakači kolonu zaglavlja",

@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "Zarządzaj niestandardowymi kolorami tekstu, tła i stylów edytora",
+	"importNotebookCryptoBackupDesc": "Zaimportuj kopię zapasową klucza zaszyfrowanych notatników za pomocą odpowiedniego hasła głównego",
 	"bazaarSearchPlaceholder": "Wpisz frazę i naciśnij Enter",
 	"aiGeneratedContent": "Generacja AI",
 	"pinTableHeaderColumn": "Przypnij kolumnę nagłówkową",

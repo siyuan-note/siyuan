@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "Kelola warna kustom untuk teks, latar belakang, dan gaya editor",
+	"importNotebookCryptoBackupDesc": "Impor cadangan kunci untuk buku catatan terenkripsi dengan kata sandi utama yang sesuai",
 	"bazaarSearchPlaceholder": "Ketik kata kunci, lalu tekan Enter",
 	"aiGeneratedContent": "Dibuat oleh AI",
 	"pinTableHeaderColumn": "Sematkan Kolom Tajuk",

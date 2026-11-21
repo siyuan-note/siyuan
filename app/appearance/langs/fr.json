@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "Gérer les couleurs personnalisées du texte, des arrière-plans et des styles de l’éditeur",
+	"importNotebookCryptoBackupDesc": "Importer une sauvegarde de clé pour les carnets chiffrés avec le mot de passe maître correspondant",
 	"bazaarSearchPlaceholder": "Saisissez un mot-clé, puis appuyez sur Entrée",
 	"aiGeneratedContent": "Généré par IA",
 	"pinTableHeaderColumn": "Épingler la colonne d’en-tête",

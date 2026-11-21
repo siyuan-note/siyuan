@@ -1,4 +1,6 @@
 {
+	"manageColorsDesc": "Benutzerdefinierte Farben für Text, Hintergründe und Editorstile verwalten",
+	"importNotebookCryptoBackupDesc": "Eine Schlüsselsicherung für verschlüsselte Notizbücher mit dem zugehörigen Hauptpasswort importieren",
 	"bazaarSearchPlaceholder": "Suchbegriff eingeben und Enter drücken",
 	"aiGeneratedContent": "KI-generiert",
 	"pinTableHeaderColumn": "Kopfspalte anheften",

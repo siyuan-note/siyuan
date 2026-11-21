@@ -747,21 +747,29 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.encryptedNotebook,
             window.siyuan.languages.enableEncryptedNotebook,
             window.siyuan.languages.masterPassword,
-            window.siyuan.languages.changeMasterPassword,
         ],
         html: () =>
             // 开关行：结构与标准 group.switch 一致（label + config-item + b3-switch fn__flex-center）
-            `<label class="fn__flex b3-label config-item">
+            `<label class="fn__flex b3-label config-item" data-config-item-id="access.__slot.encryptedNotebookStatus">
 	    ${genConfigItemMainHtml(window.siyuan.languages.enableEncryptedNotebook, window.siyuan.languages.encryptedNotebookTip + "<br><span class=\"ft__error\">" + window.siyuan.languages.encryptedNotebookRiskTip + "</span><br>" + window.siyuan.languages.featurePreview)}
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="encryptedNotebookSwitch" type="checkbox">
 </label>
-<div class="b3-label config-item fn__none" id="encryptedNotebookMigrationAlert">
+<div class="b3-label config-item fn__none" id="encryptedNotebookMigrationAlert" data-config-item-id="access.__slot.encryptedNotebookStatus">
     <div class="ft__error">${window.siyuan.languages.masterPasswordMigrationPending}</div>
-</div>
-<div class="b3-label config-item fn__none" id="encryptedNotebookActions">
+</div>`,
+        afterMount: mountEncryptedNotebook,
+    });
+    group.slot({
+        key: "encryptedNotebookActions",
+        keywords: [
+            window.siyuan.languages.changeMasterPassword,
+            ...(disableImportExport ? [] : [window.siyuan.languages.exportNotebookCryptoBackup,
+                window.siyuan.languages.importNotebookCryptoBackup, window.siyuan.languages.importNotebookCryptoBackupDesc]),
+        ],
+        html: () => `<div class="b3-label config-item fn__none" id="encryptedNotebookActions">
     <div class="fn__flex fn__flex-center">
-        <div class="fn__flex-1"></div>
+        <div class="fn__flex-1"><div id="importCryptoBackupDesc">${genConfigItemMainHtml(window.siyuan.languages.importNotebookCryptoBackup, window.siyuan.languages.importNotebookCryptoBackupDesc)}</div></div>
         <div class="fn__flex fn__flex-center" id="encryptedNotebookEnabledActions">
             <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="changeMasterPasswordBtn">
                 <svg class="svg"><use xlink:href="#iconLock"></use></svg>
@@ -779,7 +787,6 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
         </button>
     </div>
 </div>`,
-        afterMount: mountEncryptedNotebook,
     });
     if (!disableImportExport) {
         group.button({
@@ -842,8 +849,10 @@ const refreshEncryptedNotebookStatus = (root: HTMLElement) => {
         switchElement.checked = response.data.state !== "Disabled";
         window.siyuan.config.notebookCrypto.enabled = enabled;
         root.querySelector("#encryptedNotebookEnabledActions").classList.toggle("fn__none", !enabled);
-        root.querySelector("#importCryptoBackupBtn").classList.toggle("fn__none", enabled || !getHostCapabilities().importExport);
-        root.querySelector("#encryptedNotebookActions").classList.remove("fn__none");
+        const canImport = !enabled && getHostCapabilities().importExport;
+        root.querySelector("#importCryptoBackupBtn").classList.toggle("fn__none", !canImport);
+        root.querySelector("#importCryptoBackupDesc")?.classList.toggle("fn__none", !canImport);
+        root.querySelector("#encryptedNotebookActions").classList.toggle("fn__none", !enabled && !canImport);
         root.querySelector("#encryptedNotebookMigrationAlert").classList.toggle("fn__none", !response.data.migrationPending);
         const restoreButton = root.querySelector<HTMLButtonElement>("#restoreEncryptedNotebooks");
         if (restoreButton) {

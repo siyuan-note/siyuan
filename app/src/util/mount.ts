@@ -5,9 +5,8 @@ import {isMobile} from "./functions";
 import {fetchPost, fetchSyncPost} from "./fetch";
 import {ContractFormData} from "./contractFormData";
 import {AdaptiveDialog as Dialog} from "../dialog/adaptiveDialog";
-import {getOpenNotebookCount, setNoteBook} from "./pathName";
+import {getOpenNotebookCount} from "./pathName";
 import {getDockByType} from "../layout/tabUtil";
-import {notebookTreeItem} from "../layout/dock/docTree/rowData";
 import type {Files} from "../layout/dock/Files";
 import {normalizeNotebookName, validateName} from "../editor/rename";
 import {escapeHtml} from "../util/escape";
@@ -131,24 +130,18 @@ export const newDailyNoteFromLastNotebook = (app: App) => {
 export const mountHelp = () => {
     const notebookId = Constants.HELP_PATH[window.siyuan.config.appearance.lang];
     fetchPost("/api/notebook/removeNotebook", {notebook: notebookId}, () => {
-        fetchPost("/api/notebook/openNotebook", {
+        const files = isMobile() ? window.siyuan.mobile?.docks?.file : window.siyuan.layout && getDockByType("file")?.data.file as Files;
+        const cancelReveal = files?.docTree?.revealNotebookOnMount(notebookId);
+        void fetchSyncPost("/api/notebook/openNotebook", {
             notebook: notebookId,
             app: Constants.SIYUAN_APPID,
-        }, () => {
-            const files = isMobile() ? window.siyuan.mobile?.docks?.file : getDockByType("file")?.data.file as Files;
-            if (!files) {
-                return;
+        }).then(response => {
+            if (response.code !== 0) {
+                cancelReveal?.();
             }
-            setNoteBook(notebooks => {
-                const notebook = notebooks.find(item => item.id === notebookId && !item.closed);
-                if (!notebook) {
-                    return;
-                }
-                files.init(false);
-                if (files.element.clientHeight > 0) {
-                    void files.docTree.ensureRendered(notebookTreeItem(notebook).occurrenceKey);
-                }
-            });
+        }).catch(error => {
+            cancelReveal?.();
+            console.warn("open user guide failed", error);
         });
     });
 };

@@ -18,6 +18,12 @@ interface IDocTreeControllerOptions {
     onSelectionProgress?: (loaded: number, total: number, cancel: () => void) => void;
 }
 
+interface IDocTreeNotebookReveal {
+    notebook: string;
+    interaction: number;
+    mounted: boolean;
+}
+
 export interface IDocTreeScrollAnchor {
     notebookId?: string;
     id?: string;
@@ -61,6 +67,7 @@ export class DocTreeController {
     private generation = 0;
     private refresh: {interaction: number};
     private reloadTail: Promise<void>;
+    private notebookReveal: IDocTreeNotebookReveal;
     private refreshItems = new Map<string, IDocTreeItem>();
     private disposed = false;
     private frame = 0;
@@ -152,6 +159,14 @@ export class DocTreeController {
     public get selectionVersion() { return this.version; }
     public get interactionVersion() { return this.interaction; }
 
+    public revealNotebookOnMount(notebook: string) {
+        const reveal = {notebook, interaction: this.interaction, mounted: false};
+        this.notebookReveal = reveal;
+        return () => {
+            if (this.notebookReveal === reveal) { this.notebookReveal = undefined; }
+        };
+    }
+
     public setRoots(roots: IDocTreeRoot[]) {
         if (this.disposed) { return; }
         const anchor = this.getScrollAnchor();
@@ -188,6 +203,24 @@ export class DocTreeController {
         }
         this.restoreScrollAnchor(anchor);
         this.render();
+        const reveal = this.notebookReveal;
+        if (reveal?.mounted && rootKeys.has(`notebook:${reveal.notebook}`)) {
+            void this.revealMountedNotebook(reveal);
+        }
+    }
+
+    private async revealMountedNotebook(reveal: IDocTreeNotebookReveal) {
+        // 目录刷新会恢复此前的滚动锚点，等已排队的刷新结束再定位。
+        let pending: Promise<void>;
+        do {
+            pending = this.reloadTail;
+            await pending;
+        } while (pending !== this.reloadTail && this.notebookReveal === reveal && !this.disposed);
+        if (this.notebookReveal !== reveal) { return; }
+        this.notebookReveal = undefined;
+        if (!this.disposed && reveal.interaction === this.interaction && this.options.element.clientHeight > 0) {
+            await this.ensureRendered(`notebook:${reveal.notebook}`);
+        }
     }
 
     public getItem(key: string) {
@@ -1104,6 +1137,10 @@ export class DocTreeController {
             }
             directories.forEach(filter => { void this.reload(filter); });
         } else if (["reloadFiletree", "mount"].includes(data.cmd)) {
+            const reveal = this.notebookReveal;
+            if (data.cmd === "mount" && reveal && data.data?.box?.id === reveal.notebook) {
+                reveal.mounted = true;
+            }
             void this.reload();
         }
     }

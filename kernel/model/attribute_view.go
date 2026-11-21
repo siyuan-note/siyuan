@@ -5354,12 +5354,15 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 
 		view.GroupItemIDs = masterView.GroupItemIDs
 		regenAttrViewGroups(attrView)
-		foldedGroups := make(map[string]bool, len(masterView.Groups))
+		sourceGroups := make(map[string]*av.View, len(masterView.Groups))
 		for _, group := range masterView.Groups {
-			foldedGroups[group.GetGroupValue()] = group.GroupFolded
+			sourceGroups[group.GetGroupValue()] = group
 		}
 		for _, group := range view.Groups {
-			group.GroupFolded = foldedGroups[group.GetGroupValue()]
+			if source := sourceGroups[group.GetGroupValue()]; source != nil {
+				group.GroupFolded = source.GroupFolded
+				group.GroupSort = source.GroupSort
+			}
 		}
 	}
 

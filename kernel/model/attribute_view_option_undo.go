@@ -249,6 +249,18 @@ func updateAttributeViewColumnOptionValues(attrView *av.AttributeView, operation
 	}
 	if rename {
 		attrView.RenameNewItemTemplateSelectOption(operation.ID, oldName, newName, newColor)
+		if !found && newName != "" && oldName != groupValueDefault && newName != groupValueDefault &&
+			(key.Type == av.KeyTypeSelect || key.Type == av.KeyTypeMSelect) {
+			for _, view := range attrView.Views {
+				if view.Group == nil || view.Group.Field != key.ID || view.Group.ValueSource == av.ValueSourceRendered ||
+					view.GetGroupByGroupValue(newName) != nil {
+					continue
+				}
+				if group := view.GetGroupByGroupValue(oldName); group != nil {
+					group.GroupVal = &av.Value{Type: av.KeyTypeSelect, MSelect: []*av.ValueSelect{{Content: newName, Color: newColor}}}
+				}
+			}
+		}
 	}
 
 	if !found {

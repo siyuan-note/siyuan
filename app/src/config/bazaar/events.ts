@@ -619,6 +619,9 @@ const bindBazaarClickEvent = (
     });
 };
 
+// 集市搜索需要请求内核，输入过程中做防抖，避免每敲一个字符就发起一次请求
+const BAZAAR_SEARCH_DELAY = 300;
+
 const bindBazaarSearchEvents = (
     controller: TBazaarController,
     app: App,
@@ -626,6 +629,8 @@ const bindBazaarSearchEvents = (
 ) => {
     controller.element.querySelectorAll(".config-bazaar__panel .b3-text-field")
         .forEach((inputElement: HTMLInputElement) => {
+            let pending: number | undefined;
+            let inFlight: AbortController | undefined;
             const search = () => {
                 const keyword = inputElement.value.trim();
                 const type = (hasClosestByClassName(inputElement, "config-bazaar__panel") as HTMLElement)
@@ -634,12 +639,16 @@ const bindBazaarSearchEvents = (
                 if (bazaarType) {
                     const config = BAZAAR_PACKAGE_CONFIG[bazaarType];
                     const request = controller._beginBazaarRequest(bazaarType, mount);
+                    // 新请求发出前中止上一次未完成的请求，避免过期结果继续占用连接
+                    inFlight?.abort();
+                    const abortController = new AbortController();
+                    inFlight = abortController;
                     fetchPost(config.api.bazaar, {
                         ...(config.bazaarRequestUsesFrontend ? {frontend: getFrontend()} : {}),
                         keyword,
                     }, response => {
                         controller._onBazaar(response, bazaarType, request);
-                    });
+                    }, undefined, undefined, abortController.signal);
                 } else if (type === "downloaded") {
                     const activeType = inputElement.closest(".config-bazaar__title")
                         ?.querySelector('.b3-button[data-type^="my"]:not(.b3-button--outline)')
@@ -650,23 +659,32 @@ const bindBazaarSearchEvents = (
                     }
                 }
             };
-            let wasEmpty = inputElement.value.trim() === "";
-            const resetIfCleared = () => {
-                const isEmpty = inputElement.value.trim() === "";
-                if (isEmpty && !wasEmpty) {
-                    search();
+            const cancelPending = () => {
+                if (pending !== undefined) {
+                    window.clearTimeout(pending);
+                    pending = undefined;
                 }
-                wasEmpty = isEmpty;
+            };
+            const submit = () => {
+                cancelPending();
+                if (!controller.element?.isConnected) {
+                    return;
+                }
+                search();
+            };
+            const schedule = () => {
+                cancelPending();
+                pending = window.setTimeout(submit, BAZAAR_SEARCH_DELAY);
             };
             inputElement.addEventListener("input", (event: InputEvent) => {
                 if (!event.isComposing) {
-                    resetIfCleared();
+                    schedule();
                 }
             });
-            inputElement.addEventListener("compositionend", resetIfCleared);
+            inputElement.addEventListener("compositionend", schedule);
             inputElement.addEventListener("keydown", (event) => {
                 if (!event.isComposing && event.key === "Enter") {
-                    search();
+                    submit();
                     event.preventDefault();
                 }
             });

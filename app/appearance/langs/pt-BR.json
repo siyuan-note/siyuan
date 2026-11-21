@@ -1,7 +1,6 @@
 {
 	"manageColorsDesc": "Gerencie cores personalizadas para textos, fundos e estilos do editor",
 	"importNotebookCryptoBackupDesc": "Importe um backup de chave para cadernos criptografados usando a senha mestra correspondente",
-	"bazaarSearchPlaceholder": "Digite um termo e pressione Enter",
 	"aiGeneratedContent": "Gerado por IA",
 	"pinTableHeaderColumn": "Fixar coluna de cabeçalho",
 	"unpinTableHeaderColumn": "Desafixar coluna de cabeçalho",

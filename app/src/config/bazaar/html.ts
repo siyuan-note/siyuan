@@ -36,7 +36,7 @@ export const genBazaarPackagePanelHTML = (
             <button type="button" class="block__icon block__icon--show block__icon--touch block__icon--inset block__icon--tap ariaLabel" data-bazaar-filter-menu aria-label="${window.siyuan.languages.filter}" data-position="north" aria-haspopup="menu" aria-expanded="false">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </button>
-            <input spellcheck="false" class="b3-text-field" placeholder="${escapeAttr(window.siyuan.languages.bazaarSearchPlaceholder)}">
+            <input spellcheck="false" class="b3-text-field" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
     </div>

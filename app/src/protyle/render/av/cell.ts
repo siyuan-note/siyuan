@@ -337,9 +337,9 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             }
             const isImg = item.classList.contains("av__cellassetimg");
             mAsset.push({
-                type: isImg ? "image" : "file",
-                content: isImg ? removeCompressURL(decodeURI(item.getAttribute("src"))) : item.getAttribute("data-url"),
-                name: isImg ? "" : item.getAttribute("data-name")
+                type: isImg || item.getAttribute("data-asset-type") === "image" ? "image" : "file",
+                content: item.getAttribute("data-url") ?? (isImg ? removeCompressURL(decodeURI(item.getAttribute("src"))) : ""),
+                name: item.getAttribute("data-name") ?? ""
             });
         });
         cellValue.mAsset = mAsset;
@@ -624,6 +624,9 @@ export const getTypeByCellElement = (cellElement: Element) => {
     return scrollElement.querySelector(".av__row--header").querySelector(`[data-col-id="${cellElement.getAttribute("data-col-id")}"]`).getAttribute("data-dtype") as TAVCol;
 };
 
+export const hasAVPrimaryTemplate = (cell: HTMLElement) => cell.matches(".av__celltext--template") ||
+    Boolean(cell.querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template"));
+
 const getStableTextCells = (cellElements: HTMLElement[], blockElement: HTMLElement, type: "text" | "block") => {
     const viewType = blockElement.dataset.avType as TAVView;
     const stableCells: IAVSelectedCell[] = [];
@@ -779,6 +782,7 @@ export const captureAVCellInput = (protyle: IProtyle, blockElement: HTMLElement,
 };
 
 export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type?: TAVCol, options?: {
+    initialInput?: string;
     scrollIntoView?: boolean;
     data?: IAV;
     destroyCallback?: () => void;
@@ -866,9 +870,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         });
         return;
     }
-    const hasRenderedTemplate = cellElements[0].matches(".av__celltext--template") ||
-        Boolean(cellElements[0].querySelector(":scope > .av__celltext--template, :scope > .av__primary-container > .av__cellprimary > .av__celltext--template"));
-    if (type === "text" || (type === "block" && !hasRenderedTemplate)) {
+    if (type === "text" || (type === "block" && !hasAVPrimaryTemplate(cellElements[0]))) {
         const stableCells = getStableTextCells(cellElements, blockElement, type);
         if (stableCells.length > 0) {
             if (!options?.keepMenuOpen) {
@@ -880,6 +882,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 anchorElement: cellElements[0],
                 value: stableCells[0].cell.value,
                 stableCells,
+                initialInput: options?.initialInput,
                 onSave: async (value, nodeElement, selectedCells) => {
                     await updateCellsValue(protyle, nodeElement, value, undefined, undefined, undefined,
                         false, false, false, selectedCells, true, true);
@@ -891,6 +894,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             return;
         }
     }
+    if (options?.initialInput) return;
     let style = `font-family:${cssStyle.fontFamily};font-size:${cssStyle.fontSize};line-height:${cssStyle.lineHeight};padding:${cssStyle.padding};position:absolute;`;
     if (options?.positionByMenu) {
         style += `height:${cellRect.height}px;width:${Math.max(cellRect.width, 200)}px;left:${cellRect.left}px;top:${cellRect.bottom}px;`;
@@ -1762,7 +1766,8 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         if (cellValue?.isDetached) {
             text = `${renderAVBlockIcon(cellValue, showIcon)}<div class="av__celltext${primaryClass}"${primaryAttributes}>${primaryContent}</div>`;
         } else {
-            text = `${renderAVBlockIcon(cellValue, showIcon)}<div data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref${primaryClass}"${primaryAttributes}>${primaryContent}</div>`;
+            const tag = cellValue.block.richBlockDOM ? "div" : "span";
+            text = `${renderAVBlockIcon(cellValue, showIcon)}<${tag} data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="${getAVBlockRefSubtype(cellValue)}" class="av__celltext av__celltext--ref${primaryClass}"${primaryAttributes}>${primaryContent}</${tag}>`;
         }
         text = `<div class="av__cellprimary">${text}</div>`;
     } else if (cellValue.type === "number") {
@@ -1804,10 +1809,11 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         text = `<span class="av__celltext" data-value='${rowIndex + 1}'>${rowIndex + 1}</span>`;
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
+            const assetAttributes = `data-name="${escapeHtmlTextAndAttr(item.name ?? "")}" data-url="${escapeHtmlTextAndAttr(item.content)}"`;
             if (item.type === "image" && isBrowserRenderableImagePath(item.content)) {
-                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" src="${escapeAttr(getCompressURL(item.content))}">`;
+                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" ${assetAttributes} src="${escapeAttr(getCompressURL(item.content))}">`;
             } else {
-                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAriaLabel(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${escapeHtml(item.name || item.content)}</span>`;
+                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAriaLabel(item.content)}" data-asset-type="${item.type === "image" ? "image" : "file"}" ${assetAttributes}>${escapeHtml(item.name || item.content)}</span>`;
             }
         });
     } else if (cellValue.type === "checkbox") {

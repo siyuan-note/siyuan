@@ -49,10 +49,10 @@ func refreshAppearancePackages(themes, icons []string) {
 	CloseWatchThemes()
 	defer WatchThemes()
 	for _, name := range themes {
-		bazaar.RemoveInstalledPackageSizeCache("themes", name)
+		bazaar.InvalidateInstalledPackageCaches("themes", name)
 	}
 	for _, name := range icons {
-		bazaar.RemoveInstalledPackageSizeCache("icons", name)
+		bazaar.InvalidateInstalledPackageCaches("icons", name)
 	}
 	refreshAppearanceConfig()
 	util.BroadcastByType("main", "refreshAppearance", 0, "", map[string]any{

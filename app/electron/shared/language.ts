@@ -55,6 +55,7 @@ const resolveAppLanguage = (languageTags?: string[] | null): string => {
         "th": "th",
         "tr": "tr",
         "uk": "uk",
+        "vi": "vi",
     };
 
     return languageMapping[language] || "en";

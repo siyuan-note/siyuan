@@ -122,8 +122,18 @@ func ReadRoutes(apiDir string) ([]Route, map[string]string, error) {
 			contract := ""
 			switch value := call.Args[len(call.Args)-1].(type) {
 			case *ast.CallExpr:
+				// The response-cache wrapper preserves the contract handlers and their authorization middleware.
+				if wrapper, ok := value.Fun.(*ast.Ident); ok && wrapper.Name == "withGzipJSONCache" &&
+					len(value.Args) == 1 && !value.Ellipsis.IsValid() {
+					inner, valid := value.Args[0].(*ast.CallExpr)
+					if !valid {
+						err = fmt.Errorf("unsupported API route handler: %s", pathValue)
+						return false
+					}
+					value = inner
+				}
 				function, ok := value.Fun.(*ast.Ident)
-				if !ok || function.Name != "contractRouteHandlers" || len(value.Args) != 2 ||
+				if !ok || function.Name != "contractRouteHandlers" || len(value.Args) != 2 || value.Ellipsis.IsValid() ||
 					len(call.Args) != pathIndex+2 || !call.Ellipsis.IsValid() {
 					err = fmt.Errorf("unsupported API route handler: %s", pathValue)
 					return false

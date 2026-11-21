@@ -14,7 +14,10 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/render"
+	"github.com/dgraph-io/ristretto"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/net/html"
@@ -183,17 +186,32 @@ func refreshAttributeViewPrimarySources(database *av.AttributeView) (changed boo
 		rows[value.Block.ID] = append(rows[value.Block.ID], value)
 	}
 	_, boxID := database.StoragePath()
-	documents := map[string]*treenode.BlockTree{}
+	type documentSources struct {
+		block    *treenode.BlockTree
+		rootOnly bool
+	}
+	documents := map[string]documentSources{}
 	for start := 0; start < len(ids); start += 512 {
 		for _, block := range treenode.GetBlockTreesInBox(ids[start:min(start+512, len(ids))], boxID) {
 			if boxID != "" && block.BoxID != boxID || boxID == "" && IsEncryptedBox(block.BoxID) {
 				continue
 			}
-			documents[block.BoxID+"\x00"+block.Path] = block
+			key := block.BoxID + "\x00" + block.Path
+			if doc, found := documents[key]; !found || block.ID != block.RootID && doc.rootOnly {
+				documents[key] = documentSources{block, block.ID == block.RootID}
+			}
 		}
 	}
-	for _, block := range documents {
-		tree, err := loadTreeByBlockTree(block)
+	for _, doc := range documents {
+		if doc.rootOnly && boxID == "" {
+			if root := loadAttributeViewDocumentPrimarySource(doc.block); root != nil {
+				for _, value := range rows[root.ID] {
+					changed = refreshAttributeViewPrimarySource(value, root, database.ID) || changed
+				}
+			}
+			continue
+		}
+		tree, err := loadTreeByBlockTree(doc.block)
 		if err != nil || tree == nil {
 			continue
 		}
@@ -207,6 +225,62 @@ func refreshAttributeViewPrimarySources(database *av.AttributeView) (changed boo
 		})
 	}
 	return
+}
+
+type attributeViewDocumentPrimarySource struct {
+	version uint64
+	root    *ast.Node
+}
+
+var attributeViewDocumentPrimaryCache, _ = ristretto.NewCache(&ristretto.Config{
+	NumCounters: 16384,
+	MaxCost:     4 * 1024 * 1024,
+	BufferItems: 64,
+})
+
+func loadAttributeViewDocumentPrimarySource(block *treenode.BlockTree) *ast.Node {
+	key := util.DataDir + "\x00" + block.BoxID + "\x00" + block.Path
+	var previous attributeViewDocumentPrimarySource
+	if entry, ok := attributeViewDocumentPrimaryCache.Get(key); ok {
+		previous = entry.(attributeViewDocumentPrimarySource)
+	}
+	tree, needFix, version, err := filesys.LoadTreeWithSourceVersion(block.BoxID, block.Path, util.NewLute(), previous.version)
+	if err != nil {
+		return nil
+	}
+	if tree == nil {
+		return previous.root
+	}
+	if needFix {
+		treenode.UpsertBlockTree(tree)
+		sql.IndexTreeQueue(tree)
+	}
+	root := tree.Root
+	if version == 0 || root.Type != ast.NodeDocument || root.ID != block.RootID {
+		return root
+	}
+	// 空标题的锚文本可能取自正文图片，必须保留完整文档参与计算。
+	if root.IALAttr("name") == "" && strings.TrimSpace(util.UnescapeHTML(root.IALAttr("title"))) == "" {
+		return root
+	}
+	// 主键依赖文档根属性和标题源；正文块及跨文档派生结果不进入缓存。
+	snapshot := &ast.Node{Type: ast.NodeDocument, ID: strings.Clone(root.ID)}
+	cost := int64(len(key) + len(root.ID) + 1024)
+	for _, attr := range root.KramdownIAL {
+		name, value := attr[0], attr[1]
+		if name == "title" || name == "name" || name == "icon" || strings.HasPrefix(name, av.NodeAttrViewStaticText+"-") {
+			snapshot.SetIALAttr(strings.Clone(name), strings.Clone(value))
+			cost += int64(len(name) + len(value) + 64)
+		}
+	}
+	if root.DocumentTitle != nil {
+		title := *root.DocumentTitle
+		title.Format, title.Content = strings.Clone(title.Format), strings.Clone(title.Content)
+		snapshot.DocumentTitle = &title
+		cost += int64(len(title.Content))
+	}
+	attributeViewDocumentPrimaryCache.Set(key, attributeViewDocumentPrimarySource{version, snapshot}, cost)
+	return root
 }
 
 func attributeViewNodePrimaryRich(node *ast.Node) *av.ValuePrimaryRich {

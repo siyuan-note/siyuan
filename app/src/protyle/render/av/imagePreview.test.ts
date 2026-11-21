@@ -158,6 +158,7 @@ test("database image preview forwards optional groups and preserves response ord
         window: {siyuan: {}},
         require: () => ({Constants: {}, addScript: () => Promise.resolve(),
             escapeHtmlTextAndAttr,
+            isMobile: () => false,
             isBrowserRenderableImagePath: (src: string) => src.endsWith(".png"),
             fetchPost: (path: string, body: Record<string, string>, callback: (response: unknown) => void) => {
                 requests.push({path, body});

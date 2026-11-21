@@ -110,6 +110,7 @@ const cases = async (sources: Record<string, string>, styles: Record<string, str
             const host = document.createElement("div");
             host.innerHTML = cell.renderCell(value, 0, false, view);
             const preview = host.querySelector<HTMLElement>(".av__celltext");
+            check.equal(preview.localName, "div");
             check.equal(preview.querySelector('[data-type~="strong"]').textContent, "Styled");
             check.equal(preview.querySelector("img").getAttribute("alt"), "Image");
             check.equal(preview.querySelector('[data-type="inline-math"]').getAttribute("data-content"), "x^2");
@@ -195,6 +196,34 @@ const cases = async (sources: Record<string, string>, styles: Record<string, str
         rich: {spec: 1, format: "kramdown", content: "First\n\nSecond ![photo](assets/photo.png) after\n\nThird"}}};
     for (const [entry, css] of Object.entries(styles)) {
         style.textContent = css;
+        for (const refSubtype of ["d", "s"] as const) {
+            const value: IAVCellValue = {type: "block", block: {id: "bound", refSubtype,
+                content: "A long plain primary key that needs an ellipsis in a narrow column"}};
+            const host = document.createElement("div");
+            host.className = "protyle-wysiwyg";
+            host.innerHTML = '<div class="av" data-type="NodeAttributeView" data-node-id="database" data-av-type="table"><div class="av__row"><div class="av__cell" data-dtype="block" data-wrap="false" style="width:160px"></div></div></div>';
+            document.body.append(host);
+            const cellElement = host.querySelector(".av__cell");
+            cellElement.innerHTML = cell.renderCell(value, 0, false, "table");
+            const preview = cellElement.querySelector<HTMLElement>('.av__celltext[data-id="bound"]');
+            check.ok(preview.matches('span[data-type="block-ref"]'), `${entry}: plain primary targets inline reference styles`);
+            check.equal(preview.dataset.subtype, refSubtype);
+            check.equal(preview.textContent, value.block.content);
+            check.equal(getComputedStyle(preview).cursor, "pointer");
+            check.equal(getComputedStyle(preview).textOverflow, "ellipsis");
+            check.ok(preview.scrollWidth > preview.clientWidth);
+
+            cellElement.innerHTML = attribute.genAVRelationHTML(value, "row", false);
+            const relation = cellElement.querySelector<HTMLElement>('.av__cell--relation .av__celltext[data-id="bound"]');
+            check.ok(relation.matches('span[data-type="block-ref"]'), `${entry}: plain relation targets inline reference styles`);
+            check.equal(relation.dataset.subtype, refSubtype);
+            check.equal(getComputedStyle(relation).cursor, "pointer");
+
+            cellElement.innerHTML = attribute.genAVRelationHTML({...value, hasRenderTemplate: true,
+                renderedContent: "<div>Rendered primary</div>"}, "row", false);
+            check.ok(cellElement.querySelector("div.av__celltext--template > div"));
+            host.remove();
+        }
         for (const view of ["table", "calendar"] as const) {
             for (const fontSize of [16, 24]) {
                 const host = document.createElement("div");
@@ -291,7 +320,7 @@ const cases = async (sources: Record<string, string>, styles: Record<string, str
     style.remove();
 };
 
-test("database rich text renders primary and text previews and supports legacy primary editing and paste", async () => {
+test("database rich text renders primary and text previews and preserves legacy primary styles, editing and paste", async () => {
     const profile = mkdtempSync(join(tmpdir(), "siyuan-primary-rich-"));
     const env = {...process.env}; delete env.ELECTRON_RUN_AS_NODE;
     try {

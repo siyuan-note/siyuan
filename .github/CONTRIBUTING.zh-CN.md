@@ -71,6 +71,7 @@ NPM 镜像：
 
 * Windows：发布构建者须具有 Visual Studio 许可证授予的再分发权，并从 `VC/Redist/MSVC` 提供对应 x64/ARM64 架构的**发布版** CRT 文件。脚本通过 `vswhere` 或 `VCToolsRedistDir` 查找已安装的 Visual Studio。自定义位置或跨主机打包时，将 `SIYUAN_OCR_VC_REDIST_DIR` 指向含 `x64`、`arm64` 子目录的 `VC/Redist/MSVC/<version>`，也可以直接指向目标架构的 `Microsoft.VC*.CRT` 目录。仅使用官方 Visual Studio 再分发文件，不要从 `System32`、调试运行库或第三方 DLL 下载站收集文件。准备步骤会检查架构和必需的导出符号，将 CRT 的传递依赖放在 ONNX Runtime 旁，并记录 SHA-256 摘要及许可说明。发布时应及时更新这些应用本地运行库，详见 Microsoft 的[再分发条款](https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution#visual-c-runtime-files)。该方案不会安装系统级运行库，也不需要最终用户提权
 * Linux：桌面 OCR 辅助进程的 AMD64、ARM64 构建统一以 **glibc 2.28** 为兼容目标，独立于内核的 musl 工具链。准备脚本下载 `scripts/ocr-assets.json` 中固定版本的 Zig 编译器，校验摘要并缓存在 `.cache/ocr/`，不随应用分发。请安装 `binutils`，以便使用 `readelf` 检查兼容性。可选环境变量 `SIYUAN_OCR_CC_AMD64`、`SIYUAN_OCR_CC_ARM64` 分别指定带 glibc 2.28 或更旧 sysroot 的编译器命令；脚本会拒绝较新头文件及依赖较新 glibc 符号的产物。`--check-only` 仅校验默认工具链选择，不下载工具链。Docker 继续使用独立的 Alpine/musl OCR 构建流程
+  * 下游 Linux 发行版使用 CGO 和 glibc 构建动态链接内核时，可以在 `fts5 sqlcipher` 之外加上 `ocr_inprocess` Go 构建标签。在 `stage/ocr/runtime/linux-<arch>/` 打包兼容的 `libonnxruntime.so`，并照常打包 OCR 模型。这种构建由内核直接加载运行库，无需打包 `siyuan-ocr`。官方构建仍使用默认的辅助进程路径
 
 ### iOS
 

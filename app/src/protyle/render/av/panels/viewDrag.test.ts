@@ -11,12 +11,12 @@ const browserCases = (source: string) => {
     const check: typeof assert = require("node:assert/strict");
     const operations: IOperation[][][] = [];
     Object.assign(window, {siyuan: {config: {readonly: false}, languages: new Proxy({}, {get: () => "label"})}});
-    const api = new Function("Constants", "transaction", "hasClosestByAttribute", "escapeHtml", source +
-        "\nreturn {bindAVPanelDrag, getSwitcherHTML, getAVVisibleViewIDs};")(
+    const api = new Function("Constants", "transaction", "hasClosestByAttribute", "escapeHtml", "isMobile", source +
+        "\nreturn {bindAVPanelDrag, bindSwitcherEvent, getSwitcherHTML, getAVVisibleViewIDs};")(
         {CUSTOM_SY_AV_VISIBLE_VIEWS: "custom-sy-av-visible-views"},
         (_protyle: IProtyle, forward: IOperation[], undo: IOperation[]) => operations.push([forward, undo]),
         (element: Element, name: string, value: string) => element?.closest(`[${name}="${value}"]`),
-        (value: string) => value) as typeof import("./drag") & typeof import("../view") & typeof import("../viewVisibility");
+        (value: string) => value, () => true) as typeof import("./drag") & typeof import("../view") & typeof import("../viewVisibility");
     const fixture = (visible = ["A", "B"], order = ["A", "B", "C", "D"]) => {
         document.body.innerHTML = "";
         operations.length = 0;
@@ -142,14 +142,36 @@ const browserCases = (source: string) => {
         check.deepEqual(f.visible(), ["A", "B"]);
         check.equal(window.siyuan.dragElement, undefined);
     }
+    {
+        const f = fixture();
+        f.protyle.disabled = true;
+        f.menu.innerHTML = api.getSwitcherHTML(f.data.views, "B", f.block, true);
+        const views = Array.from(f.menu.querySelectorAll<HTMLElement>("button[data-id]"));
+        check.deepEqual(views.map(view => view.dataset.id), ["A", "B", "C", "D"]);
+        check.equal(f.menu.querySelector(".b3-menu__item--current").getAttribute("data-id"), "B");
+        check.equal(f.menu.querySelector('[draggable="true"], [data-type="av-add"], [data-type="av-view-edit"], ' +
+            '[data-type="av-view-visibility"], [data-type="av-view-hide-all"], [data-type="av-view-show-all"]'), null);
+        api.bindSwitcherEvent({protyle: f.protyle, menuElement: f.menu, blockElement: f.block});
+        const input = f.menu.querySelector<HTMLInputElement>("input");
+        input.value = "C";
+        input.dispatchEvent(new Event("input"));
+        check.deepEqual(views.filter(view => !view.classList.contains("fn__none")).map(view => view.dataset.id), ["C"]);
+        let selected: string;
+        f.menu.addEventListener("click", event => {
+            selected = (event.target as HTMLElement).closest<HTMLElement>('button[data-type="av-view-switch"]').dataset.id;
+        });
+        input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter"}));
+        check.equal(selected, "C");
+        check.equal(operations.length, 0);
+    }
     return "View drag cases passed";
 };
 
-test("view switcher drag changes visibility and order with undo, section targets and cancellation", {
+test("the view switcher supports drag editing and search with readonly selection", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const files = ["drag.ts", "../viewVisibility.ts", "../view.ts"];
+    const files = ["drag.ts", "../viewVisibility.ts", "../view.ts", "../../../../util/upDownHint.ts"];
     const source = files.map(file => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
     {compilerOptions: {target: ScriptTarget.ES2022}}).outputText).join("\n");

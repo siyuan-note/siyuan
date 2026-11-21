@@ -960,7 +960,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "SiYuan refuses to disable encrypted notebooks while an encrypted notebook or recoverable history still depends on the current keys, preventing permanent loss of access"
+									"Data": "SiYuan refuses to disable encrypted notebooks while an encrypted notebook or recoverable history still depends on the current keys. It also blocks disabling in workspaces linked to sync, even when sync is paused, to protect the key backup that other devices may need"
 								}
 							]
 						}
@@ -1414,7 +1414,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Removing three of five locked notebooks leaves the other two and the old key configuration in place. After all old notebook and recovery dependencies are archived, turn encrypted notebooks off and on again to set a new master password. The application also retains recovery copies; keep your independently saved archive."
+					"Data": "Removing three of five locked notebooks leaves the other two and the old key configuration in place. In a workspace that has not been linked to sync, once all old notebooks and their recovery dependencies have been archived and removed, turn encrypted notebooks off and on again to set a new master password. The application also retains recovery copies; keep your independently saved archive."
 				}
 			]
 		},

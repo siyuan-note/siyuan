@@ -1097,6 +1097,9 @@ func DisableEncryptedNotebook() error {
 	defer unlockSync()
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
+	if EncryptedNotebookDisableBlockedBySync() {
+		return errors.New(Conf.Language(474))
+	}
 	if err := checkPendingNotebookArchives(); err != nil {
 		return err
 	}

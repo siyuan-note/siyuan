@@ -1682,7 +1682,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Changes to theme.css are normally detected and refreshed automatically. If they are not, use "
+									"Data": "Changes to the current theme’s theme.css normally refresh the theme automatically, including when the theme directory is a symbolic link or Windows junction. If the theme does not refresh automatically, use "
 								},
 								{
 									"Type": "NodeTextMark",

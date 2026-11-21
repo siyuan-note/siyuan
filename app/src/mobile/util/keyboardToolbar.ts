@@ -1724,18 +1724,23 @@ export const initKeyboardToolbar = () => {
             if (dataValue === Constants.ZWSP + 3) {
                 return;
             }
+            const opensEmojiPanel = dataValue === "emoji";
             if (liteSlashBtnElement) {
                 event.preventDefault();
                 event.stopPropagation();
                 if (!dataValue) {
                     return;
                 }
+            }
+            if (liteSlashBtnElement || opensEmojiPanel) {
                 hideKeyboardToolbarUtil();
             }
             protyle.hint.fillCommand(dataValue, protyle, false, slashBtnElement.dataset.slashEntryKey);   // 点击后 range 会改变
             event.preventDefault();
             event.stopPropagation();
-            if (dataValue === "((" || dataValue === "{{") {
+            if (opensEmojiPanel) {
+                hideKeyboardToolbar(false);
+            } else if (dataValue === "((" || dataValue === "{{") {
                 keepBlockHintKeyboard(protyle);
             } else if (slashBtnElement.getAttribute("data-focus") === "true" ||
                 liteSlashBtnElement && slashBtnElement.getAttribute("data-focus") !== "false") {

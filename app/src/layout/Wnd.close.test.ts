@@ -98,10 +98,15 @@ const createCloseFixture = () => {
     });
     // Constructor initialization retains the actual private removal action; no close method is stubbed.
     const wnd = new moduleExports.Wnd({});
+    const tabClasses = new Set<string>();
+    const tabHeaders: HTMLElement[] = [];
     const tab = {
         id: "tab", model: new Editor(),
-        headElement: {classList: {contains: () => false}, getAttribute: () => "0",
-            remove: () => calls.headerRemovals++, setAttribute() {}},
+        headElement: {
+            classList: {contains: (name: string) => tabClasses.has(name), add: (name: string) => tabClasses.add(name)},
+            parentElement: {children: tabHeaders}, getAttribute: () => "0",
+            remove: () => calls.headerRemovals++, setAttribute() {},
+        },
         panelElement: {remove: () => calls.panelRemovals++},
     };
     wnd.children = [tab, {id: "other-tab"}];
@@ -262,6 +267,57 @@ for (const outcome of ["success", "failure", "uploading"] as const) {
         }
     });
 }
+
+for (const change of ["activate", "pin", "within-limit"] as const) {
+    test(`tab limit rechecks eligibility after a pending close when the state changes (${change})`, async () => {
+        const f = createCloseFixture();
+        const next = {...f.tab, id: "next", model: undefined as undefined,
+            headElement: {...f.tab.headElement, classList: {contains: () => false}, getAttribute: () => "1"}};
+        let wasActive = true;
+        const active = {...f.tab, id: "active", model: undefined as undefined,
+            headElement: {...f.tab.headElement, classList: {contains: (name: string) => wasActive && name === "item--focus"},
+                getAttribute: () => "2"}};
+        f.wnd.children = [f.tab, next, active];
+        let finishBodySave: () => void;
+        f.editor.flushPendingTransactions = () => new Promise<void>(resolve => { finishBodySave = resolve; });
+
+        const limiting = f.wnd.removeOverCounter();
+        f.resolveTitle();
+        await settleClose();
+        assert.equal(f.wnd.children.length, 3);
+        if (change === "activate") {
+            wasActive = false;
+            f.tab.headElement.classList.add("item--focus");
+        }
+        if (change === "pin") f.tab.headElement.classList.add("item--pin");
+        if (change === "within-limit") assert.equal(f.wnd.removeTab(next.id, false, false, false), true);
+        finishBodySave();
+
+        await limiting;
+        assert.deepEqual(f.wnd.children, [f.tab, active]);
+        assert.equal(f.calls.modelDestroyed, 0);
+    });
+}
+
+test("an explicit close takes precedence over a pending tab limit close", async () => {
+    const f = createCloseFixture();
+    const next = {...f.tab, id: "next", model: undefined as undefined,
+        headElement: {...f.tab.headElement, classList: {contains: () => false}, getAttribute: () => "1"}};
+    f.wnd.children = [f.tab, next, {id: "without-header"}];
+
+    const limiting = f.wnd.removeOverCounter();
+    f.tab.headElement.classList.add("item--pin");
+    const closing = f.remove(false, true);
+    assert.equal(f.calls.titleFlushes, 1);
+    f.resolveTitle();
+
+    assert.equal(await closing, true);
+    await limiting;
+    assert.equal(f.wnd.children.includes(f.tab), false);
+    assert.equal(f.wnd.children.includes(next), true);
+    assert.equal(f.timers.length, 1, "the explicit close uses its own animation");
+    assert.equal(f.calls.modelDestroyed, 1);
+});
 
 test("ordinary tabs without pending title work still close synchronously", () => {
     const f = createCloseFixture();

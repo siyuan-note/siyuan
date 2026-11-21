@@ -1626,7 +1626,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內核通常會監聽 theme.css 的修改並自動重新整理；如果沒有自動重新整理，請使用 "
+									"Data": "修改目前主題的 theme.css 通常會自動重新整理主題，主題目錄為符號連結或 Windows 目錄連接時也適用。如果沒有自動重新整理，請使用 "
 								},
 								{
 									"Type": "NodeTextMark",

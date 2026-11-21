@@ -1,4 +1,8 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Créer une archive ne supprime aucune donnée. Une fois confirmée, la suppression est propagée par la synchronisation",
+	"manageColorsDesc": "Gérer les couleurs personnalisées du texte, des arrière-plans et des styles de l’éditeur",
+	"importNotebookCryptoBackupDesc": "Importer une sauvegarde de clé pour les carnets chiffrés avec le mot de passe maître correspondant",
+	"aiGeneratedContent": "Généré par IA",
 	"pinTableHeaderColumn": "Épingler la colonne d’en-tête",
 	"unpinTableHeaderColumn": "Désépingler la colonne d’en-tête",
 	"markdownLinkUnavailable": "Impossible d’ouvrir le lien Markdown",
@@ -2898,7 +2902,7 @@
 	"attrValue1": "Si vous laissez la valeur de l'attribut vide, l'attribut sera automatiquement supprimé",
 	"specifyPath": "Spécifier le chemin",
 	"addAttr": "Ajouter",
-	"addTag": "Ajouter Tag",
+	"addTag": "Ajouter une étiquette",
 	"width": "Largeur",
 	"attrName": "Nom de l'attribut",
 	"attr": "Attribut",
@@ -3980,6 +3984,8 @@
 		"469": "Échec de l’authentification : cette requête n’a pas passé les vérifications d’accès local. Les VPN, proxys ou applications de filtrage réseau peuvent affecter l’accès local ; essayez de les désactiver temporairement, puis réessayez. Pour accéder via une adresse non locale, définissez d’abord un mot de passe de verrouillage",
 		"470": "La limite de cycles d’appels aux outils a été atteinte. J’ai cessé d’utiliser les outils ; cette tâche est peut-être encore inachevée",
 		"471": "Les appels répétés aux outils ont renvoyé le même résultat. J’ai cessé d’utiliser les outils ; cette tâche est peut-être encore inachevée",
-		"472": "Impossible de convertir la carte mentale héritée, veuillez rouvrir le document et réessayer"
+		"472": "Impossible de convertir la carte mentale héritée, veuillez rouvrir le document et réessayer",
+		"473": "Une erreur inattendue est survenue lors du traitement de la demande. Consultez le journal système",
+		"474": "Les carnets chiffrés ne peuvent pas être désactivés dans un espace de travail lié à la synchronisation, même si celle-ci est en pause"
 	}
 }

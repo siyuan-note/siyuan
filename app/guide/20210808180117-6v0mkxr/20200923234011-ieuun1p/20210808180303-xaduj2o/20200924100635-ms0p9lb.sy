@@ -251,7 +251,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to reorder sibling tags by dragging their rows. On mobile, touch and hold a row before dragging it. The custom order is saved with your workspace data. Clear the tag filter before reordering."
+					"Data": " to reorder sibling tags by dragging their rows. On mobile, touch and hold a row before dragging it. The custom order is saved with your workspace data. If you delete a tag from the tag panel and later recreate it, it appears after sibling tags with a saved position. Clear the tag filter before reordering."
 				}
 			]
 		},

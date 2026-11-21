@@ -93,8 +93,8 @@ for (const mobile of [false, true]) {
             assert.equal(h.requests[0].url, "/api/av/renderAttributeView");
             assert.equal(h.requests[0].data.ignoreRows, true);
             assert.equal(h.context.options.cellElements, h.options.cellElements);
-            if (type !== "asset") {
-                assert.ok(h.calls.includes(type === "select" ? "setSelectMenuPosition" : "setPosition"));
+            if (type === "select" || type === "date") {
+                assert.ok(h.calls.includes(type === "select" ? "setSelectMenuPosition" : "setAVCellPanelPosition"));
             }
             assert.ok(!h.calls.includes("resize.bind"));
         });
@@ -112,6 +112,23 @@ test("window resizing uses the automation height constraint only while its panel
     h.menuClasses.delete("av__automation-panel");
     h.resize();
     assert.deepEqual(h.calls, ["setPosition"]);
+});
+
+test("a locked switcher dispatches only view selection and closes when the editor unlocks", async () => {
+    const h = createPanel(true);
+    h.options.type = "switcher";
+    h.options.protyle.disabled = true;
+    h.open(h.options);
+    h.calls.length = 0;
+    for (const type of ["av-view-edit", "av-view-visibility", "av-view-hide-all", "av-view-show-all", "av-add"]) {
+        await h.click(type);
+    }
+    assert.deepEqual(h.calls, []);
+    await h.click("av-view-switch");
+    assert.deepEqual(h.calls, ["action"]);
+    h.options.protyle.disabled = false;
+    await h.click("av-view-switch");
+    assert.deepEqual(h.calls, ["action", "remove"]);
 });
 
 for (const mobile of [false, true]) {

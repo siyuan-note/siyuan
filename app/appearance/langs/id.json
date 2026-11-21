@@ -1,4 +1,8 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Membuat arsip tidak menghapus data. Setelah dikonfirmasi, penghapusan akan diterapkan melalui sinkronisasi",
+	"manageColorsDesc": "Kelola warna kustom untuk teks, latar belakang, dan gaya editor",
+	"importNotebookCryptoBackupDesc": "Impor cadangan kunci untuk buku catatan terenkripsi dengan kata sandi utama yang sesuai",
+	"aiGeneratedContent": "Dibuat oleh AI",
 	"pinTableHeaderColumn": "Sematkan Kolom Tajuk",
 	"unpinTableHeaderColumn": "Lepas Sematan Kolom Tajuk",
 	"markdownLinkUnavailable": "Tautan Markdown tidak dapat dibuka",
@@ -2898,7 +2902,7 @@
 	"attrValue1": "Kosongkan nilai atribut akan secara otomatis menghapus atribut",
 	"specifyPath": "Tentukan jalur",
 	"addAttr": "Tambah",
-	"addTag": "Tambah Tag",
+	"addTag": "Tambah tag",
 	"width": "Lebar",
 	"attrName": "Nama atribut",
 	"attr": "Atribut",
@@ -3980,6 +3984,8 @@
 		"469": "Autentikasi gagal: permintaan ini tidak lolos pemeriksaan akses lokal. VPN, proksi, atau aplikasi penyaring jaringan dapat memengaruhi akses lokal; coba nonaktifkan sementara lalu coba lagi. Saat mengakses melalui alamat nonlokal, atur kata sandi layar kunci terlebih dahulu",
 		"470": "Batas putaran pemanggilan alat telah tercapai. Saya telah berhenti menggunakan alat; tugas ini mungkin masih belum selesai",
 		"471": "Pemanggilan alat berulang mengembalikan hasil yang sama. Saya telah berhenti menggunakan alat; tugas ini mungkin masih belum selesai",
-		"472": "Gagal mengonversi peta pikiran lama, buka kembali dokumen dan coba lagi"
+		"472": "Gagal mengonversi peta pikiran lama, buka kembali dokumen dan coba lagi",
+		"473": "Terjadi kesalahan tak terduga saat memproses permintaan. Periksa log sistem",
+		"474": "Buku catatan terenkripsi tidak dapat dinonaktifkan di ruang kerja yang terhubung ke sinkronisasi, meski sinkronisasi dijeda"
 	}
 }

@@ -1,4 +1,8 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Vytvorenie archívu neodstráni údaje. Po potvrdení sa odstránenie prenesie synchronizáciou",
+	"manageColorsDesc": "Spravujte vlastné farby textu, pozadia a štýlov editora",
+	"importNotebookCryptoBackupDesc": "Importujte zálohu kľúča šifrovaných zápisníkov pomocou príslušného hlavného hesla",
+	"aiGeneratedContent": "Vytvorené AI",
 	"pinTableHeaderColumn": "Pripnúť stĺpec hlavičky",
 	"unpinTableHeaderColumn": "Odopnúť stĺpec hlavičky",
 	"markdownLinkUnavailable": "Odkaz Markdown sa nepodarilo otvoriť",
@@ -3980,6 +3984,8 @@
 		"469": "Overenie zlyhalo: táto požiadavka neprešla kontrolami lokálneho prístupu. VPN, proxy alebo aplikácie na filtrovanie siete môžu ovplyvniť lokálny prístup; skúste ich dočasne vypnúť a skúste to znova. Pri prístupe cez inú ako lokálnu adresu najprv nastavte heslo uzamknutia obrazovky",
 		"470": "Bol dosiahnutý limit kôl volaní nástrojov. Prestal som používať nástroje; táto úloha môže byť stále nedokončená",
 		"471": "Opakované volania nástrojov vrátili rovnaký výsledok. Prestal som používať nástroje; táto úloha môže byť stále nedokončená",
-		"472": "Staršiu myšlienkovú mapu sa nepodarilo previesť, znova otvorte dokument a skúste to ešte raz"
+		"472": "Staršiu myšlienkovú mapu sa nepodarilo previesť, znova otvorte dokument a skúste to ešte raz",
+		"473": "Pri spracovaní požiadavky nastala neočakávaná chyba. Skontrolujte systémový denník",
+		"474": "V pracovnom priestore prepojenom so synchronizáciou nemožno vypnúť šifrované zápisníky, ani keď je synchronizácia pozastavená"
 	}
 }

@@ -1,4 +1,8 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Das Erstellen des Archivs entfernt keine Daten. Erst nach der Bestätigung wird die Entfernung synchronisiert",
+	"manageColorsDesc": "Benutzerdefinierte Farben für Text, Hintergründe und Editorstile verwalten",
+	"importNotebookCryptoBackupDesc": "Eine Schlüsselsicherung für verschlüsselte Notizbücher mit dem zugehörigen Hauptpasswort importieren",
+	"aiGeneratedContent": "KI-generiert",
 	"pinTableHeaderColumn": "Kopfspalte anheften",
 	"unpinTableHeaderColumn": "Kopfspalte lösen",
 	"markdownLinkUnavailable": "Markdown-Link konnte nicht geöffnet werden",
@@ -3980,6 +3984,8 @@
 		"469": "Authentifizierung fehlgeschlagen: Diese Anfrage hat die Prüfungen für den lokalen Zugriff nicht bestanden. VPNs, Proxys oder Netzwerkfilter-Apps können den lokalen Zugriff beeinträchtigen; deaktivieren Sie diese vorübergehend und versuchen Sie es erneut. Richten Sie beim Zugriff über eine nicht lokale Adresse zuerst ein Sperrbildschirm-Passwort ein",
 		"470": "Die maximale Anzahl an Werkzeugaufrufrunden wurde erreicht. Ich habe die Verwendung von Werkzeugen beendet; diese Aufgabe ist möglicherweise noch nicht abgeschlossen",
 		"471": "Wiederholte Werkzeugaufrufe lieferten dasselbe Ergebnis. Ich habe die Verwendung von Werkzeugen beendet; diese Aufgabe ist möglicherweise noch nicht abgeschlossen",
-		"472": "Die alte Mindmap konnte nicht konvertiert werden. Bitte öffne das Dokument erneut und versuche es noch einmal"
+		"472": "Die alte Mindmap konnte nicht konvertiert werden. Bitte öffne das Dokument erneut und versuche es noch einmal",
+		"473": "Bei der Verarbeitung der Anfrage ist ein unerwarteter Fehler aufgetreten. Prüfen Sie das Systemprotokoll",
+		"474": "Verschlüsselte Notizbücher können in einem mit der Synchronisierung verknüpften Arbeitsbereich auch bei pausierter Synchronisierung nicht deaktiviert werden"
 	}
 }

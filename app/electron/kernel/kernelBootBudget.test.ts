@@ -1,5 +1,8 @@
 import {test} from "node:test";
-import {PROGRESS_FAILURE_LIMIT, BOOT_TIMEOUT_MS, LOCK_RETRY_DEADLINE_MS, VERSION_QUERY_ATTEMPTS, canRetryProgress, bootTimedOut, exhaustedVersionAttempts, lockRetryExpired} from "./kernelBootBudget";
+import {
+    PROGRESS_FAILURE_LIMIT, BOOT_PROGRESS_TIMEOUT_MS, LOCK_RETRY_DEADLINE_MS, VERSION_QUERY_ATTEMPTS,
+    canRetryProgress, bootProgressTimedOut, exhaustedVersionAttempts, lockRetryExpired,
+} from "./kernelBootBudget";
 const assert = require("node:assert/strict");
 
 const timeoutError = () => {
@@ -31,9 +34,10 @@ test("version queries stop after the documented attempt count", () => {
     assert.equal(exhaustedVersionAttempts(VERSION_QUERY_ATTEMPTS + 1), true);
 });
 
-test("boot and lock deadlines compare against the injected clock", () => {
-    assert.equal(bootTimedOut(BOOT_TIMEOUT_MS, 0), false);
-    assert.equal(bootTimedOut(BOOT_TIMEOUT_MS + 1, 0), true);
+test("boot measures inactivity from the last progress and lock waiting uses its deadline", () => {
+    const lastProgressAt = 1000;
+    assert.equal(bootProgressTimedOut(lastProgressAt + BOOT_PROGRESS_TIMEOUT_MS, lastProgressAt), false);
+    assert.equal(bootProgressTimedOut(lastProgressAt + BOOT_PROGRESS_TIMEOUT_MS + 1, lastProgressAt), true);
     assert.equal(lockRetryExpired(100 - 1, 100), false);
     assert.equal(lockRetryExpired(100, 100), true);
     // 期限按当前时刻加上固定预算得出。

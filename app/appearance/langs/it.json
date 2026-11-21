@@ -1,4 +1,8 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "La creazione di un archivio non rimuove dati. Dopo la conferma, la rimozione viene propagata tramite la sincronizzazione",
+	"manageColorsDesc": "Gestisci i colori personalizzati per il testo, gli sfondi e gli stili dell’editor",
+	"importNotebookCryptoBackupDesc": "Importa un backup della chiave per i taccuini crittografati usando la password principale corrispondente",
+	"aiGeneratedContent": "Generato dall’IA",
 	"pinTableHeaderColumn": "Blocca la colonna di intestazione",
 	"unpinTableHeaderColumn": "Sblocca la colonna di intestazione",
 	"markdownLinkUnavailable": "Impossibile aprire il collegamento Markdown",
@@ -2898,7 +2902,7 @@
 	"attrValue1": "Lasciare vuoto il valore dell'attributo eliminerà automaticamente l'attributo",
 	"specifyPath": "Specifica il percorso",
 	"addAttr": "Aggiungi",
-	"addTag": "Aggiungi Tag",
+	"addTag": "Aggiungi tag",
 	"width": "Larghezza",
 	"attrName": "Nome attributo",
 	"attr": "Attributo",
@@ -3980,6 +3984,8 @@
 		"469": "Autenticazione non riuscita: questa richiesta non ha superato i controlli di accesso locale. VPN, proxy o app di filtraggio della rete possono influire sull’accesso locale; prova a disattivarli temporaneamente e riprova. Per accedere tramite un indirizzo non locale, imposta prima una password di blocco schermo",
 		"470": "È stato raggiunto il limite di turni di chiamata agli strumenti. Ho smesso di usare gli strumenti; questa attività potrebbe essere ancora incompleta",
 		"471": "Le chiamate ripetute agli strumenti hanno restituito lo stesso risultato. Ho smesso di usare gli strumenti; questa attività potrebbe essere ancora incompleta",
-		"472": "Impossibile convertire la mappa mentale precedente, riapri il documento e riprova"
+		"472": "Impossibile convertire la mappa mentale precedente, riapri il documento e riprova",
+		"473": "Si è verificato un errore imprevisto durante l’elaborazione della richiesta. Controlla il registro di sistema",
+		"474": "Non è possibile disattivare i taccuini crittografati in uno spazio di lavoro collegato alla sincronizzazione, anche se è in pausa"
 	}
 }

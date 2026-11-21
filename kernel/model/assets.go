@@ -1343,18 +1343,24 @@ func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
 		if !gulu.File.IsSubPath(util.WorkspaceDir, p) {
 			return "", fmt.Errorf("[%s] is not sub path of workspace", p)
 		}
-		// 解析符号链接/目录联接，防止软链接跳出资产根目录
-		if realP, evalErr := filepath.EvalSymlinks(p); evalErr == nil && realP != p {
-			if !gulu.File.IsSubPath(util.WorkspaceDir, realP) {
-				return "", fmt.Errorf("symlink [%s] resolves outside workspace: [%s]", p, realP)
+		resolvedPath, err := util.ResolveRealPath(p)
+		if err != nil {
+			return "", err
+		}
+		if resolvedPath != p {
+			// iOS 沙箱路径可能含有系统目录别名。只解析工作空间根目录，笔记本资源目录仍以工作空间内的原位置为边界。
+			resolvedWorkspace, err := util.ResolveRealPath(util.WorkspaceDir)
+			if err != nil {
+				return "", err
 			}
-			// 验证解析后的路径仍在 <boxID>/assets/ 或全局 data/assets/ 下
-			expectedPrefix := filepath.Join(util.DataDir, "assets")
-			if boxID != "" {
-				expectedPrefix = filepath.Join(util.DataDir, boxID, "assets")
+			assetRoot := filepath.Join(util.DataDir, boxID, "assets")
+			relativeRoot, err := filepath.Rel(util.WorkspaceDir, assetRoot)
+			if err != nil {
+				return "", err
 			}
-			if !gulu.File.IsSubPath(expectedPrefix, realP) {
-				return "", fmt.Errorf("symlink [%s] resolves outside assets directory: [%s]", p, realP)
+			if !gulu.File.IsSubPath(resolvedWorkspace, resolvedPath) ||
+				!gulu.File.IsSubPath(filepath.Join(resolvedWorkspace, relativeRoot), resolvedPath) {
+				return "", fmt.Errorf("asset [%s] resolves outside notebook assets directory: [%s]", p, resolvedPath)
 			}
 		}
 		return p, nil

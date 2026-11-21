@@ -497,6 +497,20 @@
 			]
 		},
 		{
+			"ID": "20261120223328-87b0828",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261120223328-87b0828",
+				"updated": "20261120223328"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, pinch with two fingers to zoom. Double-tap the image to zoom to twice its initial size. Double-tap again to restore the initial view. Use the bottom toolbar to rotate the image or reset the view. When there are multiple images, use the previous and next buttons in the toolbar to switch between them."
+				}
+			]
+		},
+		{
 			"ID": "20261105133656-ez7ztx2",
 			"Type": "NodeParagraph",
 			"Properties": {

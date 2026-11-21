@@ -50,7 +50,7 @@ for (const name of ["base", "mobile"]) {
 const compile = file => ts.transpileModule(readFileSync(path.join(__dirname, "../src", file), "utf8"), {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
 }).outputText;
-const samples = () => {
+const samples = mobile => {
     const escape = {};
     runInNewContext(compile("util/escape.ts"), {exports: escape});
     const renderer = compile("layout/dock/agent/AgentMessageRenderer.ts");
@@ -58,7 +58,12 @@ const samples = () => {
     return readdirSync(directory).filter(file => file.endsWith(".json")).map(file => {
         const languages = JSON.parse(readFileSync(path.join(directory, file), "utf8"));
         const exports = {};
-        runInNewContext(renderer, {exports, require: () => escape, window: {siyuan: {languages}}});
+        runInNewContext(renderer, {
+            exports,
+            require: name => name === "../../../util/functions" ? {isMobile: () => mobile} :
+                name === "../../../util/escape" ? escape : {},
+            window: {siyuan: {languages}},
+        });
         const keys = Object.keys(languages).filter(key => /^agentWelcome(?:First|Return|Morning|Day|Evening|Late)\d$/.test(key));
         assert.equal(keys.length, 24, `${file}: all greeting variants enter the layout regression`);
         return {locale: file, greetings: keys.map(key => ({key, html: exports.renderWelcomeHTML(true, key),
@@ -119,6 +124,7 @@ const browserCases = ({css, languages, mobile}) => {
                         }
                         firstWidth = buttons[0].getBoundingClientRect().width;
                     } else {
+                        check.equal(!!messages.querySelector('[data-type="go-chatgpt"]'), !mobile, label);
                         const card = document.querySelector(".agent-welcome__no-model").getBoundingClientRect();
                         check.ok(card.left >= outer.left && card.right <= outer.right, `no-model bounds ${label}`);
                         near(card.left + card.width / 2, outer.left + outer.width / 2, `no-model center ${label}`);
@@ -158,8 +164,8 @@ if (process.versions.electron && process.type === "browser") {
         const win = new BrowserWindow({show: false, width: 900, height: 900,
             webPreferences: {nodeIntegration: true, contextIsolation: false}});
         try {
-            const languages = samples();
             for (const name of ["base", "mobile"]) {
+                const languages = samples(name === "mobile");
                 const compiled = stylesheet(name);
                 for (const theme of ["daylight", "midnight"]) {
                     await win.loadURL("data:text/html,<html><body></body></html>");
@@ -182,6 +188,16 @@ if (process.versions.electron && process.type === "browser") {
         app.exit(1);
     });
 } else {
+    test("the welcome screen offers ChatGPT setup only on desktop", () => {
+        for (const mobile of [false, true]) {
+            for (const {locale, greetings} of samples(mobile)) {
+                for (const {key, noModelHTML} of greetings) {
+                    assert.equal(noModelHTML.includes('data-type="go-chatgpt"'), !mobile, `${locale}/${key}`);
+                }
+            }
+        }
+    });
+
     test("welcome buttons stay stable across localized greetings, narrow widths and both model states", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 120000,

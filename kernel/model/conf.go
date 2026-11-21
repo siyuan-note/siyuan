@@ -430,6 +430,7 @@ func InitConf() {
 	}
 
 	flashcardWarning := normalizeAppConf(Conf)
+	enrollLegacySyncAssociation(Conf)
 	if err := LoadChatGPTAccountBindings(Conf.AI.Load()); err != nil {
 		logging.LogErrorf("load local ChatGPT account bindings failed: %s", err)
 	}

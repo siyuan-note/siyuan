@@ -13,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/fsnotify/fsnotify"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -44,7 +43,7 @@ func WatchThemes() {
 		return
 	}
 
-	if !gulu.File.IsDir(themesDir) {
+	if !util.IsPathRegularDirOrSymlinkDir(themesDir) {
 		os.MkdirAll(themesDir, 0755)
 	}
 
@@ -100,29 +99,34 @@ func updateThemesWatchThemeDir(w *fsnotify.Watcher) {
 	if themeDir == themesWatchThemeDir {
 		return
 	}
-
-	if "" != themeDir && gulu.File.IsDir(themeDir) {
-		if err := w.Add(themeDir); err != nil {
-			logging.LogWarnf("add themes watcher for folder [%s] failed: %s", themeDir, err)
-		}
-	}
-	if "" != themesWatchThemeDir {
-		if err := w.Remove(themesWatchThemeDir); err != nil && !errors.Is(err, fsnotify.ErrNonExistentWatch) {
-			logging.LogWarnf("remove themes watcher for folder [%s] failed: %s", themesWatchThemeDir, err)
-		}
-	}
-	themesWatchThemeDir = themeDir
+	setThemesWatchThemeDir(w, themeDir)
 }
 
 func addThemesWatchThemeDir(w *fsnotify.Watcher, path string) {
 	themesWatcherMu.Lock()
 	defer themesWatcherMu.Unlock()
-	if themesWatcher != w || filepath.Clean(path) != themesWatchThemeDir || !gulu.File.IsDir(path) {
+	path = filepath.Clean(path)
+	if themesWatcher != w || path != currentThemeDir() {
+		return
+	}
+	setThemesWatchThemeDir(w, path)
+}
+
+func setThemesWatchThemeDir(w *fsnotify.Watcher, path string) {
+	if "" != themesWatchThemeDir && themesWatchThemeDir != path {
+		if err := w.Remove(themesWatchThemeDir); err != nil && !errors.Is(err, fsnotify.ErrNonExistentWatch) {
+			logging.LogWarnf("remove themes watcher for folder [%s] failed: %s", themesWatchThemeDir, err)
+		}
+		themesWatchThemeDir = ""
+	}
+	if !util.IsPathRegularDirOrSymlinkDir(path) {
 		return
 	}
 	if err := w.Add(path); err != nil {
-		logging.LogWarnf("add themes watcher for new folder [%s] failed: %s", path, err)
+		logging.LogWarnf("add themes watcher for folder [%s] failed: %s", path, err)
+		return
 	}
+	themesWatchThemeDir = path
 }
 
 func handleThemesEvent(event fsnotify.Event) {

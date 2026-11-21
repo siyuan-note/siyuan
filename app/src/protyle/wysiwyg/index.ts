@@ -7,6 +7,7 @@ import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
 import {openEmbedBlock} from "../gutter/embedOpenMenu";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
+import {bindAVCellTyping} from "../render/av/cellTyping";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
 import {normalizeInlineElementBoundaries, prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {renderLongTextRuns} from "../util/longTextWrap";
@@ -578,6 +579,7 @@ export class WYSIWYG {
         }
         /// #endif
         if (!isMobile()) {
+            bindAVCellTyping(protyle, this.element);
             this.disposeTouchBlockDragSelect = bindTouchBlockDragSelect(this.element,
                 () => !protyle.disabled && !window.siyuan.touchDragActive &&
                     !protyle.toolbar.isMultiSelectMode(), protyle.element);
@@ -1310,7 +1312,9 @@ export class WYSIWYG {
             const documentSelf = document;
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
-            if (shouldFoldEmbeddedListByAlt(event, protyle.disabled, hasClosestByClassName(target, "protyle-action"))) {
+            const action = hasClosestByClassName(target, "protyle-action");
+            const actionElement = action && !action.closest(".table__cell-rich") && action;
+            if (shouldFoldEmbeddedListByAlt(event, protyle.disabled, actionElement)) {
                 // 折叠控件不改变选区，避免浏览器把光标放到嵌入块前方。
                 event.preventDefault();
                 return;
@@ -1388,8 +1392,7 @@ export class WYSIWYG {
                 Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")) : []);
             const rangeBeforePaddingMouseDown = startsFromPadding && getSelection().rangeCount > 0 ?
                 getSelection().getRangeAt(0).cloneRange() : undefined;
-            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
-                hasClosestByClassName(target, "protyle-action"));
+            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled, actionElement);
             if (event.shiftKey && !openListItemAttrByShift) {
                 if (!isMobile() && !protyle.disabled && isTableLikeView(avElement?.dataset.avType) &&
                     avCellElement && avCellElement.dataset.id &&
@@ -1487,7 +1490,7 @@ export class WYSIWYG {
                 }
             }
 
-            if ((hasClosestByClassName(target, "protyle-action") && !hasClosestByClassName(target, "code-block")) ||
+            if ((actionElement && !hasClosestByClassName(target, "code-block")) ||
                 (hasClosestByClassName(target, "av__cell--header") && !hasClosestByClassName(target, "av__widthdrag"))) {
                 return;
             }
@@ -4909,8 +4912,9 @@ export class WYSIWYG {
                 return;
             }
             /// #endif
-            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
-                hasClosestByClassName(event.target, "protyle-action"));
+            const action = hasClosestByClassName(event.target, "protyle-action");
+            const actionElement = action && !action.closest(".table__cell-rich") && action;
+            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled, actionElement);
             const shiftAssetElement = hasClosestByAttribute(event.target, "data-type", "file-annotation-ref") ||
                 hasClosestByAttribute(event.target, "data-type", "a") ||
                 hasClosestByClassName(event.target, "av__celltext--url");
@@ -5019,7 +5023,6 @@ export class WYSIWYG {
             if (hasClosestByClassName(event.target, "av__views") && avClick(protyle, event)) {
                 return;
             }
-            const actionElement = hasClosestByClassName(event.target, "protyle-action");
             if (actionElement && shouldFoldEmbeddedListByAlt(event, protyle.disabled, actionElement)) {
                 // 在读取编辑器选区前处理折叠，避免无选区时兜底聚焦文档顶部。
                 toggleListFold(protyle, actionElement.parentElement.parentElement);

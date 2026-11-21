@@ -11,7 +11,7 @@ import (
 )
 
 func ServeAPI(ginServer *gin.Engine) {
-	ginServer.Use(boxLeaseMiddleware)
+	ginServer.Use(boxLeaseMiddleware, recoverAPI)
 	registerOauthRoutes(ginServer)
 	registerMcpRoutes(ginServer)
 	registerSystemRoutes(ginServer)
@@ -774,23 +774,23 @@ func registerGraphRoutes(ginServer *gin.Engine) {
 
 // registerBazaarRoutes 注册本域的契约路由。
 func registerBazaarRoutes(ginServer *gin.Engine) {
-	ginServer.Handle("POST", "/api/bazaar/getBazaarPlugin", contractRouteHandlers(apicontract.GetBazaarPlugin, getBazaarPlugin)...)
+	ginServer.Handle("POST", "/api/bazaar/getBazaarPlugin", withGzipJSONCache(contractRouteHandlers(apicontract.GetBazaarPlugin, getBazaarPlugin))...)
 	ginServer.Handle("POST", "/api/bazaar/getInstalledPlugin", contractRouteHandlers(apicontract.GetInstalledPlugin, getInstalledPlugin)...)
 	ginServer.Handle("POST", "/api/bazaar/installBazaarPlugin", contractRouteHandlers(apicontract.InstallBazaarPlugin, installBazaarPlugin)...)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarPlugin", contractRouteHandlers(apicontract.UninstallBazaarPlugin, uninstallBazaarPlugin)...)
-	ginServer.Handle("POST", "/api/bazaar/getBazaarWidget", contractRouteHandlers(apicontract.GetBazaarWidget, getBazaarWidget)...)
+	ginServer.Handle("POST", "/api/bazaar/getBazaarWidget", withGzipJSONCache(contractRouteHandlers(apicontract.GetBazaarWidget, getBazaarWidget))...)
 	ginServer.Handle("POST", "/api/bazaar/getInstalledWidget", contractRouteHandlers(apicontract.GetInstalledWidget, getInstalledWidget)...)
 	ginServer.Handle("POST", "/api/bazaar/installBazaarWidget", contractRouteHandlers(apicontract.InstallBazaarWidget, installBazaarWidget)...)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarWidget", contractRouteHandlers(apicontract.UninstallBazaarWidget, uninstallBazaarWidget)...)
-	ginServer.Handle("POST", "/api/bazaar/getBazaarIcon", contractRouteHandlers(apicontract.GetBazaarIcon, getBazaarIcon)...)
+	ginServer.Handle("POST", "/api/bazaar/getBazaarIcon", withGzipJSONCache(contractRouteHandlers(apicontract.GetBazaarIcon, getBazaarIcon))...)
 	ginServer.Handle("POST", "/api/bazaar/getInstalledIcon", contractRouteHandlers(apicontract.GetInstalledIcon, getInstalledIcon)...)
 	ginServer.Handle("POST", "/api/bazaar/installBazaarIcon", contractRouteHandlers(apicontract.InstallBazaarIcon, installBazaarIcon)...)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarIcon", contractRouteHandlers(apicontract.UninstallBazaarIcon, uninstallBazaarIcon)...)
-	ginServer.Handle("POST", "/api/bazaar/getBazaarTemplate", contractRouteHandlers(apicontract.GetBazaarTemplate, getBazaarTemplate)...)
+	ginServer.Handle("POST", "/api/bazaar/getBazaarTemplate", withGzipJSONCache(contractRouteHandlers(apicontract.GetBazaarTemplate, getBazaarTemplate))...)
 	ginServer.Handle("POST", "/api/bazaar/getInstalledTemplate", contractRouteHandlers(apicontract.GetInstalledTemplate, getInstalledTemplate)...)
 	ginServer.Handle("POST", "/api/bazaar/installBazaarTemplate", contractRouteHandlers(apicontract.InstallBazaarTemplate, installBazaarTemplate)...)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarTemplate", contractRouteHandlers(apicontract.UninstallBazaarTemplate, uninstallBazaarTemplate)...)
-	ginServer.Handle("POST", "/api/bazaar/getBazaarTheme", contractRouteHandlers(apicontract.GetBazaarTheme, getBazaarTheme)...)
+	ginServer.Handle("POST", "/api/bazaar/getBazaarTheme", withGzipJSONCache(contractRouteHandlers(apicontract.GetBazaarTheme, getBazaarTheme))...)
 	ginServer.Handle("POST", "/api/bazaar/getInstalledTheme", contractRouteHandlers(apicontract.GetInstalledTheme, getInstalledTheme)...)
 	ginServer.Handle("POST", "/api/bazaar/installBazaarTheme", contractRouteHandlers(apicontract.InstallBazaarTheme, installBazaarTheme)...)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarTheme", contractRouteHandlers(apicontract.UninstallBazaarTheme, uninstallBazaarTheme)...)

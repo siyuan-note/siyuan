@@ -46,10 +46,15 @@ const browserCases = (css, header, mobile) => {
             const sort = document.querySelector('[data-type="av-sort"]');
             const search = document.querySelector('[data-type="av-search-icon"]');
             const filter = document.querySelector('[data-type="av-filter"]');
+            const switcher = document.querySelector('[data-type="av-switcher"]');
             const spacer = sort.nextElementSibling;
             check.notEqual(getComputedStyle(search).display, "none");
             check.notEqual(getComputedStyle(sort).display, "none");
             check.equal(getComputedStyle(filter).display === "none", state !== "editable");
+            check.equal(getComputedStyle(switcher).display === "none", !mobile && state !== "editable");
+            if (mobile) {
+                check.ok(switcher.getBoundingClientRect().width >= 64, "view switching keeps its touch target");
+            }
             const gap = search.getBoundingClientRect().left - sort.getBoundingClientRect().right;
             check.equal(gap, mobile ? 4 : 8, `${state}/${size}: sorting and search have independent hit targets`);
             check.equal(getComputedStyle(spacer).display === "none", mobile);
@@ -69,7 +74,6 @@ const browserCases = (css, header, mobile) => {
             const toolbar = document.querySelector(".av__views");
             const view = toolbar.querySelector(".av__mobile-view");
             const create = toolbar.querySelector(".av__new");
-            check.ok(view.getBoundingClientRect().width >= 64, "view switching keeps its touch target");
             const center = element => {
                 const rect = element.getBoundingClientRect();
                 return rect.top + rect.height / 2;

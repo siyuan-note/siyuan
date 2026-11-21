@@ -21,8 +21,9 @@ body {
   overflow: hidden;
   background: var(--b3-theme-background);
   color: var(--b3-theme-on-background);
-  font-family: var(--b3-font-family);
+  font-family: var(--markdown-global-font-family, var(--b3-font-family));
   font-size: var(--b3-font-size);
+  font-weight: var(--markdown-global-font-weight, 400);
 }
 
 button {
@@ -50,8 +51,10 @@ button {
   display: flex;
   flex-direction: column;
   --markdown-font-size: 16px;
-  font-family: var(--markdown-global-font-family, var(--b3-font-family));
-  font-weight: var(--markdown-global-font-weight, 400);
+}
+
+.tooltip {
+  font-weight: inherit;
 }
 
 .markdown-header {
@@ -409,6 +412,7 @@ button:focus-visible,
   min-width: 0;
   border: 0;
   border-radius: 0;
+  font-family: inherit;
   --border-color: var(--b3-border-color);
   --panel-background-color: var(--b3-theme-background);
   --toolbar-background-color: var(--b3-theme-surface);
@@ -427,6 +431,8 @@ button:focus-visible,
 .markdown-editor .vditor-find__row > .b3-text-field {
   flex: 1 1 160px;
   min-width: 100px;
+  font-family: inherit;
+  font-weight: inherit;
 }
 
 .markdown-editor > .vditor-toolbar {

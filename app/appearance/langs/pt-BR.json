@@ -1,4 +1,8 @@
 {
+	"archiveEncryptedNotebooksSyncTip": "Criar um arquivo não remove dados. Após a confirmação, a remoção será propagada pela sincronização",
+	"manageColorsDesc": "Gerencie cores personalizadas para textos, fundos e estilos do editor",
+	"importNotebookCryptoBackupDesc": "Importe um backup de chave para cadernos criptografados usando a senha mestra correspondente",
+	"aiGeneratedContent": "Gerado por IA",
 	"pinTableHeaderColumn": "Fixar coluna de cabeçalho",
 	"unpinTableHeaderColumn": "Desafixar coluna de cabeçalho",
 	"markdownLinkUnavailable": "Não foi possível abrir o link Markdown",
@@ -2898,7 +2902,7 @@
 	"attrValue1": "Deixar o valor do atributo em branco excluirá automaticamente o atributo",
 	"specifyPath": "Especificar caminho",
 	"addAttr": "Adicionar",
-	"addTag": "Adicionar Tag",
+	"addTag": "Adicionar tag",
 	"width": "Largura",
 	"attrName": "Nome do atributo",
 	"attr": "Atributo",
@@ -3980,6 +3984,8 @@
 		"469": "Falha na autenticação: esta solicitação não passou nas verificações de acesso local. VPNs, proxies ou aplicativos de filtragem de rede podem afetar o acesso local; tente desativá-los temporariamente e tente novamente. Ao acessar por um endereço não local, defina primeiro uma senha de bloqueio de tela",
 		"470": "O limite de rodadas de chamadas de ferramentas foi atingido. Parei de usar ferramentas; esta tarefa ainda pode estar incompleta",
 		"471": "Chamadas repetidas de ferramentas retornaram o mesmo resultado. Parei de usar ferramentas; esta tarefa ainda pode estar incompleta",
-		"472": "Não foi possível converter o mapa mental antigo, reabra o documento e tente novamente"
+		"472": "Não foi possível converter o mapa mental antigo, reabra o documento e tente novamente",
+		"473": "Ocorreu um erro inesperado ao processar a solicitação. Consulte o log do sistema",
+		"474": "Não é possível desativar os cadernos criptografados em um espaço de trabalho vinculado à sincronização, mesmo quando ela está pausada"
 	}
 }

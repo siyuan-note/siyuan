@@ -15,7 +15,7 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
             ["field", "../../../datePicker/field.ts"], ["inline", "../../../datePicker/inline.ts"],
             ["lunarCalendar", "lunarCalendar.ts"], ["dateFormat", "dateFormat.ts"], ["lunarDate", "lunarDate.ts"],
             ["dateSubmit", "dateSubmit.ts"], ["date", "date.ts"], ["datePanel", "panels/date.ts"],
-            ["datePosition", "datePosition.ts"], ["setPosition", "../../../util/setPosition.ts"],
+            ["datePosition", "datePosition.ts"], ["cellPanelPosition", "cellPanelPosition.ts"],
         ].map(([name, path]) => [name, join(__dirname, path)])));
         sources.dayjs = readFileSync(require.resolve("dayjs"), "utf8");
         sources.languages = readFileSync("appearance/langs/zh-CN.json", "utf8");
@@ -48,7 +48,7 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
             const fallback = {isMobile: () => mobile, getTopBarHeight: () => 32, getColId: () => "date",
                 escapeHtml: String, escapeAttr: String, getFieldsByData: (): unknown[] => [], genCellValueByElement: () => ({date: initial}), updateCellsValue: () => writes++};
             const modules: Record<string, any> = {dayjs: dayjs.exports, "lunar_calendar_data.json": JSON.parse(source.lunarData)};
-            for (const name of ["model", "yearInput", "field", "inline", "dateSubmit", "lunarCalendar", "dateFormat", "lunarDate", "date", "setPosition", "datePosition", "datePanel"]) {
+            for (const name of ["model", "yearInput", "field", "inline", "dateSubmit", "lunarCalendar", "dateFormat", "lunarDate", "date", "cellPanelPosition", "datePosition", "datePanel"]) {
                 const exports = modules[name] = {};
                 new Function("exports", "require", source[name])(exports, (path: string) => modules[path.split("/").at(-1)] || fallback);
             }
@@ -79,6 +79,11 @@ for (const [width, height, mobile] of [[1536, 825, false], [400, 600, false], [3
                 items.scrollTop = 0;
             };
             check("initial");
+            if (!mobile) {
+                const menuRect = menu.getBoundingClientRect();
+                const cellRect = cell.getBoundingClientRect();
+                ok(menuRect.top < cellRect.bottom && menuRect.bottom > cellRect.top, "menu covers the edited cell");
+            }
             if (!mobile) { ok(Math.abs(menu.getBoundingClientRect().width - 260) <= 1, "compact desktop width is explicit"); }
             const calendar = menu.querySelector(".date-picker__calendar").getBoundingClientRect();
             ok(calendar.width <= (mobile ? 320 : 244), "inline calendar width is bounded");

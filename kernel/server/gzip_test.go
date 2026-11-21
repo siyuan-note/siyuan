@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/api"
 )
 
 type agentStreamWriter struct {
@@ -88,6 +89,23 @@ func TestGzipPreservesOtherRoutesAndExcludedAssets(t *testing.T) {
 				if err != nil || string(body) != "response" {
 					t.Fatalf("invalid compressed response: %q, %v", body, err)
 				}
+			}
+		})
+	}
+}
+
+func TestGzipLeavesBazaarListsForResponseCache(t *testing.T) {
+	for _, path := range api.JSONGzipCachePaths {
+		t.Run(path, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(gzipMiddleware())
+			engine.POST(path, func(c *gin.Context) { c.String(http.StatusOK, "response") })
+			request := httptest.NewRequest("POST", path, nil)
+			request.Header.Set("Accept-Encoding", "gzip")
+			writer := httptest.NewRecorder()
+			engine.ServeHTTP(writer, request)
+			if "" != writer.Header().Get("Content-Encoding") || "response" != writer.Body.String() {
+				t.Fatalf("bazaar list was handled by the global gzip middleware: %v", writer.Header())
 			}
 		})
 	}

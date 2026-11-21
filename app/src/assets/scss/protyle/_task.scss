@@ -82,7 +82,8 @@
     text-decoration: none;
   }
 
-  .li.protyle-task--done > .protyle-action--task[data-task="/"] ~ div[data-node-id].p {
+  .li.protyle-task--done > .protyle-action--task[data-task="/"] ~ div[data-node-id].p,
+  .li.protyle-task--done > .protyle-action--task[data-task="/"] ~ div[data-table-cell-node].p {
     color: inherit;
     text-decoration: none;
   }

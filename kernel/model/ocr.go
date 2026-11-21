@@ -157,7 +157,7 @@ func currentPaddleConfig() ocr.PaddleConfig {
 		filename = "libonnxruntime.dylib"
 	}
 	result := ocr.PaddleConfig{Directory: ocrModelDirectory(value.Model), Library: filepath.Join(directory, filename), Thresholds: ocr.Thresholds(value.Thresholds)}
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS == "linux" && linuxOCRWorker {
 		result.Worker = filepath.Join(directory, "siyuan-ocr")
 	}
 	if runtime.GOOS == "android" {

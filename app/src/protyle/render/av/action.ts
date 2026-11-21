@@ -491,8 +491,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-switcher" && !protyle.disabled) {
-            openMenuPanel({protyle, blockElement, type: "switcher"});
+        } else if (type === "av-switcher" && (!protyle.disabled || target.classList.contains("av__mobile-view"))) {
+            const data = protyle.disabled ? getAVData(blockElement) : undefined;
+            if (!protyle.disabled || data) {
+                openMenuPanel({protyle, blockElement, type: "switcher", data});
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;

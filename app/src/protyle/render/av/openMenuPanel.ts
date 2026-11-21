@@ -21,6 +21,7 @@ import {getPageSize} from "./groups";
 import {applyAVColorPalette, getAVCustomColors} from "./color";
 import {setAVCellPanelTarget} from "./panelTarget";
 import {setSelectMenuPosition} from "./selectPosition";
+import {setAVCellPanelPosition} from "./cellPanelPosition";
 import {getAVHostIdentity, getAVRelationHost} from "./host";
 import {showMessage} from "../../../dialog/message";
 import {isAVRenderData} from "./renderData";
@@ -244,7 +245,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
                 if (options.type === "select") {
                     setSelectMenuPosition(menuElement, lastElement || options.cellElements[options.cellElements.length - 1]);
                 } else {
-                    setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
+                    setAVCellPanelPosition(menuElement, cellRect);
                 }
             }
         } else {
@@ -257,6 +258,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
         bindAVPanelDrag(context);
         bindAVPanelInputs(context);
         let suppressSelectClick = false;
+        const switcherReadonly = options.type === "switcher" && options.protyle.disabled;
 
         avPanelElement.addEventListener("click", async (event: MouseEvent) => {
             let type: string;
@@ -321,6 +323,15 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                }
+                if (type && options.type === "switcher") {
+                    if (options.protyle.disabled !== switcherReadonly) {
+                        avPanelElement.remove();
+                        break;
+                    }
+                    if (switcherReadonly && type !== "av-view-switch") {
+                        break;
+                    }
                 }
                 const actionResult = dispatchAVPanelAction(context, {type, target, event});
                 const result = typeof actionResult === "string" ? actionResult : await actionResult;

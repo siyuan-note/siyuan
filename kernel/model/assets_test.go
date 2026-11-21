@@ -462,6 +462,25 @@ func TestGetAssetAbsPathWithSymlinkedWorkspaceAncestor(t *testing.T) {
 		t.Fatalf("get global asset path: got %q, want %q", got, assetPath)
 	}
 
+	const boxID = "20260723000000-abcdefg"
+	notebookAssetPath := filepath.Join(util.DataDir, boxID, "assets", "photo.jpeg")
+	if err = os.MkdirAll(filepath.Dir(notebookAssetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(notebookAssetPath, []byte("asset"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	got, err = GetAssetAbsPathInBox("assets/photo.jpeg", boxID)
+	if err != nil || got != notebookAssetPath {
+		t.Errorf("get notebook asset path: got [%q, %v], want %q", got, err, notebookAssetPath)
+	}
+	if err = os.Symlink(filepath.Dir(assetPath), filepath.Join(filepath.Dir(notebookAssetPath), "global")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = GetAssetAbsPathInBox("assets/global/image.png", boxID); err == nil {
+		t.Error("notebook asset symlink outside notebook assets should be rejected")
+	}
+
 	outsideDir := t.TempDir()
 	outsidePath := filepath.Join(outsideDir, "outside.png")
 	if err = os.WriteFile(outsidePath, []byte("outside"), 0644); err != nil {

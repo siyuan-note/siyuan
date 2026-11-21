@@ -243,7 +243,7 @@ func tagDatesOperation(id string, dates tagDates) *Operation {
 		value, _ = json.Marshal(recorded)
 	}
 	data, _ := json.Marshal(map[string]string{treenode.TagCreatedAttr: string(value)})
-	return &Operation{Action: "setAttrs", ID: id, Data: string(data)}
+	return &Operation{Action: "setAttrs", ID: id, Data: string(data), tagDatesReplay: true}
 }
 
 func pruneInactiveTagDates(root *ast.Node) []string {

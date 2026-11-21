@@ -1,6 +1,7 @@
 import {test, afterEach} from "node:test";
 import {EventEmitter} from "node:events";
 import type {createKernelBoot} from "./kernelBoot";
+import {BOOT_PROGRESS_TIMEOUT_MS} from "./kernelBootBudget";
 import type {App} from "electron";
 import {queueSecondInstance, startSecondInstance} from "../startup/secondInstance";
 import {paths as runtimePaths, state as runtimeState, resetRuntimeState, configureRuntime} from "../shared/runtime";
@@ -237,8 +238,9 @@ const setup = (t: any, progress, options: {
             const result = await progress(requests, fixture, new URL(url).port);
             if (result?.hang) return await hangUntilAbort(requestOptions.signal);
             if (result instanceof Error) throw result;
+            const data = typeof result === "number" ? {progress: result} : result;
             return {json: async () => result?.bodyHang ? await hangUntilAbort(requestOptions.signal) :
-                {code: 0, data: {progress: result}}};
+                {code: 0, data}};
         }},
     };
     // 共享模块直接读取 process.platform，须与注入的内核启动平台一致。
@@ -798,10 +800,43 @@ test("a successful progress response resets the consecutive failure budget", asy
     assert.equal(exits(fixture).length, 0);
 });
 
-test("retries preserve the overall boot timeout", async (t) => {
-    const fixture = setup(t, certificateChange, {onSleep: (ms, state) => state.advance(300000)});
+test("retries do not refresh the boot progress timeout", async (t) => {
+    const fixture = setup(t, certificateChange, {onSleep: (_ms, state) => state.advance(BOOT_PROGRESS_TIMEOUT_MS)});
     assert.equal(await fixture.run(), undefined);
     assert.equal(fixture.requests(), 1);
+    assert.equal(exits(fixture).length, 1);
+    assert.ok(fixture.events.some(event => Array.isArray(event) && event[1] === "Boot timeout"));
+});
+
+test("increasing startup progress allows boot to finish after five minutes", async (t) => {
+    const progress = [20, 30, 40, 100];
+    const fixture = setup(t, request => progress[request - 1], {
+        onSleep: (_ms, state) => state.advance(BOOT_PROGRESS_TIMEOUT_MS / 2),
+    });
+    assert.equal(await fixture.run(), 6806);
+    assert.equal(fixture.requests(), progress.length);
+    assert.equal(exits(fixture).length, 0);
+});
+
+test("indexing new documents allows boot to finish when the percentage stays the same", async (t) => {
+    const fixture = setup(t, request => request === 4 ? 100 : {
+        progress: 20, details: "Indexing document " + request,
+    }, {
+        onSleep: (_ms, state) => state.advance(BOOT_PROGRESS_TIMEOUT_MS / 2),
+    });
+    assert.equal(await fixture.run(), 6806);
+    assert.equal(fixture.requests(), 4);
+    assert.equal(exits(fixture).length, 0);
+});
+
+test("boot times out after progress stops even when the kernel keeps responding", async (t) => {
+    const fixture = setup(t, request => request === 5 ? 100 : {
+        progress: 20, details: request === 1 ? "Preparing indexes" : "Indexing document",
+    }, {
+        onSleep: (_ms, state) => state.advance(BOOT_PROGRESS_TIMEOUT_MS / 3),
+    });
+    assert.equal(await fixture.run(), undefined);
+    assert.equal(fixture.requests(), 4);
     assert.equal(exits(fixture).length, 1);
     assert.ok(fixture.events.some(event => Array.isArray(event) && event[1] === "Boot timeout"));
 });

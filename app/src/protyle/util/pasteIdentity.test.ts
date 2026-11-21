@@ -15,7 +15,8 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
     // 粘贴入口读取编辑器配置来决定 Markdown 语法、公式分隔符与 URL 自动转换。
     Object.assign(window, {siyuan: {languages: {}, config: {editor: {markdown: {},
         mathDelimiterCompatibility: true, pasteURLAutoConvert: false}}}});
-    const constants = {Constants: {ZWSP: "\u200b", CUSTOM_RIFF_DECKS: "custom-riff-decks"}};
+    const constants = {Constants: {ZWSP: "\u200b", CUSTOM_RIFF_DECKS: "custom-riff-decks",
+        CUSTOM_SY_AV_VISIBLE_VIEWS: "custom-sy-av-visible-views"}};
     const load = (source: string, mocks: Record<string, unknown>) => {
         const api = {};
         new Function("exports", "require", source)(api, (id: string) => mocks[id] || {});
@@ -27,14 +28,21 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
     });
     const pasteSource = load(sources.pasteSource, {});
     const tabsCopy = load(sources.tabsCopy, {});
+    const viewVisibility = load(sources.viewVisibility, {"../../../constants": constants});
     const originalID = "20261007000000-abcdefg";
     const childID = "20261007000001-abcdefg";
     const html = `<div data-node-id="${originalID}" data-type="NodeBlockquote" class="bq protyle-wysiwyg--select" refcount="2">` +
         `<div data-node-id="${childID}" data-type="NodeParagraph" class="p" refcount="1">` +
         '<div contenteditable="true">Original content</div></div></div>';
-    for (const mode of ["copy", "cut", "mixed", "error", "target removed"]) {
+    const mirrorHTML = `<div data-node-id="${originalID}" data-type="NodeAttributeView" class="av"
+        data-av-id="database" custom-sy-av-visible-views="mirror" custom-sy-av-view="mirror">
+        <div class="av__container"><div class="av__header" data-view-ids="main,mirror"><div class="av__views">
+        <div class="layout-tab-bar"><div class="item" data-id="main">Main</div>
+        <div class="item item--focus" data-id="mirror">Mirror</div></div></div></div></div></div>`;
+    for (const mode of ["copy", "cut", "mixed", "error", "target removed", "view mirror"]) {
+        const clipboardHTML = mode === "view mirror" ? mirrorHTML : html;
         const editor = document.createElement("div");
-        editor.innerHTML = html + '<div data-node-id="20261007000002-abcdefg" data-type="NodeParagraph" class="p">' +
+        editor.innerHTML = clipboardHTML + '<div data-node-id="20261007000002-abcdefg" data-type="NodeParagraph" class="p">' +
             '<div contenteditable="true">Target</div></div>';
         document.body.append(editor);
         const original = editor.firstElementChild;
@@ -80,6 +88,7 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
             "../render/blockRender": {blockRender: () => {}},
             "../render/highlightRender": {highlightRender: () => {}},
             "../render/av/render": {avRender: () => {}},
+            "../render/av/viewVisibility": viewVisibility,
             "../../util/highlightById": {scrollCenter: () => {}},
             "dayjs": () => ({format: () => "20261007000003"}),
             "../../util/fetch": {fetchSyncPost: async (url: string, request: {ids: string[]}) => {
@@ -89,7 +98,7 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
                     available = false;
                 }
                 return {code: mode === "error" ? -1 : 0, data: {
-                    [originalID]: mode === "copy", [childID]: mode === "copy" || mode === "mixed",
+                    [originalID]: mode === "copy" || mode === "view mirror", [childID]: mode === "copy" || mode === "mixed",
                 }};
             }},
             "./insertHTML": {insertHTML: (value: string) => {
@@ -100,8 +109,8 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
         const api = load(sources.paste, mocks) as typeof import("./paste");
         const protyle = {notebookId: "encrypted-notebook", hint: {enableExtend: false},
             wysiwyg: {element: editor}, toolbar: {getCurrentType: (): string[] => []}, lute: Lute.New()} as unknown as IProtyle;
-        await api.paste(protyle, {target, textPlain: "Original content", textHTML: "", siyuanHTML: html});
-        check.deepEqual(requests, [{ids: [originalID, childID]}]);
+        await api.paste(protyle, {target, textPlain: "Original content", textHTML: "", siyuanHTML: clipboardHTML});
+        check.deepEqual(requests, [{ids: mode === "view mirror" ? [originalID] : [originalID, childID]}]);
         check.equal(original.outerHTML, originalHTML);
         if (mode === "error" || mode === "target removed") {
             check.equal(inserted.length, 0);
@@ -109,7 +118,11 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
             check.equal(inserted.length, 1);
             const pasted = target.previousElementSibling;
             const pastedChild = pasted.querySelector("[data-node-id]");
-            if (mode === "copy") {
+            if (mode === "view mirror") {
+                check.notEqual(pasted.getAttribute("data-node-id"), originalID);
+                check.equal(pasted.getAttribute("custom-sy-av-visible-views"), "mirror");
+                check.deepEqual(Array.from(pasted.querySelectorAll(".layout-tab-bar .item"), tab => tab.getAttribute("data-id")), ["mirror"]);
+            } else if (mode === "copy") {
                 check.notEqual(pasted.getAttribute("data-node-id"), originalID);
                 check.notEqual(pastedChild.getAttribute("data-node-id"), childID);
                 check.equal(new Set(Array.from(editor.querySelectorAll("[data-node-id]"), item =>
@@ -130,18 +143,22 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
     return "paste-identity-ok";
 };
 
-test("internal block paste keeps copied IDs independent and preserves cut IDs in the real DOM", {timeout: 30000}, async () => {
+test("internal block paste preserves block identity rules and shows only the selected view in pasted mirrors", {timeout: 30000}, async () => {
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-paste-identity-"));
     const sources = Object.fromEntries(["paste", "clear", "pasteSource", "tabsCopy"].map(name => [name,
         transpileModule(readFileSync(`src/protyle/util/${name}.ts`, "utf8"), {
             compilerOptions: {target: ScriptTarget.ES2022, module: ModuleKind.CommonJS},
         }).outputText]));
+    sources.viewVisibility = transpileModule(readFileSync("src/protyle/render/av/viewVisibility.ts", "utf8"), {
+        compilerOptions: {target: ScriptTarget.ES2022, module: ModuleKind.CommonJS},
+    }).outputText;
     const execute = transpileModule(`const __name = (value) => value; (${browserCases.toString()})(${JSON.stringify(sources)},
         ${JSON.stringify(path.resolve("stage/protyle/js/lute/lute.min.js"))})`, {
         compilerOptions: {target: ScriptTarget.ES2022},
     }).outputText;
     const script = path.join(directory, "main.cjs");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
+app.setPath("userData", ${JSON.stringify(path.join(directory, "profile"))});
 app.whenReady().then(async () => {
     const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false, offscreen: true}});
     try {

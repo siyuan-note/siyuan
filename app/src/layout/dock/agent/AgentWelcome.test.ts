@@ -10,11 +10,19 @@ const compile = (name: string) => transpileModule(readFileSync(`src/layout/dock/
 }).outputText;
 const renderer = compile("AgentMessageRenderer");
 const chatSource = compile("AgentChat");
-const loadRenderer = (languages: Record<string, string>) => {
+const loadRenderer = (languages: Record<string, string>, mobile = false) => {
     const exports = {} as {renderWelcomeHTML: (hasModel?: boolean, greetingKey?: string) => string};
-    runInNewContext(renderer, {exports, require: () => ({escapeHtml, escapeHtmlTextAndAttr}), window: {siyuan: {languages}}});
+    runInNewContext(renderer, {exports, require: () => ({escapeHtml, escapeHtmlTextAndAttr, isMobile: () => mobile}), window: {siyuan: {languages}}});
     return exports.renderWelcomeHTML;
 };
+
+test("the mobile welcome card only links to AI settings when no model is configured", () => {
+    const languages = {agentGoToSetting: "Go to Settings", chatGPTConnect: "Continue with ChatGPT"};
+    const mobileHTML = loadRenderer(languages, true)(false);
+    assert.match(mobileHTML, /data-type="go-ai-setting"/);
+    assert.doesNotMatch(mobileHTML, /data-type="go-chatgpt"|class="fn__hr"/);
+    assert.match(loadRenderer(languages)(false), /data-type="go-chatgpt"/);
+});
 
 test("every language renders plugin development as the fourth welcome suggestion", () => {
     for (const file of readdirSync("appearance/langs").filter(file => file.endsWith(".json"))) {

@@ -1414,9 +1414,23 @@ const browserCases = async (languages: Record<string, string>) => {
     check.equal(document.querySelectorAll("#markdownFonts button").length, 3);
     check.equal(document.querySelector('#markdownTheme [aria-checked="true"]').getAttribute("data-value"), "one");
     check.equal(getComputedStyle(document.querySelector(".vditor-ir .vditor-reset")).fontSize, "23px");
-    const appFont = getComputedStyle(document.getElementById("markdownApp")).fontFamily;
+    const appStyle = getComputedStyle(document.getElementById("markdownApp"));
+    const appFont = appStyle.fontFamily;
     check.ok(appFont.includes("serif"));
     check.equal(getComputedStyle(document.querySelector(".vditor-outline__title")).fontFamily, appFont);
+    inheritedEditor.openFind();
+    const find = document.querySelector<HTMLElement>(".vditor-find");
+    check.equal(find.hidden, false);
+    const findInput = find.querySelector<HTMLInputElement>('input[type="search"]');
+    check.equal(getComputedStyle(findInput).fontFamily, appFont, "the find input follows the global font");
+    for (const element of find.querySelectorAll(".b3-text-field, .b3-button, label")) {
+        check.equal(getComputedStyle(element).fontFamily, appFont);
+    }
+    findInput.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true, cancelable: true}));
+    const tooltip = document.querySelector<HTMLElement>('[role="tooltip"]');
+    check.equal(tooltip.parentElement, document.body);
+    check.equal(getComputedStyle(tooltip).fontFamily, appFont);
+    check.equal(getComputedStyle(tooltip).fontWeight, appStyle.fontWeight);
     const inlineCode = getComputedStyle(document.querySelector(".vditor-ir .vditor-reset p code"));
     check.match(inlineCode.fontFamily, /\bserif\b/);
     check.equal(inlineCode.fontWeight, "600");
@@ -1513,7 +1527,7 @@ const browserCases = async (languages: Record<string, string>) => {
     check.deepEqual(appearancePatches.at(-1).independent.fonts.editor, []);
     check.equal(inheritedApp.editor.flush().content, inheritedText);
     inheritedApp.destroy();
-    check.equal(document.getElementById("markdownApp").style.getPropertyValue("--markdown-editor-font-family"), "");
+    check.equal(document.body.style.getPropertyValue("--markdown-editor-font-family"), "");
     appearanceSnapshot = {...inherited, sources: {theme: "missing", fontSize: "independent", fonts: "independent"}, workspaces: [], theme: "system", fontSize: 16,
         fonts: {global: [], editor: [], code: []}};
     const unavailableAppearance = await api.mountMarkdownApplication(bridge);

@@ -67,10 +67,24 @@ const browserCases = (progressSource: string, touchSource: string, backSource: s
     back.goBack();
     check(backCalls === 0, "repeated system back must not reach background navigation");
 
+    document.documentElement.style.setProperty("--b3-mask-background", "rgba(0, 0, 0, 0.35)");
+    for (const theme of ["light", "dark"]) {
+        document.documentElement.dataset.themeMode = theme;
+        api.progressLoading({code: 1, msg: "Cleaning"} as IWebSocketData, "setting-task-test", undefined, "standard");
+        const settingsScrim = document.getElementById("setting-task-test").firstElementChild;
+        const settingsStyle = getComputedStyle(settingsScrim);
+        check(settingsStyle.backgroundColor === "rgba(0, 0, 0, 0.35)", "settings tasks must use the standard scrim");
+        check(settingsStyle.backdropFilter === "none", "settings tasks must not blur the background");
+        check(settingsStyle.touchAction === "none" && document.elementFromPoint(1, 1) === settingsScrim,
+            "settings scrim must block input and cover the viewport");
+        api.progressLoading({code: 2} as IWebSocketData, "setting-task-test");
+    }
+
     let clicks = 0;
     api.progressLoading({code: 1, msg: "Exiting"} as IWebSocketData, "exitProgress",
         {label: "Cancel", callback: () => clicks++});
     const exit = document.getElementById("exitProgress");
+    check(getComputedStyle(exit.firstElementChild).animationName === "exit-progress-blur", "exit must retain the blur animation");
     const button = exit.querySelector("button");
     check(document.activeElement === button, "explicit progress action must retain focus");
     back.goBack();

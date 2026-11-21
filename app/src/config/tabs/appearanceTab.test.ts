@@ -162,8 +162,9 @@ for (const mobile of [true, false]) {
         }
         const colors = slots.find(item => item.key === "manageColors");
         assert.ok(colors);
-        assert.equal(colors.keywords.join(","), "manageColors,color,colorFont,colorPrimary");
+        assert.equal(colors.keywords.join(","), "manageColors,manageColorsDesc,color,colorFont,colorPrimary");
         const html = colors.html();
+        assert.match(html, /manageColorsDesc/);
         assert.equal((html.match(/<button /g) || []).length, 3);
         assert.equal((html.match(/xlink:href="#iconSettings"/g) || []).length, 3);
         const buttons = new Map(["style1", "color", "backgroundColor"].map(type => {

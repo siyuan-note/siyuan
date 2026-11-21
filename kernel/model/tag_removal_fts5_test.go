@@ -8,6 +8,7 @@ package model
 
 import (
 	"encoding/json"
+	"reflect"
 	"slices"
 	"testing"
 
@@ -29,6 +30,13 @@ func TestTagRemovalBatchFinalStateAndUndo(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := PerformTxSync(blockCollectionTags(t, fixture.sourceID, "todo,done,todo/child,xtodo")); err != nil {
+		t.Fatal(err)
+	}
+	if err := updateTagSort(func(groups tagSortGroups) (bool, error) {
+		groups[""] = []string{"todo", "done", "xtodo", "offline"}
+		groups["todo/"] = []string{"todo/child"}
+		return true, nil
+	}); err != nil {
 		t.Fatal(err)
 	}
 	sql.FlushQueue()
@@ -73,6 +81,14 @@ func TestTagRemovalBatchFinalStateAndUndo(t *testing.T) {
 	tree, err := LoadTreeByBlockID(fixture.sourceID)
 	if err != nil || tree.Root.IALAttr("tags") != "todo/child,xtodo" {
 		t.Fatal("exact batch deletion failed", err)
+	}
+	order, err := readTagSort()
+	if want := (tagSortGroups{"": {"xtodo", "offline"}, "todo/": {"todo/child"}}); err != nil || !reflect.DeepEqual(order, want) {
+		t.Fatalf("manual order after deletion = %v, want %v, err %v", order, want, err)
+	}
+	recreated := buildTagTree(map[string]int{"done": 1, "xtodo": 1, "todo/child": 1}, util.SortModeCustom, order)
+	if len(recreated) != 3 || recreated[0].Name != "xtodo" || recreated[1].Name != "done" {
+		t.Fatalf("recreated tag retained its previous position: %+v", recreated)
 	}
 	if readAttributeViewItemsTest(t, view.ID).GetBlockValue(itemID) != nil {
 		t.Fatal("confirmed automatic entry retained")

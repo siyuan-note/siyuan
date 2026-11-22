@@ -199,11 +199,25 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 }
 
 func Outline(rootID string, preview bool) (ret []*Path, err error) {
-	return OutlineInBox(rootID, preview, "")
+	return outlineInBox(rootID, preview, "", false)
+}
+
+// OutlineForReader 返回读者可见的大纲，不输出编辑器私有的行级备注。
+func OutlineForReader(rootID string, preview bool) (ret []*Path, err error) {
+	return outlineInBox(rootID, preview, "", true)
 }
 
 // OutlineInBox 与 Outline 一致，但按 boxID 路由 blocktree 查询到加密 db 或全局 db。
 func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err error) {
+	return outlineInBox(rootID, preview, boxID, false)
+}
+
+// OutlineInBoxForReader 与 OutlineInBox 一致，但按读者可见范围渲染内容。
+func OutlineInBoxForReader(rootID string, preview bool, boxID string) (ret []*Path, err error) {
+	return outlineInBox(rootID, preview, boxID, true)
+}
+
+func outlineInBox(rootID string, preview bool, boxID string, forReader bool) (ret []*Path, err error) {
 	confEditorSnapshot := Conf.LoadEditor()
 
 	FlushTxQueue()
@@ -236,7 +250,7 @@ func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err e
 		}
 	}
 
-	ret = outline(tree)
+	ret = outlineWithReader(tree, forReader)
 	applyOutlineHeadingNumbers(ret, headingNumbers)
 
 	storage, _ := GetOutlineStorage(rootID)
@@ -303,17 +317,27 @@ func walkChildren(b *Block, expandIDs []string) {
 }
 
 func outline(tree *parse.Tree) (ret []*Path) {
+	return outlineWithReader(tree, false)
+}
+
+func outlineWithReader(tree *parse.Tree, forReader bool) (ret []*Path) {
 	luteEngine := NewLute()
 	var headings []*Block
 	for _, n := range collectOutlineHeadings(tree) {
 		n.Box, n.Path = tree.Box, tree.Path
+		var content string
+		if forReader {
+			content = renderOutlineForReader(n, luteEngine)
+		} else {
+			content = renderOutline(n, luteEngine)
+		}
 		block := &Block{
 			RootID:  tree.Root.ID,
 			Depth:   n.HeadingLevel,
 			Box:     n.Box,
 			Path:    n.Path,
 			ID:      n.ID,
-			Content: renderOutline(n, luteEngine),
+			Content: content,
 			Type:    n.Type.String(),
 			SubType: treenode.SubTypeAbbr(n),
 			Folded:  true,

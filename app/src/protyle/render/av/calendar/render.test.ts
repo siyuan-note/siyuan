@@ -412,6 +412,7 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
             columns: [{id: "date", type: "date"}], rows: [],
         }} as unknown as IAV;
         const protyle = {disabled: true, options: {}, element: {getAttribute: (): null => null, contains: () => false},
+            contentElement: {removeAttribute() {}},
             wysiwyg: {element: {style: {}, setAttribute() {},
                 querySelectorAll: (selector: string) => selector === '.av[data-av-type="calendar"]' ? [block] : []}},
         } as unknown as IProtyle;

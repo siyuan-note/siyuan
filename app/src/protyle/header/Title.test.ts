@@ -168,7 +168,8 @@ test("normal editor enabling cannot unlock the plain title while its full source
         editElement: plain, element: {dataset: {nodeId: "document"}}, sourceRequest: 0,
     });
     const protyle = {id: "title-editor", block: {rootID: "document"}, notebookId: "notebook", path: "/document.sy", title, disabled: false,
-        element: {getAttribute: (): null => null}, wysiwyg: {element: {setAttribute: noop, style: {}, querySelectorAll: (): never[] => []}}};
+        element: {getAttribute: (): null => null}, contentElement: {removeAttribute: noop},
+        wysiwyg: {element: {setAttribute: noop, style: {}, querySelectorAll: (): never[] => []}}};
     title.protyle = protyle;
     const source = readFileSync(resolve(__dirname, "../util/onGet.ts"), "utf8");
     const enableExports: {enableProtyle?: (owner: unknown) => void} = {};

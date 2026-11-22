@@ -98,7 +98,7 @@ func TestDocumentPathDeletion(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					if err = execOp(&dbQueueOperation{action: "delete", removeTreeBox: "target", removeTreePath: prefix}, tx, nil); err != nil {
+					if _, err = execOp(&dbQueueOperation{action: "delete", removeTreeBox: "target", removeTreePath: prefix}, tx, nil); err != nil {
 						tx.Rollback()
 						t.Fatal(err)
 					}
@@ -226,7 +226,7 @@ func BenchmarkDocumentPathDeletion(b *testing.B) {
 					b.Fatal(err)
 				}
 				if indexed {
-					err = execOp(&dbQueueOperation{action: "delete", removeTreeBox: "box", removeTreePath: "/target"}, tx, nil)
+					_, err = execOp(&dbQueueOperation{action: "delete", removeTreeBox: "box", removeTreePath: "/target"}, tx, nil)
 				} else {
 					_, err = tx.Exec("DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE box = ? AND path LIKE ?)", "box", "/target%")
 					for _, table := range deletePathTestTables(false) {

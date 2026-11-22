@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/eventbus"
@@ -386,6 +387,215 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 			}
 		})
 	}
+
+	for _, replay := range []bool{false, true} {
+		name := "live"
+		if replay {
+			name = "replay"
+		}
+		t.Run(name+" rename repairs a missing root before later documents", func(t *testing.T) {
+			ClearQueue()
+			tree, later := newTree(), newTree()
+			IndexTreeQueue(tree)
+			FlushQueue()
+			assertRows(tree)
+			if _, err := db.Exec("DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE id = ?)", tree.ID); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := db.Exec("DELETE FROM blocks WHERE id = ?", tree.ID); err != nil {
+				t.Fatal(err)
+			}
+			queued, _, err := filesys.LoadTreeSnapshot(box, tree.Path, lute.New())
+			if err != nil {
+				t.Fatal(err)
+			}
+			RenameDocQueue(queued)
+			tree.HPath = "/repairtitle"
+			tree.Root.SetIALAttr("title", "repairtitle")
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.IndexBlockTree(tree)
+			IndexTreeQueue(later)
+			if replay {
+				restartQueue()
+			}
+			FlushQueue()
+			assertRows(tree)
+			assertRows(later)
+			var content, path, hpath string
+			if err := db.QueryRow("SELECT content, path, hpath FROM blocks WHERE id = ?", tree.ID).Scan(&content, &path, &hpath); err != nil ||
+				content != "repairtitle" || path != tree.Path || hpath != tree.HPath {
+				t.Fatalf("repaired root differs from current disk source: %q %q %q, %v", content, path, hpath, err)
+			}
+			var matches int
+			if err := db.QueryRow("SELECT COUNT(*) FROM blocks_fts WHERE blocks_fts MATCH 'repairtitle' AND id = ?", tree.ID).Scan(&matches); err != nil || matches != 1 {
+				t.Fatalf("repaired root must have one searchable FTS row: %d, %v", matches, err)
+			}
+			if !IndexQueueIdle() || len(loadIndexQueue()) != 0 {
+				t.Fatal("successful repair did not checkpoint queue")
+			}
+		})
+
+		t.Run(name+" embed repair recalculates after rebuilding its source", func(t *testing.T) {
+			ClearQueue()
+			tree, later := newTree(), newTree()
+			source := tree.Root.LastChild
+			embed := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeBlockQueryEmbed}
+			embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + source.ID + "'")})
+			tree.Root.AppendChild(embed)
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.IndexBlockTree(tree)
+			block, _ := buildBlockFromNode(embed, tree)
+			block.Content = "stale queued result"
+			UpdateBlockContentQueue(block)
+			IndexTreeQueue(later)
+			if replay {
+				restartQueue()
+			} else {
+				if _, err := db.Exec("CREATE TEMP TRIGGER reject_repaired_embed BEFORE UPDATE OF content ON blocks WHEN old.id = '" + embed.ID + "' BEGIN SELECT RAISE(ABORT, 'reject repaired embed'); END"); err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() { _, _ = db.Exec("DROP TRIGGER IF EXISTS reject_repaired_embed") })
+				FlushQueue()
+				if len(operationQueue) != 2 || operationQueue[0].recoveryEntry == nil || len(loadIndexQueue()) != 2 {
+					t.Fatal("failed recomputation discarded or reordered queued work")
+				}
+				var count int
+				if err := db.QueryRow("SELECT COUNT(*) FROM blocks WHERE root_id = ?", later.ID).Scan(&count); err != nil || count != 0 {
+					t.Fatalf("later document escaped FIFO during recomputation failure: %d, %v", count, err)
+				}
+				if _, err := db.Exec("DROP TRIGGER reject_repaired_embed"); err != nil {
+					t.Fatal(err)
+				}
+			}
+			FlushQueue()
+			assertRows(later)
+			var content string
+			if err := db.QueryRow("SELECT content FROM blocks WHERE id = ?", embed.ID).Scan(&content); err != nil || content != "recovery content" {
+				t.Fatalf("repaired embed must query committed source, not stale queued content: %q, %v", content, err)
+			}
+			var matches int
+			if err := db.QueryRow("SELECT COUNT(*) FROM blocks_fts WHERE blocks_fts MATCH 'recovery' AND id = ?", embed.ID).Scan(&matches); err != nil || matches != 1 {
+				t.Fatalf("repaired embed must have one searchable FTS row: %d, %v", matches, err)
+			}
+			if !IndexQueueIdle() || len(loadIndexQueue()) != 0 {
+				t.Fatal("successful embed recompute did not checkpoint queue")
+			}
+		})
+
+		t.Run(name+" missing or ignored rename sources are not restored", func(t *testing.T) {
+			ClearQueue()
+			removed, ignored, later := newTree(), newTree(), newTree()
+			RenameDocQueue(removed)
+			RenameDocQueue(ignored)
+			IndexTreeQueue(later)
+			if err := os.Remove(filepath.Join(util.DataDir, box, removed.Path)); err != nil {
+				t.Fatal(err)
+			}
+			cache.RemoveTreeDataInBox(removed.ID, box)
+			previous := indexIgnore
+			indexIgnore = []string{"/" + box + ignored.Path}
+			defer func() { indexIgnore = previous }()
+			if replay {
+				restartQueue()
+			}
+			FlushQueue()
+			assertRows(later)
+			var count int
+			if err := db.QueryRow("SELECT COUNT(*) FROM blocks WHERE root_id IN (?, ?)", removed.ID, ignored.ID).Scan(&count); err != nil || count != 0 ||
+				!IndexQueueIdle() || len(loadIndexQueue()) != 0 {
+				t.Fatalf("missing or ignored document was restored or kept queued: %d, %v", count, err)
+			}
+		})
+	}
+
+	t.Run("pending SQL embed repair cannot clear a replacement JavaScript result", func(t *testing.T) {
+		ClearQueue()
+		tree, later := newTree(), newTree()
+		script := &ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where type = 'p'")}
+		embed := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeBlockQueryEmbed}
+		embed.AppendChild(script)
+		tree.Root.AppendChild(embed)
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.IndexBlockTree(tree)
+		block, _ := buildBlockFromNode(embed, tree)
+		UpdateBlockContentQueue(block)
+		IndexTreeQueue(later)
+		if _, err := db.Exec("CREATE TEMP TRIGGER reject_repaired_embed BEFORE UPDATE OF content ON blocks WHEN old.id = '" + embed.ID + "' BEGIN SELECT RAISE(ABORT, 'reject repaired embed'); END"); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { _, _ = db.Exec("DROP TRIGGER IF EXISTS reject_repaired_embed") })
+		FlushQueue()
+		if len(operationQueue) != 2 || operationQueue[0].repairedEmbed == nil {
+			t.Fatal("test requires a pending SQL repair continuation")
+		}
+		if _, err := db.Exec("DROP TRIGGER reject_repaired_embed"); err != nil {
+			t.Fatal(err)
+		}
+		script.Tokens = []byte("//!js return [];")
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		current, _ := buildBlockFromNode(embed, tree)
+		current.Content = "javascriptrendererresult"
+		tx, err := beginTxForBox(box)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tx.Rollback()
+		if err = updateBlockContent(tx, current); err != nil {
+			t.Fatal(err)
+		}
+		if err = commitTx(tx); err != nil {
+			t.Fatal(err)
+		}
+		FlushQueue()
+		var content string
+		if err = db.QueryRow("SELECT content FROM blocks WHERE id = ?", embed.ID).Scan(&content); err != nil || content != current.Content {
+			t.Fatalf("SQL continuation overwrote current renderer result: %q, %v", content, err)
+		}
+		var matches int
+		if err = db.QueryRow("SELECT COUNT(*) FROM blocks_fts WHERE blocks_fts MATCH 'javascriptrendererresult' AND id = ?", embed.ID).Scan(&matches); err != nil || matches != 1 {
+			t.Fatalf("renderer result is not searchable: %d, %v", matches, err)
+		}
+		assertRows(later)
+		if !IndexQueueIdle() || len(loadIndexQueue()) != 0 {
+			t.Fatal("obsolete SQL repair should not delay unrelated indexing")
+		}
+	})
+
+	t.Run("live JavaScript embed repair retains only a current renderer result", func(t *testing.T) {
+		for _, changed := range []bool{false, true} {
+			ClearQueue()
+			tree := newTree()
+			script := &ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("//!js return [];")}
+			embed := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeBlockQueryEmbed}
+			embed.AppendChild(script)
+			tree.Root.AppendChild(embed)
+			block, _ := buildBlockFromNode(embed, tree)
+			block.Content = "renderer result"
+			want := block.Content
+			if changed {
+				script.Tokens = []byte("//!js return null;")
+				want = ""
+			}
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.IndexBlockTree(tree)
+			UpdateBlockContentQueue(block)
+			FlushQueue()
+			var content string
+			if err := db.QueryRow("SELECT content FROM blocks WHERE id = ?", embed.ID).Scan(&content); err != nil || content != want {
+				t.Fatalf("changed=%v: repair took stale or missing renderer output: %q, %v", changed, content, err)
+			}
+		}
+	})
 
 	t.Run("embed content is recalculated and searchable after restart", func(t *testing.T) {
 		ClearQueue()

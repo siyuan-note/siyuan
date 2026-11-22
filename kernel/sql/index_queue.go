@@ -264,15 +264,16 @@ func recoverIndexQueue() {
 	dbQueueLock.Lock()
 	for _, e := range entries {
 		// 只恢复操作描述，执行时再读取文档，避免启动时同时持有所有文档树。
-		entry := e
-		operationQueue = append(operationQueue, &dbQueueOperation{
-			action: e.Action, box: e.Box, id: e.ID, recoveryEntry: &entry, inQueueTime: time.Now(),
-		})
+		operationQueue = append(operationQueue, newRecoveredIndexOperation(e))
 	}
 	dbQueueLock.Unlock()
 
 	eventbus.Publish(eventbus.EvtSQLIndexChanged)
 	logging.LogInfof("recovered [%d] index queue operations, will be flushed soon", len(entries))
+}
+
+func newRecoveredIndexOperation(entry indexEntry) *dbQueueOperation {
+	return &dbQueueOperation{action: entry.Action, box: entry.Box, id: entry.ID, recoveryEntry: &entry, inQueueTime: time.Now()}
 }
 
 func indexEntryToOp(e indexEntry, luteEngine *lute.Lute, prefix string) (*dbQueueOperation, error) {

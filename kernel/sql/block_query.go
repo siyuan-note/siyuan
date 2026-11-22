@@ -55,7 +55,7 @@ func QueryEmptyContentEmbedBlocksInBox(boxID string) (ret []*Block) {
 	return
 }
 
-func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string) {
+func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string, err error) {
 	stmt := "SELECT id, hash FROM blocks WHERE root_id = ?"
 	rows, err := queryTx(tx, stmt, rootID)
 	if err != nil {
@@ -72,6 +72,7 @@ func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string) {
 		}
 		ret[id] = hash
 	}
+	err = rows.Err()
 	return
 }
 

@@ -15,10 +15,10 @@
 .av__horizontal-scrollbar {
   position: absolute;
   z-index: 5;
-  height: 12px;
+  box-sizing: border-box;
+  height: 10px;
   transform: translateY(-100%);
   overflow: scroll hidden;
-  background-color: var(--b3-theme-surface);
   overscroll-behavior-inline: contain;
   scroll-behavior: auto;
 
@@ -30,17 +30,6 @@
   &:focus-visible {
     outline: 2px solid var(--b3-theme-primary);
     outline-offset: -2px;
-  }
-
-  &::-webkit-scrollbar {
-    height: 12px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border: 2px solid var(--b3-theme-surface);
-    border-radius: var(--b3-border-radius);
-    background-color: var(--b3-theme-on-surface-light);
-    box-shadow: none;
   }
 
   @media print {

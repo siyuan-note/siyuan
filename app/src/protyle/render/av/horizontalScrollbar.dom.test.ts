@@ -14,11 +14,12 @@ const exerciseScrollbar = async (sourceCode: string) => {
     const api: typeof import("./horizontalScrollbar") = new Function("exports", sourceCode + "\nreturn exports;")({});
     Object.defineProperty(window, "siyuan", {value: {languages: {scrollHorizontal: "Horizontal scrolling"}}});
     document.body.style.cssText = "display:flex;gap:15px;margin:0;--b3-theme-surface:#eee;--b3-theme-on-surface-light:#666";
-    const createEditor = () => {
+    const createEditor = (scrollColor: string) => {
         const element = document.createElement("div");
         element.className = "protyle";
         element.tabIndex = -1;
         element.style.cssText = "width:300px;height:250px";
+        element.style.setProperty("--b3-scroll-color", scrollColor);
         element.innerHTML = '<div class="protyle-content" style="overflow:auto;flex:1"><div class="protyle-wysiwyg" style="padding:0"></div></div>';
         document.body.append(element);
         const contentElement = element.firstElementChild as HTMLElement;
@@ -48,14 +49,31 @@ const exerciseScrollbar = async (sourceCode: string) => {
         }
         check.ok(condition(), message);
     };
-    const left = createEditor();
-    const right = createEditor();
+    const left = createEditor("rgb(187, 187, 187)");
+    const right = createEditor("rgb(85, 85, 85)");
     const first = left.addTable(900, 950);
     const second = left.addTable(1100, 800);
     const other = right.addTable(850, 800);
     const track = left.track();
     const displayed = (element: HTMLElement) => element.getBoundingClientRect().height !== 0;
     await until(() => displayed(track) && displayed(right.track()), "both viewports show their own scrollbar");
+    for (const [proxy, source] of [
+        [track, first.source],
+        [right.track(), other.source],
+    ] as const) {
+        const sourceScrollbar = getComputedStyle(source, "::-webkit-scrollbar");
+        check.equal(getComputedStyle(proxy, "::-webkit-scrollbar").height, sourceScrollbar.height);
+        check.equal(getComputedStyle(proxy).height, sourceScrollbar.height);
+        const sourceStyle = getComputedStyle(source);
+        check.equal(getComputedStyle(proxy).backgroundColor, sourceStyle.backgroundColor);
+        const proxyThumb = getComputedStyle(proxy, "::-webkit-scrollbar-thumb");
+        const sourceThumb = getComputedStyle(source, "::-webkit-scrollbar-thumb");
+        check.equal(proxyThumb.borderTopWidth, sourceThumb.borderTopWidth);
+        check.equal(proxyThumb.backgroundColor, sourceThumb.backgroundColor);
+        check.equal(proxyThumb.boxShadow, sourceThumb.boxShadow);
+        check.ok(proxyThumb.boxShadow.includes(sourceStyle.getPropertyValue("--b3-scroll-color")),
+            "the thumb uses the current theme's scrollbar color");
+    }
     check.equal(left.protyle.wysiwyg.element.contains(track), false);
     check.equal(Math.round(track.getBoundingClientRect().bottom), Math.round(left.scroller.getBoundingClientRect().bottom));
     check.equal(track.scrollWidth - track.clientWidth, first.source.scrollWidth - first.source.clientWidth);

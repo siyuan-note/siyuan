@@ -17,8 +17,10 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     .fn__flex{display:flex}.fn__flex-1{flex:1;min-width:0}.fn__none{display:none!important}
     .toolbar{padding:0}body{margin:0}#tooltip{--b3-tooltips-background:black;--b3-tooltips-color:white}
     </style><div id="toolbar" class="toolbar fn__flex"><div id="captionColor" class="toolbar__item"></div><div id="drag" class="fn__flex-1"></div>
+    <div class="toolbar__item" id="rightToolbarButton"></div><div class="toolbar__window-gap"></div>
     <div id="windowControls" class="fn__flex"></div></div>
     <div id="tooltip" class="tooltip fn__none"></div>`;
+    document.documentElement.dataset.frontend = "desktop";
     window.siyuan = {isReady: true, languages: {min: "Minimize", max: "Maximize", restore: "Restore", close: "Close"},
         storage: {zoom: 1}} as unknown as typeof window.siyuan;
     window.DOMPurify = {sanitize: (value: string) => value} as typeof window.DOMPurify;
@@ -142,6 +144,19 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
                 `${label} caption keeps ${expected}px`);
             check.ok(Math.abs(document.getElementById("toolbar").getBoundingClientRect().height - expected) < 1.5,
                 `${label} toolbar keeps ${expected}px`);
+            const gap = document.querySelector(".toolbar__window-gap");
+            const gapRect = gap.getBoundingClientRect();
+            check.ok(Math.abs(gapRect.width - (fused ? 24 : 0)) < 0.1,
+                `${label} reserves the drag area only for fused tabs`);
+            if (fused) {
+                check.equal(getComputedStyle(gap).getPropertyValue("-webkit-app-region"), "drag");
+                const buttonRight = document.getElementById("rightToolbarButton").getBoundingClientRect().right;
+                check.ok(Math.abs(buttonRight - gapRect.left) < 3,
+                    `${label} toolbar button ends at ${buttonRight}, drag area begins at ${gapRect.left}`);
+                const controlsLeft = container.getBoundingClientRect().left;
+                check.ok(Math.abs(controlsLeft - gapRect.right - 2) < 1,
+                    `${label} drag area ends at ${gapRect.right}, controls begin at ${controlsLeft}`);
+            }
         }
         document.documentElement.style.removeProperty("--b3-ui-toolbar-height");
         document.documentElement.style.removeProperty("--b3-ui-panel-height");

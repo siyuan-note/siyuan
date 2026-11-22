@@ -140,6 +140,10 @@ body.body--harmony {
     margin-left: 2px;
   }
 
+  &__window-gap {
+    display: none;
+  }
+
   #drag {
     -webkit-app-region: drag;
     color: var(--b3-toolbar-color);
@@ -277,6 +281,22 @@ body.body--harmony {
     text-overflow: ellipsis;
     white-space: nowrap;
     user-select: none;
+  }
+}
+
+html[data-frontend="desktop"] {
+  .body--toolbar-hide.body--windows:not(.body--fullscreen) #toolbar > .toolbar__window-gap,
+  .body--toolbar-hide.body--linux:not(.body--fullscreen) #toolbar > .toolbar__window-gap,
+  .body--toolbar-hide.body--mac:not(.body--fullscreen) #toolbar::before {
+    content: "";
+    display: block;
+    flex: 0 0 24px;
+    align-self: stretch;
+    -webkit-app-region: drag;
+  }
+
+  #toolbar > #drag[data-topbar-reordering="true"] ~ .toolbar__window-gap {
+    -webkit-app-region: no-drag;
   }
 }
 

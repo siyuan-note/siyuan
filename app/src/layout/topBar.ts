@@ -124,6 +124,7 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
 <div id="barMore" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.more}">
     <svg><use xlink:href="#iconMore"></use></svg>
 </div>
+<div class="toolbar__window-gap" aria-hidden="true"></div>
 <div class="fn__flex" id="windowControls"></div>`;
     applyTopBarEntryVisibility();
     bindTopBarDrag(toolbarElement, (order) => setEntryOrderValue(TOP_BAR_ROOT_PATH, order));

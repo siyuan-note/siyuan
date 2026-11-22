@@ -307,10 +307,10 @@ export const openAgentPhrases = (target: HTMLElement, run: (instruction: string)
             const builtins = [lang.aiContinueWrite, lang.aiTranslate, lang.aiExtractSummary, lang.aiPolish,
                 lang.aiBrainStorm, lang.aiFixGrammarSpell];
             [...builtins.map(action => ({name: action, action})), ...saved].forEach(item => {
-                menu.addItem({label: escapeHtml(item.name || item.action), click: () => run(item.action || item.name)});
+                menu.addItem({iconHTML: "", label: escapeHtml(item.name || item.action), click: () => run(item.action || item.name)});
             });
             menu.addSeparator();
-            menu.addItem({label: lang.manage, submenu: [
+            menu.addItem({iconHTML: "", label: lang.manage, submenu: [
                 {label: lang.new, icon: "iconAdd", click: () => editDialog({id: "", name: "", action: ""})},
                 ...saved.map(item => ({label: escapeHtml(item.name || item.action), click: () => editDialog(item)})),
             ]});

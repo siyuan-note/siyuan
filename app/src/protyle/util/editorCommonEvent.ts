@@ -93,6 +93,7 @@ import {remapListMindmapIDs} from "../render/listMindmap/model";
 import {getTabItems, getTabTask} from "../render/tabsRender";
 import {repairActiveTab} from "../wysiwyg/tabsRemoval";
 import {sortAVRows} from "../render/av/rowSort";
+import {isProtyleBlockDropAsReference} from "../runtimeCapabilities";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`;
 const SHIFT_EMBED_INSERT_TARGET_TYPES = ["NodeParagraph", "NodeHeading", "NodeCodeBlock", "NodeAttributeView"];
@@ -1130,6 +1131,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB);
     const shouldCopyBlockDrag = (event: DragEvent) => isCopyBlockDrag(protyle.lite, event.ctrlKey,
         protyle.wysiwyg.element, window.siyuan.dragElement);
+    const getReferenceGutterType = (event: DragEvent) => {
+        const types = event.dataTransfer.types;
+        if (isProtyleBlockDropAsReference(protyle) && types.includes(Constants.SIYUAN_DROP_BLOCK) &&
+            !isFragmentBlockDrag(window.siyuan.dragElement)) {
+            return types.find(type => type.startsWith(Constants.SIYUAN_DROP_GUTTER));
+        }
+    };
     const clearKanbanGroupDragover = () => {
         if (kanbanGroupDragoverElement) {
             kanbanGroupDragoverElement.classList.remove("dragover__left", "dragover__right");
@@ -1464,27 +1472,34 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK_REF)) {
+        const referenceGutterType = getReferenceGutterType(event);
+        if (referenceGutterType || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK_REF)) {
             event.preventDefault();
             event.stopPropagation();
-            let ids: string[] = [];
-            try {
-                const data = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_BLOCK_REF));
-                if (data.workspaceDir?.toLowerCase() !== window.siyuan.config.system.workspaceDir.toLowerCase()) {
-                    clearBlockDragoverTarget();
-                    return;
+            const currentWorkspace = window.siyuan.config.system.workspaceDir.toLowerCase();
+            let ids: unknown[] = [];
+            if (referenceGutterType) {
+                const [, , blockIDs, workspaceDir] = referenceGutterType.slice(Constants.SIYUAN_DROP_GUTTER.length).split(Constants.ZWSP);
+                if (blockIDs && (!workspaceDir || workspaceDir === currentWorkspace)) {
+                    ids = blockIDs.split(",");
                 }
-                ids = Array.from(new Set((Array.isArray(data.ids) ? data.ids : [])
-                    .filter((id: unknown): id is string => typeof id === "string" && /^\d{14}-[0-9a-z]{7}$/.test(id))));
-            } catch (e) {
-                console.warn("parse block reference drop data failed", e);
+            } else {
+                try {
+                    const data = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_BLOCK_REF));
+                    if (data.workspaceDir?.toLowerCase() === currentWorkspace && Array.isArray(data.ids)) {
+                        ids = data.ids;
+                    }
+                } catch (e) {
+                    console.warn("parse block reference drop data failed", e);
+                }
             }
-            if (ids.length === 0 || hasClosestByClassName(event.target, "av") || !focusBlockRefDrop(event)) {
-                clearBlockDragoverTarget();
-                return;
-            }
-            await insertBlockRefs(ids);
+            const blockIDs = uniqueDragIds(ids.filter((id): id is string => typeof id === "string" && /^\d{14}-[0-9a-z]{7}$/.test(id)));
+            const canInsert = blockIDs.length > 0 && !hasClosestByClassName(event.target, "av") && focusBlockRefDrop(event);
+            hideCaretLine();
             clearBlockDragoverTarget();
+            if (canInsert) {
+                await insertBlockRefs(blockIDs);
+            }
             return;
         }
         let gutterType = "";
@@ -2382,7 +2397,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             clearBlockDragoverTarget();
             return;
         }
-        if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK_REF)) {
+        if (getReferenceGutterType(event) || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK_REF)) {
             if (hasClosestByClassName(event.target, "av")) {
                 event.preventDefault();
                 event.dataTransfer.dropEffect = "none";

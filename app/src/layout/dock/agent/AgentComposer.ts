@@ -255,6 +255,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         },
         runtimeCapabilities: {
             websocket: false,
+            blockDropAsReference: true,
         },
         afterSetContent: (protyle, element) => {
             normalizeAgentSkills(element);

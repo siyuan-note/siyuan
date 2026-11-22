@@ -440,7 +440,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Drag blocks into the agent input"
+									"Data": "Drag blocks from a document into the agent input to insert block references"
 								}
 							]
 						}

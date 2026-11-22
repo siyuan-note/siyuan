@@ -600,7 +600,6 @@ export class AgentChat extends Model {
         }, {
             placeholder: this.host.mobile ? this.mobileComposerPlaceholder() : undefined,
         });
-        // 块拖拽由 protyle 统一处理（复制块/引用/嵌入块→引用），无需自定义 drop handler。
         this.sessionPanel = new AgentSessionPanel(
             this.sessionMenuBtn,
             this.panelElement,

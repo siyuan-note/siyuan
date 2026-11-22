@@ -57,7 +57,7 @@ const runElectron = async () => {
                                 '<div class="li" data-node-id="item-' + i + '"><div style="padding-left:34px">Task ' + i + '</div>' +
                                 '<div class="list" data-node-id="nested-' + i + '"><div class="li" data-node-id="child-' + i + '">' +
                                 '<div style="padding-left:68px">' + '1234567890 '.repeat(12) + '</div></div></div></div>').join("") + '</div></div>';
-                        const Protyle = {highlightRender() {}, async mathRender() {}};
+                        const Protyle = {highlightRender() {}, async mathRender() {}, mindmapRender() {}};
                         const waitForImages = async () => {};
                         const keepFoldElement = {}, addTitleElement = {}, titleImageElement = {checked: false}, customTitleElement = {},
                             mergeSubdocsElement = {}, mergeDocHeadingModeElement = {},

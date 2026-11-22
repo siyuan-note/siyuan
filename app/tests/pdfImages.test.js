@@ -106,7 +106,7 @@ const runElectron = async () => {
                     actionElement.remove();
                     return {pageSize: "A4", preferCSSPageSize: true, printBackground: true};
                 }
-                const Protyle = {highlightRender() {}, async mathRender() {}};
+                const Protyle = {highlightRender() {}, async mathRender() {}, mindmapRender() {}};
                 const waitForImages = async () => {};
                 const keepFoldElement = {}, addTitleElement = {}, titleImageElement = {}, customTitleElement = {},
                     mergeSubdocsElement = {}, mergeDocHeadingModeElement = {}, mergeContentHeadingModeElement = {},

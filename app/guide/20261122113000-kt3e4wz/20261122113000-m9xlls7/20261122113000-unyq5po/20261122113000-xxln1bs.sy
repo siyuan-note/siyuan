@@ -66,7 +66,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Использование в браузере"
+					"TextMarkTextContent": "Используйте в обозревателе"
 				},
 				{
 					"Type": "NodeText",
@@ -75,7 +75,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Открыть в браузере"
+					"TextMarkTextContent": "Открыть обозреватель"
 				},
 				{
 					"Type": "NodeText",
@@ -136,7 +136,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Сетевой сервер"
+					"TextMarkTextContent": "Сетевое обслуживание"
 				},
 				{
 					"Type": "NodeText",
@@ -330,7 +330,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Вход и токен"
+					"TextMarkTextContent": "Вход и токены"
 				},
 				{
 					"Type": "NodeText",
@@ -339,7 +339,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "пароля блокировки экрана"
+					"TextMarkTextContent": "Пароль блокировки экрана"
 				},
 				{
 					"Type": "NodeText",
@@ -412,7 +412,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Вход и токен"
+					"TextMarkTextContent": "Вход и токены"
 				},
 				{
 					"Type": "NodeText",

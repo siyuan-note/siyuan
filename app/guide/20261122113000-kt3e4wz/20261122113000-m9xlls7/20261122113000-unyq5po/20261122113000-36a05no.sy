@@ -1125,7 +1125,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Очистить"
+					"TextMarkTextContent": "Стереть"
 				},
 				{
 					"Type": "NodeText",
@@ -1214,7 +1214,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "ключ репозитория данных"
+					"TextMarkTextContent": "Ключ репозитория данных"
 				},
 				{
 					"Type": "NodeText",
@@ -1300,7 +1300,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Автоматическая генерация ключа"
+									"TextMarkTextContent": "Авто-сгенерировать ключ"
 								},
 								{
 									"Type": "NodeText",
@@ -1338,7 +1338,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Генерация ключа по паролю"
+									"TextMarkTextContent": "Создать ключ по паролю"
 								},
 								{
 									"Type": "NodeText",
@@ -1475,7 +1475,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "снимков данных"
+									"TextMarkTextContent": "Снимок данных"
 								}
 							]
 						}
@@ -1519,7 +1519,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Примечание"
+									"TextMarkTextContent": "Заметка"
 								},
 								{
 									"Type": "NodeText",
@@ -1569,7 +1569,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "снимков данных"
+					"TextMarkTextContent": "Снимок данных"
 				},
 				{
 					"Type": "NodeText",
@@ -1578,7 +1578,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Полная проверка"
+					"TextMarkTextContent": "Полная проверка содержимого"
 				},
 				{
 					"Type": "NodeText",
@@ -1625,7 +1625,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "снимков данных"
+					"TextMarkTextContent": "Снимок данных"
 				},
 				{
 					"Type": "NodeText",
@@ -1634,7 +1634,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Локальные снимки"
+					"TextMarkTextContent": "Локальный снимок"
 				},
 				{
 					"Type": "NodeText",
@@ -1643,7 +1643,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Облачные снимки"
+					"TextMarkTextContent": "Облачный снимок"
 				},
 				{
 					"Type": "NodeText",
@@ -1652,7 +1652,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "снимков данных"
+					"TextMarkTextContent": "Снимок данных"
 				},
 				{
 					"Type": "NodeText",
@@ -1761,7 +1761,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Массовое управление"
+									"TextMarkTextContent": "Групповое управление"
 								},
 								{
 									"Type": "NodeText",
@@ -1896,7 +1896,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Завершить управление"
+									"TextMarkTextContent": "Готово"
 								},
 								{
 									"Type": "NodeText",
@@ -2066,7 +2066,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "снимков данных"
+									"TextMarkTextContent": "Снимок данных"
 								},
 								{
 									"Type": "NodeText",
@@ -2553,7 +2553,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "снимков данных"
+					"TextMarkTextContent": "Снимок данных"
 				},
 				{
 					"Type": "NodeText",

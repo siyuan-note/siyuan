@@ -144,7 +144,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Сетевой сервер"
+									"TextMarkTextContent": "Сетевое обслуживание"
 								},
 								{
 									"Type": "NodeText",

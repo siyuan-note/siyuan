@@ -206,7 +206,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Вход и токен"
+									"TextMarkTextContent": "Вход и токены"
 								},
 								{
 									"Type": "NodeText",
@@ -215,7 +215,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "API token"
+									"TextMarkTextContent": "API токен"
 								},
 								{
 									"Type": "NodeText",

@@ -160,7 +160,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Поставщики API"
+									"TextMarkTextContent": "Поставщик API"
 								},
 								{
 									"Type": "NodeText",
@@ -271,7 +271,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Умное редактирование"
+									"TextMarkTextContent": "Редактирование с ИИ"
 								},
 								{
 									"Type": "NodeText",

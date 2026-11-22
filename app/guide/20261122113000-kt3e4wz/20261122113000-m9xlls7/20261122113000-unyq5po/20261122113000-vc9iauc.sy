@@ -256,7 +256,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ещё"
+									"TextMarkTextContent": "Больше"
 								},
 								{
 									"Type": "NodeText",
@@ -379,7 +379,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Открыть расположение файла"
+									"TextMarkTextContent": "Показать в папке"
 								},
 								{
 									"Type": "NodeText",

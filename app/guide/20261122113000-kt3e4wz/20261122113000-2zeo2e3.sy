@@ -67,7 +67,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Сброс настроек"
+					"TextMarkTextContent": "Сбросить настройки"
 				},
 				{
 					"Type": "NodeText",
@@ -147,7 +147,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Экспорт журнала"
+					"TextMarkTextContent": "Экспортировать системный журнал"
 				},
 				{
 					"Type": "NodeText",
@@ -1190,7 +1190,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "поведение"
+					"TextMarkTextContent": "Поведение"
 				},
 				{
 					"Type": "NodeText",
@@ -1199,7 +1199,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Показывать полные значки блоков"
+					"TextMarkTextContent": "Показывать все значки блоков"
 				},
 				{
 					"Type": "NodeText",
@@ -1351,7 +1351,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Неиспользуемые файлы ресурсов"
+					"TextMarkTextContent": "Неиспользуемые ресурсы"
 				},
 				{
 					"Type": "NodeText",
@@ -1476,7 +1476,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "ключ репозитория данных"
+									"TextMarkTextContent": "Ключ репозитория данных"
 								},
 								{
 									"Type": "NodeText",
@@ -1485,7 +1485,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Копировать строку ключа"
+									"TextMarkTextContent": "Скопировать строку ключа"
 								},
 								{
 									"Type": "NodeText",
@@ -1614,7 +1614,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "ключ репозитория данных"
+													"TextMarkTextContent": "Ключ репозитория данных"
 												},
 												{
 													"Type": "NodeText",

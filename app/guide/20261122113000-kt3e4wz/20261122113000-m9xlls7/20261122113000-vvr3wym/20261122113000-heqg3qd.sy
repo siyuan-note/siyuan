@@ -1581,7 +1581,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkTextContent": "Введите"
 				},
 				{
 					"Type": "NodeText",
@@ -1674,7 +1674,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Добавлять заголовок документа"
+					"TextMarkTextContent": "Добавить заголовок документа"
 				},
 				{
 					"Type": "NodeText",
@@ -1956,7 +1956,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkTextContent": "Введите"
 				},
 				{
 					"Type": "NodeText",
@@ -2002,7 +2002,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Закрепить столбец заголовков"
+					"TextMarkTextContent": "Закрепить столбец заголовка"
 				},
 				{
 					"Type": "NodeText",
@@ -2011,7 +2011,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Закрепить строку заголовков"
+					"TextMarkTextContent": "Закрепить строку заголовка"
 				},
 				{
 					"Type": "NodeText",
@@ -2321,7 +2321,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkTextContent": "Введите"
 				},
 				{
 					"Type": "NodeText",
@@ -2908,7 +2908,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkTextContent": "Введите"
 				},
 				{
 					"Type": "NodeText",
@@ -3182,7 +3182,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Блок вкладок"
+					"TextMarkTextContent": "Блок с вкладками"
 				},
 				{
 					"Type": "NodeText",
@@ -3191,7 +3191,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Задачи"
+					"TextMarkTextContent": "Задача"
 				},
 				{
 					"Type": "NodeText",
@@ -3284,7 +3284,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горизонтальный суперблок"
+									"TextMarkTextContent": "Горизонтальный супер блок"
 								},
 								{
 									"Type": "NodeText",
@@ -3293,7 +3293,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Вертикальный суперблок"
+									"TextMarkTextContent": "Вертикальный супер блок"
 								},
 								{
 									"Type": "NodeText",
@@ -3330,7 +3330,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Суперблок"
+									"TextMarkTextContent": "Супер блок"
 								},
 								{
 									"Type": "NodeText",
@@ -3339,7 +3339,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Добавить колонку в начало текущего суперблока"
+									"TextMarkTextContent": "Добавить столбец в начало текущего супер блока"
 								},
 								{
 									"Type": "NodeText",
@@ -3348,7 +3348,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Суперблок"
+									"TextMarkTextContent": "Супер блок"
 								},
 								{
 									"Type": "NodeText",
@@ -3357,7 +3357,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Добавить колонку в конец текущего суперблока"
+									"TextMarkTextContent": "Добавить столбец в конец текущего супер блока"
 								},
 								{
 									"Type": "NodeText",
@@ -3394,7 +3394,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Создать локальную колонку слева"
+									"TextMarkTextContent": "Создать локальные столбцы слева"
 								},
 								{
 									"Type": "NodeText",
@@ -3403,7 +3403,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Создать локальную колонку справа"
+									"TextMarkTextContent": "Создать локальные столбцы справа"
 								},
 								{
 									"Type": "NodeText",

@@ -264,7 +264,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "поведение"
+					"TextMarkTextContent": "Поведение"
 				},
 				{
 					"Type": "NodeText",
@@ -273,7 +273,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "значок блока контента"
+					"TextMarkTextContent": "Угловая иконка блока контента"
 				},
 				{
 					"Type": "NodeText",

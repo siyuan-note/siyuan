@@ -63,7 +63,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Горячая клавиша"
+					"TextMarkTextContent": "Карта клавиш"
 				},
 				{
 					"Type": "NodeText",
@@ -104,7 +104,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Горячая клавиша"
+					"TextMarkTextContent": "Карта клавиш"
 				},
 				{
 					"Type": "NodeText",
@@ -154,7 +154,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Горячая клавиша"
+					"TextMarkTextContent": "Карта клавиш"
 				},
 				{
 					"Type": "NodeText",
@@ -163,7 +163,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Общие"
+					"TextMarkTextContent": "Общее"
 				},
 				{
 					"Type": "NodeText",
@@ -336,7 +336,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -923,7 +923,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",
@@ -1830,7 +1830,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -1884,7 +1884,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -1938,7 +1938,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -1992,7 +1992,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -2046,7 +2046,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -2100,7 +2100,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -2154,7 +2154,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -3006,7 +3006,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -3209,7 +3209,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",
@@ -3273,7 +3273,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -3327,7 +3327,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -3381,7 +3381,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -3432,7 +3432,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Горячая клавиша"
+					"TextMarkTextContent": "Карта клавиш"
 				},
 				{
 					"Type": "NodeText",
@@ -3441,7 +3441,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Общие"
+					"TextMarkTextContent": "Общее"
 				},
 				{
 					"Type": "NodeText",
@@ -3450,7 +3450,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Переключение вкладок"
+					"TextMarkTextContent": "Переключатель"
 				},
 				{
 					"Type": "NodeText",
@@ -3497,7 +3497,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Горячая клавиша"
+					"TextMarkTextContent": "Карта клавиш"
 				},
 				{
 					"Type": "NodeText",
@@ -3506,7 +3506,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Общие"
+					"TextMarkTextContent": "Общее"
 				},
 				{
 					"Type": "NodeText",
@@ -3654,7 +3654,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Количество документов, загружаемых за раз в дереве"
+					"TextMarkTextContent": "Размер порции загрузки дерева документов"
 				},
 				{
 					"Type": "NodeText",
@@ -4060,7 +4060,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",
@@ -4428,7 +4428,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -4482,7 +4482,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -4682,7 +4682,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",
@@ -6694,7 +6694,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Пробел"
+									"TextMarkTextContent": "Место"
 								},
 								{
 									"Type": "NodeText",
@@ -7722,7 +7722,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -7740,7 +7740,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Общие"
+									"TextMarkTextContent": "Общее"
 								},
 								{
 									"Type": "NodeText",
@@ -7830,7 +7830,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -7848,7 +7848,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Общие"
+									"TextMarkTextContent": "Общее"
 								},
 								{
 									"Type": "NodeText",
@@ -9314,7 +9314,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9368,7 +9368,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9422,7 +9422,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9476,7 +9476,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9530,7 +9530,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9584,7 +9584,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9638,7 +9638,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9692,7 +9692,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9755,7 +9755,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9809,7 +9809,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9863,7 +9863,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9917,7 +9917,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -9971,7 +9971,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -10025,7 +10025,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -10079,7 +10079,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -10133,7 +10133,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -10187,7 +10187,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -10241,7 +10241,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -10295,7 +10295,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -10349,7 +10349,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -10665,7 +10665,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",
@@ -11914,7 +11914,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -12536,7 +12536,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -12589,7 +12589,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -12705,7 +12705,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Блок заголовка 1-го уровня"
+					"TextMarkTextContent": "Блок заголовка 1"
 				},
 				{
 					"Type": "NodeText",
@@ -12763,7 +12763,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Преобразовать список в обычные блоки"
+					"TextMarkTextContent": "Убрать форматирование списка"
 				},
 				{
 					"Type": "NodeText",
@@ -13087,7 +13087,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -13190,7 +13190,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",
@@ -13265,7 +13265,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -13274,7 +13274,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Инструмент «Рука»"
+					"TextMarkTextContent": "Рука"
 				},
 				{
 					"Type": "NodeText",
@@ -14322,7 +14322,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -14345,7 +14345,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Сводка"
+					"TextMarkTextContent": "Обобщение"
 				},
 				{
 					"Type": "NodeText",
@@ -14524,7 +14524,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -14568,7 +14568,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -14612,7 +14612,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -14656,7 +14656,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -15372,7 +15372,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",
@@ -15433,7 +15433,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Количество пробелов для Tab"
+									"TextMarkTextContent": "Количество пробелов табуляции"
 								},
 								{
 									"Type": "NodeText",
@@ -15471,7 +15471,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Количество пробелов для Tab"
+					"TextMarkTextContent": "Количество пробелов табуляции"
 				},
 				{
 					"Type": "NodeText",
@@ -15498,7 +15498,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "поведение"
+					"TextMarkTextContent": "Поведение"
 				},
 				{
 					"Type": "NodeText",
@@ -15507,7 +15507,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Количество пробелов для Tab"
+					"TextMarkTextContent": "Количество пробелов табуляции"
 				},
 				{
 					"Type": "NodeText",
@@ -15609,7 +15609,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",
@@ -16053,7 +16053,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",
@@ -16062,7 +16062,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Двойной щелчок"
+									"TextMarkTextContent": "Двойной клик"
 								},
 								{
 									"Type": "NodeText",
@@ -18521,7 +18521,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Одиночный щелчок по значку документа"
+					"TextMarkTextContent": "Щелчок по значку документа"
 				},
 				{
 					"Type": "NodeText",
@@ -18530,7 +18530,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Нажатие на заголовок родительского документа"
+					"TextMarkTextContent": "Щелчок по заголовку родительского документа"
 				},
 				{
 					"Type": "NodeText",
@@ -19968,7 +19968,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Вставить как обычный текст"
+									"TextMarkTextContent": "Вставить как простой текст"
 								},
 								{
 									"Type": "NodeText",
@@ -20378,7 +20378,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Восстанавливать последнюю позицию просмотра"
+					"TextMarkTextContent": "Восстанавливать последнюю позицию чтения"
 				},
 				{
 					"Type": "NodeText",
@@ -20391,7 +20391,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",

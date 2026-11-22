@@ -86,7 +86,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Поставщики API"
+					"TextMarkTextContent": "Поставщик API"
 				},
 				{
 					"Type": "NodeText",
@@ -492,7 +492,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Добавить в сеанс агента"
+									"TextMarkTextContent": "Добавить в чат агента"
 								},
 								{
 									"Type": "NodeText",
@@ -751,7 +751,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Разрешить для сеанса"
+					"TextMarkTextContent": "Разрешить сессию"
 				},
 				{
 					"Type": "NodeText",
@@ -774,7 +774,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Разрешить для сеанса"
+					"TextMarkTextContent": "Разрешить сессию"
 				},
 				{
 					"Type": "NodeText",
@@ -1316,7 +1316,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Службы MCP агента"
+					"TextMarkTextContent": "Служба MCP агента"
 				},
 				{
 					"Type": "NodeText",
@@ -1458,7 +1458,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Веб-поиск и извлечение страниц"
+					"TextMarkTextContent": "Поиск и загрузка веб-страниц"
 				},
 				{
 					"Type": "NodeText",

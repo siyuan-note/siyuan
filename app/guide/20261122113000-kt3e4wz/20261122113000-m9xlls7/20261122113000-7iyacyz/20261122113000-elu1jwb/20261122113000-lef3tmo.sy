@@ -384,7 +384,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Провайдер облачного хранилища"
+					"TextMarkTextContent": "Поставщик услуги облачного хранения"
 				},
 				{
 					"Type": "NodeText",

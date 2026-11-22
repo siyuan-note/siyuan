@@ -595,7 +595,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Переключение режима"
+					"TextMarkTextContent": "Переключить режим"
 				},
 				{
 					"Type": "NodeText",
@@ -604,7 +604,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Предпросмотр экспорта"
+					"TextMarkTextContent": "Предварительный экспорт"
 				},
 				{
 					"Type": "NodeText",
@@ -940,7 +940,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Заголовок с новой страницы"
+					"TextMarkTextContent": "Начинать заголовки с новой страницы"
 				},
 				{
 					"Type": "NodeText",
@@ -949,7 +949,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Объединить дочерние документы"
+					"TextMarkTextContent": "Объединить поддокументы"
 				},
 				{
 					"Type": "NodeText",

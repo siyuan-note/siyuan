@@ -545,7 +545,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Фрагменты кода"
+									"TextMarkTextContent": "Фрагмент кода"
 								},
 								{
 									"Type": "NodeText",
@@ -812,7 +812,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Маркет"
+									"TextMarkTextContent": "Магазин"
 								},
 								{
 									"Type": "NodeText",
@@ -821,7 +821,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Темы"
+									"TextMarkTextContent": "Тема"
 								},
 								{
 									"Type": "NodeText",
@@ -1036,7 +1036,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Темы"
+									"TextMarkTextContent": "Тема"
 								},
 								{
 									"Type": "NodeText",
@@ -1045,7 +1045,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Откройте папку с темами"
+									"TextMarkTextContent": "Открыть папку тем"
 								}
 							]
 						}
@@ -1134,7 +1134,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Темы"
+									"TextMarkTextContent": "Тема"
 								},
 								{
 									"Type": "NodeText",
@@ -1280,7 +1280,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Темы"
+									"TextMarkTextContent": "Тема"
 								},
 								{
 									"Type": "NodeText",
@@ -1289,7 +1289,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Откройте папку с темами"
+									"TextMarkTextContent": "Открыть папку тем"
 								}
 							]
 						}
@@ -1456,7 +1456,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Темы"
+									"TextMarkTextContent": "Тема"
 								},
 								{
 									"Type": "NodeText",

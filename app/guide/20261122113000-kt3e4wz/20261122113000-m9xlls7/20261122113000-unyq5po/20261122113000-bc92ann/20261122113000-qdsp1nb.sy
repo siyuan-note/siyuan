@@ -86,7 +86,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Поставщики API"
+					"TextMarkTextContent": "Поставщик API"
 				},
 				{
 					"Type": "NodeText",

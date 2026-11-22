@@ -698,7 +698,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "встроенные блоки"
+					"TextMarkTextContent": "Встраиваемый блок"
 				},
 				{
 					"Type": "NodeText",
@@ -707,7 +707,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Преобразовать в обычное содержимое"
+					"TextMarkTextContent": "Преобразовать в обычные блоки"
 				},
 				{
 					"Type": "NodeText",
@@ -730,7 +730,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "встроенные блоки"
+					"TextMarkTextContent": "Встраиваемый блок"
 				},
 				{
 					"Type": "NodeText",

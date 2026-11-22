@@ -135,7 +135,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Порт службы"
+									"TextMarkTextContent": "Порт сервиса"
 								},
 								{
 									"Type": "NodeText",
@@ -270,7 +270,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Служба публикации"
+									"TextMarkTextContent": "Сервис публикации"
 								},
 								{
 									"Type": "NodeText",
@@ -307,7 +307,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Basic-аутентификация службы"
+									"TextMarkTextContent": "Базовая аутентификация сервиса"
 								},
 								{
 									"Type": "NodeText",
@@ -316,7 +316,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Учётная запись аутентификации"
+									"TextMarkTextContent": "Аутентифицированные учётные записи"
 								},
 								{
 									"Type": "NodeText",
@@ -335,7 +335,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Учётная запись аутентификации"
+									"TextMarkTextContent": "Аутентифицированные учётные записи"
 								},
 								{
 									"Type": "NodeText",

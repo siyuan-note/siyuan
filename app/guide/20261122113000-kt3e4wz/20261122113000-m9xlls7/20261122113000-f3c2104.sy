@@ -83,7 +83,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -92,7 +92,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Группировка результатов"
+					"TextMarkTextContent": "Сгруппированные результаты"
 				},
 				{
 					"Type": "NodeText",
@@ -101,7 +101,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Развёрнуто по умолчанию"
+					"TextMarkTextContent": "Разворачивать по умолчанию"
 				},
 				{
 					"Type": "NodeText",
@@ -110,7 +110,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Свёрнуто по умолчанию"
+					"TextMarkTextContent": "Сворачивать по умолчанию"
 				},
 				{
 					"Type": "NodeText",
@@ -306,7 +306,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Учитывать регистр"
+					"TextMarkTextContent": "Регистронезависимый"
 				},
 				{
 					"Type": "NodeText",

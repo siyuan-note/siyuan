@@ -33,7 +33,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Поиск по содержимому файлов ресурсов"
+					"TextMarkTextContent": "Поиск содержимого файла активов"
 				},
 				{
 					"Type": "NodeText",

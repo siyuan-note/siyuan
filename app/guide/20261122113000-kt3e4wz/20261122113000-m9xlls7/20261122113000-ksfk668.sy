@@ -566,7 +566,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Создать поддокумент"
+					"TextMarkTextContent": "Создать под документ"
 				},
 				{
 					"Type": "NodeText",
@@ -575,7 +575,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Выбрать место и создать документ"
+					"TextMarkTextContent": "Выбрать расположение и создать документ"
 				},
 				{
 					"Type": "NodeText",

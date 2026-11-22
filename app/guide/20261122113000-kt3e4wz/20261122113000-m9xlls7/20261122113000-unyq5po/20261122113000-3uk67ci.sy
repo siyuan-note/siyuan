@@ -446,7 +446,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Шифрование блокнотов"
+					"TextMarkTextContent": "Зашифрованная записная книжка"
 				},
 				{
 					"Type": "NodeText",
@@ -527,7 +527,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ещё"
+									"TextMarkTextContent": "Больше"
 								},
 								{
 									"Type": "NodeText",
@@ -536,7 +536,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Создать зашифрованный блокнот"
+									"TextMarkTextContent": "Новая зашифрованная записная книжка"
 								}
 							]
 						}
@@ -578,7 +578,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Создать"
+									"TextMarkTextContent": "Создание"
 								},
 								{
 									"Type": "NodeText",
@@ -587,7 +587,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Создать зашифрованный блокнот"
+									"TextMarkTextContent": "Новая зашифрованная записная книжка"
 								}
 							]
 						}
@@ -766,7 +766,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Шифрование блокнотов"
+					"TextMarkTextContent": "Зашифрованная записная книжка"
 				},
 				{
 					"Type": "NodeText",
@@ -1001,7 +1001,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Шифрование блокнотов"
+					"TextMarkTextContent": "Зашифрованная записная книжка"
 				},
 				{
 					"Type": "NodeText",
@@ -1077,7 +1077,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Блокнот"
+					"TextMarkTextContent": "блокнот"
 				},
 				{
 					"Type": "NodeText",
@@ -1086,7 +1086,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -1095,7 +1095,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Очистка неиспользуемых ресурсов"
+					"TextMarkTextContent": "Очистить ресурсы без ссылок"
 				},
 				{
 					"Type": "NodeText",
@@ -1359,7 +1359,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Шифрование блокнотов"
+					"TextMarkTextContent": "Зашифрованная записная книжка"
 				},
 				{
 					"Type": "NodeText",
@@ -1368,7 +1368,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Упаковать и извлечь"
+					"TextMarkTextContent": "Архивировать и убрать"
 				},
 				{
 					"Type": "NodeText",
@@ -1437,7 +1437,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Шифрование блокнотов"
+					"TextMarkTextContent": "Зашифрованная записная книжка"
 				},
 				{
 					"Type": "NodeText",

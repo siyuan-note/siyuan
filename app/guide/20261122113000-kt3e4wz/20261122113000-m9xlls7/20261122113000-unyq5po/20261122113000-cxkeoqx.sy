@@ -95,7 +95,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Виртуальные ссылки"
+					"TextMarkTextContent": "Виртуальная ссылка"
 				},
 				{
 					"Type": "NodeText",
@@ -165,7 +165,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Виртуальные ссылки"
+					"TextMarkTextContent": "Виртуальная ссылка"
 				},
 				{
 					"Type": "NodeText",

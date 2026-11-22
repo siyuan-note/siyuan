@@ -111,7 +111,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Оптимизация форматирования"
+					"TextMarkTextContent": "Оптимизировать типографику"
 				},
 				{
 					"Type": "NodeText",

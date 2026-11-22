@@ -126,7 +126,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Поделиться в сообществе"
+									"TextMarkTextContent": "Поделиться с сообществом"
 								},
 								{
 									"Type": "NodeText",

@@ -84,7 +84,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "поведение"
+					"TextMarkTextContent": "Поведение"
 				},
 				{
 					"Type": "NodeText",
@@ -93,7 +93,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Способ открытия ресурсов"
+					"TextMarkTextContent": "Открытие ресурсов"
 				},
 				{
 					"Type": "NodeText",
@@ -424,7 +424,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Показывать имя файла изображения"
+					"TextMarkTextContent": "Показывать имена файлов изображений"
 				},
 				{
 					"Type": "NodeText",
@@ -474,7 +474,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Показывать текст подсказки изображения"
+					"TextMarkTextContent": "Показывать текст подсказок изображений"
 				},
 				{
 					"Type": "NodeText",
@@ -1185,7 +1185,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Путь к файлу ресурсов"
+					"TextMarkTextContent": "Путь к активу"
 				},
 				{
 					"Type": "NodeText",
@@ -1827,7 +1827,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Распознать текст с помощью ИИ"
+					"TextMarkTextContent": "Выполнить OCR с помощью ИИ"
 				},
 				{
 					"Type": "NodeText",
@@ -1896,7 +1896,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Интенсивность рассуждений"
+					"TextMarkTextContent": "Усилие рассуждения"
 				},
 				{
 					"Type": "NodeText",
@@ -2169,7 +2169,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Копировать как PNG"
+					"TextMarkTextContent": "Скопировать как PNG"
 				},
 				{
 					"Type": "NodeText",
@@ -2252,7 +2252,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Добавить изображение заголовка"
+					"TextMarkTextContent": "Добавить обложку"
 				},
 				{
 					"Type": "NodeText",

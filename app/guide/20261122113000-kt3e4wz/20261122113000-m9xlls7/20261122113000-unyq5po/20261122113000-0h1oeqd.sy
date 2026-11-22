@@ -238,7 +238,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Сортировка"
+					"TextMarkTextContent": "Сортировать"
 				},
 				{
 					"Type": "NodeText",
@@ -247,7 +247,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Пользовательская сортировка"
+					"TextMarkTextContent": "Индивидуальная сортировка"
 				},
 				{
 					"Type": "NodeText",
@@ -270,7 +270,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Сортировка"
+					"TextMarkTextContent": "Сортировать"
 				},
 				{
 					"Type": "NodeText",

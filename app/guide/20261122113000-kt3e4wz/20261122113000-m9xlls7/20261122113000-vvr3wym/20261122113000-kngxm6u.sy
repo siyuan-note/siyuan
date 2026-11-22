@@ -271,7 +271,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "поведение"
+					"TextMarkTextContent": "Поведение"
 				},
 				{
 					"Type": "NodeText",
@@ -289,7 +289,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Скрыть значки в навигационной цепочке"
+					"TextMarkTextContent": "Скрывать значки цепочки навигации"
 				},
 				{
 					"Type": "NodeText",
@@ -428,7 +428,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Включать дочерние блоки в обратные ссылки"
+					"TextMarkTextContent": "Включать ли дочерние блоки в обратные ссылки"
 				},
 				{
 					"Type": "NodeText",
@@ -566,7 +566,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Фильтр источников обратных ссылок"
+					"TextMarkTextContent": "Фильтровать источники обратных ссылок"
 				},
 				{
 					"Type": "NodeText",

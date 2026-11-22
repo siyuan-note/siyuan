@@ -149,7 +149,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Копировать гиперссылку на запись"
+					"TextMarkTextContent": "Копировать гиперссылку элемента"
 				},
 				{
 					"Type": "NodeText",
@@ -507,7 +507,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Копировать гиперссылку на блок"
+									"TextMarkTextContent": "Скопировать гиперссылку блока"
 								},
 								{
 									"Type": "NodeText",

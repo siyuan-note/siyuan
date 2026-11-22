@@ -423,7 +423,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								}
 							]
 						}
@@ -1119,7 +1119,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "встроенные блоки"
+					"TextMarkTextContent": "Встраиваемый блок"
 				},
 				{
 					"Type": "NodeText",
@@ -1142,7 +1142,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "встроенные блоки"
+					"TextMarkTextContent": "Встраиваемый блок"
 				},
 				{
 					"Type": "NodeText",
@@ -1151,7 +1151,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Навигационная цепочка встроенного блока"
+					"TextMarkTextContent": "Встраиваемые блоковые крошки"
 				},
 				{
 					"Type": "NodeText",
@@ -1160,7 +1160,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "встроенные блоки"
+					"TextMarkTextContent": "Встраиваемый блок"
 				},
 				{
 					"Type": "NodeText",
@@ -1169,7 +1169,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Отображать родительский путь документа в навигационной цепочке"
+					"TextMarkTextContent": "Показывать родительский путь в навигационной цепочке"
 				},
 				{
 					"Type": "NodeText",
@@ -1266,7 +1266,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Горячая клавиша"
+					"TextMarkTextContent": "Карта клавиш"
 				},
 				{
 					"Type": "NodeText",
@@ -2162,7 +2162,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -2180,7 +2180,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -2286,7 +2286,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "По размеру холста"
+					"TextMarkTextContent": "Вписать в холст"
 				},
 				{
 					"Type": "NodeText",
@@ -2352,7 +2352,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -2521,7 +2521,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -2539,7 +2539,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Стиль линий"
+					"TextMarkTextContent": "Стиль соединительных линий"
 				},
 				{
 					"Type": "NodeText",
@@ -2562,7 +2562,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -2571,7 +2571,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Стиль линий"
+					"TextMarkTextContent": "Стиль соединительных линий"
 				},
 				{
 					"Type": "NodeText",
@@ -2580,7 +2580,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -2621,7 +2621,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -2630,7 +2630,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Стиль линий по умолчанию для новых карт"
+					"TextMarkTextContent": "Стиль соединений по умолчанию для новых карт"
 				},
 				{
 					"Type": "NodeText",
@@ -2653,7 +2653,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -2671,7 +2671,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Темы"
+					"TextMarkTextContent": "Тема"
 				},
 				{
 					"Type": "NodeText",
@@ -2708,7 +2708,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -2735,7 +2735,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -2753,7 +2753,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Очистить ручные цвета"
+					"TextMarkTextContent": "Сбросить ручные цвета"
 				},
 				{
 					"Type": "NodeText",
@@ -2833,7 +2833,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Внешний вид линии связи"
+					"TextMarkTextContent": "Внешний вид связи"
 				},
 				{
 					"Type": "NodeText",
@@ -2842,7 +2842,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Путь"
+					"TextMarkTextContent": "Траектория"
 				},
 				{
 					"Type": "NodeText",
@@ -2879,7 +2879,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Внешний вид линии связи"
+					"TextMarkTextContent": "Внешний вид связи"
 				},
 				{
 					"Type": "NodeText",
@@ -2938,7 +2938,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Двунаправленная стрелка"
+					"TextMarkTextContent": "Стрелки на обоих концах"
 				},
 				{
 					"Type": "NodeText",
@@ -2947,7 +2947,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Без стрелки"
+					"TextMarkTextContent": "Без стрелок"
 				},
 				{
 					"Type": "NodeText",
@@ -2984,7 +2984,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Восстановить автоподключение"
+					"TextMarkTextContent": "Восстановить автоматические точки соединения"
 				},
 				{
 					"Type": "NodeText",
@@ -3088,7 +3088,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Сводка"
+					"TextMarkTextContent": "Обобщение"
 				},
 				{
 					"Type": "NodeText",
@@ -4573,7 +4573,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Фокус"
+					"TextMarkTextContent": "Увеличить"
 				},
 				{
 					"Type": "NodeText",
@@ -5097,7 +5097,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Автовысота строки"
+					"TextMarkTextContent": "Автоподбор высоты строки"
 				},
 				{
 					"Type": "NodeText",
@@ -5399,7 +5399,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "поведение"
+					"TextMarkTextContent": "Поведение"
 				},
 				{
 					"Type": "NodeText",
@@ -5569,7 +5569,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "По центру"
+					"TextMarkTextContent": "Центр"
 				},
 				{
 					"Type": "NodeText",

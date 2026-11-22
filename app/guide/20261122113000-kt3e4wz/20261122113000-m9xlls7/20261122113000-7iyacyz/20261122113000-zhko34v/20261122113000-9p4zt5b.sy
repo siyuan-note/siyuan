@@ -150,7 +150,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "снимков данных"
+									"TextMarkTextContent": "Снимок данных"
 								},
 								{
 									"Type": "NodeText",
@@ -207,7 +207,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Загрузить"
+									"TextMarkTextContent": "Закачать"
 								}
 							]
 						}
@@ -242,7 +242,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Локальные снимки"
+									"TextMarkTextContent": "Локальный снимок"
 								},
 								{
 									"Type": "NodeText",
@@ -251,7 +251,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Облачные снимки"
+									"TextMarkTextContent": "Облачный снимок"
 								},
 								{
 									"Type": "NodeText",

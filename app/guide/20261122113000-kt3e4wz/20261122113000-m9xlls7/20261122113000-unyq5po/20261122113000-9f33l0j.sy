@@ -99,7 +99,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Шаблоны"
+					"TextMarkTextContent": "Шаблон"
 				},
 				{
 					"Type": "NodeText",
@@ -150,7 +150,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkTextContent": "Введите"
 				},
 				{
 					"Type": "NodeText",

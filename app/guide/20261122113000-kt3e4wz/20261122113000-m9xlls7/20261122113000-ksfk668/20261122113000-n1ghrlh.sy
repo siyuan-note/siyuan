@@ -76,7 +76,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -223,7 +223,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -255,7 +255,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -273,7 +273,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -320,7 +320,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -356,7 +356,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Замена"
+					"TextMarkTextContent": "Заменить"
 				},
 				{
 					"Type": "NodeText",
@@ -468,7 +468,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -529,7 +529,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -632,7 +632,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -664,7 +664,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",
@@ -673,7 +673,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Авторизовать каталог ресурсов"
+					"TextMarkTextContent": "Разрешить доступ к папке ресурсов"
 				},
 				{
 					"Type": "NodeText",
@@ -725,7 +725,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ещё"
+					"TextMarkTextContent": "Больше"
 				},
 				{
 					"Type": "NodeText",

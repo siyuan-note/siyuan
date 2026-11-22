@@ -98,7 +98,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Маркет"
+									"TextMarkTextContent": "Магазин"
 								},
 								{
 									"Type": "NodeText",
@@ -107,7 +107,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Иконки"
+									"TextMarkTextContent": "Значок"
 								},
 								{
 									"Type": "NodeText",
@@ -257,7 +257,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Иконки"
+									"TextMarkTextContent": "Значок"
 								},
 								{
 									"Type": "NodeText",
@@ -266,7 +266,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Откройте папку с иконками"
+									"TextMarkTextContent": "Открыть папку значков"
 								}
 							]
 						}
@@ -355,7 +355,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Иконки"
+									"TextMarkTextContent": "Значок"
 								},
 								{
 									"Type": "NodeText",
@@ -501,7 +501,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Иконки"
+									"TextMarkTextContent": "Значок"
 								},
 								{
 									"Type": "NodeText",
@@ -510,7 +510,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Откройте папку с иконками"
+									"TextMarkTextContent": "Открыть папку значков"
 								}
 							]
 						}
@@ -687,7 +687,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Иконки"
+									"TextMarkTextContent": "Значок"
 								},
 								{
 									"Type": "NodeText",
@@ -1410,7 +1410,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "Иконки"
+													"TextMarkTextContent": "Значок"
 												},
 												{
 													"Type": "NodeText",

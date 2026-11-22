@@ -543,7 +543,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
+									"TextMarkTextContent": "https://liuyun.io/apis/siyuan/inbox/addCloudShorthand"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (для международных аккаунтов) или "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "https://ld246.com/apis/siyuan/inbox/addCloudShorthand"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (для аккаунтов в Китае)"
 								}
 							]
 						}
@@ -648,12 +661,22 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/settings/account",
+									"TextMarkTextContent": "Liuyun — Настройки — Аккаунт"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (для международных аккаунтов) или в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
 									"TextMarkAHref": "https://ld246.com/settings/account",
 									"TextMarkTextContent": "LianDi — Настройки — Аккаунт"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ""
+									"Data": " (для аккаунтов в Китае)"
 								}
 							]
 						}

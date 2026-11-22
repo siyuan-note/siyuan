@@ -115,7 +115,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Маркет"
+					"TextMarkTextContent": "Магазин"
 				},
 				{
 					"Type": "NodeText",
@@ -128,7 +128,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Загруженные"
+					"TextMarkTextContent": "Загружено"
 				},
 				{
 					"Type": "NodeText",

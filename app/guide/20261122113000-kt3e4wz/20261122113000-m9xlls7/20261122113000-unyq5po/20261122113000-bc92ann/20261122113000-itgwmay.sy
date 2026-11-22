@@ -86,7 +86,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Модель решений"
+					"TextMarkTextContent": "Модель принятия решений"
 				},
 				{
 					"Type": "NodeText",

@@ -56,8 +56,13 @@ function collectGuideData(guideID) {
                 if (!node || typeof node !== "object") {
                     return;
                 }
-                if (typeof node.ID === "string" && /^\d{14}-[a-z0-9]{7}$/.test(node.ID)) {
+                if (typeof node.ID === "string" && node.ID.length > 0) {
                     blockIDs.add(node.ID);
+                    nonAssetIDs.add(node.ID);
+                }
+                if (node.Properties && typeof node.Properties.id === "string" && node.Properties.id.length > 0) {
+                    blockIDs.add(node.Properties.id);
+                    nonAssetIDs.add(node.Properties.id);
                 }
                 if (node.Type === "NodeAttributeView" && node.AttributeViewID) {
                     avRefs.add(node.AttributeViewID);
@@ -101,6 +106,9 @@ test("Russian and Simplified Chinese guides have disjoint IDs, AV files, and lan
     assert.equal(ruBoxDoc.boxDocID, ruGuideID);
     assert.ok(statSync(path.join(ru.root, `${ruGuideID}.sy`)).isFile());
 
+    for (const id of ru.blockIDs) {
+        assert.match(id, /^\d{14}-[a-z0-9]{7}$/, `Russian guide block ID has invalid format: ${id}`);
+    }
     for (const id of ru.nonAssetIDs) {
         assert.equal(zh.nonAssetIDs.has(id), false, `shared non-asset ID between zh-CN and ru guides: ${id}`);
     }

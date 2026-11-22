@@ -152,7 +152,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Выбрать место и создать документ"
+					"TextMarkTextContent": "Выбрать расположение и создать документ"
 				},
 				{
 					"Type": "NodeText",
@@ -488,7 +488,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Фильтр источников обратных ссылок"
+					"TextMarkTextContent": "Фильтровать источники обратных ссылок"
 				},
 				{
 					"Type": "NodeText",
@@ -497,7 +497,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Поле базы данных"
+					"TextMarkTextContent": "Поля базы данных"
 				},
 				{
 					"Type": "NodeText",
@@ -639,7 +639,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Максимальная длина динамического текста якоря"
+									"TextMarkTextContent": "Максимальная длина динамического текста якоря ссылки блока"
 								},
 								{
 									"Type": "NodeText",
@@ -860,7 +860,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",
@@ -915,7 +915,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Введите"
 								},
 								{
 									"Type": "NodeText",

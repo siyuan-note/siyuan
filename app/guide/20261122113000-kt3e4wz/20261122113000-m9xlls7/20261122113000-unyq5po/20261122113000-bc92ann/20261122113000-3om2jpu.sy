@@ -101,7 +101,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Модель эмбеддингов"
+					"TextMarkTextContent": "Модель встраивания"
 				},
 				{
 					"Type": "NodeText",
@@ -191,7 +191,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Способ поиска"
+					"TextMarkTextContent": "Метод поиска"
 				},
 				{
 					"Type": "NodeText",
@@ -285,7 +285,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Модель эмбеддингов"
+					"TextMarkTextContent": "Модель встраивания"
 				},
 				{
 					"Type": "NodeText",
@@ -352,7 +352,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Перестроить индекс эмбеддингов"
+					"TextMarkTextContent": "Перестроить индекс вложений"
 				},
 				{
 					"Type": "NodeText",

@@ -257,7 +257,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Доверять и загружать удалённые плагины и оформление"
+					"TextMarkTextContent": "Доверять удалённым плагинам и оформлению и загружать их"
 				},
 				{
 					"Type": "NodeText",

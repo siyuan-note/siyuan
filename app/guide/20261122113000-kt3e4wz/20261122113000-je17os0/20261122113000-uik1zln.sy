@@ -401,7 +401,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "Создавать документ конфликта при конфликте синхронизации"
+													"TextMarkTextContent": "Создавать документацию конфликтов при возникновении конфликтов синхронизации"
 												},
 												{
 													"Type": "NodeText",
@@ -451,7 +451,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "снимков данных"
+									"TextMarkTextContent": "Снимок данных"
 								},
 								{
 									"Type": "NodeText",
@@ -460,7 +460,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Облачные снимки"
+									"TextMarkTextContent": "Облачный снимок"
 								},
 								{
 									"Type": "NodeText",

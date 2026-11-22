@@ -696,7 +696,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Горячая клавиша"
+									"TextMarkTextContent": "Карта клавиш"
 								},
 								{
 									"Type": "NodeText",
@@ -977,7 +977,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Макет нового окна"
+					"TextMarkTextContent": "Макеты нового окна"
 				},
 				{
 					"Type": "NodeText",
@@ -1000,7 +1000,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Макет главного окна"
+					"TextMarkTextContent": "Макеты главного окна"
 				},
 				{
 					"Type": "NodeText",
@@ -1027,7 +1027,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Переключиться"
+					"TextMarkTextContent": "Перейти"
 				},
 				{
 					"Type": "NodeText",
@@ -1068,7 +1068,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "При использовании "
+					"TextMarkTextContent": "Использовать"
 				},
 				{
 					"Type": "NodeText",
@@ -1100,7 +1100,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Макет главного окна"
+					"TextMarkTextContent": "Макеты главного окна"
 				},
 				{
 					"Type": "NodeText",
@@ -1109,7 +1109,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Макет нового окна"
+					"TextMarkTextContent": "Макеты нового окна"
 				},
 				{
 					"Type": "NodeText",

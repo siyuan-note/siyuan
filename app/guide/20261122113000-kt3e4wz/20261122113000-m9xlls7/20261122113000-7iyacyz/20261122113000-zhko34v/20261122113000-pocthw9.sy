@@ -116,7 +116,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Повторить"
+					"TextMarkTextContent": "Попробовать снова"
 				},
 				{
 					"Type": "NodeText",
@@ -474,7 +474,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Очистить конфигурацию"
+					"TextMarkTextContent": "Очистить настройки"
 				},
 				{
 					"Type": "NodeText",
@@ -511,7 +511,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Свернуть подробности"
+					"TextMarkTextContent": "Скрыть подробности"
 				},
 				{
 					"Type": "NodeText",
@@ -603,7 +603,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Загрузка ресурсов"
+					"TextMarkTextContent": "Загрузка файлов ресурсов"
 				},
 				{
 					"Type": "NodeText",
@@ -1237,7 +1237,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Интервал синхронизации"
+									"TextMarkTextContent": "интервал синхронизации"
 								},
 								{
 									"Type": "NodeText",
@@ -1321,7 +1321,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Синхронизация по уведомлению"
+					"TextMarkTextContent": "Синхронизировать восприятие"
 				},
 				{
 					"Type": "NodeText",
@@ -1358,7 +1358,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ускорение синхронизации в локальной сети"
+					"TextMarkTextContent": "Ускорение синхронизации по локальной сети"
 				},
 				{
 					"Type": "NodeText",

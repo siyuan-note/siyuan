@@ -121,7 +121,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Переключение режима"
+									"TextMarkTextContent": "Переключить режим"
 								},
 								{
 									"Type": "NodeText",
@@ -130,7 +130,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Предпросмотр экспорта"
+									"TextMarkTextContent": "Предварительный экспорт"
 								}
 							]
 						}
@@ -164,7 +164,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Копировать в WeChat"
+									"TextMarkTextContent": "Скопировать в Wechat MP"
 								},
 								{
 									"Type": "NodeText",
@@ -173,7 +173,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Копировать в Zhihu"
+									"TextMarkTextContent": "Скопировать в Zhihu"
 								},
 								{
 									"Type": "NodeText",
@@ -182,7 +182,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Копировать в Yuque"
+									"TextMarkTextContent": "Скопировать в Yuque"
 								}
 							]
 						}

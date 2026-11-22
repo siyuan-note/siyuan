@@ -389,7 +389,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Компоновка боковых панелей"
+					"TextMarkTextContent": "Левое и правое расположение"
 				},
 				{
 					"Type": "NodeText",
@@ -492,7 +492,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Сетевой сервер"
+					"TextMarkTextContent": "Сетевое обслуживание"
 				},
 				{
 					"Type": "NodeText",
@@ -584,7 +584,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ещё"
+									"TextMarkTextContent": "Больше"
 								},
 								{
 									"Type": "NodeText",
@@ -1120,7 +1120,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Путь сохранения новых быстрых заметок по умолчанию"
+					"TextMarkTextContent": "Путь сохранения по умолчанию для быстрых заметок"
 				},
 				{
 					"Type": "NodeText",

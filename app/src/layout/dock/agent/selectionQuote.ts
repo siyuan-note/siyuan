@@ -24,7 +24,11 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
         const text = selection.toString();
         if (text.trim()) return {message, text, range};
     };
-    doc.addEventListener("selectionchange", () => {
+    const capture = {...options, capture: true};
+    let pointerId: number;
+    let touching = false;
+    const update = () => {
+        if (pointerId !== undefined || touching) return;
         const passage = selectedPassage();
         if (!passage) return hide();
         const rect = passage.range.getBoundingClientRect();
@@ -39,7 +43,39 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
         const top = above >= Math.max(bounds.top, getTopBarHeight()) ? above : Math.min(bounds.bottom, rect.bottom) + gap;
         const left = Math.max(bounds.left, Math.min(rect.left + (rect.width - button.offsetWidth) / 2, bounds.right - button.offsetWidth));
         setPosition(button, left, top, rect.height + 2 * gap);
+    };
+    messages.addEventListener("pointerdown", event => {
+        if (event.button !== 0 || !event.isPrimary) return;
+        pointerId = event.pointerId;
+        hide();
+    }, capture);
+    doc.addEventListener("pointerup", event => {
+        if (event.pointerId !== pointerId) return;
+        pointerId = undefined;
+        update();
+    }, capture);
+    doc.addEventListener("pointercancel", event => {
+        if (event.pointerId === pointerId) pointerId = undefined;
+    }, capture);
+    // 原生长按选词可能先取消指针事件，手指抬起前仍要等待触摸结束。
+    messages.addEventListener("touchstart", () => {
+        touching = true;
+        hide();
+    }, {...capture, passive: true});
+    doc.addEventListener("touchend", event => {
+        if (!touching || event.touches.length) return;
+        touching = false;
+        update();
+    }, capture);
+    doc.addEventListener("touchcancel", event => {
+        if (!event.touches.length) touching = false;
+    }, capture);
+    doc.defaultView.addEventListener("blur", () => {
+        pointerId = undefined;
+        touching = false;
+        hide();
     }, options);
+    doc.addEventListener("selectionchange", update, options);
     button.addEventListener("pointerdown", event => event.preventDefault(), options);
     button.addEventListener("click", () => {
         const passage = selectedPassage();

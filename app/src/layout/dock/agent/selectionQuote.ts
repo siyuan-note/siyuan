@@ -1,3 +1,4 @@
+import {getTopBarHeight} from "../../../layout/getTopBarHeight";
 import {setPosition} from "../../../util/setPosition";
 
 export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLElement, text: string) => void) => {
@@ -6,8 +7,8 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
     const options = {signal: controller.signal};
     const button = doc.createElement("button");
     button.type = "button";
-    button.className = "b3-button agent-chat__selection-quote";
-    button.textContent = window.siyuan.languages.agentQuote;
+    button.className = "b3-button b3-button--small b3-button--secondary agent-chat__selection-quote";
+    button.textContent = window.siyuan.languages.agentQuoteText;
     const hide = () => button.remove();
     const selectedPassage = () => {
         const selection = doc.getSelection();
@@ -33,7 +34,11 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
             button.style.zIndex = (++window.siyuan.zIndex).toString();
             doc.body.appendChild(button);
         }
-        setPosition(button, Math.max(bounds.left, rect.left), Math.min(bounds.bottom, rect.bottom) + 4, rect.height + 8);
+        const gap = 4;
+        const above = rect.top - button.offsetHeight - gap;
+        const top = above >= Math.max(bounds.top, getTopBarHeight()) ? above : Math.min(bounds.bottom, rect.bottom) + gap;
+        const left = Math.max(bounds.left, Math.min(rect.left + (rect.width - button.offsetWidth) / 2, bounds.right - button.offsetWidth));
+        setPosition(button, left, top, rect.height + 2 * gap);
     }, options);
     button.addEventListener("pointerdown", event => event.preventDefault(), options);
     button.addEventListener("click", () => {

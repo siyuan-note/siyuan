@@ -1,4 +1,5 @@
 {
+	"saveToGallery": "Save to Gallery",
 	"bazaarUpdateDate": "Update date",
 	"agentQuoteText": "Quote text",
 	"agentQuote": "Quote in Agent Chat",
@@ -3801,6 +3802,8 @@
 		"472": "Failed to convert the legacy mind map, please reopen the document and try again",
 		"473": "An unexpected error occurred while processing the request. Check the system log",
 		"474": "Encrypted notebooks cannot be disabled in a workspace linked to sync, even while sync is paused",
-		"475": "Failed to share the attachment"
+		"475": "Failed to share the attachment",
+		"476": "Saved to gallery",
+		"477": "Could not save to gallery"
 	}
 }

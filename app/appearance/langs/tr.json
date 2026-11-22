@@ -1,4 +1,5 @@
 {
+	"saveToGallery": "Galeriye kaydet",
 	"bazaarUpdateDate": "Güncelleme tarihi",
 	"agentQuoteText": "Metni alıntıla",
 	"agentQuote": "Aracı sohbetinde alıntıla",
@@ -3801,6 +3802,8 @@
 		"472": "Eski zihin haritası dönüştürülemedi, lütfen belgeyi yeniden açıp tekrar deneyin",
 		"473": "İstek işlenirken beklenmeyen bir hata oluştu. Sistem günlüğünü kontrol edin",
 		"474": "Eşitlemeye bağlı bir çalışma alanında, eşitleme duraklatılmış olsa bile şifreli not defterleri devre dışı bırakılamaz",
-		"475": "Ek paylaşılamadı"
+		"475": "Ek paylaşılamadı",
+		"476": "Galeriye kaydedildi",
+		"477": "Galeriye kaydedilemedi"
 	}
 }

@@ -1,4 +1,5 @@
 {
+	"saveToGallery": "Lưu vào thư viện ảnh",
 	"bazaarUpdateDate": "Ngày cập nhật",
 	"agentQuoteText": "Trích dẫn văn bản",
 	"agentQuote": "Trích dẫn trong cuộc trò chuyện với tác nhân",
@@ -3801,6 +3802,8 @@
 		"472": "Không thể chuyển đổi sơ đồ tư duy kiểu cũ. Hãy mở lại tài liệu rồi thử lại.",
 		"473": "Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu. Hãy kiểm tra nhật ký hệ thống",
 		"474": "Không thể tắt sổ tay mã hóa trong không gian làm việc được liên kết với đồng bộ, kể cả khi đang tạm dừng đồng bộ",
-		"475": "Không thể chia sẻ tệp đính kèm"
+		"475": "Không thể chia sẻ tệp đính kèm",
+		"476": "Đã lưu vào thư viện ảnh",
+		"477": "Không thể lưu vào thư viện ảnh"
 	}
 }

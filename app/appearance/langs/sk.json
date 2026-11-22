@@ -1,4 +1,5 @@
 {
+	"saveToGallery": "Uložiť do galérie",
 	"bazaarUpdateDate": "Dátum aktualizácie",
 	"agentQuoteText": "Citovať text",
 	"agentQuote": "Citovať v chate s agentom",
@@ -3801,6 +3802,8 @@
 		"472": "Staršiu myšlienkovú mapu sa nepodarilo previesť, znova otvorte dokument a skúste to ešte raz",
 		"473": "Pri spracovaní požiadavky nastala neočakávaná chyba. Skontrolujte systémový denník",
 		"474": "V pracovnom priestore prepojenom so synchronizáciou nemožno vypnúť šifrované zápisníky, ani keď je synchronizácia pozastavená",
-		"475": "Prílohu sa nepodarilo zdieľať"
+		"475": "Prílohu sa nepodarilo zdieľať",
+		"476": "Uložené v galérii",
+		"477": "Nepodarilo sa uložiť do galérie"
 	}
 }

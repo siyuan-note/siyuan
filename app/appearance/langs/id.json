@@ -1,4 +1,5 @@
 {
+	"saveToGallery": "Simpan ke Galeri",
 	"bazaarUpdateDate": "Tanggal Pembaruan",
 	"agentQuoteText": "Kutip teks",
 	"agentQuote": "Kutip dalam percakapan agen",
@@ -3801,6 +3802,8 @@
 		"472": "Gagal mengonversi peta pikiran lama, buka kembali dokumen dan coba lagi",
 		"473": "Terjadi kesalahan tak terduga saat memproses permintaan. Periksa log sistem",
 		"474": "Buku catatan terenkripsi tidak dapat dinonaktifkan di ruang kerja yang terhubung ke sinkronisasi, meski sinkronisasi dijeda",
-		"475": "Gagal membagikan lampiran"
+		"475": "Gagal membagikan lampiran",
+		"476": "Disimpan ke galeri",
+		"477": "Tidak dapat menyimpan ke galeri"
 	}
 }

@@ -17,10 +17,10 @@ const menuCode = transpileModule("const videoMenu = " + declaration.initializer.
 const utilSource = createSourceFile("util.ts", readFileSync(join(__dirname, "util.ts"), "utf8"), ScriptTarget.Latest, true);
 const utilDeclarations = utilSource.statements.filter(isVariableStatement).flatMap(statement =>
     Array.from(statement.declarationList.declarations));
-const assetFunctions = ["getAssetShareItem", "getAssetExportItems"];
-const shareCode = transpileModule(assetFunctions.map(name =>
+const assetFunctions = ["getAssetShareItem", "getAssetExportItems", "getMediaAssetExportItems"] as const;
+const assetMenuCode = transpileModule(assetFunctions.map(name =>
     "const " + utilDeclarations.find(item => item.name.getText(utilSource) === name).getText(utilSource) + ";"
-).join("\n") + "\n({getAssetShareItem, getAssetExportItems});",
+).join("\n") + `\n({${assetFunctions.join(", ")}});`,
     {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
 
 const gutterSource = createSourceFile("gutter.ts", readFileSync(join(__dirname, "../protyle/gutter/index.ts"), "utf8"),
@@ -42,6 +42,7 @@ const createHarness = (disabled: boolean, src: string | null, canExport = true, 
     platform?: "android" | "harmony" | "legacy") => {
     const exports: string[] = [];
     const shares: string[] = [];
+    const saves: string[] = [];
     const mutations: string[] = [];
     const transactions: Array<{oldHTML: string; newHTML: string}> = [];
     const protyle = {disabled, app: {}};
@@ -55,17 +56,19 @@ const createHarness = (disabled: boolean, src: string | null, canExport = true, 
         get outerHTML() { return `<div><video src="${src}"${loop ? " loop" : ""}></video></div>`; },
         querySelector: () => media,
     };
-    const nativeBridge = {shareAsset: (path: string) => { shares.push(path); }};
+    const shareBridge = {shareAsset: (path: string) => { shares.push(path); }};
     const window = {
-        siyuan: {languages: {link: "Link", rename: "Rename", openBy: "Open", assets: "Assets", shareAsset: "Share"}},
-        JSAndroid: platform === "android" ? nativeBridge : platform === "legacy" ? {} : undefined,
-        JSHarmony: platform === "harmony" ? nativeBridge : undefined,
+        siyuan: {languages: {link: "Link", rename: "Rename", openBy: "Open", assets: "Assets", shareAsset: "Share",
+            saveToGallery: "Save to Gallery"}},
+        JSAndroid: platform === "android" ? {...shareBridge, saveAssetToGallery: (path: string) => { saves.push(path); }} :
+            platform === "legacy" ? {} : undefined,
+        JSHarmony: platform === "harmony" ? shareBridge : undefined,
     };
     const exportAsset = (path: string) => canExport ? {id: "export", click: () => exports.push(path)} : {ignore: true};
-    const assetMenus = runInNewContext(shareCode, {
+    const assetMenus = runInNewContext(assetMenuCode, {
         window, exportAsset, getHostCapabilities: () => ({importExport: canExport}),
         isInAndroid: () => platform === "android" || platform === "legacy", isInHarmony: () => platform === "harmony",
-    }) as Pick<typeof import("./util"), "getAssetShareItem" | "getAssetExportItems">;
+    }) as Pick<typeof import("./util"), typeof assetFunctions[number]>;
     const context = {
         window,
         ...assetMenus,
@@ -79,7 +82,7 @@ const createHarness = (disabled: boolean, src: string | null, canExport = true, 
     };
     const videoMenu = runInNewContext(menuCode, context) as (editor: typeof protyle, block: typeof nodeElement,
                                                           type: string) => IMenu[];
-    return {context, protyle, nodeElement, videoMenu, exports, shares, mutations, transactions, media};
+    return {context, protyle, nodeElement, videoMenu, exports, shares, saves, mutations, transactions, media};
 };
 
 test("video loop toggles the saved attribute and records independent undo snapshots", () => {
@@ -147,6 +150,29 @@ test("mobile media shares the original local asset reference from readonly and e
     assert.equal(createHarness(true, src, false, false, "android").context.getAssetShareItem(src), undefined);
 });
 
+test("Android local images and videos can save the original asset to the gallery alongside export", () => {
+    const video = "assets/影片%23test.mp4?box=20261006000000-box0001#t=10";
+    const image = "assets/picture%25.png?box=20261006000000-box0001";
+    for (const disabled of [true, false]) {
+        const harness = createHarness(disabled, video, true, false, "android");
+        const menu = harness.videoMenu(harness.protyle, harness.nodeElement, "NodeVideo");
+        menu.find(item => item.id === "export").click(null, null);
+        menu.find(item => item.id === "saveToGallery").click(null, null);
+        const imageMenu = harness.context.getMediaAssetExportItems(image);
+        assert.deepEqual(Array.from(imageMenu, item => item.id), ["export", "shareAsset", "saveToGallery"]);
+        imageMenu.find(item => item.id === "saveToGallery").click(null, null);
+        assert.deepEqual(harness.saves, [video, image]);
+        assert.deepEqual(harness.exports, [video]);
+        assert.equal(harness.videoMenu(harness.protyle, harness.nodeElement, "NodeAudio").some(item =>
+            item.id === "saveToGallery"), false);
+    }
+    for (const [platform, src, canExport] of [["harmony", image, true], ["legacy", image, true], [undefined, image, true],
+        ["android", image, false], ["android", "https://example.com/photo.png", true]] as const) {
+        const harness = createHarness(false, src, canExport, false, platform);
+        assert.equal(harness.context.getMediaAssetExportItems(src).some(item => item.id === "saveToGallery"), false);
+    }
+});
+
 test("asset file menus share arbitrary file extensions with their original encoded paths", () => {
     const harness = createHarness(false, "", true, false, "android");
     for (const extension of ["pdf", "zip", "docx", "bin"]) {
@@ -200,7 +226,7 @@ const browserCases = (source: string, lutePath: string) => {
     check.ok(block, "standard video HTML must remain a video block");
     const snapshots: Array<{oldHTML: string; newHTML: string}> = [];
     const videoMenu = new Function("window", "updateTransaction", "openMenu", "getAssetExportItems", "writeAssetToClipboard",
-        source + "\nreturn videoMenu;")({siyuan: {languages: {videoLoop: "Loop"}}},
+        "const getMediaAssetExportItems = getAssetExportItems;\n" + source + "\nreturn videoMenu;")({siyuan: {languages: {videoLoop: "Loop"}}},
         (_editor: unknown, element: Element, oldHTML: string) => snapshots.push({oldHTML, newHTML: element.outerHTML}),
         (): IMenu[] => [], (): IMenu[] => [{id: "export"}], () => ({id: "copyFile"})) as typeof import("./protyle").videoMenu;
     const editor = {disabled: false, app: {}} as IProtyle;

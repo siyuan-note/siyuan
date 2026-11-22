@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261112034624"
+		"updated": "20261122235513"
 	},
 	"Children": [
 		{
@@ -709,12 +709,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122120803-gw2su8t",
-				"updated": "20261122120803"
+				"updated": "20261122235513"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在行動裝置上分享資料文件"
+					"Data": "在行動裝置上分享和儲存資料文件"
 				}
 			]
 		},
@@ -765,6 +765,47 @@
 				{
 					"Type": "NodeText",
 					"Data": " 開啟系統分享面板。"
+				}
+			]
+		},
+		{
+			"ID": "20261122235513-72669f0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122235513-72669f0",
+				"updated": "20261122235513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android 上，長按本機圖片，選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "儲存到相簿"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。若要儲存本機影片，請開啟區塊選單並選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "儲存到相簿"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。思源會將原始檔案儲存到系統相簿。"
 				}
 			]
 		},

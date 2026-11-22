@@ -1,4 +1,5 @@
 {
+	"saveToGallery": "Opslaan in galerij",
 	"bazaarUpdateDate": "Bijgewerkt op",
 	"agentQuoteText": "Tekst citeren",
 	"agentQuote": "Citeren in de agentchat",
@@ -3801,6 +3802,8 @@
 		"472": "De oude mindmap kon niet worden geconverteerd, open het document opnieuw en probeer het nogmaals",
 		"473": "Er is een onverwachte fout opgetreden bij het verwerken van het verzoek. Controleer het systeemlogboek",
 		"474": "Versleutelde notitieboeken kunnen niet worden uitgeschakeld in een werkruimte die aan synchronisatie is gekoppeld, ook niet als deze is gepauzeerd",
-		"475": "Bijlage delen mislukt"
+		"475": "Bijlage delen mislukt",
+		"476": "Opgeslagen in de galerij",
+		"477": "Opslaan in de galerij is mislukt"
 	}
 }

@@ -1,4 +1,5 @@
 {
+	"saveToGallery": "In der Galerie speichern",
 	"bazaarUpdateDate": "Aktualisierungsdatum",
 	"agentQuoteText": "Text zitieren",
 	"agentQuote": "Im Agentenchat zitieren",
@@ -3801,6 +3802,8 @@
 		"472": "Die alte Mindmap konnte nicht konvertiert werden. Bitte öffne das Dokument erneut und versuche es noch einmal",
 		"473": "Bei der Verarbeitung der Anfrage ist ein unerwarteter Fehler aufgetreten. Prüfen Sie das Systemprotokoll",
 		"474": "Verschlüsselte Notizbücher können in einem mit der Synchronisierung verknüpften Arbeitsbereich auch bei pausierter Synchronisierung nicht deaktiviert werden",
-		"475": "Anhang konnte nicht geteilt werden"
+		"475": "Anhang konnte nicht geteilt werden",
+		"476": "In der Galerie gespeichert",
+		"477": "Speichern in der Galerie fehlgeschlagen"
 	}
 }

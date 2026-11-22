@@ -6,7 +6,7 @@
 		"id": "20261122113000-mg7cuep",
 		"title": "ресурсов",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261122235513"
 	},
 	"Children": [
 		{
@@ -713,12 +713,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-6b12u3m",
-				"updated": "20261122120803"
+				"updated": "20261122235513"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Отправка ресурсов в мобильной версии"
+					"Data": "Отправка и сохранение ресурсов в мобильной версии"
 				}
 			]
 		},
@@ -769,6 +769,47 @@
 				{
 					"Type": "NodeText",
 					"Data": ", чтобы открыть системную панель отправки."
+				}
+			]
+		},
+		{
+			"ID": "20261122235513-f065ace",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122235513-f065ace",
+				"updated": "20261122235513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На Android нажмите и удерживайте локальное изображение, затем выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сохранить в галерею"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Для локального видео откройте меню блока и выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ресурсы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сохранить в галерею"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". SiYuan сохранит исходный файл в системной галерее."
 				}
 			]
 		},

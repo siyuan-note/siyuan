@@ -434,6 +434,7 @@ const gutterSingle = () => [
         node("openBy", lang("openBy")),
         node("export", lang("export")),
         node("shareAsset", lang("shareAsset")),
+        node("saveToGallery", lang("saveToGallery")),
         node("copyFile", lang("copyFile")),
     ]),
     node("assetAudio", location(lang("audio"), lang("assets")), true, [
@@ -1073,6 +1074,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("openBy", lang("openBy")),
             node("export", lang("export")),
             node("shareAsset", lang("shareAsset")),
+            node("saveToGallery", lang("saveToGallery")),
             node("copyFile", lang("copyFile"), false),
             node("copyAsPNG", lang("copyAsPNG"), false),
         ],

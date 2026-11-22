@@ -1,4 +1,5 @@
 {
+	"saveToGallery": "Guardar en la galería",
 	"bazaarUpdateDate": "Fecha de actualización",
 	"agentQuoteText": "Citar texto",
 	"agentQuote": "Citar en el chat del agente",
@@ -3801,6 +3802,8 @@
 		"472": "No se pudo convertir el mapa mental antiguo, vuelve a abrir el documento e inténtalo de nuevo",
 		"473": "Se produjo un error inesperado al procesar la solicitud. Consulta el registro del sistema",
 		"474": "No se pueden desactivar los cuadernos cifrados en un espacio de trabajo vinculado a la sincronización, aunque esté en pausa",
-		"475": "No se pudo compartir el archivo adjunto"
+		"475": "No se pudo compartir el archivo adjunto",
+		"476": "Guardado en la galería",
+		"477": "No se pudo guardar en la galería"
 	}
 }

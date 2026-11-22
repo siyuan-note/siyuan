@@ -1,4 +1,5 @@
 {
+	"saveToGallery": "Enregistrer dans la galerie",
 	"bazaarUpdateDate": "Date de mise à jour",
 	"agentQuoteText": "Citer le texte",
 	"agentQuote": "Citer dans la conversation de l’agent",
@@ -3801,6 +3802,8 @@
 		"472": "Impossible de convertir la carte mentale héritée, veuillez rouvrir le document et réessayer",
 		"473": "Une erreur inattendue est survenue lors du traitement de la demande. Consultez le journal système",
 		"474": "Les carnets chiffrés ne peuvent pas être désactivés dans un espace de travail lié à la synchronisation, même si celle-ci est en pause",
-		"475": "Impossible de partager la pièce jointe"
+		"475": "Impossible de partager la pièce jointe",
+		"476": "Enregistré dans la galerie",
+		"477": "Impossible d’enregistrer dans la galerie"
 	}
 }

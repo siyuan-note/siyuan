@@ -74,6 +74,20 @@ export const getAssetExportItems = (src: string, exportPath = src): IMenu[] => {
     return items;
 };
 
+export const getMediaAssetExportItems = (src: string): IMenu[] => {
+    const items = getAssetExportItems(src);
+    if (src?.startsWith("assets/") && getHostCapabilities().importExport && isInAndroid() &&
+        typeof window.JSAndroid?.saveAssetToGallery === "function") {
+        items.push({
+            id: "saveToGallery",
+            label: window.siyuan.languages.saveToGallery,
+            icon: "iconGallery",
+            click: () => window.JSAndroid.saveAssetToGallery(src)
+        });
+    }
+    return items;
+};
+
 // 复制资源文件到系统剪贴板，在文件资源管理器中可粘贴为文件（仅 Windows、macOS 桌面端支持）
 export const writeAssetToClipboard = (src: string) => {
     if (!getHostCapabilities().localFileSystem) {

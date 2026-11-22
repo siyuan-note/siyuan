@@ -1,4 +1,5 @@
 {
+	"saveToGallery": "Zapisz w galerii",
 	"bazaarUpdateDate": "Data aktualizacji",
 	"agentQuoteText": "Cytuj tekst",
 	"agentQuote": "Zacytuj na czacie z agentem",
@@ -3801,6 +3802,8 @@
 		"472": "Nie udało się przekonwertować starej mapy myśli, otwórz ponownie dokument i spróbuj jeszcze raz",
 		"473": "Podczas przetwarzania żądania wystąpił nieoczekiwany błąd. Sprawdź dziennik systemowy",
 		"474": "Nie można wyłączyć szyfrowanych notatników w obszarze roboczym powiązanym z synchronizacją, nawet gdy jest ona wstrzymana",
-		"475": "Nie udało się udostępnić załącznika"
+		"475": "Nie udało się udostępnić załącznika",
+		"476": "Zapisano w galerii",
+		"477": "Nie udało się zapisać w galerii"
 	}
 }

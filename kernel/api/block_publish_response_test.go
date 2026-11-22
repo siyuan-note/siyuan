@@ -20,8 +20,10 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -41,7 +43,7 @@ func TestContractBlockPublishResponses(t *testing.T) {
 		return
 	}
 
-	root := t.TempDir()
+	root := testutil.PublicDataDir(t)
 	util.WorkspaceDir = root
 	util.DataDir = filepath.Join(root, "data")
 	util.TempDir = root
@@ -332,6 +334,151 @@ func TestContractBlockPublishResponses(t *testing.T) {
 			}
 			if !ok || strings.Count(content, "virtual-block-ref") != want {
 				t.Fatalf("reader did not receive %d virtual reference labels: %v", want, response)
+			}
+		}
+	})
+
+	t.Run("ReferenceGroupingRespectsParentAccess", func(t *testing.T) {
+		const (
+			docID         = "20261117000009-listdoc"
+			listID        = "20261117000010-list000"
+			publicItem    = "20261117000011-listpub"
+			publicRef     = "20261117000012-publist"
+			protectedItem = "20261117000013-listpro"
+			protectedRef  = "20261117000014-prolist"
+		)
+		tree := treenode.NewTree(boxID, "/"+docID+".sy", "/Reference group", "Reference group")
+		list := &ast.Node{Type: ast.NodeList, ID: listID, ListData: &ast.ListData{}}
+		for _, pair := range [][2]string{{publicItem, publicRef}, {protectedItem, protectedRef}} {
+			item := &ast.Node{Type: ast.NodeListItem, ID: pair[0], ListData: &ast.ListData{Marker: []byte("-")}}
+			paragraph := treenode.NewParagraph(pair[1])
+			paragraph.AppendChild(ref(publicDocID, "Reference group"))
+			item.AppendChild(paragraph)
+			list.AppendChild(item)
+		}
+		tree.Root.AppendChild(list)
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.IndexBlockTree(tree)
+		sql.IndexTreeQueue(tree)
+		sql.FlushQueue()
+		access := model.GetPublishAccess()
+		if err := model.SetPublishAccess(append(access, &model.PublishAccessItem{ID: protectedItem, Visible: true, Disable: true})); err != nil {
+			t.Fatal(err)
+		}
+		defer func() {
+			if err := model.SetPublishAccess(access); err != nil {
+				t.Error(err)
+			}
+		}()
+		const path = "/api/block/getRefIDs"
+		route := contractRouteHandlers(apicontract.GetRefIDs, getRefIDs)
+		for _, role := range []model.Role{model.RoleReader, model.RoleAdministrator} {
+			response := postWithCookie(role, nil, path, singleBody(publicDocID), route...)
+			data := response["data"].(map[string]any)
+			mappings := data["originalRefBlockIDs"].(map[string]any)
+			if response["code"] != float64(0) || mappings[publicItem] != publicRef {
+				t.Fatalf("missing accessible parent mapping: %v", response)
+			}
+			body := normalize(response, publicDocID)
+			if want := role == model.RoleAdministrator; strings.Contains(body, protectedItem) != want ||
+				(mappings[protectedItem] != nil) != want {
+				t.Fatalf("incorrect parent access for %v: %v", role, response)
+			}
+		}
+	})
+
+	t.Run("DOMTextRespectsAttributeViewAccess", func(t *testing.T) {
+		const viewID, blockID, viewName = "20261117000015-avname0", "20261117000016-avblock", "Project database"
+		util.Lang = "en"
+		util.AttrViewLangs = map[string]map[string]any{"en": {"key": "Key", "select": "Select", "table": "Table"}}
+		view := av.NewAttributeView(viewID)
+		view.Name = viewName
+		if err := av.SaveAttributeView(view); err != nil {
+			t.Fatal(err)
+		}
+		tree, err := filesys.LoadTree(boxID, "/"+protectedID+".sy", util.NewLute())
+		if err != nil {
+			t.Fatal(err)
+		}
+		block := &ast.Node{Type: ast.NodeAttributeView, ID: blockID, AttributeViewID: viewID, AttributeViewType: "table"}
+		block.SetIALAttr("id", blockID)
+		tree.Root.AppendChild(block)
+		if _, err = filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
+		av.UpsertBlockRel(viewID, blockID)
+		if ids := treenode.GetMirrorAttrViewBlockIDs(viewID); len(ids) != 1 || ids[0] != blockID {
+			t.Fatal("could not index the database block")
+		}
+		dom := util.NewLute().RenderNodeBlockDOM(block)
+		const path = "/api/block/getDOMText"
+		route := contractRouteHandlers(apicontract.GetDOMText, getDOMText)
+		for _, test := range []struct {
+			role   model.Role
+			cookie *http.Cookie
+			want   string
+		}{
+			{role: model.RoleReader},
+			{role: model.RoleReader, cookie: publishCookie, want: viewName},
+			{role: model.RoleAdministrator, want: viewName},
+		} {
+			body := fmt.Sprintf(`{"dom":%q}`, dom)
+			response := postWithCookie(test.role, test.cookie, path, body, route...)
+			if response["code"] != float64(0) || response["data"] != test.want {
+				t.Fatalf("incorrect database label for %v: %v", test.role, response)
+			}
+		}
+	})
+
+	t.Run("EmojiCatalogRespectsDocumentAccess", func(t *testing.T) {
+		util.AppearancePath = filepath.Join(root, "appearance")
+		builtIn := filepath.Join(util.AppearancePath, "emojis")
+		customDir := filepath.Join(util.DataDir, "emojis")
+		for _, dir := range []string{builtIn, customDir} {
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if err := os.WriteFile(filepath.Join(builtIn, "conf.json"), []byte(`[{"id":"built-in","items":[]}]`), 0600); err != nil {
+			t.Fatal(err)
+		}
+		for docID, name := range map[string]string{publicDocID: "public.png", deniedDocID: "disabled.png", protectedID: "protected.png"} {
+			if err := os.WriteFile(filepath.Join(customDir, name), []byte("test image"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			tree, err := filesys.LoadTree(boxID, "/"+docID+".sy", util.NewLute())
+			if err != nil {
+				t.Fatal(err)
+			}
+			tree.Root.SetIALAttr("icon", name)
+			if _, err = filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.UpsertBlockTree(tree)
+		}
+		const path = "/api/system/getEmojiConf"
+		route := contractRouteHandlers(apicontract.SystemGetEmojiConf, getEmojiConf)
+		for _, test := range []struct {
+			role   model.Role
+			cookie *http.Cookie
+			want   int
+		}{
+			{role: model.RoleReader, want: 1},
+			{role: model.RoleReader, cookie: publishCookie, want: 2},
+			{role: model.RoleAdministrator, want: 3},
+		} {
+			response := postWithCookie(test.role, test.cookie, path, "{}", route...)
+			groups := response["data"].([]any)
+			items := groups[0].(map[string]any)["items"].([]any)
+			list := normalize(response, publicDocID)
+			if response["code"] != float64(0) || len(groups) != 2 || len(items) != test.want ||
+				!strings.Contains(list, "built-in") || !strings.Contains(list, "public.png") ||
+				strings.Contains(list, "protected.png") != (test.want >= 2) ||
+				strings.Contains(list, "disabled.png") != (test.want == 3) {
+				t.Fatalf("incorrect emoji catalog for %v: %v", test.role, response)
 			}
 		}
 	})

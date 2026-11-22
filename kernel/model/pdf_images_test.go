@@ -20,6 +20,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	pdfmodel "github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
@@ -117,6 +118,29 @@ func TestPDFImagesWithOptimizationDisabled(t *testing.T) {
 	prepared, err := PreparePDFImage(context.Background(), source, PDFImageSelection{Revision: list.Revision, Page: first.Page, Object: first.Object})
 	if err != nil || prepared.Width != 3 || prepared.Height != 2 {
 		t.Fatalf("preview with optimization disabled: %+v %v", prepared, err)
+	}
+}
+
+func TestPDFImagePageTreeRequiresUniqueChildren(t *testing.T) {
+	pdf, err := api.ReadContext(bytes.NewReader(testutil.PDFImageFixture("")), pdfmodel.NewDefaultConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = checkPDFImagePageTree(pdf.XRefTable); err != nil {
+		t.Fatalf("valid page tree: %v", err)
+	}
+	catalog, err := pdf.Catalog()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pages, err := pdf.DereferenceDict(catalog["Pages"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	kids := pages.ArrayEntry("Kids")
+	pages["Kids"] = append(types.Array{}, kids[0], kids[0])
+	if err = checkPDFImagePageTree(pdf.XRefTable); err == nil {
+		t.Fatal("page tree accepted a shared child")
 	}
 }
 

@@ -5118,6 +5118,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 发布只读会话只解析有权访问的数据库名称，且不读取资源的 OCR 文本。
+     */
     "/api/block/getDOMText": {
         request: DOMTextRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5221,6 +5224,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 发布只读会话只返回可访问的引用块、目标块和反链归并父块。
+     */
     "/api/block/getRefIDs": {
         request: RefIDsRequestInput;
         response: { "code": 0; "data": RefIDsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8839,6 +8845,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 发布只读会话可读取内置表情及当前有权访问的文档引用的自定义表情。
+     */
     "/api/system/getEmojiConf": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<SystemEmojiGroup | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -9468,6 +9477,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 授权票据绑定登录会话和浏览器。每个会话最多保留 8 个未兑换授权码，超出时替换该会话最早到期的授权码。
+     */
     "/oauth/mcp/consent": {
         request: MCPOAuthConsentRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

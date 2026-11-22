@@ -28,6 +28,7 @@ const scope = "mcp"
 const maxClients = 64
 const maxGrants = 256
 const maxPending = 256
+const maxCodesPerSession = 8
 
 var ErrInvalid = errors.New("invalid_request")
 var ErrGrant = errors.New("invalid_grant")
@@ -70,6 +71,7 @@ type Authorization struct {
 type pending struct {
 	Authorization
 	Binding string
+	Session string
 	Expires time.Time
 }
 
@@ -330,7 +332,7 @@ func (s *Service) ValidateAuthorization(values url.Values) error {
 	return err
 }
 
-func (s *Service) Begin(values url.Values, binding string) (ticket string, c apicontract.MCPOAuthClient, err error) {
+func (s *Service) Begin(values url.Values, binding, sessionID string) (ticket string, c apicontract.MCPOAuthClient, err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	a, err := s.authorizeLocked(values)
@@ -342,7 +344,7 @@ func (s *Service) Begin(values url.Values, binding string) (ticket string, c api
 			delete(s.pending, key)
 		}
 	}
-	if binding == "" {
+	if binding == "" || sessionID == "" {
 		return "", c, ErrInvalid
 	}
 	if len(s.pending) >= maxPending {
@@ -357,15 +359,17 @@ func (s *Service) Begin(values url.Values, binding string) (ticket string, c api
 		delete(s.pending, oldestKey)
 	}
 	ticket = random()
-	s.pending[hash(ticket)] = pending{Authorization: a, Binding: hash(binding), Expires: s.now().Add(10 * time.Minute)}
+	s.pending[hash(ticket)] = pending{Authorization: a, Binding: hash(binding), Session: hash(sessionID), Expires: s.now().Add(10 * time.Minute)}
 	return ticket, s.data.Clients[a.ClientID].MCPOAuthClient, nil
 }
 
-func (s *Service) Consent(ticket, binding string, approve bool) (string, error) {
+func (s *Service) Consent(ticket, binding, sessionID string, approve bool) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	p, ok := s.pending[hash(ticket)]
-	if !s.data.Config.Enabled || !ok || !equal(p.Binding, hash(binding)) || !s.now().Before(p.Expires) {
+	now := s.now()
+	if !s.data.Config.Enabled || !ok || !equal(p.Binding, hash(binding)) ||
+		!equal(p.Session, hash(sessionID)) || !now.Before(p.Expires) {
 		return "", ErrInvalid
 	}
 	delete(s.pending, hash(ticket))
@@ -374,16 +378,11 @@ func (s *Service) Consent(ticket, binding string, approve bool) (string, error) 
 	q.Set("state", p.State)
 	q.Set("iss", s.data.Config.PublicURL)
 	if approve {
-		for key, code := range s.codes {
-			if !s.now().Before(code.Expires) {
-				delete(s.codes, key)
-			}
-		}
-		if len(s.codes) >= maxPending {
+		if !s.reserveCodeSlot(p.Session, now) {
 			return "", ErrInvalid
 		}
 		code := random()
-		p.Expires = s.now().Add(2 * time.Minute)
+		p.Expires = now.Add(2 * time.Minute)
 		s.codes[hash(code)] = p
 		q.Set("code", code)
 	} else {
@@ -391,6 +390,27 @@ func (s *Service) Consent(ticket, binding string, approve bool) (string, error) 
 	}
 	u.RawQuery = q.Encode()
 	return u.String(), nil
+}
+
+func (s *Service) reserveCodeSlot(session string, now time.Time) bool {
+	count, oldestKey := 0, ""
+	var oldestExpiry time.Time
+	for key, code := range s.codes {
+		if !now.Before(code.Expires) {
+			delete(s.codes, key)
+			continue
+		}
+		if code.Session == session {
+			count++
+			if oldestKey == "" || code.Expires.Before(oldestExpiry) {
+				oldestKey, oldestExpiry = key, code.Expires
+			}
+		}
+	}
+	if count >= maxCodesPerSession {
+		delete(s.codes, oldestKey)
+	}
+	return len(s.codes) < maxPending
 }
 
 func (s *Service) authenticate(req apicontract.MCPOAuthTokenRequest) error {

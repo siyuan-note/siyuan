@@ -1719,31 +1719,55 @@ func filterBlockTreesByPublishAccess(c *gin.Context, publishAccess PublishAccess
 	return
 }
 
-func FilterRefDefsByPublishAccess(c *gin.Context, publishAccess PublishAccess, refDefs []*RefDefs) (retRefDefs []*RefDefs, originalRefBlockIDs map[string]string) {
-	retRefDefs = []*RefDefs{}
+func GetPublishedBlockRefsInBox(c *gin.Context, defID, boxID string) ([]*RefDefs, map[string]string) {
+	bt := treenode.GetBlockTreeInBox(defID, boxID)
+	if bt == nil {
+		return []*RefDefs{}, map[string]string{}
+	}
+	publishAccess := GetPublishAccess()
+	invisible := GetInvisiblePublishAccess(publishAccess)
+	disabled := GetDisablePublishAccess(publishAccess)
+	restricted := make(map[string]*PublishAccessItem, len(publishAccess))
+	for _, item := range publishAccess {
+		restricted[item.ID] = item
+	}
+	allowed := func(bt *treenode.BlockTree) bool {
+		if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) ||
+			!CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, invisible) ||
+			!CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, disabled) {
+			return false
+		}
+		if item := restricted[bt.ID]; item != nil {
+			if item.Disable || !item.Visible || (item.Password != "" && !CheckPublishAuthCookie(c, bt.ID, item.Password)) {
+				return false
+			}
+		}
+		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+		return password == "" || CheckPublishAuthCookie(c, passwordID, password)
+	}
+	if !allowed(bt) {
+		return []*RefDefs{}, map[string]string{}
+	}
+
+	refDefs := queryBlockRefDefsInBox(bt, bt.BoxID)
 	IDs := []string{}
 	for _, refDef := range refDefs {
 		IDs = append(IDs, refDef.RefID)
 		IDs = append(IDs, refDef.DefIDs...)
 	}
-	IDs = gulu.Str.RemoveDuplicatedElem(IDs)
-	bts := treenode.GetBlockTrees(IDs)
-	bts = filterBlockTreesByPublishAccess(c, publishAccess, bts)
 	visibles := make(map[string]bool)
-	for _, ID := range IDs {
-		visibles[ID] = false
+	for id, refTree := range treenode.GetBlockTrees(gulu.Str.RemoveDuplicatedElem(IDs)) {
+		visibles[id] = allowed(refTree)
 	}
-	for _, bt := range bts {
-		visibles[bt.ID] = true
-	}
+	retRefDefs := []*RefDefs{}
 	for _, refDef := range refDefs {
 		if !visibles[refDef.RefID] {
 			continue
 		}
 		newDefIDs := []string{}
-		for i, defID := range refDef.DefIDs {
+		for _, defID := range refDef.DefIDs {
 			if visibles[defID] {
-				newDefIDs = append(newDefIDs, refDef.DefIDs[i])
+				newDefIDs = append(newDefIDs, defID)
 			}
 		}
 		refDef.DefIDs = newDefIDs
@@ -1751,8 +1775,9 @@ func FilterRefDefsByPublishAccess(c *gin.Context, publishAccess PublishAccess, r
 			retRefDefs = append(retRefDefs, refDef)
 		}
 	}
-	retRefDefs, originalRefBlockIDs = buildBacklinkListItemRefs(retRefDefs)
-	return
+	return buildBacklinkListItemRefsInBox(retRefDefs, bt.BoxID, func(id string) bool {
+		return allowed(treenode.GetBlockTree(id))
+	})
 }
 
 func FilterRefIDsByPublishAccess(c *gin.Context, publishAccess PublishAccess, refIDs []string) (ret []string) {

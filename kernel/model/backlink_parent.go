@@ -27,6 +27,10 @@ func buildBacklinkParentMappings(refBlocks []*Block, boxID string) (ret []*backl
 }
 
 func buildBacklinkParentMappingsWithDocumentGrouping(refBlocks []*Block, boxID string, groupDocuments bool) (ret []*backlinkParentMapping) {
+	return buildBacklinkParentMappingsWithAccess(refBlocks, boxID, groupDocuments, nil)
+}
+
+func buildBacklinkParentMappingsWithAccess(refBlocks []*Block, boxID string, groupDocuments bool, allowParent func(string) bool) []*backlinkParentMapping {
 	parentRefParagraphs := map[string][]*Block{}
 	var paragraphParentIDs []string
 	for _, refBlock := range refBlocks {
@@ -45,6 +49,9 @@ func buildBacklinkParentMappingsWithDocumentGrouping(refBlocks []*Block, boxID s
 	treeCache := map[string]*parse.Tree{}
 	return buildBacklinkParentMappingsForSources(refBlocks, parentRefParagraphs, paragraphParents, groupDocuments,
 		func(parent *Block, refs []*Block) *Block {
+			if allowParent != nil && !allowParent(parent.ID) {
+				return nil
+			}
 			return selectBacklinkParentRef(parent, refs, boxID, luteEngine, treeCache)
 		}, func(parent *Block) map[string]bool {
 			return backlinkHeadingCoveredIDs(parent, boxID, treeCache)

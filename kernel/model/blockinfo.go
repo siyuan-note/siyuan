@@ -17,6 +17,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -90,7 +91,7 @@ func getDocInfoByTree(blockID string, tree *parse.Tree) (ret *BlockInfo) {
 		refBoxID = bt.BoxID
 	}
 	refDefs := queryBlockRefDefsInBox(bt, refBoxID)
-	refDefs, _ = buildBacklinkListItemRefsInBox(refDefs, refBoxID)
+	refDefs, _ = buildBacklinkListItemRefsInBox(refDefs, refBoxID, nil)
 	var refIDs []string
 	for _, refDef := range refDefs {
 		refIDs = append(refIDs, refDef.RefID)
@@ -295,12 +296,18 @@ func GetDOMText(dom string) (ret string) {
 	return
 }
 
-// GetDOMTextWithoutOCRAssets 供发布读者使用，不返回资源的 OCR 文本，避免读取未发布资源的 OCR 缓存。
-func GetDOMTextWithoutOCRAssets(dom string) (ret string) {
+func GetDOMTextForPublish(c *gin.Context, dom string) string {
 	luteEngine := NewLute()
 	tree := luteEngine.BlockDOM2Tree(dom)
-	ret = renderBlockTextWithoutOCRAssets(tree.Root.FirstChild, nil, true)
-	return
+	node := tree.Root.FirstChild
+	if node != nil && node.Type == ast.NodeAttributeView {
+		if !CheckAttributeViewAccessableByPublishAccess(c, GetPublishAccess(), node.AttributeViewID) {
+			return ""
+		}
+		name, _ := av.GetAttributeViewNameInBox(node.AttributeViewID, "")
+		return strings.TrimSpace(util.EscapeHTML(strings.ReplaceAll(name, "\n", "")))
+	}
+	return renderBlockTextWithoutOCRAssets(node, nil, true)
 }
 
 func getBlockRefText(id string, tree *parse.Tree) (ret string) {
@@ -450,7 +457,7 @@ func GetBlockRefsInBox(defID, boxID string) (refDefs []*RefDefs, originalRefBloc
 
 	// 加密笔记本的 refs 在加密 db，用 bt.BoxID 路由
 	refDefs = queryBlockRefDefsInBox(bt, bt.BoxID)
-	refDefs, originalRefBlockIDs = buildBacklinkListItemRefsInBox(refDefs, bt.BoxID)
+	refDefs, originalRefBlockIDs = buildBacklinkListItemRefsInBox(refDefs, bt.BoxID, nil)
 	return
 }
 
@@ -921,10 +928,10 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 }
 
 func buildBacklinkListItemRefs(refDefs []*RefDefs) (retRefDefs []*RefDefs, originalRefBlockIDs map[string]string) {
-	return buildBacklinkListItemRefsInBox(refDefs, "")
+	return buildBacklinkListItemRefsInBox(refDefs, "", nil)
 }
 
-func buildBacklinkListItemRefsInBox(refDefs []*RefDefs, boxID string) (retRefDefs []*RefDefs, originalRefBlockIDs map[string]string) {
+func buildBacklinkListItemRefsInBox(refDefs []*RefDefs, boxID string, allowParent func(string) bool) (retRefDefs []*RefDefs, originalRefBlockIDs map[string]string) {
 	originalRefBlockIDs = map[string]string{}
 
 	var refIDs []string
@@ -933,7 +940,7 @@ func buildBacklinkListItemRefsInBox(refDefs []*RefDefs, boxID string) (retRefDef
 	}
 	sqlRefBlocks := sql.GetBlocksInBox(refIDs, boxID)
 	refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 12)
-	for _, mapping := range buildBacklinkParentMappings(refBlocks, boxID) {
+	for _, mapping := range buildBacklinkParentMappingsWithAccess(refBlocks, boxID, true, allowParent) {
 		for _, refDef := range refDefs {
 			if mapping.coveredRefIDs[refDef.RefID] {
 				refDef.RefID = mapping.parent.ID

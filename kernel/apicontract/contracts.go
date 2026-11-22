@@ -89,6 +89,8 @@ var MCPOAuthMetadata = define[EmptyRequest, BinaryContent]("mcpOAuthMetadata", "
 var MCPOAuthToken = define[MCPOAuthTokenRequest, BinaryContent]("mcpOAuthToken", "/oauth/mcp/token", PublicAccess, FormBody, mcpOAuthContentOptions(), "POST")
 var MCPOAuthRevoke = define[MCPOAuthTokenRequest, BinaryContent]("mcpOAuthRevoke", "/oauth/mcp/revoke", PublicAccess, FormBody, mcpOAuthContentOptions(), "POST")
 var MCPOAuthAuthorize = define[EmptyRequest, BinaryContent]("mcpOAuthServerAuthorize", "/oauth/mcp/authorize", PublicAccess, NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 302, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}), "GET")
+
+// 授权票据绑定登录会话和浏览器。每个会话最多保留 8 个未兑换授权码，超出时替换该会话最早到期的授权码。
 var MCPOAuthConsent = define[MCPOAuthConsentRequest, BinaryContent]("mcpOAuthConsent", "/oauth/mcp/consent", PublicAccess, FormBody, HTTPContentOptions(HTTPContentVariant{Status: 302, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}), "POST")
 
 // 返回内置 MCP 服务端 OAuth 的公开地址、开关和预注册客户端列表，不返回凭证摘要或客户端密钥。
@@ -341,10 +343,11 @@ var (
 	SetNetworkProxy    = define[NetworkProxy, Null]("setNetworkProxy", "/api/system/setNetworkProxy", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "system"}}, "POST")
 	GetBookmarkLabels  = define[EmptyRequest, []string]("getBookmarkLabels", "/api/attr/getBookmarkLabels", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 	BatchGetBlockAttrs = define[BlockIDsRequest, map[string]map[string]string]("batchGetBlockAttrs", "/api/attr/batchGetBlockAttrs", AuthenticatedAccess, JSONBody, ResponseOptions{NonNullable: true}, "POST")
-	GetDOMText         = define[DOMTextRequest, string]("getDOMText", "/api/block/getDOMText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-	RemoveBookmark     = define[RemoveBookmarkRequest, Null]("removeBookmark", "/api/bookmark/removeBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	RenameBookmark     = define[RenameBookmarkRequest, Null]("renameBookmark", "/api/bookmark/renameBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	RemoveTag          = define[RemoveTagRequest, Null]("removeTag", "/api/tag/removeTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	// 发布只读会话只解析有权访问的数据库名称，且不读取资源的 OCR 文本。
+	GetDOMText     = define[DOMTextRequest, string]("getDOMText", "/api/block/getDOMText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	RemoveBookmark = define[RemoveBookmarkRequest, Null]("removeBookmark", "/api/bookmark/removeBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	RenameBookmark = define[RenameBookmarkRequest, Null]("renameBookmark", "/api/bookmark/renameBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	RemoveTag      = define[RemoveTagRequest, Null]("removeTag", "/api/tag/removeTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	// 精确匹配标签及其子标签前缀，通过单笔可撤销事务改名并广播编辑操作；成功仍返回 null。
 	// 无匹配时不写入；源快照变化时拒绝提交，保留并发编辑。自动收集保留已有条目和字段。
 	RenameTag = define[RenameTagRequest, Null]("renameTag", "/api/tag/renameTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -426,7 +429,8 @@ var (
 )
 
 var (
-	GetRefText                  = define[BlockQueryRequest, string]("getRefText", "/api/block/getRefText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	GetRefText = define[BlockQueryRequest, string]("getRefText", "/api/block/getRefText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	// 发布只读会话只返回可访问的引用块、目标块和反链归并父块。
 	GetRefIDs                   = define[RefIDsRequest, RefIDsData]("getRefIDs", "/api/block/getRefIDs", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 	GetRefIDsByFileAnnotationID = define[FileAnnotationRefRequest, RefDefsData]("getRefIDsByFileAnnotationID", "/api/block/getRefIDsByFileAnnotationID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 	// 发布只读会话只返回可访问的目标，引用锚文本匹配还要求引用来源可访问。
@@ -1970,6 +1974,8 @@ var SystemExportTLSCACert = define[EmptyRequest, SystemPathData]("exportTLSCACer
 var SystemGetChangelog = define[SystemChangelogRequest, SystemChangelogData]("getChangelog", "/api/system/getChangelog", AuthenticatedAccess|AdminAccess|WritableAccess, LegacyOptionalBody, ResponseOptions{Setting: SettingWrite{Namespace: "system", Mode: SettingSilent}}, "POST")
 var SystemGetConf = define[EmptyRequest, SystemConfData]("getConf", "/api/system/getConf", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 var SystemGetCustomFonts = define[EmptyRequest, []*SystemCustomFont]("getCustomFonts", "/api/system/getCustomFonts", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
+
+// 发布只读会话可读取内置表情及当前有权访问的文档引用的自定义表情。
 var SystemGetEmojiConf = define[EmptyRequest, []*SystemEmojiGroup]("getEmojiConf", "/api/system/getEmojiConf", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 var SystemGetMobileWorkspaces = define[EmptyRequest, []string]("getMobileWorkspaces", "/api/system/getMobileWorkspaces", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemGetSysFonts = define[EmptyRequest, []*SystemFont]("getSysFonts", "/api/system/getSysFonts", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")

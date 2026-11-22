@@ -207,13 +207,25 @@ var getEmojiConf = contractHandler(apicontract.SystemGetEmojiConf, func(c *gin.C
 		TitleZhCN: "自定义",
 		TitleJaJP: "カスタム",
 	}
-	items := []*apicontract.SystemEmoji{}
-	custom.Items = items
+	custom.Items = []*apicontract.SystemEmoji{}
 	if gulu.File.IsDir(customConfDir) {
-		model.ClearCustomEmojis()
-		readCustomEmojis(customConfDir, "", &items)
+		if model.IsReadOnlyRoleContext(c) {
+			for _, name := range model.PublishedEmojiPaths(c, model.GetPublishAccess()) {
+				if !util.IsValidExistingEmojiFileName(html.UnescapeString(filepath.Base(name))) {
+					continue
+				}
+				file, openErr := util.OpenPublishReaderFile(customConfDir, name)
+				if openErr != nil {
+					continue
+				}
+				file.Close()
+				custom.Items = append(custom.Items, customEmojiEntry(name))
+			}
+		} else {
+			model.ClearCustomEmojis()
+			readCustomEmojis(customConfDir, "", &custom.Items)
+		}
 	}
-	custom.Items = items
 	conf = append([]*apicontract.SystemEmojiGroup{custom}, conf...)
 
 	ret = apicontract.Success(conf)
@@ -251,24 +263,22 @@ func readCustomEmojis(rootDir, relativeDir string, items *[]*apicontract.SystemE
 			readCustomEmojis(rootDir, relativePath, items)
 			continue
 		}
-		appendCustomEmoji(relativePath, items)
+		entry := customEmojiEntry(relativePath)
+		*items = append(*items, entry)
+		model.AddCustomEmoji(entry.Description, "/emojis/"+relativePath)
 	}
 }
 
-func appendCustomEmoji(name string, items *[]*apicontract.SystemEmoji) {
+func customEmojiEntry(name string) *apicontract.SystemEmoji {
 	ext := filepath.Ext(name)
 	nameWithoutExt := strings.TrimSuffix(name, ext)
-	emoji := &apicontract.SystemEmoji{
+	return &apicontract.SystemEmoji{
 		Unicode:         name,
 		Description:     nameWithoutExt,
 		DescriptionZhCN: nameWithoutExt,
 		DescriptionJaJP: nameWithoutExt,
 		Keywords:        nameWithoutExt,
 	}
-	*items = append(*items, emoji)
-
-	imgSrc := "/emojis/" + name
-	model.AddCustomEmoji(nameWithoutExt, imgSrc)
 }
 
 const maxCustomEmojiSize = 10 * 1024 * 1024

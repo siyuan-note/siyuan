@@ -463,10 +463,8 @@ var getTreeStat = contractHandler(apicontract.GetTreeStat, func(c *gin.Context, 
 })
 
 var getDOMText = contractHandler(apicontract.GetDOMText, func(c *gin.Context, request apicontract.DOMTextRequest) apicontract.Response[string] {
-	if model.GetGinContextRole(c) == model.RoleReader {
-		// 读者不能通过调用方构造的 DOM 读取未发布资源的 OCR 文本
-		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-vmvr-gf8m-x483
-		return apicontract.Success(model.GetDOMTextWithoutOCRAssets(request.DOM))
+	if model.IsReadOnlyRoleContext(c) {
+		return apicontract.Success(model.GetDOMTextForPublish(c, request.DOM))
 	}
 	return apicontract.Success(model.GetDOMText(request.DOM))
 })
@@ -517,10 +515,12 @@ var getRefIDs = contractHandler(apicontract.GetRefIDs, func(c *gin.Context, requ
 	if err != nil {
 		return apicontract.Failure[apicontract.RefIDsData](-1, err.Error())
 	}
-	refDefs, originalRefBlockIDs := model.GetBlockRefsInBox(id, boxID)
+	var refDefs []*model.RefDefs
+	var originalRefBlockIDs map[string]string
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		refDefs, originalRefBlockIDs = model.FilterRefDefsByPublishAccess(c, publishAccess, refDefs)
+		refDefs, originalRefBlockIDs = model.GetPublishedBlockRefsInBox(c, id, boxID)
+	} else {
+		refDefs, originalRefBlockIDs = model.GetBlockRefsInBox(id, boxID)
 	}
 	return apicontract.Success(apicontract.RefIDsData{RefDefs: refDefContracts(refDefs), OriginalRefBlockIDs: originalRefBlockIDs})
 })

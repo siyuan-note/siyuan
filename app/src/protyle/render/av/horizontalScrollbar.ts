@@ -24,6 +24,12 @@ class AVHorizontalScrollbar {
         this.track.setAttribute("role", "region");
         this.track.setAttribute("aria-label", window.siyuan.languages.scrollHorizontal);
         this.track.append(this.spacer);
+        this.track.addEventListener("pointerdown", event => {
+            if (event.pointerType === "mouse" && event.button === 0) {
+                // 鼠标拖动原生滑块时，编辑器保有当前焦点和光标。
+                event.preventDefault();
+            }
+        });
         // 源表保有真实滚动位置，代理仅回写尚未投影的用户滚动。
         this.track.addEventListener("scroll", () => {
             const left = this.track.scrollLeft;

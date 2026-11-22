@@ -51,6 +51,10 @@ const exerciseScrollbar = async (sourceCode: string) => {
     };
     const left = createEditor("rgb(187, 187, 187)");
     const right = createEditor("rgb(85, 85, 85)");
+    const paragraph = document.createElement("div");
+    paragraph.contentEditable = "true";
+    paragraph.textContent = "abc";
+    left.protyle.wysiwyg.element.append(paragraph);
     const first = left.addTable(900, 950);
     const second = left.addTable(1100, 800);
     const other = right.addTable(850, 800);
@@ -78,6 +82,8 @@ const exerciseScrollbar = async (sourceCode: string) => {
     check.equal(Math.round(track.getBoundingClientRect().bottom), Math.round(left.scroller.getBoundingClientRect().bottom));
     check.equal(track.scrollWidth - track.clientWidth, first.source.scrollWidth - first.source.clientWidth);
 
+    paragraph.focus();
+    document.getSelection().collapse(paragraph.firstChild, 1);
     const bounds = track.getBoundingClientRect();
     await ipcRenderer.invoke("drag-thumb", bounds.left + 12, bounds.bottom - 5, bounds.width * .56);
     await settle();
@@ -88,6 +94,9 @@ const exerciseScrollbar = async (sourceCode: string) => {
     check.equal(track.scrollLeft, first.source.scrollLeft);
     check.equal(other.source.scrollLeft, 0);
     check.equal(getComputedStyle(track).outlineStyle, "none", "mouse dragging does not draw a focus outline");
+    check.equal(document.activeElement, paragraph, "dragging leaves focus in the paragraph");
+    await ipcRenderer.invoke("press-key", "x", "KeyX", 88, "x");
+    check.equal(paragraph.textContent, "axbc", "typing continues at the original caret");
     first.source.scrollLeft = 100;
     await settle();
     check.equal(track.scrollLeft, 100);
@@ -111,13 +120,13 @@ const exerciseScrollbar = async (sourceCode: string) => {
     const beforeTrack = document.createElement("button");
     track.before(beforeTrack);
     beforeTrack.focus({preventScroll: true});
-    await ipcRenderer.invoke("scroll-key", "Tab", 9);
+    await ipcRenderer.invoke("press-key", "Tab", "Tab", 9);
     check.equal(document.activeElement, track);
     check.equal(getComputedStyle(track).outlineStyle, "auto", "Tab uses the browser's visible focus indicator");
-    await ipcRenderer.invoke("scroll-key", "End", 35);
+    await ipcRenderer.invoke("press-key", "End", "End", 35);
     await settle();
     check.equal(second.source.scrollLeft, second.source.scrollWidth - second.source.clientWidth);
-    await ipcRenderer.invoke("scroll-key", "Home", 36);
+    await ipcRenderer.invoke("press-key", "Home", "Home", 36);
     await settle();
     check.equal(second.source.scrollLeft, 0);
     second.body.style.width = "100px";
@@ -174,9 +183,10 @@ app.whenReady().then(async () => {
             for (let step = 1; step <= 4; step++) await send("mouseMoved", x + distance * step / 4, 1);
             await send("mouseReleased", x + distance, 0);
         });
-        ipcMain.handle("scroll-key", async (_event, key, windowsVirtualKeyCode) => {
+        ipcMain.handle("press-key", async (_event, key, code, windowsVirtualKeyCode, text) => {
             for (const type of ["keyDown", "keyUp"]) {
-                await win.webContents.debugger.sendCommand("Input.dispatchKeyEvent", {type, key, code:key, windowsVirtualKeyCode});
+                await win.webContents.debugger.sendCommand("Input.dispatchKeyEvent",
+                    {type, key, code, windowsVirtualKeyCode, text: type === "keyDown" ? text : undefined});
             }
         });
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));

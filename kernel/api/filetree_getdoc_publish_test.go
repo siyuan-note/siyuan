@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -29,7 +30,7 @@ import (
 type getDocPublishProbe struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
-	Data struct {
+	Data *struct {
 		Content               string   `json:"content"`
 		Keywords              []string `json:"keywords"`
 		PublishAccessRequired bool     `json:"publishAccessRequired"`
@@ -46,20 +47,19 @@ func containsKeyword(keywords []string, text string) bool {
 	return false
 }
 
-// TestGetDocKeywordsPublishAccess 验证读者请求密码保护或禁止发布的文档时，
-// getDoc 不通过 keywords 返回正文检索片段，同时确认发布可见文档的检索片段不受影响。
+// 密码保护的文档仅在验证后返回检索片段，禁止发布的文档按不存在处理。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-qf37-w288-frvq
-func TestGetDocKeywordsPublishAccess(t *testing.T) {
+func TestGetDocPublishAccessContract(t *testing.T) {
 	previousConf := model.Conf
 	previousWorkspaceDir, previousConfDir, previousDataDir := util.WorkspaceDir, util.ConfDir, util.DataDir
-	previousTempDir, previousDBPath, previousBlockTreeDBPath := util.TempDir, util.DBPath, util.BlockTreeDBPath
+	previousTempDir, previousQueueDir, previousDBPath, previousBlockTreeDBPath := util.TempDir, util.QueueDir, util.DBPath, util.BlockTreeDBPath
 	previousHistoryDBPath, previousAssetContentDBPath := util.HistoryDBPath, util.AssetContentDBPath
 
 	root := t.TempDir()
 	t.Cleanup(func() {
 		model.Conf = previousConf
 		util.WorkspaceDir, util.ConfDir, util.DataDir = previousWorkspaceDir, previousConfDir, previousDataDir
-		util.TempDir, util.DBPath, util.BlockTreeDBPath = previousTempDir, previousDBPath, previousBlockTreeDBPath
+		util.TempDir, util.QueueDir, util.DBPath, util.BlockTreeDBPath = previousTempDir, previousQueueDir, previousDBPath, previousBlockTreeDBPath
 		util.HistoryDBPath, util.AssetContentDBPath = previousHistoryDBPath, previousAssetContentDBPath
 	})
 
@@ -67,11 +67,12 @@ func TestGetDocKeywordsPublishAccess(t *testing.T) {
 	util.ConfDir = filepath.Join(root, "conf")
 	util.DataDir = filepath.Join(root, "data")
 	util.TempDir = filepath.Join(root, "temp")
+	util.QueueDir = filepath.Join(util.TempDir, "queue")
 	util.DBPath = filepath.Join(util.TempDir, "siyuan.db")
 	util.HistoryDBPath = filepath.Join(util.TempDir, "history.db")
 	util.AssetContentDBPath = filepath.Join(util.TempDir, "asset_content.db")
 	util.BlockTreeDBPath = filepath.Join(util.TempDir, "blocktree.db")
-	for _, dir := range []string{util.ConfDir, util.DataDir, util.TempDir} {
+	for _, dir := range []string{util.ConfDir, util.DataDir, util.TempDir, util.QueueDir} {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			t.Fatal(err)
 		}
@@ -90,6 +91,7 @@ func TestGetDocKeywordsPublishAccess(t *testing.T) {
 		boxID              = "20261026000000-boxkw01"
 		protectedDocID     = "20261026000001-dockw01"
 		protectedBlockID   = "20261026000002-blkkw01"
+		missingDocID       = "20261026000008-dockw99"
 		disabledDocID      = "20261026000003-dockw02"
 		disabledBlockID    = "20261026000004-blkkw02"
 		publicDocID        = "20261026000005-dockw03"
@@ -162,19 +164,22 @@ func TestGetDocKeywordsPublishAccess(t *testing.T) {
 		query                 string
 		queryMethod           int
 		cookie                *http.Cookie
+		wantCode              int
 		wantGate              string
 		wantPasswordRequired  bool
 		wantKeyword           string
 		wantSentinelInContent string
 	}{
-		{"protected regex", protectedDocID, broadRegexp, 3, nil, "protyle-password", true, "", ""},
-		{"protected control", protectedDocID, nonMatchingPattern, 3, nil, "protyle-password", true, "", ""},
-		{"protected fts", protectedDocID, protectedSentinel, 1, nil, "protyle-password", true, "", ""},
-		{"protected authorized", protectedDocID, broadRegexp, 3, protectedAuthCookie, "", false, protectedSentinel, protectedSentinel},
-		{"disabled regex", disabledDocID, broadRegexp, 3, nil, "protyle-password--forbidden", false, "", ""},
-		{"visible regex", publicDocID, broadRegexp, 3, nil, "", false, visibleSentinel, visibleSentinel},
+		{"protected regex", protectedDocID, broadRegexp, 3, nil, 0, "protyle-password", true, "", ""},
+		{"protected control", protectedDocID, nonMatchingPattern, 3, nil, 0, "protyle-password", true, "", ""},
+		{"protected fts", protectedDocID, protectedSentinel, 1, nil, 0, "protyle-password", true, "", ""},
+		{"protected authorized", protectedDocID, broadRegexp, 3, protectedAuthCookie, 0, "", false, protectedSentinel, protectedSentinel},
+		{"disabled document", disabledDocID, broadRegexp, 3, nil, 1, "", false, "", ""},
+		{"missing document", missingDocID, broadRegexp, 3, nil, 1, "", false, "", ""},
+		{"visible regex", publicDocID, broadRegexp, 3, nil, 0, "", false, visibleSentinel, visibleSentinel},
 	}
 
+	var unavailableResponse *getDocPublishProbe
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			body, err := json.Marshal(map[string]any{
@@ -198,8 +203,22 @@ func TestGetDocKeywordsPublishAccess(t *testing.T) {
 			if err = json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
 				t.Fatalf("decode response failed: %v, body: %s", err, recorder.Body.String())
 			}
-			if 0 != response.Code {
+			if test.wantCode != response.Code {
 				t.Fatalf("unexpected response code [%d]: %s", response.Code, recorder.Body.String())
+			}
+			if test.wantCode != 0 {
+				if response.Data != nil {
+					t.Fatal("unavailable document returned data")
+				}
+				if unavailableResponse == nil {
+					unavailableResponse = &response
+				} else if !reflect.DeepEqual(response, *unavailableResponse) {
+					t.Fatal("unavailable document responses differ")
+				}
+				return
+			}
+			if response.Data == nil {
+				t.Fatal("readable document returned no data")
 			}
 			if test.wantPasswordRequired != response.Data.PublishAccessRequired {
 				t.Fatalf("publishAccessRequired = %t, want %t: %s", response.Data.PublishAccessRequired, test.wantPasswordRequired, recorder.Body.String())

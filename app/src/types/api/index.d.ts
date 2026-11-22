@@ -2967,6 +2967,9 @@ export interface APIGETRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 返回数值进度和本地化阶段，阶段文案只包含公开的启动状态。
+     */
     "/api/system/bootProgress": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2974,6 +2977,9 @@ export interface APIGETRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["public"];
     };
+    /**
+     * 以 SSE 推送数值进度和本地化阶段，阶段文案只包含公开的启动状态。
+     */
     "/api/system/bootProgressSSE": {
         request: EmptyRequestInput;
         response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6001,7 +6007,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin"];
     };
     /**
-     * 发布只读会话的虚拟引用标记只使用当前会话可解析的引用。
+     * 发布只读会话请求禁止发布的文档时按文档不存在处理。虚拟引用标记只使用当前会话可解析的引用。
      */
     "/api/filetree/getDoc": {
         request: FileTreeGetDocRequestInput;
@@ -8694,6 +8700,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 返回数值进度和本地化阶段，阶段文案只包含公开的启动状态。
+     */
     "/api/system/bootProgress": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

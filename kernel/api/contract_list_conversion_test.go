@@ -21,7 +21,7 @@ import (
 
 func testAPIContractListConversion(t *testing.T, engine *gin.Engine, docID string) {
 	t.Helper()
-	util.IncBootProgress(100-util.GetBootProgress(), "")
+	util.IncBootProgress(100-util.GetBootProgress(), util.BootStageNone)
 	tree, err := model.LoadTreeByBlockID(docID)
 	if err != nil {
 		t.Fatal(err)

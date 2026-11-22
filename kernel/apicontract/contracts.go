@@ -329,8 +329,9 @@ var (
 	// 包含运行版本、UID、文件系统类型、零 inode、路径差异、目录变化及读取错误；路径相对于 data。
 	// 不支持原始目录读取的平台返回 rawSupported=false，不将未执行的比较视为通过。
 	// 并发诊断返回 code=-1；请求取消或 60 秒超时会停止后续扫描，不保证并发编辑时的原子快照。
-	CheckFileTraversal        = define[EmptyRequest, SystemFileTraversalData]("checkFileTraversal", "/api/system/checkFileTraversal", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
-	CurrentTime               = define[EmptyRequest, int64]("currentTime", "/api/system/currentTime", PublicAccess, NoBody, ResponseOptions{}, "POST")
+	CheckFileTraversal = define[EmptyRequest, SystemFileTraversalData]("checkFileTraversal", "/api/system/checkFileTraversal", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+	CurrentTime        = define[EmptyRequest, int64]("currentTime", "/api/system/currentTime", PublicAccess, NoBody, ResponseOptions{}, "POST")
+	// 返回数值进度和本地化阶段，阶段文案只包含公开的启动状态。
 	BootProgress              = define[EmptyRequest, BootProgressData]("bootProgress", "/api/system/bootProgress", PublicAccess, NoBody, ResponseOptions{}, "GET", "POST")
 	SetFollowSystemLockScreen = define[LockScreenRequest, Null]("setFollowSystemLockScreen", "/api/system/setFollowSystemLockScreen", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "system"}}, "POST")
 	SetAutoLaunch             = define[AutoLaunchRequest, Null]("setAutoLaunch", "/api/system/setAutoLaunch", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "system"}}, "POST")
@@ -1329,7 +1330,7 @@ var ListDocTreeRange = define[FileTreeRangeRequest, FileTreeRangeData]("listDocT
 // 任一祖先隐藏、发布不可见或目标不属于指定笔记本时返回错误，不泄露不可访问的数量和位置。
 var LocateDocTreeItem = define[FileTreeLocateRequest, FileTreeLocateData]("locateDocTreeItem", "/api/filetree/locateDocTreeItem", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
-// 发布只读会话的虚拟引用标记只使用当前会话可解析的引用。
+// 发布只读会话请求禁止发布的文档时按文档不存在处理。虚拟引用标记只使用当前会话可解析的引用。
 var GetDoc = define[FileTreeGetDocRequest, FileTreeGetDocData]("getDoc", "/api/filetree/getDoc", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 3}}, "POST")
 var SetPublishAccess = define[FileTreeSetPublishRequest, Null]("setPublishAccess", "/api/filetree/setPublishAccess", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetPublishAccess = define[FileTreePublishIDsRequest, FileTreePublishData]("getPublishAccess", "/api/filetree/getPublishAccess", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1937,6 +1938,7 @@ var GetDynamicIcon = define[EmptyRequest, BinaryContent]("getDynamicIcon", "/api
 // 未登录、站点与账号区域不匹配或获取原文失败时，使用提交的 DOM 和上传资源；局部剪藏直接使用 DOM。
 var ExtensionCopy = define[ExtensionCopyRequest, *ExtensionCopyData]("extensionCopy", "/api/extension/copy", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{DataOnError: true}, "POST")
 
+// 以 SSE 推送数值进度和本地化阶段，阶段文案只包含公开的启动状态。
 var SystemBootProgressSSE = define[EmptyRequest, Null]("bootProgressSSE", "/api/system/bootProgressSSE", PublicAccess, NoBody, SSEOptions(SSEEvent[BootProgressData]("")), "GET")
 var SystemGetBootAppearance = define[EmptyRequest, *SettingBootAppearance]("getBootAppearance", "/api/system/getBootAppearance", PublicAccess, NoBody, ResponseOptions{EmptyResponseStatuses: []int{403}}, "GET")
 var SystemGetCaptcha = define[EmptyRequest, BinaryContent]("getCaptcha", "/api/system/getCaptcha", PublicAccess, NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200, ContentVariants: []HTTPContentVariant{{Status: 200, ContentType: "image/png"}}, EmptyResponseStatuses: []int{500}}, "GET")

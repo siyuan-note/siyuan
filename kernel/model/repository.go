@@ -3341,7 +3341,7 @@ func init() {
 func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtIndexBeforeWalkData, func(context map[string]any, path string) {
 		msg := fmt.Sprintf(Conf.Language(158), path)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageIndexingDocuments)
 		util.ContextPushMsg(context, msg)
 	})
 
@@ -3349,70 +3349,73 @@ func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtIndexWalkData, func(context map[string]any, path string) {
 		msg := fmt.Sprintf(Conf.Language(158), filepath.Base(path))
 		if 0 == indexWalkDataCount%1024 {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(indexWalkDataCount+1), 0)
 			util.ContextPushMsg(context, msg)
 		}
 		indexWalkDataCount++
 	})
 	eventbus.Subscribe(eventbus.EvtIndexBeforeGetLatestFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(159), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageIndexingDocuments, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtIndexGetLatestFile, func(context map[string]any, count int, total int) {
 		msg := fmt.Sprintf(Conf.Language(159), count, total)
 		if 0 == count%64 {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(count), int64(total))
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtIndexUpsertFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(160), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageIndexingDocuments, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtIndexUpsertFile, func(context map[string]any, count int, total int) {
 		msg := fmt.Sprintf(Conf.Language(160), count, total)
 		if 0 == count%32 {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(count), int64(total))
 			util.ContextPushMsg(context, msg)
 		}
 	})
 
+	var checkoutWalkCount atomic.Int64
 	eventbus.Subscribe(eventbus.EvtCheckoutBeforeWalkData, func(context map[string]any, path string) {
+		checkoutWalkCount.Store(0)
 		msg := fmt.Sprintf(Conf.Language(161), path)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCheckoutWalkData, func(context map[string]any, path string) {
 		msg := fmt.Sprintf(Conf.Language(161), filepath.Base(path))
+		count := checkoutWalkCount.Add(1)
 		if repoProgressDue("checkout-walk", false) {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageSyncing, count, 0)
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(162), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(162), count, total)
-		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		util.UpdateBootProgress(repoBootIncrement(count, total), util.BootStageSyncing, int64(count), int64(total))
 		if repoProgressDue("checkout-upsert", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(163), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(163), count, total)
-		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		util.UpdateBootProgress(repoBootIncrement(count, total), util.BootStageSyncing, int64(count), int64(total))
 		if repoProgressDue("checkout-remove", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
@@ -3420,66 +3423,66 @@ func subscribeRepoEvents() {
 
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadIndex, func(context map[string]any, id string) {
 		msg := fmt.Sprintf(Conf.Language(164), id[:7])
-		util.IncBootProgress(1, msg)
+		util.IncBootProgress(1, util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(165), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(165), count, total)
-		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		util.UpdateBootProgress(repoBootIncrement(count, total), util.BootStageSyncing, int64(count), int64(total))
 		if repoProgressDue("download-files", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunks, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(166), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunk, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(166), count, total)
-		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		util.UpdateBootProgress(repoBootIncrement(count, total), util.BootStageSyncing, int64(count), int64(total))
 		if repoProgressDue("download-chunks", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadRef, func(context map[string]any, ref string) {
 		msg := fmt.Sprintf(Conf.Language(167), ref)
-		util.IncBootProgress(1, msg)
+		util.IncBootProgress(1, util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadIndex, func(context map[string]any, id string) {
 		msg := fmt.Sprintf(Conf.Language(168), id[:7])
-		util.IncBootProgress(1, msg)
+		util.IncBootProgress(1, util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(169), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(169), count, total)
 		if 0 == count%8 {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageSyncing, int64(count), int64(total))
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadChunks, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(170), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadChunk, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(170), count, total)
 		if 0 == count%8 {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageSyncing, int64(count), int64(total))
 			util.ContextPushMsg(context, msg)
 		}
 	})
@@ -3488,37 +3491,37 @@ func subscribeRepoEvents() {
 			uploadingRef.Store(true)
 		}
 		msg := fmt.Sprintf(Conf.Language(171), ref)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudLock, func(context map[string]any) {
 		msg := Conf.Language(186)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudUnlock, func(context map[string]any) {
 		msg := Conf.Language(187)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadIndexes, func(context map[string]any) {
 		msg := Conf.Language(208)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadCheckIndex, func(context map[string]any) {
 		msg := Conf.Language(209)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeFixObjects, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(210), count, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, int64(count), int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudAfterFixObjects, func(context map[string]any) {
 		msg := Conf.Language(211)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudCorrupted, func() {

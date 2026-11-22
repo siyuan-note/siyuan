@@ -1195,13 +1195,25 @@ func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) a
 	if decodeErr != nil {
 		return apicontract.Failure[apicontract.FileTreeGetDocData](-1, decodeErr.Error())
 	}
+	mode := int(options.Mode)
 	includeDocInfo := options.IncludeDocInfo
-	if includeDocInfo && model.IsReadOnlyRoleContext(c) {
-		includeDocInfo = isBlockPublishAccessible(c, id, requestedNotebook)
+	var publishDocAccess func(string, string) bool
+	publishReader := model.IsReadOnlyRoleContext(c)
+	if publishReader {
+		publishIgnore := model.GetDisablePublishAccess(model.GetPublishAccess())
+		publishDocAccess = func(box, docPath string) bool {
+			return model.CheckPathAccessableByPublishIgnore(box, docPath, publishIgnore)
+		}
+		if bt := treenode.GetBlockTree(id); bt != nil && !publishDocAccess(bt.BoxID, bt.Path) {
+			return getDocUnavailable(mode)
+		}
+		if includeDocInfo {
+			includeDocInfo = isBlockPublishAccessible(c, id, requestedNotebook)
+		}
 	}
 	index, query, queryMethod := int(options.Index), options.Query, int(options.QueryMethod)
 	queryTypes, querySubTypes := options.QueryTypes, options.QuerySubTypes.Selected()
-	mode, size := int(options.Mode), 102400
+	size := 102400
 	if options.Size != nil {
 		size = int(*options.Size)
 	}
@@ -1233,10 +1245,10 @@ func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) a
 	// 加密笔记本的打开文档走 InBox 版（查加密 blocktree + content db）
 	if requestedNotebook != "" && model.IsEncryptedBox(requestedNotebook) {
 		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, docInfo, err =
-			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, requestedNotebook, publishRefAccess)
+			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, requestedNotebook, publishDocAccess, publishRefAccess)
 	} else {
 		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, docInfo, err =
-			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, publishRefAccess)
+			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, publishDocAccess, publishRefAccess)
 	}
 	if errors.Is(err, model.ErrBlockNotFound) {
 		return apicontract.Failure[apicontract.FileTreeGetDocData](3, "")
@@ -1253,9 +1265,12 @@ func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) a
 	isSyncing := model.IsSyncingFile(rootID)
 
 	publishAccessRequired := false
-	if model.IsReadOnlyRoleContext(c) {
+	if publishReader {
 		publishAccess := model.GetPublishAccess()
 		newContent, publishAccessStatus := model.FilterContentByPublishAccessWithStatus(c, publishAccess, boxID, docPath, content, false)
+		if publishAccessStatus == model.PublishAccessDenied {
+			return getDocUnavailable(mode)
+		}
 		publishAccessRequired = publishAccessStatus == model.PublishAccessPasswordRequired
 		if model.PublishAccessAllowed != publishAccessStatus {
 			content = newContent
@@ -1279,6 +1294,13 @@ func getDocContract(c *gin.Context, request apicontract.FileTreeGetDocRequest) a
 		IsSyncing: isSyncing, IsBacklinkExpand: isBacklinkExpand, Keywords: keywords, HeadingNumbers: headingNumbers,
 		PublishAccessRequired: publishAccessRequired, ReqID: options.ReqID, DocInfo: docInfoContract(docInfo),
 	})
+}
+
+func getDocUnavailable(mode int) apicontract.Response[apicontract.FileTreeGetDocData] {
+	if 0 == mode {
+		return apicontract.Failure[apicontract.FileTreeGetDocData](1, model.ErrTreeNotFound.Error())
+	}
+	return apicontract.Failure[apicontract.FileTreeGetDocData](3, "")
 }
 
 var setPublishAccess = contractHandler(apicontract.SetPublishAccess, setPublishAccessContract)

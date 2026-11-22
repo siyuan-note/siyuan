@@ -211,7 +211,7 @@ func bootSyncData() {
 
 	afterBoot := util.IsBooted()
 	if !afterBoot {
-		util.IncBootProgress(3, Conf.Language(307))
+		util.IncBootProgress(3, util.BootStageSyncing)
 	}
 	BootSyncSucc.Store(-1)
 	if afterBoot {
@@ -499,7 +499,7 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 	upsertRootIDs = []string{}
 	removeRootIDs = []string{}
 
-	util.IncBootProgress(3, Conf.Language(308))
+	util.IncBootProgress(3, util.BootStageSyncReindexing)
 	removeRootIDs = removeIndexes(removes) // 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
 	upsertRootIDs = upsertIndexes(upserts)
 
@@ -516,7 +516,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 	finishDocTreeChange := cache.BeginDocTreeMutation("")
 	defer finishDocTreeChange()
 	bootProgressPart := int32(10 / float64(len(removeFilePaths)))
-	for _, removeFile := range removeFilePaths {
+	for i, removeFile := range removeFilePaths {
 		if !strings.HasSuffix(removeFile, ".sy") {
 			continue
 		}
@@ -526,7 +526,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 
 		msg := fmt.Sprintf(Conf.Language(39), rootID)
 		updateSyncCheckoutIndexMessage(msg)
-		util.IncBootProgress(bootProgressPart, msg)
+		util.UpdateBootProgress(bootProgressPart, util.BootStageSyncReindexing, int64(i+1), int64(len(removeFilePaths)))
 		pushSyncStatusBar(msg)
 
 		cache.RemoveTreeData(rootID)
@@ -555,7 +555,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 	defer finishDocTreeChange()
 	luteEngine := util.NewLute()
 	bootProgressPart := int32(10 / float64(len(upsertFilePaths)))
-	for _, upsertFile := range upsertFilePaths {
+	for i, upsertFile := range upsertFilePaths {
 		rootID, indexed := func() (string, bool) {
 			if !strings.HasSuffix(upsertFile, ".sy") {
 				return "", false
@@ -584,7 +584,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 			defer hpathRefresh.Unlock()
 			msg := fmt.Sprintf(Conf.Language(40), util.GetTreeID(p))
 			updateSyncCheckoutIndexMessage(msg)
-			util.IncBootProgress(bootProgressPart, msg)
+			util.UpdateBootProgress(bootProgressPart, util.BootStageSyncReindexing, int64(i+1), int64(len(upsertFilePaths)))
 			pushSyncStatusBar(msg)
 
 			rootID := util.GetTreeID(p)

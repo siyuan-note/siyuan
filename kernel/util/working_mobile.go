@@ -19,7 +19,7 @@ import (
 )
 
 func BootMobile(container, appDir, workspaceBaseDir, lang string) {
-	IncBootProgress(3, BootL10n(299, "Booting kernel..."))
+	IncBootProgress(3, BootStageStarting)
 	initMime()
 	initHttpClient()
 	ServerPort = FixedPort

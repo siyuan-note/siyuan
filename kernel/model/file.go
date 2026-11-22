@@ -681,14 +681,14 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	return
 }
 
-func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, publishRefAccess func(string, string) bool) (
+func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, publishDocAccess, publishRefAccess func(string, string) bool) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, keywords []string, headingNumbers map[string]string, docInfo *BlockInfo, err error) {
-	return GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, "", publishRefAccess)
+	return GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, "", publishDocAccess, publishRefAccess)
 }
 
 // GetDocInBox 与 GetDoc 一致，但按 boxID 路由到加密 db 或全局 db。
 // 加密笔记本打开文档时传入 boxID，blocktree/content 查询走加密 db；boxID 为空时 fall-through 全局 db。
-func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, boxID string, publishRefAccess func(string, string) bool) (
+func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, boxID string, publishDocAccess, publishRefAccess func(string, string) bool) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxIDOut, docPath string, isBacklinkExpand bool, keywords []string, headingNumbers map[string]string, docInfo *BlockInfo, err error) {
 	timing := util.BeginPerformance("document.load")
 	defer func() {
@@ -716,6 +716,13 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	}
 	if nil == tree {
 		err = ErrBlockNotFound
+		return
+	}
+	if publishDocAccess != nil && !publishDocAccess(tree.Box, tree.Path) {
+		err = ErrBlockNotFound
+		if 0 == mode {
+			err = ErrTreeNotFound
+		}
 		return
 	}
 	if includeDocInfo {

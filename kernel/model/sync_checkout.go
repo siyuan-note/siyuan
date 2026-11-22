@@ -189,7 +189,7 @@ func (task *syncCheckoutTask) push() {
 	}
 	msg := fmt.Sprintf(Conf.Language(432), path.Base(p.Path), p.Count, p.Total, checkoutBytes(p.Written), checkoutBytes(p.Size), checkoutBytes(int64(rate)), remaining)
 	task.message = msg
-	util.SetBootDetails(msg)
+	util.UpdateBootProgress(0, util.BootStageSyncing, p.Written, p.Size)
 	pushSyncStatusBar(msg)
 	task.broadcastLocked(0)
 	if time.Since(task.lastLog) >= 5*time.Second || task.lastLogPath != p.Path || (p.Written == p.Size && task.lastLogBytes != p.Written) {

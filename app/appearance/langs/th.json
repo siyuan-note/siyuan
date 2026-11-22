@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "วันที่อัปเดต",
 	"agentQuoteText": "อ้างอิงข้อความ",
 	"agentQuote": "อ้างข้อความในแชตเอเจนต์",
 	"agentContinueEditing": "ดำเนินการต่อในแชตเอเจนต์",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "การอ้างอิงเสมือน (คำค้นหาการอ้างอิงเสมือนได้มาจาก)",
 	"netImg2LocalAsset": "แปลงรูปเครือข่าย",
 	"netAssets2LocalAssets": "แปลงทรัพยากรเครือข่าย",
-	"releaseDate": "วันที่เผยแพร่",
 	"pkgSize": "ขนาดแพ็คเกจ",
 	"installSize": "ขนาดติดตั้ง",
 	"installDate": "วันที่ติดตั้ง",

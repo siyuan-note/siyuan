@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "Ngày cập nhật",
 	"agentQuoteText": "Trích dẫn văn bản",
 	"agentQuote": "Trích dẫn trong cuộc trò chuyện với tác nhân",
 	"agentContinueEditing": "Tiếp tục trò chuyện với tác nhân",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "Tham chiếu ảo (từ khóa được lấy từ các nguồn bên dưới)",
 	"netImg2LocalAsset": "Lưu ảnh trên mạng về máy",
 	"netAssets2LocalAssets": "Lưu tệp tài nguyên trên mạng về máy",
-	"releaseDate": "Ngày phát hành",
 	"pkgSize": "Kích thước gói",
 	"installSize": "Kích thước cài đặt",
 	"installDate": "Ngày cài đặt",

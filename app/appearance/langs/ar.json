@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "تاريخ التحديث",
 	"agentQuoteText": "اقتباس النص",
 	"agentQuote": "اقتباس في محادثة الوكيل",
 	"agentContinueEditing": "المتابعة مع الوكيل",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "المرجع الافتراضي (يتم الحصول على كلمات البحث المرجعي الافتراضي من الطرق التالية)",
 	"netImg2LocalAsset": "تحويل صور الشبكة إلى الصور المحلية",
 	"netAssets2LocalAssets": "تحويل أصول الشبكة إلى الأصول المحلية",
-	"releaseDate": "تاريخ الإصدار",
 	"pkgSize": "حجم الحزمة",
 	"installSize": "حجم التثبيت",
 	"installDate": "تاريخ التثبيت",

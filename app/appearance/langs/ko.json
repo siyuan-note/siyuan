@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "업데이트 날짜",
 	"agentQuoteText": "텍스트 인용",
 	"agentQuote": "에이전트 대화에 인용",
 	"agentContinueEditing": "에이전트에서 계속",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "가상 참조 (가상 참조 검색 키워드를 가져오는 위치)",
 	"netImg2LocalAsset": "네트워크 이미지를 로컬 이미지로 변환",
 	"netAssets2LocalAssets": "네트워크 에셋을 로컬로 변환",
-	"releaseDate": "출시일",
 	"pkgSize": "패키지 크기",
 	"installSize": "설치 크기",
 	"installDate": "설치 날짜",

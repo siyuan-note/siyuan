@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "Tanggal Pembaruan",
 	"agentQuoteText": "Kutip teks",
 	"agentQuote": "Kutip dalam percakapan agen",
 	"agentContinueEditing": "Lanjutkan di percakapan agen",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "Referensi virtual (kata kunci pencarian referensi virtual diperoleh dari)",
 	"netImg2LocalAsset": "Konversi gambar jaringan ke gambar lokal",
 	"netAssets2LocalAssets": "Konversi aset jaringan ke lokal",
-	"releaseDate": "Tanggal Rilis",
 	"pkgSize": "Ukuran paket",
 	"installSize": "Ukuran Instalasi",
 	"installDate": "Tanggal Instalasi",

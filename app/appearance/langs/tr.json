@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "Güncelleme tarihi",
 	"agentQuoteText": "Metni alıntıla",
 	"agentQuote": "Aracı sohbetinde alıntıla",
 	"agentContinueEditing": "Aracı sohbetinde devam et",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "Sanal referans (anahtar kelimeler sanal referanslardan alınır)",
 	"netImg2LocalAsset": "Ağ görsellerini yerel görsellere dönüştür",
 	"netAssets2LocalAssets": "Ağ varlıklarını yerel varlıklara dönüştür",
-	"releaseDate": "Yayın tarihi",
 	"pkgSize": "Paket boyutu",
 	"installSize": "Kurulum boyutu",
 	"installDate": "Kurulum tarihi",

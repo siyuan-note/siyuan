@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "Fecha de actualización",
 	"agentQuoteText": "Citar texto",
 	"agentQuote": "Citar en el chat del agente",
 	"agentContinueEditing": "Continuar en el chat del agente",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "Referencia virtual (las palabras clave de búsqueda de referencias virtuales se obtienen a partir de ellas)",
 	"netImg2LocalAsset": "Convertir imágenes remotas a recursos locales",
 	"netAssets2LocalAssets": "Convertir recursos remotos a locales",
-	"releaseDate": "Fecha de lanzamiento",
 	"pkgSize": "Tamaño del paquete",
 	"installSize": "Tamaño de instalación",
 	"installDate": "Fecha de instalación",

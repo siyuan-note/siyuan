@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "Bijgewerkt op",
 	"agentQuoteText": "Tekst citeren",
 	"agentQuote": "Citeren in de agentchat",
 	"agentContinueEditing": "Doorgaan in de agentchat",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "Virtuele verwijzing (zoekwoorden voor virtuele verwijzing worden verkregen uit)",
 	"netImg2LocalAsset": "Netwerkafbeeldingen naar lokaal",
 	"netAssets2LocalAssets": "Netwerkassets naar lokaal",
-	"releaseDate": "Releasedatum",
 	"pkgSize": "Pakketgrootte",
 	"installSize": "Installatiegrootte",
 	"installDate": "Installatiedatum",

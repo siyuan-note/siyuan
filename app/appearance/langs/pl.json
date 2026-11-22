@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "Data aktualizacji",
 	"agentQuoteText": "Cytuj tekst",
 	"agentQuote": "Zacytuj na czacie z agentem",
 	"agentContinueEditing": "Kontynuuj na czacie z agentem",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "Wirtualne odniesienie (słowa kluczowe wyszukiwania z wirtualnych odniesień są pobierane z)",
 	"netImg2LocalAsset": "Konwertuj obrazy z sieci na obrazy lokalne",
 	"netAssets2LocalAssets": "Konwertuj zasoby sieciowe na lokalne",
-	"releaseDate": "Data wydania",
 	"pkgSize": "Rozmiar pakietu",
 	"installSize": "Rozmiar instalacji",
 	"installDate": "Data instalacji",

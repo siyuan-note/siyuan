@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "Dátum aktualizácie",
 	"agentQuoteText": "Citovať text",
 	"agentQuote": "Citovať v chate s agentom",
 	"agentContinueEditing": "Pokračovať v chate s agentom",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "Virtuálne referencie",
 	"netImg2LocalAsset": "Previesť obrázky z internetu na lokálne",
 	"netAssets2LocalAssets": "Previesť sieťové prílohy na lokálne",
-	"releaseDate": "Dátum vydania",
 	"pkgSize": "Veľkosť balíka",
 	"installSize": "Inštalačná veľkosť",
 	"installDate": "Dátum inštalácie",

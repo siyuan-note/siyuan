@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "更新日",
 	"agentQuoteText": "テキストを引用",
 	"agentQuote": "エージェントに引用",
 	"agentContinueEditing": "エージェントで続ける",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "仮想参照 (仮想参照の検索キーワードは以下の項目から取得されます)",
 	"netImg2LocalAsset": "ネットワーク画像をローカル画像に変換",
 	"netAssets2LocalAssets": "ネットワークアセットをローカルに変換",
-	"releaseDate": "リリース日",
 	"pkgSize": "パッケージサイズ",
 	"installSize": "インストールサイズ",
 	"installDate": "インストール日",

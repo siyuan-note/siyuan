@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "תאריך עדכון",
 	"agentQuoteText": "צטט טקסט",
 	"agentQuote": "ציטוט בשיחת הסוכן",
 	"agentContinueEditing": "המשך בשיחת הסוכן",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "ייחוס וירטואלי (מילות ייחוס חזרה מחפשות הן)",
 	"netImg2LocalAsset": "המרת תמונות רשת לתמונות מקומיות",
 	"netAssets2LocalAssets": "המרת נכסי רשת לנכסים מקומיים",
-	"releaseDate": "תאריך שחרור",
 	"pkgSize": "גודל החבילה",
 	"installSize": "גודל ההתקנה",
 	"installDate": "תאריך התקנה",

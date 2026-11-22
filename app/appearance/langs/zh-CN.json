@@ -1,4 +1,5 @@
 {
+	"bazaarUpdateDate": "更新日期",
 	"agentQuoteText": "引用文本",
 	"agentQuote": "引用到智能体",
 	"agentContinueEditing": "在智能体中继续",
@@ -2564,7 +2565,6 @@
 	"searchVirtualRef": "虚拟引用（虚拟引用搜索关键字从以下方式获得）",
 	"netImg2LocalAsset": "网络图片转换为本地图片",
 	"netAssets2LocalAssets": "网络资源文件转换本地",
-	"releaseDate": "发布日期",
 	"pkgSize": "包大小",
 	"installSize": "安装大小",
 	"installDate": "安装日期",

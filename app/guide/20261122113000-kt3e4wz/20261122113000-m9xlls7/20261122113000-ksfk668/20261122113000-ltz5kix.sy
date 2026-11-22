@@ -1,0 +1,425 @@
+{
+	"ID": "20261122113000-ltz5kix",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-ltz5kix",
+		"title": "Смешанное форматирование заголовков и списков",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-hvh3cip",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-hvh3cip",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Это пример конспекта, объединяющего заголовки и списки."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wsai0jq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-wsai0jq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-aua54c5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-aua54c5",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-7stdhof",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7stdhof",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Элемент списка 1"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-zefaf0b",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"id": "20261122113000-zefaf0b",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Заголовок 2"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-340oo7v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-340oo7v",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Простой абзац"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-2ngliga",
+							"Type": "NodeBlockquote",
+							"Properties": {
+								"id": "20261122113000-2ngliga",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockquoteMarker",
+									"Data": ">"
+								},
+								{
+									"ID": "20261122113000-9y4fful",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20261122113000-9y4fful",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Цитата"
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-32d3om7",
+									"Type": "NodeList",
+									"ListData": {},
+									"Properties": {
+										"id": "20261122113000-32d3om7",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-vvt3oap",
+											"Type": "NodeListItem",
+											"ListData": {
+												"BulletChar": 42,
+												"Marker": "Kg=="
+											},
+											"Properties": {
+												"id": "20261122113000-vvt3oap",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"ID": "20261122113000-5ud155s",
+													"Type": "NodeParagraph",
+													"Properties": {
+														"id": "20261122113000-5ud155s",
+														"updated": "20261122113000"
+													},
+													"Children": [
+														{
+															"Type": "NodeText",
+															"Data": "Элемент списка в цитате"
+														}
+													]
+												},
+												{
+													"ID": "20261122113000-r7ny945",
+													"Type": "NodeList",
+													"ListData": {},
+													"Properties": {
+														"id": "20261122113000-r7ny945",
+														"updated": "20261122113000"
+													},
+													"Children": [
+														{
+															"ID": "20261122113000-cy65v08",
+															"Type": "NodeListItem",
+															"ListData": {
+																"BulletChar": 42,
+																"Marker": "Kg=="
+															},
+															"Properties": {
+																"id": "20261122113000-cy65v08",
+																"updated": "20261122113000"
+															},
+															"Children": [
+																{
+																	"ID": "20261122113000-k8rw2xd",
+																	"Type": "NodeParagraph",
+																	"Properties": {
+																		"id": "20261122113000-k8rw2xd",
+																		"updated": "20261122113000"
+																	},
+																	"Children": [
+																		{
+																			"Type": "NodeText",
+																			"Data": "Подэлемент списка 1"
+																		}
+																	]
+																}
+															]
+														},
+														{
+															"ID": "20261122113000-wvbcla4",
+															"Type": "NodeListItem",
+															"ListData": {
+																"BulletChar": 42,
+																"Marker": "Kg=="
+															},
+															"Properties": {
+																"id": "20261122113000-wvbcla4",
+																"updated": "20261122113000"
+															},
+															"Children": [
+																{
+																	"ID": "20261122113000-bslu2g4",
+																	"Type": "NodeParagraph",
+																	"Properties": {
+																		"id": "20261122113000-bslu2g4",
+																		"updated": "20261122113000"
+																	},
+																	"Children": [
+																		{
+																			"Type": "NodeText",
+																			"Data": "Подэлемент списка 2"
+																		}
+																	]
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-znymufj",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-znymufj",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-3zd0uqx",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-3zd0uqx",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-1dhqexe",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-1dhqexe",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Подэлемент списка 1"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-btvbi35",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-btvbi35",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-hv2hnl7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-hv2hnl7",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Подэлемент списка 2"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-95nz7xs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-95nz7xs",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-rvep8xo",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"id": "20261122113000-rvep8xo",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Элемент списка 2"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-8251xk1",
+							"Type": "NodeList",
+							"ListData": {
+								"Typ": 1
+							},
+							"Properties": {
+								"id": "20261122113000-8251xk1",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-32h9ww9",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "MS4=",
+										"Num": 1
+									},
+									"Properties": {
+										"id": "20261122113000-32h9ww9",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-89o9h0z",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-89o9h0z",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Нумерованный элемент 1"
+												}
+											]
+										},
+										{
+											"ID": "20261122113000-nc73g15",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"id": "20261122113000-nc73g15",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "Z28="
+												},
+												{
+													"Type": "NodeCodeBlockCode",
+													"Data": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, Мир\")\n}\n"
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-lfb3t9e",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "Mi4=",
+										"Num": 2
+									},
+									"Properties": {
+										"id": "20261122113000-lfb3t9e",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-6lc3udu",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-6lc3udu",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Нумерованный элемент 2"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,1555 @@
+{
+	"ID": "20261122113000-r4qe8qg",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f4f1",
+		"id": "20261122113000-r4qe8qg",
+		"title": "Мобильное приложение",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-mup076e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-mup076e",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wdsp0ek",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-wdsp0ek",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan доступен для Android, iOS и HarmonyOS и уже опубликован в некоторых магазинах приложений; ищите в магазине приложений "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ или "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3254ty6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-3254ty6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Установка и обновление"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-iq8x4sp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-iq8x4sp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Доступно в следующих магазинах приложений:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6leiqdu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-6leiqdu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-6u7lc4r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-6u7lc4r",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ichsxgg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ichsxgg",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Xiaomi"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-kb169ou",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-kb169ou",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-14ptpal",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-14ptpal",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Huawei"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-acxn4kn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-acxn4kn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-b8ym56a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-b8ym56a",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Honor"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-c4gcuzk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-c4gcuzk",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2mtukoo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2mtukoo",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "OPPO"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-0agqufh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-0agqufh",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-m0ds4ws",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-m0ds4ws",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "vivo"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8fzgmnq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-8fzgmnq",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-254coot",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-254coot",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "App Store (Apple)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ylkn9vc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ylkn9vc",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-jn4exfn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-jn4exfn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "CoolApk"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-5r9cn1u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-5r9cn1u",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-riahr83",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-riahr83",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Google Play"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-500vtk8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-500vtk8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Скачать APK: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/download.html",
+					"TextMarkTextContent": "https://b3log.org/siyuan/download.html"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xvyw0g3",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-xvyw0g3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Навигация по интерфейсу"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-gm1rfis",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-gm1rfis",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Свайп вправо в редакторе открывает левую боковую панель, свайп влево — правую. После запуска приложения при первом открытии боковой панели отображается первая видимая функция на этой стороне, а при последующих открытиях восстанавливается последняя использованная функция. Порядок функций можно настроить в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Внешний вид"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Левое и правое расположение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-z7o00cb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-z7o00cb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Нижняя выдвижная панель по умолчанию открывается на половину экрана. Потяните верхнюю ручку вверх и отпустите, чтобы развернуть панель на весь экран; как в полуэкранном, так и в полноэкранном режиме можно потянуть ручку вниз и отпустить, чтобы свернуть её. Панель также можно закрыть кнопкой «Назад» или нажатием на затемнённую область. В области содержимого по-прежнему работают прокрутка и выделение текста. При появлении клавиатуры видимая высота временно ограничивается, а после скрытия клавиатуры восстанавливается прежнее положение. Формы, требующие подтверждения, отображают под содержимым кнопки «ОК», «Отмена» и др. При закрытии сохраняются стандартные правила отмены и сохранения. Уведомления о процессе сохранения или обязательных действиях ограничивают закрытие — продолжайте с помощью действий, предложенных в интерфейсе."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bzpjgo3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-bzpjgo3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После редактирования содержимого ссылки, обратной ссылки или флеш-карты в мобильной нижней панели при закрытии выполняется ожидание завершения сохранения. При ошибке сохранения редактор и черновик сохраняются; после восстановления соединения достаточно снова закрыть панель, чтобы повторить отправку изменений без повторного ввода текста."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-v2jtuf9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-v2jtuf9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При использовании настольной компоновки на Android системная кнопка «Назад» сначала закрывает самый верхний элемент — всплывающее окно, меню, панель редактирования, предпросмотр изображения или плавающую панель — по одному уровню за раз, сохраняя состояние нижнего слоя. Если открытых слоёв нет, выполняется возврат по истории документов внутри приложения без перезагрузки всего интерфейса. При достижении начала истории появляется подсказка о повторном нажатии; повторное нажатие кнопки «Назад» во время показа подсказки возвращает на рабочий стол системы."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-e77t5nb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-e77t5nb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Использование маркетплейса"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9ndvdj4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-9ndvdj4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В некоторых версиях из магазинов приложений маркетплейс может отсутствовать внутри приложения из-за требований модерации."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-uxivjyo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-uxivjyo",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В ограниченных версиях маркетплейс всё равно можно использовать: включите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Аутентификация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сетевое обслуживание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", а затем откройте SiYuan через браузер на компьютере."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0udtebj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-0udtebj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wjdseut",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-wjdseut",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-bi6gttt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-bi6gttt",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-lx845fv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-lx845fv",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Удаление приложения удалит локальные данные. Перед удалением завершите синхронизацию и сохраните резервную копию вне приложения; данные без резервной копии могут быть безвозвратно утеряны"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-gmt9pds",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-gmt9pds",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-atkjtap",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-atkjtap",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Для корректного выхода из приложения используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Больше"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Выйти из приложения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": смахивание приложения из списка недавних принудительно завершает его, из-за чего синхронизация данных не выполняется"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-q5kszdp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-q5kszdp",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-l4k9zfn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-l4k9zfn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В iOS переключение на другое приложение приводит к разрыву соединения; нажмите кнопку во всплывающем окне для ручного переподключения"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-f0h4l4n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-f0h4l4n",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-cflkjbs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-cflkjbs",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Во время синхронизации данных не переключайтесь на другие приложения и не выключайте экран, иначе синхронизация завершится сбоем"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zbykkif",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-zbykkif",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Пользовательское уведомление для поддержания работы в фоне на Android"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-yg1zpj3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-yg1zpj3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если вам нужно, чтобы SiYuan максимально долго оставался активным в фоновом режиме, выполните следующие шаги:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-n2ohtsl",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20261122113000-n2ohtsl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-5jd9cms",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261122113000-5jd9cms",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-wpv8209",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-wpv8209",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Установите режим энергосбережения в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Без ограничений"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-rkxabd7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261122113000-rkxabd7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-c0nebbc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-c0nebbc",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Разрешите уведомления"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-uobosgh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261122113000-uobosgh",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-z7snshn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-z7snshn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В настольной версии в окне "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "рабочее пространство/data/assets/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ создайте текстовый файл с именем "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "android-notification-texts.txt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, каждая строка которого будет использоваться как текст уведомления"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ozctb3n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20261122113000-ozctb3n",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-nvwxhq4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-nvwxhq4",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ссылки на блоки контента, созданные через "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-pocthw9",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "синхронизации данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ""
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-uy0m4v5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-uy0m4v5",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После выполнения этих шагов SiYuan будет отправлять уведомление каждые 45 секунд для поддержания работы в фоновом режиме."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cwhcwyw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-cwhcwyw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Быстрые заметки"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-77euak3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-77euak3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Быстрые заметки — это функция мгновенной записи на мобильных устройствах. Когда появляется идея или нужно сохранить временную информацию, не обязательно открывать SiYuan и переходить в редактор: текст можно быстро сохранить через системное меню «Поделиться» или ярлык быстрого доступа. Записи сначала сохраняются локально, а затем автоматически переносятся в панель документов для разбора."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lipvxd3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-lipvxd3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zlhg38h",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-zlhg38h",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-zyyrp7b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-zyyrp7b",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-fevvmes",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-fevvmes",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Создание быстрой заметки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": на мобильном устройстве отправьте текст или ссылку в SiYuan через системное меню «Поделиться» либо добавьте ярлык SiYuan на рабочий стол для записи в один клик"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-n65aphw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-n65aphw",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-d8uxyp9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-d8uxyp9",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Автоматический перенос: во время работы SiYuan каждые 7 секунд проверяет локальный каталог быстрых заметок и переносит новые записи в заданное место в панели документов"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-f7kzaui",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-f7kzaui",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Импортированные быстрые заметки следуют переключателям синтаксиса Markdown в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Включённый строчный синтаксис, ограждения кода со средней точкой ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "···"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ") и полноширинный быстрый синтаксис задач ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "【X】"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ") преобразуются сразу при импорте без необходимости повторного редактирования."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7fj5ohi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7fj5ohi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Каждая быстрая заметка разбирается отдельно, поэтому незакрытый блок кода не повлияет на следующую заметку. Уже импортированные документы повторно не разбираются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-h2hrzl9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-h2hrzl9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка сохранения"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rpjaca4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rpjaca4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Документы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Новый документ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Путь сохранения по умолчанию для быстрых заметок"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " укажите место сохранения быстрых заметок:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-j2ce2g4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-j2ce2g4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-dmtvf62",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-dmtvf62",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ak2hd0o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ak2hd0o",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Целевой блокнот"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": выберите блокнот, в который будут переноситься быстрые заметки"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-426xc1n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-426xc1n",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-mbjxpfr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-mbjxpfr",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Путь хранения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": задайте шаблон пути для сохранения содержимого:"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-c6wijbz",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-c6wijbz",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-egww674",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-egww674",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-tgvobwx",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-tgvobwx",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Без шаблона пути: для каждой быстрой заметки создаётся отдельный документ с временной меткой в заголовке"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-4wn9e67",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-4wn9e67",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-70ns0rj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-70ns0rj",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "С шаблоном пути: все быстрые заметки добавляются в конец указанного документа. Шаблон пути поддерживает синтаксис Go template, например "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "/Быстрые заметки/{{now | date \"20060102150405\"}}"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ создаст отдельный документ по времени"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zsq7udv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-zsq7udv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Отличие от «Входящих»"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3t6fpsd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3t6fpsd",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Быстрые заметки и облачные «Входящие» — это два независимых способа быстрой записи:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-j9hfjgi",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20261122113000-j9hfjgi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th"
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Быстрые заметки"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Облачные «Входящие»"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Место хранения"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Локально"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Облачный "
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Способ использования"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Системное меню «Поделиться» / ярлык"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Отправка через WeChat / вызов API"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Способ переноса"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Автоматический перенос в панель документов"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Требуется ручная обработка из панели «Входящие»"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Требуется подписка"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Нет"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Да"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Доступные платформы"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Только мобильные"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Все платформы"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-a1gvsa6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-a1gvsa6",
+				"updated": "20261122113000"
+			}
+		}
+	]
+}

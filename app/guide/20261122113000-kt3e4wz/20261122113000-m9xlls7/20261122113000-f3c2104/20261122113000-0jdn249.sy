@@ -1,0 +1,338 @@
+{
+	"ID": "20261122113000-0jdn249",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-0jdn249",
+		"title": "Игнорирование поиска",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-1xroqwx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-1xroqwx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-sae6y19",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-sae6y19",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Игнорирование поиска позволяет отфильтровывать ненужные результаты при выполнении поиска."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-p49uezx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-p49uezx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qrwlcc4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-qrwlcc4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Игнорирование глобального поиска и игнорирование поиска ссылок настраиваются отдельно:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ccnwu2r",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-ccnwu2r",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-dn2x0mq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-dn2x0mq",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-uauwqd9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-uauwqd9",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Игнорирование глобального поиска: вручную создайте или отредактируйте в файловой системе "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "рабочее пространство/data/.siyuan/searchignore"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — текстовый файл"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-xqathy4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-xqathy4",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-d834q9d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-d834q9d",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Игнорирование поиска ссылок: вручную создайте или отредактируйте в файловой системе "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "рабочее пространство/data/.siyuan/refsearchignore"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — текстовый файл"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-y8s7t1j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-y8s7t1j",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Каждая строка в этих конфигурационных файлах ignore должна представлять собой полное условие фильтрации SQL; несколько строк объединяются через AND, например:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3xg0ck6",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20261122113000-3xg0ck6",
+				"style": "line-height: 23px;",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "path NOT LIKE '/20261122113000-u3pmciy%'\nbox != '20261122113000-kt3e4wz'\nid != '20261122113000-u3pmciy'\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6n2jmia",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-6n2jmia",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-4sve9sg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-4sve9sg",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-0w9ibs7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-0w9ibs7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "path NOT LIKE '/20261122113000-u3pmciy%'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": игнорировать блоки содержимого в этом документе и его дочерних документах."
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " использует путь из ID документов без ID блокнота; замените на фактический префикс пути документа"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8dh9k7m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-8dh9k7m",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-hdvcwf7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-hdvcwf7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "box != '20261122113000-kt3e4wz'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: исключить из поиска блоки содержимого в блокноте data/20261122113000-kt3e4wz"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-2mr63qt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-2mr63qt",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-1sspd5p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-1sspd5p",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "id != '20261122113000-u3pmciy'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: исключить из поиска блок содержимого с id 20261122113000-u3pmciy"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-myoyyrx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-myoyyrx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После изменения и сохранения файла конфигурации изменения вступят в силу через 30 секунд."
+				}
+			]
+		}
+	]
+}

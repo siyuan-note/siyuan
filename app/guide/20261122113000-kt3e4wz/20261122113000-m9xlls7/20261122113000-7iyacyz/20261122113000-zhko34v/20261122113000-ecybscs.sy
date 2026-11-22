@@ -1,0 +1,762 @@
+{
+	"ID": "20261122113000-ecybscs",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-ecybscs",
+		"title": "Входящие",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-d31voel",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-d31voel",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6ht490e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-6ht490e",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "С помощью облачных «Входящих» можно собирать внешние данные, а затем в SiYuan получать их из облака через панель «Входящие» и отправлять в блокнот для дальнейшей систематизации."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-g1i4sau",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-g1i4sau",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-aa8u1a7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-aa8u1a7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В настоящее время доступны два способа подключения данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-szk7zu3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-szk7zu3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ввод через WeChat"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8u8pew9",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20261122113000-8u8pew9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-wrddmpm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261122113000-wrddmpm",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-pv9j3bo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-pv9j3bo",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/settings/account",
+									"TextMarkTextContent": "LianDi — Настройки — Аккаунт"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " привяжите WeChat"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8r99gm2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261122113000-8r99gm2",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2parhu4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2parhu4",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Подпишитесь на официальный аккаунт "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log Open Source"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ""
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-3v8wcex",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-3v8wcex",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "image.png"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/image-20220119231125-qt2ooye.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-5krn4ci",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261122113000-5krn4ci",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-kcy2x09",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-kcy2x09",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "После подписки нажмите в правом нижнем углу, чтобы привязать аккаунт"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-3tayzk9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20261122113000-3tayzk9",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-t0aa513",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-t0aa513",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Отправляйте сообщения этому официальному аккаунту (можно выбрать сообщения из избранного); поддерживаются только текст, изображения и "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "гиперссылки"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8ca5i2b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20261122113000-8ca5i2b",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ne9197f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ne9197f",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Откройте панель «Входящие» в SiYuan ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "6"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "）"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ndorksy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ndorksy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После подписки на официальный аккаунт и привязки аккаунта помимо ввода через официальный аккаунт можно также добавить "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Помощник SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " в контакты и отправлять сообщения ему — так можно напрямую пересылать историю чата."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-prhfexc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-prhfexc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "image"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/image-20220803164829-wrh3h5w.png"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-omqgdwv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-omqgdwv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поддерживаемые типы сообщений: текст, изображения, аудио, видео и файлы; размер одного изображения, аудио, видео или файла не должен превышать 20 МБ."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gwbh92z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-gwbh92z",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jh7mucc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-jh7mucc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-9glky7x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9glky7x",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-dz23ku3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-dz23ku3",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Доступно только для подписчиков; без подписки или после её истечения контактная связь будет удалена"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-vcko9gt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-vcko9gt",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-oaub8z7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-oaub8z7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ограничение веб-клиппинга: каждый пользователь может получать до 7 запросов на сохранение в минуту и до 128 запросов за 24 часа; для каждого пользователя сохраняется не более 7 незавершённых запросов (1 обрабатывается, остальные стоят в очереди по порядку). Запросы сверх лимита не попадают в облачные «Входящие», повторите попытку позже"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-tmaldy4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-tmaldy4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "API"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ffyfktt",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-ffyfktt",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-5sy0tbw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-5sy0tbw",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-9atpks0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-9atpks0",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "POST "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://liuyun.io/apis/siyuan/inbox/addCloudShorthand"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (для международных аккаунтов) или "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://ld246.com/apis/siyuan/inbox/addCloudShorthand"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (для аккаунтов в Китае)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-qhq10sw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-qhq10sw",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-j0lgk6f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-j0lgk6f",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Body"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-cwoplef",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20261122113000-cwoplef",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "anNvbg=="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "{\n    \"title\": \"A simple text title\",\n    \"content\": \"Content with **Markdown**.\"\n}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-p9jp9q5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-p9jp9q5",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2276p5a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2276p5a",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Способ аутентификации — HTTP-заголовок запроса "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Authorization"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " со значением "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "token {Your API Token}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (учитывайте регистр и пробелы), API Token можно найти в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/settings/account",
+									"TextMarkTextContent": "Liuyun — Настройки — Аккаунт"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (для международных аккаунтов) или в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/settings/account",
+									"TextMarkTextContent": "LianDi — Настройки — Аккаунт"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (для аккаунтов в Китае)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-am4tpht",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-am4tpht",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-y2seuzl",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-y2seuzl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-7avpwrl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-7avpwrl",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-m8z3ie4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-m8z3ie4",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ограничение частоты: не более 128 записей за 24 часа"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-79mjrc3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-79mjrc3",
+				"updated": "20261122113000"
+			}
+		}
+	]
+}

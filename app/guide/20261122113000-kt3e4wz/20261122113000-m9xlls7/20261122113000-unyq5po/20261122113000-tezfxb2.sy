@@ -1,0 +1,1607 @@
+{
+	"ID": "20261122113000-tezfxb2",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-tezfxb2",
+		"title": "Окна и вкладки",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-8i4ldl2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-8i4ldl2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-x9uo1h0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-x9uo1h0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan поддерживает несколько вкладок как на настольных, так и на мобильных устройствах. На настольных устройствах также доступны разделение экрана и работа с несколькими окнами, а на мобильных — обзор вкладок, оптимизированный для сенсорного управления."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-kc1onkr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-kc1onkr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настольная версия"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ho4jwbi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-ho4jwbi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вкладки"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ff42ftq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-ff42ftq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-k0s4sbp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-k0s4sbp",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-dugkjsx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-dugkjsx",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Создать"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите на документ на панели документов, чтобы открыть его в новой вкладке"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-y9yje98",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-y9yje98",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5juwuov",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5juwuov",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Закрытие: нажмите правой кнопкой мыши на вкладку и выберите «Закрыть» или используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "W"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "W"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-wdh8ypd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-wdh8ypd",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-3xptby7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-3xptby7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Восстановление: используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "T"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "T"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", чтобы повторно открыть недавно закрытую вкладку"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-xynzxfm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-xynzxfm",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-gclb05z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-gclb05z",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Переключение: используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": " для перехода к предыдущей вкладке, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " для перехода к следующей вкладке; "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "1-8"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "1-8"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " для перехода к вкладкам с 1-й по 8-ю; "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " для перехода к последней вкладке"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-e5u5dw9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-e5u5dw9",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-plym7a2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-plym7a2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Перетаскивание"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": порядок вкладок можно свободно менять перетаскиванием"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-aup2uui",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-aup2uui",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-xz1j17t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-xz1j17t",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Переместить документ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": при перетаскивании документа с панели документов удерживайте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " и перенесите его во временно отображаемую область «Документ того же уровня» или «Дочерний документ» на вкладке документа"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fmbu3lj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-fmbu3lj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После включения объединения вкладок с верхней панелью в настольной версии для Windows, macOS или Linux окно можно перемещать, перетаскивая пустое пространство между кнопкой переключения вкладок и кнопками в правой части верхней панели."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7knzelg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-7knzelg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Разделение экрана"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-a3tvdnw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-a3tvdnw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вкладки поддерживают вертикальное и горизонтальное разделение экрана для одновременного просмотра нескольких документов."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-uh7gfo7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-uh7gfo7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-1gkmyvp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-1gkmyvp",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-lcjcdis",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-lcjcdis",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Способы разделения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": перетащите вкладку к верхнему/нижнему/левому/правому краю области редактирования или выберите направление разделения в контекстном меню вкладки"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-k446df0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-k446df0",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-9f4ryob",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-9f4ryob",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Изменение размера"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": перетаскивайте границу разделения для изменения размеров областей"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-y0qeh9l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-y0qeh9l",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-s96lmz8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-s96lmz8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Отменить разделение экрана"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите правой кнопкой мыши на вкладку и выберите «Отменить разделение экрана» или в разделе "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Карта клавиш"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " назначьте горячую клавишу для отмены разделения экрана"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-wubmsmu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-wubmsmu",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-wttg3bm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-wttg3bm",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Синхронизация в реальном времени"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": содержимое всех открытых вкладок синхронизируется в реальном времени. После редактирования и сохранения одного и того же документа в одной из вкладок остальные вкладки автоматически обновляются до актуального состояния, предотвращая перезапись устаревшими данными. Помимо содержимого синхронно обновляется связанная отрисовка: предпросмотр блоков и граф связей обновляются в реальном времени"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-iveh0t4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-iveh0t4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Несколько окон"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-tce3o3n",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-tce3o3n",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-aeo3aiv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-aeo3aiv",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-bfsfkfs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-bfsfkfs",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Переместить в новое окно"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите правой кнопкой мыши на вкладку и выберите «Переместить в новое окно» или перетащите вкладку за пределы текущего окна и отпустите"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-n4t4o8t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-n4t4o8t",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-j6p1e2g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-j6p1e2g",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Перетаскивание между окнами"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": вкладки можно перетаскивать между разными окнами"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qciggi3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-qciggi3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Макет нового окна"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-foj5m6q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-foj5m6q",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Макет нового окна используется для сохранения вкладок, разделения экрана и позиции чтения именованного окна. Макеты главного окна и макеты новых окон сгруппированы в одном меню макетов, но сохраняются раздельно. При сохранении или обновлении макета главного окна также записываются размер, положение и развёрнутое или полноэкранное состояние окна; для именованных новых окон эти сведения сохраняются автоматически. При открытии макета восстанавливается соответствующее состояние окна, а при изменении конфигурации мониторов оно корректируется в пределах доступного экрана."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8axcdf2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-8axcdf2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Старые макеты без информации об окне продолжают работать как обычно. Восстановление положения и размера окна ограничено возможностями операционной системы и может не поддерживаться в среде Wayland. Можно отметить не более одного макета главного окна и несколько макетов новых окон, а затем нажать кнопку «Открыть» над списком, чтобы открыть их одновременно; выбор флажков не сохраняется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5gmr734",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-5gmr734",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Эта функция предназначена для настольного клиента; вкладки зашифрованных блокнотов не записываются в конфигурацию макета."
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Повторное нажатие на кнопку макета закрывает всплывающее окно ввода имени. В разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Внешний вид"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Видимость и порядок меню и кнопок"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Верхняя панель нового окна"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " можно настроить отображение и порядок кнопок макета и закрепления окна поверх остальных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8ger21o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-8ger21o",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Создание: расположите вкладки в новом окне, нажмите кнопку "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сохранить как макет нового окна"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", введите название и сохраните. В дальнейшем изменения вкладок, разделения экрана, позиции чтения документов и номеров страниц PDF будут сохраняться автоматически."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-onhj7nw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-onhj7nw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Повторное открытие: в главном окне откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Макет"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Макеты нового окна"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и выберите макет, чтобы восстановить сохранённый макет в новом окне. Если соответствующее окно уже открыто, произойдёт переключение на него. Список поддерживает поиск по названию."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-la6kdj6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-la6kdj6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Управление: рядом с разделом "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Макеты главного окна"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сохранить"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы сохранить текущий макет главного окна. При наведении указателя мыши на элемент или стрелку справа от него открывается подменю при сохранении списка макетов. Для макетов новых окон последовательно доступны пункты "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Открыть"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (если соответствующее окно уже открыто, отображается "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Перейти"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Переименовать"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Удалить"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-y0w3irx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-y0w3irx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для макетов главного окна доступны пункты "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Использовать"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", загружающий выбранный макет, и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Обновить"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", сохраняющий текущее главное окно в эту запись (макеты новых окон сохраняются автоматически). В конце подменю обоих типов макетов отображается время последнего сохранения. Переименовать макет нового окна также можно, нажав на значок макета рядом с кнопкой закрепления окна."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7qi84cb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7qi84cb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Всплывающие окна переименования имеют заголовки "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Макеты главного окна"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Макеты нового окна"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " соответственно и содержат кнопки «Отмена» и «ОК». Удаление макета сохраняет документы, вложения и открытые окна. Поле поиска закреплено сверху, а список ниже прокручивается независимо."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qnrpb4l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-qnrpb4l",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Навигация"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gedm3yf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-gedm3yf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-rtjx0gu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-rtjx0gu",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-znu61b8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-znu61b8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Вперёд/Назад"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": кнопки «Назад» и «Вперёд» на панели инструментов позволяют быстро переходить по истории просмотров"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-utkr1qj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-utkr1qj",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-lgita1s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-lgita1s",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Недавние документы: используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "E"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "E"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", чтобы открыть список недавних документов"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-sj3cupy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-sj3cupy",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-nxwdli1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-nxwdli1",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Найти документ в дереве"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите кнопку позиционирования в верхней части панели документов, чтобы быстро найти текущий открытый документ в дереве"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-w5zw22b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-w5zw22b",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-mfcls7q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-mfcls7q",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Переключение вкладок: используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌃"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " для перехода к следующей вкладке редактирования"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8q0y6cz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-8q0y6cz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В списке недавних документов на настольных устройствах выберите вкладку «Недавно просмотренные», «Недавно открытые» или «Недавно закрытые», нажмите кнопку «Очистить» внизу и подтвердите действие, чтобы одновременно очистить все три категории записей; на мобильных устройствах используется кнопка с корзиной в верхней части списка. Очистка затрагивает только локальные записи текущего рабочего пространства, не удаляет документы и не влияет на списки «Недавно созданные» и «Недавно изменённые», а также на историю переходов «Назад/Вперёд» во вкладках (в этих двух списках кнопка очистки недоступна). Последующий просмотр, открытие или закрытие документов снова создаст записи, включая закрытие вкладок, открытых до очистки."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0pqzaia",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-0pqzaia",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Окно настроек"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-89yhyhq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-89yhyhq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В настольном клиенте настройки по умолчанию открываются в главном окне. Переключатель "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Приложение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Открывать настройки в отдельном окне"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " управляет тем, открывать ли интерфейс настроек в отдельном окне, которое после включения можно перемещать, изменять в размерах и сворачивать; после переключения настройки приложения сразу открываются заново выбранным способом. В новых окнах документов также поддерживается открытие настроек с помощью заданного сочетания клавиш. Пока окно настроек открыто, можно продолжать прокручивать, переключать и редактировать документы. Повторное открытие настроек переводит фокус на уже открытое окно."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wfkds07",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-wfkds07",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Изменения конфигурации синхронизируются с другими окнами текущего рабочего пространства; во время массовой очистки неиспользуемых вложений, очистки неиспользуемых баз данных и импорта конфигурации операции временно блокируются. В браузере используется диалоговое окно настроек, на мобильных устройствах — страница настроек. Настройки устаревших плагинов открываются в том окне, к которому они относятся, с выводом этого окна на передний план; плагины, адаптированные для отдельного окна, открываются в новом окне. В отдельном окне настроек можно нажать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (Windows/Linux) или "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Option+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (macOS) для переключения инструментов разработчика."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pfaj4m8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-pfaj4m8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Мобильная версия"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-idzcadg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-idzcadg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Мобильная версия также поддерживает работу с несколькими вкладками. Нажмите на кнопку вкладок в верхней части экрана, чтобы открыть обзор вкладок."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vb2tc04",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-vb2tc04",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-5w2ikjr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-5w2ikjr",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-nmda4qf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-nmda4qf",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Переключение: нажмите на вкладку в обзоре, чтобы переключиться на неё"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-gxqus3s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-gxqus3s",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ug9sqgp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ug9sqgp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Навигация: используйте кнопки «Назад» и «Вперёд» в обзоре для перемещения по истории просмотров"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-80gstdc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-80gstdc",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-gn0y9ym",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-gn0y9ym",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Создание: используйте кнопку создания документа в обзоре, чтобы создать и открыть новый документ"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-0kksx0q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-0kksx0q",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-m3z6iuk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-m3z6iuk",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Закрытие: можно закрыть отдельную вкладку на её карточке или закрыть все вкладки через меню"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2qauie6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-2qauie6",
+				"updated": "20261122113000"
+			}
+		}
+	]
+}

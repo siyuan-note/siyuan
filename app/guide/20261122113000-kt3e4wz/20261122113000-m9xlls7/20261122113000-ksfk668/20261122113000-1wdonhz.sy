@@ -1,0 +1,314 @@
+{
+	"ID": "20261122113000-1wdonhz",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-1wdonhz",
+		"title": "Выбор и операции с блоками содержимого",
+		"type": "doc",
+		"updated": "20261122171459"
+	},
+	"Children": [
+		{
+			"Type": "NodeParagraph",
+			"ID": "20261122113000-8lfugt3",
+			"Properties": {
+				"id": "20261122113000-8lfugt3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Режим выбора блоков позволяет выбирать блоки и управлять ими с клавиатуры без возврата к редактированию текста. Светлый контур обозначает только текущий блок; в множественный выбор включаются только отмеченные блоки."
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20261122113000-vznjesb",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-vznjesb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вход и выход из режима выбора блоков"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20261122113000-7wgsjna",
+			"Properties": {
+				"id": "20261122113000-7wgsjna",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поместите курсор в любой блок контента и нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы войти в режим выбора блоков. Выделив текст через несколько блоков, нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы преобразовать выделение в выбор блоков (работает и в режиме только для чтения). Нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " или "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы сделать текущим предыдущий или следующий блок. Нажмите снова "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы выйти и снять все отметки."
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20261122113000-1qi87f9",
+			"Properties": {
+				"id": "20261122113000-1qi87f9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для редактируемых блоков нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы выйти и установить курсор в конец текущего блока. Ввод текста также выходит из режима. В этом режиме "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "A"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " вставляет блок после текущего, а "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "B"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " вставляет блок перед текущим. Чтобы ввести эти буквы как текст, сначала выйдите из режима выбора блоков."
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20261122113000-owqwxft",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-owqwxft",
+				"updated": "20261122171459"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Отметка блоков и определение цели операций"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20261122113000-1ijsc6h",
+			"Properties": {
+				"id": "20261122113000-1ijsc6h",
+				"updated": "20261122171459"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Пробел"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы отметить или снять отметку с текущего блока. С помощью клавиш со стрелками можно отметить любое количество блоков, включая несмежные. Используйте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " или "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для непрерывного выделения."
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20261122113000-d7hcuwk",
+			"Properties": {
+				"id": "20261122113000-d7hcuwk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При наличии отмеченных блоков копирование, удаление, вырезание и перемещение применяются только к ним. Если отмеченных блоков нет, операция применяется к текущему блоку."
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20261122113000-vxz7ri3",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-vxz7ri3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Удаление и перемещение блоков"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20261122113000-phqb2m2",
+			"Properties": {
+				"id": "20261122113000-phqb2m2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если отмеченных блоков нет, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Delete"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Backspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " удаляют текущий блок. Если есть отмеченные блоки, обе клавиши удаляют все отмеченные блоки."
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20261122113000-yotyund",
+			"Properties": {
+				"id": "20261122113000-yotyund",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Отдельный блок или непрерывный диапазон можно перемещать вверх и вниз соответствующими командами. Несмежные отмеченные блоки нельзя переупорядочить напрямую, но можно использовать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Переместить"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы перенести их вместе в другой документ."
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20261122113000-58op15x",
+			"Properties": {
+				"id": "20261122113000-58op15x",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После удаления, вырезания или перемещения блоков режим выбора блоков остаётся активным."
+				}
+			]
+		}
+	]
+}

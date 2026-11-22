@@ -1,0 +1,735 @@
+{
+	"ID": "20261122113000-hh13dzg",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-hh13dzg",
+		"title": "Дневник",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-yagx97p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-yagx97p",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-tm82zj1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-tm82zj1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Дневник — это способ быстрого создания и поиска документов по дате. Его можно использовать для ведения ежедневных записей, рабочих журналов, списков дел на день и т.д."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-nerdyau",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-nerdyau",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Создание и открытие"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jhnl5ah",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-jhnl5ah",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-0wf6l9x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-0wf6l9x",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-84n0xzn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-84n0xzn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Точка входа"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите кнопку «Дневник» в верхнем главном меню или используйте горячую клавишу "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "5"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (на macOS "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌃"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "5"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-78r1ee5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-78r1ee5",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-z17gk93",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-z17gk93",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Поведение горячей клавиши"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": при открытии дневника с помощью горячей клавиши используется последний выбранный блокнот"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-wggkyt1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-wggkyt1",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-w0k6019",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-w0k6019",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Правило открытия"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": кнопка и горячая клавиша определяют имя и расположение документа по шаблону пути хранения на текущий день — если он существует, он открывается, если нет, создаётся новый; поиск по атрибуту даты дневника не выполняется, поэтому после переименования или перемещения исходного дневника может быть создан другой документ"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-33b1sn0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-33b1sn0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Создание и ссылка по дате"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-t4cu5gc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-t4cu5gc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Введите в редакторе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[сегодня"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[завтра"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[25 сентября"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " или "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[25 sept"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы отобразить кандидатов дневника для соответствующей даты в автодополнении ссылок. Поддерживаются относительные даты, полные и сокращённые названия месяцев на текущем языке интерфейса и английском языке, а также полные даты по григорианскому календарю, такие как "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[[2026-09-25"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fgpfljl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-fgpfljl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если год не указан, используется текущий год. Кандидаты показывают реальное имя документа или имя создания, разобранное по шаблону, полный путь и целевую дату; значок существующего дневника поддерживает всплывающий предпросмотр. Для неоднозначных выражений, таких как "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "03/04"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", или недопустимых дат кандидаты дневника не отображаются. Вместо этого можно использовать формат "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYY-MM-DD"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", при этом обычный поиск документов остаётся доступным."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zu0ko29",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zu0ko29",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если блокнот для дневника уже выбран, кандидаты используют последний выбранный блокнот; если он ещё не выбран или исходный блокнот недоступен, кандидаты показывают полные пути всех доступных блокнотов, а при выборе сохраняют блокнот дневника. Если кандидат не выбран, документ не создаётся. В зашифрованном блокноте можно ссылаться только на дневники этого же блокнота, а обычные блокноты не могут ссылаться на дневники зашифрованных блокнотов."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qrgwo5f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-qrgwo5f",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ввод и просмотр кандидатов не создают документ. Ещё не созданный дневник отображается с надписью «Новый дневник» и значком календаря с плюсом. Если переместить курсор после отправки запроса на создание, ссылка всё равно вставится в исходную позицию ввода; если исходное содержимое было изменено или удалено, новое содержимое не перезаписывается. После выбора поиск дневника в целевом блокноте сначала выполняется по атрибуту даты дневника, включая перемещённые или переименованные документы, сохранившие этот атрибут. При нескольких совпадениях приоритет отдаётся документу, соответствующему имени и расположению шаблона, иначе выбирается документ по возрастанию ID. Если обычная кнопка создала другой дневник в расположении шаблона, кандидат по дате начнёт отдавать приоритет ему. При отсутствии совпадения по атрибуту даты повторно используется или создаётся документ в расположении шаблона и вставляется ссылка. При повторном использовании существующего документа через любую из двух точек входа шаблон содержимого не применяется заново. Шаблон пути, переменная now в шаблоне содержимого и атрибут даты дневника используют целевую дату, а фактическое время создания и обновления сохраняет реальное время операции."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-q9sxm6r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-q9sxm6r",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-txityb6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-txityb6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ в контекстном меню блокнота и настройте в параметрах создания нового дневника:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-j7wbzdf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-j7wbzdf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-nhufgue",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-nhufgue",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-pvd4go1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-pvd4go1",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Путь хранения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": задаёт путь хранения документов дневника в блокноте, поддерживаются "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-91uuy79",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "переменные шаблона"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ""
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-uv4i7p3",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-uv4i7p3",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-pry80l3",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-pry80l3",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-k6m7za8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-k6m7za8",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Типичные примеры:"
+												}
+											]
+										},
+										{
+											"ID": "20261122113000-rj5licv",
+											"Type": "NodeList",
+											"ListData": {},
+											"Properties": {
+												"id": "20261122113000-rj5licv",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"ID": "20261122113000-61evzcx",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20261122113000-61evzcx",
+														"updated": "20261122113000"
+													},
+													"Children": [
+														{
+															"ID": "20261122113000-5mlw5jq",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20261122113000-5mlw5jq",
+																"updated": "20261122113000"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "​"
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "/Дневник/{{now | date \"2006/01/2006-01-02\"}}"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ — группировка по году/месяцу, один файл на каждый день"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20261122113000-rw7mygm",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20261122113000-rw7mygm",
+														"updated": "20261122113000"
+													},
+													"Children": [
+														{
+															"ID": "20261122113000-x886t3w",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20261122113000-x886t3w",
+																"updated": "20261122113000"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "​"
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "/Дневник/{{now | date \"2006-01-02\"}}"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ — все дневники в одной папке"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20261122113000-8l9hxyf",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20261122113000-8l9hxyf",
+														"updated": "20261122113000"
+													},
+													"Children": [
+														{
+															"ID": "20261122113000-fwbwem7",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20261122113000-fwbwem7",
+																"updated": "20261122113000"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "​"
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "/{{now | date \"2006/01/02\"}}"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ — группировка по дням в корневом каталоге"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-2g656uk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-2g656uk",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-78pai9w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-78pai9w",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Путь к шаблону"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (необязательно): выберите существующий документ в качестве шаблона дневника, чтобы при создании нового дневника его содержимое автоматически использовалось как начальное. Часто используется для предустановки структуры ежедневных задач, шаблонов ежедневных отчётов и т.д."
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-t8l6sy3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-t8l6sy3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Советы по использованию"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bwzmowh",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-bwzmowh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-qtws91k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-qtws91k",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-uxkngl0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-uxkngl0",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Встраивание сводки задач"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-asl0p10",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "встроенные блоки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " в шаблоне дневника для сбора списка задач или блоков содержимого, которые нужно просматривать ежедневно"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ehx5l25",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ehx5l25",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-tx1j2ok",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-tx1j2ok",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Разные настройки для разных блокнотов"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": для каждого блокнота можно независимо настроить путь хранения и шаблон дневника без взаимного влияния"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zjraffi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zjraffi",
+				"updated": "20261122113000"
+			}
+		}
+	]
+}

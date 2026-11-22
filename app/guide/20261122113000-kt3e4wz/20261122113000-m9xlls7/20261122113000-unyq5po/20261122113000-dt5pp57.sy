@@ -1,0 +1,68 @@
+{
+	"ID": "20261122113000-dt5pp57",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-dt5pp57",
+		"title": "API ядра",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-n6zq98y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-n6zq98y",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "API ядра предоставляет операции над документами, блоками контента, файлами ресурсов и другими данными по протоколу HTTP, что удобно для интеграции со скриптами и внешними инструментами. Перед вызовом необходимо запустить ядро SiYuan и использовать API Token согласно требованиям эндпоинта. Подробные параметры и примеры приведены в документации API ниже."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cy54trl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-cy54trl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Документация API",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/dev/docs/API.zh-CN.md"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rdloel2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rdloel2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan также предоставляет внешним клиентам инструменты через MCP; порядок подключения и описание прав см. в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-vh19a42",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Служба MCP"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

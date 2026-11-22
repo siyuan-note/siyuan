@@ -4,7 +4,7 @@ const path = require("node:path");
 const {test} = require("node:test");
 
 const guideRoot = path.resolve(__dirname, "../guide");
-const guideIDs = ["20210808180117-6v0mkxr", "20210808180117-czj9bvb", "20211226090932-5lcq56f", "20240530133126-axarxgx"];
+const guideIDs = ["20210808180117-6v0mkxr", "20210808180117-czj9bvb", "20211226090932-5lcq56f", "20240530133126-axarxgx", "20261122113000-kt3e4wz"];
 
 function* documents(directory) {
     for (const entry of readdirSync(directory, {withFileTypes: true})) {

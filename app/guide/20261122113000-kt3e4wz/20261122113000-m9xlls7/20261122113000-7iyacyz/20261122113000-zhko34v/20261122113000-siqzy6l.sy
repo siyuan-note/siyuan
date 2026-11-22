@@ -1,0 +1,359 @@
+{
+	"ID": "20261122113000-siqzy6l",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-siqzy6l",
+		"title": "Напоминания в WeChat",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-t6c5cwi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-t6c5cwi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9qo4vsb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-9qo4vsb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Функция напоминаний WeChat отправляет блок содержимого в облако, а при наступлении срока пересылает уведомление в WeChat пользователя через шаблонное сообщение официального аккаунта."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4ko1mkj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-4ko1mkj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bojrcug",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20261122113000-bojrcug",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-1vmfwml",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261122113000-1vmfwml",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2l3la3o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2l3la3o",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/settings/account",
+									"TextMarkTextContent": "LianDi — Настройки — Аккаунт"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " привяжите WeChat"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-otpmzpq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261122113000-otpmzpq",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-x0yz3ad",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-x0yz3ad",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Подпишитесь на официальный аккаунт "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log Open Source"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ""
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-ggx3pes",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ggx3pes",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "image.png"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/image-20220119231125-qt2ooye.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-61x6dzb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261122113000-61x6dzb",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-6godx6n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-6godx6n",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "После подписки нажмите в правом нижнем углу, чтобы привязать аккаунт"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-udgqnqv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20261122113000-udgqnqv",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-msbsq9o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-msbsq9o",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Настройте напоминание в SiYuan через меню значка блока"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-esivmpx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-esivmpx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6vgjs75",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-6vgjs75",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-kyilzwz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-kyilzwz",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-n3ihtsx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-n3ihtsx",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Погрешность времени напоминания составляет около 10 секунд"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-iqwu2hw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-iqwu2hw",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-fu8we7t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-fu8we7t",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Блок содержимого отправляется в облако в открытом виде; отправляется только текст, без файлов ресурсов"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-d5w01w7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-d5w01w7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-11vuqgg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-11vuqgg",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Не настраивайте напоминания с незаконным или конфиденциальным содержимым, иначе аккаунт будет заблокирован навсегда с соответствующей юридической ответственностью"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

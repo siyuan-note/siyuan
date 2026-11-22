@@ -1,0 +1,606 @@
+{
+	"ID": "20261122113000-bc92ann",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-bc92ann",
+		"title": "Искусственный интеллект",
+		"type": "doc",
+		"updated": "20261122172348"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-qy90342",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-qy90342",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-aiw20jx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-aiw20jx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan предоставляет функции ИИ-редактирования, ИИ-агента и семантического поиска. Перед использованием этих функций необходимо настроить соответствующих поставщиков API и модели в зависимости от задач."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lscbsf1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-lscbsf1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При использовании аккаунта ChatGPT откройте настройки поставщика ChatGPT в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Искусственный интеллект"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", выберите аккаунт для рабочего пространства текущего устройства и сохраните. Учётные данные и привязка аккаунта хранятся локально на устройстве и не сохраняются в conf.json или файле экспорта настроек. На каждом устройстве нужно войти и выбрать аккаунт отдельно; при последующем копировании конфигурации существующий поставщик продолжает использовать привязку аккаунта целевого устройства. После добавления нового поставщика или перемещения каталога рабочего пространства аккаунт нужно выбрать заново. После обновления также потребуется выбрать аккаунт ещё раз, при этом существующие учётные данные сохраняются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5lpiu6i",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-5lpiu6i",
+				"updated": "20261122172348"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ИИ-редактирование"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2kf49sz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-2kf49sz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ИИ-редактирование предназначено для обработки выделенного текста: продолжения, краткого изложения, перевода, стилистической правки и т. п. Введите разовую инструкцию в верхнее поле ввода и нажмите «Использовать» — она выполнится сразу без сохранения как пользовательское действие. На десктопе Enter запускает выполнение, а Shift+Enter вставляет перенос строки; на мобильных устройствах для запуска нажмите «Использовать». Отдельное поле поиска позволяет фильтровать частые и сохранённые действия. Чтобы использовать инструкцию повторно, сохраните её через «Пользовательские действия...». На мобильных устройствах в заголовке панели результатов отображается метка «Создано ИИ»."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-43c382g",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20261122113000-43c382g",
+				"updated": "20261122172348"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-c8lx531",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261122113000-c8lx531",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-pmw558m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-pmw558m",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Искусственный интеллект"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Поставщик API"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " настройте и включите поставщика API и модель"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-2n02b94",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261122113000-2n02b94",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-gbrb8h5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-gbrb8h5",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Искусственный интеллект"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Редактор"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " выберите модель, используемую редактором"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-foru211",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 3,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261122113000-foru211",
+						"updated": "20261122172348"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-o11d2l1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-o11d2l1",
+								"updated": "20261122172348"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/Написать с ИИ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", чтобы открыть диалог написания. При ИИ-редактировании выделите текст и нажмите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Редактирование с ИИ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", или выберите «Редактирование с ИИ» в меню блока. Результат можно скопировать или вставить после исходного блока. Генерацию можно перезапустить или остановить. Перетащите панель за заголовок, чтобы переместить её. Двойной щелчок возвращает панель к исходному блоку. На мобильном устройстве перетащите верхний край нижней панели, чтобы изменить её высоту. Чтобы продолжить работу над результатом, нажмите «Продолжить в чате с агентом». В новый сеанс будут переданы исходная инструкция, исходный текст и текущий результат. Продолжив диалог, вы сможете вставить ответ в исходное место, пока редактор открыт"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-linos95",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-linos95",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ИИ-агент"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-sx4oson",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-sx4oson",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ИИ-агент может использовать текущий контекст редактора и инструменты для поиска, систематизации, создания и изменения содержимого базы знаний. Подробнее об использовании см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "ИИ-агент",
+					"TextMarkBlockRefID": "20261122113000-ngzp72k",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-dzkolf1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-dzkolf1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Семантический поиск"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2ewtw53",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-2ewtw53",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Семантический поиск ищет связанное содержимое по смыслу текста, что удобно для поиска заметок с разными формулировками, но близкой тематикой. Подробнее о настройке и использовании см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Семантический поиск",
+					"TextMarkBlockRefID": "20261122113000-3om2jpu",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-f6k3v2h",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-f6k3v2h",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Модель решений"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-r3y9mns",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-r3y9mns",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Агент может использовать TypeSafe System One (Jev) или OpenAI Decisions API для классификации, фильтрации и оценки. Подробнее о настройке и использовании см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Модель решений",
+					"TextMarkBlockRefID": "20261122113000-itgwmay",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7wg5hhi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-7wg5hhi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Служба MCP"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-sgiwc79",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-sgiwc79",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Служба MCP позволяет клиентам с поддержкой MCP вызывать инструменты SiYuan по стандартному протоколу. Подробнее о настройке и использовании см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Служба MCP",
+					"TextMarkBlockRefID": "20261122113000-vh19a42",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3t5gb35",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-3t5gb35",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Долговременная память"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7ssz939",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7ssz939",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Долговременная память сохраняет факты и предпочтения для использования в разных диалогах. Подробнее о включении, управлении и конфиденциальности см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Долговременная память",
+					"TextMarkBlockRefID": "20261122113000-qdsp1nb",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-govk4b3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-govk4b3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Примечание"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-d4z8e2i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-d4z8e2i",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-us9xnwn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-us9xnwn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-nbjy92e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-nbjy92e",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Текст документов, изображения или запросы могут отправляться настроенному поставщику API"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-mvyqq3a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-mvyqq3a",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-7meckxs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7meckxs",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Вызов внешнего API может повлечь расходы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8dfvey1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-8dfvey1",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-cqrzjnf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-cqrzjnf",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Надёжно храните API-ключи и проверяйте цель и содержимое перед применением изменений, сгенерированных ИИ"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

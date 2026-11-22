@@ -1,0 +1,6155 @@
+{
+	"ID": "20261122113000-hhra6d7",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f5c3-fe0f",
+		"id": "20261122113000-hhra6d7",
+		"title": "База данных",
+		"type": "doc",
+		"updated": "20261122171459"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-grscqnm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-grscqnm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0wqkmf6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0wqkmf6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "База данных служит для управления записями по полям. Записи могут быть привязаны к существующим блокам содержимого или существовать независимо. Один и тот же набор данных можно отображать в виде таблицы, списка, календаря, канбана и карточек, при этом для каждого вида можно отдельно настроить макет, фильтрацию и сортировку."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xriijzz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xriijzz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Назначение и возможности полей см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-4x02oe8",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Типы полей"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; статистику в нижней части столбцов см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-hwt09co",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Вычисления в таблице"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fwzktic",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-fwzktic",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Создание базы данных"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m82691h",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-m82691h",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-5jdof2c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-5jdof2c",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-0l9np7x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-0l9np7x",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Создаётся через "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/База данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, по умолчанию используется табличный вид, который можно переключить в настройках макета"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-6siw58b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-6siw58b",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-gmq2cks",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-gmq2cks",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Добавить"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-4x02oe8",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Поле"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8q16ag9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-8q16ag9",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-thme93q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-thme93q",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Просмотр"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-hwt09co",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Вычисления в таблице"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-3izvfqw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-3izvfqw",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ipgpfh0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ipgpfh0",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Добавление записей"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-cmttu1n",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-cmttu1n",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-y6zokbk",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-y6zokbk",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-265sjz9",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-265sjz9",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Не являющиеся блоками содержимого: записи, добавленные непосредственно в виде, не привязанные ни к какому блоку содержимого"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-lt4bom4",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-lt4bom4",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-v3rp30c",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-v3rp30c",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Блоки содержимого: записи, добавленные перетаскиванием в вид или через меню значка блока "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Добавить в базу данных"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-oywsr4h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-oywsr4h",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-e872chc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-e872chc",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Настройте фильтрацию и сортировку по необходимости"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-kbu6mjo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-kbu6mjo",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-m9wqjbv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-m9wqjbv",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В одну базу данных можно добавить несколько видов: все они используют общие данные, но настройки фильтрации и сортировки независимы"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-f2p5zgr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-f2p5zgr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В мобильной версии нажмите на название текущего представления базы данных, чтобы открыть панель представлений. Когда редактор заблокирован, выбор представления позволяет временно переключиться на него. Для изменения настроек представления необходимо разблокировать редактор."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zypmefo",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-zypmefo",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Макет вида"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-u6ywn1o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-u6ywn1o",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "База данных"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " настройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Показывать значки записей в первичном ключе"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Показывать значки записей в связях и сводках"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Оба параметра включены по умолчанию и действуют только при создании новых баз данных и видов; изменение настроек по умолчанию не влияет на существующие виды."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-j217twj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-j217twj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В меню "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Макет"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " текущего вида управляйте двумя типами значков через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Показывать значки записей в первичном ключе"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Показывать значки записей в связях и сводках"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". При дублировании вида или переключении макета эти две настройки сохраняются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vrm87u4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-vrm87u4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В меню "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Атрибут"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " можно перетаскивать поля в пределах одной области для изменения порядка, а также перетаскивать между областями «Показанные поля» и «Скрытые поля», одновременно меняя видимость и позицию. Если область пуста, можно перетащить в нижнюю половину заголовка области. Заголовки областей, в которых уже есть поля, не принимают перетаскивание. Изменения поддерживают отмену и повтор. Поле первичного ключа в видах таблицы, списка и календаря скрыть нельзя."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m3xdmct",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-m3xdmct",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Табличный вид"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-la39ecw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-la39ecw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вид базы данных по умолчанию, отображающий данные в виде таблицы со строками и столбцами."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9mhdldr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-9mhdldr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-r8r5hg1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-r8r5hg1",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-heg3030",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-heg3030",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Способ переключения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": после создания базы данных по умолчанию используется табличный вид; для переключения из другого вида выберите «Табличный вид» в выпадающем меню"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-srhxv4z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-srhxv4z",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-qv58i80",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-qv58i80",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Управление столбцами"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": каждый столбец соответствует полю; поддерживается перетаскивание для изменения ширины и порядка столбцов; правый клик по заголовку столбца позволяет редактировать, удалять и скрывать поле"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-lf0s08n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-lf0s08n",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-acl4u9j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-acl4u9j",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Операции со строками"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите на начало строки, чтобы раскрыть детали строки; перетаскивайте строки для изменения порядка; правый клик по строке позволяет удалить, дублировать или переместить её в другую базу данных"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-hallrlz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hallrlz",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-20skl9d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-20skl9d",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Добавление строки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите на пустую строку внизу таблицы или используйте кнопку с плюсом для добавления новой записи"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-6szuzvf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-6szuzvf",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-erzkgh3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-erzkgh3",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Сценарии применения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ввод данных, массовое редактирование, табличные сценарии с богатыми типами полей, обычное управление данными по аналогии с Excel"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ah6i8hj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-ah6i8hj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вид списка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-z8t8gt7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-z8t8gt7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Каждая запись отображается в одну строку без заголовков столбцов и сетки таблицы. Новый вид списка по умолчанию показывает только поле первичного ключа, остальные поля скрыты."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-clniwqz",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-clniwqz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-35doxer",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-35doxer",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-jhkuv62",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-jhkuv62",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Способ переключения: выберите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Макет"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Список"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " в настройках вида; также можно вставить вид списка базы данных через меню слэша"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-xp7i1ip",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-xp7i1ip",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-d1pb2sf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-d1pb2sf",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Отображение полей: откройте панель "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Атрибут"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", чтобы включить нужные поля. Видимые поля отображаются в одной строке с первичным ключом и поддерживают редактирование значений"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-405vl0w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-405vl0w",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-esdnh7q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-esdnh7q",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Настройки вида: при дублировании вида списка или возврате к макету списка сохраняются настроенные параметры видимости полей"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ufr8fqo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ufr8fqo",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-7ee1nk9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7ee1nk9",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Фильтрация, сортировка и группировка: общие данные с другими видами той же базы данных, поддерживается независимая настройка фильтрации, сортировки и группировки"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xhnrelc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-xhnrelc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вид календаря"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-nfb9ctr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-nfb9ctr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Отображает записи с датами по месяцам или неделям. Недельный вид содержит семь столбцов дат, а многодневные записи отображаются непрерывно на соответствующих днях. Текущий режим и просматриваемая дата в разных редакторах не влияют друг на друга. Режим месяца или недели каждого вида календаря сохраняется в текущем рабочем пространстве и восстанавливается при открытии в новом редакторе или после перезапуска SiYuan. Новый редактор начинает просмотр с сегодняшнего дня."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-orxpcrq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-orxpcrq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-a7mxrgp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-a7mxrgp",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-wn8u3xa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-wn8u3xa",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Способ переключения: выберите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Макет"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Календарь"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " в настройках вида; также можно вставить вид календаря базы данных через меню слэша"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-240v8g1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-240v8g1",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-3uvcvmb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-3uvcvmb",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Поле даты: выберите в настройках макета поле даты, времени создания или времени обновления. При отсутствии подходящего поля календарь предложит выбрать или создать поле и не будет автоматически заполнять обычные даты для существующих записей; записи без даты не отображаются в ячейках календаря. При привязке обычного поля даты такие записи можно найти в списке без даты"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-f1n2eek",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-f1n2eek",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ea9e9sf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ea9e9sf",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Дата по шаблону: если для поля даты задан шаблон отображения, календарь размещает записи по вычисленной шаблоном дате, а исходная дата остаётся без изменений. Шаблон должен выводить дату в виде обычного текста; поддерживаются форматы YYYY-MM-DD, выбранный в поле числовой формат даты, а также локальный формат даты текущего языка (например, 2 октября 2026 г.); можно добавить время HH:mm или HH:mm:ss через пробел или символ T. Даты интерпретируются в локальном часовом поясе текущего устройства, а даты со слэшами — строго по формату поля без угадывания порядка дня и месяца. Пустые результаты, некорректные даты и прочие форматы не отображаются и не попадают в список записей без даты. Вычисляемые даты нельзя перетаскивать, очищать или использовать для создания записи на дату — изменяйте исходное поле или шаблон; при многоязычном использовании рекомендуется выводить дату в формате YYYY-MM-DD"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-czk5chw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-czk5chw",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-mn04964",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-mn04964",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Просмотр дат: переключайте даты кнопками «Назад», «Вперёд», «Сегодня» или выбором даты. В месячном виде дни с большим количеством записей сворачиваются — нажмите кнопку «Ещё», чтобы раскрыть соответствующую неделю. Даты отображаются в локальном часовом поясе текущего устройства. Месячный вид показывает четыре, пять или шесть недель в зависимости от потребностей месяца. В месячном и недельном видах у начальной даты каждой строки отображается номер недели ISO. Нажмите кнопку календаря, чтобы перейти к дате или к году и номеру недели ISO. Если неделя начинается не с понедельника, номер недели определяется по четвергу этой строки"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-csieuhv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-csieuhv",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-tvpi0ik",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-tvpi0ik",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Редактирование записей: нажатие на запись открывает существующий интерфейс редактирования записи базы данных. При использовании обычного поля даты можно создавать записи через плюс в ячейке даты, перетаскивать запись для изменения даты или перетаскивать края для изменения диапазона дат. Нажатие кнопки «Без даты» рядом с фильтром вида позволяет искать незапланированные записи; перетащите запись в ячейку даты или сначала выберите запись, а затем нажмите на ячейку даты (на сенсорных устройствах также доступен второй способ). При планировании записывается дата на весь день, а после очистки даты запись возвращается в список без даты. Изменение даты поддерживает отмену; на сенсорных устройствах можно перетаскивать маркер перемещения на существующей записи в календаре. После нажатия или создания записи фокус автоматически переходит на поле первичного ключа; при перетаскивании предпросматривается изменённый диапазон дат и подсвечиваются соответствующие ячейки, а сохранение происходит после отпускания. Контекстное меню также поддерживает дублирование, создание и привязку нового документа, добавление в другую базу данных, редактирование полей и создание новой записи на выбранную дату"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-cd5g6g4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-cd5g6g4",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-hqm0rkx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-hqm0rkx",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Системное время: время создания и время обновления используют фактическое время записи или привязанного блока, не поддерживают перетаскивание и не предоставляют кнопку создания в ячейке даты"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-reu7cku",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-reu7cku",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-wpw2jkc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-wpw2jkc",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Диапазон дат: диапазон на весь день включает день окончания; диапазон со временем, заканчивающийся в полночь, отображается до предыдущего дня. Если задана только одна граница, запись отображается на эту дату; если окончание раньше начала, отмечается ошибка и сохраняется исходное значение"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-1a2w5fr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-1a2w5fr",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5xdqqwu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5xdqqwu",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Настройки вида: наследуются фильтрация, сортировка, видимость полей и шаблон новой записи базы данных, а фон записи можно задать через условные цвета. Макет календаря пока не применяет группировку, но при возврате к другому макету прежние настройки группировки сохраняются. В настройках макета количество отображаемых строк записей можно выбрать 3, 5, 10 или «Все» (по умолчанию 3), что сохраняется в текущем виде календаря. Эта настройка управляет только сворачиванием в месячном виде; в недельном виде показываются все записи, а данные в диапазоне дат загружаются полностью"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-fncswp9",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261122113000-fncswp9",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-l58i65a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-l58i65a",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Имена полей: включите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Макет"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Показать имя поля"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " в настройках вида, чтобы отображать имя поля рядом со значением неключевых полей, при этом первичный ключ по-прежнему служит заголовком записи. Этот параметр по умолчанию выключен и сохраняется для каждого вида календаря; после выключения снова отображаются только значения полей"
+								}
+							]
+						}
+					],
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					}
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-g85slkn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-g85slkn",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вид канбан"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zin3e03",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zin3e03",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Отображает записи в виде карточек по столбцам, где каждый столбец соответствует группе. Возможность группировки зависит от типа поля; при использовании поля одиночного или множественного выбора можно также менять значение, перетаскивая карточку между столбцами."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-sv856iv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-sv856iv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-hhk383l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hhk383l",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-33ksvvp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-33ksvvp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Способ переключения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": выберите «Вид канбан» в выпадающем меню макета вида"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-285wy6b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-285wy6b",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-xdu901l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-xdu901l",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Поле группировки: выберите в настройках группировки поддерживаемое поле и способ группировки, подробнее см. раздел «Группировка» этой главы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-u8dm2yp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-u8dm2yp",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-1xm052v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-1xm052v",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Содержимое карточки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": каждая карточка показывает краткое содержание блока, привязанного к первичному ключу, а также значения выбранных в этом виде полей"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Включите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Макет"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Показать имя поля"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " в настройках вида, чтобы показывать имя поля рядом со значением; этот параметр сохраняется для каждого вида, а при выключении имена полей скрываются"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Скрытие первичного ключа в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Атрибут"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " в настройках вида позволяет сохранить предпросмотр обложки и избежать дублирования текста. Нажмите кнопку "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Открыть"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " на карточке, чтобы открыть запись"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-n06paor",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-n06paor",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-1z9lzzw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-1z9lzzw",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Перетаскивание: если полем группировки является одиночный или множественный выбор, перетаскивание карточки в другой столбец изменяет значение этого поля у записи"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-iwlpces",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-iwlpces",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-710970v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-710970v",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Добавление записи"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите плюс внизу столбца, чтобы сразу добавить новую карточку в этот столбец; значение поля новой карточки автоматически устанавливается в вариант, соответствующий текущему столбцу"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-3b9jhm4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-3b9jhm4",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-bjgit41",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-bjgit41",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Независимость видов"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": общие данные с другими видами той же базы данных, но настройки фильтрации, сортировки и группировки независимы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-9836gpc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9836gpc",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-qa8l6wq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-qa8l6wq",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Сценарии применения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": канбан-доска управления проектами (К выполнению → В работе → Готово), управление переходом статусов, просмотр по категориям"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bxh2eq1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-bxh2eq1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вид карточек"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-v0jan5c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-v0jan5c",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Отображает данные в виде сетки отдельных карточек, что подходит для сценариев с акцентом на предпросмотр содержимого."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-86rbqcu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-86rbqcu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-t5efxaa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-t5efxaa",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-h2v32in",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-h2v32in",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Способ переключения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": выберите «Вид карточек» в выпадающем меню макета вида"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-iw5bflu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-iw5bflu",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-myxmjg5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-myxmjg5",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Формат отображения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": каждая запись отображается в виде карточки с кратким содержанием блока первичного ключа и значениями выбранных полей, что удобно для быстрого просмотра и работы с контентом"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Включите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Макет"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Показать имя поля"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " в настройках вида, чтобы показывать имя поля рядом со значением; этот параметр сохраняется для каждого вида, а при выключении имена полей скрываются"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-f3vyp0i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-f3vyp0i",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-eh5rebb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-eh5rebb",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Операции с карточками"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите на карточку, чтобы раскрыть детали или открыть привязанный блок содержимого; поддерживается контекстное меню для удаления, дублирования и других действий"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-rcnx9ur",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-rcnx9ur",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-qztyox7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-qztyox7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Фильтрация и сортировка"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": поддерживаются те же настройки фильтрации и сортировки, что и в других видах"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-5qs6wis",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-5qs6wis",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-noqew2g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-noqew2g",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Сценарии применения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": медиатека изображений/файлов, карточки заметок по книгам, управление контентом с визуальным предпросмотром"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-hg8f6y8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-hg8f6y8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Условные цвета"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7ob1hrq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7ob1hrq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Откройте настройки вида базы данных, выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Условные цвета"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и добавьте правило. Выберите поле и задайте условие, затем выберите цвет фона и область его применения. Изменения вступают в силу немедленно и поддерживают отмену и повтор."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mxwr25n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mxwr25n",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Правила сохраняются в текущем виде. Табличный вид, список, календарь, канбан и карточки поддерживают цвет фона всей записи; табличный вид также поддерживает окрашивание только того свойства, к которому относится условие. Правила для свойств сохраняются в других макетах, но не действуют."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-y5ghogc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-y5ghogc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Каждое правило независимо проверяет условие одного поля; несколько правил не связаны отношением «И». Перетаскивайте маркер слева от правила для изменения приоритета (работает и на сенсорных устройствах); каждое свойство принимает цвет первого сработавшего правила. Правило для всей записи после срабатывания окрашивает оставшуюся область и останавливает дальнейшую проверку, при этом цвета свойств, сработавших ранее, сохраняются. Фон по умолчанию также занимает место в приоритете сопоставления."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-e1my467",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-e1my467",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Например, первое правило задаёт для некоторого свойства синий цвет, а второе — зелёный для всей записи. При срабатывании обоих правил это свойство остаётся синим, а остальная область становится зелёной; если переместить зелёное правило для всей записи на первое место, вся запись станет зелёной."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pmusydp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-pmusydp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для полей одиночного и множественного выбора можно выбрать сопоставление с первым вариантом — цвет берётся по первому выбранному варианту в порядке внутри записи (включая цвет по умолчанию), а не по порядку определения вариантов в поле. Также можно выбрать фиксированный встроенный или пользовательский цвет. Условия используют существующие операторы фильтрации, а поддерживаемые поля могут также проверяться по результату шаблона отображения."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-h5vw1ck",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-h5vw1ck",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Условные цвета не изменяют значения полей и не фильтруют записи. Скрытые поля по-прежнему могут использоваться в условиях. Незаполненные до конца условия и правила, ссылающиеся на удалённые поля, не действуют. При дублировании вида правила копируются, после чего каждый вид настраивается независимо. Существующая окраска вариантов в календаре для совместимости отображается как одно правило; после удаления всех правил цвета очищаются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6t12js8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-6t12js8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Фильтрация, сортировка и группировка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-prowwz9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-prowwz9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для каждого вида можно независимо задать условия фильтрации и правила сортировки; фильтрация и сортировка разных видов не влияют друг на друга."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xv5aj5w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-xv5aj5w",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Фильтрация"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-akip0a6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-akip0a6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Используется для отбора записей, отображаемых в виде, показывая только данные, удовлетворяющие условиям."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8iwkrha",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-8iwkrha",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-il79yzs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-il79yzs",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-v4orlue",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-v4orlue",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Точка входа"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите кнопку меню на панели инструментов вида, перейдите в «Фильтр», в подменю нажмите «Добавить фильтр» и выберите поле для фильтрации"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-y2wfk0x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-y2wfk0x",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-i948jnn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-i948jnn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Типы условий"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": разные типы полей поддерживают разные условия фильтрации:"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-6ais2u7",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-6ais2u7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-k7a99w0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-k7a99w0",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-mutm4ox",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-mutm4ox",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Текст / URL / Email / Телефон: равно, не равно, содержит, не содержит, начинается с, заканчивается на, пусто, не пусто"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-2z9b6qk",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-2z9b6qk",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-ypw1cvd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-ypw1cvd",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Число: равно, не равно, больше, больше или равно, меньше, меньше или равно, пусто, не пусто"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-yt5k0in",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-yt5k0in",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-jkfnyzy",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-jkfnyzy",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Дата / Время создания / Время обновления: равно, раньше, раньше или равно, позже, позже или равно, диапазон, пусто, не пусто"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-fncs4zf",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-fncs4zf",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-4jaag7i",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-4jaag7i",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Одиночный выбор: равно, не равно, пусто, не пусто"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-15ydp1g",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-15ydp1g",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-mbzfz34",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-mbzfz34",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Множественный выбор: содержит, не содержит, пусто, не пусто"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-zrp80o0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-zrp80o0",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-apvebxh",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-apvebxh",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Флажок: отмечен, не отмечен"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-egec47g",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-egec47g",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-mgl4dwu",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-mgl4dwu",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Связь: содержит, не содержит, пусто, не пусто"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-n99s06r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-n99s06r",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-fpdijy9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-fpdijy9",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Сводка: если целью является поле связи, а способом вычисления выбрано «Показывать исходные значения» или «Показывать уникальные значения», в обычном фильтре поддерживаются «Содержит любое» и «Не содержит ни одного»: можно искать и отмечать записи конечной связанной базы данных, сопоставление идёт по всему множеству записей сводки, а одноимённые записи различаются по ID записи; прежний фильтр по ключевым словам и его квантификаторы «любое», «все», «нет» сохраняют прежнее поведение"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-zc1vwn6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-zc1vwn6",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5ux1xnt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5ux1xnt",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Добавление нескольких условий"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": можно задать условия для нескольких полей; по умолчанию они объединяются по «И» (AND), требуя выполнения всех; можно переключить на «ИЛИ» (OR) для выполнения любого условия, а также добавлять вложенные группы условий"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-rn7ju9k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-rn7ju9k",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-7bb5rtv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7bb5rtv",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Удаление фильтра"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите кнопку удаления справа от условия фильтра, чтобы удалить одно условие; через меню фильтра можно очистить все одним нажатием"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ybhiq7h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ybhiq7h",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-jwshexg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-jwshexg",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Примечание"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": поле номера строки не поддерживает фильтрацию"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9vx6tpc",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-9vx6tpc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Контекстный фильтр"
+				}
+			],
+			"HeadingLevel": 4
+		},
+		{
+			"ID": "20261122113000-p9nkcpc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-p9nkcpc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Контекстный фильтр"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " на панели инструментов блока базы данных и выберите настроенное поле связи или поле сводки, целью которого является поле связи со способом вычисления «Показывать исходные значения» или «Показывать уникальные значения». На панели перечислены все подходящие поля базы данных, но одновременно можно включить только одно. Нажмите на другое поле для переключения; повторное нажатие на текущее отмеченное поле отключает контекстный фильтр."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-62rdl1y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-62rdl1y",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После включения система применяет ко всем видам этого блока базы данных фиксированное условие «Содержит любое — Текущий документ»; исходные фильтры каждого вида остаются независимыми и объединяются с контекстным фильтром по «И»."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-hk2kcxr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-hk2kcxr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Текущий документ уже должен быть привязан как запись в конечной целевой базе данных связи, иначе совпадения не будут отображаться и нельзя будет добавлять записи из этого блока базы данных. При выборе прямого поля связи новая запись автоматически связывается с текущим документом; при выборе поля сводки новая запись не заполняет значение сводки и не изменяет связи промежуточной базы данных, поэтому может быть скрыта из-за несоответствия условию."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-s19oc29",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-s19oc29",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сортировка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ucv1392",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ucv1392",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Используется для упорядочивания записей в виде по указанному полю."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-z3mzyvh",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-z3mzyvh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-llt0hk3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-llt0hk3",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-o8zlt5d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-o8zlt5d",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Точка входа"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите меню на панели инструментов вида, перейдите в «Сортировка», добавьте условие сортировки, выберите поле и направление"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8r381kk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-8r381kk",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-z5clulr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-z5clulr",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Направление сортировки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": по возрастанию или по убыванию, переключается нажатием"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-k3j1iv6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-k3j1iv6",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ml8fdem",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ml8fdem",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Множественная сортировка"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": можно добавить несколько условий сортировки; система применяет их последовательно в порядке добавления. Например, сначала по «Дате» по убыванию, затем по «Заголовку» по возрастанию"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-vw4pfdw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-vw4pfdw",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-y7b7tn9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-y7b7tn9",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Удаление сортировки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите кнопку удаления справа от условия сортировки для удаления одного условия; через меню сортировки можно очистить все"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-vu25kk4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-vu25kk4",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ewmn0fa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ewmn0fa",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Особенности типов полей"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-njziq39",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-njziq39",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-dtzhlt5",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-dtzhlt5",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-rqxtphw",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-rqxtphw",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Текст: сортировка по пиньиню или кодовым точкам Unicode"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-542chdm",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-542chdm",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-vzy09a5",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-vzy09a5",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Число: сортировка по числовому значению"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-pw49oat",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-pw49oat",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-qixb51q",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-qixb51q",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Дата / Время создания / Время обновления: сортировка по хронологии"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-menlxju",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-menlxju",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-a5d00sw",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-a5d00sw",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Одиночный / Множественный выбор: сортировка по порядку вариантов в списке"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-6r4mqz1",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-6r4mqz1",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-n9fr4aj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-n9fr4aj",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Флажок: сортировка по состоянию отмечен/не отмечен"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-9zxcvuz",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-9zxcvuz",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-qzpepmt",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-qzpepmt",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Сводка: сортировка по результату вычисления"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-x9kk9ca",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-x9kk9ca",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-js7okuv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-js7okuv",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Примечание"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-7r2tl2k",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-7r2tl2k",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-osbeqzr",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-osbeqzr",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-6udoh7i",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-6udoh7i",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Поле номера строки не поддерживает сортировку"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-z9a6e21",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-z9a6e21",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-yqejhqd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-yqejhqd",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Нередактированные строки располагаются в конце с сохранением ручного порядка; записи с одинаковыми значениями сортировки также сохраняют ручной порядок"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-45o7pmi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-45o7pmi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При заблокированном редактировании нажмите значок сортировки на панели инструментов базы данных, выберите поле и направление (по возрастанию или по убыванию). Временная сортировка влияет только на текущий блок базы данных и вид в текущем окне и не изменяет сохранённые правила сортировки. После выбора «Восстановить сортировку по умолчанию», снятия блокировки или закрытия документа восстанавливаются сохранённые правила."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gtx915n",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-gtx915n",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Группировка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2b8tcit",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-2b8tcit",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Использует одно поле в качестве основы для группировки, распределяя записи по значениям групп."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-j63ktnd",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-j63ktnd",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-zlgn2lz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-zlgn2lz",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-em77ccp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-em77ccp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Точка настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите меню на панели инструментов вида, перейдите в «Группировка», выберите поле и способ группировки"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-swth7g1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-swth7g1",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-avnb7mw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-avnb7mw",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Поддерживаемые поля"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": поля сводки, номера строки и местоположения не поддерживают группировку, остальные типы полей поддерживают; для поля ресурса сначала нужно настроить шаблон отображения, и группировка выполняется по результату шаблона. Разным типам полей соответствуют разные способы группировки:"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-rp8mda0",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-rp8mda0",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-b4vts4i",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-b4vts4i",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-bt0gjmr",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-bt0gjmr",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Текст / Одиночный выбор / Множественный выбор / URL / Email / Телефон / Флажок / Связь / Шаблон: группировка по значению, каждое уникальное значение образует отдельную группу"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-rfp80as",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-rfp80as",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-5tbj01w",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-5tbj01w",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Число: группировка по числовым диапазонам"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-smng2tn",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-smng2tn",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-ii67r89",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-ii67r89",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Дата / Время создания / Время обновления: группировка по относительным датам"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-hw42mwv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hw42mwv",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-1cjcgwn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-1cjcgwn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Различия между видами"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-ncuvkl7",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-ncuvkl7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-7sk4vk5",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-7sk4vk5",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-oc5q82j",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-oc5q82j",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Таблица и список: после группировки строки распределяются по группам, каждую группу можно сворачивать и разворачивать"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-cg6nipb",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-cg6nipb",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-mh688x9",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-mh688x9",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Вид карточек: после группировки карточки распределяются по группам"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-lwxi9ew",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-lwxi9ew",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-m3sv8i7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-m3sv8i7",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Канбан: группировка обязательна, каждое значение группы образует столбец; отмена группировки не поддерживается. Если полем группировки является одиночный или множественный выбор, перетаскивание карточки в другой столбец автоматически изменяет значение поля (кроме полей шаблона, времени создания и времени обновления)"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-6ug0tb7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-6ug0tb7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-qjoa5t8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-qjoa5t8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Удаление группировки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": в видах таблицы, списка и карточек можно выбрать «Нет» для отмены группировки; в канбане отмена невозможна"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-03plrc1",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-03plrc1",
+				"updated": "20261122113000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Макет и сортировка панели базы данных"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mdh9ybz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mdh9ybz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "База данных"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " выберите «Одна колонка», «Две колонки (по строкам)» или «Две колонки (по столбцам)» в параметре «Макет полей панели базы данных» (по умолчанию «Две колонки (по строкам)»). Эта настройка одновременно действует для панели базы данных вверху документа и панели отдельной записи; при нехватке места автоматически используется одна колонка, а смена макета не меняет порядок полей. После привязки непривязанной записи на панели, если включено отображение свойств базы данных, панель открывает редактор привязанного блока. На панели уже привязанной записи кнопка перепривязки не отображается — меняйте привязку в виде базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-su6m6xy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-su6m6xy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При расположении по строкам поля отображаются слева направо и сверху вниз. Перетащите мышью маркер слева от поля в ячейку целевого поля для предпросмотра нового порядка в реальном времени; после отпускания порядок сохраняется. При расположении по столбцам сначала сверху вниз отображается левый столбец, затем правый; видимые поля делятся поровну по количеству (при нечётном числе в левом столбце на одно больше), а редактирование содержимого поля не вызывает автоматического переноса в другой столбец. В макетах по столбцам и в одну колонку горизонтальная линия-индикатор показывает позицию вставки сверху или снизу. Отмена перетаскивания возвращает исходный порядок; сортировка полей поддерживает отмену и повтор."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5l9gwkh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-5l9gwkh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Видимость полей панели базы данных"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-88odhx6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-88odhx6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Нажмите на имя поля на панели свойств базы данных вверху документа, на странице записи базы данных или в диалоге свойств блока, чтобы задать «Видимость поля на панели базы данных»: «Всегда показывать», «Скрывать, если пусто» или «Всегда скрывать». «По умолчанию» сохраняет прежнюю настройку панели, при этом панель вверху документа использует глобальную настройку скрытия пустых полей. Правило действует для панели свойств этой базы данных и не влияет на видимость полей в видах базы данных. Нажатие кнопки редактирования на панели временно раскрывает скрытые поля для редактирования значений или изменения правила отображения."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7bxffh0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-7bxffh0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Значок записи"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wf73px6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-wf73px6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Непривязанные записи могут иметь собственный значок — нажмите на значок рядом с первичным ключом, в деталях записи или в поле связи, чтобы изменить или очистить его. Шаблон записи может заранее задавать значок для непривязанных записей и записей документов. Непривязанные записи без пользовательского значка отображают короткое тире, при этом настройки отображения значков вида сохраняют силу."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xrxgvo5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xrxgvo5",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При привязке или перепривязке к обычному блоку без пользовательского значка блок наследует значок записи. Если у обычного блока уже есть значок или привязка выполняется к существующему документу, используется собственный значок целевого блока. Новый документ, созданный при привязке, наследует значок, заданный у записи; если у записи значок не задан, используется значок шаблона документа. После привязки запись и привязанный блок делят один значок. Отмена привязки сохраняет последний отображавшийся значок, после чего его можно менять независимо."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-a0gltwd",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-a0gltwd",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Шаблон записи"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-tiud0b0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-tiud0b0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Откройте выпадающее меню рядом с кнопкой создания записи и выберите «Новый шаблон» для настройки шаблона записи. Можно заранее задать тип записи, значок, содержимое первичного ключа и значения полей; для записи документа также можно задать место сохранения, шаблон содержимого и скрытие в дереве документов."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-t23z4k1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-t23z4k1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выберите шаблон из того же меню, чтобы создать запись по его настройкам. Меню «Ещё» шаблона позволяет редактировать, назначить по умолчанию и удалить шаблон; обычное создание записи использует шаблон по умолчанию, также можно выбрать пустую запись. Изменение шаблона не затрагивает уже созданные записи."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pvo8ye0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-pvo8ye0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Шаблон записи служит для предзаполнения содержимого при создании, а поле шаблона — для вычисления значений полей существующих записей в виде; их назначение различно. Для поля даты можно заранее задать фиксированное время или текущее время на момент создания."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pyw2vmv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-pyw2vmv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В шаблоне записи через выпадающее меню "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Открывать элемент после создания"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " выберите «Не открывать» (по умолчанию), «Открыть» (в текущей панели) или «Разделить вправо». Поддерживается как для привязанных, так и для свободных записей; для привязанного документа фокус сначала переходит на редактируемый заголовок, в остальных случаях — на первичный ключ. На мобильных устройствах оба способа открытия используют существующую страницу или всплывающее окно."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-in0s6zn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-in0s6zn",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Существующие шаблоны сохраняют прежнее поведение открытия, если этот параметр не изменён. Создание пустой записи без шаблона следует поведению вида; при необходимости можно создать шаблон пустой свободной записи и назначить его по умолчанию."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mru7msm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-mru7msm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Зеркальная база данных"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zn668l8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zn668l8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Копирование и вставка блока базы данных создаёт зеркальную базу данных: эти блоки используют общие данные, и изменение данных в любом из них синхронизируется со всеми остальными зеркалами."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rmmg68f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-rmmg68f",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Связи и сводки"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-f9mkopz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-f9mkopz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Две базы данных можно связать через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Связь"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ для совместного управления. Например, связь между двумя базами данных "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Авторы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Книги"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zti70j8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zti70j8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Панель выбора связей на настольной и мобильной версиях всегда предоставляет кнопку создания и применяет шаблон по умолчанию связанной базы данных. Если введённое имя отличается от имени, сгенерированного шаблоном первичного ключа, отображаются два варианта с их фактическими именами: создать по шаблону по умолчанию или создать с введённым именем. Использование введённого имени перезаписывает только первичный ключ, а значения полей по умолчанию, значок, шаблон содержимого и место сохранения по-прежнему берутся из шаблона по умолчанию. Если ввод пуст, шаблон первичного ключа не настроен или имена совпадают, показывается только один вариант. Если шаблон по умолчанию не настроен, создаётся независимая запись. Создание записи и обновление связи можно отменить вместе."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zp61skb",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"id": "20261122113000-zp61skb",
+				"updated": "20261122113000"
+			},
+			"AttributeViewID": "20261122113000-q4n3gjm",
+			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20261122113000-7gm8lb2",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"custom-sy-av-view": "20261122113000-mljjg5f",
+				"id": "20261122113000-7gm8lb2",
+				"updated": "20261122113000"
+			},
+			"AttributeViewID": "20261122113000-6652nv5",
+			"AttributeViewType": "gallery"
+		},
+		{
+			"ID": "20261122113000-7hkrjvn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7hkrjvn",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Авторы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ в базе данных "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Количество работ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ сводка подсчитывает "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Работы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, способ вычисления — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Количество записей"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-plt9jaz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-plt9jaz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вид связанной базы данных в деталях записи"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1e35ydu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-1e35ydu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В настройках поля связи включите «Показывать связанную таблицу» и через «Вид связанной базы данных» выберите существующий табличный вид в связанной базе данных. При создании или смене цели связи можно настроить связанную таблицу в том же меню и нажать «ОК» для совместного сохранения. Настройка принадлежит этому полю и используется всеми записями; новые записи наследуют её автоматически. Отключение показа не удаляет связи или целевые записи."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2rv6c9f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-2rv6c9f",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Связанная таблица отображается внизу области свойств базы данных в деталях записи, а при наличии основного текста — перед ним. Её могут использовать привязанные документы, блоки содержимого и непривязанные записи. Если один и тот же блок относится к нескольким базам данных, по умолчанию переключение выполняется по вкладкам; если отключить «Показывать несколько баз данных во вкладках», свойства и связанные таблицы каждой базы данных отображаются сгруппированно. Состав участников разных баз данных, записей и полей связи независим друг от друга."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xt4l64z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xt4l64z",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Таблица показывает только записи, уже связанные с текущей записью в этом поле, одновременно применяя фильтр выбранного вида. Односторонняя связь также поддерживается, обратное поле связи не требуется. Макет столбцов целевого вида является общим; область текущей записи не записывается в общий фильтр. Поиск на панели, «Сортировка этой панели» и «Дополнительный фильтр этой панели» действуют только для текущей панели."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-u8tr2d0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-u8tr2d0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Редактирование полей в таблице изменяет реальную целевую запись, и остальные ссылки обновляются синхронно. «Удалить связь» отменяет только связь текущей записи в текущем поле, не удаляя целевую запись. «Добавить существующую запись» соблюдает фильтр кандидатов связи; «Создать и связать запись» использует правила создания целевой базы данных, а при отсутствии шаблона создаёт непривязанную запись."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2pgbx8x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-2pgbx8x",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если текущие связи пусты, отображается пустая таблица. Если поле или целевой вид недействительны либо база данных заблокирована, отображается состояние недоступности, а вся база данных без фильтра не показывается. Эта функция в первую очередь поддерживает таблицы; внутри таблицы дополнительные связанные таблицы рекурсивно не раскрываются. В предпросмотре истории и снимков живые связанные виды не раскрываются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vqmn1ux",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-vqmn1ux",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Шаблоны"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rbf3jod",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rbf3jod",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Шаблоны могут обращаться, вычислять и отображать значения других полей той же записи с помощью синтаксиса, описанного в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-9f33l0j",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Фрагменты шаблонов"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ":"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-hykf1vo",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-hykf1vo",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-7rl1y4h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-7rl1y4h",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ouneoj3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ouneoj3",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .ИмяПоля }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ обращение к полю вида"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-fek2vil",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-fek2vil",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-whg8bt9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-whg8bt9",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ index . \"custom-xxx\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ обращение к пользовательскому атрибуту блока содержимого"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-i1lihml",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-i1lihml",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-u99czow",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-u99czow",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .ИмяПоля_end }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ обращение к дате окончания поля даты, суффикс "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_end"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ действует только для типа даты"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-hqrf7qy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hqrf7qy",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-7cv3mlh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7cv3mlh",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .ИмяПоля_str }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ обращение к отформатированной строке поля множественного выбора, суффикс "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_str"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ действует только для типа множественного выбора"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-njx7xlk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-njx7xlk",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-r0rkc9w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-r0rkc9w",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .ИмяПоля_created }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ обращение ко времени создания блока, привязанного к полю блока, суффикс "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_created"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ действует только для типа блока"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-kdmh962",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-kdmh962",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-znvc50v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-znvc50v",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .ИмяПоля_raw }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ обращение к объекту исходного значения поля, суффикс "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_raw"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ действует для всех типов полей"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-q1xrcy3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-q1xrcy3",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5d6carj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5d6carj",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ index .id_mod \"ID_поля\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ обращение к отформатированному значению по ID поля"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-z2cpiux",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-z2cpiux",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-y9k7re7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-y9k7re7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ index . \"entryCreated\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ обращение ко времени создания блока, привязанного к строке"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-jsojoog",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-jsojoog",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-107vk5f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-107vk5f",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ index . \"entryUpdated\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ обращение ко времени обновления блока, привязанного к строке"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m56flld",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-m56flld",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Например, в следующей базе данных "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Счета"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ поле "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Шаблоны"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ демонстрирует суммирование "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Питание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Одежда"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zdbz342",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"id": "20261122113000-zdbz342",
+				"updated": "20261122113000"
+			},
+			"AttributeViewID": "20261122113000-o9fypbs",
+			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20261122113000-y8vuuco",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-y8vuuco",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поле шаблона может использовать httpGet для чтения данных из внешнего API; при выполнении требуется подтверждение в текущем окне, а бюджет запросов общий для всех строк. Подробнее см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-txe1wtm",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Чтение данных из внешнего API"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-19zcyou",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-19zcyou",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Шаблон отображения"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wh8xbzk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-wh8xbzk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для обычных полей можно настроить шаблон отображения без смены типа поля. Откройте меню поля в заголовке столбца и введите шаблон в поле ввода шаблона внизу. Шаблон отображения меняет только представление; при редактировании ячейки по-прежнему считывается и записывается исходное хранимое значение. Поля шаблона, сводки, номера строки, времени создания и времени обновления не поддерживают шаблоны отображения."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-uio2uuy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-uio2uuy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Шаблон отображения использует тот же синтаксис Go-шаблонов, что и фрагменты шаблонов, с разделителями "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и может содержать HTML. Например, если в поле прогресса хранится значение 42, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "&lt;progress value=\".action{.Прогресс}\" max=\"100\"&gt;&lt;/progress&gt; .action{.Прогресс}%"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " отобразит индикатор выполнения на 42% и текст 42%. HTML по умолчанию проходит безопасную фильтрацию."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9ui7gws",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-9ui7gws",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Можно ссылаться на другие поля той же строки по имени. Например, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "&lt;strong&gt;.action{.Название}&lt;/strong&gt;: .action{.Прогресс}%"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " объединит поля названия и прогресса. Если имя поля содержит пробелы или символы, используйте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{index . \"Название проекта\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Чтобы избежать неоднозначности при совпадении или переименовании полей, можно ссылаться по ID поля с помощью "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{index .id_mod \"ID_поля\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xrkk0ha",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xrkk0ha",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Шаблон отображения считывает исходные хранимые значения полей и не читает результаты шаблонов отображения других полей. Для фильтрации, сортировки и группировки можно выбрать использование исходного значения или отрендеренного шаблоном значения. Очистите шаблон отображения, чтобы вернуть исходный способ показа поля. Поле связи следует шаблону отображения первичного ключа целевой базы данных, включая пустой результат, при этом исходное значение первичного ключа и связь сохраняются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mq4paxe",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-mq4paxe",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Автоматизация"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-n26c5tw",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-n26c5tw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка правил"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-wx0opp5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-wx0opp5",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Автоматизация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " в виде базы данных и добавьте правило. Изменения сохраняются автоматически, текст сохраняется при потере фокуса или нажатии Enter. Новое правило по умолчанию отключено; при неполной конфигурации оно автоматически отключается с подсказкой о недостающих пунктах — после заполнения включите его вручную. Правила общие для всей базы данных, и изменение записи в любом виде или зеркале может их запускать"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9x5oq94",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-9x5oq94",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После удаления или смены типа поля, на которое есть ссылка, либо удаления целевой базы данных последующая запись в элемент автоматически отключит затронутое правило и покажет имя правила и недействительную ссылку. Изменения пользователя сохраняются штатно, а конфигурация правила остаётся; после исправления конфигурации правило нужно включить вручную. При блокировке базы данных, сбое аутентификации, повреждении данных или ошибке записи изменения пользователя и автоматические действия откатываются вместе."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0jqyz8s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0jqyz8s",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "«Уведомлять при успешном выполнении» включено по умолчанию и настраивается отдельно для каждого правила. Уведомление показывается только тогда, когда автоматическое добавление, обновление или сбор действительно внесли изменения и вся транзакция успешно зафиксирована; одна транзакция объединяется в одно сообщение, учитываются только правила с включённым уведомлением, а обновление нескольких полей одной записи считается как одна запись. Отключение уведомлений не останавливает выполнение и не скрывает ошибки. При несоответствии условиям, отсутствии цели, неизменённом значении, повторном совпадении, ручном сборе или очистке, отмене/повторе и неудачных транзакциях уведомление об успехе не отправляется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-q5ubu9a",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-q5ubu9a",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Условия срабатывания"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-a4hy1ep",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-a4hy1ep",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка разделена на три блока: «Когда происходит следующее событие», «И триггерная запись удовлетворяет следующим условиям (необязательно)» и «Выполнить следующие действия». Сначала выберите событие добавления записи или изменения поля; изменение поля может отслеживать указанное поле или любое редактируемое поле, повторная запись того же значения не срабатывает. Второй блок проверяет значения полей триггерной записи после изменения; если условия не заданы, ограничений нет."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-10iz1jh",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-10iz1jh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Действия и присваивание"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-knjydvl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-knjydvl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Каждое правило может содержать несколько действий, выполняемых по порядку. Сначала выберите операцию и объект операции, затем добавьте настраиваемые поля и способ присваивания. Операция изменения поддерживает триггерную запись, связанные записи или подходящие записи в выбранной базе данных; условия внутри действия фильтруют изменяемые записи отдельно от условий триггерной записи, а при отсутствии целевых условий подходят все записи выбранной цели. Операция добавления создаёт непривязанную запись в текущей или другой базе данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-epc9m99",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-epc9m99",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Значением поля в действии может быть фиксированное значение, совместимое по типу исходное поле, время срабатывания, связь с триггерной записью или вычисление по шаблону. Время срабатывания подходит для поля даты; связь с триггерной записью — для поля связи, указывающего на исходную базу данных. Изменение текста первичного ключа сохраняет существующую привязку и значок."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xk8iq53",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-xk8iq53",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Присваивание с помощью шаблона"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-5tqc1au",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-5tqc1au",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После выбора способа присваивания «Шаблон» можно редактировать шаблон "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{...}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " прямо в строке. Редактирование шаблона приостанавливает правило — после завершения включите его снова. Шаблоны поддерживаются для всех редактируемых полей; вычисляемые поля (время создания, время обновления, номер строки, сводка и поле шаблона) присваивание не поддерживают. Первичный ключ изменяет только текст, сохраняя существующую привязку."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6a6iz3a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-6a6iz3a",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Например, взяв в качестве триггерной записи задачу полива цветов со статусом «Выполнено», создайте следующую задачу и задайте дату как "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{((now).AddDate 0 0 7).Format \"2006-01-02\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "now"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " фиксируется как текущее время срабатывания,"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate 0 0 7"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " сдвигается на семь календарных дней вперёд. При первом использовании шаблона в правиле сохраняется текущий часовой пояс интерфейса, который продолжает использоваться при выполнении на других устройствах."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-f2c5qtd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-f2c5qtd",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "field \"ID_поля\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " считывает хранимое значение исходной записи, дата может участвовать в вычислениях "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AddDate"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; переименование поля не влияет на ссылку по ID."
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "value \"ID_поля\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " считывает структурированную нагрузку,"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "toJson"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " выводит JSON. Например,"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{toJson (dateAdd 0 0 7 (value \"ID_поля\"))}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " одновременно сдвигает начало и конец диапазона дат, сохраняя настройку только даты или точного времени."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-15aa73i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-15aa73i",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Текст, ссылка, email и телефон используют текстовый результат, число должно быть допустимым конечным числовым значением, флажок использует "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " или "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Дата принимает дату ISO, дату и время или JSON нагрузки даты; одиночный выбор использует имя существующего варианта, множественный выбор — JSON-массив имён или массив вариантов; связь — массив ID существующих записей; ресурс и местоположение — существующий JSON нагрузки. Варианты, связанные записи и ресурсы автоматически не создаются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1i6ca53",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-1i6ca53",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Раскройте «Данные для предпросмотра», выберите реальную запись в качестве примера, измените дату предпросмотра или ссылаемые поля и посмотрите результат предпросмотра. Эти входные данные влияют только на предпросмотр и не изменяют реальную запись. Допустимый пустой вывод очищает поле; отсутствующая переменная, пустая исходная дата, ошибка типа или ссылки вызывают откат триггерного изменения вместе со всеми автоматическими действиями."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-z7fl7hk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-z7fl7hk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Результат шаблона записывается только при срабатывании, а повтор использует первый результат. Шаблоны не поддерживают SQL, файлы, циклы или рекурсию; правила с HTTP выполняются после сохранения правки. Исходный код — до 8 КиБ, ввод и вывод одного поля — до 64 КиБ. После сохранения шаблона база данных требует клиент с поддержкой автоматизации версии 2, старые версии явно откажутся её читать; прежние правила версии 1 сохраняют совместимость."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0ffua4z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0ffua4z",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выберите исходное поле по имени в редакторе шаблона и нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Вставить ссылку на поле"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы вставить в позицию курсора стабильную ссылку по ID поля, которая сохранит работоспособность после переименования поля; нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Скопировать ИД"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для копирования ID выбранного поля. Эта кнопка также доступна на мобильных устройствах."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-azdqh73",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-azdqh73",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ручное выполнение"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-esih6yk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-esih6yk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выберите триггер "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Вручную"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", добавьте действие записи в обычное поле, задайте способ присваивания "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Шаблон"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и включите правило. Нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Выполнить сейчас"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для обработки всех сохранённых записей, соответствующих условиям правила. Результаты можно просматривать офлайн, повторное открытие базы данных не запрашивает данные заново. Выполнение по расписанию пока не предоставляется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-uutw5f3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-uutw5f3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выражения .action{...} в ручных правилах поддерживают httpGet и fromJson. Например, следующий шаблон записывает возвращённый заголовок слайда в текстовое поле:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-01c31wx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-01c31wx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{$r := httpGet \"https://httpbingo.org/json\"}.action{(fromJson $r.body).slideshow.title}"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-yifcu1p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-yifcu1p",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сетевые запросы требуют подтверждения в текущем окне и подчиняются HTTP-ограничениям шаблонов. Постоянное разрешение привязывается к сохранённой версии правила и может быть отозвано на панели автоматизации. Интерфейс ручного выполнения сохраняет каждую подходящую запись независимо: все действия одной записи либо выполняются вместе, либо сохраняют прежние значения, не затрагивая другие успешные записи. Каждая запись считывает снимок хранилища на тот момент, и все действия этой записи используют его; изменения базы данных во время получения данных отклоняют устаревший результат. Отмена и повтор используют сохранённые результаты без повторного запроса. Лимиты HTTP общие для партий: не более 1 000 записей полей и добавлений записей за раунд. Ручные шаблоны не предоставляют предпросмотр полей. Ручные правила требуют формата автоматизации 9; прежние форматы 1–8 по-прежнему читаются, а старые клиенты отклоняют формат 9 без перезаписи базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-a8y8g7x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-a8y8g7x",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Во время выполнения отображается количество успешных, неудачных, ожидающих и пропущенных записей, можно раскрыть список неудачных записей. «Повторить для неудачных и незавершённых записей» обрабатывает только эти записи, не дублируя уже успешные добавления. Лимиты запросов, размера ответа, общего времени и записи общие для партий; при достижении лимита, отказе в авторизации или закрытии панели дальнейшая обработка останавливается с сохранением уже зафиксированных результатов. Явный повтор открывает новый раунд бюджета. При потере ответа сначала запрашивается прогресс, затем продолжается запись. Прогресс привязан к текущему главному окну, действует пятнадцать минут и очищается при переходе блокнота к блокировке; после истечения срока сначала проверьте сохранённые значения и начните заново. Существующие вызовы API без явного включения поштучного режима сохраняют атомарную фиксацию всей партии и ответ null."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9z4838p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-9z4838p",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Флажок можно использовать как переключатель обновления: отслеживайте его изменение с условием «отмечен», в том же правиле сохраняйте результат HTTP и снимайте флажок. Успешная запись не запускает повторно другие автоматизации; при сбое флажок и прежний результат сохраняются — можно снять и снова поставить флажок для повтора."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-o4afhyx",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-o4afhyx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Автоматические сетевые запросы и функции форматирования"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-5zk38ky",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-5zk38ky",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В триггерах добавления записи и изменения поля всё правило, содержащее httpGet, выполняет все действия после сохранения правки. Последовательные правки одной базы данных объединяются, а разрешение на сетевой доступ подтверждается текущим окном. При сбое сохраняются сохранённая правка и прежний результат; изменения базы данных во время ожидания отбрасывают устаревший результат. Полученные результаты сохраняются вместе и образуют отдельный шаг отмены: первая отмена откатывает результат, сохраняя ввод, а следующая отменяет сам ввод. Повтор использует сохранённые результаты без повторного сетевого запроса; запись результата не запускает другие автоматизации. Запись через API без интерактивного окна только сохраняет правку и не выполняет правила с HTTP. Выполнение по расписанию пока не предоставляется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vw7u1d6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-vw7u1d6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Все шаблоны автоматизации поддерживают printf, urlquery, dict, toString и fromJson. printf поддерживает обычные спецификаторы формата и ограничивает ширину и точность скалярных аргументов, не поддерживая динамическую ширину (*) или индексацию аргументов; dict требует строковых ключей и полных пар ключ-значение. Эти вспомогательные функции принимают до 64 аргументов, сериализованный ввод и строковый вывод — до 64 КиБ. Новые функции форматирования и событийные правила HTTP требуют формата автоматизации 10. Прежние форматы 1–9 по-прежнему читаются, отключённые незавершённые шаблоны сохраняются как есть; старые клиенты отклоняют формат 10 без перезаписи базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3g4t3p6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3g4t3p6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Например, сборка URL на основе исходного поля (замените FIELD_ID на ID поля):"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-z269f01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-z269f01",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{printf \"https://example.com?q=%s\" (urlquery (field \"FIELD_ID\"))}"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ef7s4nk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-ef7s4nk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Примеры шаблонов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-u0rhruc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-u0rhruc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Скопируйте полный пример в поле ввода шаблона."
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "FIELD_ID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " — это заполнитель; замените его на ID исходного поля базы данных триггерной записи, а не на имя поля. При копировании поля исходное и целевое поля должны быть одного типа; при копировании связи оба поля связи должны указывать на одну и ту же базу данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2fgugbj",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20261122113000-2fgugbj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Назначение"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Содержимое шаблона"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Дата: день срабатывания"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{now | date \"2006-01-02\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Дата: через семь дней после срабатывания"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{((now).AddDate 0 0 7).Format \"2006-01-02\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Дата: сдвиг исходной даты или диапазона на семь дней вперёд с сохранением настроек времени"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{toJson (dateAdd 0 0 7 (value \"FIELD_ID\"))}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Текст, первичный ключ, ссылка, email или телефон: копирование исходного поля"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{field \"FIELD_ID\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Текст или первичный ключ: добавление суффикса после исходного текста"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{field \"FIELD_ID\"} (в следующий раз)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Число: прибавление единицы к исходному числу, поддерживаются десятичные дроби"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{addf (field \"FIELD_ID\") 1}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Флажок: противоположное значение исходного поля"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{not (field \"FIELD_ID\")}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Одиночный выбор: установка существующего варианта"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Выполнено"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Множественный выбор: установка двух существующих вариантов"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[\"Работа\",\"Важное\"]"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Дата, множественный выбор, связь, ресурс или местоположение: копирование исходного поля того же типа"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{toJson (value \"FIELD_ID\")}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-sihvshj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-sihvshj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В формате даты "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "2006-01-02"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " — это фиксированная запись формата, не заменяйте её текущей датой. Имена вариантов в примерах одиночного и множественного выбора должны уже существовать в целевом поле; замените их при необходимости. После настройки сначала проверьте результат в предпросмотре, затем включите правило."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-n1vi3p0",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-n1vi3p0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Примеры правил"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-dclz82p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-dclz82p",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Например, чтобы зафиксировать время первого завершения, отслеживайте изменение поля «Статус», задайте условие «Статус» = «Выполнено» и «Время завершения» пусто, затем измените триггерную запись, установив «Время завершения» равным «Времени срабатывания». После настройки включите правило. Без условия пустого времени завершения повторное выполнение может перезаписать исходное время завершения."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-t7xwv3b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-t7xwv3b",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Например, установите двустороннюю связь между базой задач и базой учёта времени. Когда статус задачи меняется на «В работе», создавайте запись в базе учёта времени, задавая время начала равным времени срабатывания и связывая её с триггерной задачей; когда статус меняется на «Выполнено», изменяйте связанную запись учёта времени, фильтруя только записи с пустым временем окончания, и устанавливайте время окончания равным времени срабатывания."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lyqdfa9",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-lyqdfa9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выполнение, отмена и совместимость"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-zqfsdlv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zqfsdlv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Автоматические действия отменяются и повторяются вместе с исходным изменением, а при сбое откатываются вместе. Повтор сохраняет ID записи и время первого выполнения. Автоматические действия не запускают другие правила; импорт, синхронизация, восстановление истории и воспроизведение отмены также не запускают правила повторно; обычная запись через API запускает правила, но не создаёт запись отмены в редакторе."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qo5gu0g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-qo5gu0g",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Зашифрованная база данных может работать только с базами данных внутри того же зашифрованного блокнота. Сначала разблокируйте соответствующий блокнот; если целевая база данных или поле недоступны, исправьте правило или приостановите его. После дублирования базы данных правила сохраняются в приостановленном состоянии — проверьте целевые и связанные поля перед включением."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m9uvqjx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-m9uvqjx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сбор обычных блоков"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-onfd2sc",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-onfd2sc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Область отслеживания и условия"
+				}
+			],
+			"HeadingLevel": 4
+		},
+		{
+			"ID": "20261122113000-7orybf0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7orybf0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выберите триггер «Обычный блок соответствует условиям» и через кнопку добавления под «Областью отслеживания» выберите блокноты или документы (области объединяются). В окне выбора отметьте несколько блокнотов или документов и подтвердите для добавления за один раз; при поиске и раскрытии каталогов отмеченные пункты сохраняются. Дублирующиеся области автоматически удаляются, каждое правило может содержать до 32 блокнотов или документов. Нажатие на заголовок документа открывает предпросмотр во всплывающем окне с сохранением настроек автоматизации; также можно навести курсор на значок для предпросмотра. Типы блоков, теги и пользовательские атрибуты сгруппированы в отдельные группы чипов, настраиваются кнопкой добавления в каждой группе и удаляются нажатием на значок закрытия чипа."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6jp9p3h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-6jp9p3h",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Список типов блоков поддерживает поиск и непрерывный множественный выбор; нажатие на чип тега или атрибута открывает редактирование (тег подтверждается клавишей Enter, атрибут сначала редактируется как черновик и сохраняется только после подтверждения; Esc или отмена не влияют на существующие условия)."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-va53dvk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-va53dvk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "У тегов удаляются начальные и конечные пробелы и автоматически убираются дубликаты. Для типов блоков достаточно любого совпадения; теги и атрибуты по умолчанию требуют «Выполнить все» и могут быть независимо переключены на «Выполнить любое». Между тремя группами по-прежнему требуется выполнение всех условий, пустая группа не накладывает ограничений. Атрибуты поддерживают «равно», «содержит», «существует» и «не существует» (последние два не требуют значения атрибута). «Выполнить любое» требует формата автоматизации 3; существующие правила сохраняют поведение «Выполнить все»."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-dp8pzek",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-dp8pzek",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После выбора области документов под «Областью отслеживания» появляется «Глубина поддокументов». По умолчанию «Без ограничений» (включает все дочерние документы); «Только текущий документ» включает только сам выбранный документ; при выборе «Максимум уровней» введите положительное целое число: 1 означает выбранный документ и поддокументы первого уровня, 2 добавляет второй уровень и т.д."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-76joxtv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-76joxtv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Эта настройка общая для всех областей документов одного правила; области блокнотов не ограничиваются, а перекрывающиеся области по-прежнему объединяются. Изменение глубины сохраняет существующие записи и поля и не собирает автоматически накопленное содержимое; можно просмотреть и собрать совпадающее содержимое через управление сбором или проверить и убрать несовпадающие записи. Ограниченная глубина требует формата автоматизации 5; старые клиенты откажутся от чтения без перезаписи базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-u3as51q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-u3as51q",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "«Включать сам выбранный документ» включено по умолчанию. При отключении каждый выбранный документ и все блоки внутри него пропускаются, а поддокументы продолжают отслеживаться согласно заданной глубине. Например, если отключить этот параметр и задать глубину 1, будут отслеживаться только поддокументы первого уровня; в сочетании с «Только текущий документ» область документов становится пустой. Эта настройка общая для всех областей документов одного правила."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fd9vyut",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-fd9vyut",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Области по-прежнему объединяются, поэтому область блокнота или другая перекрывающаяся область документа всё равно может включать этот документ. Изменение этого параметра сохраняет существующие записи и поля и не собирает и не удаляет записи автоматически; можно просмотреть, собрать или проверить и убрать записи через управление сбором. Исключение самого выбранного документа требует формата автоматизации 7; прежние форматы 1–6 по-прежнему читаются, а старые клиенты отклоняют формат 7 без перезаписи базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-kh1cg7o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-kh1cg7o",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При сборе ссылок на блоки выберите цель ссылки и вставьте ID целевого блока или ссылку на блок, либо выберите «Текущий документ». Цель сохраняется как фиксированный ID блока и используется всеми зеркалами базы данных. Цель документа включает ссылки на блоки содержимого внутри него без поддокументов. Сопоставляются только ссылки на блоки в основном тексте, без обычных ссылок, встроенных блоков и ссылок в форматированных текстовых полях базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cl05nhx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-cl05nhx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Источники ссылок объединяются по правилам обратных ссылок, включая элементы списка, блоки цитат, суперблоки, выноски, а также правила передачи, когда первый абзац документа или первый абзац после заголовка является чистой ссылкой на блок. Тип блока и пользовательские атрибуты ограничивают итоговый объединённый блок, а условия тегов — исходный блок ссылки; после указания цели ссылки параметр объекта сбора для тегов не участвует в выборе. Очистите цель ссылки, чтобы вернуться к обычному сбору. При удалении ссылки на блок в основном тексте можно подтвердить синхронное удаление автоматически собранных записей согласно описанию ниже. Исторические ссылки можно просмотреть и дособрать через управление сбором. Цель ссылки требует формата автоматизации 8; прежние форматы 1–7 по-прежнему читаются, а старые клиенты отклоняют формат 8 без перезаписи базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mi6vhv8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mi6vhv8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для «Имени атрибута» можно независимо выбрать «Равно» (по умолчанию), «Содержит» или «Регулярное выражение» без влияния на условие значения атрибута. «Равно» использует полное имя вроде custom-state; «Содержит» требует только буквальной подстроки без префикса custom-, например dailynote совпадёт с custom-dailynote-20261021; регулярное выражение использует синтаксис Go для сопоставления полного имени, например ^custom-dailynote-[0-9]{8}$."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-q9wu0sl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-q9wu0sl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Проверяются только пользовательские атрибуты; имя и значение чувствительны к регистру и должны одновременно удовлетворять условию для одного и того же атрибута; «Существует» требует хотя бы одного совпадения имени, «Не существует» — отсутствия совпадений имени, оба игнорируют значение атрибута. Некорректное регулярное выражение нельзя сохранить, шаблон имени — до 256 байт. «Содержит» и «Регулярное выражение» требуют формата автоматизации 6; прежние форматы 1–5 по-прежнему читаются, а старые клиенты отклоняют формат 6 без перезаписи базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5i3ijkq",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-5i3ijkq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выбор объекта сбора"
+				}
+			],
+			"HeadingLevel": 4
+		},
+		{
+			"ID": "20261122113000-b0mymx0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-b0mymx0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Пункт «Объект сбора» над типами блоков предлагает варианты «По умолчанию», «Блок с тегом» и «Блок-контейнер». По умолчанию, если первый блок содержимого элемента списка содержит тег и элемент списка удовлетворяет условиям типа и атрибутов, приоритетно собирается элемент списка, иначе проверяется сам блок с тегом; даже при одновременном выборе абзаца и элемента списка для одного источника тега не собираются два уровня. «Блок с тегом» фильтрует и собирает по типу и атрибутам блока, фактически содержащего тег. «Блок-контейнер» выбирает вверх ближайший контейнер, удовлетворяющий условиям типа и атрибутов, с дедупликацией по ID блока; документ участвует только при явном выборе."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-plg6l3n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-plg6l3n",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При требовании всех тегов все теги должны присутствовать в одном и том же исходном блоке — теги разных дочерних блоков не объединяются. При отсутствии условий по тегам этот параметр не влияет на фильтрацию. Предпросмотр показывает итоговый объект сбора. Переключение не преобразует привязанные блоки существующих записей и не изменяет их поля. Два явных режима требуют формата автоматизации 4; прежние форматы по-прежнему читаются, а старые клиенты отклоняют формат 4 без перезаписи базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rm2f18f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rm2f18f",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выбор основного типа блока сопоставляет все его подтипы; также можно отдельно выбрать заголовки H1–H6, маркированные/нумерованные/списки задач и их элементы, а также встроенные или пользовательские типы выносок. Списки и элементы списков сопоставляются независимо, при нескольких вариантах достаточно любого совпадения, а отсутствие выбора снимает ограничение. Выбор основного типа заменяет выбранные подтипы. После изменения подтипа блока автоматический сбор, проверка активной очистки и предпросмотр используют одну и ту же логику сопоставления. Фильтрация по подтипам требует формата автоматизации 3; правила форматов 1 и 2 по-прежнему читаются, а старые клиенты отклоняют формат 3 без перезаписи базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bsw9s7n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-bsw9s7n",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Теги сопоставляются только с самим блоком и не собирают автоматически все его родительские контейнеры. Элемент списка использует теги первого абзаца; только при явном выборе типа абзаца этот первый абзац сопоставляется отдельно. Сбор привязывает исходный блок к текущей базе данных без копирования и перемещения исходного текста; инициализация полей поддерживает фиксированные значения и время срабатывания для поля даты, а первичный ключ сохраняет привязку к исходному блоку."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-691aa1d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-691aa1d",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Запись добавляется при первом соответствии блока условиям. Автоматический сбор только добавляет записи; при изменении исходного текста, выходе из области отслеживания, изменении условий или объекта сбора, отключении или удалении правила существующие записи и их поля сохраняются. При повторном совпадении по-прежнему используется исходная запись с сохранением вручную заполненных или изменённых полей."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-in9zrgn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-in9zrgn",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При удалении тега из основного текста, тегов документа или панели тегов, либо при удалении ссылки на блок в основном тексте проверяется, перестали ли автоматически собранные записи соответствовать каким-либо включённым правилам сбора. При наличии влияния в одном диалоге перечисляются базы данных и количество записей; одновременное удаление тега и ссылки также подтверждается один раз. По умолчанию отмечены все затронутые базы данных; подтверждение «Одновременно убрать выбранные записи» удаляет тег или ссылку и синхронно убирает выбранные записи и значения их полей. Снятие отметки сохраняет записи и поля соответствующей базы данных; выбор «Удалить только тег», «Удалить только ссылку» или «Удалить только теги и ссылки» сохраняет все записи и поля баз данных. Отмена диалога не выполняет удаление. Исходный текст сохраняется, а отмена вместе восстанавливает тег или ссылку, исходные записи и значения полей. Записи, добавленные вручную, а также записи, всё ещё совпадающие через другие ссылки на ту же цель или другие включённые правила, сохраняются. Переименование тега или изменение только текста якоря ссылки не вызывает этот диалог."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-olowvno",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-olowvno",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Управление и дополнительный сбор"
+				}
+			],
+			"HeadingLevel": 4
+		},
+		{
+			"ID": "20261122113000-ebe4p42",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ebe4p42",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Автоматизация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Управление сбором"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", выберите «Записи базы данных», чтобы проверить существующие записи по объединению всех включённых правил сбора обычных блоков; к ручным и автоматически собранным записям применяются одинаковые критерии. Для категорий «Соответствует правилам», «Не соответствует правилам» и «Невозможно определить» отдельно отображается количество и работает независимая пагинация; сначала приоритетно показываются несоответствующие записи."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-y04ose2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-y04ose2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для записей со статусом «Невозможно определить» указывается причина. «Убрать несоответствующие записи на этой странице» показывает количество и требует подтверждения; перед выполнением перепроверяются правила, исходный текст и привязки, убираются только записи этой страницы, которые по-прежнему явно не соответствуют. Несоответствующие и неопределённые записи также можно убирать по одной. Удаление сохраняет исходный текст, а отмена и повтор восстанавливают исходный ID записи, поля и порядок; при отсутствии исходного блока он не воссоздаётся заново, при ошибке чтения или аутентификации данные сохраняются и возвращается ошибка. При новом совпадении после активного удаления создаётся и инициализируется новая запись без восстановления удалённых значений полей."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-g4317c1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-g4317c1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Включение или редактирование правила не собирает уже существующие блоки. В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Автоматизация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Управление сбором"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " выберите «Совпадения правил», затем выберите включённое правило сбора, чтобы просмотреть совпадающие блоки и их статус (собрано или не собрано). «Собрать совпадающие блоки на этой странице» собирает только ещё не собранные блоки на текущей странице. Элемент управления пагинацией показывает номер текущей страницы, до 100 блоков на страницу (при большом количестве инициализируемых полей размер страницы уменьшается)."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bjcr8iv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-bjcr8iv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Условия сбора проверяются после того, как пользователь добавляет, дублирует, изменяет основной текст или атрибуты, применяет шаблон содержимого, выполняет глобальный поиск и замену, а также перемещает блок или документ в область отслеживания. Копирование и перемещение в дереве документов включает поддокументы. Существующие записи сохраняют значения полей. Если отслеживаемый блокнот удалён, при следующей проверке этого правила во время редактирования правка сохраняется штатно, а правило отключается; после корректировки области отслеживания его можно включить снова. Временное закрытие блокнота не отключает правило. Импорт Markdown и .sy, синхронизация, восстановление истории, отмена и повтор не запускают новый сбор — накопленное содержимое можно собрать вручную через предпросмотр. Автоматические действия не запускают цепочкой другие правила. Исходная и целевая базы данных должны находиться в одной границе шифрования; зашифрованный блокнот нужно сначала разблокировать перед предпросмотром или редактированием правила."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6tyrk5g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-6tyrk5g",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После удаления последнего блока базы данных (включая удаление документа, в котором он находится) автоматический сбор обычных блоков прекращается; при наличии других зеркал сбор продолжается. После отмены удаления и восстановления блока базы данных последующие правки возобновляют сбор без автоматического добора существующего содержимого. Данные базы данных и конфигурация правил сохраняются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4474e6q",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-4474e6q",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Родительские и дочерние записи"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-78mh0iu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-78mh0iu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Откройте в настройках базы данных "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Подэлементы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Включить подэлементы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы при первом включении автоматически создать поля связи родителя и потомка. Если нужно повторно использовать существующие поля связи, перейдите в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Использовать существующие поля связей"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", выберите пару двусторонних полей связи и проверьте предпросмотр иерархии реальных записей. Если нужно изменить направление иерархии, нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Обратить направление"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и включите после подтверждения направления. Предпросмотр показывает только часть связей среди уже загруженных записей, а при включении проверяются все связи. После включения все клиенты, обращающиеся к этой базе данных, должны поддерживать новый формат. Невключённые базы данных не затрагиваются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-420son4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-420son4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "У записи может быть не более одного родителя и несколько уровней потомков. Нельзя назначить родителем саму запись или её потомка. Отношения родитель-потомок общие для всех видов и зеркал базы данных и не меняют исходную иерархию документов или блоков."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xq1b0pk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xq1b0pk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В таблице и списке можно выбрать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Древовидный вид"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " или "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Плоский вид"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". В древовидном отображении таблица разворачивает и сворачивает потомков кнопкой перед первым видимым полем (позиция кнопки подстраивается под порядок и видимость полей), а в списке кнопка находится перед главным полем. У записей без потомков на месте кнопки разворачивания отображается некликабельная серая точка, сохраняя выравнивание записей одного уровня. Значок записи остаётся в главном поле. Карточки, канбан и календарь остаются плоскими; просматривать и изменять отношения родитель-потомок можно через свойства записи."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-apbzep6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-apbzep6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Меню записи предоставляет "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Добавить подэлемент"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Изменить родителя"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Поднять на один уровень"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". При перемещении родителя его потомки перемещаются вместе с ним; смена родителя не изменяет автоматически статус, дату и другие поля потомков. При включённой автосортировке порядок на одном уровне определяется правилами сортировки. В древовидном отображении при вставке выше или ниже через меню записи новая запись оказывается на том же уровне, что и текущая, и имеет того же родителя."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-hqxxv9b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-hqxxv9b",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если фильтр находит потомка, сохраняется путь его предков в качестве контекста, а несовпавшие соседние записи не показываются. Древовидная группировка следует за верхнеуровневым родителем, при этом потомки сохраняют собственные значения поля группировки. Плоская группировка обрабатывает каждую запись по её собственному значению поля."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8ci1yze",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-8ci1yze",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Древовидный вид разбивается на страницы по верхнеуровневым записям, потомки загружаются при разворачивании, а при большом количестве потомков можно листать страницы вперёд и назад. Сворачивание не меняет результаты статистики, а предки, показанные только для контекста, не учитываются в количестве совпадений фильтра. Многострочная вставка перезаписывает только видимые на текущей странице записи, включая контекстных предков; строки сверх видимой области добавляются как верхнеуровневые записи и не перезаписывают свёрнутые записи или записи других страниц."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-laid69f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-laid69f",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После удаления родителя неудалённые прямые потомки повышаются на один уровень без каскадного удаления потомков или привязанных документов и блоков. Дублирование родителя копирует всё поддерево, включая свёрнутых или скрытых фильтром потомков; копии получают новые идентификаторы записей, а копии привязанных записей становятся непривязанными без копирования основного текста. Структурные операции поддерживают отмену и повтор."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mk6hark",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mk6hark",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Переключение на плоское отображение или отключение родительских и дочерних записей не удаляет поля связи или данные связей и не понижает автоматически версию формата базы данных. Повторное включение перепроверяет существующие отношения. Если во время отключения указанное поле было удалено или перестало образовывать двустороннюю самосвязь, автоматическое включение создаёт новую пару полей связи, сохраняя остальные поля и значения. Циклы родитель-потомок или наличие нескольких родителей показывают конкретную причину и отклоняют сохранение. После переключения параметра в меню родительских и дочерних записей меню остаётся открытым и обновляет состояние. Состояние раскрытия зашифрованной базы данных очищается после блокировки или закрытия блокнота."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gcaq0tu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-gcaq0tu",
+				"updated": "20261122171459"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2zyddlr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-2zyddlr",
+				"updated": "20261122171459"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если нужно перенести строку в ячейке базы данных, используйте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3dma7c7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3dma7c7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При редактировании отдельной ячейки числа, URL, email, телефона или одиночного выбора в таблице и списке нажатие Enter сохраняет значение и выделяет то же поле в следующей строке той же группы, а повторное нажатие Enter открывает редактирование этой ячейки. Для поля множественного выбора после нажатия Enter можно продолжить выбор вариантов в текущей ячейке. В последней строке новая запись автоматически не добавляется. В полях текста и первичного ключа Enter служит для редактирования абзацев и элементов списка, а Shift+Enter — для переноса строки внутри блока. Выделите несколько ячеек и нажмите Enter, чтобы вводить данные поочерёдно в пределах выделения — слева направо и затем на следующую строку (при выделении в одном столбце — вниз) до конца выделения. Ввод по диапазону поддерживает текст, число, URL, email, телефон, непривязанный первичный ключ и одиночный выбор, пропуская остальные поля. Для текста и первичного ключа внутри выделения используйте Ctrl+Enter (Cmd+Enter на macOS) или кнопку подтверждения на мобильных устройствах для сохранения и перехода дальше. Композитный ввод IME и выбор кандидатов сохраняют прежнее поведение; при сбое сохранения поля ввода текущий черновик сохраняется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bwtg84j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-bwtg84j",
+				"updated": "20261122113000"
+			}
+		},
+		{
+			"ID": "20261122113000-go5bpzm",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-go5bpzm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Форматированный текст первичного ключа"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-btvj606",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-btvj606",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поля первичного ключа и текста используют общий блочный редактор с поддержкой абзацев, заголовков, списков, цитат, блоков кода и блоков формул, а также с сохранением форматирования текста, ссылок, изображений, строчных формул и ссылок на блоки. В настольной версии в представлениях «Таблица» и «Список» после создания пустой записи автоматически выделяется ячейка первичного ключа. Выделив текстовую ячейку или ячейку первичного ключа, можно сразу начать ввод, чтобы открыть редактор. При использовании метода ввода (IME) редактор откроется и вставит текст после подтверждения выбранного варианта. При редактировании первичного ключа или текстового поля на компьютере двойной клик по встроенному изображению открывает его предпросмотр с возможностью переключения между другими изображениями в том же поле. Клавиша Enter создаёт новый абзац или элемент списка, Shift+Enter вставляет перенос строки. При вводе в выделенную ячейку используйте Ctrl+Enter (Cmd+Enter на macOS) или кнопку подтверждения на мобильном устройстве, чтобы сохранить и продолжить. В таблице, списке, галерее, канбане, календаре, карточке записи, связях и сводках отображается полное содержимое; для фильтрации, сортировки, поиска и копирования обычного текста используется текстовая проекция, при этом существующий текст первичного ключа, похожий на Markdown, сохраняет буквальное значение."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cihigou",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-cihigou",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Редактирование привязанного первичного ключа задаёт пользовательский статический текст якоря без перезаписи исходного документа или блока; после очистки восстанавливается динамический источник. Динамический текст якоря следует за заголовком исходного документа или поддерживаемыми строчными стилями в абзаце и обновляется даже при изменении только стиля; статический текст якоря сохраняет собственное содержимое. Привязка, перепривязка и отвязка сохраняют идентификатор записи. Неподдерживаемые структуры блоков отклоняются, а при сбое сохранения черновик сохраняется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ps6ueug",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ps6ueug",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Новые сохранённые форматированные первичные ключи и текстовые поля используют ту же структуру исходника Kramdown, и база данных обновляется до формата 16. Существующие строчные исходники формата 15 продолжают читаться; нередактируемые базы данных не обновляются. Старые клиенты без поддержки формата 16 не смогут открыть обновлённую базу данных; для отката требуется восстановление полного снимка до обновления, автоматическое понижение версии невозможно. Изображения и ссылки подчиняются границам доступа блокнота, в котором находится база данных; перед обновлением или сменой клиента сделайте резервную копию рабочего пространства. Текстовое поле также поддерживает вставку строчных изображений. При первом сохранении строчного изображения в текстовом поле база данных обновляется до формата 17, после чего для её открытия потребуется клиент с поддержкой формата 17."
+				}
+			]
+		}
+	]
+}

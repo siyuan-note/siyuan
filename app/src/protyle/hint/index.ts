@@ -727,8 +727,9 @@ export class Hint {
         const rootID = protyle.block.rootID;
         this.source = source;
         this.bindingDismissController?.abort();
-        if (source === "av" && getAVBindingCell(protyle.toolbar.range)?.dataset.rowId) {
-            // 独立条目面板没有编辑器的空白点击处理，使用捕获事件兼容鼠标和触摸。
+        const bindingCell = source === "av" ? getAVBindingCell(protyle.toolbar.range) : null;
+        if (bindingCell?.isConnected) {
+            // 表格和独立条目面板共用外部点击关闭逻辑，使用捕获事件兼容鼠标和触摸。
             const controller = new AbortController();
             this.bindingDismissController = controller;
             document.addEventListener("pointerdown", event => {
@@ -748,9 +749,8 @@ export class Hint {
             this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><span class="b3-loading" aria-hidden="true"></span></div>';
             this.element.classList.remove("fn__none");
             if (this.source === "av") {
-                const cellElement = getAVBindingCell(protyle.toolbar.range);
-                if (cellElement) {
-                    const cellRect = cellElement.getBoundingClientRect();
+                if (bindingCell) {
+                    const cellRect = bindingCell.getBoundingClientRect();
                     /// #if !MOBILE
                     setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
                     /// #else

@@ -1,0 +1,471 @@
+{
+	"ID": "20261122113000-f2lw6su",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-f2lw6su",
+		"title": "Что такое блок контента",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-dsst9r0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-dsst9r0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Определение блока контента"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-olekzta",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-olekzta",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Блок контента — это единица содержимого в SiYuan, которую можно независимо редактировать, цитировать и организовывать. Каждый блок имеет автоматически сгенерированный глобально уникальный ID, например "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "20261122113000-zm774i1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". ID состоит из 14-значной метки времени ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYYMMDDHHMMSS"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "), дефиса и 7 случайных строчных латинских букв или цифр."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vfroqny",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-vfroqny",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Типы блоков контента"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mvfzkhv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mvfzkhv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Самый распространённый блок — абзац, используемый для основного текста. Каждый абзац является независимым блоком."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zb91knp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zb91knp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Заголовки, списки, таблицы и блоки цитат выражают различные структуры содержимого."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ic8alae",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ic8alae",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Особенности и правила вложенности каждого типа см. в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-heqg3qd",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Типы блоков контента"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zr50zj6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-zr50zj6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Комбинирование блоков контента"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qia8dw6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-qia8dw6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Документ состоит из нескольких блоков. Типы, способные содержать другие блоки, называются контейнерными блоками (например, списки и цитаты)."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fso6byb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-fso6byb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сам документ также является блоком контента. Как весь документ, так и отдельные абзацы можно связывать через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-369mcst",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "ссылки на блоки контента"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", не разбивая текст на отдельные документы."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ob7oz0z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ob7oz0z",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Имя, псевдонимы и примечание"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0mzd5ya",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0mzd5ya",
+				"memo": "Примечание обычно представляет собой короткую фразу.",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для блока можно задать имя, псевдонимы и примечание. Имя и псевдонимы используются для "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-xheyk4j",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "упоминаний в обратных ссылках"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; примечание служит для дополнительной информации, не отображаемой в основном тексте."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-edr6xdr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-edr6xdr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Включив "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "поведение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "значок блока контента"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", можно отображать имя, псевдонимы и примечание в редакторе."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rh4ov3g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rh4ov3g",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Можно использовать"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-asl0p10",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "встроенные блоки контента"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "для поиска и сводки по именам и примечаниям, например, вывести блоки, примечание которых содержит "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "кратко"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ключевое слово:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2j6te0u",
+			"Type": "NodeBlockQueryEmbed",
+			"Data": "{{SELECT * FROM blocks WHERE memo LIKE '%короткую%'}}\n",
+			"Properties": {
+				"id": "20261122113000-2j6te0u"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks WHERE memo LIKE '%короткую%'"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qc1fhnq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-qc1fhnq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-e479pkb",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-e479pkb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-udfbpsj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-udfbpsj",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-xwwh7qa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-xwwh7qa",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Для одного блока можно задать только одно имя; разные блоки могут иметь одинаковые имена"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ldajxaq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ldajxaq"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-d9iw3an",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-d9iw3an",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Можно задать несколько псевдонимов, разделяя их английской запятой ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ","
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-t1fxr09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-t1fxr09",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-rvlzlul",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-rvlzlul",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Примечание поддерживает только обычный текст"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,1860 @@
+{
+	"ID": "20261122113000-2zeo2e3",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "2753",
+		"id": "20261122113000-2zeo2e3",
+		"title": "Частые вопросы",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-ql4slpl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ql4slpl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Как сбросить настройки?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4rbbh01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-4rbbh01",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Приложение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Обслуживание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сброс настроек"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " можно восстановить обычные пользовательские настройки текущего рабочего пространства, встроенные горячие клавиши, настройки меню и мобильной панели инструментов, а также текущую компоновку окон."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jaaopaq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-jaaopaq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Заметки, ресурсы, история, снимки, прогресс изучения флеш-карт и текущее количество дней хранения истории сохраняются. Аккаунт, аутентификация, ключи синхронизации и шифрования, подключения AI/MCP, ключи, переменные, язык и сетевые настройки также сохраняются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-s3gwrcx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-s3gwrcx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Установленные темы и значки не удаляются, но оформление переключается на стандартное. Плагины, фрагменты кода и их состояние включения, горячие клавиши плагинов и сохранённые компоновки сохраняются. Глобальные настройки приложения (канал обновлений, специальные возможности, метод ввода Linux, автозапуск и т. д.) остаются без изменений."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ngcnreo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ngcnreo",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Перед сбросом все клиенты, подключённые к этому рабочему пространству, должны завершить сохранение; при сбое сохранения сброс отменяется. Затем клиенты перезагружаются. При запуске из локального настольного приложения оно завершит работу после перезагрузки — запустите его снова; мобильное приложение и браузерная версия просто перезагрузятся."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ab9mrrj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ab9mrrj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Как экспортировать системный журнал?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rbeicta",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rbeicta",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В левом нижнем углу всплывающего окна ошибки состояния нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Экспорт журнала"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы сохранить ZIP-архив. Также журнал можно экспортировать в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Приложение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Обслуживание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Системный журнал"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-l20nrtk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-l20nrtk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Как SiYuan хранит данные?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0ub8ll1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0ub8ll1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Данные сохраняются в папке "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-vc9iauc",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Рабочее пространство"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " — в этой папке, а именно в каталоге рабочая область/data/:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6cd0d4h",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-6cd0d4h",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-xry1ai4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-xry1ai4",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-rybjh1b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-rybjh1b",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "assets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — для хранения всех вставленных "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-mg7cuep",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "ресурсов"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-acc25kf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-acc25kf",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5svmqmi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5svmqmi",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "emojis"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — для хранения пользовательских изображений значков и эмодзи"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-fdcayf7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-fdcayf7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-j2s5dk9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-j2s5dk9",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "snippets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — для хранения фрагментов кода"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-7kxkkp9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-7kxkkp9",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-65lock2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-65lock2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "storage"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — для хранения условий запросов, компоновок и "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-l7t5898",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Флеш-карты"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "и других данных"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-0seox74",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-0seox74",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-j6lwpvk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-j6lwpvk",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "templates"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — для хранения "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-9f33l0j",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Фрагменты шаблонов"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8nrqml8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-8nrqml8",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-i91pghy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-i91pghy",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "widgets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — для хранения "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-opvetg2",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Виджеты"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-tqble6a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-tqble6a",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-jl2gkas",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-jl2gkas",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "plugins"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — для хранения "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-maoruzg",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "плагинами"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-apwxu5e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-apwxu5e",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ps0gjip",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ps0gjip",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "public"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — для хранения публичных данных"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-j2najip",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-j2najip",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-o42f8vs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-o42f8vs",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Остальные папки — это папки блокнотов, созданные пользователем; файлы с расширением "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​​​ внутри папок блокнотов хранят данные документов. В обычных блокнотах данные документов сохраняются в формате JSON; в зашифрованных блокнотах файлы документов сохраняются в зашифрованном виде и не могут быть напрямую прочитаны или отредактированы как JSON, подробнее см. "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-3uk67ci",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "Шифрование блокнотов"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-setrdpe",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-setrdpe",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поддерживается ли "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "синхронизации данных"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " через сторонние облачные диски?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-q65lawe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-q65lawe",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Синхронизация данных через сторонние облачные диски не поддерживается, так как это может привести к повреждению данных. Хотя сторонние диски синхронизации не поддерживаются, поддерживается "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-lef3tmo",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "подключение стороннего облачного хранилища"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lnfdpyd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-lnfdpyd",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Кроме того, для синхронизации можно вручную экспортировать и импортировать Data:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ymz0zjy",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-ymz0zjy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-eom2hn9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-eom2hn9",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-9ufyxps",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-9ufyxps",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Настольная версия:"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Приложение"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Данные"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Экспорт Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Приложение"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Данные"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Импорт Data"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ybv1il6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ybv1il6",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-l818w9g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-l818w9g",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Мобильная версия:"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Приложение"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Данные"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Экспорт Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Приложение"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Данные"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Импорт Data"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mcpbrn2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mcpbrn2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В macOS SiYuan проверяет папки «Рабочий стол», «Документы» и iCloud Drive исключительно для того, чтобы определить, не находится ли рабочее пространство в пути синхронизации iCloud; SiYuan никогда не просматривает ваши личные данные."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-s8vcyr3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-s8vcyr3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Является ли SiYuan открытым ПО?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-umdner6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-umdner6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan — полностью открытое программное обеспечение; полный исходный код доступен на GitHub."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-tsyat7y",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-tsyat7y",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Как обновиться до новой версии?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ymbx0el",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-ymbx0el",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-zl9qmds",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-zl9qmds",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-3ok5o9x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-3ok5o9x",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если приложение установлено через магазин приложений, обновляйте его через магазин приложений"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-b0ojbhu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-b0ojbhu"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-kegyoq1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-kegyoq1",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если настольная версия установлена через установщик, можно включить "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "О программе"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Автоматически загружать пакет обновления"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " — тогда SiYuan автоматически загрузит последнюю версию установщика и предложит установку. При выходе можно просмотреть примечания к выпуску и выбрать «Установить сейчас» или «Не сейчас»"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-lxhue6s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-lxhue6s"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-wgt5fh2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-wgt5fh2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если установка выполнялась вручную через установщик, скачайте новый установщик и установите его повторно"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-dklfxji",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-dklfxji",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "О программе"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Текущая версия"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Проверить обновления"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ или следить за новыми версиями на "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/",
+					"TextMarkTextContent": "официальном сайте"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-q14y59b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-q14y59b",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Документы, записанные более новой версией, если их свойства ещё можно прочитать, отображаются в дереве документов бледным заполнителем с заголовком и значком. Обновите SiYuan перед их открытием или редактированием; вложенные документы по-прежнему можно просматривать через стрелку раскрытия."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-i6adnqx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-i6adnqx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Что делать, если у некоторых блоков (например, абзацев в элементах списка) не отображается значок блока?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cbjdnmb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-cbjdnmb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "По умолчанию используется упрощённое отображение значков блоков. Даже при одном элементе списка сохраняются значки блока списка и элемента списка. Чтобы отображать скрытые при упрощении значки текущего блока и его последовательных первых дочерних блоков, включите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "поведение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Показывать полные значки блоков"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и открывайте меню нужного блока или перетаскивайте его напрямую за значок."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bfuqe9a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-bfuqe9a",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если значок блока содержимого не отображается, поместите курсор в этот блок, несколько раз нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы выделить блок, а затем нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы открыть меню значка блока; в macOS используйте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jt49h0l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-jt49h0l",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Почему после удаления изображения или файла из заметки файл ресурса всё ещё остаётся?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-h96isz4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-h96isz4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вставленные в заметку изображения или файлы являются ссылками на файлы ресурсов. Удаление содержимого из заметки удаляет только ссылку в текущем месте и не удаляет сам файл ресурса, так как на тот же ресурс могут ссылаться другие документы, базы данных, обложки или HTML-блоки."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-u81gg7o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-u81gg7o",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Чтобы убедиться, что файл ресурса больше нигде не используется, нужно проверить всё рабочее пространство. Проверка при каждом удалении ссылки снизила бы производительность редактирования; кроме того, автоматическое удаление файлов ресурсов сделало бы ненадёжными отмену действий и многоустройственную синхронизацию и могло бы привести к случайной потере данных. Поэтому SiYuan не удаляет файлы ресурсов автоматически при удалении ссылок и не предоставляет такой опции."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wy2iztl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-wy2iztl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Убедившись, что эти файлы больше не нужны, их можно проверить и очистить в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ресурсы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Неиспользуемые файлы ресурсов"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Очистка создаёт "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-36a05no",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "История данных"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; при случайном удалении можно выбрать файл ресурса в истории данных и откатить его."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2weexim",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-2weexim",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Что делать при утере ключа репозитория данных?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ihlw0ol",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ihlw0ol",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ключ репозитория данных используется для снимков и синхронизации и отличается от мастер-пароля и резервной копии ключа зашифрованного блокнота. Сброс репозитория данных не восстанавливает утерянный мастер-пароль зашифрованного блокнота и не заменяет соответствующую резервную копию ключа шифрования."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-appxg0i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-appxg0i",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Перед сбросом корректно закройте SiYuan и сделайте резервную копию всего рабочего пространства; при наличии зашифрованных блокнотов также отдельно сохраните соответствующую резервную копию ключа шифрования и убедитесь, что мастер-пароль работает. После завершения новой синхронизации и проверки целостности данных и сохранности материалов восстановления при необходимости удалите старый каталог синхронизации и облачные снимки."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1r7le7a",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-1r7le7a",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-ravr66x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ravr66x",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-st9wddc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-st9wddc",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если ранее ключ репозитория данных был корректно инициализирован на нескольких устройствах, он одинаков на всех устройствах, и его можно найти в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Аккаунт и синхронизация"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Репозиторий данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ключ репозитория данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Копировать строку ключа"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-rj3gg62",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-rj3gg62",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-urr9k4q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-urr9k4q",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если ранее настройка была выполнена неверно (например, ключи на разных устройствах не совпадают) или все устройства недоступны и получить строку ключа невозможно, сбросьте ключ следующим образом:"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-vettbhr",
+							"Type": "NodeList",
+							"ListData": {
+								"Typ": 1
+							},
+							"Properties": {
+								"id": "20261122113000-vettbhr",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-z81d88w",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "MS4=",
+										"Num": 1
+									},
+									"Properties": {
+										"id": "20261122113000-z81d88w",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-tiejwwa",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-tiejwwa",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Корректно закройте SiYuan и сделайте резервную копию всего рабочего пространства; при наличии зашифрованных блокнотов сохраните также соответствующую резервную копию ключа шифрования и мастер-пароль"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-3ucxzm7",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "Mi4=",
+										"Num": 2
+									},
+									"Properties": {
+										"id": "20261122113000-3ucxzm7",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-c8g7rg8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-c8g7rg8",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Настройки"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Аккаунт и синхронизация"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Репозиторий данных"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "ключ репозитория данных"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Сбросить репозиторий данных"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-aymgjit",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "My4=",
+										"Num": 3
+									},
+									"Properties": {
+										"id": "20261122113000-aymgjit",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-g76zxnt",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-g76zxnt",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Повторно инициализируйте ключ репозитория данных; после инициализации на одном устройстве импортируйте ключ на остальных устройствах"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-4eg2emx",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "NC4=",
+										"Num": 4
+									},
+									"Properties": {
+										"id": "20261122113000-4eg2emx",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-ldi20q9",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-ldi20q9",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Переключитесь в облаке на новый каталог синхронизации; после завершения новой синхронизации и проверки целостности данных и сохранности материалов восстановления при необходимости удалите старый каталог синхронизации"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-b17nups",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "NS4=",
+										"Num": 5
+									},
+									"Properties": {
+										"id": "20261122113000-b17nups",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-h4cyl5z",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-h4cyl5z",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "После завершения новой синхронизации и проверки целостности данных и сохранности материалов восстановления при необходимости удалите старые облачные снимки"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lbor1zm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-lbor1zm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Нужно ли платить за использование?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-e6qk7xa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-e6qk7xa",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Большинство функций бесплатны, даже при использовании в коммерческой среде."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m04qrer",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-m04qrer",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-7iyacyz",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Привилегии подписки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "требуют оплаты; подробнее см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/pricing.html",
+					"TextMarkTextContent": "Тарифы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xec8mob",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xec8mob",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если вам не нужны функции подписки, но вы хотите поддержать разработку, вы можете сделать пожертвование:"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/sponsor",
+					"TextMarkTextContent": "Поддержать разработку — LianDi"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3wrmn17",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-3wrmn17",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Происхождение названия «SiYuan»"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0r950q1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0r950q1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Название SiYuan (思源) происходит от древней китайской идиомы «饮水思源» (дословно: «Когда пьёшь воду, помни о её источнике»), что означает не забывать свои корни и быть благодарным."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-sd32ons",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-sd32ons",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Мы надеемся, что при использовании SiYuan для управления знаниями пользователи не будут забывать об источниках и связях знаний, а главное — будут приносить пользу обществу и человечеству благодаря полученным знаниям."
+				}
+			]
+		}
+	]
+}

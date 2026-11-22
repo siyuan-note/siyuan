@@ -1,0 +1,423 @@
+{
+	"ID": "20261122113000-9p4zt5b",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-9p4zt5b",
+		"title": "Резервное копирование данных",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-lmd80hk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-lmd80hk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xz251wv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xz251wv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Резервное копирование данных — это загрузка "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-n08nhqf",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "снимков данных"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " в облако для аварийного восстановления. В отличие от синхронизации данных (цель которой — поддерживать согласованность данных на нескольких устройствах), резервное копирование — это ручная загрузка снимков в архив на случай непредвиденных ситуаций."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-u71zttg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-u71zttg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jozitev",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20261122113000-jozitev",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-hxsxba4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261122113000-hxsxba4",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ebbg4yb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ebbg4yb",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-k065dzo",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "инициализации ключа репозитория данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " если всё в порядке, резервное копирование уже настроено"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-smaqpm7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261122113000-smaqpm7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-m0sbv4u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-m0sbv4u",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Откройте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "История данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "снимков данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", найдите нужный снимок на вкладке локальных снимков, нажмите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Пометить снимок"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " и введите метку"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ae7ht3q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261122113000-ae7ht3q",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-u9oyx3c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-u9oyx3c",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Переключитесь на верхнюю вкладку "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Пометить снимок"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", найдите помеченный снимок на локальной вкладке и нажмите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Загрузить"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-x5in3os",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20261122113000-x5in3os",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-txtlceg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-txtlceg",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "После загрузки просмотрите резервный помеченный снимок на облачной вкладке; в узких окнах и на мобильных устройствах переключайтесь между списками через "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Локальные снимки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Облачные снимки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-48l5kun",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20261122113000-48l5kun"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-qzm63ca",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-qzm63ca",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "После загрузки облачного резервного снимка на устройство данные можно восстановить через "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-h9jdyuc",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "откат снимка данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ""
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-a51xn0y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-a51xn0y",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если нужно удалить часть меток резервных копий, см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-5x0yqrx",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Пакетное управление помеченными снимками"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m0ntj2d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-m0ntj2d",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Кроме того:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-12pyiow",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-12pyiow",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-nokd4m8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-nokd4m8",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-t73vg0x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-t73vg0x",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-0bkxtqb",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "игнорируемые файлы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-bggyibp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-bggyibp",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-8ph8ije",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-8ph8ije",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В облаке поддерживается хранение до 12 снимков данных"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pk4ks0o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-pk4ks0o"
+			}
+		}
+	]
+}

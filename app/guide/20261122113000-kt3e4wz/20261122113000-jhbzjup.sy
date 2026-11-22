@@ -1,0 +1,42 @@
+{
+	"ID": "20261122113000-jhbzjup",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f64f",
+		"id": "20261122113000-jhbzjup",
+		"title": "Благодарности",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-5rsh6sg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-5rsh6sg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Появление SiYuan стало возможным благодаря множеству проектов с открытым исходным кодом и участников; см. `kernel/go.mod`, `app/package.json` и главную страницу проекта."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gq0nyde",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-gq0nyde",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Развитие SiYuan невозможно без отзывов и поддержки пользователей — спасибо всем, кто помогает SiYuan! ❤"
+				}
+			]
+		}
+	]
+}

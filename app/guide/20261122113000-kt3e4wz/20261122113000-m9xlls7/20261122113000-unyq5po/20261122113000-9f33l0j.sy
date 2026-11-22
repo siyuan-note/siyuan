@@ -1,0 +1,2429 @@
+{
+	"ID": "20261122113000-9f33l0j",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-9f33l0j",
+		"title": "Фрагменты шаблонов",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-tn935t9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-tn935t9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-x23mjy4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-x23mjy4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Фрагменты шаблонов позволяют вставлять в позицию курсора многократно используемое содержимое с поддержкой переменных и вычислений. Шаблоны сохраняются в виде файлов "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " в папке "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "data/templates/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " рабочего пространства."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1e9g7v7",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-1e9g7v7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Создание шаблона"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-jugvsit",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-jugvsit",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сначала подготовьте нужное содержимое в документе, затем сохраните его через меню документа "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Экспорт"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Шаблоны"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", указав название и место сохранения. Для изменения шаблона можно отредактировать исходный код и посмотреть предпросмотр в управлении шаблонами либо вернуться к исходному документу, внести правки и экспортировать заново."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-o7116vf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-o7116vf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Вызов шаблона"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jfcqec7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-jfcqec7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В позиции курсора используйте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ и выберите шаблон для поиска, а найдя нужный шаблон, нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-be5cias",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-be5cias",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Управление шаблонами"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-3cy0sxj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3cy0sxj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Нажмите кнопку «Ещё» рядом с шаблоном или папкой, чтобы переименовать, переместить или удалить элемент. В настольном клиенте то же меню открывается правой кнопкой мыши. На мобильной странице редактирования доступна кнопка «Ещё» для текущего шаблона."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5tfeg5q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-5tfeg5q",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При достаточной ширине окна на компьютере исходный код и предпросмотр располагаются рядом слева и справа; в узких окнах и на мобильных устройствах предпросмотр находится под исходным кодом. Контекст предпросмотра позволяет выбрать, данные какого документа использовать при выполнении шаблона; сам предпросмотр не изменяет этот документ."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5wpblns",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-5wpblns",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если в шаблоне сохранён ID исходного документа экспорта, можно нажать «Открыть документ, из которого экспортирован шаблон» рядом с кнопкой предпросмотра или в меню элемента, чтобы вернуться к исходному документу (если он по-прежнему доступен в текущем рабочем пространстве). После открытия управление шаблонами закроется; отредактируйте документ, экспортируйте его заново и снова откройте управление шаблонами, чтобы загрузить обновлённую версию."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zspdwdr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zspdwdr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На мобильных устройствах возврат со страницы редактирования открывает список шаблонов, а повторный возврат закрывает управление шаблонами. При выходе со страницы редактирования с несохранёнными изменениями запрашивается подтверждение; при отмене текущее содержимое сохраняется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-chhflbj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-chhflbj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Написание шаблонов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3e9int9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3e9int9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В шаблонах используются "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://golang.org/pkg/text/template/",
+					"TextMarkTextContent": "текстовые шаблоны языка программирования Go"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", поэтому при наличии опыта вы можете использовать программную логику, например сравнения, циклы и т. д. Кроме того, во избежание конфликтов синтаксиса в шаблонах применяются разделители "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{action}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (вместо "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{action}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-91uuy79",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-91uuy79",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для расширения возможностей шаблонов мы встроили переменные и функции из проекта с открытым исходным кодом Sprig (репозиторий GitHub: Masterminds/sprig). Например, с помощью "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{now | date &quot;2006-01-02 15:04:05&quot;}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ можно вывести текущее время; подробнее см. в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "http://masterminds.github.io/sprig/",
+					"TextMarkTextContent": "справочной документации Sprig"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2jaxhsw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-2jaxhsw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Есть важный нюанс форматирования даты и времени, на который следует "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ": в языке программирования Go форматирование устроено особым образом — вместо "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "yyyy-MM-dd HH:mm:ss"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " используется фиксированный шаблон времени "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "2006-01-02 15:04:05"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://www.zhihu.com/question/366830553",
+					"TextMarkTextContent": "обсуждение на Zhihu"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-f5peg8w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-f5peg8w"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Помимо встроенных переменных и функций Sprig, поддерживаются следующие переменные и функции:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-arqx7vf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-arqx7vf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-ya7x2jo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ya7x2jo",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-9xw1ccb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-9xw1ccb",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "title"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: переменная для вставки имени текущего документа. Например, если содержимое шаблона — "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "# .action{.title}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, то после вызова в текущий документ вставится заголовок первого уровня"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-xo80s4j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-xo80s4j",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-a1ykrb5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-a1ykrb5",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: переменная для вставки ID текущего документа"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-2uyquck",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-2uyquck",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-0l0a5b2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-0l0a5b2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": вставляет именованный атрибут текущего блока документа (в отличие от заголовка документа "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "title"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ")"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-2g49t93",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-2g49t93",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-yr77thh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-yr77thh",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alias"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: переменная для вставки псевдонима (alias) текущего документа"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-1exm6xo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-1exm6xo",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ho1vkew",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ho1vkew",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "getHPathByID"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция, возвращающая человекочитаемый путь к блоку по его ID"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-0l7mf1q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-0l7mf1q",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-x7mq20k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-x7mq20k",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "queryBlocks"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция для запроса к базе данных, возвращающая список блоков (blocks)"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-p5ajexp",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20261122113000-p5ajexp",
+								"style": "line-height: 22px;",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated > '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ahkq3dm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ahkq3dm",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-p0q6l0c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-p0q6l0c",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "getBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция для запроса к базе данных по ID блока, возвращающая объект block"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-zqrydiz",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20261122113000-zqrydiz",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ getBlock \"20261122113000-ahkq3dm\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-pkkf0q4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-pkkf0q4",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-yiavfu2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-yiavfu2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "querySpans"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция для запроса к базе данных, возвращающая список строковых элементов (spans)"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-25u46si",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20261122113000-25u46si",
+								"style": "line-height: 22px;",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ querySpans \"SELECT * FROM spans LIMIT ?\" \"3\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-4ir0lns",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-4ir0lns",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-xmb0wcg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-xmb0wcg",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "querySQL"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция для запроса к базе данных, возвращающая набор результатов"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-e2k3wix",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20261122113000-e2k3wix",
+								"style": "line-height: 22px;",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ querySQL \"SELECT * FROM refs LIMIT 3\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-yjku2re",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-yjku2re",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-vnow5i6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-vnow5i6",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "statBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция для подсчёта статистики содержимого блока"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-qu9n6yd",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20261122113000-qu9n6yd",
+								"style": "line-height: 22px;",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ (statBlock .id).RuneCount }\n.action{ (statBlock .id).WordCount }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-rxgnyqo",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-rxgnyqo",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-0p949zf",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-0p949zf",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-vsal7ag",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-vsal7ag",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RuneCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-pdk6er1",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-pdk6er1",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-sezunl6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-sezunl6",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "WordCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-ts69y86",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-ts69y86",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-3d7rnk8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-3d7rnk8",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "LinkCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-lz74z2m",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-lz74z2m",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-mdaft1b",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-mdaft1b",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ImageCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-l97snzb",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-l97snzb",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-7dem6pk",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-7dem6pk",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RefCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-zucixtj",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-zucixtj",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-q1ew3ch",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-q1ew3ch",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "BlockCount"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ruiafs0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ruiafs0",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ae3a5tx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ae3a5tx",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "runeCount"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция, возвращающая количество символов в строке"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-66o3w48",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-66o3w48",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-vn7f5gm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-vn7f5gm",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "wordCount"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция, возвращающая количество слов в строке"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-2smcdwz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-2smcdwz",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-mjz902l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-mjz902l",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "parseTime"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция для разбора строки времени в тип "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, чтобы использовать дополнительные методы форматирования даты и времени"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-v08b3ot",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-v08b3ot",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-qg22x7u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-qg22x7u",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Weekday"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция, возвращающая день недели "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=0, Monday=1, ..., Saturday=6"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-e8fjqi1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-e8fjqi1",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-visnuph",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-visnuph",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция, возвращающая день недели "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=Вс, Monday=Пн, ..., Saturday=Сб"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-yoe9uc6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-yoe9uc6",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-fl4om78",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-fl4om78",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция, возвращающая день недели "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=Вс, Monday=Пн, ..., Saturday=Сб"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-tzblzl0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-tzblzl0",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-bkfoau8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-bkfoau8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeek"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: возвращает номер недели по стандарту ISO 8601 (1–53) для указанной даты; например, 2021-01-01 относится к 53-й неделе"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-pusqzyd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-pusqzyd",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-v412bil",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-v412bil",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOMonth"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: возвращает календарный месяц, на который приходится четверг ISO-недели указанной даты; например, для 2021-01-01 возвращается 12. Если нужен обычный календарный месяц, используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "date \"01\""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-tqledhb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-tqledhb",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-4nak6eu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-4nak6eu",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOYear"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: возвращает год ISO-недели для указанной даты; например, для 2021-01-01 возвращается 2020. Если нужен обычный календарный год, используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "date \"2006\""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-2o18wq1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-2o18wq1",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2rya2fp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2rya2fp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeekDate"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: функция, возвращающая дату заданного дня недели "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​; например, для получения даты четверга текущей недели "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ now | ISOWeekDate 4 | date \"2006-01-02\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-1fd0xve",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-1fd0xve",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ojeg8wp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ojeg8wp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "pow"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: возведение в степень, возвращает целое число"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-9ytbxlo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9ytbxlo",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-reomlyt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-reomlyt",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "powf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: возведение в степень, возвращает число с плавающей точкой"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-zy0gmlu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-zy0gmlu",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-cjtyiol",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-cjtyiol",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "log"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: вычисление логарифма, возвращает целое число"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-88p3269",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-88p3269",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-isbxntw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-isbxntw",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "logf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: вычисление логарифма, возвращает число с плавающей точкой"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-6qmcl04",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-6qmcl04",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-mk48kqr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-mk48kqr",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "markdown2text"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ преобразует значение поля в формате Markdown в обычный текст (отбрасывая код, формулы и т. п., без вставки переносов строк)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-28h6n1q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-28h6n1q",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-16ecuad",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-16ecuad",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "markdown2content"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ преобразует значение поля в формате Markdown в текстовое содержимое (сохраняя код, формулы и т. п., со вставкой переносов строк между блочными узлами)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-4oqjwv1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-4oqjwv1",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-kksery3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-kksery3",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "countif"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ подсчитывает количество элементов в списке чисел, удовлетворяющих заданному условию сравнения: первый аргумент — список чисел, второй — оператор сравнения ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "gt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "lt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "eq"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ge"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "le"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​), третий — пороговое значение для сравнения. Например:"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "countif .values \"gt\" 0"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-hrbxetq",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261122113000-hrbxetq",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-kxa10gq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-kxa10gq",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "httpGet"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": чтение данных из публичного сетевого API, подробнее см. "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-txe1wtm",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Чтение данных из внешнего API"
+								}
+							]
+						}
+					],
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					}
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-txe1wtm",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-txe1wtm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Чтение данных из внешнего API"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-hkzwr64",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-hkzwr64",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При вставке в документ, предпросмотре, в шаблоне текста ежедневной заметки или в шаблонном поле базы данных используйте httpGet для чтения публичного HTTP/HTTPS API, а затем fromJson для разбора JSON-ответа. Возвращаемый объект содержит поля ok, status, body, error; полученное тело ответа не выполняется как шаблон. Замените адрес из примера на свой эндпоинт:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1vr4dlf",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261122113000-1vr4dlf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{$r := httpGet \"https://example.com/weather.json\" (dict \"timeout\" 5)}\n.action{if $r.ok}\n.action{$data := fromJson $r.body}\n.action{$data}\n.action{else}\n.action{$r.error}\n.action{end}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			],
+			"IsFencedCodeBlock": true
+		},
+		{
+			"ID": "20261122113000-6l126ok",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-6l126ok",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Необязательные параметры: dict \"headers\" (dict \"Authorization\" \"Bearer ...\") \"timeout\" 5, где timeout задаётся в секундах (максимум 10 с). Поддерживается только метод GET; локальные сети и прокси не поддерживаются. Не вписывайте реальные ключи в шаблоны, которыми можно делиться: ключи могут синхронизироваться или передаваться вместе с шаблоном. При кросс-источниковом перенаправлении пользовательские заголовки очищаются, а учётные данные входа SiYuan не передаются автоматически. Если домен разрешается в непубличный IP-адрес (включая адреса Fake-IP прокси), доступ будет заблокирован — добавьте домен API в исключения Fake-IP или используйте разрешение в реальный IP."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m6bxqyg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-m6bxqyg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При запросе подтверждения отображаются источник шаблона и фактический целевой адрес, а значения параметров запроса и заголовков скрываются. Если выбрать «Разрешить в этот раз», та же версия шаблона в рамках текущего запуска сможет обращаться к нескольким публичным целям, включая последующие запросы и перенаправления; шаблон сможет передавать во внешний сервис содержимое заметок, к которому у него уже есть доступ, однако разрешение не расширяет права чтения — предварительно проверьте код шаблона. При отказе запрос не отправляется. Статус выполнения показывается в правом верхнем углу. Закрытие окна, переключение предпросмотра или блокировка блокнота прерывают ожидание и отбрасывают результат; при отсутствии интерактивного окна, в фоновом выполнении, на опубликованных страницах или при заблокированном блокноте автоматическое разрешение не выдаётся."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ywnx1dm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ywnx1dm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для сохранённых файловых шаблонов, источник которых ядро может проверить, а также для шаблонных полей баз данных можно выбрать «Всегда разрешать этому шаблону доступ к сети». Разрешение сохраняется локально в текущем рабочем пространстве с привязкой к источнику и версии содержимого шаблона, не ограничивается текущим целевым документом или разблокированным блокнотом и не передаётся при встроенном экспорте или синхронизации; после изменения, копирования или импорта требуется повторное подтверждение. Подключаемые файлы подшаблонов подтверждаются отдельно и не наследуют разрешение родительского шаблона. В управлении шаблонами можно просматривать статус, отзывать отдельное разрешение через меню «Ещё» шаблона или отозвать все разрешения (включая базы данных) кнопкой «Отозвать все сетевые разрешения шаблонов» вверху; в настройках шаблонного поля базы данных при наличии httpGet в исходном коде отображаются статус сетевого разрешения и действие отзыва."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-x2s0s4g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-x2s0s4g",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если постоянное разрешение не выбрано, подтверждение можно повторно использовать для одной вставки в течение 30 секунд после успешного предпросмотра в том же окне — при условии, что шаблон и подключаемые им файлы, целевой документ, блокнот и фактический запрос не изменились. При вставке данные запрашиваются заново, результат предпросмотра не переиспользуется. Изменение или закрытие окна, переключение предпросмотра, блокировка блокнота, разрыв соединения или истечение тайм-аута аннулируют этот перенос подтверждения. Данное упрощение действует только для вставки после предпросмотра и не распространяется на базы данных, ежедневные заметки или другие виды запуска."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3h6xr91",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3h6xr91",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Одинаковые запросы кешируются в рамках одного выполнения при совпадении области данных и учётных данных. Запросы в базах данных выполняются пакетами по 32 с паузой 100 мс между пакетами, всего не более 1024 целевых запросов за один запуск (включая перенаправления); для остальных шаблонов лимит составляет до 32 целевых запросов. Во всех режимах допускается не более 1024 вызовов функции, до 1 MiB на один ответ, до 8 MiB суммарного объёма тел ответов и до 8 MiB суммарного вывода шаблона. Суммарное сетевое время ограничено 30 секундами, общее время выполнения — 2 минутами, ожидание подтверждения — 1 минутой. Тайм-ауты проверяются при сетевых обращениях и выводе, поэтому избегайте длительных циклов без сетевых запросов и вывода."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-r9konsb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-r9konsb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После отклонения сетевого доступа для шаблонного поля базы данных все строки этой версии поля в текущем выполнении отклоняют последующие запросы, однако постоянный отказ не сохраняется. При автообновлении, если входные данные шаблона и его зависимостей не изменились, используется сохранённый успешный результат строки; редактирование несвязанных полей, добавление строк или привязка блоков к первичному ключу вызывают пересчёт только тех существующих строк, у которых изменились входные данные шаблона. Ручное обновление или повторное открытие пересчитывает значения заново. При динамическом обращении ко всей строке зависимость отслеживается по всей строке, а шаблоны, читающие другие блоки или результаты SQL-запросов, пересчитываются консервативно. Результаты хранятся только в ограниченном по объёму кэше в памяти, который очищается при блокировке блокнота или отзыве разрешения; при вытеснении из кэша значения вычисляются заново, а фоновое обновление по расписанию не выполняется. При первом открытии сначала отображаются структура базы данных и доступные исходные строки, а для шаблонного поля показывается состояние загрузки; если фильтрация, группировка, агрегация, календарь или вложенные элементы зависят от результата шаблона, сначала выводится структура, а точный набор строк появляется после завершения вычислений. Если от шаблона зависит только сортировка, записи показываются сразу, а порядок уточняется после завершения запросов. Сортировка и поиск по базе данных используют текущий успешный снимок, включая шаблоны с внешними запросами; при изменении входных данных строки или ручном обновлении происходит пересчёт. Открытие редактора ячейки шаблона считывает только исходный код; закрытие до загрузки кода не сохранит результат запроса в качестве шаблона для всего столбца."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0arrpdc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0arrpdc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сетевые сбои, отказ в доступе и неуспешные HTTP-статусы возвращаются в поле error — с помощью ветки ok можно вывести запасное содержимое. При превышении общих лимитов или прерывании выполнения результат не вставляется. Если прервано создание ежедневной заметки, уже созданный документ остаётся, а шаблон его содержимого не перезапускается автоматически. Панель свойств базы данных использует те же подтверждения сети и разрешения шаблонов. Открытие редактора поля не отправляет запросы; пересчёт запускается после сохранения изменений. Обычные ошибки разбора или вычисления HTTP-шаблона отображаются в проблемном поле и не мешают показу остальных полей; при отмене выполнения или блокировке блокнота результат всё равно отбрасывается."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6p1jl1a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-6p1jl1a",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сохранение баз данных в шаблоне"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pso0mkx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-pso0mkx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При сохранении документа как шаблона параметр «Базы данных в шаблоне» применяет единый режим ко всем блокам баз данных в документе. Вариант «Создать полную копию» выбран по умолчанию: при каждом применении шаблона создаётся независимая база данных, которая больше не синхронизируется с исходной, а контекстные фильтры уровня блока удаляются. Вариант «Создать зеркальную копию» сохраняет существующие ссылки на базу данных и контекстные фильтры: вставленный блок базы данных разделяет данные и настройки представлений с исходной базой. В режиме ссылки целевой документ должен иметь доступ к исходной базе данных в пределах одной границы шифрования, иначе вставка шаблона завершится ошибкой. Сочетание общей базы задач по ссылке с полем связи «Проект» в «Контекстном фильтре» блока базы данных («Содержит любой — Текущий документ») позволяет одному шаблону проекта показывать в каждом документе проекта только связанные с ним задачи."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-275aick",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-275aick",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Создание дерева поддокументов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-u61wj0v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-u61wj0v",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Только при ручной вставке шаблона в редакторе срабатывает "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "createDocTree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". После рендеринга шаблона SiYuan сначала показывает полное дерево планируемых поддокументов и создаёт их только после подтверждения; при отмене не вставляется ни шаблон, ни документы. Даже если под тем же родительским документом уже есть документ с таким именем, всегда создаётся новый без переиспользования или перезаписи. Одно действие отмены (Undo) одновременно удаляет вставленное содержимое шаблона и все созданные в этот раз поддокументы. За один раз можно запланировать создание до 128 документов и до 16 уровней вложенности дерева; при этом фактическая глубина дерева файлов по-прежнему ограничивается настройкой «Разрешить создание поддокументов глубже 7 уровней»."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rwj5anb",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20261122113000-rwj5anb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{define \"child-review\"}\n## Разбор\n.action{end}\n\n.action{createDocTree (list\n  (dict \"title\" \"Материалы\" \"template\" \"children/material.md\"\n    \"children\" (list (dict \"title\" \"Выдержки\")))\n  (dict \"title\" \"Разбор\" \"define\" \"child-review\")\n)}\n\n.action{range $doc := renderDocRef \"children\" .id}\n- ((.action{$doc.RootID} \".action{$doc.HPath}\"))\n.action{end}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-axsanc7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-axsanc7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Перед запуском этого примера создайте в текущем пакете шаблонов файл "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "children/material.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Он используется в примере как шаблон содержимого поддокумента; при желании путь можно заменить на путь к уже существующему шаблону."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-b4to75c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-b4to75c",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Каждый шаблон содержимого поддокумента выполняется в контексте этого поддокумента и может использовать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".title"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".id"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".parentID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".rootID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".hPath"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-n1tqkpl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-n1tqkpl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"children\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для получения списка статических описаний поддокументов в плане создания; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"id\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " возвращает текст статической ссылки на блок запланированного документа по его ID независимо от заголовка или читаемого пути; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"path\" <hPath>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " служит точкой входа для совместимости при поиске по читаемому пути."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-x9dq6mu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-x9dq6mu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для каждого узла можно через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "define"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " использовать именованный шаблон из текущего файла шаблона или через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ссылаться на внешний шаблон относительно текущего пакета шаблонов. Если какой-либо внешний шаблон отсутствует или не может быть разобран, отменяется вся операция целиком — без вставки содержимого и частичного создания поддокументов."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-j55g4m9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-j55g4m9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "createDocTree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " не выполняется в автоматически применяемых шаблонах содержимого — например, при создании новых документов, ежедневных заметок и записей баз данных. В текущей версии не поддерживается упаковка баз данных или ресурсов, а также экспорт целого поддерева документов в шаблон."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-h5rghah",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-h5rghah",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Пример"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bk6ezmx",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20261122113000-bk6ezmx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{ $before := (div (now.Sub (toDate \"2006-01-02\" \"2020-02-19\")).Hours 24) }\n.action{ $after := (div ((toDate \"2006-01-02\" \"2048-02-19\").Sub now).Hours 24) }\nСегодня `.action{ now | date \"2006-01-02\" }`.\n\n* С `2020-02-19` прошло `.action{ $before }` дн.\n* До `2048-02-19` осталось `.action{ $after }` дн.\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ubl48ca",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ubl48ca"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$before"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$after"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " задаёт две переменные, в которых вычисляется количество дней от текущей даты до 2020 и 2048 годов соответственно."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fo9eplr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-fo9eplr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Публикация в магазине шаблонов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rc2e1c4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rc2e1c4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "См. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
+					"TextMarkTextContent": "репозиторий маркета сообщества"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

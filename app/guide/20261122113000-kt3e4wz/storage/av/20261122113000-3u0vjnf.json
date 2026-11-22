@@ -1,0 +1,78 @@
+{
+  "spec": 5,
+  "id": "20261122113000-3u0vjnf",
+  "name": "",
+  "keyValues": [
+    {
+      "key": {
+        "id": "20261122113000-cm898wl",
+        "name": "Первичный ключ",
+        "type": "block",
+        "icon": "",
+        "desc": "",
+        "numberFormat": "",
+        "template": ""
+      }
+    },
+    {
+      "key": {
+        "id": "20261122113000-vifjg6w",
+        "name": "Одиночный выбор",
+        "type": "select",
+        "icon": "",
+        "desc": "",
+        "numberFormat": "",
+        "template": ""
+      }
+    }
+  ],
+  "keyIDs": null,
+  "viewID": "20261122113000-a2nwvff",
+  "views": [
+    {
+      "id": "20261122113000-a2nwvff",
+      "icon": "",
+      "name": "Таблица",
+      "hideAttrViewName": false,
+      "desc": "",
+      "filters": [
+        {
+          "column": "",
+          "operator": "",
+          "value": null,
+          "combination": "and"
+        }
+      ],
+      "pageSize": 50,
+      "type": "table",
+      "table": {
+        "spec": 0,
+        "id": "20261122113000-sav3va0",
+        "showIcon": true,
+        "wrapField": false,
+        "columns": [
+          {
+            "id": "20261122113000-cm898wl",
+            "wrap": false,
+            "hidden": false,
+            "pin": false,
+            "width": ""
+          },
+          {
+            "id": "20261122113000-vifjg6w",
+            "wrap": false,
+            "hidden": false,
+            "pin": false,
+            "width": ""
+          }
+        ],
+        "rowIds": null
+      },
+      "groupCreated": 0,
+      "groupItemIds": null,
+      "groupFolded": false,
+      "groupHidden": 0,
+      "groupSort": 0
+    }
+  ]
+}

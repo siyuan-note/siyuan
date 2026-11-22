@@ -1,0 +1,331 @@
+{
+	"ID": "20261122113000-zjh12w2",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-zjh12w2",
+		"title": "Облачный хостинг ресурсов",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-1us5toe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-1us5toe",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan предоставляет облачный хостинг изображений и ресурсов, предназначенный в основном для копирования документов с ресурсами в WeChat Official Accounts, Zhihu, Yuque и другие платформы — редакторы этих платформ при вставке автоматически загружают ресурсы к себе."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ar4cnnj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ar4cnnj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ax8yz0r",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20261122113000-ax8yz0r",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-t01o1ha",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261122113000-t01o1ha",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-yljbjxn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-yljbjxn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В правом верхнем углу документа нажмите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "︙"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ и в меню «Ещё» выберите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Загрузить ресурсы на облачный хостинг"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-moctrkd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261122113000-moctrkd"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-yh132le",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-yh132le",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Переключение режима"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " выберите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Предпросмотр экспорта"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8jgx2l4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261122113000-8jgx2l4"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-6cqosw4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-6cqosw4",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Нажмите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Копировать в WeChat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Копировать в Zhihu"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " или "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Копировать в Yuque"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-imsy0xu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20261122113000-imsy0xu",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-am59mwo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-am59mwo",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Вставьте скопированное содержимое в редактор целевой платформы"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-yywb3sv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-yywb3sv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Чтобы удалить файлы ресурсов с облачного хостинга, перейдите в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/settings/file?type=3",
+					"TextMarkTextContent": "Liandi — Настройки — Файлы — Клиент заметок"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". После удаления занимаемое файлом место в облачном хранилище освобождается сразу, однако очистка кэша CDN может сработать не мгновенно, из-за чего URL файла может оставаться доступным до автоматического истечения кэша CDN через 30 дней."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mlj8i38",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-mlj8i38",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xnmgcbq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-xnmgcbq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-lnqub9v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-lnqub9v",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-28shf2g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-28shf2g",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Не используйте ссылки облачного хостинга напрямую на сторонних ресурсах: эти адреса нестабильны и могут перестать работать при смене домена"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-9li1ch6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9li1ch6",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ysol9e7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ysol9e7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Не загружайте незаконные или запрещённые материалы: загружаемые файлы ресурсов проверяются сторонним сервисом модерации (порнография, насилие, запрещённый контент и т. д.). При выявлении нарушений аккаунт пользователя будет заблокирован навсегда, а сам пользователь понесёт соответствующую юридическую ответственность"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

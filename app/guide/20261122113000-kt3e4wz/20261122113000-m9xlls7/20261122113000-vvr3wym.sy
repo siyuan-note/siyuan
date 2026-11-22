@@ -1,0 +1,133 @@
+{
+	"ID": "20261122113000-vvr3wym",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f36b",
+		"id": "20261122113000-vvr3wym",
+		"title": "блоками контента",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-3setiaw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3setiaw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-f2lw6su",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Что такое блок контента"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-g4bb4hh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-g4bb4hh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-heqg3qd",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Типы блоков контента"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mihnzzi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mihnzzi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-369mcst",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Цитирование блоков контента"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ed0mwrp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ed0mwrp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-kngxm6u",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Навигация по блокам контента"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qtcgiqq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-qtcgiqq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-oey5dc8",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Преобразование блоков документов и заголовков"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lig233y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-lig233y",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-asl0p10",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "встроенные блоки контента"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pg63ana",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-pg63ana",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-7frwcu2",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Атрибуты блоков контента"
+				}
+			]
+		}
+	]
+}

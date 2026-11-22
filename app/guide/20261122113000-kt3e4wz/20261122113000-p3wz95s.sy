@@ -1,0 +1,515 @@
+{
+	"ID": "20261122113000-p3wz95s",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f9d1-200d-1f4bb",
+		"id": "20261122113000-p3wz95s",
+		"title": "Разработка расширений",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-nyi84lm",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-nyi84lm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-9015yuu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9015yuu",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-1m69nuw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-1m69nuw",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-ues0d7c",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Темы"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " — пример проекта на GitHub: `siyuan-note/theme-sample`"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-0kipnhk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-0kipnhk",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-dwgpx96",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-dwgpx96",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-iv7j3s2",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Иконки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " — пример проекта на GitHub: `siyuan-note/icon-sample`"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-hjrdwcs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hjrdwcs",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2nedrtr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2nedrtr",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-opvetg2",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Виджеты"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " — пример проекта на GitHub: `siyuan-note/widget-sample`"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-uugow5q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-uugow5q",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-sctm0al",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-sctm0al",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-maoruzg",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "плагинами"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " — пример проекта на GitHub: `siyuan-note/plugin-sample`"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-2a6oope",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-2a6oope",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-xjtf90j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-xjtf90j",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-9f33l0j",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Шаблоны"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " — пример проекта на GitHub: `siyuan-note/template-sample`"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8eqm7n6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-8eqm7n6",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-nf7ca94",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-nf7ca94",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Репозиторий маркетплейса на GitHub: `siyuan-note/bazaar`"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wj68i84",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-wj68i84",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Мобильные темы могут использовать селектор `#keyboardToolbar.keyboard--sheet-open` для стилизации состояния, когда одновременно отображаются панель инструментов клавиатуры и нижнее меню или диалоговая панель. Это состояние определяется логикой видимости в приложении и не зависит от производных стилей темы. Класс удаляется при скрытии панели инструментов или закрытии всех нижних панелей."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-s4r32bf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-s4r32bf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-iesntwx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-iesntwx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-jxf2w1c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-jxf2w1c",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-085m3y7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-085m3y7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если плагину или внешнему расширению требуется напрямую читать или записывать файлы в каталоге `data`, делайте это через вызов API ядра; "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "не вызывайте напрямую"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong code",
+									"TextMarkTextContent": "fs"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": " или другие API Electron и Node.js"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", иначе при синхронизации данных могут потеряться фрагменты, что приведёт к повреждению данных в облаке. Соответствующие API см. в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/file/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (например, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/file/getFile"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ и др.)"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Файлы зашифрованных блокнотов нельзя читать или изменять через эти низкоуровневые файловые API. После разблокировки используйте соответствующие API документов, блоков или ресурсов, подробнее см. "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-3uk67ci",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "Шифрование блокнотов"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-grpdjjn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-grpdjjn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-qm48cgp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-qm48cgp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При создании ежедневной заметки SiYuan автоматически добавляет документу атрибут `custom-dailynote-yyyymmdd`, чтобы отличать ежедневные заметки от обычных документов"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-kws326k",
+							"Type": "NodeBlockquote",
+							"Properties": {
+								"id": "20261122113000-kws326k",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockquoteMarker",
+									"Data": ">"
+								},
+								{
+									"ID": "20261122113000-b5f11w9",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20261122113000-b5f11w9",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Подробнее см. GitHub Issue #9807"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-w73wo79",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-w73wo79",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Разработчикам, реализующим ручное создание Daily Note, следует учитывать:"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-i6rrl38",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-i6rrl38",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-kiiqhan",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-kiiqhan",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-jpztxvv",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-jpztxvv",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Если вызывается "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "/api/filetree/createDailyNote"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ для создания ежедневной заметки, этот атрибут добавляется документу автоматически и не требует дополнительной обработки"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-xnc3ls2",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-xnc3ls2",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-cfacw2z",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-cfacw2z",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Если документ создаётся кодом вручную (например, через API "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "createDocWithMd"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​), добавьте этот атрибут документу вручную"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

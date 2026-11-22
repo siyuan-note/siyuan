@@ -1,0 +1,694 @@
+{
+	"ID": "20261122113000-kngxm6u",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-kngxm6u",
+		"title": "Навигация по блокам контента",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-g9r3i1f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-g9r3i1f",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ссылка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zxxhq18",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zxxhq18"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ссылки в содержимом документа делятся на два типа:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5352oqb",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20261122113000-5352oqb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-c55k2wk",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-c55k2wk"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-6cs5ri9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-6cs5ri9",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Стандартные URL-гиперссылки, открываемые в браузере для доступа к веб-ресурсам"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-utbgs2p",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-utbgs2p",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-xqr2qfu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-xqr2qfu",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ссылки на блоки контента, созданные через "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-369mcst",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Ссылки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", используемые для двусторонних связей внутри SiYuan"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lqrsah1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-lqrsah1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Фокус"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4u7wt1q",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20261122113000-4u7wt1q",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-q58ll90",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-q58ll90",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-mxfpfw5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-mxfpfw5",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "После выбора «Фокус» в меню маркера блока редактор фокусируется на этом блоке."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-i43kj4g",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-i43kj4g"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-c0ngd9z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-c0ngd9z",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Навигационная цепочка в верхней части редактора позволяет переходить по контексту"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-57e80yf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-57e80yf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Глобальная навигационная цепочка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-47wgbv1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-47wgbv1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Включив "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "поведение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Глобальная навигационная цепочка"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " отображает блокнот и родительские документы перед текущим документом в единой цепочке."
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Скрыть значки в навигационной цепочке"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " скрывает значки у текстовых элементов пути."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-yj13sym",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-yj13sym",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На компьютере клик по родительскому документу открывает его, а стрелка рядом позволяет выбрать поддокумент."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-eprn71x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-eprn71x",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Граф"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cs380xt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-cs380xt",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Граф связей бывает уровня документа и глобальным. Граф документа отображает все связанные с ним блоки, а глобальный граф — все блоки и связи во всех блокнотах."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-dut4qpv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-dut4qpv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Нажмите на узел, чтобы открыть соответствующий блок; удерживайте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (в macOS — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Command"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ") при нажатии для открытия всплывающего предпросмотра."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ng4nveh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ng4nveh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Обратные ссылки"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-plj8opw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-plj8opw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обратные ссылки рассчитываются по документам и перечисляют блоки, ссылающиеся на блоки текущего документа или упоминающие их. Включение дочерних блоков управляется параметром "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Включать дочерние блоки в обратные ссылки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-aanghrf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-aanghrf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Ссылка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bei8eme",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20261122113000-bei8eme",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-lx0rkg2",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-lx0rkg2",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5764g0w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5764g0w",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Наведите курсор на исходный документ или маркер блока в списке обратных ссылок для предпросмотра"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-v6t31q2",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-v6t31q2",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-8xneead",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-8xneead",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Нажмите на исходный документ, чтобы раскрыть контекст, затем нажмите на блок ссылки для перехода"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fq58vb6",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-fq58vb6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Фильтрация и сворачивание"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-8qtd92x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-8qtd92x",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В нижней или боковой панели обратных ссылок откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Фильтр источников обратных ссылок"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы отфильтровать источники или свернуть элементы по типу блока."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-hnkn9o3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-hnkn9o3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Фильтры по дневникам, блокнотам, исключению текущего документа и исключению ссылок являются временными."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ec0i4b1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ec0i4b1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сворачивать по типу блока"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " сохраняется индивидуально для каждой панели."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xheyk4j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-xheyk4j",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Упоминания"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-n35gucr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-n35gucr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Упоминания используют имена блоков, псевдонимы, текст якорей и имя текущего документа в качестве ключевых слов для поиска (источники можно выбрать в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Поиск"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "упоминаний в обратных ссылках"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ")."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-z3fsx6j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-z3fsx6j",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: упоминания ищутся в основном тексте, а также в заголовках, именах и псевдонимах других документов."
+				}
+			]
+		}
+	]
+}

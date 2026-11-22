@@ -1,0 +1,167 @@
+{
+	"ID": "20261122113000-opvetg2",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-opvetg2",
+		"title": "Виджеты",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-qe3728x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-qe3728x",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-63i336w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-63i336w",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Виджеты — это небольшие инструменты, работающие внутри документа и встраиваемые в редактор в виде веб-страниц. Файлы виджетов предоставляются ядром SiYuan, отображаются через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "iframe"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", а также могут читать и записывать данные через API."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rnm459j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rnm459j",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "По сравнению с "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-maoruzg",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "плагинами"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", виджет является блоком содержимого, подчиняется правилам индексации и рендеринга блоков и ориентирован в основном на расширение блоков содержимого, а не функциональности самой программы."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3qciu8l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-3qciu8l",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-q3tb4dy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-q3tb4dy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Виджеты устанавливаются через маркет виджетов и после установки помещаются в папку "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Рабочее_пространство/data/widgets/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. Вызовите поиск через меню слэша в редакторе и выберите нужный виджет — он вставится в документ в виде блока виджета."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-sdb7qsp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-sdb7qsp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Наведите курсор на блок, чтобы появились небольшие маркеры изменения размера по краям: перетащите маркер посередине справа для изменения ширины, посередине снизу — для изменения высоты, а закруглённый маркер в правом нижнем углу — для одновременного изменения ширины и высоты. На сенсорном экране маркеры можно перетаскивать напрямую; при раздельном изменении ширины или высоты второй размер сохраняется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4mytkaj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-4mytkaj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Публикация в маркете виджетов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-y9s8f2d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-y9s8f2d",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "См. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
+					"TextMarkTextContent": "репозиторий маркета сообщества"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

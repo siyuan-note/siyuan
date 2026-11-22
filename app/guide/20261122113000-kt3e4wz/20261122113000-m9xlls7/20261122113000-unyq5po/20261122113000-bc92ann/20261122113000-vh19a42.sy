@@ -1,0 +1,416 @@
+{
+	"ID": "20261122113000-vh19a42",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-vh19a42",
+		"title": "Служба MCP",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-uk6lh23",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-uk6lh23",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-131anh1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-131anh1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan включает встроенный сервер MCP, через который внешние клиенты MCP могут обнаруживать и вызывать инструменты SiYuan для поиска, чтения и работы с текущим рабочим пространством. Направление этой службы противоположно внешним службам MCP, настроенным в ИИ-агенте: в первом случае внешний клиент подключается к SiYuan, во втором агент SiYuan подключается к внешней службе."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bgly84j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-bgly84j",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Подключение к службе"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-hh5380p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-hh5380p",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сначала убедитесь, что SiYuan запущен и клиент MCP может получить доступ к сетевому адресу SiYuan. Служба использует транспорт Streamable HTTP, фиксированная конечная точка — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/mcp"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", а локальный адрес по умолчанию обычно "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "http://127.0.0.1:6806/mcp"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". При удалённом подключении замените хост и порт на фактически доступный адрес SiYuan."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ep7wcg6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ep7wcg6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Аутентификация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Вход и токен"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API token"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " просмотрите или задайте API token, затем укажите в заголовках запроса клиента "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Authorization: Token {Your API Token}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4917nxq",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20261122113000-4917nxq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "{\n  \"mcpServers\": {\n    \"siyuan\": {\n      \"url\": \"http://127.0.0.1:6806/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Token {Your API Token}\"\n      }\n    }\n  }\n}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-e7h8rn0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-e7h8rn0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выше приведён общий пример конфигурации; расположение файла конфигурации и имена полей в разных клиентах MCP могут отличаться — ориентируйтесь на документацию клиента. Основные параметры — адрес Streamable HTTP и заголовок аутентификации."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-w6jex2d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-w6jex2d",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Возможности инструментов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mqyditq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mqyditq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После успешного подключения клиент динамически обнаруживает доступные инструменты. Встроенные инструменты охватывают поиск, документы, блоки содержимого, блокноты, базы данных, ресурсы, историю, импорт/экспорт, синхронизацию и др. Набор инструментов может меняться в зависимости от версии SiYuan и среды выполнения — ориентируйтесь на фактически обнаруженный клиентом список. Инструмент file требует передачи пути относительно рабочего пространства, например temp/siyuan.log. Абсолютные пути, пути с буквой диска и родительские пути, выходящие за пределы рабочего пространства, отклоняются; исходные и целевые пути при переименовании и копировании также подчиняются этому правилу."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-aem0jgq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-aem0jgq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Права и безопасность"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ku65smk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ku65smk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Конечная точка MCP доступна только аутентифицированным администраторам. API token предоставляет права администратора рабочего пространства: подключённый клиент может читать данные, а также изменять или удалять их, получать доступ к файлам рабочего пространства, выполнять SQL или запускать синхронизацию, поэтому подключайте только надёжные клиенты."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ccg03x7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ccg03x7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Режим только для чтения отклоняет POST- и DELETE-запросы MCP, поэтому вызов инструментов невозможен. Не открывайте порт службы SiYuan напрямую в ненадёжные сети; при удалённом использовании настройте HTTPS, обратный прокси или брандмауэр и немедленно смените token при утечке."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jcx7b37",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-jcx7b37",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для прямой работы с SiYuan через HTTP API см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-dt5pp57",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "API ядра"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; для настройки внешних служб MCP для ИИ-агента SiYuan см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-ngzp72k",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "ИИ-агент"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wh54uhc",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-wh54uhc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Подключение OAuth"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-9obqwsl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-9obqwsl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Искусственный интеллект"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "MCP"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " настройте OAuth для сервера MCP. По умолчанию отключено; требуется задать пароль блокировки экрана или вход через OIDC. Укажите публичный адрес HTTPS, например https://note.example.com, без пути."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mnc002x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mnc002x",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Адрес MCP: https://note.example.com/mcp; обратный прокси должен сохранять публичный Host и перенаправлять /.well-known/, /oauth/mcp/, /mcp и страницу входа."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-s9d3nwr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-s9d3nwr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Зарегистрируйте клиент с использованием имени клиента и полного адреса обратного вызова, отображаемого клиентом MCP (например, ChatGPT). Сразу сохраните ID клиента и секрет — секрет показывается только один раз. Укажите оба значения в настройках OAuth-подключения клиента, подключитесь к адресу MCP, войдите в SiYuan и подтвердите авторизацию. Динамическая регистрация клиентов не поддерживается."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6fepyfn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-6fepyfn",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Авторизация разрешает использование всех открытых вовне инструментов MCP текущего рабочего пространства, включая чтение, запись, удаление и управление. Токен OAuth можно использовать только для /mcp. Режим только для чтения и блокировка зашифрованных блокнотов сохраняют силу — авторизация не разблокирует блокноты. Прежний способ подключения по API Token продолжает работать."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-nf02oal",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-nf02oal",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Срок действия токена доступа — один час. Клиенты, запрашивающие offline_access, получают обновляемый токен обновления со сроком действия до тридцати дней после авторизации. Удаление клиента отзывает его токены; отзыв всех авторизаций сохраняет регистрацию клиента. Отключение OAuth, изменение публичного адреса или изменение настроек аутентификации администратора отзывает существующие авторизации. Конфигурация и дайджест учётных данных сохраняются локально в conf/mcp-oauth.json — надёжно храните этот файл и не делитесь им между рабочими пространствами."
+				}
+			]
+		}
+	]
+}

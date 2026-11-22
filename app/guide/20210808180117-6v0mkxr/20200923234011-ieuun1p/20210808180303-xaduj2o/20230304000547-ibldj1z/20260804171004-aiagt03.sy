@@ -663,6 +663,20 @@
 			]
 		},
 		{
+			"ID": "20261122115000-5j2n0xw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122115000-5j2n0xw",
+				"updated": "20261122115000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the Android app, tap Insert image below the input to select one or more images. The app uses the system photo picker when available. Supported formats are PNG, JPEG, GIF, and WebP."
+				}
+			]
+		},
+		{
 			"ID": "20261022182404-71cve53",
 			"Type": "NodeParagraph",
 			"Properties": {

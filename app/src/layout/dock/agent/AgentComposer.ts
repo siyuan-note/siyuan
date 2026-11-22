@@ -33,7 +33,7 @@ interface ComposerHandle {
     restoreHistory: (h: string[]) => void;
     insertMention: (id: string, label: string) => void;
     insertMentions: (mentions: Array<{ id: string; label: string }>) => void;
-    uploadImages: (files: FileList, element: HTMLInputElement) => void;
+    uploadImages: (files: FileList | File[], element: HTMLInputElement) => void;
     isUploading: () => boolean;
     renderBlockHTML: (element: HTMLElement, onEmbedRender: () => void) => void;
 }

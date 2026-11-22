@@ -12,7 +12,7 @@ import {isCapabilityEnabled, listCapabilityManifests, lookupCapability} from "./
 import {AgentPermissionMode, AgentSession, SessionStore} from "./SessionStore";
 import {genAgentConfirmActionButtons} from "./agentConfirmActions";
 import {AgentSessionPanel} from "./AgentSessionPanel";
-import {updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
+import {isInAndroid, updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
 import {getAgentLute} from "../../../protyle/render/setLute";
 import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {hideTooltip, showTooltip} from "../../../dialog/tooltip";
@@ -67,9 +67,9 @@ import {AgentWelcomeGreeting} from "./AgentWelcomeGreeting";
 import {AgentMessageQueue} from "./AgentMessageQueue";
 import {clearAgentInteractionNotifications, notifyAgentInteraction} from "./agentNotification";
 import {AgentNotificationTarget, parseAgentNotificationTarget} from "./agentNotificationTarget";
+import {Constants} from "../../../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
-import {Constants} from "../../../constants";
 /// #endif
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
@@ -514,8 +514,7 @@ export class AgentChat extends Model {
             '<div class="agent-chat__button-options">' +
             '<button class="agent-chat__image-upload b3-button b3-button--icon b3-button--cancel ariaLabel" aria-label="' +
             escapeAriaLabel(L.insertImage) + '" type="button"><svg><use xlink:href="#iconImage"></use></svg></button>' +
-            '<input class="agent-chat__image-upload-input fn__none" type="file" multiple="multiple" ' +
-            'accept="image/png,image/jpeg,image/gif,image/webp,application/x-siyuan-image-picker">' +
+            '<input class="agent-chat__image-upload-input fn__none" type="file" multiple="multiple">' +
             '<button class="b3-select b3-select--noborder agent-chat__permission ariaLabel" data-menu="true" data-position="n" type="button">' +
             '<svg class="agent-chat__permission-icon"><use xlink:href="#iconShieldCheck"></use></svg>' +
             '<span class="agent-chat__permission-label"></span></button>' +
@@ -1190,6 +1189,44 @@ export class AgentChat extends Model {
         }, 1500);
     }
 
+    private bindImageUpload() {
+        const input = this.imageUploadInput;
+        const useAndroidPhotoPicker = isInAndroid();
+        input.accept = useAndroidPhotoPicker ? "image/*,application/x-siyuan-image-picker" : Constants.AGENT_IMAGE_MIME_TYPES.join(",");
+        this.imageUploadButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+            input.click();
+        });
+        input.addEventListener("change", () => {
+            if (!input.files?.length || !this.composer) {
+                return;
+            }
+            if (!useAndroidPhotoPicker) {
+                this.composer.uploadImages(input.files, input);
+                return;
+            }
+            const accepted: File[] = [];
+            const rejected: string[] = [];
+            for (const file of input.files) {
+                const hasSpecificType = file.type && file.type !== "application/octet-stream";
+                if (hasSpecificType ? Constants.AGENT_IMAGE_MIME_TYPES.includes(file.type) :
+                    /\.(?:gif|jpe?g|jfif|jpe|pjp|pjpeg|png|webp)$/i.test(file.name)) {
+                    accepted.push(file);
+                } else {
+                    rejected.push(`<li>${escapeHtml(file.name)} ${window.siyuan.languages.fileTypeError}</li>`);
+                }
+            }
+            if (rejected.length) {
+                showMessage(`<ul>${rejected.join("")}</ul>`, undefined, "error");
+            }
+            if (accepted.length) {
+                this.composer.uploadImages(accepted, input);
+            } else {
+                input.value = "";
+            }
+        });
+    }
+
     private bindEvents() {
         // hover 底部 tokens 数字弹出分类明细面板。
         // 仅在支持 hover 的设备绑定 mouseenter/mouseleave（移动端 tap 会合成 mouse 事件导致闪烁）；
@@ -1223,15 +1260,7 @@ export class AgentChat extends Model {
             e.stopPropagation();
             this.sendMessage();
         });
-        this.imageUploadButton.addEventListener("click", (e: MouseEvent) => {
-            e.stopPropagation();
-            this.imageUploadInput.click();
-        });
-        this.imageUploadInput.addEventListener("change", () => {
-            if (this.imageUploadInput.files && this.composer) {
-                this.composer.uploadImages(this.imageUploadInput.files, this.imageUploadInput);
-            }
-        });
+        this.bindImageUpload();
         this.stopBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
             void this.stopGeneration();

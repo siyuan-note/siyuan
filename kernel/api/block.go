@@ -443,7 +443,8 @@ var getBlocksWordCount = contractHandler(apicontract.GetBlocksWordCount, func(c 
 })
 
 var getTreeStat = contractHandler(apicontract.GetTreeStat, func(c *gin.Context, request apicontract.TreeStatRequest) apicontract.Response[apicontract.TreeStatData] {
-	id, includeEmbed := strings.TrimSpace(request.ID), request.IncludeEmbed
+	id := strings.TrimSpace(request.ID)
+	includeEmbed := request.IncludeEmbed && !model.IsReadOnlyRoleContext(c)
 	if id == "" {
 		return apicontract.Failure[apicontract.TreeStatData](-1, "Field [id] must not be empty")
 	}
@@ -457,14 +458,7 @@ var getTreeStat = contractHandler(apicontract.GetTreeStat, func(c *gin.Context, 
 	if !isBlockPublishAccessible(c, id, boxID) {
 		return apicontract.Success(apicontract.TreeStatData{ReqID: request.ReqID})
 	}
-	var accessChecker model.EmbedBlockAccessChecker
-	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		accessChecker = func(blockID string) bool {
-			return model.CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, blockID, boxID)
-		}
-	}
-	stat := model.GetDocumentStat(c.Request.Context(), id, boxID, includeEmbed, accessChecker)
+	stat := model.GetDocumentStat(c.Request.Context(), id, boxID, includeEmbed)
 	return apicontract.Success(treeStatContract(request.ReqID, stat, includeEmbed))
 })
 
@@ -551,17 +545,19 @@ var getRefIDsByFileAnnotationID = contractHandler(apicontract.GetRefIDsByFileAnn
 
 var getBlockDefIDsByRefText = contractHandler(apicontract.GetBlockDefIDsByRefText, func(c *gin.Context, request apicontract.RefTextQueryRequest) apicontract.Response[apicontract.RefDefsData] {
 	anchor := request.Anchor
-	boxID := request.Notebook
-	ids := model.GetBlockDefIDsByRefTextInBox(anchor, boxID)
-	ids = filterBlockIDsByPublishAccess(c, ids, "")
-	var retRefDefs []apicontract.RefDefs
+	notebook := request.Notebook
+	if isEncryptedNotebookDeniedForPublish(c, notebook) || holdEncryptedBoxRequest(c, notebook) != nil {
+		return apicontract.Success(apicontract.RefDefsData{RefDefs: []apicontract.RefDefs{}})
+	}
+	boxID := ""
+	if model.IsEncryptedBox(notebook) {
+		boxID = notebook
+	}
+	ids := model.GetBlockDefIDsByRefTextInBox(anchor, boxID, model.NewPublishRefAccessChecker(c))
+	retRefDefs := make([]apicontract.RefDefs, 0, len(ids))
 	for _, id := range ids {
 		retRefDefs = append(retRefDefs, apicontract.RefDefs{RefID: id, DefIDs: []string{}})
 	}
-	if 1 > len(retRefDefs) {
-		retRefDefs = []apicontract.RefDefs{}
-	}
-
 	return apicontract.Success(apicontract.RefDefsData{RefDefs: retRefDefs})
 })
 

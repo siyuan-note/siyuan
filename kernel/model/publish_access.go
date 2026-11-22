@@ -399,6 +399,25 @@ func CheckBlockIdAccessableByPublishAccessInBox(c *gin.Context, publishAccess Pu
 	return checkBlockTreeAccessableByPublishAccess(c, publishAccess, bt)
 }
 
+func NewPublishRefAccessChecker(c *gin.Context) func(string, string) bool {
+	if !IsReadOnlyRoleContext(c) {
+		return nil
+	}
+	publishAccess := GetPublishAccess()
+	publishDisable := filterDisablePublishAccess(publishAccess)
+	checked := map[[2]string]bool{}
+	return func(id, boxID string) bool {
+		key := [2]string{id, boxID}
+		if allowed, ok := checked[key]; ok {
+			return allowed
+		}
+		bt := treenode.GetBlockTreeInExactBox(id, boxID)
+		allowed := getBlockTreePublishAccessStatus(c, publishAccess, publishDisable, bt) == PublishAccessAllowed
+		checked[key] = allowed
+		return allowed
+	}
+}
+
 func CheckBlockIdMetadataAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockID string) bool {
 	return CheckBlockIdMetadataAccessableByPublishAccessInBox(c, publishAccess, blockID, "")
 }

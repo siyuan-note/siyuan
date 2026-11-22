@@ -429,7 +429,9 @@ var (
 	GetRefText                  = define[BlockQueryRequest, string]("getRefText", "/api/block/getRefText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 	GetRefIDs                   = define[RefIDsRequest, RefIDsData]("getRefIDs", "/api/block/getRefIDs", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 	GetRefIDsByFileAnnotationID = define[FileAnnotationRefRequest, RefDefsData]("getRefIDsByFileAnnotationID", "/api/block/getRefIDsByFileAnnotationID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-	GetBlockDefIDsByRefText     = define[RefTextQueryRequest, RefDefsData]("getBlockDefIDsByRefText", "/api/block/getBlockDefIDsByRefText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	// 发布只读会话只返回可访问的目标，引用锚文本匹配还要求引用来源可访问。
+	// 没有可访问的匹配项时 refDefs 为空数组。
+	GetBlockDefIDsByRefText = define[RefTextQueryRequest, RefDefsData]("getBlockDefIDsByRefText", "/api/block/getBlockDefIDsByRefText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 )
 
 var (
@@ -449,6 +451,7 @@ var GetDocTitle = define[DocumentTitleRequest, DocumentTitleData]("getDocTitle",
 
 var GetDocsInfo = define[DocsInfoRequest, []*DocInfo]("getDocsInfo", "/api/block/getDocsInfo", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 发布只读会话只统计文档正文，响应省略 statWithEmbed 和 embedStat。
 var GetTreeStat = define[TreeStatRequest, TreeStatData]("getTreeStat", "/api/block/getTreeStat", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 var TransferBlockRef = define[TransferBlockRefRequest, Null]("transferBlockRef", "/api/block/transferBlockRef", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1321,6 +1324,8 @@ var ListDocTreeRange = define[FileTreeRangeRequest, FileTreeRangeData]("listDocT
 // 返回目标在各级可见兄弟列表中的位置和版本，steps 按根级到目标排列，无需先读取所有前置范围。
 // 任一祖先隐藏、发布不可见或目标不属于指定笔记本时返回错误，不泄露不可访问的数量和位置。
 var LocateDocTreeItem = define[FileTreeLocateRequest, FileTreeLocateData]("locateDocTreeItem", "/api/filetree/locateDocTreeItem", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 发布只读会话的虚拟引用标记只使用当前会话可解析的引用。
 var GetDoc = define[FileTreeGetDocRequest, FileTreeGetDocData]("getDoc", "/api/filetree/getDoc", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 3}}, "POST")
 var SetPublishAccess = define[FileTreeSetPublishRequest, Null]("setPublishAccess", "/api/filetree/setPublishAccess", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetPublishAccess = define[FileTreePublishIDsRequest, FileTreePublishData]("getPublishAccess", "/api/filetree/getPublishAccess", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

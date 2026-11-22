@@ -47,21 +47,20 @@ type EmbedStat struct {
 }
 
 type documentEmbedStatResolver struct {
-	ctx           context.Context
-	hostRootID    string
-	accessChecker EmbedBlockAccessChecker
-	queryLimit    int
-	treeCache     map[string]*parse.Tree
-	path          map[string]bool
-	stat          *util.BlockStatResult
-	info          *EmbedStat
-	queryBlocks   func(context.Context, string, int, string) ([]*sql.Block, bool, error)
-	loadTree      func(*sql.Block) *parse.Tree
-	validate      func(string, string) error
+	ctx         context.Context
+	hostRootID  string
+	queryLimit  int
+	treeCache   map[string]*parse.Tree
+	path        map[string]bool
+	stat        *util.BlockStatResult
+	info        *EmbedStat
+	queryBlocks func(context.Context, string, int, string) ([]*sql.Block, bool, error)
+	loadTree    func(*sql.Block) *parse.Tree
+	validate    func(string, string) error
 }
 
 // GetDocumentStat 统计文档，并按需解析查询嵌入块。
-func GetDocumentStat(ctx context.Context, id, boxID string, includeEmbed bool, accessChecker EmbedBlockAccessChecker) (ret *DocumentStat) {
+func GetDocumentStat(ctx context.Context, id, boxID string, includeEmbed bool) (ret *DocumentStat) {
 	confSearchSnapshot := Conf.LoadSearch()
 
 	tree := loadDocumentStatTree(id, boxID)
@@ -89,17 +88,16 @@ func GetDocumentStat(ctx context.Context, id, boxID string, includeEmbed bool, a
 		queryLimit = confSearchSnapshot.Limit
 	}
 	resolver := &documentEmbedStatResolver{
-		ctx:           ctx,
-		hostRootID:    tree.Root.ID,
-		accessChecker: accessChecker,
-		queryLimit:    queryLimit,
-		treeCache:     map[string]*parse.Tree{documentStatTreeCacheKey(tree.Box, tree.Root.ID): tree},
-		path:          map[string]bool{},
-		stat:          ret.StatWithEmbed,
-		info:          ret.EmbedStat,
-		queryBlocks:   sql.SelectBlocksRawStmtBoundedInBoxContext,
-		loadTree:      loadDocumentStatResultTree,
-		validate:      validateDocumentStatQuery,
+		ctx:         ctx,
+		hostRootID:  tree.Root.ID,
+		queryLimit:  queryLimit,
+		treeCache:   map[string]*parse.Tree{documentStatTreeCacheKey(tree.Box, tree.Root.ID): tree},
+		path:        map[string]bool{},
+		stat:        ret.StatWithEmbed,
+		info:        ret.EmbedStat,
+		queryBlocks: sql.SelectBlocksRawStmtBoundedInBoxContext,
+		loadTree:    loadDocumentStatResultTree,
+		validate:    validateDocumentStatQuery,
 	}
 	resolver.resolveNodes(tree, []*ast.Node{tree.Root}, 0)
 	return
@@ -237,9 +235,6 @@ func (resolver *documentEmbedStatResolver) resolveEmbed(sourceTree *parse.Tree, 
 			break
 		}
 		if nil == block || "query_embed" == block.Type || block.ID == embed.ID || block.ID == resolver.hostRootID {
-			continue
-		}
-		if nil != resolver.accessChecker && !resolver.accessChecker(block.ID) {
 			continue
 		}
 		resultTree := resolver.getResultTree(block)

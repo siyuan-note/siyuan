@@ -491,12 +491,8 @@ func GetBlockRefIDsByFileAnnotationIDInBox(id, boxID string) []string {
 	return sql.QueryRefIDsByAnnotationIDInBox(id, boxID)
 }
 
-func GetBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
-	if boxID == "" {
-		ret = sql.QueryBlockDefIDsByRefText(refText)
-	} else {
-		ret = sql.QueryBlockDefIDsByRefTextInBox(refText, boxID)
-	}
+func GetBlockDefIDsByRefTextInBox(refText, boxID string, accessible func(string, string) bool) (ret []string) {
+	ret = sql.QueryBlockDefIDsByRefTextInBox(refText, boxID, accessible)
 	sort.Sort(sort.Reverse(sort.StringSlice(ret)))
 	if 1 > len(ret) {
 		ret = []string{}

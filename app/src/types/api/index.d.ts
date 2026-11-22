@@ -5022,6 +5022,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 发布只读会话只返回可访问的目标，引用锚文本匹配还要求引用来源可访问。
+     * 没有可访问的匹配项时 refDefs 为空数组。
+     */
     "/api/block/getBlockDefIDsByRefText": {
         request: RefTextQueryRequestInput;
         response: { "code": 0; "data": RefDefsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5245,6 +5249,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 发布只读会话只统计文档正文，响应省略 statWithEmbed 和 embedStat。
+     */
     "/api/block/getTreeStat": {
         request: TreeStatRequestInput;
         response: { "code": 0; "data": TreeStatData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5981,6 +5988,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 发布只读会话的虚拟引用标记只使用当前会话可解析的引用。
+     */
     "/api/filetree/getDoc": {
         request: FileTreeGetDocRequestInput;
         response: { "code": 0; "data": FileTreeGetDocData; "msg": string; } | { "code": -1 | 1 | 3; "data": { "closeTimeout": number; } | null; "msg": string; };

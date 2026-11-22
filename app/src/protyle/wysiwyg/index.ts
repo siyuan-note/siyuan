@@ -5162,10 +5162,14 @@ export class WYSIWYG {
                     virtualRefParam.notebook = protyle.notebookId;
                 }
                 fetchPost("/api/block/getBlockDefIDsByRefText", virtualRefParam, (response) => {
-                    checkReferenceFold(response.data.refDefs[0].refID, (zoomIn) => {
+                    const targetID = response.data?.refDefs?.[0]?.refID;
+                    if (response.code !== 0 || !targetID) {
+                        return;
+                    }
+                    checkReferenceFold(targetID, (zoomIn) => {
                         mobileBlur = true;
                         activeBlur();
-                        openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
+                        openMobileFileById(protyle.app, targetID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
                     });
                 });
                 return;

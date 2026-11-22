@@ -486,7 +486,7 @@ const cacheRelationFilterValues = (data: IAV, avID: string, values: IAVCellValue
     values.forEach((value) => {
         if (value.blockID) {
             const cacheKey = getRelationFilterCacheKey(avID, value.blockID);
-            cache.set(cacheKey, value.block?.content || window.siyuan.languages.untitled);
+            cache.set(cacheKey, value.block?.content ?? "");
         }
     });
 };
@@ -785,21 +785,21 @@ ${searchInput}<div class="av__select-options" data-type="selectOptions" data-pat
     return {trigger, dropdown};
 };
 
-const getRelationFilterLabel = (avID: string, blockID: string, data?: IAV) => {
-    return relationFilterLabelCaches.get(data)?.get(getRelationFilterCacheKey(avID, blockID)) ||
-        window.siyuan.languages.untitled;
-};
-
 const getRelationFilterItems = (avID: string, blockIDs: string[], data?: IAV) => {
+    const titles = relationFilterLabelCaches.get(data);
     const labelCounts = new Map<string, number>();
     const items = blockIDs.map(blockID => {
-        const label = getRelationFilterLabel(avID, blockID, data);
-        labelCounts.set(label, (labelCounts.get(label) || 0) + 1);
-        return {blockID, label};
+        const title = titles?.get(getRelationFilterCacheKey(avID, blockID));
+        const label = title || window.siyuan.languages.untitled;
+        // 按单行标题的空白折叠规则比较展示文本。
+        const labelKey = label.replace(/[ \t\r\n]+/g, " ").replace(/^ | $/g, "");
+        labelCounts.set(labelKey, (labelCounts.get(labelKey) || 0) + 1);
+        return {blockID, label, labelKey, needsID: !title || !labelKey};
     });
-    return items.map(item => ({
-        ...item,
-        showID: item.label === window.siyuan.languages.untitled || labelCounts.get(item.label) > 1,
+    return items.map(({blockID, label, labelKey, needsID}) => ({
+        blockID,
+        label,
+        showID: needsID || labelCounts.get(labelKey) > 1,
     }));
 };
 

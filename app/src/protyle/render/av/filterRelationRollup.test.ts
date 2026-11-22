@@ -106,7 +106,17 @@ test("selecting, removing and clearing rollup relation candidates preserves the 
 
 test("exact relation filters show short IDs only for same-name or untitled entries", () => {
     const h = createEditor();
-    const blockIDs = ["row-unique1", "row-repeat1", "row-repeat2", "row-unnamed"];
+    const values = [
+        {blockID: "row-unique1", block: {content: "Unique title"}},
+        {blockID: "row-repeat1", block: {content: "Same title"}},
+        {blockID: "row-repeat2", block: {content: "Same title"}},
+        {blockID: "row-unnamed", block: {content: ""}},
+        {blockID: "row-spaced1", block: {content: "Spaced  title"}},
+        {blockID: "row-spaced2", block: {content: "Spaced title"}},
+        {blockID: "row-nobreak", block: {content: "Spaced\u00a0title"}},
+        {blockID: "row-blankid", block: {content: " \t "}},
+    ];
+    const blockIDs = values.map(value => value.blockID);
     h.data.view.filters = [{column: "tasks", operator: "Contains any item", value: {
         type: "relation", relation: {blockIDs, contents: []},
     } as IAVCellValue}];
@@ -122,19 +132,30 @@ test("exact relation filters show short IDs only for same-name or untitled entri
     h.methods.bindInlineFilterEvents(panel as unknown as HTMLElement, h.data, {} as IProtyle, "carrier", "source", {
         root: panel as unknown as HTMLElement, save() {},
     });
-    listeners.get("input")({target: {value: "", dataset: {type: "relationFilterSearch"},
-        closest: (selector: string) => selector === '[data-filter-events-bound="true"]' ? panel : dropdown}});
-    h.candidates[0]({code: 0, data: {rows: {values: blockIDs.map((blockID, index) => ({
-        blockID, block: {content: ["Unique title", "Same title", "Same title", ""][index]},
-    }))}}});
+    const search = (keyword: string, results: typeof values) => {
+        listeners.get("input")({target: {value: keyword, dataset: {type: "relationFilterSearch"},
+            closest: (selector: string) => selector === '[data-filter-events-bound="true"]' ? panel : dropdown}});
+        h.candidates.at(-1)({code: 0, data: {rows: {values: results}}});
+    };
+    search("", values);
 
     const shortIDs = (html: string, className: string) =>
         Array.from(html.matchAll(new RegExp(`class="${className}">([^<]+)<`, "g")), match => match[1]);
-    assert.deepEqual(shortIDs(options.innerHTML, "av__relation-filter-option-id"), ["repeat1", "repeat2", "unnamed"]);
-    assert.deepEqual(shortIDs(selected.innerHTML, "av__relation-filter-id"), ["repeat1", "repeat2", "unnamed"]);
+    const expected = ["repeat1", "repeat2", "unnamed", "spaced1", "spaced2", "blankid"];
+    assert.deepEqual(shortIDs(options.innerHTML, "av__relation-filter-option-id"), expected);
+    assert.deepEqual(shortIDs(selected.innerHTML, "av__relation-filter-id"), expected);
     assert.deepEqual(shortIDs(trigger.innerHTML, "av__relation-filter-id"), ["repeat1"]);
     assert.match(options.innerHTML, /data-id="row-unique1" title="Unique title"/);
-    assert.match(trigger.innerHTML, /av__relation-filter-count">\+2/);
+    assert.match(options.innerHTML, /title="Spaced {2}title"/);
+    assert.match(trigger.innerHTML, /av__relation-filter-count">\+6/);
+
+    dropdown.dataset.selected = '["row-literal"]';
+    search("untitled", [{blockID: "row-literal", block: {content: "untitled"}}]);
+    assert.deepEqual(shortIDs(options.innerHTML, "av__relation-filter-option-id"), []);
+    assert.deepEqual(shortIDs(selected.innerHTML, "av__relation-filter-id"), []);
+    assert.deepEqual(shortIDs(trigger.innerHTML, "av__relation-filter-id"), []);
+    assert.match(options.innerHTML, /data-id="row-literal" title="untitled"/);
+    assert.deepEqual(Array.from(h.data.view.filters[0].value.relation.blockIDs), blockIDs);
 });
 
 test("inline filters retain their panel's selected labels and relation access scope", async () => {

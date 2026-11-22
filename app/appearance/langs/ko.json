@@ -1,4 +1,5 @@
 {
+	"agentImageFromFiles": "파일에서 이미지 선택",
 	"shareAsset": "공유",
 	"archiveEncryptedNotebooksSyncTip": "보관 파일을 만들어도 데이터는 제거되지 않습니다. 제거를 확정하면 동기화를 통해 반영됩니다",
 	"manageColorsDesc": "텍스트, 배경 및 편집기 스타일에 사용할 사용자 지정 색상을 관리합니다",

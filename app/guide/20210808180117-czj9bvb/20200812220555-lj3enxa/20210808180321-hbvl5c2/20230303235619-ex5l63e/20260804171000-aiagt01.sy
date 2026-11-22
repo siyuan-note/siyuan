@@ -644,7 +644,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 Android 客户端，点击输入框下方的「插入图片」会优先打开系统相册，可一次选择多张图片。支持 PNG、JPEG、GIF 和 WebP 格式。"
+					"Data": "在 Android 客户端，点击输入框下方的「插入图片」会优先打开系统相册。点击旁边的「从文件选择图片」可浏览文件夹。两种方式都支持多选，可上传 PNG、JPEG、GIF 和 WebP 格式的图片。"
 				}
 			]
 		},

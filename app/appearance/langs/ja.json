@@ -1,4 +1,5 @@
 {
+	"agentImageFromFiles": "ファイルから画像を選択",
 	"shareAsset": "共有",
 	"archiveEncryptedNotebooksSyncTip": "アーカイブを作成するだけではデータは削除されません。移出を確定すると、同期を通じて他の端末にも反映されます",
 	"manageColorsDesc": "テキスト、背景、エディターのスタイルに使うカスタム色を管理します",

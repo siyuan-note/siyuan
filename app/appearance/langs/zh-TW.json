@@ -1,4 +1,5 @@
 {
+	"agentImageFromFiles": "從檔案選取圖片",
 	"shareAsset": "分享",
 	"archiveEncryptedNotebooksSyncTip": "建立封存檔不會移除資料；確認移出後，移出操作會透過同步影響其他裝置",
 	"manageColorsDesc": "管理編輯器中的自訂顏色、字型顏色和背景顏色",

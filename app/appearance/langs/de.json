@@ -1,4 +1,5 @@
 {
+	"agentImageFromFiles": "Bild aus Dateien auswählen",
 	"shareAsset": "Teilen",
 	"archiveEncryptedNotebooksSyncTip": "Das Erstellen des Archivs entfernt keine Daten. Erst nach der Bestätigung wird die Entfernung synchronisiert",
 	"manageColorsDesc": "Benutzerdefinierte Farben für Text, Hintergründe und Editorstile verwalten",

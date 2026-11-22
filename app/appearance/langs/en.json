@@ -1,4 +1,5 @@
 {
+	"agentImageFromFiles": "Choose image from files",
 	"shareAsset": "Share",
 	"archiveEncryptedNotebooksSyncTip": "Creating an archive does not remove data. Confirming removal makes it propagate through sync",
 	"manageColorsDesc": "Manage custom colors for text, backgrounds and editor styles",

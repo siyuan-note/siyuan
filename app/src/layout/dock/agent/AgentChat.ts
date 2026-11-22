@@ -251,6 +251,7 @@ export class AgentChat extends Model {
         }
     };
     private imageUploadButton: HTMLButtonElement;
+    private imageFileUploadButton: HTMLButtonElement | null;
     private imageUploadInput: HTMLInputElement;
     private newSessionBtn: HTMLElement;
     private titleElement: HTMLElement;
@@ -514,6 +515,8 @@ export class AgentChat extends Model {
             '<div class="agent-chat__button-options">' +
             '<button class="agent-chat__image-upload b3-button b3-button--icon b3-button--cancel ariaLabel" aria-label="' +
             escapeAriaLabel(L.insertImage) + '" type="button"><svg><use xlink:href="#iconImage"></use></svg></button>' +
+            (isInAndroid() ? '<button class="b3-button b3-button--icon b3-button--cancel ariaLabel" data-type="image-file-upload" aria-label="' +
+                escapeAriaLabel(L.agentImageFromFiles) + '" type="button"><svg><use xlink:href="#iconFolder"></use></svg></button>' : "") +
             '<input class="agent-chat__image-upload-input fn__none" type="file" multiple="multiple">' +
             '<button class="b3-select b3-select--noborder agent-chat__permission ariaLabel" data-menu="true" data-position="n" type="button">' +
             '<svg class="agent-chat__permission-icon"><use xlink:href="#iconShieldCheck"></use></svg>' +
@@ -552,6 +555,7 @@ export class AgentChat extends Model {
         this.queueElement = panel.querySelector(".agent-chat__queue");
         this.queueRenderState = "";
         this.imageUploadButton = panel.querySelector(".agent-chat__image-upload") as HTMLButtonElement;
+        this.imageFileUploadButton = panel.querySelector<HTMLButtonElement>('[data-type="image-file-upload"]');
         this.imageUploadInput = panel.querySelector(".agent-chat__image-upload-input") as HTMLInputElement;
         this.newSessionBtn = panel.querySelector('.block__icon[data-type="new-session"]') as HTMLElement;
         this.sessionMenuBtn = panel.querySelector('.block__icon[data-type="session-menu"]') as HTMLElement;
@@ -1190,17 +1194,24 @@ export class AgentChat extends Model {
 
     private bindImageUpload() {
         const input = this.imageUploadInput;
-        const useAndroidPhotoPicker = isInAndroid();
-        input.accept = useAndroidPhotoPicker ? "image/*,application/x-siyuan-image-picker" : Constants.AGENT_IMAGE_MIME_TYPES.join(",");
-        this.imageUploadButton.addEventListener("click", (event) => {
+        const fileButton = this.imageFileUploadButton;
+        const imageTypes = Constants.AGENT_IMAGE_MIME_TYPES.join(",");
+        const nativePickerType = "application/x-siyuan-image-picker";
+        const defaultAccept = fileButton ? "image/*," + nativePickerType : imageTypes;
+        const openPicker = (event: MouseEvent, accept: string) => {
             event.stopPropagation();
+            input.accept = accept;
             input.click();
-        });
+        };
+        input.accept = defaultAccept;
+        this.imageUploadButton.addEventListener("click", event => openPicker(event, defaultAccept));
+        // 通用文件选择请求包含非媒体类型时，Android 照片选择器会将其交给文件管理器。
+        fileButton?.addEventListener("click", event => openPicker(event, imageTypes + "," + nativePickerType));
         input.addEventListener("change", () => {
             if (!input.files?.length || !this.composer) {
                 return;
             }
-            if (!useAndroidPhotoPicker) {
+            if (!fileButton) {
                 this.composer.uploadImages(input.files, input);
                 return;
             }
@@ -5167,8 +5178,12 @@ export class AgentChat extends Model {
         } else {
             this.sendBtn.removeAttribute("disabled");
         }
+        const uploadDisabled = starting || modelUnavailable || uploading;
         if (this.imageUploadButton) {
-            this.imageUploadButton.disabled = starting || modelUnavailable || uploading;
+            this.imageUploadButton.disabled = uploadDisabled;
+        }
+        if (this.imageFileUploadButton) {
+            this.imageFileUploadButton.disabled = uploadDisabled;
         }
         if (this.composerHost) {
             const composerDisabled = modelUnavailable;

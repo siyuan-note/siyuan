@@ -1,4 +1,5 @@
 {
+	"agentImageFromFiles": "Wybierz obraz z plików",
 	"shareAsset": "Udostępnij",
 	"archiveEncryptedNotebooksSyncTip": "Utworzenie archiwum nie usuwa danych. Po potwierdzeniu usunięcie zostanie rozpropagowane przez synchronizację",
 	"manageColorsDesc": "Zarządzaj niestandardowymi kolorami tekstu, tła i stylów edytora",

@@ -1,4 +1,5 @@
 {
+	"agentImageFromFiles": "Izaberi sliku iz datoteka",
 	"shareAsset": "Подели",
 	"archiveEncryptedNotebooksSyncTip": "Прављење архиве не уклања податке. Након потврде, уклањање се преноси синхронизацијом",
 	"manageColorsDesc": "Upravljajte prilagođenim bojama teksta, pozadine i stilova uređivača",

@@ -644,7 +644,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 Android 用戶端，點選輸入框下方的「插入圖片」會優先開啟系統相簿，可一次選取多張圖片。支援 PNG、JPEG、GIF 和 WebP 格式。"
+					"Data": "在 Android 用戶端，點選輸入框下方的「插入圖片」會優先開啟系統相簿。點選旁邊的「從檔案選取圖片」可瀏覽資料夾。兩種方式都支援多選，可上傳 PNG、JPEG、GIF 和 WebP 格式的圖片。"
 				}
 			]
 		},

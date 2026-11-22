@@ -1,6 +1,9 @@
 import {ToolbarItem} from "./ToolbarItem";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
+import {isMobile} from "../../util/functions";
+import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
+import {Constants} from "../../constants";
 
 export class InlineMath extends ToolbarItem {
     public element: HTMLElement;
@@ -50,6 +53,12 @@ export class InlineMath extends ToolbarItem {
             }
             if (mathElement) {
                 protyle.toolbar.showRender(protyle, mathElement);
+                return;
+            }
+            if (isMobile() && (range.collapsed ||
+                (range.startContainer === range.endContainer && range.startContainer.nodeType === Node.TEXT_NODE))) {
+                protyle.toolbar.openNewInlineRenderSheet(protyle, "inline-math",
+                    stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join(""));
                 return;
             }
             protyle.toolbar.setInlineMark(protyle, "inline-math", "range", {

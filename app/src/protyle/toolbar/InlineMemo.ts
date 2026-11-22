@@ -5,6 +5,7 @@ import {Constants} from "../../constants";
 import {getFirstSelectedInlineMemoContent, isExactInlineMemoSelection} from "./inlineMemoSelection";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {getSelectionOffset} from "../util/selectionOffsets";
+import {isMobile} from "../../util/functions";
 
 export class InlineMemo extends ToolbarItem {
     public element: HTMLElement;
@@ -35,6 +36,10 @@ export class InlineMemo extends ToolbarItem {
                 return;
             }
 
+            if (isMobile()) {
+                protyle.toolbar.openNewInlineRenderSheet(protyle, "inline-memo", memoContent || "");
+                return;
+            }
             protyle.toolbar.setInlineMark(protyle, "inline-memo", "range", {
                 type: "inline-memo",
                 color: memoContent,

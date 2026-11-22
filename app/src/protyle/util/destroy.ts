@@ -17,11 +17,13 @@ import {destroyAutoDirection} from "../render/autoDirection";
 import {destroyTableCorners} from "../render/tableCorners";
 import {disposeSyncEditorSave} from "./editorSave";
 import {destroyRelatedAVViews} from "../render/av/relatedView";
+import {invalidateMobileEditorSheet} from "../toolbar/mobileEditorSheet";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
+    invalidateMobileEditorSheet(protyle);
     protyle.title?.cancelPendingInput();
     destroyRelatedAVViews(protyle.id);
     protyle.title?.destroy?.();

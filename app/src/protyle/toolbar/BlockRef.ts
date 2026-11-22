@@ -4,6 +4,7 @@ import {fixTableRange} from "../util/selection";
 import {isSameBlockRange} from "../../util/newFileSelection";
 import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
 import {Constants} from "../../constants";
+import {isMobile} from "../../util/functions";
 
 export class BlockRef extends ToolbarItem {
     public element: HTMLElement;
@@ -20,7 +21,11 @@ export class BlockRef extends ToolbarItem {
             if (!isSameBlockRange(protyle.toolbar.range)) {
                 return;
             }
-            hintRef(selectedText, protyle, "search");
+            if (isMobile()) {
+                protyle.hint.openMobileToolbarRefSearch(protyle, selectedText);
+            } else {
+                hintRef(selectedText, protyle, "search");
+            }
             protyle.toolbar.element.classList.add("fn__none");
             event.stopPropagation();
         });

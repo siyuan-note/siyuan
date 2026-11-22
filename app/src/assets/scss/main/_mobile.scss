@@ -2230,6 +2230,45 @@ body.mobile-topbar--merged {
 
 }
 
+.editor-tool-sheet {
+  &__content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    gap: 8px;
+  }
+
+  &__search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    > input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__list,
+  &__preview {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  &__text {
+    flex: 1;
+    min-height: 0;
+    resize: none;
+  }
+
+  &__source {
+    font-family: var(--b3-font-family-editor-code, var(--b3-font-family-code));
+  }
+}
+
 .mobile-attributes-sheet .b3-dialog__body > .fn__flex-column {
   flex: 1;
   min-height: 0;

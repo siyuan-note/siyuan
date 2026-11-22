@@ -100,6 +100,7 @@ import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
 import {getSemanticInlineVisibleText, stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
 import {areProtylePluginExtensionsEnabled, isProtyleListItemFragment} from "../runtimeCapabilities";
+import {mobileEditorSearchInput, mobileEditorSheetActions, openMobileEditorSheet} from "../toolbar/mobileEditorSheet";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -977,9 +978,68 @@ export class Hint {
         }
     }
 
-    private genSearchHTML(protyle: IProtyle, searchElement: HTMLInputElement, nodeElement: false | HTMLElement, oldValue: string, source: THintSource) {
+    public openMobileToolbarRefSearch(protyle: IProtyle, selectedText: string) {
+        if (protyle.disabled) return;
+        const range = protyle.toolbar.range;
+        const nodeElement = hasClosestBlock(range.startContainer);
+        hideElements(["hint", "toolbar"], protyle);
+        const sheet = openMobileEditorSheet(protyle, window.siyuan.languages.ref,
+            `<div class="b3-dialog__content editor-tool-sheet__content">
+    ${mobileEditorSearchInput()}
+    <div class="b3-list b3-list--background editor-tool-sheet__list"></div>
+</div>${mobileEditorSheetActions()}`, {range});
+        if (!sheet) return;
+        const input = sheet.dialog.element.querySelector("input");
+        const list = sheet.dialog.element.querySelector<HTMLElement>(".editor-tool-sheet__list");
+        const search = () => this.genSearchHTML(protyle, input, nodeElement, selectedText, "search",
+            {list, isCurrent: sheet.isCurrent});
+        const choose = (value?: string) => {
+            if (!value) return;
+            sheet.choose(insertRange => {
+                protyle.toolbar.range = insertRange;
+                this.source = "search";
+                this.splitChar = "((";
+                this.lastIndex = -1;
+                this.consumeCloseKey = false;
+                this.closeKeyTyped = false;
+                this.hashTagSearchElement = undefined;
+                this.fill(decodeURIComponent(value), protyle, false, true);
+            });
+        };
+        input.value = selectedText;
+        input.addEventListener("input", (event: InputEvent) => {
+            if (!event.isComposing) search();
+        });
+        input.addEventListener("compositionend", search);
+        input.addEventListener("keydown", event => {
+            if (event.isComposing || event.keyCode === 229) return;
+            upDownHint(list, event);
+            if (event.key === "Enter") {
+                event.preventDefault();
+                choose(list.querySelector<HTMLElement>(".b3-list-item--focus")?.dataset.value);
+            }
+        });
+        list.addEventListener("click", event => {
+            choose((event.target as HTMLElement).closest<HTMLElement>("[data-value]")?.dataset.value);
+        });
+        sheet.dialog.focusWhenReady(() => input, {select: true, showKeyboard: true});
+        search();
+    }
+
+    private genSearchHTML(protyle: IProtyle, searchElement: HTMLInputElement, nodeElement: false | HTMLElement,
+                          oldValue: string, source: THintSource, sheet?: {list: HTMLElement, isCurrent: () => boolean}) {
         const createTarget = this.prepareCreateTarget(protyle, "ref");
-        this.element.lastElementChild.innerHTML = '<div class="ft__center"><span class="b3-loading" aria-hidden="true"></span></div>';
+        const isCurrent = () => createTarget.isCurrent() && (!sheet || sheet.isCurrent());
+        const list = sheet?.list || this.element.lastElementChild;
+        const showEmpty = () => {
+            if (!isCurrent()) return;
+            if (sheet) {
+                list.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
+            } else {
+                this.genHTML([], protyle, true, source);
+            }
+        };
+        list.innerHTML = '<div class="ft__center"><span class="b3-loading" aria-hidden="true"></span></div>';
         const searchParam: import("../../types/api").SearchRefBlockRequestInput = {
             k: searchElement.value,
             id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
@@ -992,13 +1052,11 @@ export class Hint {
         }
         searchRef(searchParam).then((response) => {
             if (!response) {
-                if (createTarget.isCurrent()) {
-                    this.genHTML([], protyle, true, source);
-                }
+                showEmpty();
                 return;
             }
             return createTarget.promise.then((hideConfiguredCreate) => {
-                if (!createTarget.isCurrent()) {
+                if (!isCurrent()) {
                     return;
                 }
                 let searchHTML = "";
@@ -1033,7 +1091,8 @@ export class Hint {
                         }
                         blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="${getAVBindingCandidateSubtype(item.ial, avStaticTextKey)}">${refText}</span>`;
                     } else {
-                        blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
+                        const text = sheet ? escapeHtml(oldValue) : oldValue;
+                        blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${text}</span>`;
                     }
                     searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">
 ${genHintItemHTML(item)}
@@ -1042,14 +1101,10 @@ ${genHintItemHTML(item)}
                 if (searchHTML === "") {
                     searchHTML = `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two" data-value="">${window.siyuan.languages.emptyContent}</button>`;
                 }
-                this.element.lastElementChild.innerHTML = searchHTML;
-                setPosition(this.element, parseInt(this.element.style.left), parseInt(this.element.style.right));
+                list.innerHTML = searchHTML;
+                if (!sheet) setPosition(this.element, parseInt(this.element.style.left), parseInt(this.element.style.right));
             });
-        }).catch(() => {
-            if (createTarget.isCurrent()) {
-                this.genHTML([], protyle, true, source);
-            }
-        });
+        }).catch(showEmpty);
     }
 
     private genEmojiHTML(protyle: IProtyle, value = "") {

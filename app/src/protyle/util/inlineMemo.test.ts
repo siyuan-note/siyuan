@@ -68,7 +68,30 @@ const browserCases = async (sources: Record<string, string>) => {
 
     let mobile = false;
     let updates: string[] = [];
+    const sheets: SheetFixture[] = [];
+    class SheetFixture {
+        element = document.createElement("div");
+        constructor(private options: {content: string; mobileSheet: {beforeClose: (reason: string) => boolean}; destroyCallback: () => void}) {
+            this.element.innerHTML = options.content;
+            document.body.append(this.element);
+            sheets.push(this);
+        }
+        focusWhenReady() {}
+        requestClose(reason: string) {
+            if (!this.options.mobileSheet.beforeClose(reason)) return false;
+            this.element.remove();
+            this.options.destroyCallback();
+            sheets.pop();
+            return true;
+        }
+    }
+    const mobileSheet = load(sources.sheet, {
+        "../../dialog/adaptiveDialog": {AdaptiveDialog: SheetFixture},
+        "../../util/newFileSelection": {createNewFileSelectionContext: (): undefined => undefined},
+        "../../util/escape": escape,
+    });
     const toolbarAPI = load(sources.toolbar, {
+        "./mobileEditorSheet": mobileSheet,
         "../util/inlineMemo": memoAPI,
         "../../util/escape": escape,
         "../util/hasClosest": {
@@ -95,7 +118,7 @@ const browserCases = async (sources: Record<string, string>) => {
     }) as typeof import("../toolbar");
     window.siyuan = {languages: {memo: "Memo"}, config: {editor: {}}, menus: {menu: {remove: (): void => undefined}}, zIndex: 1} as unknown as typeof window.siyuan;
     for (mobile of [false, true]) {
-        for (const refresh of [false, true]) {
+        for (const refresh of mobile ? [false] : [false, true]) {
             for (const batch of [false, true]) {
                 document.body.innerHTML = '<div id="editor"><div data-node-id="20261018120000-abcdefg" data-type="NodeParagraph"><div contenteditable="true"><span data-type="inline-memo">note</span></div></div></div>';
                 const editor = document.getElementById("editor");
@@ -109,27 +132,33 @@ const browserCases = async (sources: Record<string, string>) => {
                 getSelection().addRange(toolbar.range);
                 Object.assign(toolbar, {clearSubElement: (): void => undefined});
                 document.body.append(toolbar.subElement, toolbar.element);
-                const protyle = {wysiwyg: {element: editor}, lute} as IProtyle;
+                const protyle = {wysiwyg: {element: editor}, lute, path: "/test.sy", notebookId: "test",
+                    block: {rootID: "20261018120000-abcdefg"}} as IProtyle;
                 const oldHTML = editor.firstElementChild.outerHTML;
                 toolbar.showRender(protyle, span, batch ? [span] : undefined,
                     batch ? new Map([["20261018120000-abcdefg", oldHTML]]) : oldHTML);
-                const input = toolbar.subElement.querySelector("textarea");
-                if (!refresh) {
+                const surface = () => mobile ? sheets.at(-1).element : toolbar.subElement;
+                const input = surface().querySelector("textarea");
+                if (!mobile && !refresh) {
                     toolbar.subElement.querySelector('[data-type="refresh"]').classList.remove("block__icon--active");
                 }
                 input.value = "before<a &lt;";
                 input.dispatchEvent(new Event("input", {bubbles: true}));
                 if (refresh) {
                     check.equal(Lute.UnEscapeHTMLStr(span.getAttribute("data-inline-memo-content")), input.value);
+                } else {
+                    check.equal(span.getAttribute("data-inline-memo-content"), null);
                 }
                 updates = [];
-                toolbar.subElementCloseCB();
+                if (mobile) check.equal(sheets.at(-1).requestClose("back"), true);
+                else toolbar.subElementCloseCB();
                 check.equal(updates.length, 1, JSON.stringify({mobile, refresh, batch}));
                 editor.innerHTML = lute.Md2BlockDOM(lute.BlockDOM2Md(updates[0]));
                 const reopened = editor.querySelector("span");
                 reopened.setAttribute("data-inline-memo-content", memoAPI.sanitizeInlineMemoContent(reopened.getAttribute("data-inline-memo-content")));
                 toolbar.showRender(protyle, reopened);
-                check.equal(toolbar.subElement.querySelector("textarea").value, "before<a &lt;");
+                check.equal(surface().querySelector("textarea").value, "before<a &lt;");
+                if (mobile) check.equal(sheets.at(-1).requestClose("cancel"), true);
             }
         }
     }
@@ -140,7 +169,8 @@ test("inline memo input, reload and export preserve text, legacy HTML and saniti
     timeout: 45000,
 }, async () => {
     const sources = Object.fromEntries(Object.entries({
-        escape: "../../util/escape.ts", memo: "inlineMemo.ts", av: "../render/av/richTextValue.ts", toolbar: "../toolbar/index.ts",
+        escape: "../../util/escape.ts", memo: "inlineMemo.ts", av: "../render/av/richTextValue.ts",
+        toolbar: "../toolbar/index.ts", sheet: "../toolbar/mobileEditorSheet.ts",
     }).map(([name, file]) => [name, transpileModule(readFileSync(path.join(__dirname, file), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText]));

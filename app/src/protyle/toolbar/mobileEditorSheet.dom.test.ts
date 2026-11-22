@@ -66,6 +66,7 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
         "../util/selectionOffsets": {focusByRange},
         "../../util/escape": {escapeAttr: escape, escapeHtmlTextAndAttr: escape},
         "./ToolbarItem": {ToolbarItem: class {}},
+        "../../constants": {Constants: {ZWSP: "\u200b"}},
         "../util/inlineMemo": {encodeInlineMemoContent: escape},
     };
     const load = (name: string) => {
@@ -84,11 +85,15 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     const commits: unknown[][] = [];
     const previews: string[] = [];
     const env = {
-        ...sheet, ...modules["../../util/newFileSelection"], ...load("navigation"),
-        Constants: {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing", ALIAS_CODE_LANGUAGES: ["javascript", "rust"]},
+        ...sheet, ...modules["../../util/newFileSelection"], ...load("navigation"), ...load("refRange"), ...load("createTargetContext"),
+        Constants: {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing", ALIAS_CODE_LANGUAGES: ["javascript", "rust"],
+            BLOCK_HINT_KEYS: ["((", "[[", "【【"], BLOCK_HINT_CLOSE_KEYS: {"((": "))", "[[": "]]", "【【": "】】"}},
         isMobile: () => true, dayjs: () => ({format: () => "20261122171500"}),
         hasClosestBlock: closestBlock, hasClosestByClassName: (node: Element, name: string) => node.closest("." + name),
-        getHostCapabilities: () => ({}), hideElements() {}, isEncryptedBox: () => false,
+        getHostCapabilities: () => ({}), isEncryptedBox: () => false,
+        hideElements: (_types: string[], protyle: IProtyle) => protyle.hint.element.classList.add("fn__none"),
+        isConfiguredCreateTargetCurrentSubDoc: async (): Promise<boolean> => false,
+        stripSemanticMarkersFromRangeText: (range: Range) => range.toString(), getUndoFocusContext() {},
         getConfiguredEntryVisibility: () => true, genHintItemHTML: (item: {id: string}) => item.id,
         escapeAttr: escape, escapeHtml: escape, escapeHtmlTextAndAttr: escape,
         encodeInlineMemoContent: (value: string) => escape(value),
@@ -114,17 +119,18 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     const hint = new Hint();
     Object.assign(toolbar, {
         element: document.createElement("div"), subElement: document.createElement("div"),
-        setInlineMark: (_protyle: IProtyle, type: string, _mode: string, option: {color: string}) =>
-            commits.push([type, option.color, toolbar.range.toString()]),
+        setInlineMark: (_protyle: IProtyle, type: string, _mode: string, option: ITextOption) => {
+            commits.push([type, option.color, toolbar.range.toString()]);
+            if (type !== "block-ref") return [];
+            const ref = document.createElement("span");
+            ref.dataset.type = type;
+            setFontStyle(ref, option);
+            toolbar.range.deleteContents();
+            toolbar.range.insertNode(ref);
+            return [ref];
+        },
         updateLanguage: (_elements: HTMLElement[], _protyle: IProtyle, language: string) => commits.push(["language", language]),
     });
-    let requestID = 0;
-    hint.prepareCreateTarget = () => {
-        const id = ++requestID;
-        return {isCurrent: () => id === requestID, promise: Promise.resolve(false)};
-    };
-    hint.fill = (value: string, _protyle: IProtyle, _update: boolean, staticAnchor: boolean) =>
-        commits.push(["reference", value, toolbar.range.toString(), staticAnchor]);
     const protyle = {toolbar, hint, path: "/test.sy", notebookId: "test", block: {rootID: "root", parentID: "root"},
         wysiwyg: {element: editor}, element: editor} as unknown as IProtyle;
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -213,22 +219,42 @@ const browserCases = async (sources: Record<string, string>, css: string) => {
     await current().requestClose("cancel");
     render.remove();
 
+    editable.textContent = "selected text";
     selectText();
     hint.openMobileToolbarRefSearch(protyle, "selected");
+    const cancelled = requests.shift();
+    await current().requestClose("cancel");
+    cancelled.reply({blocks: [{id: "after-close"}]});
+    await tick();
+    check.equal(editable.textContent, "selected text");
+    check.equal(commits.length, 0);
+    selectText();
+    hint.openMobileToolbarRefSearch(protyle, "selected");
+    check.ok(hint.element.classList.contains("fn__none"));
     const firstRequest = requests.shift();
     const input = current().element.querySelector("input");
     check.equal(input.value, "selected");
     check.equal(firstRequest.key, "selected");
-    input.value = "new query";
-    input.dispatchEvent(new InputEvent("input"));
+    input.value = "新";
+    input.dispatchEvent(new InputEvent("input", {isComposing: true}));
+    check.equal(requests.length, 0);
+    input.value = "新关键词";
+    input.dispatchEvent(new CompositionEvent("compositionend"));
+    check.equal(requests[0].key, "新关键词");
     requests.shift().reply({blocks: [{id: "target"}]});
     await tick();
     firstRequest.reply({blocks: [{id: "obsolete"}]});
     await tick();
-    current().element.querySelector<HTMLButtonElement>("[data-value]").click();
-    const reference = commits.pop();
-    check.match(reference[1] as string, /data-id="target".*>selected<\/span>/);
-    check.deepEqual(reference.slice(2), ["selected", true]);
+    const candidate = current().element.querySelector<HTMLButtonElement>("[data-value]");
+    check.ok(candidate, "the sheet renders search results while the old hint is hidden");
+    candidate.click();
+    const reference = editable.querySelector<HTMLElement>('[data-type="block-ref"]');
+    check.equal(reference.dataset.id, "target");
+    check.equal(reference.dataset.subtype, "s");
+    check.equal(reference.textContent, "selected");
+    check.equal(editable.textContent, "selected text");
+    check.deepEqual(commits.pop(), ["block-ref", "target\u200bs\u200bselected", "selected"]);
+    editable.textContent = "selected text";
 
     const language = document.createElement("span");
     language.textContent = "javascript";
@@ -289,12 +315,15 @@ test("mobile editor drawers save, cancel, search and restore their source select
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
 }, async () => {
     const files = {adaptive: "src/dialog/adaptiveDialog.ts", sheet: "src/protyle/toolbar/mobileEditorSheet.ts",
-        range: "src/util/newFileSelection.ts", navigation: "src/util/upDownHint.ts", font: "src/protyle/toolbar/Font.ts"};
+        range: "src/util/newFileSelection.ts", navigation: "src/util/upDownHint.ts", font: "src/protyle/toolbar/Font.ts",
+        refRange: "src/protyle/hint/blockHintRange.ts", createTargetContext: "src/protyle/hint/createTargetContext.ts"};
     const sources = Object.fromEntries(Object.entries(files).map(([name, file]) => [name, transpile(readFileSync(file, "utf8"))]));
     sources.toolbar = loadMethods("src/protyle/toolbar/index.ts", "Toolbar",
         ["openNewInlineRenderSheet", "showRender", "showCodeLanguage", "showTpl", "showMobileTemplateSheet", "showWidget"],
         "private clearSubElement() {} private inlineRenderDraft?: string;");
-    sources.hint = loadMethods("src/protyle/hint/index.ts", "Hint", ["openMobileToolbarRefSearch", "genSearchHTML"]);
+    sources.hint = loadMethods("src/protyle/hint/index.ts", "Hint",
+        ["openMobileToolbarRefSearch", "genSearchHTML", "prepareCreateTarget", "fill", "consumeRefBracketClose"],
+        'element = document.createElement("div"); private createTargetSessionID = 0; private createTargetRenderID = 0;');
     const css = compile("src/assets/scss/mobile.scss").css;
     const directory = mkdtempSync(join(tmpdir(), "siyuan-mobile-editor-sheet-"));
     const script = join(directory, "run.cjs");

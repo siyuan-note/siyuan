@@ -991,8 +991,17 @@ export class Hint {
         if (!sheet) return;
         const input = sheet.dialog.element.querySelector("input");
         const list = sheet.dialog.element.querySelector<HTMLElement>(".editor-tool-sheet__list");
-        const search = () => this.genSearchHTML(protyle, input, nodeElement, selectedText, "search",
-            {list, isCurrent: sheet.isCurrent});
+        const context = getCreateTargetContext(protyle);
+        const promise = isConfiguredCreateTargetCurrentSubDoc(protyle, "ref").catch(() => false);
+        let requestID = 0;
+        const search = () => {
+            const id = ++requestID;
+            this.genSearchHTML(protyle, input, nodeElement, selectedText, "search", {
+                list,
+                promise,
+                isCurrent: () => id === requestID && sheet.isCurrent() && isSameCreateTargetContext(context, protyle),
+            });
+        };
         const choose = (value?: string) => {
             if (!value) return;
             sheet.choose(insertRange => {
@@ -1027,9 +1036,12 @@ export class Hint {
     }
 
     private genSearchHTML(protyle: IProtyle, searchElement: HTMLInputElement, nodeElement: false | HTMLElement,
-                          oldValue: string, source: THintSource, sheet?: {list: HTMLElement, isCurrent: () => boolean}) {
-        const createTarget = this.prepareCreateTarget(protyle, "ref");
-        const isCurrent = () => createTarget.isCurrent() && (!sheet || sheet.isCurrent());
+                          oldValue: string, source: THintSource, sheet?: {
+                              list: HTMLElement;
+                              promise: Promise<boolean>;
+                              isCurrent: () => boolean;
+                          }) {
+        const {isCurrent, promise} = sheet || this.prepareCreateTarget(protyle, "ref");
         const list = sheet?.list || this.element.lastElementChild;
         const showEmpty = () => {
             if (!isCurrent()) return;
@@ -1055,7 +1067,7 @@ export class Hint {
                 showEmpty();
                 return;
             }
-            return createTarget.promise.then((hideConfiguredCreate) => {
+            return promise.then((hideConfiguredCreate) => {
                 if (!isCurrent()) {
                     return;
                 }

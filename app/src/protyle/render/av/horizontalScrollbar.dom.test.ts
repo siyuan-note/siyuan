@@ -13,7 +13,7 @@ const exerciseScrollbar = async (sourceCode: string) => {
     const {ipcRenderer} = require("electron") as typeof import("electron");
     const api: typeof import("./horizontalScrollbar") = new Function("exports", sourceCode + "\nreturn exports;")({});
     Object.defineProperty(window, "siyuan", {value: {languages: {scrollHorizontal: "Horizontal scrolling"}}});
-    document.body.style.cssText = "display:flex;gap:15px;margin:0;--b3-theme-surface:#eee;--b3-theme-on-surface-light:#666";
+    document.body.style.cssText = "display:flex;gap:15px;margin:0;--b3-theme-surface:#eee;--b3-theme-on-surface-light:#666;--b3-theme-primary:#2563eb";
     const createEditor = (scrollColor: string) => {
         const element = document.createElement("div");
         element.className = "protyle";
@@ -87,6 +87,7 @@ const exerciseScrollbar = async (sourceCode: string) => {
             rect: bounds.toJSON(), clientHeight: track.clientHeight}));
     check.equal(track.scrollLeft, first.source.scrollLeft);
     check.equal(other.source.scrollLeft, 0);
+    check.equal(getComputedStyle(track).outlineStyle, "none", "mouse dragging does not draw a focus outline");
     first.source.scrollLeft = 100;
     await settle();
     check.equal(track.scrollLeft, 100);
@@ -112,6 +113,7 @@ const exerciseScrollbar = async (sourceCode: string) => {
     beforeTrack.focus({preventScroll: true});
     await ipcRenderer.invoke("scroll-key", "Tab", 9);
     check.equal(document.activeElement, track);
+    check.equal(getComputedStyle(track).outlineStyle, "auto", "Tab uses the browser's visible focus indicator");
     await ipcRenderer.invoke("scroll-key", "End", 35);
     await settle();
     check.equal(second.source.scrollLeft, second.source.scrollWidth - second.source.clientWidth);

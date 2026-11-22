@@ -3,7 +3,7 @@ import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
 import {Dialog} from "../../dialog";
 import {showMessage} from "../../dialog/message";
 import {fetchSyncPost} from "../../util/fetch";
-import {escapeHtml} from "../../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
 import {getFileRenameTarget, getFileTree} from "../../util/fileTree";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {isBrowser, isMobile} from "../../util/functions";
@@ -92,7 +92,9 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
         window.removeEventListener("beforeunload", beforeUnload);
     };
     const dialog = mobile ? undefined : new Dialog({
-        title: lang.agentSkillManager,
+        title: `<div class="skill-manager__dialog-header">
+<button type="button" class="block__icon block__icon--show" data-type="workspace-skills-back" aria-label="${escapeHtmlTextAndAttr(lang.back)}"><svg aria-hidden="true"><use xlink:href="#iconLeft"></use></svg></button>
+<span class="ft__breakword" data-type="workspace-skills-title">${escapeHtml(lang.agentWorkspaceSkills)}</span></div>`,
         width: "min(1100px, 96vw)",
         height: "min(800px, 90vh)",
         containerClassName: "skill-manager-dialog",
@@ -167,6 +169,12 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
     };
     if (dialog) {
         dialog.destroy = () => { void close(); };
+        const title = element.querySelector<HTMLElement>("[data-type=workspace-skills-title]");
+        title.id = title.closest<HTMLElement>(".b3-dialog__header").id + "-text";
+        title.closest("[role=dialog]").setAttribute("aria-labelledby", title.id);
+        const back = element.querySelector<HTMLButtonElement>("[data-type=workspace-skills-back]");
+        back.addEventListener("mousedown", event => event.stopPropagation());
+        back.addEventListener("click", () => dialog.destroy());
     }
     const run = async (action: () => Promise<void>) => {
         if (busy || closed || confirming || prompting) {

@@ -147,7 +147,7 @@ const isLayoutItem = (value: unknown): boolean => {
         return value.type == null || value.type === "pin" || value.type === "local" || value.type === "global";
     }
     if (value.instance === "Search") {
-        return isSearchConfig(value.config);
+        return isSearchConfig(value.config) && (value.tagPanel == null || typeof value.tagPanel === "boolean");
     }
     return typeof value.instance === "string" && ["Tab", "Editor", "Asset", "Custom", "Bookmark", "Files", "Tag"].includes(value.instance);
 };

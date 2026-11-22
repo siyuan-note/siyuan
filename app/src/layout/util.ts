@@ -610,7 +610,8 @@ export const JSONToCenter = (
         (layout as Tab).addModel(new Search({
             app,
             tab: (layout as Tab),
-            config: json.config
+            config: json.config,
+            tagPanel: json.tagPanel,
         }));
     } else if (json.instance === "Custom") {
         if (json.customModelType === "siyuan-database-row") {
@@ -863,6 +864,9 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
     } else if (layout instanceof Search) {
         json.instance = "Search";
         json.config = layout.config;
+        if (layout.tagPanel) {
+            json.tagPanel = true;
+        }
     } else if (layout instanceof Custom) {
         json.instance = "Custom";
         json.customModelType = layout.type;

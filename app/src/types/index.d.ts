@@ -771,6 +771,7 @@ interface ILayoutJSON extends ILayoutOptions {
     customModelData?: any
     customModelType?: string
     config?: Config.IUILayoutTabSearchConfig
+    tagPanel?: boolean
     children?: ILayoutJSON[] | ILayoutJSON
 }
 
@@ -832,6 +833,7 @@ interface IExportOptions {
 interface IOpenFileOptions {
     app: import("../index").App,
     searchData?: Config.IUILayoutTabSearchConfig, // 搜索必填
+    tagPanel?: boolean,
     // card 和自定义页签 必填
     custom?: {
         title: string,

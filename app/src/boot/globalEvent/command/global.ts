@@ -183,6 +183,7 @@ export const globalCommand = (command: string, app: App, range?: Range, openOnly
                     openFile({
                         app,
                         searchData: childData.config,
+                        tagPanel: childData.tagPanel,
                     });
                     return true;
                 }

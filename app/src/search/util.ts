@@ -74,7 +74,12 @@ import {
 import {beginSearchPathRequest, invalidateSearchPathRequests, refreshCurrentSearchPath} from "./path";
 import {beginSearchPreviewRequest, getSearchAVMatches, getSearchAVMatchesFromHTML, IAVSearchMatch, locateSearchAVPreview} from "./avPreview";
 
+const tagPanelConfigs = new WeakSet<Config.IUILayoutTabSearchConfig>();
+
 const persistSearchConfig = (config: Config.IUILayoutTabSearchConfig) => {
+    if (tagPanelConfigs.has(config)) {
+        return;
+    }
     window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = resolvePersistedSearchConfig(
         config,
         window.siyuan.storage[Constants.LOCAL_SEARCHDATA],
@@ -85,6 +90,9 @@ const persistSearchConfig = (config: Config.IUILayoutTabSearchConfig) => {
 
 const hydrateSearchPath = (element: Element, config: Config.IUILayoutTabSearchConfig) => {
     void refreshCurrentSearchPath({element, config}).then((refreshed) => {
+        if (tagPanelConfigs.has(config)) {
+            return;
+        }
         const localConfig = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
         if (!refreshed || !syncSearchConfigHPath(localConfig, config)) {
             return;
@@ -93,26 +101,26 @@ const hydrateSearchPath = (element: Element, config: Config.IUILayoutTabSearchCo
     });
 };
 
-export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
+export const openGlobalSearch = (app: App, text: string, replace: boolean,
+                                 searchData?: Pick<Config.IUILayoutTabSearchConfig, "method" | "sensitive"> & {tagPanel?: boolean}) => {
     text = text.trim();
     const sensitive = searchData?.sensitive || getAllModels().editor.some((item) =>
         isEncryptedBox(item.editor.protyle.notebookId) &&
         item.parent.headElement?.classList.contains("item--focus") &&
         item.parent.parent.element.classList.contains("layout__wnd--active"));
-    const searchModel = getAllModels().search.find((item) => {
-        if (sensitive) {
-            item.config.sensitive = true;
-        }
-        item.parent.parent.switchTab(item.parent.headElement);
-        item.updateSearch(text, replace);
-        return true;
-    });
+    const searchModel = !searchData?.tagPanel && getAllModels().search.find((item) => !item.tagPanel);
     if (searchModel) {
+        if (sensitive) {
+            searchModel.config.sensitive = true;
+        }
+        searchModel.parent.parent.switchTab(searchModel.parent.headElement);
+        searchModel.updateSearch(text, replace);
         return;
     }
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
     openFile({
         app,
+        tagPanel: searchData?.tagPanel,
         searchData: {
             sensitive,
             k: text,
@@ -133,8 +141,11 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
     });
 };
 
-// closeCB 不存在为页签搜索
-export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, element: HTMLElement, closeCB?: () => void) => {
+export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, element: HTMLElement,
+                          {closeCB, tagPanel}: {closeCB?: () => void, tagPanel?: boolean} = {}) => {
+    if (tagPanel) {
+        tagPanelConfigs.add(config);
+    }
     if (window.siyuan.isPublish) {
         config.hasReplace = false;
     }
@@ -1154,6 +1165,7 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
                                  clear?: boolean,
                                  preserveCurrentPath?: boolean,
                                  storageConfig?: Config.IUILayoutTabSearchConfig,
+                                 resetResults?: boolean,
                              }) => {
     invalidateSearchPathRequests(element);
     const preserveCurrentPath = Boolean(options?.preserveCurrentPath && hasSearchConfigTemporaryPath(config));
@@ -1217,9 +1229,11 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     (element.querySelector("#replaceInput") as HTMLInputElement).value = runtimeConfig.r;
     element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(runtimeConfig.method, "searchSyntaxCheck");
     syncSearchConfig(config, runtimeConfig);
-    window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = resolvedConfig.persistedConfig;
-    setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
-    inputEvent(element, config, edit);
+    if (!tagPanelConfigs.has(config)) {
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = resolvedConfig.persistedConfig;
+        setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
+    }
+    inputEvent(element, config, edit, options?.resetResults);
     hydrateSearchPath(element, config);
     window.siyuan.menus.menu.remove();
     return config;

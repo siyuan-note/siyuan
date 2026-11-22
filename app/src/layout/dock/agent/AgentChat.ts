@@ -6,6 +6,7 @@ import type {App} from "../../../index";
 import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult, IToolEffects} from "./agentSSE";
 import {genUUID} from "../../../util/genID";
 import {AGENT_QUOTE_SELECTOR, AgentQuote, quotePreview, readAgentQuote} from "./agentQuote";
+import {bindSelectionQuote} from "./selectionQuote";
 import {mountComposer, type AgentComposerData} from "./AgentComposer";
 import {bindAgentComposerResize} from "./AgentComposerResize";
 import {disabledWYSIWYG} from "../../../protyle/util/disabledWYSIWYG";
@@ -227,6 +228,7 @@ export class AgentChat extends Model {
     private host: AgentChatHost;
     private panelElement: HTMLElement;
     private messagesContainer: HTMLElement;
+    private unbindSelectionQuote: () => void;
     private composerHost: HTMLElement;
     private composerResize?: ReturnType<typeof bindAgentComposerResize>;
     private composer: ReturnType<typeof mountComposer> | null = null;
@@ -409,6 +411,7 @@ export class AgentChat extends Model {
     }
 
     public destroy() {
+        this.unbindSelectionQuote?.();
         this.destroyed = true;
         this.pendingNotificationTarget = undefined;
         this.notifiedSessions.forEach(sessionID => clearAgentInteractionNotifications(sessionID));
@@ -823,12 +826,16 @@ export class AgentChat extends Model {
             event.stopPropagation();
             const excerpt = selected || selectionText();
             selected = "";
-            void this.insertQuote({text: excerpt || content, source: {
-                id, sessionID: this.sessionId, kind: message.classList.contains("agent-chat__msg--user") ? "user" : "assistant",
-                whole: !excerpt,
-            }});
+            this.quoteMessage(message, excerpt || content, !excerpt);
         });
         actions.prepend(button);
+    }
+
+    private quoteMessage(message: HTMLElement, text: string, whole: boolean) {
+        void this.insertQuote({text, source: {
+            id: message.dataset.messageId, sessionID: this.sessionId,
+            kind: message.classList.contains("agent-chat__msg--user") ? "user" : "assistant", whole,
+        }});
     }
 
     public insertBlockMentions(mentions: Array<{ id: string; label: string }>) {
@@ -1335,6 +1342,8 @@ export class AgentChat extends Model {
     }
 
     private bindEvents() {
+        this.unbindSelectionQuote = bindSelectionQuote(this.messagesContainer, (message, text) =>
+            this.quoteMessage(message, text, false));
         // hover 底部 tokens 数字弹出分类明细面板。
         // 仅在支持 hover 的设备绑定 mouseenter/mouseleave（移动端 tap 会合成 mouse 事件导致闪烁）；
         // 不支持 hover 的设备（移动端）用 click 切换。

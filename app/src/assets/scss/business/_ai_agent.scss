@@ -257,9 +257,15 @@
 }
 
 .agent-chat__msg-meta {
+  order: -1;
+  margin-right: auto;
   font-size: 13px;
   color: var(--b3-theme-on-surface-light);
   align-self: center;
+}
+
+.agent-chat__selection-quote {
+  position: fixed;
 }
 
 .agent-chat__msg-time--ai {
@@ -284,11 +290,6 @@
 .agent-chat__msg--ai:hover .agent-chat__msg-actions,
 .agent-chat__msg--user:hover .agent-chat__msg-actions {
   opacity: 1;
-}
-
-.agent-chat__msg--user .agent-chat__msg-actions {
-  width: auto;
-  justify-content: flex-end;
 }
 
 .agent-chat__body--streaming {

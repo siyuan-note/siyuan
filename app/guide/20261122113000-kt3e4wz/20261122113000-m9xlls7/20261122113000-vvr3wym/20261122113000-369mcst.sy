@@ -6,7 +6,7 @@
 		"id": "20261122113000-369mcst",
 		"title": "Цитирование блоков контента",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261122171459"
 	},
 	"Children": [
 		{
@@ -285,14 +285,16 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20261122113000-elewwos"
+						"id": "20261122113000-elewwos",
+						"updated": "20261122113000"
 					},
 					"Children": [
 						{
 							"ID": "20261122113000-kmtnz0c",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20261122113000-kmtnz0c"
+								"id": "20261122113000-kmtnz0c",
+								"updated": "20261122113000"
 							},
 							"Children": [
 								{
@@ -368,14 +370,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20261122113000-5i2joug"
+						"id": "20261122113000-5i2joug",
+						"updated": "20261122113000"
 					},
 					"Children": [
 						{
 							"ID": "20261122113000-b23c0cb",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20261122113000-b23c0cb"
+								"id": "20261122113000-b23c0cb",
+								"updated": "20261122113000"
 							},
 							"Children": [
 								{
@@ -534,7 +538,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-pvaomg1",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -830,7 +834,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-gw83gdp",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -842,7 +846,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-bkwqlwz",
-						"updated": "20261122113000"
+						"updated": "20261122171459"
 					},
 					"Children": [
 						{
@@ -850,7 +854,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-zlueogl",
-								"updated": "20261122113000"
+								"updated": "20261122171459"
 							},
 							"Children": [
 								{
@@ -860,7 +864,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -888,7 +892,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-fr8b4qy",
-						"updated": "20261122113000"
+						"updated": "20261122171459"
 					},
 					"Children": [
 						{
@@ -896,7 +900,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-dmmguek",
-								"updated": "20261122113000"
+								"updated": "20261122171459"
 							},
 							"Children": [
 								{
@@ -915,7 +919,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",

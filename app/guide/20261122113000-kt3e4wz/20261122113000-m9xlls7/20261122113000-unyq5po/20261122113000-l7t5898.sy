@@ -7,7 +7,7 @@
 		"id": "20261122113000-l7t5898",
 		"title": "Флеш-карты",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261122171459"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-nk054fv",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -323,7 +323,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-wazw33q",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -474,7 +474,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-jbfjvln",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -484,7 +484,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Место"
+					"TextMarkTextContent": "Пробел"
 				},
 				{
 					"Type": "NodeText",
@@ -493,7 +493,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Введите"
+					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",
@@ -816,7 +816,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-ga6wkmn",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -826,7 +826,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Место"
+					"TextMarkTextContent": "Пробел"
 				},
 				{
 					"Type": "NodeText",
@@ -835,7 +835,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Введите"
+					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",

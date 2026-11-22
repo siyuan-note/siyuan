@@ -320,7 +320,8 @@
 			"Type": "NodeBlockQueryEmbed",
 			"Data": "{{SELECT * FROM blocks WHERE memo LIKE '%короткую%'}}\n",
 			"Properties": {
-				"id": "20261122113000-2j6te0u"
+				"id": "20261122113000-2j6te0u",
+				"updated": "20261122113000"
 			},
 			"Children": [
 				{
@@ -409,7 +410,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20261122113000-ldajxaq"
+						"id": "20261122113000-ldajxaq",
+						"updated": "20261122113000"
 					},
 					"Children": [
 						{

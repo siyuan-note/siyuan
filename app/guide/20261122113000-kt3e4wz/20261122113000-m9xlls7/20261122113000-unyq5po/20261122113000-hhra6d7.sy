@@ -7,7 +7,7 @@
 		"id": "20261122113000-hhra6d7",
 		"title": "База данных",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261122171459"
 	},
 	"Children": [
 		{
@@ -6026,7 +6026,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-gcaq0tu",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -6045,7 +6045,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-2zyddlr",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -6064,7 +6064,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Введите"
+					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",

@@ -6,7 +6,7 @@
 		"id": "20261122113000-9f33l0j",
 		"title": "Фрагменты шаблонов",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261122171459"
 	},
 	"Children": [
 		{
@@ -113,7 +113,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-o7116vf",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -131,7 +131,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-jfcqec7",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -150,7 +150,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Введите"
+					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",
@@ -378,7 +378,8 @@
 			"ID": "20261122113000-f5peg8w",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261122113000-f5peg8w"
+				"id": "20261122113000-f5peg8w",
+				"updated": "20261122113000"
 			},
 			"Children": [
 				{
@@ -2363,7 +2364,8 @@
 			"ID": "20261122113000-ubl48ca",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261122113000-ubl48ca"
+				"id": "20261122113000-ubl48ca",
+				"updated": "20261122113000"
 			},
 			"Children": [
 				{

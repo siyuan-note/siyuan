@@ -444,7 +444,8 @@
 					"Type": "NodeCodeBlockCode",
 					"Data": "SELECT *\nFROM blocks\nWHERE id IN (\n    SELECT block_id\n    FROM attributes AS a\n    WHERE (a.name = 'custom-progress' AND a.value = '30')\n       OR (a.name = 'custom-priority' AND a.value = '2')\n    GROUP BY block_id\n    HAVING count(block_id) = 2\n);\n",
 					"Properties": {
-						"id": "20261122113000-0gnpt1q"
+						"id": "20261122113000-0gnpt1q",
+						"updated": "20261122113000"
 					}
 				},
 				{

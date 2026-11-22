@@ -6,7 +6,7 @@
 		"id": "20261122113000-ytl8rub",
 		"title": "Интерфейс командной строки",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261122171459"
 	},
 	"Children": [
 		{
@@ -67,7 +67,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-sy566l5",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-6q95zp3",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -126,7 +126,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-slnleyl",
-						"updated": "20261122113000"
+						"updated": "20261122171459"
 					},
 					"Children": [
 						{
@@ -194,7 +194,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20261122115500-rnst0r1",
-								"updated": "20261122113000"
+								"updated": "20261122171459"
 							},
 							"Children": [
 								{
@@ -261,7 +261,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122115500-rnun1n2",
-								"updated": "20261122113000"
+								"updated": "20261122171459"
 							},
 							"Children": [
 								{

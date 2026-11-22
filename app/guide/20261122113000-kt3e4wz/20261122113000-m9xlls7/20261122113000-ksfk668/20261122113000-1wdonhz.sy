@@ -6,7 +6,7 @@
 		"id": "20261122113000-1wdonhz",
 		"title": "Выбор и операции с блоками содержимого",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261122171459"
 	},
 	"Children": [
 		{
@@ -144,7 +144,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-owqwxft",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -158,7 +158,7 @@
 			"ID": "20261122113000-1ijsc6h",
 			"Properties": {
 				"id": "20261122113000-1ijsc6h",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -168,7 +168,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Место"
+					"TextMarkTextContent": "Пробел"
 				},
 				{
 					"Type": "NodeText",

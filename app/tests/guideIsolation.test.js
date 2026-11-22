@@ -57,6 +57,13 @@ function collectGuideData(guideID) {
                     return;
                 }
                 if (typeof node.ID === "string" && node.ID.length > 0) {
+                    if (guideID === ruGuideID) {
+                        assert.equal(blockIDs.has(node.ID), false, `duplicate Russian guide block ID: ${node.ID}`);
+                        assert.equal(node.Properties?.id, node.ID, `Russian guide block ID does not match Properties.id: ${node.ID}`);
+                        const updated = node.Properties.updated ?? "";
+                        assert.match(updated, /^\d{14}$/, `Russian guide block has an invalid update timestamp: ${node.ID}`);
+                        assert.ok(updated >= node.ID.slice(0, 14), `Russian guide block predates its ID: ${node.ID}`);
+                    }
                     blockIDs.add(node.ID);
                     nonAssetIDs.add(node.ID);
                 }

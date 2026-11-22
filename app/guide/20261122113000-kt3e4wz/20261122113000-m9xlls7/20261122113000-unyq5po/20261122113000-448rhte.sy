@@ -7,7 +7,7 @@
 		"id": "20261122113000-448rhte",
 		"title": "Горячая клавиша",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261122171459"
 	},
 	"Children": [
 		{
@@ -227,7 +227,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-4ktz6x2",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -247,7 +247,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20261122113000-7bajfbw",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -923,7 +923,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -3209,7 +3209,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -3603,7 +3603,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-t4srnrv",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -3687,7 +3687,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20261122113000-5nrejdf",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -4060,7 +4060,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -4500,7 +4500,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-v175h3e",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -4515,7 +4515,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-wc3cef8",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -4539,7 +4539,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20261122113000-9imaz0w",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -4682,7 +4682,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -6694,7 +6694,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Место"
+									"TextMarkTextContent": "Пробел"
 								},
 								{
 									"Type": "NodeText",
@@ -10475,7 +10475,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-p04ckf6",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -10495,7 +10495,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20261122113000-igt3dum",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -10665,7 +10665,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -12777,7 +12777,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-io72lbb",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -12797,7 +12797,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20261122113000-tpayh8n",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -13190,7 +13190,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -15230,7 +15230,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-zvd5gf6",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -15303,7 +15303,7 @@
 			"Properties": {
 				"colgroup": "min-width: 60px;|min-width: 60px;",
 				"id": "20261122113000-4cyeujf",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -15372,7 +15372,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -15521,7 +15521,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-zd64l6f",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -15540,7 +15540,7 @@
 			"Properties": {
 				"colgroup": "min-width: 60px;|min-width: 60px;",
 				"id": "20261122113000-j2kya93",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -15609,7 +15609,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -15836,7 +15836,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-1yxhd54",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -15878,7 +15878,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20261122113000-xwqkrzs",
-				"updated": "20261122113000"
+				"updated": "20261122171459"
 			},
 			"Children": [
 				{
@@ -16053,7 +16053,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Введите"
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -19984,7 +19984,8 @@
 			"ID": "20261122113000-lj9dwbd",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20261122113000-lj9dwbd"
+				"id": "20261122113000-lj9dwbd",
+				"updated": "20261122113000"
 			}
 		},
 		{

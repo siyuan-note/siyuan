@@ -2,6 +2,7 @@ import {saveUILayout} from "../config/util/resourceConfig";
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllLayout, suspendLayoutSaving} from "../layout/util";
+import {refreshLayoutDocumentIcons} from "../layout/documentIcons";
 import {showMessage} from "../dialog/message";
 import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -89,6 +90,8 @@ const openLayout = async (name: string) => {
     const resumeLayoutSaving = await suspendLayoutSaving();
     let reloading = false;
     try {
+        const layout = structuredClone(item.layout);
+        await refreshLayoutDocumentIcons(layout.layout);
         await restoreWindowGeometry(item.windowGeometry).catch(console.error);
         if (item.filesPaths) {
             const previous = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
@@ -100,7 +103,7 @@ const openLayout = async (name: string) => {
                 return;
             }
         }
-        await saveUILayout(item.layout, undefined, () => {
+        await saveUILayout(layout, undefined, () => {
             reloading = true;
             window.location.reload();
         });

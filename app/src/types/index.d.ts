@@ -412,7 +412,7 @@ interface IPosition {
 
 interface ISaveLayout {
     name: string,
-    layout: IObject
+    layout: Config.IUiLayout & import("./api").APIPOSTRoutes["/api/system/setUILayout"]["request"]["layout"]
     time: number
     filesPaths: IFilesPath[]
 }

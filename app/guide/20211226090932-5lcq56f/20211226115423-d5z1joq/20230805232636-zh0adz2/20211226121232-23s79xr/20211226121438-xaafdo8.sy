@@ -6,7 +6,7 @@
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
 		"type": "doc",
-		"updated": "20261105042900"
+		"updated": "20261122184916"
 	},
 	"Children": [
 		{
@@ -442,6 +442,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "S3 和 WebDAV 的端點位址省略協定時，含點的主機名稱預設使用 HTTPS；IP 位址、localhost 和單一標籤主機名稱預設使用 HTTP。含點的主機名稱對應的服務若僅支援 HTTP，請明確填寫 http://。明確填寫的 http:// 和 https:// 位址維持原樣，已儲存的設定也不會自動變更協定。"
+				}
+			]
+		},
+		{
+			"ID": "20261122184916-70xv9y4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122184916-70xv9y4",
+				"updated": "20261122184916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定 WebDAV 同步時，建議在端點位址中明確填寫 https://，確認伺服器使用受信任的憑證，並將 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "TLS Verify"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 設為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Verify"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

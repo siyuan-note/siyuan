@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261105042900"
+		"updated": "20261122184916"
 	},
 	"Children": [
 		{
@@ -456,6 +456,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "For S3 and WebDAV endpoints without a protocol, dotted hostnames use HTTPS by default; IP addresses, localhost, and single-label hostnames use HTTP. To connect to an HTTP-only service using a dotted hostname, enter http:// explicitly. Explicit http:// and https:// addresses are preserved, including saved configurations."
+				}
+			]
+		},
+		{
+			"ID": "20261122184916-ucidw1n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122184916-ucidw1n",
+				"updated": "20261122184916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When configuring WebDAV sync, use an explicit https:// endpoint with a trusted server certificate and set "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "TLS Verify"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Verify"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

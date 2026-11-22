@@ -7,7 +7,7 @@
 		"id": "20240530101000-wo49zvq",
 		"title": "データ同期",
 		"type": "doc",
-		"updated": "20261105042900"
+		"updated": "20261122184916"
 	},
 	"Children": [
 		{
@@ -471,6 +471,38 @@
 				{
 					"Type": "NodeText",
 					"Data": "S3 と WebDAV のエンドポイントでプロトコルを省略すると、ドットを含むホスト名には HTTPS、IP アドレス、localhost、単一ラベルのホスト名には HTTP を使用します。ドットを含むホスト名のサービスが HTTP のみに対応する場合は、http:// を明示してください。明示された http:// と https:// は保存済みの設定も含めて保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261122184916-auu8nag",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122184916-auu8nag",
+				"updated": "20261122184916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "WebDAV 同期を設定する際は、エンドポイントに https:// を明示し、信頼できる証明書を使用するサーバーに接続してください。 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "TLS Verify"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Verify"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " に設定してください。"
 				}
 			]
 		},

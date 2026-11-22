@@ -1,4 +1,5 @@
 {
+	"shareAsset": "Compartir",
 	"archiveEncryptedNotebooksSyncTip": "Crear un archivo no elimina datos. Al confirmar la eliminación, esta se propagará mediante la sincronización",
 	"manageColorsDesc": "Administra los colores personalizados del texto, los fondos y los estilos del editor",
 	"importNotebookCryptoBackupDesc": "Importa una copia de seguridad de claves para los cuadernos cifrados con la contraseña maestra correspondiente",
@@ -3790,6 +3791,7 @@
 		"471": "Las llamadas repetidas a herramientas devolvieron el mismo resultado. He dejado de usar herramientas; esta tarea puede seguir incompleta",
 		"472": "No se pudo convertir el mapa mental antiguo, vuelve a abrir el documento e inténtalo de nuevo",
 		"473": "Se produjo un error inesperado al procesar la solicitud. Consulta el registro del sistema",
-		"474": "No se pueden desactivar los cuadernos cifrados en un espacio de trabajo vinculado a la sincronización, aunque esté en pausa"
+		"474": "No se pueden desactivar los cuadernos cifrados en un espacio de trabajo vinculado a la sincronización, aunque esté en pausa",
+		"475": "No se pudo compartir el archivo adjunto"
 	}
 }

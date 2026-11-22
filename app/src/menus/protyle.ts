@@ -61,7 +61,7 @@ import {renderImageActions} from "../protyle/render/imageActions";
 import {getImageTitle, setImageTitle} from "../protyle/render/imageTitle";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
-import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "./util";
+import {copyPNGByLink, getAssetExportItems, getAssetShareItem, writeAssetToClipboard} from "./util";
 import {removeInlineType} from "../protyle/toolbar/util";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {checkReferenceFold, genTagList, renameTag} from "../util/noRelyPCFunction";
@@ -1595,7 +1595,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     }
     const dataSrc = imgElement.getAttribute("data-src");
     if (dataSrc && dataSrc.startsWith("assets/")) {
-        window.siyuan.menus.menu.append(new MenuItem(exportAsset(dataSrc)).element);
+        getAssetExportItems(dataSrc).forEach(item => window.siyuan.menus.menu.append(new MenuItem(item).element));
         window.siyuan.menus.menu.append(new MenuItem(writeAssetToClipboard(dataSrc)).element);
     }
     window.siyuan.menus.menu.append(new MenuItem({
@@ -1904,7 +1904,7 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         openMenu(protyle.app, linkAddress, false, true);
         if (linkAddress?.startsWith("assets/")) {
-            window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
+            getAssetExportItems(linkAddress).forEach(item => window.siyuan.menus.menu.append(new MenuItem(item).element));
             window.siyuan.menus.menu.append(new MenuItem(writeAssetToClipboard(linkAddress)).element);
         }
     }
@@ -2319,7 +2319,11 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
             id: "separator_openBy",
             type: "separator"
         });
-        return subMenus.concat(openMenu(protyle.app, iframeSrc, true, false) as IMenu[]);
+        subMenus.push(...openMenu(protyle.app, iframeSrc, true, false) as IMenu[]);
+        const shareItem = getAssetShareItem(iframeSrc);
+        if (shareItem) {
+            subMenus.push(shareItem);
+        }
     }
     return subMenus;
 };
@@ -2328,7 +2332,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     const videoElement = nodeElement.querySelector(type === "NodeVideo" ? "video" : "audio");
     const src = videoElement.getAttribute("src");
     if (protyle.disabled) {
-        return src && src.startsWith("assets/") ? [exportAsset(src)] : [];
+        return src?.startsWith("assets/") ? getAssetExportItems(src) : [];
     }
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
@@ -2382,7 +2386,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
         });
     }
     if (src && src.startsWith("assets/")) {
-        subMenus.push(exportAsset(src));
+        subMenus.push(...getAssetExportItems(src));
         subMenus.push(writeAssetToClipboard(src));
     }
     return subMenus;

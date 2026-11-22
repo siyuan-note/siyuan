@@ -11,7 +11,7 @@ import {Constants} from "../constants";
 import {openNewWindowById} from "../window/openNewWindow";
 import {MenuItem} from "./Menu";
 import type {App} from "../index";
-import {isInAndroid, isPhablet, saveExportFile, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isPhablet, saveExportFile, updateHotkeyTip} from "../protyle/util/compatibility";
 import {checkFold} from "../util/noRelyPCFunction";
 import {showMessage} from "../dialog/message";
 import type {Editor} from "../editor";
@@ -19,7 +19,7 @@ import {setEditMode} from "../protyle/util/setEditMode";
 import {getDownloadURL} from "../util/imageURL";
 import {getHostCapabilities} from "../util/hostCapabilities";
 
-export const exportAsset = (src: string) => {
+const exportAsset = (src: string) => {
     if (!getHostCapabilities().importExport) {
         return {ignore: true};
     }
@@ -46,6 +46,32 @@ export const exportAsset = (src: string) => {
             /// #endif
         }
     };
+};
+
+export const getAssetShareItem = (src: string): IMenu | undefined => {
+    if (!src?.startsWith("assets/") || !getHostCapabilities().importExport) {
+        return;
+    }
+    const bridge = isInAndroid() ? window.JSAndroid : isInHarmony() ? window.JSHarmony : undefined;
+    if (!bridge || !("shareAsset" in bridge) || typeof bridge.shareAsset !== "function") {
+        return;
+    }
+    const share = bridge.shareAsset;
+    return {
+        id: "shareAsset",
+        label: window.siyuan.languages.shareAsset,
+        icon: "iconForward",
+        click: () => share.call(bridge, src)
+    };
+};
+
+export const getAssetExportItems = (src: string, exportPath = src): IMenu[] => {
+    const items: IMenu[] = [exportAsset(exportPath)];
+    const shareItem = getAssetShareItem(src);
+    if (shareItem) {
+        items.push(shareItem);
+    }
+    return items;
 };
 
 // 复制资源文件到系统剪贴板，在文件资源管理器中可粘贴为文件（仅 Windows、macOS 桌面端支持）

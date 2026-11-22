@@ -146,6 +146,10 @@ func TestMobileExportLeaseExpiresAndReleasesBoxLock(t *testing.T) {
 }
 
 func TestMobileExportLeaseStreamsEncryptedAsset(t *testing.T) {
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.Editor.Store(&conf.Editor{})
+	t.Cleanup(func() { Conf = originalConf })
 	originalDataDir := util.DataDir
 	originalTempDir := util.TempDir
 	originalWorkspaceDir := util.WorkspaceDir
@@ -231,6 +235,52 @@ func TestMobileExportLeaseStreamsEncryptedAsset(t *testing.T) {
 	ReleaseMobileExportLease(lease.ID)
 	if _, err = os.Stat(cleanupDir); !os.IsNotExist(err) {
 		t.Fatalf("releasing the lease should remove plaintext temp data: %v", err)
+	}
+
+	assetRef := "assets/" + diskName + "?box=" + boxID + "#preview"
+	sharedPath, err := PrepareAssetForExternalShare(assetRef)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if filepath.Base(sharedPath) != originalName {
+		t.Fatalf("unexpected shared file name: %q", sharedPath)
+	}
+	shared, err := os.ReadFile(sharedPath)
+	if err != nil || !bytes.Equal(shared, plaintext) {
+		t.Fatalf("unexpected shared content: %d bytes, %v", len(shared), err)
+	}
+	LockBox(boxID)
+	if _, err = os.Stat(sharedPath); !os.IsNotExist(err) {
+		t.Fatalf("locking the notebook should remove the shared plaintext: %v", err)
+	}
+	if _, err = PrepareAssetForExternalShare(assetRef); err == nil {
+		t.Fatal("sharing a locked asset should fail")
+	}
+}
+
+func TestPrepareAssetForExternalShareUsesOriginalFile(t *testing.T) {
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.FileTree.Store(conf.NewFileTree())
+	t.Cleanup(func() { Conf = originalConf })
+	oldWorkspace, oldData := util.WorkspaceDir, util.DataDir
+	util.WorkspaceDir = t.TempDir()
+	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
+	t.Cleanup(func() { util.WorkspaceDir, util.DataDir = oldWorkspace, oldData })
+	original := filepath.Join(util.DataDir, "assets", "image #1.png")
+	if err := os.MkdirAll(filepath.Dir(original), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(original, []byte("original image"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if shared, err := PrepareAssetForExternalShare("assets/image%20%231.png#preview"); err != nil || shared != original {
+		t.Fatalf("share should use original asset: %q, %v", shared, err)
+	}
+	for _, invalid := range []string{"assets/missing.png", "assets/../conf.json", "https://example.com/image.png"} {
+		if shared, err := PrepareAssetForExternalShare(invalid); err == nil || shared != "" {
+			t.Fatalf("share accepted %q: %q, %v", invalid, shared, err)
+		}
 	}
 }
 

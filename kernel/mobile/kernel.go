@@ -337,6 +337,15 @@ func GetAssetAbsPath(asset string) (ret string) {
 	return
 }
 
+func GetAssetSharePath(asset string) string {
+	path, err := model.PrepareAssetForExternalShare(asset)
+	if err != nil {
+		logging.LogWarnf("prepare asset for sharing failed: %s", err)
+		return ""
+	}
+	return path
+}
+
 func GetMimeTypeByExt(ext string) string {
 	return util.GetMimeTypeByExt(ext)
 }

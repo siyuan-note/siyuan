@@ -1,4 +1,5 @@
 {
+	"shareAsset": "Compartilhar",
 	"archiveEncryptedNotebooksSyncTip": "Criar um arquivo não remove dados. Após a confirmação, a remoção será propagada pela sincronização",
 	"manageColorsDesc": "Gerencie cores personalizadas para textos, fundos e estilos do editor",
 	"importNotebookCryptoBackupDesc": "Importe um backup de chave para cadernos criptografados usando a senha mestra correspondente",
@@ -3790,6 +3791,7 @@
 		"471": "Chamadas repetidas de ferramentas retornaram o mesmo resultado. Parei de usar ferramentas; esta tarefa ainda pode estar incompleta",
 		"472": "Não foi possível converter o mapa mental antigo, reabra o documento e tente novamente",
 		"473": "Ocorreu um erro inesperado ao processar a solicitação. Consulte o log do sistema",
-		"474": "Não é possível desativar os cadernos criptografados em um espaço de trabalho vinculado à sincronização, mesmo quando ela está pausada"
+		"474": "Não é possível desativar os cadernos criptografados em um espaço de trabalho vinculado à sincronização, mesmo quando ela está pausada",
+		"475": "Não foi possível compartilhar o anexo"
 	}
 }

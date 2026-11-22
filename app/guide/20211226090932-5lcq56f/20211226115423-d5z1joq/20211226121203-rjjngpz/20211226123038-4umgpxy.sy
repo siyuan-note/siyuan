@@ -704,6 +704,71 @@
 			]
 		},
 		{
+			"ID": "20261122120803-gw2su8t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122120803-gw2su8t",
+				"updated": "20261122120803"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在行動裝置上分享資料文件"
+				}
+			]
+		},
+		{
+			"ID": "20261122120803-26re8p5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122120803-26re8p5",
+				"updated": "20261122120803"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android 和 HarmonyOS 上，開啟圖片、附件連結或資料庫附件的選單，選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "分享"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。若要分享音訊、影片或嵌入的本機 HTML 檔案，請開啟其區塊選單並選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "分享"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。系統分享面板會以原始格式傳送附件。在 iOS 上，可在提供匯出的資源選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "匯出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開啟系統分享面板。"
+				}
+			]
+		},
+		{
 			"ID": "20211226123051-5250xg7",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

@@ -1064,9 +1064,12 @@ test("conditional copy and image actions have configuration entries in menu orde
         "copyMirror", "copy", "duplicate", "duplicateMirror", "duplicateCompletely",
     ]);
     const image = getEntryCatalogChildren("inline.image").map(item => item.key);
-    assert.deepEqual(image.slice(image.indexOf("separator_3")), ["separator_3", "openBy", "export", "copyFile", "copyAsPNG"]);
+    assert.deepEqual(image.slice(image.indexOf("separator_3")), ["separator_3", "openBy", "export", "shareAsset", "copyFile", "copyAsPNG"]);
+    assert.deepEqual(getEntryCatalogChildren("inline.link").map(item => item.key).slice(-3), ["export", "shareAsset", "copyFile"]);
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.assetIFrame").map(item => item.key).slice(-2), ["openBy", "shareAsset"]);
     ["gutter.single.table.cancelMerged", "gutter.single.table.transposeTable", "inline.text.more.cancelMerged",
-        "gutter.single.copy.copyMirror", "inline.image.openBy"].forEach(path => {
+        "gutter.single.copy.copyMirror", "inline.image.openBy", "inline.image.shareAsset", "inline.link.shareAsset",
+        "gutter.single.assetIFrame.shareAsset"].forEach(path => {
         assert.equal(getEntryCatalogNode(path).type, "entry");
         assert.equal(getEntryCatalogNode(path).simple, true);
     });

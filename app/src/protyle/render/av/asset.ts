@@ -8,7 +8,7 @@ import {uploadFiles, uploadLocalFiles} from "../../upload";
 import {pathPosix} from "../../../util/pathName";
 import {openMenu} from "../../../menus/commonMenuItem";
 import {MenuItem} from "../../../menus/Menu";
-import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "../../../menus/util";
+import {copyPNGByLink, getAssetExportItems, writeAssetToClipboard} from "../../../menus/util";
 import {setAVCellPanelPosition} from "./cellPanelPosition";
 import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
 import {previewAttrViewImages, previewImages} from "../../preview/image";
@@ -506,8 +506,9 @@ export const editAssetItem = (options: {
         }).element);
     }
     if (linkAddress?.startsWith("assets/")) {
-        window.siyuan.menus.menu.append(new MenuItem(exportAsset(decodeURI(linkAddress))).element);
-        window.siyuan.menus.menu.append(new MenuItem(writeAssetToClipboard(decodeURI(linkAddress))).element);
+        const decodedAddress = decodeURI(linkAddress);
+        getAssetExportItems(linkAddress, decodedAddress).forEach(item => window.siyuan.menus.menu.append(new MenuItem(item).element));
+        window.siyuan.menus.menu.append(new MenuItem(writeAssetToClipboard(decodedAddress)).element);
     }
     const rect = options.rect;
     /// #if MOBILE

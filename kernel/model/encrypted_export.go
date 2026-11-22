@@ -246,6 +246,41 @@ func PrepareEncryptedAssetForExternalOpen(assetPath string) (string, error) {
 	return artifact.Path, nil
 }
 
+func PrepareAssetForExternalShare(assetPath string) (string, error) {
+	assetPath, _, _ = strings.Cut(assetPath, "#")
+	relativePath, boxID, err := assetPathAndBox(assetPath, "")
+	if err != nil {
+		return "", err
+	}
+	relativePath, err = url.PathUnescape(relativePath)
+	if err != nil {
+		return "", err
+	}
+	if boxID != "" && IsEncryptedBox(boxID) {
+		artifact, err := prepareEncryptedAssetExport(relativePath, boxID, true)
+		if err != nil {
+			return "", err
+		}
+		return artifact.Path, nil
+	}
+
+	artifact, err := GetAssetAbsPathInBox(relativePath, boxID)
+	if err != nil {
+		return "", err
+	}
+	if err = EnsureAssetLocal(artifact); err != nil {
+		return "", err
+	}
+	info, err := os.Stat(artifact)
+	if err != nil {
+		return "", err
+	}
+	if !info.Mode().IsRegular() {
+		return "", errors.New("share asset is not a regular file")
+	}
+	return artifact, nil
+}
+
 func prepareEncryptedAssetExport(relativePath, boxID string, external bool) (lease *ExportArtifactLease, err error) {
 	if !IsBoxUnlocked(boxID) {
 		return nil, errors.New(Conf.Language(314))

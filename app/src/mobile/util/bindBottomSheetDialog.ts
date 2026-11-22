@@ -51,8 +51,16 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     actionsObserver.observe(sheet, {childList: true, subtree: true});
     const disposeKeyboardState = bindKeyboardSheetState(sheet);
     const dragState: {cancel?: () => void} = {};
+    let expansion: Animation;
+    const freeze = () => {
+        layout.freeze();
+        expansion?.cancel();
+    };
     const layout = (require("./mobileSheetLayout") as typeof import("./mobileSheetLayout")).bindMobileSheetLayout(dialog.element.querySelector<HTMLElement>(".b3-dialog"),
-        sheet, {onResize: afterResize, onGeometryChange: () => dragState.cancel?.()});
+        sheet, {onResize: afterResize, onGeometryChange: () => {
+            expansion?.cancel();
+            dragState.cancel?.();
+        }});
     // 底部抽屉通过抓手展开或收起，禁用通用对话框的移动和缩放。
     sheet.querySelector(".b3-dialog__header")?.classList.remove("resize__move");
     sheet.querySelectorAll(":scope > .resize__rd, :scope > .resize__ld, :scope > .resize__lt, :scope > .resize__rt, " +
@@ -70,7 +78,7 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     const updateOpen = () => {
         if (!dialog.element.classList.contains("b3-dialog--open")) {
             if (dialog.element.dataset.dialogClosing === "true") {
-                layout.freeze();
+                freeze();
                 // 退出样式接管拖动位移，保留从当前绘制位置向下滑出的过渡。
                 sheet.style.transition = "";
                 sheet.style.transform = "";
@@ -109,7 +117,19 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     updateOpen();
     const disposeDrag = bindBottomSheetDrag(sheet, dialog.element.querySelector(".b3-dialog__scrim"), close, {
         grip: handle,
-        expand: () => layout.setMode("expanded"),
+        expand: () => {
+            if (expansion?.playState === "running" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                layout.setMode("expanded");
+                return;
+            }
+            const from = sheet.getBoundingClientRect().height;
+            layout.setMode("expanded");
+            const to = sheet.getBoundingClientRect().height;
+            if (from !== to) {
+                expansion = sheet.animate([{height: `${from}px`}, {height: `${to}px`}],
+                    {duration: 150, easing: "cubic-bezier(0, 0, .2, 1)"});
+            }
+        },
         canStart: () => {
             const body = sheet.querySelector<HTMLElement>(":scope > .b3-dialog__body");
             return window.siyuan.dialogs?.[window.siyuan.dialogs.length - 1] === dialog &&
@@ -121,6 +141,7 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
     });
     dragState.cancel = disposeDrag.cancel;
     const dispose = () => {
+        expansion?.cancel();
         actionsObserver.disconnect();
         disposeKeyboardState();
         cancelOpen?.();
@@ -129,6 +150,6 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
         disposeDrag();
         handle.remove();
     };
-    dispose.freeze = () => layout.freeze();
+    dispose.freeze = freeze;
     return dispose;
 };

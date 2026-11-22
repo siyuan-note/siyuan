@@ -183,6 +183,13 @@ const browserCases = async (sources: string[]) => {
         touch("touchstart", 0);
         touch("touchmove", -100);
         touch("touchend", -100);
+        const expansion = panel.getAnimations().find(animation => !(animation instanceof CSSTransition));
+        check.ok(expansion, gate + " animates the height on release");
+        expansion.pause();
+        expansion.currentTime = Number(expansion.effect.getComputedTiming().duration) / 2;
+        const height = panel.getBoundingClientRect().height;
+        check.ok(height > initial && height < 750, gate + " passes through intermediate heights");
+        expansion.finish();
         check.equal(panel.getBoundingClientRect().height, 750, gate + " allows a fresh grip gesture");
         dispose();
     }

@@ -6,7 +6,7 @@
 		"id": "20260612191136-feqbi1x",
 		"title": "命令行接口",
 		"type": "doc",
-		"updated": "20261101194733"
+		"updated": "20261122174034"
 	},
 	"Children": [
 		{
@@ -67,7 +67,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123536-f5newid",
-				"updated": "20261006133358"
+				"updated": "20261122174034"
 			},
 			"Children": [
 				{
@@ -114,7 +114,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260618123536-fdlw82f",
-				"updated": "20261006133358"
+				"updated": "20261122174034"
 			},
 			"Children": [
 				{
@@ -126,7 +126,7 @@
 					},
 					"Properties": {
 						"id": "20260618123536-lkzcvp0",
-						"updated": "20261006133358"
+						"updated": "20261122174034"
 					},
 					"Children": [
 						{
@@ -189,12 +189,12 @@
 							]
 						},
 						{
-							"ID": "20260708121000-cnstore1",
+							"ID": "20261122174034-8bwkqyq",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20260708121000-cnstore1",
-								"updated": "20261006133358"
+								"id": "20261122174034-8bwkqyq",
+								"updated": "20261122174034"
 							},
 							"Children": [
 								{
@@ -257,11 +257,11 @@
 							]
 						},
 						{
-							"ID": "20260708130000-cnuninst",
+							"ID": "20261122174034-xw9y7vw",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260708130000-cnuninst",
-								"updated": "20261006133358"
+								"id": "20261122174034-xw9y7vw",
+								"updated": "20261122174034"
 							},
 							"Children": [
 								{

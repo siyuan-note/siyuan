@@ -11,6 +11,7 @@ const startDocs = {
     [ruGuideID]: "20261122113000-m9xlls7",
 };
 const idPattern = /\b\d{14}-[a-z0-9]{7}\b/g;
+const exactIDPattern = /^\d{14}-[a-z0-9]{7}$/;
 
 function* walkFiles(dir) {
     for (const entry of readdirSync(dir, {withFileTypes: true})) {
@@ -22,6 +23,36 @@ function* walkFiles(dir) {
         }
     }
 }
+
+test("bundled guide IDs use the SiYuan ID format", () => {
+    for (const notebook of readdirSync(guideRoot, {withFileTypes: true})) {
+        if (!notebook.isDirectory()) {
+            continue;
+        }
+        assert.match(notebook.name, exactIDPattern, `invalid guide notebook ID: ${notebook.name}`);
+        const root = path.join(guideRoot, notebook.name);
+        for (const file of walkFiles(root)) {
+            const relative = path.relative(root, file);
+            if (!file.endsWith(".sy") || relative.startsWith(`assets${path.sep}`)) {
+                continue;
+            }
+            const location = path.relative(guideRoot, file);
+            const doc = JSON.parse(readFileSync(file, "utf8"));
+            assert.equal(doc.ID, path.basename(file, ".sy"), `guide document ID does not match its filename: ${location}`);
+            const nodes = [doc];
+            for (const node of nodes) {
+                if (node.ID !== undefined) {
+                    assert.match(node.ID, exactIDPattern, `invalid guide node ID ${node.ID}: ${location}`);
+                }
+                const propertyID = node.Properties?.id;
+                if (propertyID !== undefined && propertyID !== "") {
+                    assert.match(propertyID, exactIDPattern, `invalid guide Properties.id ${propertyID}: ${location}`);
+                }
+                nodes.push(...(node.Children || []));
+            }
+        }
+    }
+});
 
 function collectGuideData(guideID) {
     const root = path.join(guideRoot, guideID);
@@ -113,9 +144,6 @@ test("Russian and Simplified Chinese guides have disjoint IDs, AV files, and lan
     assert.equal(ruBoxDoc.boxDocID, ruGuideID);
     assert.ok(statSync(path.join(ru.root, `${ruGuideID}.sy`)).isFile());
 
-    for (const id of ru.blockIDs) {
-        assert.match(id, /^\d{14}-[a-z0-9]{7}$/, `Russian guide block ID has invalid format: ${id}`);
-    }
     for (const id of ru.nonAssetIDs) {
         assert.equal(zh.nonAssetIDs.has(id), false, `shared non-asset ID between zh-CN and ru guides: ${id}`);
     }

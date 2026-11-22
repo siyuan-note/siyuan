@@ -4,6 +4,7 @@ import {Constants} from "../../../constants";
 const API = "/api/ai/agent";
 const sessionRevisions = new Map<string, number>();
 const sessionRuntimeRevisions = new Map<string, number>();
+const sessionReadGenerations = new Map<string, number>();
 const sessionSaveQueues = new Map<string, Promise<SessionSaveResult>>();
 
 export type AgentPermissionMode = "confirm" | "allowSession";
@@ -11,6 +12,12 @@ export type AgentPermissionMode = "confirm" | "allowSession";
 interface SessionSaveResult {
     revision: number;
     session?: AgentSession;
+}
+
+export class SessionRevisionConflict extends Error {
+    constructor(message: string, readonly expectedRevision: number, readonly revision: number) {
+        super(message);
+    }
 }
 
 async function waitForPendingSave(id: string) {
@@ -151,10 +158,14 @@ export const SessionStore = {
         return {sessions: [], total: 0, page: 1, pageSize: opts?.pageSize || 30};
     },
 
-    async load(id: string): Promise<AgentSession | null> {
+    async load(id: string, conflict?: SessionRevisionConflict): Promise<AgentSession | null> {
         for (let attempt = 0; attempt < 3; attempt++) {
             await waitForPendingSave(id);
+            const generation = sessionReadGenerations.get(id) ?? 0;
             const resp = await fetchSyncPost(API + "/getSession", {id}) as {code: number, data: AgentSession};
+            if (generation !== (sessionReadGenerations.get(id) ?? 0)) {
+                continue;
+            }
             if (!resp || resp.code !== 0) {
                 return null;
             }
@@ -162,9 +173,14 @@ export const SessionStore = {
             const runtimeRevision = resp.data.recoveryRevision ?? 0;
             const knownRevision = sessionRevisions.get(id) ?? 0;
             const knownRuntimeRevision = sessionRuntimeRevisions.get(id) ?? 0;
-            if (revision < knownRevision ||
+            // 同步可能恢复较早的会话。只有内核拒绝已知版本后才接受回退，仍需读取完整会话。
+            const revisionFloor = conflict?.expectedRevision === knownRevision ? conflict.revision : knownRevision;
+            if (revision < revisionFloor ||
                 (revision === knownRevision && runtimeRevision < knownRuntimeRevision)) {
                 continue;
+            }
+            if (revision < knownRevision) {
+                sessionReadGenerations.set(id, generation + 1);
             }
             sessionRevisions.set(id, revision);
             sessionRuntimeRevisions.set(id, runtimeRevision);
@@ -187,6 +203,11 @@ export const SessionStore = {
                 data?: {revision?: number; session?: AgentSession};
             };
             if (!resp || resp.code !== 0) {
+                const revision = resp?.data?.revision;
+                if (resp?.msg === "agent session revision conflict" && typeof revision === "number" &&
+                    revision !== expectedRevision) {
+                    throw new SessionRevisionConflict(resp.msg, expectedRevision, revision);
+                }
                 throw new Error(resp?.msg || "Failed to save agent session");
             }
             const revision = resp.data?.revision ?? expectedRevision;

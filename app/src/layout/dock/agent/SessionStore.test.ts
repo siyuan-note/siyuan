@@ -44,3 +44,54 @@ test("pinning waits for a new session to be saved and uses the independent metad
     pinFailure = true;
     await assert.rejects(store.setPinned("session", true), /Pin rejected/);
 });
+
+test("a save conflict can reload an older canonical session without replaying the rejected write", async () => {
+    const exports = {} as typeof import("./SessionStore");
+    const session = {id: "session", title: "Latest content", createdAt: 1, updatedAt: 1, revision: 8};
+    let disk = {...session};
+    let holdRead = false;
+    let finishRead: (result: unknown) => void;
+    const submitted: number[] = [];
+    runInNewContext(compiled, {
+        exports,
+        require: () => ({
+            Constants: {SIYUAN_APPID: "test-app"},
+            fetchSyncPost: (url: string, body: {expectedRevision: number}) => {
+                if (url.endsWith("/getSession")) {
+                    if (holdRead) {
+                        holdRead = false;
+                        return new Promise(resolve => { finishRead = resolve; });
+                    }
+                    return Promise.resolve({code: 0, data: disk});
+                }
+                assert.ok(url.endsWith("/saveSession"));
+                submitted.push(body.expectedRevision);
+                if (body.expectedRevision !== disk.revision) {
+                    return Promise.resolve({code: -1, msg: "agent session revision conflict", data: {revision: disk.revision}});
+                }
+                return Promise.resolve({code: 0, data: {revision: disk.revision + 1}});
+            },
+        }),
+    });
+    const {SessionStore: store, SessionRevisionConflict} = exports;
+    assert.equal((await store.load(session.id))?.revision, 8);
+    holdRead = true;
+    const inFlight = store.load(session.id);
+    await Promise.resolve();
+    disk = {...session, title: "Restored content", revision: 3};
+    assert.equal(await store.load(session.id), null, "ordinary reads do not accept older versions");
+    let conflict: InstanceType<typeof SessionRevisionConflict>;
+    await assert.rejects(store.save(session), (error: unknown) => {
+        assert.ok(error instanceof SessionRevisionConflict);
+        conflict = error;
+        return true;
+    });
+    assert.equal(store.getRevision(session.id), 8, "a rejection does not update the cached revision");
+    assert.equal((await store.load(session.id, conflict))?.title, "Restored content");
+    assert.deepEqual(submitted, [8]);
+    finishRead({code: 0, data: session});
+    assert.equal((await inFlight)?.title, "Restored content", "a read started before the rollback cannot restore stale data");
+    const canonical = await store.load(session.id);
+    assert.equal((await store.save({...canonical, title: "New title"})).revision, 4);
+    assert.deepEqual(submitted, [8, 3]);
+});

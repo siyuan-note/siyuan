@@ -19,6 +19,8 @@ const compiled = transpileModule(`class Chat { ${methods.join("\n")} } globalThi
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText;
 
+class SessionRevisionConflict extends Error {}
+
 const createChat = () => {
     const events: string[] = [];
     const sent: string[] = [];
@@ -26,6 +28,7 @@ const createChat = () => {
         window: {siyuan: {config: {appearance: {lang: "en_US"}}}},
         listCapabilityManifests: (): [] => [],
         SessionStore: {newSessionId: () => "entry", getRevision: () => 1},
+        SessionRevisionConflict,
         fetchAgentSSE: async (text: string) => { events.push("send"); sent.push(text); },
     };
     runInNewContext(compiled, context);
@@ -85,6 +88,37 @@ test("rejected sends preserve the current draft and its manually selected height
         assert.deepEqual(events, []);
         assert.deepEqual(sent, []);
         assert.equal(chat.entries.length, 0);
+    }
+});
+
+test("a send rejected by a revision conflict preserves both the failed message and any newer draft", async () => {
+    for (const newerDraft of [false, true]) {
+        const {chat, sent} = createChat();
+        let draft = chat.composer.getSendData();
+        const original = draft;
+        const conflict = new SessionRevisionConflict("agent session revision conflict");
+        chat.composer.getSendData = () => draft;
+        chat.composer.clear = () => { draft = {text: "", blockHTML: "", references: []}; };
+        chat.composer.setData = (value: AgentComposerData) => { draft = value; };
+        chat.runController.discard = () => {};
+        chat.rollbackUserEntry = () => { chat.entries = []; };
+        chat.saveSession = async () => {
+            if (newerDraft) draft = {text: "Newer draft", blockHTML: "", references: []};
+            throw conflict;
+        };
+        let recovered: unknown;
+        chat.reloadFromDisk = async (_force: boolean, error: unknown) => { recovered = error; };
+        await chat.sendMessage();
+        assert.equal(recovered, conflict);
+        assert.deepEqual(sent, []);
+        assert.equal(chat.entries.length, 0);
+        if (newerDraft) {
+            assert.equal(draft.text, "Newer draft");
+            assert.equal(chat.queuedMessages.get("session")[0].data, original);
+            assert.equal(chat.queuedMessages.isPaused("session"), true);
+        } else {
+            assert.equal(draft, original);
+        }
     }
 });
 

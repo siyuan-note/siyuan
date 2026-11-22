@@ -863,7 +863,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The agent supports creating, searching, switching, renaming, and deleting sessions. Sessions preserve messages, references, tool calls, and results and can be viewed across synchronized instances."
+					"Data": "The agent supports creating, searching, switching, renaming, and deleting sessions. Sessions preserve messages, references, tool calls, and results and can be viewed across synchronized instances. If a send conflicts with a saved session revision, the agent reloads the saved conversation when available. Review the draft before sending again."
 				}
 			]
 		},

@@ -9,7 +9,7 @@ import {bindAgentComposerResize} from "./AgentComposerResize";
 import {disabledWYSIWYG} from "../../../protyle/util/disabledWYSIWYG";
 import {getAllEditor} from "../../getAll";
 import {isCapabilityEnabled, listCapabilityManifests, lookupCapability} from "./frontendCapabilities";
-import {AgentPermissionMode, AgentSession, SessionStore} from "./SessionStore";
+import {AgentPermissionMode, AgentSession, SessionRevisionConflict, SessionStore} from "./SessionStore";
 import {genAgentConfirmActionButtons} from "./agentConfirmActions";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {isInAndroid, updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
@@ -977,7 +977,7 @@ export class AgentChat extends Model {
                         this.runController.discard(run);
                         if (this.sessionId === run.sessionID) {
                             this.rollbackUserEntry(userEntryId);
-                            await this.reloadFromDisk();
+                            await this.reloadFromDisk(false, e);
                         }
                         return;
                     }
@@ -1410,6 +1410,14 @@ export class AgentChat extends Model {
             await this.saveSession();
         }
         return result.session ?? null;
+    }
+
+    private async saveSessionBeforeNavigation() {
+        try {
+            await this.saveSession();
+        } catch (error) {
+            if (!(error instanceof SessionRevisionConflict)) throw error;
+        }
     }
 
     private sessionRunController: AgentRunController<AgentSessionRunViewState>;
@@ -1912,9 +1920,11 @@ export class AgentChat extends Model {
     }
 
     // 镜像端从磁盘拉取整条会话权威数据重绘。仅 entries 变化时清空重绘，避免无谓跳变。
-    private async reloadFromDisk(forceRender = false) {
+    private async reloadFromDisk(forceRender = false, saveError?: unknown) {
+        const conflict = saveError && saveError instanceof SessionRevisionConflict ? saveError : undefined;
+        forceRender ||= !!conflict;
         const targetSessionId = this.sessionId;
-        const session = await SessionStore.load(targetSessionId);
+        const session = await SessionStore.load(targetSessionId, conflict);
         // await 期间用户可能已切换会话，丢弃过期结果。
         if (targetSessionId !== this.sessionId) {
             return;
@@ -2050,7 +2060,7 @@ export class AgentChat extends Model {
             await this.saveSession();
             return this.sessionId === sessionID;
         } catch (e) {
-            await this.reloadFromDisk(true);
+            await this.reloadFromDisk(true, e);
             return false;
         }
     }
@@ -2193,7 +2203,7 @@ export class AgentChat extends Model {
             this.flushThinkingStep();
         }
         if (!hadActiveTurn && !this.pendingRecoverySessionIDs.has(this.sessionId)) {
-            await this.saveSession();
+            await this.saveSessionBeforeNavigation();
         }
         const session = await SessionStore.load(id);
         if (!session) {
@@ -2660,7 +2670,7 @@ export class AgentChat extends Model {
             this.flushThinkingStep();
         }
         if (!hadActiveTurn && !this.pendingRecoverySessionIDs.has(this.sessionId)) {
-            await this.saveSession();
+            await this.saveSessionBeforeNavigation();
         }
         this.sessionId = SessionStore.newSessionId();
         this.sessionRuns.markRead(this.sessionId);
@@ -2919,7 +2929,16 @@ export class AgentChat extends Model {
             this.runController.discard(run);
             if (this.sessionId === run.sessionID) {
                 this.rollbackUserEntry(userEntryId);
-                await this.reloadFromDisk();
+                if (!queued && e instanceof SessionRevisionConflict) {
+                    const draft = this.composer.getSendData();
+                    if (draft.text || draft.blockHTML || draft.references.length > 0 || this.composer.isUploading()) {
+                        this.queuedMessages.prepend(sessionID, {id: userEntryId, sessionID, data: sendData, editorContext});
+                        this.queuedMessages.pause(sessionID);
+                    } else {
+                        this.composer.setData(sendData);
+                    }
+                }
+                await this.reloadFromDisk(false, e);
             }
             return;
         }
@@ -3276,7 +3295,7 @@ export class AgentChat extends Model {
             const turnID = this.currentTurnID;
             this.pendingRecoverySessionIDs.add(sessionID);
             try {
-                await this.reloadFromDisk(true);
+                await this.reloadFromDisk(true, e);
             } catch (reloadError) {
                 console.error("reload agent session after event failure failed:", reloadError);
             }

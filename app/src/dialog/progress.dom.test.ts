@@ -135,9 +135,37 @@ app.whenReady().then(async () => {
         await win.loadURL("about:blank");
         win.webContents.enableDeviceEmulation({screenPosition: "desktop", screenSize: {width: 384, height: 808},
             viewPosition: {x: 0, y: 0}, viewSize: {width: 384, height: 808}, deviceScaleFactor: 1, scale: 1});
+        win.webContents.debugger.attach();
+        const features = [
+            {name: "prefers-reduced-motion", value: "no-preference"},
+            {name: "prefers-reduced-transparency", value: "no-preference"},
+            {name: "forced-colors", value: "none"},
+        ];
+        const setMedia = async (index = -1) => {
+            const emulated = features.map((feature, current) => current === index ?
+                {...feature, value: feature.name === "forced-colors" ? "active" : "reduce"} : feature);
+            await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {features: emulated});
+            const queries = emulated.map(({name, value}) => "(" + name + ": " + value + ")");
+            if (!await win.webContents.executeJavaScript(JSON.stringify(queries) + ".every(query => matchMedia(query).matches)")) {
+                throw new Error("Progress test media emulation failed: " + queries.join(", "));
+            }
+        };
+        await setMedia();
         await win.webContents.executeJavaScript("new Promise(requestAnimationFrame)");
         const {result, error} = await win.webContents.executeJavaScript(${JSON.stringify(code)});
         if (error) throw new Error(error);
+        for (let index = 0; index < features.length; index++) {
+            await setMedia(index);
+            const animation = await win.webContents.executeJavaScript(${JSON.stringify(`(() => {
+                const api = {};
+                new Function("exports", ${JSON.stringify(progress)})(api);
+                api.progressLoading({code: 1, msg: "Exiting"}, "exitProgress");
+                const name = getComputedStyle(document.getElementById("exitProgress").firstElementChild).animationName;
+                api.progressLoading({code: 2}, "exitProgress");
+                return name;
+            })()`)});
+            if (animation !== "none") throw new Error(features[index].name + " must disable the exit animation: " + animation);
+        }
         console.log(result);
         win.destroy(); app.exit(0);
     } catch (error) {

@@ -21,7 +21,7 @@ const functions = [
     extract("cell.ts", ["getStoredCellValueByElement", "genCellValueByElement", "genCellValue",
         "createCellInputTarget", "captureAVCellInput", "updateCellsValue"]),
     extract("openMenuPanel.ts", ["openMenuPanel"]),
-    extract("date.ts", ["bindDateEvent", "getFullYearTime"]),
+    extract("date.ts", ["normalizeDateDraft", "bindDateEvent", "getFullYearTime"]),
     extract("lunarDate.ts", ["bindLunarDateEvent"]),
     extract("panels/date.ts", ["datePanel"]),
     extract("select.ts", ["bindSelectEvent", "removeCellOption", "addColOptionOrCell", "setColOption"]),

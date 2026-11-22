@@ -33,6 +33,7 @@ const sources = () => {
     assert.equal(dropBranches.length, 1);
     assert.equal(externalDropBranches.length, 1);
     return {
+        bindDrop: extract("protyle/util/editorCommonEvent.ts", ["dropEvent"]),
         externalDrop: compile(`async function externalDrop(protyle, event) ${externalDropBranches[0]}`),
         uploadCapture: [
             extract("protyle/upload/index.ts", ["captureUploadInsertPosition"]),
@@ -65,6 +66,48 @@ const cases = async source => {
     root.className = "protyle-wysiwyg";
     document.body.append(root);
     const protyle = {lute, wysiwyg: {element: root}, block: {rootID: "doc"}};
+    const sourceDragTypes = {
+        SIYUAN_DROP_BLOCK: "application/siyuan-block",
+        SIYUAN_DROP_GUTTER: "application/siyuan-gutter",
+        ZWSP: "\u200b",
+    };
+    window.siyuan = {};
+    document.body.style.cssText = "display:flex;flex-direction:column;margin:0";
+    root.style.cssText = "margin:48px 0 0 24px;width:300px";
+    root.innerHTML = lute.Md2BlockDOM("- > Quoted text\n\n  Another paragraph");
+    const marker = root.querySelector(".protyle-action");
+    const listItem = marker.parentElement;
+    marker.replaceChildren();
+    marker.style.cssText = "width:24px;height:24px";
+    listItem.querySelector(".bq").style.cssText = "height:160px;pointer-events:auto";
+    const markerRect = marker.getBoundingClientRect();
+    const x = markerRect.x + 8;
+    const y = markerRect.y + 8;
+    let preview;
+    const bindDrop = new Function("Constants", "hasClosestByClassName", "getContenteditableElement", "setDragTipGhost",
+        "createListDragTarget", source.bindDrop + "; return dropEvent;")(sourceDragTypes, () => false,
+        element => element.querySelector("[contenteditable]"), element => { preview = element; }, () => {});
+    bindDrop(protyle, root);
+    for (const touch of [false, true]) {
+        window.siyuan.touchDragActive = touch;
+        const dataTransfer = new DataTransfer();
+        marker.dispatchEvent(new DragEvent("dragstart", {bubbles: true, cancelable: true, dataTransfer}));
+        const bounds = preview.getBoundingClientRect();
+        check.ok(x >= bounds.left && x < bounds.right && y >= bounds.top && y < bounds.bottom);
+        check.equal(document.elementFromPoint(x, y), marker, "the overlapping preview must leave the original drag handle hittable");
+        check.match(preview.textContent, /Quoted text/);
+        check.ok(dataTransfer.types.includes(sourceDragTypes.SIYUAN_DROP_BLOCK));
+        check.ok(dataTransfer.types.includes(sourceDragTypes.SIYUAN_DROP_GUTTER + "nodelistitem" + sourceDragTypes.ZWSP +
+            "u" + sourceDragTypes.ZWSP + listItem.dataset.nodeId));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        check.equal(preview.isConnected, touch);
+        if (touch) {
+            check.equal(window.siyuan.touchDragGhost, preview);
+            preview.remove();
+        }
+    }
+    document.body.removeAttribute("style");
+    root.removeAttribute("style");
     let transaction;
     const api = new Function("transaction", "focusBlock", source.actions +
         "; return {dragSame, getTargetListItem, shouldKeepListBlockDragTarget, getSameSuperBlockEdgeTarget};")(
@@ -266,7 +309,7 @@ const run = async () => {
 if (process.versions.electron && process.type === "browser") {
     run().catch(error => { console.error(error); require("electron").app.exit(1); });
 } else {
-    require("node:test").test("editor drops preserve list boundaries, undo/redo, and external file insertion positions", {
+    require("node:test").test("editor dragging preserves list marker hit tests, list boundaries, undo/redo, and file insertion positions", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 45000,
     }, async () => {

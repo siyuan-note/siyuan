@@ -1185,6 +1185,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 target.parentElement.classList.add("protyle-wysiwyg--select");
                 const ghostElement = document.createElement("div");
                 ghostElement.className = protyle.wysiwyg.element.className;
+                // 浏览器起拖时会再次命中检测，预览及其子元素不能遮挡圆点。
+                ghostElement.inert = true;
                 const cloneElement = target.parentElement.cloneNode(true) as Element;
                 cloneElement.querySelectorAll(".iframe").forEach(item => {
                     item.remove();

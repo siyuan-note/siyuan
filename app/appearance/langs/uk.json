@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Процитувати в чаті з агентом",
+	"agentContinueEditing": "Продовжити в чаті з агентом",
+	"agentQuickPhrases": "Швидкі фрази",
+	"aiPolish": "Поліпшити формулювання",
 	"agentRestoreDraft": "Відновити чернетку",
 	"agentSnapshotWriteBlocked": "Не вдалося створити автоматичний знімок. Цей запис у робочу область не виконано",
 	"agentRestoreDraftInUse": "Перед відновленням збережіть або очистьте поточну чернетку",

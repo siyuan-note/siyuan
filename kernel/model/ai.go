@@ -131,6 +131,7 @@ func buildAIEditorMessages(prompt string, history []AIEditorMessage, maxHistoryM
 }
 
 type AIEditorChatStream struct {
+	Prompt      string
 	stream      *util.OpenAICompletionStream
 	cancel      context.CancelFunc
 	idleTimeout time.Duration
@@ -208,6 +209,7 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 		return nil, errors.New("AI editor model returned nil stream")
 	}
 	return &AIEditorChatStream{
+		Prompt:      prompt,
 		stream:      completionStream,
 		cancel:      cancel,
 		idleTimeout: 120 * time.Second,

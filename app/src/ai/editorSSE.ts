@@ -15,6 +15,7 @@ export interface IAIEditorChatRequest {
 export type TAIEditorSSEEvent = {
     type: "start";
     taskID: string;
+    prompt?: string;
 } | {
     type: "reasoning";
     token: string;
@@ -42,7 +43,8 @@ export const createAIEditorSSEParserState = (): IAIEditorSSEParserState => ({buf
 const buildEvent = (event: string, data: Record<string, unknown>): TAIEditorSSEEvent | undefined => {
     switch (event) {
         case "start":
-            return {type: "start", taskID: String(data.taskID || "")};
+            return {type: "start", taskID: String(data.taskID || ""),
+                ...(typeof data.prompt === "string" ? {prompt: data.prompt} : {})};
         case "content":
             return {type: "content", token: String(data.token || "")};
         case "reasoning":

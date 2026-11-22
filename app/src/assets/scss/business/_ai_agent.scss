@@ -237,6 +237,20 @@
   min-height: 96px;
 }
 
+.sy__agentChat [custom-agent-quote] {
+  display: inline-block;
+  max-width: min(26ch, 90%);
+  padding-inline: .32em;
+  overflow: hidden;
+  border-radius: var(--b3-border-radius);
+  background: var(--b3-theme-primary-lightest);
+  color: var(--b3-theme-primary);
+  vertical-align: bottom;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
 .agent-chat__msg--editing .agent-chat__msg-actions {
   margin-top: 4px;
   opacity: 1;

@@ -1,4 +1,8 @@
 {
+	"agentQuote": "引用到智能体",
+	"agentContinueEditing": "在智能体中继续",
+	"agentQuickPhrases": "快捷短语",
+	"aiPolish": "润色",
 	"agentRestoreDraft": "恢复草稿",
 	"agentSnapshotWriteBlocked": "自动快照创建失败，本次工作空间写入未执行",
 	"agentRestoreDraftInUse": "请先保存或清空当前草稿，再恢复原草稿",

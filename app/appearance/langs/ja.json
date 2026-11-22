@@ -1,4 +1,8 @@
 {
+	"agentQuote": "エージェントに引用",
+	"agentContinueEditing": "エージェントで続ける",
+	"agentQuickPhrases": "定型フレーズ",
+	"aiPolish": "文章を推敲",
 	"agentRestoreDraft": "下書きを復元",
 	"agentSnapshotWriteBlocked": "自動スナップショットの作成に失敗したため、今回のワークスペースへの書き込みは実行されませんでした",
 	"agentRestoreDraftInUse": "復元する前に現在の下書きを保存するか消去してください",

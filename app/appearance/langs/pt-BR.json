@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Citar na conversa com o agente",
+	"agentContinueEditing": "Continuar na conversa com o agente",
+	"agentQuickPhrases": "Frases rápidas",
+	"aiPolish": "Aprimorar a redação",
 	"agentRestoreDraft": "Restaurar rascunho",
 	"agentSnapshotWriteBlocked": "Falha no instantâneo automático. Esta gravação na área de trabalho não foi executada",
 	"agentRestoreDraftInUse": "Salve ou limpe o rascunho atual antes de restaurar",

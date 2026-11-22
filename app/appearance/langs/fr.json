@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Citer dans la conversation de l’agent",
+	"agentContinueEditing": "Continuer avec l’agent",
+	"agentQuickPhrases": "Phrases rapides",
+	"aiPolish": "Améliorer la formulation",
 	"agentRestoreDraft": "Restaurer le brouillon",
 	"agentSnapshotWriteBlocked": "L’instantané automatique a échoué. Cette écriture dans l’espace de travail n’a pas été effectuée",
 	"agentRestoreDraftInUse": "Enregistrez ou effacez le brouillon en cours avant de le restaurer",

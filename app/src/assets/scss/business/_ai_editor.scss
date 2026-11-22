@@ -12,6 +12,8 @@
   box-shadow: var(--b3-dialog-shadow);
 
   &__header {
+    cursor: move;
+    touch-action: none;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -90,10 +92,41 @@
   &--mobile {
     top: auto !important;
     right: max(8px, env(safe-area-inset-right));
-    bottom: calc(var(--mobile-bottom-bar-offset, var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom))) + 8px);
+    bottom: calc(max(var(--ai-editor-keyboard-offset, 0px), var(--mobile-bottom-bar-offset, var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)))) + 8px);
     left: max(8px, env(safe-area-inset-left)) !important;
     width: auto;
     max-height: 55%;
+
+    .ai-editor-panel__header {
+      cursor: auto;
+      touch-action: auto;
+    }
+
+    .ai-editor-panel__grip {
+      display: grid;
+      flex: 0 0 22px;
+      place-items: center;
+      cursor: ns-resize;
+      touch-action: none;
+
+      &::before {
+        content: "";
+        width: 32px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--b3-theme-on-surface-light);
+      }
+    }
+
+    .ai-editor-panel__thinking {
+      min-height: 0;
+      flex-shrink: 1;
+      overflow-y: auto;
+    }
+
+    .ai-editor-panel__body {
+      flex: 1 1 auto;
+    }
 
     .ai-editor-panel__actions .b3-button {
       min-height: 36px;

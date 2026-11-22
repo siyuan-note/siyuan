@@ -1894,12 +1894,14 @@ var AIRenameSkill = define[AISkillRenameRequest, Null]("renameSkill", "/api/ai/a
 // 路径穿越、平台别名、链接、过期版本，以及单独修改不支持的内容或重命名、删除根 SKILL.md 均被拒绝。
 var AIManageSkills = define[AISkillFileRequest, AISkillFileData]("manageSkills", "/api/ai/agent/manageSkills", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 按块请求的 start 事件携带本轮实际展开的 prompt，供显式转入智能体时保留原文快照。
 var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/editor/chat", AuthenticatedAccess|AdminAccess, StructJSONBody, aiEditorSSEOptions(), "POST")
 
 // gemini-interactions 使用 store=false 和本地会话历史，nativeContent 版本 1 保留完整原生步骤及思考签名。
 // 未知原生版本保留原会话并报错；缺失终止事件、失败或不完整的响应不会执行工具调用。
 // 流式事件按序发送；消费停滞会取消生成，待工具结果和运行时检查点收尾后发送 interrupted。
 // 同轮重试保留原 thinking 轮次；上下文压缩的 thinking 事件携带该轮 roundID。
+// references 中带 messageID 的条目使用 ⟦id⟧ 定位整条消息引用；title 保存快照，压缩后的历史仍可引用原文。
 var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, aiAgentSSEOptions(), "POST")
 var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", PublicAccess, NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
 

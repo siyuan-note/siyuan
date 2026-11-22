@@ -2242,6 +2242,9 @@
         "id": {
           "type": "string"
         },
+        "messageID": {
+          "type": "string"
+        },
         "title": {
           "type": "string"
         }
@@ -2256,6 +2259,16 @@
       "type": "object",
       "properties": {
         "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "messageID": {
           "anyOf": [
             {
               "type": "string"
@@ -2473,6 +2486,9 @@
     "AISSEStart": {
       "type": "object",
       "properties": {
+        "prompt": {
+          "type": "string"
+        },
         "taskID": {
           "type": "string"
         }
@@ -4138,6 +4154,16 @@
             }
           ]
         },
+        "messageID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "title": {
           "anyOf": [
             {
@@ -4157,6 +4183,16 @@
       "type": "object",
       "properties": {
         "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "messageID": {
           "anyOf": [
             {
               "type": "string"

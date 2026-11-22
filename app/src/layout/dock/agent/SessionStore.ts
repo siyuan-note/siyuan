@@ -1,3 +1,4 @@
+import type {AIReference} from "../../../types/api";
 import {fetchSyncPost} from "../../../util/fetch";
 import {Constants} from "../../../constants";
 
@@ -67,7 +68,7 @@ export interface AgentSession {
         type: "user" | "thinking" | "assistant" | "confirm" | "question" | "snapshot" | "rollback";
         content?: string;
         blockHTML?: string;
-        references?: Array<{id: string; title: string}>;
+        references?: AIReference[];
         editorContext?: {
             activeDocID?: string;
             activeDocTitle?: string;

@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Cita nella chat dell’agente",
+	"agentContinueEditing": "Continua nella chat dell’agente",
+	"agentQuickPhrases": "Frasi rapide",
+	"aiPolish": "Migliora la formulazione",
 	"agentRestoreDraft": "Ripristina bozza",
 	"agentSnapshotWriteBlocked": "Lo snapshot automatico non è riuscito. Questa operazione di scrittura nell’area di lavoro non è stata eseguita",
 	"agentRestoreDraftInUse": "Salva o svuota la bozza corrente prima del ripristino",

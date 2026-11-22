@@ -1,4 +1,8 @@
 {
+	"agentQuote": "에이전트 대화에 인용",
+	"agentContinueEditing": "에이전트에서 계속",
+	"agentQuickPhrases": "빠른 문구",
+	"aiPolish": "문장 다듬기",
 	"agentRestoreDraft": "초안 복원",
 	"agentSnapshotWriteBlocked": "자동 스냅샷을 만들지 못해 이번 작업 공간 쓰기를 실행하지 않았습니다",
 	"agentRestoreDraftInUse": "복원하기 전에 현재 초안을 저장하거나 비워 주세요",

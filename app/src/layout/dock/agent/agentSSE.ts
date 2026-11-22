@@ -1,3 +1,4 @@
+import type {AIReference} from "../../../types/api";
 import {fetchWithAppId} from "../../../util/fetchWithAppId";
 import {buildAgentConfirmEvent, IToolEffects} from "./agentConfirmEvent";
 
@@ -102,7 +103,7 @@ export class AgentHttpError extends Error {
 export async function fetchAgentSSE(
     message: string,
     language: string,
-    references: Array<{id: string; title: string}>,
+    references: AIReference[],
     onEvent: (event: ISSEResult) => void | Promise<void>,
     onError: (err: Error) => void | Promise<void>,
     signal?: AbortSignal,

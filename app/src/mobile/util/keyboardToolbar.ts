@@ -85,6 +85,7 @@ import {applyMobileToolbarEntries} from "./toolbarEntries";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
 import {MOBILE_TOOLBAR_NAMES} from "../../protyle/toolbar/defaults";
 import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
+import {isEncryptedBox} from "../../util/pathName";
 import {isMobileLandscape} from "./orientation";
 import {restoreGutterBySelection} from "../../protyle/gutter/restore";
 import {isGutterTouchDragging} from "../../protyle/ui/gutterVisibility";
@@ -128,6 +129,10 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
             }
             if (hasText && (name === "block-type" || MOBILE_TOOLBAR_ACTION_NAMES.includes(name))) {
                 return false;
+            }
+            if (name === "agentQuote") {
+                return hasText && !!protyle?.block.rootID && !isEncryptedBox(protyle.notebookId) &&
+                    !window.siyuan.config.readonly && !window.siyuan.isPublish;
             }
             if (name === "block-type") {
                 return !!range && !!getBlockTypeSelection(protyle, range);
@@ -1826,6 +1831,12 @@ export const initKeyboardToolbar = () => {
             return;
         }
         if (window.siyuan.config.readonly || !protyle || protyle.disabled) {
+            return;
+        }
+        if (type === "agentQuote") {
+            const snapshot = range.cloneRange();
+            const {quoteEditorSelection} = await import("../../ai/editorAgent");
+            await quoteEditorSelection(protyle, snapshot);
             return;
         }
         if (type === "undo") {

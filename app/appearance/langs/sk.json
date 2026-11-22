@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Citovať v chate s agentom",
+	"agentContinueEditing": "Pokračovať v chate s agentom",
+	"agentQuickPhrases": "Rýchle frázy",
+	"aiPolish": "Vylepšiť formuláciu",
 	"agentRestoreDraft": "Obnoviť koncept",
 	"agentSnapshotWriteBlocked": "Automatickú snímku sa nepodarilo vytvoriť. Tento zápis v pracovnom priestore sa nevykonal",
 	"agentRestoreDraftInUse": "Pred obnovením uložte alebo vymažte aktuálny koncept",

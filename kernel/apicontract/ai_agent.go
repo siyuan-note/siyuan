@@ -7,6 +7,8 @@ package apicontract
 type AIReference struct {
 	ID    string `json:"id" api:"optional,nullable"`
 	Title string `json:"title" api:"optional,nullable"`
+	// 整条消息引用的来源消息 ID。此时 id 对应消息正文中的行内占位符，title 为发送时的快照；省略时仍表示块引用。
+	MessageID string `json:"messageID,omitempty" api:"optional,nullable"`
 }
 
 type AIEditorContext struct {
@@ -175,6 +177,7 @@ type AISessionSaveData struct {
 
 type AISSEStart struct {
 	TaskID string `json:"taskID"`
+	Prompt string `json:"prompt,omitempty"`
 }
 type AISSEToken struct {
 	Token string `json:"token"`

@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Citeren in de agentchat",
+	"agentContinueEditing": "Doorgaan in de agentchat",
+	"agentQuickPhrases": "Snelle zinnen",
+	"aiPolish": "Formulering verbeteren",
 	"agentRestoreDraft": "Concept herstellen",
 	"agentSnapshotWriteBlocked": "De automatische momentopname is mislukt. Deze schrijfbewerking in de werkruimte is niet uitgevoerd",
 	"agentRestoreDraftInUse": "Sla het huidige concept op of wis het voordat je het herstelt",

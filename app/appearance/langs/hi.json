@@ -1,4 +1,8 @@
 {
+	"agentQuote": "एजेंट चैट में उद्धृत करें",
+	"agentContinueEditing": "एजेंट चैट में जारी रखें",
+	"agentQuickPhrases": "त्वरित वाक्यांश",
+	"aiPolish": "भाषा सँवारें",
 	"agentRestoreDraft": "ड्राफ़्ट बहाल करें",
 	"agentSnapshotWriteBlocked": "स्वचालित स्नैपशॉट विफल रहा। कार्यस्थान में लिखने की यह कार्रवाई नहीं हुई",
 	"agentRestoreDraftInUse": "बहाल करने से पहले मौजूदा ड्राफ़्ट सहेजें या साफ़ करें",

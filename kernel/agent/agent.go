@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -279,8 +280,9 @@ type AgentAttachment struct {
 }
 
 type Reference struct {
-	ID    string `json:"id"`
-	Title string `json:"title"` // 引用锚文本，仅作预览，不代表目标块正文。
+	ID        string `json:"id"`
+	Title     string `json:"title"`               // 块引用的锚文本或来源消息的完整快照。
+	MessageID string `json:"messageID,omitempty"` // 整条消息引用携带原始消息快照，供上下文压缩后使用。
 }
 
 // EditorContext 是发送消息时前端编辑器的只读状态快照。
@@ -425,7 +427,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		}
 
 		for _, reference := range references {
-			memoryIDs = append(memoryIDs, reference.ID)
+			if reference.MessageID == "" {
+				memoryIDs = append(memoryIDs, reference.ID)
+			}
 		}
 		ctx = kernelModel.ContextWithAIMemoryScope(ctx, memoryIDs)
 		if confAIReadSnapshot.MCP != nil {
@@ -2201,7 +2205,38 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 }
 
 func buildUserMessageContent(userMessage string, references []Reference, editorCtx *EditorContext,
-	capabilities *capabilitySet) string {
+	capabilities *capabilitySet, history ...AgentMessage) string {
+	var blocks []Reference
+	var replacements []string
+	for _, ref := range references {
+		if ref.MessageID == "" {
+			blocks = append(blocks, ref)
+			continue
+		}
+		snapshot := ref.Title
+		for i := len(history) - 1; i >= 0; i-- {
+			message := &history[i]
+			if message.EntryID == ref.MessageID && message.Content == snapshot {
+				distance := 0
+				for _, later := range history[i:] {
+					if later.Role == message.Role {
+						distance++
+					}
+				}
+				preview := []rune(snapshot)
+				snapshot = fmt.Sprintf("the earlier %s message (%d back among %s messages)", message.Role, distance, message.Role)
+				if len(preview) > 60 {
+					snapshot += fmt.Sprintf(" beginning %q", string(preview[:60]))
+				}
+				break
+			}
+		}
+		replacements = append(replacements, "⟦"+ref.ID+"⟧", strconv.Quote(snapshot))
+	}
+	if len(replacements) > 0 {
+		userMessage = strings.NewReplacer(replacements...).Replace(userMessage)
+	}
+	references = blocks
 	if len(references) == 0 && editorCtx == nil {
 		return userMessage
 	}
@@ -2427,7 +2462,7 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 				Role: openai.ChatMessageRoleSystem, Content: cm.Content,
 			})
 		case "user":
-			content := buildUserMessageContent(cm.Content, cm.References, cm.EditorContext, capabilities)
+			content := buildUserMessageContent(cm.Content, cm.References, cm.EditorContext, capabilities, checkpointMsgs[:cmi]...)
 			if content == "" {
 				content = " "
 			}
@@ -2531,7 +2566,7 @@ func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, _ st
 				Type: "message", Role: openai.ChatMessageRoleSystem, Content: message.Content,
 			})
 		case "user":
-			content := buildUserMessageContent(message.Content, message.References, message.EditorContext, capabilities)
+			content := buildUserMessageContent(message.Content, message.References, message.EditorContext, capabilities, checkpointMsgs[:messageIndex]...)
 			if content == "" {
 				content = " "
 			}

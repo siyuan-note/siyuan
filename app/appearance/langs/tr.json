@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Aracı sohbetinde alıntıla",
+	"agentContinueEditing": "Aracı sohbetinde devam et",
+	"agentQuickPhrases": "Hızlı ifadeler",
+	"aiPolish": "Anlatımı iyileştir",
 	"agentRestoreDraft": "Taslağı geri yükle",
 	"agentSnapshotWriteBlocked": "Otomatik anlık görüntü oluşturulamadı. Çalışma alanına bu yazma işlemi yapılmadı",
 	"agentRestoreDraftInUse": "Geri yüklemeden önce mevcut taslağı kaydedin veya temizleyin",

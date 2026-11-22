@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Цитирај у разговору са агентом",
+	"agentContinueEditing": "Настави разговор са агентом",
+	"agentQuickPhrases": "Брзе фразе",
+	"aiPolish": "Побољшај стил",
 	"agentRestoreDraft": "Врати нацрт",
 	"agentSnapshotWriteBlocked": "Прављење аутоматског снимка није успело. Овај упис у радни простор није извршен",
 	"agentRestoreDraftInUse": "Сачувајте или обришите тренутни нацрт пре враћања",

@@ -132,9 +132,9 @@ export type AIProviderRequestInput = { "provider"?: string | null; "providerConf
 
 export type AIQuestionRequestInput = { "answers"?: Array<string> | null; "questionID"?: string | null; };
 
-export type AIReference = { "id": string; "title": string; };
+export type AIReference = { "id": string; "messageID"?: string; "title": string; };
 
-export type AIReferenceInput = { "id"?: string | null; "title"?: string | null; };
+export type AIReferenceInput = { "id"?: string | null; "messageID"?: string | null; "title"?: string | null; };
 
 export type AIRerankTestData = { "matched": boolean; "msg"?: string; };
 
@@ -154,7 +154,7 @@ export type AISSERetry = { "attempt": number; "maxRetries": number; };
 
 export type AISSESnapshot = { "roundID": string; "snapshotID": string; };
 
-export type AISSEStart = { "taskID": string; };
+export type AISSEStart = { "prompt"?: string; "taskID": string; };
 
 export type AISSEThinking = { "reasoning": string; "roundID": string; };
 
@@ -208,9 +208,9 @@ export type AISessionExtensionAIPDFImageSelection = ({ "object"?: number | null;
 
 export type AISessionExtensionAIPDFImageSelectionInput = ({ "object"?: number | null; "page"?: number | null; "revision"?: string | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAIReference = ({ "id"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAIReference = ({ "id"?: string | null; "messageID"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAIReferenceInput = ({ "id"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAIReferenceInput = ({ "id"?: string | null; "messageID"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
 
 export type AISessionExtensionAISessionEntry = ({ "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AISessionExtensionAIEditorContext | null; "id"?: string | null; "name"?: string | null; "nativeContent"?: AISessionExtensionAINativeContent | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReference> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionExtensionAISessionEntryStep> | null; "timestamp"?: number | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCall> | null; "type"?: string | null; } & { [key: string]: JSONValue });
 
@@ -3165,6 +3165,7 @@ export interface APIPOSTRoutes {
      * 未知原生版本保留原会话并报错；缺失终止事件、失败或不完整的响应不会执行工具调用。
      * 流式事件按序发送；消费停滞会取消生成，待工具结果和运行时检查点收尾后发送 interrupted。
      * 同轮重试保留原 thinking 轮次；上下文压缩的 thinking 事件携带该轮 roundID。
+     * references 中带 messageID 的条目使用 ⟦id⟧ 定位整条消息引用；title 保存快照，压缩后的历史仍可引用原文。
      */
     "/api/ai/agent/chat": {
         request: AIAgentChatRequestInput;
@@ -3445,6 +3446,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 按块请求的 start 事件携带本轮实际展开的 prompt，供显式转入智能体时保留原文快照。
+     */
     "/api/ai/editor/chat": {
         request: AIEditorChatRequestInput;
         response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

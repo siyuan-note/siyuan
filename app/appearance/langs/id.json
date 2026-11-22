@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Kutip dalam percakapan agen",
+	"agentContinueEditing": "Lanjutkan di percakapan agen",
+	"agentQuickPhrases": "Frasa cepat",
+	"aiPolish": "Perhalus kalimat",
 	"agentRestoreDraft": "Pulihkan draf",
 	"agentSnapshotWriteBlocked": "Snapshot otomatis gagal. Penulisan ini tidak dilakukan di ruang kerja",
 	"agentRestoreDraftInUse": "Simpan atau kosongkan draf saat ini sebelum memulihkan",

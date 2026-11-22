@@ -112,7 +112,11 @@ func aiEditorChatContract(c *gin.Context, request apicontract.AIEditorChatReques
 		c.Header("Cache-Control", "no-cache")
 		c.Header("Connection", "keep-alive")
 		c.Header("X-Accel-Buffering", "no")
-		if err = writeSSEEvent(c, "start", apicontract.AISSEStart{TaskID: req.TaskID}); nil != err {
+		start := apicontract.AISSEStart{TaskID: req.TaskID}
+		if len(req.IDs) > 0 {
+			start.Prompt = stream.Prompt
+		}
+		if err = writeSSEEvent(c, "start", start); nil != err {
 			return
 		}
 		flusher.Flush()

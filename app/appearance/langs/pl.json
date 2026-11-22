@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Zacytuj na czacie z agentem",
+	"agentContinueEditing": "Kontynuuj na czacie z agentem",
+	"agentQuickPhrases": "Szybkie frazy",
+	"aiPolish": "Dopracuj styl",
 	"agentRestoreDraft": "Przywróć szkic",
 	"agentSnapshotWriteBlocked": "Nie udało się utworzyć automatycznej migawki. Ten zapis w obszarze roboczym nie został wykonany",
 	"agentRestoreDraftInUse": "Zapisz lub wyczyść obecny szkic przed przywróceniem",

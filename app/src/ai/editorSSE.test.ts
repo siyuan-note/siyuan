@@ -22,6 +22,14 @@ test("parses fragmented AI editor SSE events", () => {
     }]);
 });
 
+test("preserves the exact editor prompt for handoff and accepts older start events", () => {
+    const state = createAIEditorSSEParserState();
+    for (const data of [{taskID: "edit", prompt: "Polish:\n\nselected blocks"}, {taskID: "edit"}]) {
+        assert.deepEqual(parseAIEditorSSE(state, "event:start\ndata:" + JSON.stringify(data) + "\n\n"),
+            [{type: "start", ...data}]);
+    }
+});
+
 test("skips malformed AI editor SSE events", () => {
     const state = createAIEditorSSEParserState();
     assert.deepEqual(parseAIEditorSSE(state,

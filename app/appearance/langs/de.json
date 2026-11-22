@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Im Agentenchat zitieren",
+	"agentContinueEditing": "Im Agentenchat fortsetzen",
+	"agentQuickPhrases": "Schnelltexte",
+	"aiPolish": "Stil verbessern",
 	"agentRestoreDraft": "Entwurf wiederherstellen",
 	"agentSnapshotWriteBlocked": "Der automatische Schnappschuss ist fehlgeschlagen. Dieser Schreibvorgang im Arbeitsbereich wurde nicht ausgeführt",
 	"agentRestoreDraftInUse": "Sichere oder leere den aktuellen Entwurf vor dem Wiederherstellen",

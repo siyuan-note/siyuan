@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Trích dẫn trong cuộc trò chuyện với tác nhân",
+	"agentContinueEditing": "Tiếp tục trò chuyện với tác nhân",
+	"agentQuickPhrases": "Cụm từ nhanh",
+	"aiPolish": "Trau chuốt câu chữ",
 	"agentRestoreDraft": "Khôi phục bản nháp",
 	"agentSnapshotWriteBlocked": "Không tạo được bản chụp tự động. Thao tác ghi này chưa được thực hiện trong không gian làm việc",
 	"agentRestoreDraftInUse": "Hãy lưu hoặc xóa bản nháp hiện tại trước khi khôi phục",

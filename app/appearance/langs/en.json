@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Quote in Agent Chat",
+	"agentContinueEditing": "Continue in Agent Chat",
+	"agentQuickPhrases": "Quick phrases",
+	"aiPolish": "Polish wording",
 	"agentRestoreDraft": "Restore draft",
 	"agentSnapshotWriteBlocked": "The automatic snapshot failed. This workspace write was not performed",
 	"agentRestoreDraftInUse": "Save or clear the current draft before restoring",

@@ -1,4 +1,8 @@
 {
+	"agentQuote": "ציטוט בשיחת הסוכן",
+	"agentContinueEditing": "המשך בשיחת הסוכן",
+	"agentQuickPhrases": "ביטויים מהירים",
+	"aiPolish": "שיפור הניסוח",
 	"agentRestoreDraft": "שחזור הטיוטה",
 	"agentSnapshotWriteBlocked": "יצירת תמונת המצב האוטומטית נכשלה. פעולת הכתיבה הזו בסביבת העבודה לא בוצעה",
 	"agentRestoreDraftInUse": "יש לשמור או לנקות את הטיוטה הנוכחית לפני השחזור",

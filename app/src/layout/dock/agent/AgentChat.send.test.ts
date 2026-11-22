@@ -10,7 +10,7 @@ const source = createSourceFile("AgentChat.ts", readFileSync("src/layout/dock/ag
     ScriptTarget.Latest, true);
 const declaration = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "AgentChat");
 assert.ok(declaration && isClassDeclaration(declaration));
-const methods = ["sendMessage", "sendQueuedMessage"].map(name => {
+const methods = ["sendMessage", "sendQueuedMessage", "continueEditorTask"].map(name => {
     const method = declaration.members.find(item => item.name?.getText(source) === name);
     assert.ok(method);
     return method.getText(source);
@@ -25,8 +25,9 @@ const createChat = () => {
     const events: string[] = [];
     const sent: string[] = [];
     const context: any = {
-        window: {siyuan: {config: {appearance: {lang: "en_US"}}}},
+        window: {siyuan: {languages: {aiEdit: "AI Edit"}, config: {appearance: {lang: "en_US"}}}},
         listCapabilityManifests: (): [] => [],
+        quotePreview: (text: string) => text,
         SessionStore: {newSessionId: () => "entry", getRevision: () => 1},
         SessionRevisionConflict,
         fetchAgentSSE: async (text: string) => { events.push("send"); sent.push(text); },
@@ -62,8 +63,27 @@ const createChat = () => {
             finish: async () => events.push("finish"),
         },
     });
-    return {chat, events, sent};
+    return {chat, events, sent, context};
 };
+
+test("explicit editor handoff seeds a new session once and allows insertion without sending another request", async () => {
+    const {chat, context, sent} = createChat();
+    const saved: import("./SessionStore").AgentSession[] = [];
+    context.SessionStore.save = async (session: import("./SessionStore").AgentSession) => { saved.push(session); };
+    chat.editorInsertions = new Map();
+    chat.composer.focus = () => {};
+    chat.switchSession = async () => {};
+    const insert = (content: string) => content === "revision";
+    assert.equal(await chat.continueEditorTask("new", "Polish: draft", "result", insert), false);
+    chat.switchSession = async (id: string) => { chat.sessionId = id; };
+    assert.equal(await chat.continueEditorTask("new", "Polish: draft", "result", insert), true);
+    assert.equal(saved.length, 1);
+    assert.equal(saved[0].entries[0].content, "Polish: draft");
+    assert.equal(saved[0].entries[1].type, "assistant");
+    assert.equal(saved[0].entries[1].content, "result");
+    assert.equal(chat.editorInsertions.get("new")("revision"), true);
+    assert.deepEqual(sent, []);
+});
 
 test("sending a new message resets composer height after clearing and before starting the response", async () => {
     const {chat, events, sent} = createChat();

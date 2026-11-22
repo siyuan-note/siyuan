@@ -281,7 +281,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the selection toolbar, or choose it from the block menu. The result streams into a panel where you can replace or insert it, copy it, retry, stop, or discard it. Replacement is available only for a supported selection within one block. Cross-block selections, complex sources, and sources changed while generating can still use insertion"
+									"Data": " in the selection toolbar or choose it from the block menu. Copy the result, insert it after the source, retry, or stop generation. Drag the panel header to move it and double-click to follow the source again. On mobile, drag the top edge of the bottom panel to adjust its height. To revise the result, choose Continue in Agent Chat. The new session includes the original request, its source text, and the result. While the source editor is open, you can insert a later reply at the original location"
 								}
 							]
 						}

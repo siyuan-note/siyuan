@@ -1,4 +1,8 @@
 {
+	"agentQuote": "اقتباس في محادثة الوكيل",
+	"agentContinueEditing": "المتابعة مع الوكيل",
+	"agentQuickPhrases": "عبارات سريعة",
+	"aiPolish": "تحسين الصياغة",
 	"agentRestoreDraft": "استعادة المسودة",
 	"agentSnapshotWriteBlocked": "تعذّر إنشاء اللقطة التلقائية. لم تُنفّذ عملية الكتابة هذه في مساحة العمل",
 	"agentRestoreDraftInUse": "احفظ المسودة الحالية أو امسحها قبل الاستعادة",

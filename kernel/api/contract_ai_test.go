@@ -267,6 +267,9 @@ func TestAPIContractAIEditorSSE(t *testing.T) {
 	if err = bundle.ValidateHTTPResponse("POST", "/api/ai/editor/chat", recorder.Code, recorder.Header().Get("Content-Type"), recorder.Body.Bytes()); err != nil {
 		t.Fatalf("%v: %s", err, recorder.Body.String())
 	}
+	if err = bundle.ValidateSSEEvent("POST", "/api/ai/editor/chat", "start", []byte(`{"taskID":"task","prompt":"Summarize the selected blocks"}`)); err != nil {
+		t.Fatal(err)
+	}
 	for frame := range strings.SplitSeq(strings.TrimSpace(recorder.Body.String()), "\n\n") {
 		lines := strings.SplitN(frame, "\n", 2)
 		if len(lines) != 2 {

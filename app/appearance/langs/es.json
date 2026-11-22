@@ -1,4 +1,8 @@
 {
+	"agentQuote": "Citar en el chat del agente",
+	"agentContinueEditing": "Continuar en el chat del agente",
+	"agentQuickPhrases": "Frases rápidas",
+	"aiPolish": "Mejorar la redacción",
 	"agentRestoreDraft": "Restaurar borrador",
 	"agentSnapshotWriteBlocked": "Falló la instantánea automática. No se realizó esta escritura en el espacio de trabajo",
 	"agentRestoreDraftInUse": "Guarda o borra el borrador actual antes de restaurarlo",

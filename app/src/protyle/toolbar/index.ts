@@ -108,6 +108,7 @@ import {
     normalizeInlineMarkRange
 } from "./inlineRangeBoundary";
 import {resolvePluginToolbar} from "../../plugin/toolbarItem";
+import {isEncryptedBox} from "../../util/pathName";
 import {FontControl, updateFontControls} from "./fontControls";
 import {
     areProtylePluginExtensionsEnabled,
@@ -299,6 +300,9 @@ export class Toolbar {
             return;
         }
         this.range = range;
+        const quote = this.element.querySelector<HTMLElement>('[data-type="agentQuote"]');
+        if (quote) quote.dataset.entryUnavailable = String(!protyle.block.rootID || isEncryptedBox(protyle.notebookId) ||
+            window.siyuan.config.readonly || window.siyuan.isPublish);
         updateBlockTypeButton(protyle, this.element.querySelector('[data-type="block-type"]'), range);
         applyToolbarEntryVisibility(this.element);
         this.rangePosition = undefined;

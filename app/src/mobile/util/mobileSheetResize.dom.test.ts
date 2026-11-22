@@ -294,6 +294,14 @@ app.whenReady().then(async () => {
             win.webContents.enableDeviceEmulation({screenPosition:"mobile", screenSize:{width:390,height:900},
                 viewSize:{width:390,height:900}, deviceScaleFactor:1, scale:1});
         }
+        // Exercise actual animation regardless of the runner's accessibility settings.
+        win.webContents.debugger.attach();
+        await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+            features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+        });
+        if (!await win.webContents.executeJavaScript('matchMedia("(prefers-reduced-motion: no-preference)").matches')) {
+            throw new Error("Sheet resize test could not disable reduced motion emulation");
+        }
         await win.webContents.insertCSS(${JSON.stringify(css)});
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
         win.destroy(); app.exit(0);

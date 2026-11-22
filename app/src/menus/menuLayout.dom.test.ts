@@ -885,7 +885,10 @@ const browserCases = async (sources: Record<string, string>, css: string,
     pointer(sheetItems, .3);
     pointer(sheetItems, .7);
     check.equal(sheetItems.scrollTop, 0, "Mobile sheets ignore mouse-follow scrolling even with a saved preference");
-    check.equal(sheet.element.getBoundingClientRect().height, sheetHeight);
+    const updatedSheetHeight = sheet.element.getBoundingClientRect().height;
+    // A compositor transform can round the same CSS height differently across frames.
+    check.ok(Math.abs(updatedSheetHeight - sheetHeight) < .01,
+        `Updating menu contents preserves the sheet height: ${sheetHeight}px -> ${updatedSheetHeight}px`);
     check.ok(sheet.element.getBoundingClientRect().height <= innerHeight / 2 + .5);
     check.equal(sheetResets, 1);
     await settle();

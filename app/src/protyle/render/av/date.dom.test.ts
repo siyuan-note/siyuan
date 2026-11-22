@@ -253,16 +253,33 @@ test("date panels embed a shared calendar without changing range, batch, clear o
             const check = async (code: string, message: string) => {
                 if (!await win.webContents.executeJavaScript(code)) { throw new Error(message); }
             };
+            const typeDigit = async (key: string, includeKeyEvents: boolean) => {
+                // Arm the listener before sending input, then await the renderer's actual input event.
+                await run(`window.nativeInput = new Promise(resolve => {
+                    const onInput = event => {
+                        if (!event.isTrusted || event.target !== nativeTime) return;
+                        clearTimeout(timer);
+                        document.removeEventListener("input", onInput, true);
+                        resolve(true);
+                    };
+                    const timer = setTimeout(() => {
+                        document.removeEventListener("input", onInput, true);
+                        resolve(false);
+                    }, 2000);
+                    document.addEventListener("input", onInput, true);
+                })`);
+                if (includeKeyEvents) win.webContents.sendInputEvent({type: "keyDown", keyCode: key});
+                win.webContents.sendInputEvent({type: "char", keyCode: key});
+                if (includeKeyEvents) win.webContents.sendInputEvent({type: "keyUp", keyCode: key});
+                await check("nativeInput", `No trusted input event for digit ${key}`);
+            };
             for (const endpoint of [0, 1]) {
                 for (const digits of ["1234", "2360"]) {
                     await run(`nativeDatePanel.mount(); window.nativeTime = nativeDatePanel.panel.querySelectorAll('[data-date-picker-part="time"]')[${endpoint}]; nativeTime.focus(); nativeTime.select();`);
                     let draft = "";
                     for (const key of digits) {
-                        win.webContents.sendInputEvent({type: "keyDown", keyCode: key});
-                        win.webContents.sendInputEvent({type: "char", keyCode: key});
-                        win.webContents.sendInputEvent({type: "keyUp", keyCode: key});
+                        await typeDigit(key, true);
                         draft += key;
-                        await run("new Promise(resolve => requestAnimationFrame(resolve))");
                         await check(`nativeTime.value === ${JSON.stringify(draft)}`, "Real range host preserves every numeric draft on either endpoint");
                     }
                     await run("window.nativeBefore = nativeDatePanel.updates.length");
@@ -273,8 +290,7 @@ test("date panels embed a shared calendar without changing range, batch, clear o
                         await check("nativeDatePanel.updates.length === nativeBefore", "Invalid time and date selection do not save");
                     } else {
                         await run("nativeTime.setSelectionRange(1, 2)");
-                        win.webContents.sendInputEvent({type: "char", keyCode: "0"});
-                        await run("new Promise(resolve => requestAnimationFrame(resolve))");
+                        await typeDigit("0", false);
                         await check('nativeTime.value === "1034" && nativeTime.selectionStart === 2', "Middle digit replacement preserves cursor and raw draft");
                         await run("nativeDatePanel.close()");
                         await check("nativeDatePanel.updates.length === nativeBefore + 1", "Valid native digits save once without blur");

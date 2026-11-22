@@ -5,6 +5,9 @@ import {stickyRow} from "../render/av/row";
 import {trimAVRowsSync} from "../render/av/virtualScroll";
 import {isDocumentBoundaryLoaded} from "../util/documentRange";
 import {getVisibleRootBlockID, isScrolledToBottom} from "./viewport";
+/// #if !MOBILE
+import {scheduleAVHorizontalScrollbar} from "../render/av/horizontalScrollbar";
+/// #endif
 
 let getIndexTimeout: number;
 const avScrollPending = new WeakSet<HTMLElement>();
@@ -39,6 +42,10 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 trimAVRowsSync(item, elementRect);
             });
         });
+
+        /// #if !MOBILE
+        scheduleAVHorizontalScrollbar(protyle);
+        /// #endif
 
         if (!protyle.element.classList.contains("block__edit") && !isMobile()) {
             protyle.contentElement.setAttribute("data-scrolltop", element.scrollTop.toString());

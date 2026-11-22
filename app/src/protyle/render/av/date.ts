@@ -59,6 +59,15 @@ export const getDateHTML = (cellElements: HTMLElement[], format?: TAVDateFormat)
 </div>`;
 };
 
+const normalizeDateDraft = (value: string) => {
+    const match = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.exec(value) ||
+        /^(\d{4})年(\d{1,2})月(\d{1,2})日$/.exec(value) ||
+        /^(\d{4})(\d{2})(\d{2})$/.exec(value);
+    if (!match) { return value; }
+    const [, year, month, day] = match;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+};
+
 export const bindDateEvent = (options: {
     protyle: IProtyle,
     data: IAV,
@@ -78,11 +87,14 @@ export const bindDateEvent = (options: {
 
     [inputElements[0], inputElements[1]].forEach(input => input.addEventListener("input", () => { dirty = true; }));
     const picker = bindInlineDatePicker(options.menuElement.querySelector("[data-date-inline]"),
-        [inputElements[0], inputElements[1]], {onChange: (_input, state) => {
-            if (state.part === "time") { timeEdited[_input === inputElements[0] ? 0 : 1] = true; }
-            if (!state.valid || state.kind === "input") { return; }
-            dirty = true;
-        }});
+        [inputElements[0], inputElements[1]], {
+            normalizeDateDraft,
+            onChange: (input, state) => {
+                if (state.part === "time") { timeEdited[input === inputElements[0] ? 0 : 1] = true; }
+                if (!state.valid || state.kind === "input") { return; }
+                dirty = true;
+            },
+        });
     picker.activate(inputElements[0]);
     const validate = () => picker.validate() &&
         [inputElements[0], inputElements[1]].every(input => validateInlineDateInput(input));

@@ -183,6 +183,68 @@ test("date panels embed a shared calendar without changing range, batch, clear o
             const rect = button.querySelector("use").getBBox();
             equal(rect.width > 0 && rect.height > 0, true, "Date panel navigation paints real icons");
         }
+        const fillDate = (input: HTMLInputElement, value: string, inputType = "insertText") => {
+            input.value = value;
+            input.dispatchEvent(new InputEvent("input", {bubbles: true, inputType}));
+        };
+        const selectedDate = () => panel.querySelector<HTMLButtonElement>('[aria-selected="true"] button[data-date]')?.dataset.date;
+
+        initial.isNotTime = true;
+        document.documentElement.dataset.frontend = "browser-desktop";
+        inputs = mount(true);
+        inputs[0].focus();
+        fillDate(inputs[0], "2027/1/2");
+        equal(selectedDate(), "2027-01-02", "Unpadded slash date immediately positions the calendar");
+        equal(inputs[0].value, "2027/1/2", "Preview leaves the draft editable");
+        fillDate(inputs[0], "2027/1/25");
+        equal(selectedDate(), "2027-01-25", "Typing another day digit updates the selected date");
+        inputs[1].focus();
+        fillDate(inputs[1], "20271122", "insertFromPaste");
+        equal(selectedDate(), "2027-11-22", "Compact end date immediately positions the shared calendar");
+        close();
+        equal(updates.at(-1).content, new Date(2027, 0, 25).getTime(), "Slash start date is saved");
+        equal(updates.at(-1).content2, new Date(2027, 10, 22).getTime(), "Compact end date is saved without blur");
+
+        inputs = mount(true);
+        inputs[0].focus();
+        inputs[0].dispatchEvent(new CompositionEvent("compositionstart", {bubbles: true}));
+        fillDate(inputs[0], "2028年2月29日", "insertCompositionText");
+        equal(selectedDate(), "2026-02-10", "Calendar waits for composition to finish");
+        inputs[0].dispatchEvent(new CompositionEvent("compositionend", {bubbles: true}));
+        equal(selectedDate(), "2028-02-29", "Chinese leap date positions the calendar after composition");
+        inputs[0].dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+        equal(updates.at(-1).content, new Date(2028, 1, 29).getTime(), "Enter saves Chinese date input");
+
+        inputs = mount(true);
+        inputs[0].focus();
+        const beforeInvalidDate = updates.length;
+        for (const value of ["2027/02/29", "2027年13月1日", "2027112", "202711220"]) {
+            fillDate(inputs[0], value);
+            equal(inputs[0].getAttribute("aria-invalid"), "true", "Invalid date remains invalid");
+            equal(selectedDate(), undefined, "Invalid date does not select a day");
+        }
+        close();
+        equal(updates.length, beforeInvalidDate, "Invalid draft cannot replace existing dates");
+        equal(inputs[0].value, "202711220", "Invalid draft is preserved");
+
+        initial.isNotTime = false;
+        inputs = mount(true);
+        inputs[0].focus();
+        fillDate(inputs[0], "2028/02/29", "insertFromPaste");
+        equal(selectedDate(), "2028-02-29", "Pasted padded date positions the calendar in time mode");
+        close();
+        equal(updates.at(-1).content, new Date(2028, 1, 29, 12, 34, 56, 123).getTime(), "Replacing only the date preserves time precision");
+        equal(updates.at(-1).content2, initial.content2, "Changing the start date preserves the end timestamp");
+
+        inputs = mount(true);
+        inputs[1].focus();
+        fillDate(inputs[1], "20271122 14:45", "insertFromPaste");
+        equal(inputs[1].value, "2027-11-22", "Pasting a date and time splits the date into its own field");
+        equal(selectedDate(), "2027-11-22", "Pasted date and time positions the end calendar");
+        close();
+        equal(updates.at(-1).content2, new Date(2027, 10, 22, 14, 45).getTime(), "Explicitly pasted time replaces stored precision");
+        document.documentElement.dataset.frontend = "browser-mobile";
+
         Object.assign(window, {nativeDatePanel: {panel, updates, mount, close: () => close()}});
         return "date panel inline cases passed";
     }, sources, readFileSync("appearance/themes/daylight/theme.css", "utf8") + compile("src/assets/scss/base.scss").css, {width: 320, height: 740,

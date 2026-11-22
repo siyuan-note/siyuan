@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "ड्राफ़्ट बहाल करें",
+	"agentSnapshotWriteBlocked": "स्वचालित स्नैपशॉट विफल रहा। कार्यस्थान में लिखने की यह कार्रवाई नहीं हुई",
+	"agentRestoreDraftInUse": "बहाल करने से पहले मौजूदा ड्राफ़्ट सहेजें या साफ़ करें",
 	"agentImageFromFiles": "फ़ाइलों से छवि चुनें",
 	"shareAsset": "साझा करें",
 	"archiveEncryptedNotebooksSyncTip": "आर्काइव बनाने से डेटा नहीं हटता। हटाने की पुष्टि करने पर यह बदलाव सिंक के ज़रिए लागू होता है",

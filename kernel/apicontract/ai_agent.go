@@ -185,6 +185,11 @@ type AISSEFinish struct {
 type AISSEMessage struct {
 	Message string `json:"message"`
 }
+type AISSEAgentError struct {
+	Message string `json:"message"`
+	// 自动快照失败，当前工具的工作空间写入未执行。
+	SnapshotFailed bool `json:"snapshotFailed,omitempty"`
+}
 type AISSETurn struct {
 	TurnID string `json:"turnID"`
 }
@@ -245,7 +250,7 @@ func aiEditorSSEOptions() ResponseOptions {
 	return SSEOptions(SSEEvent[AISSEStart]("start"), SSEEvent[AISSEToken]("reasoning"), SSEEvent[AISSEToken]("content"), SSEEvent[AISSEMessage]("error"), SSEEvent[AISSEMessage]("truncated"), SSEEvent[AISSEFinish]("done"))
 }
 func aiAgentSSEOptions() ResponseOptions {
-	options := SSEOptions(SSEEvent[AISSETurn]("turn"), SSEEvent[AISSEToken]("content"), SSEEvent[AISSEThinking]("thinking"), SSEEvent[AISSEToken]("reasoning"), SSEEvent[AISSEConfirm]("confirm"), SSEEvent[AIPermissionData]("permission"), SSEEvent[AISSEToolCall]("tool_call"), SSEEvent[AISSEToolResult]("tool_result"), SSEEvent[AISSEMessage]("error"), SSEEvent[AISSEMessage]("interrupted"), SSEEvent[AISSEUsage]("usage"), SSEEvent[AISSETurn]("done"), SSEEvent[AISSERetry]("retry"), SSEEvent[AISSEQuestion]("question"), SSEEvent[AISSEBrowserCapabilityCall]("browser_capability_call"), SSEEvent[AISSESnapshot]("snapshot"))
+	options := SSEOptions(SSEEvent[AISSETurn]("turn"), SSEEvent[AISSEToken]("content"), SSEEvent[AISSEThinking]("thinking"), SSEEvent[AISSEToken]("reasoning"), SSEEvent[AISSEConfirm]("confirm"), SSEEvent[AIPermissionData]("permission"), SSEEvent[AISSEToolCall]("tool_call"), SSEEvent[AISSEToolResult]("tool_result"), SSEEvent[AISSEAgentError]("error"), SSEEvent[AISSEMessage]("interrupted"), SSEEvent[AISSEUsage]("usage"), SSEEvent[AISSETurn]("done"), SSEEvent[AISSERetry]("retry"), SSEEvent[AISSEQuestion]("question"), SSEEvent[AISSEBrowserCapabilityCall]("browser_capability_call"), SSEEvent[AISSESnapshot]("snapshot"))
 	options.AdditionalErrorStatuses = []int{409}
 	return options
 }

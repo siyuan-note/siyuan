@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Obnoviť koncept",
+	"agentSnapshotWriteBlocked": "Automatickú snímku sa nepodarilo vytvoriť. Tento zápis v pracovnom priestore sa nevykonal",
+	"agentRestoreDraftInUse": "Pred obnovením uložte alebo vymažte aktuálny koncept",
 	"agentImageFromFiles": "Vybrať obrázok zo súborov",
 	"shareAsset": "Zdieľať",
 	"archiveEncryptedNotebooksSyncTip": "Vytvorenie archívu neodstráni údaje. Po potvrdení sa odstránenie prenesie synchronizáciou",

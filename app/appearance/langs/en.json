@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Restore draft",
+	"agentSnapshotWriteBlocked": "The automatic snapshot failed. This workspace write was not performed",
+	"agentRestoreDraftInUse": "Save or clear the current draft before restoring",
 	"agentImageFromFiles": "Choose image from files",
 	"shareAsset": "Share",
 	"archiveEncryptedNotebooksSyncTip": "Creating an archive does not remove data. Confirming removal makes it propagate through sync",

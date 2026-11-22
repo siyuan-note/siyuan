@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "استعادة المسودة",
+	"agentSnapshotWriteBlocked": "تعذّر إنشاء اللقطة التلقائية. لم تُنفّذ عملية الكتابة هذه في مساحة العمل",
+	"agentRestoreDraftInUse": "احفظ المسودة الحالية أو امسحها قبل الاستعادة",
 	"agentImageFromFiles": "اختيار صورة من الملفات",
 	"shareAsset": "مشاركة",
 	"archiveEncryptedNotebooksSyncTip": "إنشاء الأرشيف لا يزيل البيانات. عند تأكيد الإزالة، ستنتقل عبر المزامنة",

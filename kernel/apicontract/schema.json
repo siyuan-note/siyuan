@@ -2293,6 +2293,21 @@
       ],
       "additionalProperties": false
     },
+    "AISSEAgentError": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "snapshotFailed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "additionalProperties": false
+    },
     "AISSEBrowserCapabilityCall": {
       "type": "object",
       "properties": {
@@ -133804,7 +133819,7 @@
             "$ref": "#/$defs/AISSETurn"
           },
           "error": {
-            "$ref": "#/$defs/AISSEMessage"
+            "$ref": "#/$defs/AISSEAgentError"
           },
           "interrupted": {
             "$ref": "#/$defs/AISSEMessage"

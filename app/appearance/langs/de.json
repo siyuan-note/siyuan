@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Entwurf wiederherstellen",
+	"agentSnapshotWriteBlocked": "Der automatische Schnappschuss ist fehlgeschlagen. Dieser Schreibvorgang im Arbeitsbereich wurde nicht ausgeführt",
+	"agentRestoreDraftInUse": "Sichere oder leere den aktuellen Entwurf vor dem Wiederherstellen",
 	"agentImageFromFiles": "Bild aus Dateien auswählen",
 	"shareAsset": "Teilen",
 	"archiveEncryptedNotebooksSyncTip": "Das Erstellen des Archivs entfernt keine Daten. Erst nach der Bestätigung wird die Entfernung synchronisiert",

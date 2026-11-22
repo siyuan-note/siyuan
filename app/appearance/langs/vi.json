@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Khôi phục bản nháp",
+	"agentSnapshotWriteBlocked": "Không tạo được bản chụp tự động. Thao tác ghi này chưa được thực hiện trong không gian làm việc",
+	"agentRestoreDraftInUse": "Hãy lưu hoặc xóa bản nháp hiện tại trước khi khôi phục",
 	"agentImageFromFiles": "Chọn ảnh từ tệp",
 	"shareAsset": "Chia sẻ",
 	"archiveEncryptedNotebooksSyncTip": "Tạo bản lưu trữ không xóa dữ liệu. Sau khi xác nhận, việc xóa sẽ được áp dụng qua đồng bộ",

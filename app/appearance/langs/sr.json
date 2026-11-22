@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Врати нацрт",
+	"agentSnapshotWriteBlocked": "Прављење аутоматског снимка није успело. Овај упис у радни простор није извршен",
+	"agentRestoreDraftInUse": "Сачувајте или обришите тренутни нацрт пре враћања",
 	"agentImageFromFiles": "Izaberi sliku iz datoteka",
 	"shareAsset": "Подели",
 	"archiveEncryptedNotebooksSyncTip": "Прављење архиве не уклања податке. Након потврде, уклањање се преноси синхронизацијом",

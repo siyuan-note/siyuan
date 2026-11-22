@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Restaurar rascunho",
+	"agentSnapshotWriteBlocked": "Falha no instantâneo automático. Esta gravação na área de trabalho não foi executada",
+	"agentRestoreDraftInUse": "Salve ou limpe o rascunho atual antes de restaurar",
 	"agentImageFromFiles": "Escolher imagem nos arquivos",
 	"shareAsset": "Compartilhar",
 	"archiveEncryptedNotebooksSyncTip": "Criar um arquivo não remove dados. Após a confirmação, a remoção será propagada pela sincronização",

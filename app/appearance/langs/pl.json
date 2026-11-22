@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Przywróć szkic",
+	"agentSnapshotWriteBlocked": "Nie udało się utworzyć automatycznej migawki. Ten zapis w obszarze roboczym nie został wykonany",
+	"agentRestoreDraftInUse": "Zapisz lub wyczyść obecny szkic przed przywróceniem",
 	"agentImageFromFiles": "Wybierz obraz z plików",
 	"shareAsset": "Udostępnij",
 	"archiveEncryptedNotebooksSyncTip": "Utworzenie archiwum nie usuwa danych. Po potwierdzeniu usunięcie zostanie rozpropagowane przez synchronizację",

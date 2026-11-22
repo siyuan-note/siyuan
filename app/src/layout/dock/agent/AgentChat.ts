@@ -115,6 +115,7 @@ type UserEntry = EntryBase & {
     editorContext?: IEditorContext;
     timestamp?: number
 };
+type AgentSessionError = {message: string; userEntryID?: string; snapshotFailed?: boolean};
 
 type SessionEntry =
     | UserEntry
@@ -273,7 +274,7 @@ export class AgentChat extends Model {
     private recoveryCommitTurnIDs = new Map<string, string>();
     private pendingRecoverySessionIDs = new Set<string>();
     // 错误提示按会话和用户轮次保留，恢复重绘时重新显示，不参与模型上下文。
-    private sessionErrors = new Map<string, {message: string; userEntryID?: string}>();
+    private sessionErrors = new Map<string, AgentSessionError>();
     private recoveryInFlightSessionIDs = new Set<string>();
     private lute: Lute;
     private streamingMarkdownEnabled = isAgentStreamingMarkdownEnabled();
@@ -1626,6 +1627,14 @@ export class AgentChat extends Model {
 
     private finishDetachedRunView(run: ManagedAgentSessionRun, attached: boolean) {
         this.pendingRecoverySessionIDs.add(run.sessionID);
+        const failure = run.pendingEvents.find(event => event.type === "error" && event.snapshotFailed);
+        if (failure?.type === "error") {
+            const entries = run.viewState?.entries || [];
+            const user = entries[findAgentUserEntryIndex(entries)];
+            if (user?.id) {
+                this.sessionErrors.set(run.sessionID, {message: failure.message, userEntryID: user.id, snapshotFailed: true});
+            }
+        }
         if (attached) {
             const pendingTitle = this.pendingSessionTitles.get(run.sessionID);
             if (pendingTitle) {
@@ -2396,6 +2405,8 @@ export class AgentChat extends Model {
             statusLabel = L.agentConfirmReject || "Rejected";
         } else if (entry.status === "always") {
             statusLabel = L.agentConfirmAlways || "Session Allow";
+        } else if (entry.status === "expired") {
+            statusLabel = L.agentNotificationExpired;
         } else {
             // pending（用户未操作就切换/出错而落盘）：重载后无法再交互，
             // 至少显示一个状态提示，避免变成无按钮无文本的死卡片。
@@ -2582,7 +2593,7 @@ export class AgentChat extends Model {
         if (error) {
             const lastUser = [...displayEntries].reverse().find(entry => entry.type === "user");
             if (error.userEntryID === lastUser?.id) {
-                this.renderError(error.message);
+                this.renderError(error);
             } else {
                 this.sessionErrors.delete(session.id);
             }
@@ -3197,20 +3208,32 @@ export class AgentChat extends Model {
                 case "usage":
                     this.appendUsage(event.lastPromptTokens, event.tokenBreakdown, event.cachedTokens, event.contextLimit);
                     break;
-                case "error":
+                case "error": {
+                    const sessionID = this.sessionId;
+                    const userEntryID = event.snapshotFailed ? this.entries[findAgentUserEntryIndex(this.entries)]?.id : undefined;
                     this.queuedMessages.pause(this.sessionId);
                     this.flushTokenUpdate();
                     this.requestStartTime = 0;
                     if (this.currentTurnID) {
+                        if (event.snapshotFailed) {
+                            this.expirePendingConfirmations();
+                        }
                         // 服务端 error 是终止事件：此前已完成运行时检查点和所有工具结果发送，
                         // 因此可复用正常收尾，把部分回复与工具调用写入 entries 后提交该 turn。
                         await this.finishResponse(false);
-                        this.appendError(event.message);
+                        if (!this.destroyed) {
+                            if (this.sessionId === sessionID) {
+                                this.appendError(event.message, event.snapshotFailed);
+                            } else if (event.snapshotFailed && userEntryID) {
+                                this.sessionErrors.set(sessionID, {message: event.message, userEntryID, snapshotFailed: true});
+                            }
+                        }
                     } else {
                         // turn 建立前的错误没有可提交的运行时，直接恢复磁盘权威状态。
                         await this.handleError(new Error(event.message));
                     }
                     break;
+                }
                 case "interrupted":
                     this.queuedMessages.pause(this.sessionId);
                     await this.handleError(new Error(event.message));
@@ -3894,6 +3917,9 @@ export class AgentChat extends Model {
         this.messagesContainer.querySelectorAll(".agent-chat__regenerate").forEach((element) => {
             element.classList.toggle("fn__none", hidden);
         });
+        this.messagesContainer.querySelectorAll<HTMLButtonElement>(".agent-chat__snapshot-recovery > button").forEach(button => {
+            button.disabled = hidden;
+        });
     }
 
     private findUserEntryIDBeforeElement(el: HTMLElement): string | undefined {
@@ -4258,31 +4284,85 @@ export class AgentChat extends Model {
         });
     }
 
-    private appendError(message: string) {
+    private appendError(message: string, snapshotFailed?: boolean) {
         if (this.streamingMarkdownEnabled && this.currentContent &&
             this.currentAIElement?.querySelector(".agent-chat__body--streaming")) {
             this.finalizeStreamingBody(this.currentContent, Date.now());
         }
         this.cancelTokenUpdate();
         const lastUser = [...this.entries].reverse().find(entry => entry.type === "user");
-        this.sessionErrors.set(this.sessionId, {message, userEntryID: lastUser?.id});
+        const error = {message, userEntryID: lastUser?.id, snapshotFailed};
+        this.sessionErrors.set(this.sessionId, error);
         this.finishActiveThinking();
         this.clearThinking();
         if (this.currentAIElement && !this.currentContent) {
             this.currentAIElement.remove();
         }
         this.currentAIElement = null;
-        this.renderError(message);
+        this.renderError(error);
         this.scrollToBottom();
         this.flushThinkingStep();
     }
 
-    private renderError(message: string) {
+    private renderError(error: AgentSessionError) {
         this.messagesContainer.querySelectorAll(".agent-chat__msg--error").forEach(el => el.remove());
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--error";
-        el.innerHTML = '<div class="agent-chat__body agent-chat__body--error"><svg class="agent-chat__error-icon"><use xlink:href="#iconTriangleAlert"></use></svg><span>' + escapeHtml(message) + "</span></div>";
+        el.innerHTML = '<div class="agent-chat__body agent-chat__body--error"><svg class="agent-chat__error-icon"><use xlink:href="#iconTriangleAlert"></use></svg><span>' + escapeHtml(error.message) + "</span></div>";
+        if (error.snapshotFailed && error.userEntryID) {
+            const L = window.siyuan.languages;
+            const details = document.createElement("div");
+            details.className = "agent-chat__snapshot-recovery";
+            const notice = document.createElement("span");
+            notice.textContent = L.agentSnapshotWriteBlocked;
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "b3-button b3-button--outline";
+            button.textContent = L.agentRestoreDraft;
+            button.disabled = this.isCurrentSessionRunning();
+            const sessionID = this.sessionId;
+            button.addEventListener("click", () => this.restoreFailedDraft(sessionID, error));
+            details.append(notice, button);
+            el.appendChild(details);
+        }
         this.messagesContainer.appendChild(el);
+    }
+
+    private restoreFailedDraft(sessionID: string, error: AgentSessionError) {
+        if (!this.composer || this.destroyed || this.sessionId !== sessionID || this.sessionViewChanging ||
+            this.startingSessionID || this.isCurrentSessionRunning() || this.sessionErrors.get(sessionID) !== error) {
+            return;
+        }
+        const entry = this.entries[findAgentUserEntryIndex(this.entries)];
+        if (entry?.type !== "user" || entry.id !== error.userEntryID) {
+            return;
+        }
+        const current = this.composer.getSendData();
+        if (current.text || current.references.length || this.composer.isUploading()) {
+            showMessage(window.siyuan.languages.agentRestoreDraftInUse);
+            return;
+        }
+        this.composer.setData({text: entry.content, blockHTML: entry.blockHTML || "", references: entry.references || []});
+        this.composer.focus(true);
+    }
+
+    private expirePendingConfirmations() {
+        const start = findAgentUserEntryIndex(this.entries);
+        const currentTurn = start < 0 ? this.pendingConfirms : this.entries.slice(start + 1).concat(this.pendingConfirms);
+        for (const entry of currentTurn) {
+            if (entry.type !== "confirm" || entry.status !== "pending") {
+                continue;
+            }
+            entry.status = "expired";
+            const card = entry.id ? this.messagesContainer.querySelector(`[data-message-id="${CSS.escape(entry.id)}"]`) : null;
+            const actions = card?.querySelector(".agent-chat__confirm-actions");
+            if (actions) {
+                const label = document.createElement("span");
+                label.className = "agent-chat__confirm-done";
+                label.textContent = window.siyuan.languages.agentNotificationExpired;
+                actions.replaceChildren(label);
+            }
+        }
     }
 
     private appendRetry(attempt: number, maxRetries: number) {
@@ -4497,12 +4577,17 @@ export class AgentChat extends Model {
         el.setAttribute("data-message-id", confirmEntryId);
         this.pendingConfirms.push(confirmEntry);
         const submitConfirm = async (approved: boolean, always: boolean, doneText: string) => {
+            if (confirmEntry.status !== "pending") {
+                return;
+            }
             const buttons = Array.from(el.querySelectorAll("button")) as HTMLButtonElement[];
             buttons.forEach((button) => button.disabled = true);
             const accepted = await this.postConfirm(confirmID, approved, always, sessionID, confirmEntryId);
             if (!accepted) {
-                buttons.forEach((button) => button.disabled = false);
-                showMessage(window.siyuan.languages._kernel[28], 3000);
+                if (confirmEntry.status === "pending") {
+                    buttons.forEach((button) => button.disabled = false);
+                    showMessage(window.siyuan.languages._kernel[28], 3000);
+                }
                 return;
             }
             el.classList.add("agent-chat__msg--confirmed");

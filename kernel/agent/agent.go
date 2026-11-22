@@ -215,6 +215,7 @@ type AgentEvent struct {
 	QuestionID       string
 	CallID           string
 	Error            string
+	SnapshotFailed   bool
 	PromptTokens     int
 	CompletionTokens int
 	LastPromptTokens int
@@ -1438,8 +1439,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 								})
 							}
 							sendEvent(ctx, ch, AgentEvent{
-								Type:  "error",
-								Error: "auto snapshot failed, operation aborted: " + err.Error(),
+								Type:           "error",
+								Error:          "auto snapshot failed, operation aborted: " + err.Error(),
+								SnapshotFailed: true,
 							})
 							return
 						}

@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Pulihkan draf",
+	"agentSnapshotWriteBlocked": "Snapshot otomatis gagal. Penulisan ini tidak dilakukan di ruang kerja",
+	"agentRestoreDraftInUse": "Simpan atau kosongkan draf saat ini sebelum memulihkan",
 	"agentImageFromFiles": "Pilih gambar dari berkas",
 	"shareAsset": "Bagikan",
 	"archiveEncryptedNotebooksSyncTip": "Membuat arsip tidak menghapus data. Setelah dikonfirmasi, penghapusan akan diterapkan melalui sinkronisasi",

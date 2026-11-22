@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "กู้คืนฉบับร่าง",
+	"agentSnapshotWriteBlocked": "สร้างสแนปช็อตอัตโนมัติไม่สำเร็จ จึงไม่ได้เขียนข้อมูลครั้งนี้ลงในพื้นที่ทำงาน",
+	"agentRestoreDraftInUse": "บันทึกหรือล้างฉบับร่างปัจจุบันก่อนกู้คืน",
 	"agentImageFromFiles": "เลือกรูปภาพจากไฟล์",
 	"shareAsset": "แชร์",
 	"archiveEncryptedNotebooksSyncTip": "การสร้างไฟล์เก็บถาวรจะไม่ลบข้อมูล เมื่อยืนยันการนำออกแล้ว การนำออกจะมีผลผ่านการซิงค์",

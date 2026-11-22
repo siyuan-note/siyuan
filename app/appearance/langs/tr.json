@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Taslağı geri yükle",
+	"agentSnapshotWriteBlocked": "Otomatik anlık görüntü oluşturulamadı. Çalışma alanına bu yazma işlemi yapılmadı",
+	"agentRestoreDraftInUse": "Geri yüklemeden önce mevcut taslağı kaydedin veya temizleyin",
 	"agentImageFromFiles": "Dosyalardan görsel seç",
 	"shareAsset": "Paylaş",
 	"archiveEncryptedNotebooksSyncTip": "Arşiv oluşturmak verileri kaldırmaz. Kaldırma onaylandıktan sonra eşitlemeyle yayılır",

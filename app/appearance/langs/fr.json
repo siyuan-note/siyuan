@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Restaurer le brouillon",
+	"agentSnapshotWriteBlocked": "L’instantané automatique a échoué. Cette écriture dans l’espace de travail n’a pas été effectuée",
+	"agentRestoreDraftInUse": "Enregistrez ou effacez le brouillon en cours avant de le restaurer",
 	"agentImageFromFiles": "Choisir une image dans les fichiers",
 	"shareAsset": "Partager",
 	"archiveEncryptedNotebooksSyncTip": "Créer une archive ne supprime aucune donnée. Une fois confirmée, la suppression est propagée par la synchronisation",

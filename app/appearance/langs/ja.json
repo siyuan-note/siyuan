@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "下書きを復元",
+	"agentSnapshotWriteBlocked": "自動スナップショットの作成に失敗したため、今回のワークスペースへの書き込みは実行されませんでした",
+	"agentRestoreDraftInUse": "復元する前に現在の下書きを保存するか消去してください",
 	"agentImageFromFiles": "ファイルから画像を選択",
 	"shareAsset": "共有",
 	"archiveEncryptedNotebooksSyncTip": "アーカイブを作成するだけではデータは削除されません。移出を確定すると、同期を通じて他の端末にも反映されます",

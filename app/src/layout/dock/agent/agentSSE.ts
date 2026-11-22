@@ -35,6 +35,7 @@ export type ISSEResult = {
 } | {
     type: "error";
     message: string;
+    snapshotFailed?: boolean;
 } | {
     type: "interrupted";
     message: string;
@@ -310,7 +311,7 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
                 result: data.result as string,
             };
         case "error":
-            return {type: "error", message: data.message as string};
+            return {type: "error", message: data.message as string, snapshotFailed: data.snapshotFailed === true};
         case "interrupted":
             return {type: "interrupted", message: data.message as string};
         case "done":

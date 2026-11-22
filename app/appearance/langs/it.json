@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Ripristina bozza",
+	"agentSnapshotWriteBlocked": "Lo snapshot automatico non è riuscito. Questa operazione di scrittura nell’area di lavoro non è stata eseguita",
+	"agentRestoreDraftInUse": "Salva o svuota la bozza corrente prima del ripristino",
 	"agentImageFromFiles": "Scegli un’immagine dai file",
 	"shareAsset": "Condividi",
 	"archiveEncryptedNotebooksSyncTip": "La creazione di un archivio non rimuove dati. Dopo la conferma, la rimozione viene propagata tramite la sincronizzazione",

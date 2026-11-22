@@ -138,6 +138,8 @@ export type AIReferenceInput = { "id"?: string | null; "title"?: string | null; 
 
 export type AIRerankTestData = { "matched": boolean; "msg"?: string; };
 
+export type AISSEAgentError = { "message": string; "snapshotFailed"?: boolean; };
+
 export type AISSEBrowserCapabilityCall = { "arguments": { [key: string]: JSONValue } | null; "callID": string; "capabilityID": string; "generation": number; "name": string; };
 
 export type AISSEConfirm = { "arguments": { [key: string]: JSONValue } | null; "confirmID": string; "effects": AIToolEffects; "forced": boolean; "name": string; };
@@ -3172,7 +3174,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
         output: "sse";
         additionalErrorStatuses: [409];
-        sse: { events: { "browser_capability_call": AISSEBrowserCapabilityCall; "confirm": AISSEConfirm; "content": AISSEToken; "done": AISSETurn; "error": AISSEMessage; "interrupted": AISSEMessage; "permission": AIPermissionData; "question": AISSEQuestion; "reasoning": AISSEToken; "retry": AISSERetry; "snapshot": AISSESnapshot; "thinking": AISSEThinking; "tool_call": AISSEToolCall; "tool_result": AISSEToolResult; "turn": AISSETurn; "usage": AISSEUsage; }; };
+        sse: { events: { "browser_capability_call": AISSEBrowserCapabilityCall; "confirm": AISSEConfirm; "content": AISSEToken; "done": AISSETurn; "error": AISSEAgentError; "interrupted": AISSEMessage; "permission": AIPermissionData; "question": AISSEQuestion; "reasoning": AISSEToken; "retry": AISSERetry; "snapshot": AISSESnapshot; "thinking": AISSEThinking; "tool_call": AISSEToolCall; "tool_result": AISSEToolResult; "turn": AISSETurn; "usage": AISSEUsage; }; };
     };
     "/api/ai/agent/confirm": {
         request: AIConfirmRequestInput;

@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "還原草稿",
+	"agentSnapshotWriteBlocked": "自動快照建立失敗，本次工作空間寫入未執行",
+	"agentRestoreDraftInUse": "請先儲存或清空目前的草稿，再還原原本的草稿",
 	"agentImageFromFiles": "從檔案選取圖片",
 	"shareAsset": "分享",
 	"archiveEncryptedNotebooksSyncTip": "建立封存檔不會移除資料；確認移出後，移出操作會透過同步影響其他裝置",

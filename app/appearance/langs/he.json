@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "שחזור הטיוטה",
+	"agentSnapshotWriteBlocked": "יצירת תמונת המצב האוטומטית נכשלה. פעולת הכתיבה הזו בסביבת העבודה לא בוצעה",
+	"agentRestoreDraftInUse": "יש לשמור או לנקות את הטיוטה הנוכחית לפני השחזור",
 	"agentImageFromFiles": "בחירת תמונה מתוך הקבצים",
 	"shareAsset": "שיתוף",
 	"archiveEncryptedNotebooksSyncTip": "יצירת ארכיון אינה מסירה נתונים. לאחר אישור ההסרה, היא תועבר באמצעות הסנכרון",

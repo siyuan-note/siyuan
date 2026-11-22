@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Restaurar borrador",
+	"agentSnapshotWriteBlocked": "Falló la instantánea automática. No se realizó esta escritura en el espacio de trabajo",
+	"agentRestoreDraftInUse": "Guarda o borra el borrador actual antes de restaurarlo",
 	"agentImageFromFiles": "Elegir una imagen desde archivos",
 	"shareAsset": "Compartir",
 	"archiveEncryptedNotebooksSyncTip": "Crear un archivo no elimina datos. Al confirmar la eliminación, esta se propagará mediante la sincronización",

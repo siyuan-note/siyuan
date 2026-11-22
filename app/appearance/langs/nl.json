@@ -1,4 +1,7 @@
 {
+	"agentRestoreDraft": "Concept herstellen",
+	"agentSnapshotWriteBlocked": "De automatische momentopname is mislukt. Deze schrijfbewerking in de werkruimte is niet uitgevoerd",
+	"agentRestoreDraftInUse": "Sla het huidige concept op of wis het voordat je het herstelt",
 	"agentImageFromFiles": "Afbeelding uit bestanden kiezen",
 	"shareAsset": "Delen",
 	"archiveEncryptedNotebooksSyncTip": "Een archief maken verwijdert geen gegevens. Na bevestiging wordt de verwijdering gesynchroniseerd",

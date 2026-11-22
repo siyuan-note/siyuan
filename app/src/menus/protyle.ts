@@ -41,11 +41,11 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {copyPlainText, isIOSDevice, isPhablet, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
+import {copyPlainText, isIOSDevice, isPhablet, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {usesNativeTextMenu} from "../protyle/wysiwyg/nativeTextMenu";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
-import {paste, pasteAndKeepSourceFormat, pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
+import {pasteAndKeepSourceFormat, pasteAsPlainText, pasteEscaped, pasteFromMenu} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
 import {openGlobalSearch} from "../search/util";
@@ -941,17 +941,12 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             label: window.siyuan.languages.paste,
             icon: "iconPaste",
             accelerator: "⌘V",
-            async click() {
+            async click(_element, event) {
                 focusByRange(getEditorRange(nodeElement));
-                if (document.queryCommandSupported("paste")) {
-                    document.execCommand("paste");
-                } else {
-                    try {
-                        const text = await readClipboard();
-                        paste(protyle, Object.assign(text, {target: nodeElement as HTMLElement}));
-                    } catch (e) {
-                        console.log(e);
-                    }
+                try {
+                    await pasteFromMenu(protyle, nodeElement as HTMLElement, event?.isTrusted === true);
+                } catch (error) {
+                    console.log(error);
                 }
             }
         }).element);

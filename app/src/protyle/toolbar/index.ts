@@ -41,7 +41,6 @@ import {Constants} from "../../constants";
 import {
     copyPlainText,
     isNotCtrl,
-    readClipboard,
     saveExportFile,
     setStorageVal
 } from "../util/compatibility";
@@ -72,7 +71,7 @@ import {decodeInlineMemoContent, encodeInlineMemoContent} from "../util/inlineMe
 import {mathRender} from "../render/mathRender";
 import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
-import {paste, pasteAsPlainText, pasteEscaped} from "../util/paste";
+import {pasteAsPlainText, pasteEscaped, pasteFromMenu} from "../util/paste";
 import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
 import {resizeSide} from "../../history/resizeSide";
 import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardToolbar";
@@ -2476,16 +2475,10 @@ export class Toolbar {
                 this.subElement.classList.add("fn__none");
             } else if (action === "paste") {
                 focusByRange(getEditorRange(nodeElement));
-                if (document.queryCommandSupported("paste")) {
-                    document.execCommand("paste");
-                } else {
-                    try {
-                        const text = await readClipboard();
-
-                        paste(protyle, Object.assign(text, {target: nodeElement as HTMLElement}));
-                    } catch (e) {
-                        console.log(e);
-                    }
+                try {
+                    await pasteFromMenu(protyle, nodeElement as HTMLElement, event.isTrusted);
+                } catch (error) {
+                    console.log(error);
                 }
                 this.subElement.classList.add("fn__none");
             } else if (action === "select") {

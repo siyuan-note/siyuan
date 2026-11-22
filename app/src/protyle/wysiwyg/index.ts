@@ -28,6 +28,7 @@ import {
     getTextStar,
     normalizeVirtualBlockRef,
     paste,
+    pasteFromMenu,
     restoreLuteMarkdownSyntax
 } from "../util/paste";
 import {
@@ -129,7 +130,6 @@ import {
     isMac,
     isOnlyMeta,
     isPhablet,
-    readClipboard,
     writeClipboardData
 } from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
@@ -3058,20 +3058,15 @@ export class WYSIWYG {
                                 label: window.siyuan.languages.paste,
                                 icon: "iconPaste",
                                 accelerator: "⌘V",
-                                async click() {
+                                async click(_element, event) {
                                     if (!tableBlockElement) {
                                         return;
                                     }
                                     focusByRange(getEditorRange(tableBlockElement));
-                                    if (document.queryCommandSupported("paste")) {
-                                        document.execCommand("paste");
-                                    } else {
-                                        try {
-                                            const text = await readClipboard();
-                                            paste(protyle, Object.assign(text, {target: tableBlockElement as HTMLElement}));
-                                        } catch (e) {
-                                            console.log(e);
-                                        }
+                                    try {
+                                        await pasteFromMenu(protyle, tableBlockElement as HTMLElement, event?.isTrusted === true);
+                                    } catch (error) {
+                                        console.log(error);
                                     }
                                 }
                             }).element);

@@ -342,8 +342,19 @@ func (s *Service) Begin(values url.Values, binding string) (ticket string, c api
 			delete(s.pending, key)
 		}
 	}
-	if len(s.pending) >= maxPending || binding == "" {
+	if binding == "" {
 		return "", c, ErrInvalid
+	}
+	if len(s.pending) >= maxPending {
+		// 容量满时淘汰最早到期的待确认票据，避免单个会话长期占满共享容量后其他会话无法发起授权
+		oldestKey := ""
+		var oldestExpires time.Time
+		for key, p := range s.pending {
+			if "" == oldestKey || p.Expires.Before(oldestExpires) {
+				oldestKey, oldestExpires = key, p.Expires
+			}
+		}
+		delete(s.pending, oldestKey)
 	}
 	ticket = random()
 	s.pending[hash(ticket)] = pending{Authorization: a, Binding: hash(binding), Expires: s.now().Add(10 * time.Minute)}

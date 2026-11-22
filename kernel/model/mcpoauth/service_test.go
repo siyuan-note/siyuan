@@ -150,6 +150,40 @@ func TestMCPOAuthAuthorizationValidation(t *testing.T) {
 	}
 }
 
+func TestMCPOAuthPendingAdmissionUnderSaturation(t *testing.T) {
+	s, c := setup(t)
+	now := time.Date(2026, 11, 22, 10, 0, 0, 0, time.UTC)
+	s.now = func() time.Time { return now }
+	first := ""
+	for i := 0; i < maxPending; i++ {
+		ticket, _, err := s.Begin(authorization(c, random()), "browser")
+		if err != nil {
+			t.Fatalf("begin %d failed: %v", i, err)
+		}
+		if 0 == i {
+			first = ticket
+		}
+		now = now.Add(time.Millisecond)
+	}
+	if len(s.pending) != maxPending {
+		t.Fatalf("pending tickets = %d, want %d", len(s.pending), maxPending)
+	}
+
+	ticket, _, err := s.Begin(authorization(c, random()), "other-browser")
+	if err != nil {
+		t.Fatalf("authorization after saturation failed: %v", err)
+	}
+	if len(s.pending) != maxPending {
+		t.Fatalf("pending tickets after eviction = %d, want %d", len(s.pending), maxPending)
+	}
+	if _, err = s.Consent(first, "browser", true); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("oldest ticket survived eviction: %v", err)
+	}
+	if _, err = s.Consent(ticket, "other-browser", false); err != nil {
+		t.Fatalf("new ticket unusable: %v", err)
+	}
+}
+
 func TestMCPOAuthTokenBinding(t *testing.T) {
 	s, c := setup(t)
 	for _, mutation := range []func(*apicontract.MCPOAuthTokenRequest){

@@ -992,9 +992,7 @@ func GetHeadingChildrenDOM(id string, removeFoldAttr, forPublish bool) (ret stri
 	children := treenode.HeadingChildren(heading)
 	nodes := prepareHeadingChildrenDOMNodes(heading, children, removeFoldAttr)
 	if forPublish {
-		for _, node := range nodes {
-			clearInlineMemoContent(node)
-		}
+		clearPublishDOMMemos(nodes...)
 	}
 
 	luteEngine := util.NewLute()
@@ -1209,11 +1207,7 @@ func GetBlockDOMsInBox(ids []string, boxID string, forPublish bool) (ret map[str
 			return ast.WalkContinue
 		})
 
-		domNode := cleanRenderNode(node, false)
-		if forPublish {
-			clearInlineMemoContent(domNode)
-		}
-		ret[id] = luteEngine.RenderNodeBlockDOM(domNode)
+		ret[id] = renderCleanBlockDOM(node, luteEngine, false, forPublish)
 	}
 	return
 }
@@ -1250,7 +1244,7 @@ func GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids []string, boxID string, acc
 			continue
 		}
 
-		resolveEmbedContentInBox(node, luteEngine, boxID, accessChecker)
+		resolveEmbedContentInBox(node, luteEngine, boxID, accessChecker, forPublish)
 
 		// 处理折叠标题
 		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -1264,11 +1258,7 @@ func GetBlockDOMsWithEmbedInBoxWithAccessChecker(ids []string, boxID string, acc
 			return ast.WalkContinue
 		})
 
-		domNode := cleanRenderNode(node, false)
-		if forPublish {
-			clearInlineMemoContent(domNode)
-		}
-		htmlContent := luteEngine.RenderNodeBlockDOM(domNode)
+		htmlContent := renderCleanBlockDOM(node, luteEngine, false, forPublish)
 
 		htmlContent = processEmbedHTML(htmlContent)
 
@@ -1297,7 +1287,7 @@ func loadTreeForBlockDOM(id, boxID string) *parse.Tree {
 	return tree
 }
 
-func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string, accessChecker EmbedBlockAccessChecker) {
+func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string, accessChecker EmbedBlockAccessChecker, forPublish bool) {
 	ast.Walk(n, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeBlockQueryEmbed != node.Type {
 			return ast.WalkContinue
@@ -1332,24 +1322,25 @@ func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string, 
 			var contentHTML string
 			if "d" == sqlBlock.Type {
 				// 文档块：直接使用原始 AST 节点渲染，保持原始的 data-node-id
-				contentHTML = luteEngine.RenderNodeBlockDOM(cleanRenderNode(subTree.Root, true))
+				contentHTML = renderCleanBlockDOM(subTree.Root, luteEngine, true, forPublish)
 			} else if "h" == sqlBlock.Type {
 				// 标题块：使用标题及其子块的原始 AST 节点渲染
 				h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
 				if nil == h {
 					continue
 				}
-				var hChildren []*ast.Node
-				hChildren = append(hChildren, h)
-				hChildren = append(hChildren, treenode.HeadingChildren(h)...)
-				contentHTML = renderVisibleBlockDOMByNodes(hChildren, luteEngine)
+				headingNodes := cleanRenderNodes(append([]*ast.Node{h}, treenode.HeadingChildren(h)...), true)
+				if forPublish {
+					clearPublishDOMMemos(headingNodes...)
+				}
+				contentHTML = renderBlockDOMByNodes(headingNodes, luteEngine)
 			} else {
 				// 其他块：直接使用原始 AST 节点渲染
 				blockNode := treenode.GetNodeInTree(subTree, sqlBlock.ID)
 				if nil == blockNode {
 					continue
 				}
-				contentHTML = luteEngine.RenderNodeBlockDOM(cleanRenderNode(blockNode, true))
+				contentHTML = renderCleanBlockDOM(blockNode, luteEngine, true, forPublish)
 			}
 
 			if contentHTML != "" {

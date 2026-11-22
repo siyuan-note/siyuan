@@ -1025,7 +1025,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	luteEngine.RenderOptions.NodeIndexStart = index
 	timing.Stage("render")
 	if publishRefAccess != nil {
-		clearInlineMemoContent(subTree.Root)
+		clearPublishDOMMemos(subTree.Root)
 	}
 	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 

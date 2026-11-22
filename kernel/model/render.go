@@ -254,17 +254,22 @@ func cleanRenderNodes(nodes []*ast.Node, visibleOnly bool) (ret []*ast.Node) {
 	return
 }
 
-// clearInlineMemoContent 清除行级备注内容并保留可见文字，读者侧渲染不输出编辑器私有备注。
-func clearInlineMemoContent(node *ast.Node) {
-	if nil == node {
-		return
-	}
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if entering && n.IsTextMarkType("inline-memo") {
-			n.TextMarkInlineMemoContent = ""
+func clearPublishDOMMemos(nodes ...*ast.Node) {
+	for _, node := range nodes {
+		if nil == node {
+			continue
 		}
-		return ast.WalkContinue
-	})
+		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+			n.RemoveIALAttr("memo")
+			if n.IsTextMarkType("inline-memo") {
+				n.TextMarkInlineMemoContent = ""
+			}
+			return ast.WalkContinue
+		})
+	}
 }
 
 func cleanRenderNode(node *ast.Node, visibleOnly bool) *ast.Node {
@@ -273,6 +278,14 @@ func cleanRenderNode(node *ast.Node, visibleOnly bool) *ast.Node {
 		return nil
 	}
 	return nodes[0]
+}
+
+func renderCleanBlockDOM(node *ast.Node, luteEngine *lute.Lute, visibleOnly, forPublish bool) string {
+	node = cleanRenderNode(node, visibleOnly)
+	if forPublish {
+		clearPublishDOMMemos(node)
+	}
+	return luteEngine.RenderNodeBlockDOM(node)
 }
 
 func renderVisibleBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {

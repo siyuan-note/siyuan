@@ -142,6 +142,7 @@ body.body--harmony {
 
   &__window-gap {
     display: none;
+    -webkit-app-region: drag;
   }
 
   #drag {
@@ -285,14 +286,16 @@ body.body--harmony {
 }
 
 html[data-frontend="desktop"] {
-  .body--toolbar-hide.body--windows:not(.body--fullscreen) #toolbar > .toolbar__window-gap,
-  .body--toolbar-hide.body--linux:not(.body--fullscreen) #toolbar > .toolbar__window-gap,
-  .body--toolbar-hide.body--mac:not(.body--fullscreen) #toolbar::before {
-    content: "";
+  .body--toolbar-hide.body--windows:not(.body--fullscreen) #toolbar > #drag:not(.fn__hidden) ~ .toolbar__window-gap,
+  .body--toolbar-hide.body--linux:not(.body--fullscreen) #toolbar > #drag:not(.fn__hidden) ~ .toolbar__window-gap,
+  .body--toolbar-hide.body--mac:not(.body--fullscreen) #toolbar > #drag:not(.fn__hidden) ~ .toolbar__window-gap {
     display: block;
     flex: 0 0 24px;
     align-self: stretch;
-    -webkit-app-region: drag;
+  }
+
+  .body--mac #toolbar > .toolbar__window-gap {
+    order: -1;
   }
 
   #toolbar > #drag[data-topbar-reordering="true"] ~ .toolbar__window-gap {

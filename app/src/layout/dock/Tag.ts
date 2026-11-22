@@ -56,10 +56,7 @@ export class Tag extends Model {
         this.tree = new TagTree({
             element: this.element.lastElementChild as HTMLElement,
             input: inputElement,
-            open: label => openGlobalSearch(app, `#${label}#`, false, {
-                method: 0,
-                tagPanel: !window.siyuan.ctrlIsPressed,
-            }),
+            open: label => openGlobalSearch(app, `#${label}#`, !window.siyuan.ctrlIsPressed, {method: 0}),
             menu: openTagMenu,
             setLoading: loading => refresh.classList.toggle("fn__rotate", loading),
         });

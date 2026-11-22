@@ -161,7 +161,7 @@ export const openAssetInBackground = (app: App, assetPath: string, page: number 
 
 export const openFile = async (options: IOpenFileOptions) => {
     if (typeof options.removeCurrentTab === "undefined") {
-        options.removeCurrentTab = !options.tagPanel;
+        options.removeCurrentTab = true;
     }
     // https://github.com/siyuan-note/siyuan/issues/10168
     if (!options.keepAVPanel) {
@@ -221,17 +221,16 @@ export const openFile = async (options: IOpenFileOptions) => {
         }
     } else if (options.searchData) {
         clearOBG();
-        const search = allModels.search.find((item) =>
-            options.tagPanel ? item.tagPanel : !item.tagPanel && objEquals(item.config, options.searchData));
-        if (search) {
-            const wnd = search.parent.parent;
-            if (!pdfIsLoading(wnd.element)) {
-                if (options.tagPanel) {
-                    search.updateTagSearch(options.searchData);
+        const search = allModels.search.find((item) => {
+            if (objEquals(item.config, options.searchData)) {
+                if (!pdfIsLoading(item.parent.parent.element)) {
+                    item.parent.parent.switchTab(item.parent.headElement);
+                    item.parent.parent.showHeading();
                 }
-                wnd.switchTab(search.parent.headElement);
-                wnd.showHeading();
+                return true;
             }
+        });
+        if (search) {
             return search.parent;
         }
     } else if (!options.position && !options.openNewTab) {
@@ -278,7 +277,7 @@ export const openFile = async (options: IOpenFileOptions) => {
 
     /// #if !BROWSER
     // https://github.com/siyuan-note/siyuan/issues/7491
-    if (!options.tagPanel && shouldCheckOtherWindows(options)) {
+    if (shouldCheckOtherWindows(options)) {
         let hasMatch = false;
         const optionsClone: IObject = {};
         Object.keys(options).forEach((key: keyof IOpenFileOptions) => {
@@ -678,14 +677,13 @@ export const newTab = (options: IOpenFileOptions, afterInitProtyle?: Constructor
         });
     } else if (options.searchData) {
         tab = new Tab({
-            icon: options.tagPanel ? "iconTag" : "iconSearch",
-            title: options.tagPanel ? window.siyuan.languages.tag : window.siyuan.languages.search,
+            icon: "iconSearch",
+            title: window.siyuan.languages.search,
             callback(tab) {
                 tab.addModel(new Search({
                     app: options.app,
                     tab,
-                    config: options.searchData,
-                    tagPanel: options.tagPanel,
+                    config: options.searchData
                 }));
                 setPanelFocus(tab.panelElement.parentElement.parentElement);
             }

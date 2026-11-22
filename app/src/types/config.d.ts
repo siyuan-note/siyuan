@@ -2378,7 +2378,7 @@ declare namespace Config {
         ({instance: "Backlink"} & Partial<Pick<IUILayoutTabBacklink, "blockId" | "rootId" | "notebookId" | "type">>) |
         ({instance: "Graph"} & Partial<Pick<IUILayoutTabGraph, "blockId" | "rootId" | "notebookId" | "type">>) |
         ({instance: "Outline"} & Partial<Pick<IUILayoutTabOutline, "blockId" | "notebookId" | "type" | "isPreview">>) |
-        ({instance: "Search"} & Partial<Pick<IUILayoutTabSearch, "config" | "tagPanel">>) |
+        ({instance: "Search"} & Partial<Pick<IUILayoutTabSearch, "config">>) |
         ({instance: "Custom"} & Partial<Pick<IUILayoutTabCustom, "customModelType" | "customModelData">>) |
         {instance: "Bookmark" | "Files" | "Tag"}
     ) & {children?: TPersistedUILayoutItem[] | TPersistedUILayoutItem};
@@ -2730,7 +2730,6 @@ declare namespace Config {
      */
     export interface IUILayoutTabSearch {
         config: IUILayoutTabSearchConfig;
-        tagPanel?: boolean;
         /**
          * Object name
          */

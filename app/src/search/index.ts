@@ -1,7 +1,7 @@
 import {Model} from "../layout/Model";
 import {Tab} from "../layout/Tab";
 import {Protyle} from "../protyle";
-import {genSearch, updateConfig} from "./util";
+import {genSearch} from "./util";
 import {setPanelFocus} from "../layout/util";
 import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
@@ -12,28 +12,21 @@ export class Search extends Model {
     public element: HTMLElement;
     public config: Config.IUILayoutTabSearchConfig;
     public editors: { edit: Protyle, unRefEdit: Protyle };
-    public readonly tagPanel: boolean;
 
-    constructor(options: { tab: Tab, config: Config.IUILayoutTabSearchConfig, app: App, tagPanel?: boolean }) {
+    constructor(options: { tab: Tab, config: Config.IUILayoutTabSearchConfig, app: App }) {
         super({
             app: options.app,
         });
-        if (!options.tagPanel && window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+        if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             options.tab.headElement?.classList.add("item--unupdate");
         }
         this.element = options.tab.panelElement as HTMLElement;
         this.config = options.config;
-        this.tagPanel = options.tagPanel === true;
-        this.editors = genSearch(options.app, this.config, this.element, {tagPanel: this.tagPanel});
+        this.editors = genSearch(options.app, this.config, this.element);
         this.element.addEventListener("click", () => {
             clearOBG();
             setPanelFocus(this.element.parentElement.parentElement);
         });
-    }
-
-    public updateTagSearch(config: Config.IUILayoutTabSearchConfig) {
-        updateConfig(this.element, {...config, sensitive: this.config.sensitive || config.sensitive},
-            this.config, this.editors.edit, {resetResults: true});
     }
 
     public updateSearch(text: string, replace: boolean) {

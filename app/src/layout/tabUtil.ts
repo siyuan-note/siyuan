@@ -355,11 +355,10 @@ export const newCenterEmptyTab = (app: App) => {
 };
 
 export const copyTab = (app: App, tab: Tab) => {
-    const tagPanel = tab.model instanceof Search && tab.model.tagPanel;
     return new Tab({
-        icon: tagPanel ? "iconSearch" : tab.icon,
+        icon: tab.icon,
         docIcon: tab.docIcon,
-        title: tagPanel ? window.siyuan.languages.search : tab.title,
+        title: tab.title,
         callback(newTab: Tab) {
             let model: Model;
             if (tab.model instanceof Editor) {

@@ -5,134 +5,100 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-test("tag panel reuses its own search tab and keeps ordinary search independent", async () => {
-    const defaults = {k: "previous", method: 2, idPath: ["notebook/document.sy"], page: 3};
-    const searchTabs: TestTab[] = [];
-    let activeTab: TestTab;
-    let openRequest: Promise<unknown>;
-    let otherWindowRequests = 0;
-    const window = {
-        siyuan: {
-            config: {fileTree: {openFilesUseCurrentTab: true, noSplitScreenWhenOpenTab: true}},
-            layout: {centerLayout: {children: [] as TestTab[]}},
-            languages: {tag: "Tag", search: "Search"},
-            storage: {search: defaults},
-        },
-    };
-    const wnd = {
-        element: {},
-        children: searchTabs,
-        addTab(tab: TestTab) {
-            searchTabs.push(tab);
-            activeTab = tab;
-            tab.parent = wnd;
-            tab.options.callback(tab);
-        },
-        switchTab(tab: TestTab) {
-            activeTab = tab;
-        },
-        showHeading() {},
-        removeTab() {
-            assert.fail("Opening a tag search removed an existing tab");
-        },
-    };
-    class TestTab {
-        model: {tagPanel: boolean; config: Config.IUILayoutTabSearchConfig};
-        parent = wnd;
-        headElement = this;
-        panelElement = {parentElement: {}, addEventListener() {}};
-        private readonly classes = new Set<string>();
-        classList = {
-            add: (name: string) => this.classes.add(name),
-            contains: (name: string) => name === "item--focus" ? activeTab === this : this.classes.has(name),
-        };
+const load = <T>(file: string, modules: Record<string, unknown>, window: unknown): T => {
+    const exports = {};
+    const source = readFileSync(join(__dirname, file), "utf8");
+    runInNewContext(transpileModule(source, {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+    }).outputText, {exports, require: (id: string) => modules[id] || {}, window, HTMLElement: class {}, location: {port: "6806"}});
+    return exports as T;
+};
 
-        constructor(public readonly options: {title: string; icon: string; callback: (tab: TestTab) => void}) {}
-
-        addModel(model: typeof this.model) {
-            this.model = model;
-            Object.assign(model, {parent: this});
-        }
-    }
-    const getAllModels = () => ({search: searchTabs.map(tab => tab.model), editor: [] as never[]});
-    const load = <T>(file: string, modules: Record<string, unknown>): T => {
-        const exports = {};
-        const source = readFileSync(join(__dirname, file), "utf8");
-        const code = transpileModule(source, {
-            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
-        }).outputText;
-        runInNewContext(code, {
-            exports,
-            require: (id: string) => modules[id] || {},
-            window,
-            HTMLElement: class {},
-            location: {port: "6806"},
-            document: {activeElement: null, querySelectorAll: (): [] => [], querySelector: (): null => null},
-        });
-        return exports as T;
-    };
-    const {Search} = load<typeof import("./index")>("index.ts", {
-        "../layout/Model": {Model: class {}},
-        "./util": {
-            genSearch: () => ({edit: {}}),
-            updateConfig: (_element: unknown, next: Config.IUILayoutTabSearchConfig, current: Config.IUILayoutTabSearchConfig) => {
-                Object.assign(current, next);
-            },
-        },
-    });
-    const editor = load<typeof import("../editor/util")>("../editor/util.ts", {
-        "../layout/Tab": {Tab: TestTab},
-        "../layout/getAll": {getAllModels},
-        "../layout/util": {pdfIsLoading: () => false, getWndByLayout: () => wnd, setPanelFocus() {}},
-        "../layout/dock/util": {clearOBG() {}},
-        "../util/functions": {objEquals: (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)},
-        "../search": {Search},
-        "../constants": {Constants: {}},
-        electron: {ipcRenderer: {invoke: async () => { otherWindowRequests++; return false; }}},
-        "./openFileWindow": {shouldCheckOtherWindows: () => true},
-    });
+test("desktop tag clicks use global search and preserve modifier matching", () => {
+    const window = {siyuan: {
+        config: {keymap: {editor: {general: {expand: {}, collapse: {}}}, general: {closeTab: {}}},
+            fileTree: {noSplitScreenWhenOpenTab: true}},
+        ctrlIsPressed: false,
+        languages: {tag: "Tag", search: "Search"},
+        storage: {search: {k: "old", method: 2}},
+    }};
+    let searchOptions: IOpenFileOptions;
+    const updates: [string, boolean][] = [];
+    let tabCount = 0;
+    const headElement = {};
+    let activeHead: object;
+    const searchModels: {config: object; parent: object; updateSearch: (text: string, replace: boolean) => void}[] = [];
     const {openGlobalSearch} = load<typeof import("./util")>("util.ts", {
         "../constants": {Constants: {LOCAL_SEARCHDATA: "search"}},
-        "../layout/getAll": {getAllModels},
-        "../editor/util": {openFile: (options: IOpenFileOptions) => { openRequest = editor.openFile(options); }},
-    });
+        "../layout/getAll": {getAllModels: () => ({search: searchModels, editor: [] as never[]})},
+        "../editor/util": {openFile: (options: IOpenFileOptions) => {
+            searchOptions = options;
+            tabCount++;
+            searchModels.push({
+                config: options.searchData,
+                parent: {headElement, parent: {switchTab: (head: object) => { activeHead = head; }}},
+                updateSearch: (text, replace) => updates.push([text, replace]),
+            });
+        }},
+    }, window);
+    const {newTab} = load<typeof import("../editor/util")>("../editor/util.ts", {
+        "../layout/Tab": {Tab: class { constructor(public options: unknown) {} }},
+    }, window);
+    let clickTag: (label: string) => void;
+    const {Tag} = load<typeof import("../layout/dock/Tag")>("../layout/dock/Tag.ts", {
+        "../Model": {Model: class { public connect() {} }},
+        "./TagTree": {TagTree: class {
+            constructor(options: {open: typeof clickTag}) { clickTag = options.open; }
+            public update() {}
+        }},
+        "./panelSearch": {bindPanelSearch() {}},
+        "../../protyle/util/compatibility": {updateHotkeyAfterTip: () => ""},
+        "../../search/util": {openGlobalSearch},
+    }, window);
+    const control = {addEventListener() {}};
+    const tab = {panelElement: {...control, classList: {add() {}}, querySelector: () => control}};
     const app = {} as Parameters<typeof openGlobalSearch>[0];
-    const ordinary = new TestTab({title: "Search", icon: "iconSearch", callback: () => {
-        const search = new Search({app, tab: ordinary as unknown as ConstructorParameters<typeof Search>[0]["tab"],
-            config: structuredClone(defaults)});
-        search.updateSearch = (text, replace) => {
-            assert.equal(replace, false);
-            search.config.k += " " + text;
-        };
-        ordinary.addModel(search);
-    }});
-    wnd.addTab(ordinary);
+    new Tag(app, tab as unknown as ConstructorParameters<typeof Tag>[1]);
 
-    openGlobalSearch(app, "#first#", false, {method: 0, tagPanel: true});
-    const firstOpen = openRequest;
-    const tag = activeTab;
-    tag.model.config.method = 3;
-    tag.model.config.idPath = ["another-notebook"];
-    tag.model.config.page = 4;
-    openGlobalSearch(app, "#second#", false, {method: 0, tagPanel: true});
-    await Promise.all([firstOpen, openRequest]);
+    clickTag("first");
+    assert.equal(tabCount, 1);
+    assert.equal(searchOptions.searchData.k, "#first#");
+    assert.equal(searchOptions.searchData.method, 0);
+    assert.equal("tagPanel" in searchOptions, false);
+    const created = newTab(searchOptions) as unknown as {options: {title: string; icon: string}};
+    assert.equal(created.options.title, "Search");
+    assert.equal(created.options.icon, "iconSearch");
+    clickTag("second");
+    window.siyuan.ctrlIsPressed = true;
+    clickTag("third");
+    assert.deepEqual(updates, [["#second#", true], ["#third#", false]]);
+    assert.equal(activeHead, headElement);
+    assert.equal(tabCount, 1);
+});
 
-    assert.deepEqual(searchTabs, [ordinary, tag]);
-    assert.equal(otherWindowRequests, 0);
-    assert.equal(activeTab, tag);
-    assert.equal(tag.options.title, "Tag");
-    assert.equal(tag.options.icon, "iconTag");
-    assert.equal(tag.classList.contains("item--unupdate"), false);
-    assert.equal(tag.model.config.k, "#second#");
-    assert.equal(tag.model.config.method, 0);
-    assert.equal(tag.model.config.idPath.length, 0);
-    assert.equal(tag.model.config.page, 1);
-    assert.deepEqual(ordinary.model.config, defaults);
-    assert.equal(window.siyuan.storage.search, defaults);
-
-    searchTabs.reverse();
-    openGlobalSearch(app, "#second#", false, {method: 0});
-    assert.equal(activeTab, ordinary);
-    assert.equal(ordinary.model.config.k, "previous #second#");
-    assert.equal(tag.model.config.k, "#second#");
+test("a saved Alpha 2 tag search restores as ordinary search without losing the query", () => {
+    const headElement = {classList: {add() {}}, querySelector: () => ({classList: {add() {}}})};
+    class Tab {
+        public headElement = headElement;
+        public model: unknown;
+        constructor(public options: {title: string; icon: string}) {}
+        public addModel(model: unknown) { this.model = model; }
+    }
+    const {JSONToCenter} = load<typeof import("../layout/util")>("../layout/util.ts", {
+        "./Tab": {Tab},
+        "../search": {Search: class { constructor(public options: unknown) {} }},
+        "../protyle/util/compatibility": {isSensitiveLayoutData: () => false},
+    }, {siyuan: {languages: {search: "Search"}}});
+    let restored: Tab;
+    const wnd = {addTab(tab: Tab) { restored = tab; }};
+    const config = {k: "#saved#"};
+    const saved = {instance: "Tab", title: "Tag", icon: "iconTag",
+        children: {instance: "Search", tagPanel: true, config}};
+    JSONToCenter({} as Parameters<typeof JSONToCenter>[0], saved as Parameters<typeof JSONToCenter>[1],
+        wnd as unknown as Parameters<typeof JSONToCenter>[2]);
+    assert.equal(restored.options.title, "Search");
+    assert.equal(restored.options.icon, "iconSearch");
+    const search = restored.model as {options: {config: typeof config}};
+    assert.equal(search.options.config, config);
+    assert.equal("tagPanel" in search.options, false);
 });

@@ -184,8 +184,8 @@ export const openSearch = async (options: SearchOpenOptions & {
         }
     });
     dialog.element.setAttribute("data-key", options.hotkey);
-    dialog.editors = genSearch(options.app, config, dialog.element.querySelector(".b3-dialog__body"), {
-        closeCB: () => dialog.destroy({focus: "false"}),
+    dialog.editors = genSearch(options.app, config, dialog.element.querySelector(".b3-dialog__body"), () => {
+        dialog.destroy({focus: "false"});
     });
     dialog.data = config;
     if (options.focusInput) {

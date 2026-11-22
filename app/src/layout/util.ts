@@ -469,6 +469,12 @@ const JSONToDock = (json: any, app: App) => {
 
 const removedTabs: Tab[] = [];
 
+// 兼容 3.8.12 Alpha 2 保存的标签搜索页签，查询配置仍按普通搜索读取。
+const isSavedTagSearch = (tab: Config.TPersistedUILayoutItem) => {
+    const children = Array.isArray(tab.children) ? tab.children : [tab.children];
+    return children.some(child => child?.instance === "Search" && "tagPanel" in child && child.tagPanel === true);
+};
+
 export const JSONToCenter = (
     app: App,
     json: Config.TPersistedUILayoutItem,
@@ -513,12 +519,11 @@ export const JSONToCenter = (
         if (!json.title) {
             child = newCenterEmptyTab(app);
         } else {
-            let title = json.title;
-            if (json.lang) {
-                title = window.siyuan.languages[json.lang];
-            }
+            const tagSearch = isSavedTagSearch(json);
+            const title = tagSearch ? window.siyuan.languages.search : json.lang ?
+                window.siyuan.languages[json.lang] : json.title;
             child = new Tab({
-                icon: json.icon,
+                icon: tagSearch ? "iconSearch" : json.icon,
                 docIcon: json.docIcon,
                 title
             });
@@ -610,8 +615,7 @@ export const JSONToCenter = (
         (layout as Tab).addModel(new Search({
             app,
             tab: (layout as Tab),
-            config: json.config,
-            tagPanel: json.tagPanel,
+            config: json.config
         }));
     } else if (json.instance === "Custom") {
         if (json.customModelType === "siyuan-database-row") {
@@ -864,9 +868,6 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
     } else if (layout instanceof Search) {
         json.instance = "Search";
         json.config = layout.config;
-        if (layout.tagPanel) {
-            json.tagPanel = true;
-        }
     } else if (layout instanceof Custom) {
         json.instance = "Custom";
         json.customModelType = layout.type;

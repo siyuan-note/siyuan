@@ -158,7 +158,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
+					"Data": ". If you use MiniMax-H3-Image or MiniMax-H3-Image-Highspeed with MiniMax’s official API, set the image generation timeout to 600 seconds as MiniMax recommends."
 				}
 			]
 		},

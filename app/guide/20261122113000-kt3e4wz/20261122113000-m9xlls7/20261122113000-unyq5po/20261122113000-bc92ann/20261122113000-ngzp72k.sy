@@ -158,7 +158,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
+					"Data": ". При использовании MiniMax-H3-Image или MiniMax-H3-Image-Highspeed через официальный API MiniMax установите время ожидания генерации изображений на 600 секунд, как рекомендует MiniMax."
 				}
 			]
 		},

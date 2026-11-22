@@ -158,7 +158,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中配置支持图片输出的模型。"
+					"Data": " 中配置支持图片输出的模型。通过 MiniMax 官方 API 使用 MiniMax-H3-Image 或 MiniMax-H3-Image-Highspeed 时，请按 MiniMax 的建议将图片生成超时设为 600 秒。"
 				}
 			]
 		},

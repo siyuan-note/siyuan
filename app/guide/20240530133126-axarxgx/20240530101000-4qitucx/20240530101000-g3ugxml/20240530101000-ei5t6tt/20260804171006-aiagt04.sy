@@ -154,7 +154,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で画像出力に対応するモデルを設定します。"
+					"Data": " で画像出力に対応するモデルを設定します。MiniMax の公式 API で MiniMax-H3-Image または MiniMax-H3-Image-Highspeed を使う場合は、MiniMax の推奨に従い、画像生成のタイムアウトを 600 秒に設定してください。"
 				}
 			]
 		},

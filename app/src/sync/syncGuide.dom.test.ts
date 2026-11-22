@@ -20,7 +20,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
             const requests: {url: string, data: unknown, reply: (response: unknown) => void}[] = [];
             const confirmations: (() => void)[] = [];
 			const messages: string[] = [];
-            const config = {readonly: false, sync: {provider: 0, enabled: false, cloudName: "main"},
+            const config = {readonly: false, sync: {provider: 0, enabled: false, cloudName: "main", mode: 0},
                 repo: {key: initializeKey ? "" : "fixture-key"}};
             class Dialog {
                 element = document.createElement("div");
@@ -226,6 +226,19 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 requests.shift().reply({code: 0});
                 await new Promise(resolve => setTimeout(resolve, 0));
             }
+            config.sync.mode = 3;
+            guide.syncGuide();
+            check.equal(requests[0].url, "/api/sync/getSyncSourceState");
+            requests.shift().reply({code: 0, data: {pending: false, source: ""}});
+            document.querySelector<HTMLInputElement>(`input[name="upload"][value="${!mobile}"]`).checked = true;
+            const manualConfirm = document.querySelectorAll<HTMLButtonElement>(".b3-dialog__action button")[1];
+            manualConfirm.click();
+            manualConfirm.click();
+            check.equal(requests.length, 1);
+            check.equal(requests[0].url, "/api/sync/performSync");
+            check.deepEqual(requests[0].data, {upload: !mobile});
+            check.equal(manualConfirm.isConnected, false, "manual sync leaves the editor usable while the request is pending");
+            requests.shift();
         }
     }
     return "Sync setup directory cases passed";

@@ -350,6 +350,9 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState, refr
         manualDialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
+        if (!manualDialog.element.isConnected || manualDialog.element.dataset.dialogClosing === "true") {
+            return;
+        }
         if (!previewReady) {
             void manualDialog.runPending(async () => {
                 await refreshPreview();
@@ -362,10 +365,15 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState, refr
             showMessage(window.siyuan.languages.plsChoose);
             return;
         }
+        const upload = uploadElement.value === "true";
+        if (!state.source) {
+            manualDialog.destroy();
+            fetchPost("/api/sync/performSync", {upload});
+            return;
+        }
         void manualDialog.runPending(async () => {
             const response = await fetchSyncPost("/api/sync/performSync", {
-                upload: uploadElement.value === "true",
-                ...(state.source ? {source: state.source, localID: state.localID, cloudID: state.cloudID} : {}),
+                upload, source: state.source, localID: state.localID, cloudID: state.cloudID,
             });
             if (response.code === 2) {
                 await refreshPreview();

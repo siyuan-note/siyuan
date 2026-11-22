@@ -14,18 +14,9 @@
   border-radius: var(--b3-border-radius-b);
   background-color: var(--b3-theme-background);
   box-shadow: var(--b3-dialog-shadow);
-  transition: transform .2s cubic-bezier(0, 0, .2, 1), opacity .15s linear, visibility 0s;
 
   &--editor {
     position: absolute;
-  }
-
-  &--keyboard {
-    visibility: hidden;
-    opacity: 0;
-    transform: translateY(100%);
-    pointer-events: none;
-    transition: transform .2s cubic-bezier(.4, 0, 1, 1), opacity .15s linear, visibility 0s .2s;
   }
 
   &__close {
@@ -75,8 +66,12 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .onboarding {
-    transition: none;
+.onboarding-sheet__content {
+  > p {
+    margin: 0 0 16px;
+  }
+
+  > .b3-button + .b3-button {
+    margin-top: 8px;
   }
 }

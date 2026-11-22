@@ -229,7 +229,7 @@ export const refreshSyncCloudDirBlock = (root: Element) => {
     }
 };
 
-export const syncGuide = (app?: App) => {
+export const syncGuide = (app?: App, openSettings = () => openSyncSetting(app)) => {
     if (openSyncCheckoutProgress()) return;
     if (window.siyuan.config.readonly) {
         return;
@@ -238,16 +238,16 @@ export const syncGuide = (app?: App) => {
         return;
     }
     if (window.siyuan.config.sync.provider === 0 && needSubscribe()) {
-        openSyncSetting(app);
+        openSettings();
         showMessage(window.siyuan.languages._kernel[29].replaceAll("${accountServer}", getCloudURL("")));
         return;
     } else if (!isPaidUser()) {
-        openSyncSetting(app);
+        openSettings();
         showMessage(window.siyuan.languages._kernel[214].replaceAll("${accountServer}", getCloudURL("")));
         return;
     }
     if (!window.siyuan.config.sync.enabled && window.siyuan.config.sync.provider !== 0) {
-        openSyncSetting(app);
+        openSettings();
         return;
     }
     if (!window.siyuan.config.repo.key) {

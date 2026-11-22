@@ -65,7 +65,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If you are using SiYuan for the first time, start with the steps below, then explore the rest of the guide as needed."
+					"Data": "In a new workspace on mobile, a welcome sheet appears after the first document opens. Swipe it down, use Back, or tap Close to start editing. If you are using SiYuan for the first time, start with the steps below, then explore the rest of the guide as needed."
 				}
 			]
 		},

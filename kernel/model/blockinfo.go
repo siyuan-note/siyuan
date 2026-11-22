@@ -79,23 +79,8 @@ func getDocInfoByTree(blockID string, tree *parse.Tree) (ret *BlockInfo) {
 		if parseErr := gulu.JSON.UnmarshalJSON([]byte(scrollData), &scroll); nil != parseErr {
 			logging.LogWarnf("parse scroll data [%s] failed: %s", scrollData, parseErr)
 			delete(ret.IAL, "scroll")
-		} else {
-			if zoomInId := scroll["zoomInId"]; nil != zoomInId {
-				if !treenode.ExistBlockTreeInBox(zoomInId.(string), boxID) {
-					delete(ret.IAL, "scroll")
-				}
-			} else {
-				if startId := scroll["startId"]; nil != startId {
-					if !treenode.ExistBlockTreeInBox(startId.(string), boxID) {
-						delete(ret.IAL, "scroll")
-					}
-				}
-				if endId := scroll["endId"]; nil != endId {
-					if !treenode.ExistBlockTreeInBox(endId.(string), boxID) {
-						delete(ret.IAL, "scroll")
-					}
-				}
-			}
+		} else if !scrollTargetsExist(scroll, func(id string) bool { return treenode.ExistBlockTreeInBox(id, boxID) }) {
+			delete(ret.IAL, "scroll")
 		}
 	}
 
@@ -163,6 +148,26 @@ func getDocInfoByTree(blockID string, tree *parse.Tree) (ret *BlockInfo) {
 	return
 }
 
+// scrollTargetsExist 校验文档 scroll 属性中记录的目标块仍然存在。
+// JSON 解码得到的非字符串值视为无效记录，避免直接断言类型导致 panic。
+func scrollTargetsExist(scroll map[string]any, exist func(string) bool) bool {
+	if zoomInID, ok := scroll["zoomInId"]; ok && nil != zoomInID {
+		id, isStr := zoomInID.(string)
+		return isStr && exist(id)
+	}
+	for _, key := range []string{"startId", "endId"} {
+		value, ok := scroll[key]
+		if !ok || nil == value {
+			continue
+		}
+		id, isStr := value.(string)
+		if !isStr || !exist(id) {
+			return false
+		}
+	}
+	return true
+}
+
 func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*BlockInfo) {
 	FlushTxQueue()
 
@@ -197,23 +202,8 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 			if parseErr := gulu.JSON.UnmarshalJSON([]byte(scrollData), &scroll); nil != parseErr {
 				logging.LogWarnf("parse scroll data [%s] failed: %s", scrollData, parseErr)
 				delete(ret.IAL, "scroll")
-			} else {
-				if zoomInId := scroll["zoomInId"]; nil != zoomInId {
-					if !treenode.ExistBlockTree(zoomInId.(string)) {
-						delete(ret.IAL, "scroll")
-					}
-				} else {
-					if startId := scroll["startId"]; nil != startId {
-						if !treenode.ExistBlockTree(startId.(string)) {
-							delete(ret.IAL, "scroll")
-						}
-					}
-					if endId := scroll["endId"]; nil != endId {
-						if !treenode.ExistBlockTree(endId.(string)) {
-							delete(ret.IAL, "scroll")
-						}
-					}
-				}
+			} else if !scrollTargetsExist(scroll, treenode.ExistBlockTree) {
+				delete(ret.IAL, "scroll")
 			}
 		}
 		if queryRefCount {

@@ -506,6 +506,7 @@ for (const mobile of [false, true]) {
         let docLocked = true;
         for (const protyle of [draft, ordinary]) {
             protyle.disabled = false;
+            protyle.contentElement = {removeAttribute() {}};
             protyle.wysiwyg.element = {getAttribute: (key: string) => key === attr && docLocked ? "true" : null,
                 querySelectorAll: (): Element[] => [], setAttribute() {}, style: {}};
         }

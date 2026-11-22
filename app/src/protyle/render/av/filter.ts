@@ -790,24 +790,37 @@ const getRelationFilterLabel = (avID: string, blockID: string, data?: IAV) => {
         window.siyuan.languages.untitled;
 };
 
-const genRelationFilterChip = (avID: string, blockID: string, removable: boolean, path: string, data?: IAV) => {
-    const label = getRelationFilterLabel(avID, blockID, data);
-    const suffix = blockID.slice(-7);
+const getRelationFilterItems = (avID: string, blockIDs: string[], data?: IAV) => {
+    const labelCounts = new Map<string, number>();
+    const items = blockIDs.map(blockID => {
+        const label = getRelationFilterLabel(avID, blockID, data);
+        labelCounts.set(label, (labelCounts.get(label) || 0) + 1);
+        return {blockID, label};
+    });
+    return items.map(item => ({
+        ...item,
+        showID: item.label === window.siyuan.languages.untitled || labelCounts.get(item.label) > 1,
+    }));
+};
+
+const genRelationFilterChip = ({blockID, label, showID}: ReturnType<typeof getRelationFilterItems>[number],
+                               removable: boolean, path: string) => {
+    const idHTML = showID ? `<span class="av__relation-filter-id">${escapeHtml(blockID.slice(-7))}</span>` : "";
     const removeButton = removable
         ? `<button type="button" class="av__relation-filter-remove" data-type="relationFilterRemove" data-path="${path}" data-id="${escapeAttr(blockID)}" aria-label="${window.siyuan.languages.remove}">
 <svg><use xlink:href="#iconCloseRound"></use></svg></button>`
         : "";
     return `<span class="b3-chip b3-chip--middle av__relation-filter-chip" title="${escapeAttr(blockID)}">
-<span class="fn__ellipsis">${escapeHtml(label)}</span><span class="av__relation-filter-id">${escapeHtml(suffix)}</span>${removeButton}</span>`;
+<span class="fn__ellipsis">${escapeHtml(label)}</span>${idHTML}${removeButton}</span>`;
 };
 
 const genRelationFilterTriggerContent = (avID: string, blockIDs: string[], path: string, data?: IAV) => {
     if (0 === blockIDs.length) {
         return `<span class="ft__on-surface fn__ellipsis">${window.siyuan.languages.selectRelationItems}</span>`;
     }
-    const visibleBlockIDs = blockIDs.slice(0, 2);
-    const overflow = blockIDs.length - visibleBlockIDs.length;
-    return visibleBlockIDs.map((blockID) => genRelationFilterChip(avID, blockID, false, path, data)).join("") +
+    const visibleItems = getRelationFilterItems(avID, blockIDs, data).slice(0, 2);
+    const overflow = blockIDs.length - visibleItems.length;
+    return visibleItems.map(item => genRelationFilterChip(item, false, path)).join("") +
         (0 < overflow ? `<span class="b3-chip b3-chip--middle av__relation-filter-count">+${overflow}</span>` : "");
 };
 
@@ -815,8 +828,9 @@ const genRelationFilterSelectedHTML = (avID: string, blockIDs: string[], path: s
     if (0 === blockIDs.length) {
         return "";
     }
-    return `<div class="av__relation-filter-selected-chips">${blockIDs.map((blockID) =>
-        genRelationFilterChip(avID, blockID, true, path, data)).join("")}</div>
+    const items = getRelationFilterItems(avID, blockIDs, data);
+    return `<div class="av__relation-filter-selected-chips">${items.map(item =>
+        genRelationFilterChip(item, true, path)).join("")}</div>
 <button type="button" class="b3-button b3-button--text av__relation-filter-clear" data-type="relationFilterClear" data-path="${path}">${window.siyuan.languages.clear}</button>`;
 };
 
@@ -1168,17 +1182,13 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         if (!optionsElement) {
             return;
         }
-        optionsElement.innerHTML = values.map((value) => {
-            const rowID = value.blockID;
-            if (!rowID) {
-                return "";
-            }
-            const label = value.block?.content || window.siyuan.languages.untitled;
-            return `<button type="button" class="av__relation-filter-option" data-type="relationFilterOption" data-path="${path}" data-id="${escapeAttr(rowID)}">
+        const blockIDs = values.map(value => value.blockID).filter(Boolean);
+        optionsElement.innerHTML = getRelationFilterItems(targetAVID, blockIDs, data).map(({blockID, label, showID}) => {
+            const idHTML = showID ? `<span class="av__relation-filter-option-id">${escapeHtml(blockID.slice(-7))}</span>` : "";
+            return `<button type="button" class="av__relation-filter-option" data-type="relationFilterOption" data-path="${path}" data-id="${escapeAttr(blockID)}" title="${escapeAttr(label)}">
 <svg class="av__relation-filter-option-icon"><use xlink:href="#iconFile"></use></svg>
-<span class="fn__ellipsis">${escapeHtml(label)}</span>
-<span class="av__relation-filter-option-id">${escapeHtml(rowID.slice(-7))}</span>
-<svg class="av__relation-filter-option-check"><use xlink:href="#${selectedSet.has(rowID) ? "iconCheck" : "iconUncheck"}"></use></svg>
+<span class="fn__ellipsis">${escapeHtml(label)}</span>${idHTML}
+<svg class="av__relation-filter-option-check"><use xlink:href="#${selectedSet.has(blockID) ? "iconCheck" : "iconUncheck"}"></use></svg>
 </button>`;
         }).join("");
         renderRelationFilterSelection(path, dropdown, getRelationFilterSelection(dropdown));

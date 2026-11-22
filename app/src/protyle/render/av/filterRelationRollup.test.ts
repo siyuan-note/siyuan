@@ -104,6 +104,39 @@ test("selecting, removing and clearing rollup relation candidates preserves the 
     assert.equal(saves, 3);
 });
 
+test("exact relation filters show short IDs only for same-name or untitled entries", () => {
+    const h = createEditor();
+    const blockIDs = ["row-unique1", "row-repeat1", "row-repeat2", "row-unnamed"];
+    h.data.view.filters = [{column: "tasks", operator: "Contains any item", value: {
+        type: "relation", relation: {blockIDs, contents: []},
+    } as IAVCellValue}];
+    const listeners = new Map<string, (event: unknown) => void>();
+    const options = {innerHTML: ""};
+    const selected = {innerHTML: ""};
+    const trigger = {innerHTML: ""};
+    const dropdown = {dataset: {path: "0", avId: "tasks-db", selected: JSON.stringify(blockIDs)}, style: {display: "none"},
+        querySelector: (selector: string) => selector.includes("relationFilterOptions") ? options : selected,
+        querySelectorAll: (): HTMLElement[] => []};
+    const panel = {dataset: {}, querySelector: () => trigger,
+        addEventListener: (type: string, listener: (event: unknown) => void) => listeners.set(type, listener)};
+    h.methods.bindInlineFilterEvents(panel as unknown as HTMLElement, h.data, {} as IProtyle, "carrier", "source", {
+        root: panel as unknown as HTMLElement, save() {},
+    });
+    listeners.get("input")({target: {value: "", dataset: {type: "relationFilterSearch"},
+        closest: (selector: string) => selector === '[data-filter-events-bound="true"]' ? panel : dropdown}});
+    h.candidates[0]({code: 0, data: {rows: {values: blockIDs.map((blockID, index) => ({
+        blockID, block: {content: ["Unique title", "Same title", "Same title", ""][index]},
+    }))}}});
+
+    const shortIDs = (html: string, className: string) =>
+        Array.from(html.matchAll(new RegExp(`class="${className}">([^<]+)<`, "g")), match => match[1]);
+    assert.deepEqual(shortIDs(options.innerHTML, "av__relation-filter-option-id"), ["repeat1", "repeat2", "unnamed"]);
+    assert.deepEqual(shortIDs(selected.innerHTML, "av__relation-filter-id"), ["repeat1", "repeat2", "unnamed"]);
+    assert.deepEqual(shortIDs(trigger.innerHTML, "av__relation-filter-id"), ["repeat1"]);
+    assert.match(options.innerHTML, /data-id="row-unique1" title="Unique title"/);
+    assert.match(trigger.innerHTML, /av__relation-filter-count">\+2/);
+});
+
 test("inline filters retain their panel's selected labels and relation access scope", async () => {
     const h = createEditor();
     let active = true;

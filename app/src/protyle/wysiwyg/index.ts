@@ -253,7 +253,7 @@ import {syncRootAttributes} from "../util/syncRootAttributes";
 import {isHandlerIALAttribute} from "../util/ialAttributes";
 import {bindImageTitleEditor} from "../render/imageTitleEditor";
 import {bindImageResize, getImageResizeWidth} from "../render/imageResize";
-import {isDirectCalloutStructureClick} from "./calloutClick";
+import {isBelowCalloutContent, isDirectCalloutStructureClick} from "./calloutClick";
 import {
     BLOCK_SELECTION_CLASS,
     clearBlockSelectionMode,
@@ -5593,9 +5593,8 @@ export class WYSIWYG {
                     }
                 } else if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutElement &&
                     isDirectCalloutClick) {
-                    // 提示块结构区域不可编辑，点击后将光标定位到首个可编辑子块
-                    // https://github.com/siyuan-note/siyuan/issues/16310
-                    newRange = focusBlock(calloutElement) || newRange;
+                    const toStart = !isBelowCalloutContent(calloutElement, event.clientY);
+                    newRange = focusBlock(calloutElement, undefined, toStart) || newRange;
                 }
                 // 表格中点击两侧或间隙导致光标跳转到开头 https://github.com/siyuan-note/siyuan/issues/16179
                 if (event.target.classList.contains("protyle-wysiwyg") || event.target.parentElement?.classList.contains("table")) {

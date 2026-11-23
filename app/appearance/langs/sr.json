@@ -1,4 +1,5 @@
 {
+	"agentQuoteAdded": "Цитат је додат у разговор са агентом (${count})",
 	"saveToGallery": "Сачувај у галерију",
 	"bazaarUpdateDate": "Datum ažuriranja",
 	"agentQuoteText": "Цитирај текст",

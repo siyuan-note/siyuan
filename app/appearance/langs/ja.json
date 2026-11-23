@@ -1,4 +1,5 @@
 {
+	"agentQuoteAdded": "エージェントのチャットに引用を追加しました（${count} 件）",
 	"saveToGallery": "ギャラリーに保存",
 	"bazaarUpdateDate": "更新日",
 	"agentQuoteText": "テキストを引用",

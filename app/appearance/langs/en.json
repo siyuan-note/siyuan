@@ -1,4 +1,5 @@
 {
+	"agentQuoteAdded": "Quote added to Agent Chat (${count})",
 	"saveToGallery": "Save to Gallery",
 	"bazaarUpdateDate": "Update date",
 	"agentQuoteText": "Quote text",

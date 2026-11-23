@@ -9,10 +9,14 @@ import type {AgentQuote} from "../layout/dock/agent/agentQuote";
 import type {Editor} from "../editor";
 import {Constants} from "../constants";
 /// #if !MOBILE
+import {showMessage} from "../dialog/message";
 import {getDockByType} from "../layout/tabUtil";
+
+const quotedEditors = new WeakSet<IProtyle>();
+const agentDockItem = '.dock__item[data-type="agentChat"].dock__item--active';
 /// #endif
 
-export const openEditorAgent = async (app: App): Promise<AgentChat | undefined> => {
+export const openEditorAgent = async (app: App, quote?: "first" | "repeat"): Promise<AgentChat | undefined> => {
     if (window.siyuan.config.readonly || window.siyuan.isPublish || isDisabledFeature("ai")) {
         return;
     }
@@ -27,9 +31,14 @@ export const openEditorAgent = async (app: App): Promise<AgentChat | undefined> 
     }
     const ready = (value: unknown): value is AgentChat => !!value && typeof value === "object" &&
         "insertBlockMentions" in value && typeof value.insertBlockMentions === "function";
-    if (!ready(dock.data.agentChat) ||
-        !document.querySelector('.dock__item[data-type="agentChat"].dock__item--active')) {
-        dock.toggleModel("agentChat", true);
+    const floating = dock.isFloating();
+    if (!(floating && quote === "repeat" && ready(dock.data.agentChat))) {
+        if (!ready(dock.data.agentChat) || !document.querySelector(agentDockItem) ||
+            (floating && quote === "first" && !dock.isPanelVisible())) {
+            dock.toggleModel("agentChat", true);
+        } else if (floating && quote === "first") {
+            dock.showDock();
+        }
     }
     result = ready(dock.data.agentChat) ? dock.data.agentChat : undefined;
     /// #endif
@@ -95,9 +104,26 @@ export const quoteEditorSelection = async (editor: IProtyle, range: Range) => {
     if (text.trim()) {
         const cellIndex = (part: typeof first) => part.editableElement.matches("th, td") ?
             Array.from(part.blockElement.querySelectorAll("th, td")).indexOf(part.editableElement) : undefined;
-        const chat = await openEditorAgent(editor.app);
-        await chat?.insertQuote({text, source: {kind: "selection", id: first.blockElement.dataset.nodeId,
+        const quote: AgentQuote = {text, source: {kind: "selection", id: first.blockElement.dataset.nodeId,
             endID: last.blockElement.dataset.nodeId, start: first.start, end: last.end,
-            startCell: cellIndex(first), endCell: cellIndex(last)}});
+            startCell: cellIndex(first), endCell: cellIndex(last)}};
+        /// #if MOBILE
+        const mobileChat = await openEditorAgent(editor.app);
+        await mobileChat?.insertQuote(quote);
+        /// #else
+        const chat = await openEditorAgent(editor.app, quotedEditors.has(editor) ? "repeat" : "first");
+        if (!chat) return;
+        const dock = getDockByType("agentChat");
+        const floating = dock?.isFloating();
+        const inBackground = !!floating && (!dock.isPanelVisible() ||
+            dock.layout.element.style.opacity !== "1" || !document.querySelector(agentDockItem));
+        const count = await chat.insertQuote(quote, inBackground);
+        if (floating && count) {
+            quotedEditors.add(editor);
+            if (inBackground) {
+                showMessage(window.siyuan.languages.agentQuoteAdded.replace("${count}", count.toString()), 3000, "info", "agent-quote-added");
+            }
+        }
+        /// #endif
     }
 };

@@ -49,7 +49,7 @@ const browserCases = async (source: string) => {
     const api = new Function(...Object.keys(dependencies), source +
         "\nreturn {hintSkill, mountLiteSlashMenu, normalizeAgentTokens, expandAgentTokenSelection, deleteAgentToken, " +
         "AGENT_SKILL_SELECTOR, AGENT_QUOTE_SELECTOR, createAgentQuote, readAgentQuote, projectAgentQuotes, quotePreview, " +
-        "Hint, isBuiltinSlashHint, bindComposerInput, applyPhrase};")(...Object.values(dependencies));
+        "Hint, isBuiltinSlashHint, bindComposerInput, applyPhrase, insertQuote};")(...Object.values(dependencies));
     const element = document.createElement("div");
     element.className = "protyle-hint fn__none";
     document.body.appendChild(element);
@@ -280,6 +280,28 @@ const browserCases = async (source: string) => {
     check.deepEqual(Array.from(editor.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), [...quotes, ...quotes]);
     const ids = Array.from(editor.querySelectorAll<HTMLElement>("[data-node-id]")).map(block => block.dataset.nodeId);
     check.equal(new Set(ids).size, ids.length, "repeated placeholders keep editor block IDs unique");
+
+    const draft = document.createElement("div");
+    draft.innerHTML = '<div data-node-id="paragraph"><div contenteditable="true">Draft</div></div>';
+    draft.style.display = "none";
+    document.body.appendChild(draft);
+    const toolbar = {range: undefined as Range};
+    const composer = {toolbar, wysiwyg: {element: draft}};
+    const starter = draft.querySelector("[contenteditable]").firstChild;
+    select(editor.querySelector(api.AGENT_QUOTE_SELECTOR).nextSibling, 0);
+    const sourceAnchor = getSelection().anchorNode;
+    const fragment = {focus: () => check.fail("a hidden composer cannot take focus")};
+    const instance = {insert: (html: string) => {
+        toolbar.range.insertNode(toolbar.range.createContextualFragment(html));
+        dependencies.focusByRange(toolbar.range);
+    }};
+    check.equal(api.insertQuote(fragment, composer, instance, quotes[0], true), 1);
+    check.equal(getSelection().anchorNode, sourceAnchor);
+    check.equal(starter.textContent, "Draft");
+    toolbar.range.selectNodeContents(draft.querySelector("[contenteditable]"));
+    check.equal(api.insertQuote(fragment, composer, instance, quotes[1], true), 2);
+    check.equal(getSelection().anchorNode, sourceAnchor);
+    check.deepEqual(Array.from(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), quotes.slice(0, 2));
     return "Agent skill cases passed";
 };
 
@@ -298,7 +320,8 @@ test("mobile commands, atomic skills, inline quotes and phrase templates coexist
     const handle = mount.body.statements.find(isReturnStatement)?.expression;
     assert.ok(handle && isObjectLiteralExpression(handle));
     const phrase = handle.properties.find(property => property.name?.getText(composer) === "applyPhrase");
-    assert.ok(phrase);
+    const quote = handle.properties.find(property => property.name?.getText(composer) === "insertQuote");
+    assert.ok(phrase && quote);
     const inputBindings = mount.body.statements.filter(statement => {
         if (isVariableStatement(statement)) {
             return statement.declarationList.declarations.some(declaration =>
@@ -314,6 +337,8 @@ test("mobile commands, atomic skills, inline quotes and phrase templates coexist
         read("agentQuote.ts"), read("agentSkill.ts"), read("../../../mobile/util/liteSlashMenu.ts"), composerSource,
         "class Hint {" + hintSource + "}",
         "const applyPhrase = (fragment, p, getBlockHTML, instruction) => ({" + phrase.getText(composer) + "}).applyPhrase(instruction);",
+        "const insertQuote = (fragment, p, protyle, value, background) => { const wysiwyg = p.wysiwyg; return ({" +
+            quote.getText(composer) + "}).insertQuote(value, background); };",
         "const bindComposerInput = p => { const wysiwyg = p.wysiwyg; " + inputBindings + "};"].join("\n").replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;

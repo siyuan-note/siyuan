@@ -1,4 +1,5 @@
 {
+	"agentQuoteAdded": "에이전트 대화에 인용을 추가했습니다(${count}개)",
 	"saveToGallery": "갤러리에 저장",
 	"bazaarUpdateDate": "업데이트 날짜",
 	"agentQuoteText": "텍스트 인용",

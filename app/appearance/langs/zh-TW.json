@@ -1,4 +1,5 @@
 {
+	"agentQuoteAdded": "已引用到智能體（${count} 則）",
 	"saveToGallery": "儲存到相簿",
 	"bazaarUpdateDate": "更新日期",
 	"agentQuoteText": "引用文字",

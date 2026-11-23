@@ -1,4 +1,5 @@
 {
+	"agentQuoteAdded": "Citação adicionada à conversa com o agente (${count})",
 	"saveToGallery": "Salvar na galeria",
 	"bazaarUpdateDate": "Data da atualização",
 	"agentQuoteText": "Citar texto",

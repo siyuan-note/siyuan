@@ -796,10 +796,10 @@ export class AgentChat extends Model {
         return true;
     }
 
-    public async insertQuote(quote: AgentQuote) {
+    public async insertQuote(quote: AgentQuote, inBackground = false) {
         await this.initialSession;
         await this.sessionViewChange;
-        if (!this.destroyed) (this.editingComposer || this.composer)?.insertQuote(quote);
+        if (!this.destroyed) return (this.editingComposer || this.composer)?.insertQuote(quote, inBackground);
     }
 
     private bindQuoteAction(actions: HTMLElement, message: HTMLElement, content: string) {

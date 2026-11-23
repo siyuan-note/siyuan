@@ -1,4 +1,5 @@
 {
+	"agentQuoteAdded": "Citaat aan agentchat toegevoegd (${count})",
 	"saveToGallery": "Opslaan in galerij",
 	"bazaarUpdateDate": "Bijgewerkt op",
 	"agentQuoteText": "Tekst citeren",

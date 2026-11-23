@@ -1,4 +1,5 @@
 {
+	"agentQuoteAdded": "Citát bol pridaný do chatu s agentom (${count})",
 	"saveToGallery": "Uložiť do galérie",
 	"bazaarUpdateDate": "Dátum aktualizácie",
 	"agentQuoteText": "Citovať text",

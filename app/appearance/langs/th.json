@@ -1,4 +1,5 @@
 {
+	"agentQuoteAdded": "เพิ่มข้อความอ้างอิงในแชตกับเอเจนต์แล้ว (${count} รายการ)",
 	"saveToGallery": "บันทึกลงในแกลเลอรี",
 	"bazaarUpdateDate": "วันที่อัปเดต",
 	"agentQuoteText": "อ้างอิงข้อความ",

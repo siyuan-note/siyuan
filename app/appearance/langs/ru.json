@@ -1,4 +1,5 @@
 {
+	"agentQuoteAdded": "Цитата добавлена в чат с агентом (${count})",
 	"saveToGallery": "Сохранить в галерею",
 	"bazaarUpdateDate": "Дата обновления",
 	"agentQuoteText": "Цитировать текст",

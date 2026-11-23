@@ -1,6 +1,6 @@
 import type {AIReference} from "../../../types/api";
 import {Constants} from "../../../constants";
-import {AgentQuote, createAgentQuote, projectAgentQuotes, quotePreview} from "./agentQuote";
+import {AGENT_QUOTE_SELECTOR, AgentQuote, createAgentQuote, projectAgentQuotes, quotePreview} from "./agentQuote";
 import {escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
 import {hintRef, hintSlash} from "../../../protyle/hint/extend";
@@ -34,7 +34,7 @@ interface ComposerHandle {
     clearHistory: () => void;
     restoreHistory: (h: string[]) => void;
     insertMention: (id: string, label: string) => void;
-    insertQuote: (quote: AgentQuote) => void;
+    insertQuote: (quote: AgentQuote, inBackground?: boolean) => number | undefined;
     applyPhrase: (instruction: string) => void;
     insertMentions: (mentions: Array<{ id: string; label: string }>) => void;
     uploadImages: (files: FileList | File[], element: HTMLInputElement) => void;
@@ -500,17 +500,42 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             });
             fragment.setBlockHTML(output.innerHTML);
         },
-        insertQuote: (quote) => {
+        insertQuote: (quote, inBackground) => {
+            const selection = getSelection();
+            const original = inBackground && selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : undefined;
+            const previousCount = inBackground ? wysiwyg.element.querySelectorAll(AGENT_QUOTE_SELECTOR).length : 0;
             const saved = p.toolbar.range;
             if (!saved || !wysiwyg.element.contains(saved.commonAncestorContainer)) {
-                fragment.focus(true);
-                const selection = getSelection();
-                if (!selection?.rangeCount || !wysiwyg.element.contains(selection.anchorNode)) return;
-                p.toolbar.range = selection.getRangeAt(0).cloneRange();
+                if (inBackground) {
+                    const editables = wysiwyg.element.querySelectorAll('[contenteditable="true"]');
+                    const last = editables[editables.length - 1];
+                    if (!last) return;
+                    const end = document.createRange();
+                    end.selectNodeContents(last);
+                    end.collapse(false);
+                    p.toolbar.range = end;
+                } else {
+                    fragment.focus(true);
+                    if (!selection?.rangeCount || !wysiwyg.element.contains(selection.anchorNode)) return;
+                    p.toolbar.range = selection.getRangeAt(0).cloneRange();
+                }
+            }
+            if (inBackground) {
+                p.toolbar.range = p.toolbar.range.cloneRange();
+                p.toolbar.range.collapse(false);
             }
             expandAgentTokenSelection(p.toolbar.range);
-            focusByRange(p.toolbar.range);
+            if (!inBackground) focusByRange(p.toolbar.range);
             protyle.insert(createAgentQuote(quote), false, true);
+            if (inBackground && selection && (!selection.anchorNode || wysiwyg.element.contains(selection.anchorNode))) {
+                if (original?.commonAncestorContainer.isConnected) {
+                    focusByRange(original);
+                } else {
+                    selection.removeAllRanges();
+                }
+            }
+            const count = wysiwyg.element.querySelectorAll(AGENT_QUOTE_SELECTOR).length;
+            if (count > previousCount) return count;
         },
         insertMention: (id: string, label: string) => {
             protyle.insert('<span data-type="block-ref" data-id="' + id + '" data-subtype="d">' +

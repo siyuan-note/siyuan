@@ -13,7 +13,7 @@ const browserCases = (source: string) => {
     Object.assign(window, {siyuan: {config: {readonly: false}, languages: new Proxy({}, {get: () => "label"})}});
     const api = new Function("Constants", "transaction", "hasClosestByAttribute", "escapeHtml", "isMobile", source +
         "\nreturn {bindAVPanelDrag, bindSwitcherEvent, getSwitcherHTML, getAVVisibleViewIDs};")(
-        {CUSTOM_SY_AV_VISIBLE_VIEWS: "custom-sy-av-visible-views"},
+        {CUSTOM_SY_AV_VISIBLE_VIEWS: "custom-sy-av-visible-views", CUSTOM_SY_AV_VIEW: "custom-sy-av-view"},
         (_protyle: IProtyle, forward: IOperation[], undo: IOperation[]) => operations.push([forward, undo]),
         (element: Element, name: string, value: string) => element?.closest(`[${name}="${value}"]`),
         (value: string) => value, () => true) as typeof import("./drag") & typeof import("../view") & typeof import("../viewVisibility");
@@ -24,6 +24,7 @@ const browserCases = (source: string) => {
         const menu = document.createElement("div");
         const block = document.createElement("div");
         block.setAttribute("custom-sy-av-visible-views", visible.join(","));
+        block.setAttribute("custom-sy-av-view", "A");
         panel.append(menu);
         document.body.append(panel, block);
         const data = {views: order.map(id => ({id, name: id, type: "table"})), viewID: "A"} as IAV;
@@ -31,6 +32,7 @@ const browserCases = (source: string) => {
         const render = () => {
             renders++;
             const keyword = menu.querySelector<HTMLInputElement>("input")?.value || "";
+            data.viewID = block.getAttribute("custom-sy-av-view");
             menu.innerHTML = api.getSwitcherHTML(data.views, data.viewID, block);
             menu.querySelector<HTMLInputElement>("input").value = keyword;
         };
@@ -56,6 +58,8 @@ const browserCases = (source: string) => {
             list.forEach(operation => {
                 if (operation.action === "setAttrViewBlockVisibleViews") {
                     block.setAttribute("custom-sy-av-visible-views", operation.viewIDs.join(","));
+                } else if (operation.action === "setAttrViewBlockView") {
+                    block.setAttribute("custom-sy-av-view", operation.id);
                 } else if (operation.action === "sortAttrViewView") {
                     const view = data.views.find(item => item.id === operation.id);
                     data.views = data.views.filter(item => item !== view);
@@ -97,6 +101,19 @@ const browserCases = (source: string) => {
         check.equal(f.row("B").dataset.avViewVisibility, "hidden");
         f.apply(operations[0][1]);
         check.deepEqual(f.visible(), ["A", "B"]);
+    }
+    {
+        const f = fixture();
+        f.drag("A", f.row("D"));
+        check.deepEqual(f.visible(), ["B"]);
+        check.equal(f.data.viewID, "B");
+        const [forward, undo] = operations[0];
+        f.apply(undo);
+        check.deepEqual(f.visible(), ["A", "B"]);
+        check.equal(f.data.viewID, "A");
+        f.apply(forward);
+        check.deepEqual(f.visible(), ["B"]);
+        check.equal(f.data.viewID, "B");
     }
     for (const section of ["visible", "hidden"]) {
         const f = fixture();

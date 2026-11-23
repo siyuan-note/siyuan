@@ -11,7 +11,7 @@ import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
 import {clearSelect} from "../../util/clear";
-import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "./viewVisibility";
+import {getAVVisibleViewIDs, setAVVisibleViewIDs, updateAVVisibleViews} from "./viewVisibility";
 import {isNotEditBlock} from "../../wysiwyg/getBlock";
 import {countFilterLeaves} from "./filterTree";
 import {isMobile} from "../../../util/functions";
@@ -31,18 +31,8 @@ export const setAVBlockVisibleViewIDs = (
         return false;
     }
 
-    setAVVisibleViewIDs(blockElement, viewIDs);
-    transaction(protyle, [{
-        action: "setAttrViewBlockVisibleViews",
-        avID: blockElement.getAttribute("data-av-id"),
-        blockID: blockElement.getAttribute("data-node-id"),
-        viewIDs,
-    }], [{
-        action: "setAttrViewBlockVisibleViews",
-        avID: blockElement.getAttribute("data-av-id"),
-        blockID: blockElement.getAttribute("data-node-id"),
-        viewIDs: oldViewIDs,
-    }]);
+    const {operations, undoOperations} = updateAVVisibleViews(blockElement, allViewIDs, oldViewIDs, viewIDs);
+    transaction(protyle, operations, undoOperations);
     return true;
 };
 

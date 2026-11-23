@@ -226,7 +226,7 @@ test("mobile database sheets fit group field rows, preserve navigation and edits
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuGroup", "menus/menuPosition", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
         "util/escape", "util/setPosition", "protyle/util/hasClosest", "protyle/render/av/openMenuPanel", "protyle/render/av/cellPanelPosition",
-        "protyle/render/av/mobilePanel", "protyle/render/av/host", "protyle/render/av/renderData", "protyle/render/av/groups"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
+        "protyle/render/av/mobilePanel", "protyle/render/av/host", "protyle/render/av/renderData", "protyle/render/av/viewVisibility", "protyle/render/av/groups"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText]));
     const css = compile(path.join(__dirname, "../assets/scss/mobile.scss"), {logger: Logger.silent}).css;

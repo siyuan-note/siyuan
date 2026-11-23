@@ -2789,6 +2789,7 @@ type Operation struct {
 	relationCellReplay            *attributeViewRelationCellReplay
 	relationCellReplayUndo        bool
 	attributeViewFieldUndo        bool
+	attributeViewColumnWidths     map[string]string
 	attributeViewAutomation       bool
 	attributeViewCollectionRuleID string
 	attributeViewBinding          *attributeViewBindingSnapshot

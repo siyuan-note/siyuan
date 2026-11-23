@@ -618,7 +618,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Each column represents a field. Drag to resize columns and reorder them. Right-click the column header to edit, delete, or hide the field"
+									"Data": ": Each column represents a field. Drag to resize columns and reorder them. Right-click the column header to edit, delete, or hide the field. Undo restores the previous width after resizing and restores each affected view's previous width after applying a width to other views"
 								}
 							]
 						}

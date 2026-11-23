@@ -1729,6 +1729,7 @@ export class WYSIWYG {
                 const blockID = nodeElement.dataset.nodeId;
                 const dragElement = target.parentElement as HTMLElement;
                 const dragRect = dragElement.getBoundingClientRect();
+                const originalWidth = dragElement.style.width;
                 const oldWidth = Math.round(parseFloat(dragElement.style.width) || dragRect.width);
                 const dragColId = dragElement.getAttribute("data-col-id");
                 const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
@@ -1856,7 +1857,7 @@ export class WYSIWYG {
                         action: "setAttrViewColWidth",
                         id: dragColId,
                         avID: avId,
-                        data: oldWidth + "px",
+                        data: originalWidth || oldWidth + "px",
                         blockID,
                         viewID
                     }]);

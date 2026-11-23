@@ -234,8 +234,8 @@ importers:
         specifier: ^11.0.28
         version: 11.0.28
       globals:
-        specifier: ^15.12.0
-        version: 15.12.0
+        specifier: ^17.14.0
+        version: 17.14.0
       html-loader:
         specifier: ^5.1.0
         version: 5.1.0(webpack@5.112.2)
@@ -2016,8 +2016,8 @@ packages:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
     engines: {node: '>=18'}
 
-  globals@15.12.0:
-    resolution: {integrity: sha512-1+gLErljJFhbOVyaetcwJiJ4+eLe45S2E7P5UiZ9xGfeq3ATQf5DOv9G7MH3gGbKQLkzmNh2DxfZwLdw+j6oTQ==}
+  globals@17.14.0:
+    resolution: {integrity: sha512-UtdkTVyAJePQv0J2M9Xe4L0ruNSDV314XiIJsADI2Zf40bcdAonE/D/OhAU8AT99oij9mhLByb+NvA3QWZYgCg==}
     engines: {node: '>=18'}
 
   globalthis@1.0.4:
@@ -5019,7 +5019,7 @@ snapshots:
 
   globals@14.0.0: {}
 
-  globals@15.12.0: {}
+  globals@17.14.0: {}
 
   globalthis@1.0.4:
     dependencies:

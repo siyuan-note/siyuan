@@ -55,7 +55,7 @@ const mountDate = (requireExplicitChange = false) => {
     return {inputs, updates, pickers, close, setValid: (value: boolean) => { valid = value; }};
 };
 
-test("date inputs keep segment navigation while allowing Escape to close the panel", () => {
+test("date inputs stop the host from handling editor keys while allowing Escape to close the panel", () => {
     const {inputs, pickers} = mountDate();
     assert.deepEqual(pickers.map(picker => picker.input), inputs.slice(0, 2));
     for (const input of inputs.slice(0, 2)) {

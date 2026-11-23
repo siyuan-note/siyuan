@@ -35,6 +35,8 @@ var (
 	dbQueueCond    = sync.NewCond(&dbQueueLock)
 )
 
+const indexRecoveryBatchSize = 512
+
 type dbQueueOperation struct {
 	inQueueTime                   time.Time
 	action                        string      // upsert/delete/delete_id/rename/move/delete_box/delete_box_refs/index/delete_ids/update_block_content/delete_assets/index_node
@@ -50,6 +52,7 @@ type dbQueueOperation struct {
 	removeAssetHashes             []string // delete_assets
 	refreshDefIDs                 []string // refresh_def_refs
 	recoveryEntry                 *indexEntry
+	recoveryEnd                   int64
 	recoveredIndex                bool
 	repairedEmbed                 *indexQueueRepair
 }
@@ -172,6 +175,11 @@ func (op *dbQueueOperation) boxID() string {
 }
 
 func FlushTxJob() {
+	if IndexRecoveryPending() {
+		// 历史索引恢复在独立任务中分批执行，重建索引等串行任务可以在批次之间取得执行锁。
+		task.AppendAsyncTaskWithDelay(task.DatabaseIndexCommit, 0, FlushQueue)
+		return
+	}
 	task.AppendTask(task.DatabaseIndexCommit, FlushQueue)
 }
 
@@ -210,6 +218,8 @@ func WaitFlushTx() {
 func ClearQueue() {
 	HPathRefreshLock.Lock()
 	defer HPathRefreshLock.Unlock()
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
 	clearQueue()
 }
 
@@ -218,6 +228,7 @@ func clearQueue() {
 	defer dbQueueLock.Unlock()
 	operationQueue = nil
 	clearIndexQueueEntries()
+	dbQueueCond.Broadcast()
 }
 
 var flushingTx = atomic.Bool{}
@@ -232,6 +243,11 @@ func IndexQueueIdle() bool {
 }
 
 func FlushQueue() {
+	for flushQueueBatch() {
+	}
+}
+
+func flushQueueBatch() (more bool) {
 	timing := util.BeginPerformance("index.flush")
 	timing.Stage("wait_lock")
 	diagnostic := util.WatchOperation("flush database index", "wait for index lock")
@@ -241,7 +257,16 @@ func FlushQueue() {
 
 	diagnostic.Stage("take queued operations")
 	timing.Stage("take_queue")
-	ops, indexSnapshot := getOperations()
+	var ops []*dbQueueOperation
+	var recoveryEnds []int64
+	if IndexRecoveryPending() {
+		ops, recoveryEnds = takeIndexRecoveryBatch()
+	}
+	recovering := len(recoveryEnds) > 0
+	var indexSnapshot int64
+	if !recovering {
+		ops, indexSnapshot = getOperations()
+	}
 	total := len(ops)
 	if 1 > total && !flushingTx.Load() {
 		return
@@ -250,9 +275,28 @@ func FlushQueue() {
 	timing.Count("operations", int64(total))
 
 	flushingTx.Store(true)
+	backlinkChange := newBacklinkIndexChange()
 	defer func() {
+		var recovered int
+		if recovering {
+			diagnostic.Stage("persist index queue completion")
+			for _, op := range ops {
+				if op != nil {
+					break
+				}
+				recovered++
+			}
+			if recovered > 0 {
+				checkpointIndexRecovery(recoveryEnds[recovered-1])
+			}
+			if backlinkChange.changed {
+				util.BroadcastByType("main", "databaseIndexCommit", 0, "", backlinkChange.data())
+			}
+		}
+
 		// 中断或恢复失败时保留尚未完成的操作，并排在刷新期间追加的操作之前。
 		dbQueueLock.Lock()
+		defer dbQueueLock.Unlock()
 		var pending []*dbQueueOperation
 		for _, op := range ops {
 			if op != nil {
@@ -265,7 +309,10 @@ func FlushQueue() {
 		flushingTx.Store(false)
 		// 通知等待的协程队列已刷新完成
 		dbQueueCond.Broadcast()
-		dbQueueLock.Unlock()
+		if recovered > 0 && indexRecoveryRemaining.Add(-int64(recovered)) == 0 && len(operationQueue) == 0 {
+			more = false
+			eventbus.Publish(eventbus.EvtSQLIndexFlushed)
+		}
 	}()
 
 	start := time.Now()
@@ -295,7 +342,6 @@ func FlushQueue() {
 	}
 
 	groupOpsCurrent := map[string]int{}
-	backlinkChange := newBacklinkIndexChange()
 	var recoveryLute *lute.Lute
 	for i, op := range ops {
 		if util.IsExiting.Load() {
@@ -378,13 +424,17 @@ func FlushQueue() {
 			if repair.embedID != "" {
 				// 嵌入查询等待修复事务提交，持久队列仍保留本项以便重新计算失败时重试。
 				entry := indexEntry{Action: "update_block_content", Box: repair.box, ID: repair.embedID}
+				recoveryEnd := ops[i].recoveryEnd
 				ops[i] = newRecoveredIndexOperation(entry)
+				ops[i].recoveryEnd = recoveryEnd
 				ops[i].repairedEmbed = repair
 				if err = refreshRepairedEmbed(entry, repair); err != nil {
-					committed := newBacklinkIndexChange()
-					committed.changed = true
-					committed.addRootID(repair.rootID)
-					util.BroadcastByType("main", "databaseIndexCommit", 0, "", committed.data())
+					if !recovering {
+						committed := newBacklinkIndexChange()
+						committed.changed = true
+						committed.addRootID(repair.rootID)
+						util.BroadcastByType("main", "databaseIndexCommit", 0, "", committed.data())
+					}
 					logging.LogErrorf("queue operation [%s] failed after repairing index: %s", op.action, err)
 					return
 				}
@@ -419,6 +469,10 @@ func FlushQueue() {
 		logging.LogInfof("database op tx [%dms]", elapsed)
 	}
 
+	if recovering {
+		return true
+	}
+
 	// Push database index commit event https://github.com/siyuan-note/siyuan/issues/8814
 	diagnostic.Stage("notify index completion")
 	timing.Stage("notify")
@@ -430,6 +484,7 @@ func FlushQueue() {
 	diagnostic.Stage("persist index queue completion")
 	timing.Stage("persist_queue")
 	clearIndexQueue(indexSnapshot)
+	return false
 }
 
 func invalidateRefsCacheForOperation(op *dbQueueOperation) {
@@ -908,6 +963,24 @@ func getOperations() (ops []*dbQueueOperation, indexSnapshot int64) {
 	return
 }
 
+func takeIndexRecoveryBatch() (ops []*dbQueueOperation, journalEnds []int64) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	limit := min(len(operationQueue), indexRecoveryBatchSize)
+	journalEnds = make([]int64, 0, limit)
+	for _, op := range operationQueue[:limit] {
+		if op.recoveryEnd == 0 {
+			break
+		}
+		journalEnds = append(journalEnds, op.recoveryEnd)
+	}
+	n := len(journalEnds)
+	ops = operationQueue[:n:n]
+	operationQueue = operationQueue[n:]
+	return
+}
+
 func appendOperation(op *dbQueueOperation) {
 	operationQueue = append(operationQueue, op)
 	recordIndexOperation(op)
@@ -918,6 +991,10 @@ func appendOperation(op *dbQueueOperation) {
 // in-memory operation is coalesced. Unchanged descriptors already reload the
 // latest document from disk and do not need another journal entry.
 func replaceOperation(index int, op *dbQueueOperation) {
+	if operationQueue[index].recoveryEnd > 0 {
+		appendOperation(op)
+		return
+	}
 	previous := dbOpToIndexEntry(operationQueue[index])
 	operationQueue[index] = op
 	if !reflect.DeepEqual(previous, dbOpToIndexEntry(op)) {

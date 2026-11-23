@@ -1486,11 +1486,12 @@ func prepareRepoCheckout(repo *dejavu.Repo) (*syncCheckoutTask, error) {
 	}
 	// A full restore refreshes all indexes as one operation. Do not release the
 	// guard through incremental sync Applied callbacks or repeat a partial refresh.
+	prepare := func() error { return checkout.prepareWriteProtection(false) }
 	repo.SetCheckoutHooks(dejavu.CheckoutHooks{
-		Context: checkout.ctx, Apply: checkout.prepareApply, Before: checkCheckoutSpace,
+		Context: checkout.ctx, Apply: prepare, Before: checkCheckoutSpace,
 		Preflight: documentAddressingPreflight(repo),
 	})
-	if err := checkout.prepareApply(); err != nil {
+	if err := prepare(); err != nil {
 		checkout.finish(repo, &err)
 		return nil, err
 	}

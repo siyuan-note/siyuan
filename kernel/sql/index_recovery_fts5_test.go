@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"context"
 	stdsql "database/sql"
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -23,15 +24,16 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestIndexRecoveryLifecycle(t *testing.T) {
 	if os.Getenv("SIYUAN_TEST_INDEX_RECOVERY") != "1" {
-		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 150*time.Second)
 		defer cancel()
-		cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestIndexRecoveryLifecycle$", "-test.timeout=60s", "-test.v")
+		cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestIndexRecoveryLifecycle$", "-test.timeout=120s", "-test.v")
 		cmd.Env = append(os.Environ(), "SIYUAN_TEST_INDEX_RECOVERY=1")
 		if output, err := cmd.CombinedOutput(); err != nil {
 			t.Fatalf("index recovery subprocess: %v\n%s", err, output)
@@ -87,6 +89,63 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 		}
 	}
 
+	t.Run("large recovery resumes after committing a prefix", func(t *testing.T) {
+		const total, interruptAfter, documentUpdates = 35000, 600, 1200
+		ClearQueue()
+		first, last := newTree(), newTree()
+		record := func(id, path string) []byte {
+			data, err := json.Marshal(indexEntry{Action: "upsert", Box: box, ID: id, Path: path})
+			if err != nil {
+				t.Fatal(err)
+			}
+			return append(data, '\n')
+		}
+		journal := bytes.Repeat(record(first.ID, first.Path), documentUpdates)
+		const assetRecord = "{\"action\":\"delete_assets\",\"hashes\":[\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"]}\n"
+		journal = append(journal, bytes.Repeat([]byte(assetRecord), total-documentUpdates-1)...)
+		journal = append(journal, record(last.ID, last.Path)...)
+		if err := os.WriteFile(filepath.Join(util.QueueDir, "index.queue"), journal, 0644); err != nil {
+			t.Fatal(err)
+		}
+		restartQueue()
+		committed := 0
+		handler := func(id string) {
+			if id == first.ID {
+				committed++
+				if committed == interruptAfter {
+					util.IsExiting.Store(true)
+				}
+			}
+		}
+		eventbus.Subscribe(eventbus.EvtEmbeddingDirty, handler)
+		defer util.IsExiting.Store(false)
+		if !flushQueueBatch() || committed != indexRecoveryBatchSize || len(loadIndexQueue()) != total-indexRecoveryBatchSize {
+			t.Fatalf("first recovery batch did not checkpoint %d entries: committed %d", indexRecoveryBatchSize, committed)
+		}
+		if !initDatabaseLock.TryLock() {
+			t.Fatal("completed recovery batch retained the index execution lock")
+		}
+		initDatabaseLock.Unlock()
+		FlushQueue()
+		util.IsExiting.Store(false)
+		assertRows(first)
+		if pending := len(loadIndexQueue()); committed != interruptAfter || pending != total-interruptAfter {
+			t.Fatalf("committed %d of %d entries, journal still has %d entries, want %d", committed, total, pending, total-interruptAfter)
+		}
+		t.Logf("checkpointed %d of %d records before reopening", committed, total)
+		operationQueue = nil
+		InitDatabase(false)
+		if len(operationQueue) != total-interruptAfter || !IndexRecoveryPending() {
+			t.Fatalf("reopened database queued %d entries, want %d", len(operationQueue), total-interruptAfter)
+		}
+		FlushQueue()
+		if committed != documentUpdates || len(loadIndexQueue()) != 0 || IndexRecoveryPending() {
+			t.Fatalf("recovery repeated committed work or left pending entries: %d document updates", committed)
+		}
+		assertRows(last)
+		t.Logf("replayed %d pending records after reopening", total-interruptAfter)
+	})
+
 	t.Run("interrupted replay and live append", func(t *testing.T) {
 		ClearQueue()
 		first, second, live := newTree(), newTree(), newTree()
@@ -113,8 +172,8 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 			t.Fatal("interruption did not retain pending operations before live appends")
 		}
 		assertRows(first)
-		if len(loadIndexQueue()) != 3 {
-			t.Fatal("interruption lost persistent recovery records")
+		if entries := loadIndexQueue(); len(entries) != 2 || entries[0].ID != second.ID || entries[1].ID != live.ID {
+			t.Fatal("interruption did not checkpoint the committed prefix and retain pending work in order")
 		}
 		restartQueue()
 		FlushQueue()
@@ -226,8 +285,8 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 			t.Fatal(err)
 		}
 		FlushQueue()
-		if len(operationQueue) != 1 || len(loadIndexQueue()) != 3 {
-			t.Fatal("failed reference repair lost its recovery record")
+		if entries := loadIndexQueue(); len(operationQueue) != 1 || len(entries) != 1 || entries[0].Action != "refresh_def_refs" {
+			t.Fatal("failed reference repair did not retain its recovery record after checkpointing prior commits")
 		}
 		if _, err := db.Exec("DROP TRIGGER reject_ref_location"); err != nil {
 			t.Fatal(err)
@@ -681,4 +740,50 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("scheduled recovery leaves the rebuild worker available", func(t *testing.T) {
+		ClearQueue()
+		tree := newTree()
+		IndexTreeQueue(tree)
+		restartQueue()
+		FlushTxJob()
+		waiting, drained := make(chan struct{}), make(chan struct{})
+		go func() {
+			dbQueueLock.Lock()
+			defer dbQueueLock.Unlock()
+			close(waiting)
+			for len(operationQueue) > 0 {
+				dbQueueCond.Wait()
+			}
+			close(drained)
+		}()
+		<-waiting
+		rebuildCompleted, recoveryPending := false, false
+		task.AppendTask(task.DatabaseIndexFull, func() {
+			recoveryPending = IndexRecoveryPending()
+			InitDatabase(true)
+			rebuildCompleted = true
+		})
+		deadline := time.Now().Add(2 * time.Second)
+		for !rebuildCompleted && time.Now().Before(deadline) {
+			task.ExecTaskJob()
+			if !rebuildCompleted {
+				time.Sleep(time.Millisecond)
+			}
+		}
+		if !rebuildCompleted {
+			t.Fatal("serial worker did not run the requested rebuild")
+		}
+		if !recoveryPending {
+			t.Fatal("scheduled recovery took the serial worker ahead of the requested rebuild")
+		}
+		if IndexRecoveryPending() || len(loadIndexQueue()) != 0 {
+			t.Fatal("full rebuild retained superseded recovery entries")
+		}
+		select {
+		case <-drained:
+		case <-time.After(2 * time.Second):
+			t.Fatal("rebuild did not notify the waiter after clearing recovery entries")
+		}
+	})
 }

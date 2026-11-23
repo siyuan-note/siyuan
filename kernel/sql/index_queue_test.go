@@ -90,6 +90,33 @@ func TestIndexQueuePreservesOperationsAppendedDuringFlush(t *testing.T) {
 	}
 }
 
+func TestIndexRecoveryCheckpointRetriesFromLastPersistedOffset(t *testing.T) {
+	prepareIndexQueueTest(t)
+	for _, box := range []string{"first", "second", "third"} {
+		appendOperation(&dbQueueOperation{action: "delete_box", box: box})
+	}
+	entries := loadIndexQueue()
+	if len(entries) != 3 {
+		t.Fatalf("expected three recovery records, got %d", len(entries))
+	}
+	journal := filepath.Join(util.QueueDir, "index.queue")
+	unavailable := journal + ".unavailable"
+	if err := os.Rename(journal, unavailable); err != nil {
+		t.Fatal(err)
+	}
+	checkpointIndexRecovery(entries[0].end)
+	if indexRecoveryCheckpoint != 0 {
+		t.Fatal("failed checkpoint advanced the confirmed offset")
+	}
+	if err := os.Rename(unavailable, journal); err != nil {
+		t.Fatal(err)
+	}
+	checkpointIndexRecovery(entries[1].end)
+	if remaining := loadIndexQueue(); len(remaining) != 1 || remaining[0].Box != "third" {
+		t.Fatalf("checkpoint retry lost or split the pending record: %+v", remaining)
+	}
+}
+
 func TestRecoverIndexQueueAfterRestart(t *testing.T) {
 	prepareIndexQueueTest(t)
 
@@ -338,6 +365,8 @@ func prepareIndexQueueTest(t *testing.T) {
 	oldQueueDir := util.QueueDir
 	oldIndexFlock := indexFlock
 	oldIndexQueueSize := indexQueueSize.Load()
+	oldIndexRecoveryRemaining := indexRecoveryRemaining.Load()
+	oldIndexRecoveryCheckpoint := indexRecoveryCheckpoint
 
 	dbQueueLock.Lock()
 	oldOperationQueue := operationQueue
@@ -353,5 +382,7 @@ func prepareIndexQueueTest(t *testing.T) {
 		util.QueueDir = oldQueueDir
 		indexFlock = oldIndexFlock
 		indexQueueSize.Store(oldIndexQueueSize)
+		indexRecoveryRemaining.Store(oldIndexRecoveryRemaining)
+		indexRecoveryCheckpoint = oldIndexRecoveryCheckpoint
 	})
 }

@@ -16,6 +16,7 @@ const setup = (mobile = true) => {
     let freezes = 0;
     let disposals = 0;
     let bindings = 0;
+    let initiallyExpanded: boolean;
     let keyboard = 0;
     const document = {activeElement: undefined as unknown};
     const window = {siyuan: {dialogs: [] as any[], languages: {settingsPendingSaveError: "failed"}}};
@@ -35,25 +36,28 @@ const setup = (mobile = true) => {
     }
     const dependencies = {Dialog: Base, isMobile: () => mobile,
         bindBottomSheetDialog: (_dialog: any, _close: any, _resize: any, open: () => void,
-            options: {canStart: () => boolean}) => {
+            options: {canStart: () => boolean, initiallyExpanded?: boolean}) => {
             drag = _close; canDrag = options.canStart;
+            initiallyExpanded = options.initiallyExpanded;
             bindings++; opened = open; resized = _resize;
             const dispose = () => { disposals++; };
             dispose.freeze = () => { freezes++; };
             return dispose;
         },
-        scrollInputIntoView: () => { scrolled++; }, callMobileAppShowKeyboard: () => { keyboard++; }, setSheetExpanded() {}, Constants: {TIMEOUT_INPUT: 10}, isNotCtrl: () => true, showMessage() {}};
+        scrollInputIntoView: () => { scrolled++; }, callMobileAppShowKeyboard: () => { keyboard++; }, Constants: {TIMEOUT_INPUT: 10}, isNotCtrl: () => true, showMessage() {}};
     const exports: any = {};
     runInNewContext(source, {exports, require: () => dependencies, window, document, console: {error() {}}});
-    return {...exports, window, document, Base, drag: () => drag(), canDrag: () => canDrag(), resize: () => resized(), open: () => opened(), stats: () => ({freezes, disposals, bindings, keyboard, scrolled})};
+    return {...exports, window, document, Base, drag: () => drag(), canDrag: () => canDrag(), resize: () => resized(), open: () => opened(), stats: () => ({freezes, disposals, bindings, keyboard, scrolled, initiallyExpanded})};
 };
 test("explicit mobile geometry binds once; desktop is untouched", () => {
     const mobile = setup();
-    const dialog = new mobile.AdaptiveDialog({content: ""});
+    const mobileSheet = {initiallyExpanded: true};
+    const dialog = new mobile.AdaptiveDialog({content: "", mobileSheet});
     assert.equal(dialog.options.height, "auto");
     assert.equal(mobile.stats().bindings, 1);
+    assert.equal(mobile.stats().initiallyExpanded, true);
     const desktop = setup(false);
-    const original = {content: "", height: "350px", disableClose: true};
+    const original = {content: "", height: "350px", disableClose: true, mobileSheet};
     const desktopDialog = new desktop.AdaptiveDialog(original);
     assert.equal(desktopDialog.options, original);
     assert.equal(desktop.stats().bindings, 0);

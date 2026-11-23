@@ -5,8 +5,8 @@ import {isMobileLandscape} from "./orientation";
 type MobileSheetMode = "standard" | "expanded";
 
 export const bindMobileSheetLayout = (overlay: HTMLElement, sheet: HTMLElement,
-                                     options: {onResize?: () => void, onGeometryChange?: () => void, standalone?: boolean} = {}) => {
-    let mode: MobileSheetMode = "standard";
+                                     options: {onResize?: () => void, onGeometryChange?: () => void, standalone?: boolean, initiallyExpanded?: boolean} = {}) => {
+    let mode: MobileSheetMode = options.initiallyExpanded ? "expanded" : "standard";
     let geometry: string;
     let frozen = false;
     let disposed = false;

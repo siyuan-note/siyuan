@@ -133,6 +133,22 @@ const browserCases = async (sources: string[]) => {
     document.body.classList.remove("body--ios");
     document.body.style.setProperty("--mobile-bottom-bar-safe-area", "30px");
     viewport.bottom = 800;
+    document.body.innerHTML = markup;
+    const expandedRoot = document.querySelector<HTMLElement>(".mobile-bottom-sheet-dialog");
+    const expandedPanel = expandedRoot.querySelector<HTMLElement>(".b3-dialog__container");
+    expandedPanel.querySelector(".b3-menu__title").remove();
+    let heightAtOpen: number;
+    const disposeExpanded = dependencies.bindBottomSheetDialog({element: expandedRoot}, async () => true, undefined,
+        () => { heightAtOpen = expandedPanel.getBoundingClientRect().height; }, {initiallyExpanded: true});
+    check.equal(heightAtOpen, 750, "an initially expanded sheet opens at full available height");
+    viewport.bottom = 500;
+    window.dispatchEvent(new Event("resize"));
+    check.equal(expandedPanel.getBoundingClientRect().height, 450, "the keyboard clips the expanded sheet");
+    viewport.bottom = 800;
+    window.dispatchEvent(new Event("resize"));
+    check.equal(expandedPanel.getBoundingClientRect().height, 750, "the sheet returns to full height after keyboard dismissal");
+    disposeExpanded();
+
     for (const gate of ["child", "root-inert", "body-inert", "root-busy", "body-busy", "business", "closing"]) {
         document.body.innerHTML = markup;
         const root = document.querySelector<HTMLElement>(".mobile-bottom-sheet-dialog");

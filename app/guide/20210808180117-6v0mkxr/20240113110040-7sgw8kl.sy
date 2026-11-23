@@ -407,7 +407,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Bottom sheets have no X icon, Close, Fullscreen or Restore buttons. Confirmation and cancellation buttons appear below the content when needed. Bottom sheets open at half screen. Drag the top grip up and release to expand to full screen. Drag it down and release from either height to dismiss the sheet. You can also use Back or tap outside the sheet. Scroll and select text in the content as usual. The keyboard temporarily limits the visible height, and the sheet returns to its selected height when the keyboard closes. Dismissal follows the usual cancellation and saving rules. Saving and mandatory prompts may prevent dismissal. Follow the available actions."
+					"Data": "Bottom sheets have no X icon, Close, Fullscreen or Restore buttons. Confirmation and cancellation buttons appear below the content when needed. Flashcard review and browsing open in full screen. Other bottom sheets generally open at half screen. Drag the top grip up and release to expand to full screen. Drag it down and release from either height to dismiss the sheet. You can also use Back or tap outside the sheet. Scroll and select text in the content as usual. The keyboard temporarily limits the visible height, and the sheet returns to its selected height when the keyboard closes. Dismissal follows the usual cancellation and saving rules. Saving and mandatory prompts may prevent dismissal. Follow the available actions."
 				}
 			]
 		},

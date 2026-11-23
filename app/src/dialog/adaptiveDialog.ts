@@ -9,6 +9,7 @@ import {showMessage} from "./message";
 
 export type DialogCloseReason = "confirm" | "cancel" | "scrim" | "drag" | "back" | "escape" | "programmatic" | "invalidate";
 export type MobileSheetOptions = {
+    initiallyExpanded?: boolean,
     beforeClose?: (reason: DialogCloseReason) => boolean | Promise<boolean>
 };
 const passive = (reason: DialogCloseReason) => ["scrim", "drag", "back", "escape"].includes(reason);
@@ -79,7 +80,10 @@ const createAdaptiveDialogClass = () => {
                 this.ready = true;
                 this.focusTask?.();
                 this.focusTask = undefined;
-            }, {canStart: () => !this.pending && !this.checking && !this.disposed && this.topmost()});
+            }, {
+                initiallyExpanded: this.sheetOptions.initiallyExpanded,
+                canStart: () => !this.pending && !this.checking && !this.disposed && this.topmost(),
+            });
             const click = (event: MouseEvent) => {
                 const target = event.target as HTMLElement;
                 if (target.closest(".b3-dialog__scrim")) {

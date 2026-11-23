@@ -4,7 +4,8 @@ import {waitForSheetViewport} from "../../menus/sheetOpen";
 import {bindKeyboardSheetState} from "./keyboardSheetState";
 
 export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void | boolean>, afterResize?: () => void,
-                                     afterOpen?: () => void, layoutOptions?: {canStart?: () => boolean}) => {
+                                     afterOpen?: () => void,
+                                     layoutOptions?: {canStart?: () => boolean, initiallyExpanded?: boolean}) => {
     dialog.element.classList.add("mobile-bottom-sheet-dialog");
     const sheet = dialog.element.querySelector<HTMLElement>(".b3-dialog__container");
     sheet.querySelector(".b3-dialog__close")?.remove();
@@ -57,10 +58,14 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void 
         expansion?.cancel();
     };
     const layout = (require("./mobileSheetLayout") as typeof import("./mobileSheetLayout")).bindMobileSheetLayout(dialog.element.querySelector<HTMLElement>(".b3-dialog"),
-        sheet, {onResize: afterResize, onGeometryChange: () => {
-            expansion?.cancel();
-            dragState.cancel?.();
-        }});
+        sheet, {
+            initiallyExpanded: layoutOptions?.initiallyExpanded,
+            onResize: afterResize,
+            onGeometryChange: () => {
+                expansion?.cancel();
+                dragState.cancel?.();
+            },
+        });
     // 底部抽屉通过抓手展开或收起，禁用通用对话框的移动和缩放。
     sheet.querySelector(".b3-dialog__header")?.classList.remove("resize__move");
     sheet.querySelectorAll(":scope > .resize__rd, :scope > .resize__ld, :scope > .resize__lt, :scope > .resize__rt, " +

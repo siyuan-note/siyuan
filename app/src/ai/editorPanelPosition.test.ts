@@ -1,8 +1,63 @@
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {compileString} from "sass";
+import {compile, compileString, Logger} from "sass";
 import {browserSources, runBrowserCase} from "../datePicker/test/browser";
+
+test("long AI edit results leave the thinking toggle and actions accessible", async () => {
+    const css = compile("src/assets/scss/base.scss", {logger: Logger.silent}).css;
+    const result = await runBrowserCase(async (_modules, sheet) => {
+        const style = document.createElement("style");
+        style.textContent = sheet + "main{position:relative;height:480px;width:420px;--b3-font-size:20px}";
+        document.head.appendChild(style);
+        document.body.innerHTML = `<main><div class="ai-editor-panel">
+            <div class="ai-editor-panel__grip"></div><div class="ai-editor-panel__header">AI edit</div>
+            <div class="ai-editor-panel__thinking"><div class="agent-chat__thinking-card">
+                <div class="agent-chat__thinking-header"><span>Thought for 3s</span></div>
+                <div class="agent-chat__thinking-body"><div class="agent-chat__thinking-reasoning-text"></div></div>
+            </div></div>
+            <div class="ai-editor-panel__body protyle-wysiwyg"></div>
+            <div class="ai-editor-panel__actions"><button class="b3-button">Insert</button></div>
+        </div></main>`;
+        const panel = document.querySelector<HTMLElement>(".ai-editor-panel");
+        const toggle = panel.querySelector<HTMLElement>(".agent-chat__thinking-header");
+        const reasoning = panel.querySelector<HTMLElement>(".agent-chat__thinking-body");
+        const answer = panel.querySelector<HTMLElement>(".ai-editor-panel__body");
+        const button = panel.querySelector("button");
+        reasoning.firstElementChild.textContent = "Reasoning\n".repeat(100);
+        answer.innerHTML = "<p>Result</p>".repeat(100);
+        const hit = (element: HTMLElement, y: number) => {
+            const rect = element.getBoundingClientRect();
+            return element.contains(document.elementFromPoint(rect.left + rect.width / 2, y));
+        };
+        for (const [mode, height] of [["desktop", ""], ["resized", "230px"], ["minimum", "128px"], ["mobile", ""]]) {
+            panel.classList.toggle("ai-editor-panel--resized", !!height);
+            panel.classList.toggle("ai-editor-panel--mobile", mode === "mobile");
+            panel.style.height = height;
+            for (const expanded of [false, true, false]) {
+                reasoning.classList.toggle("agent-chat__thinking-body--expanded", expanded);
+                await Promise.all(reasoning.getAnimations().map(animation => animation.finished));
+                panel.scrollTop = 0;
+                const header = toggle.getBoundingClientRect();
+                if (!hit(toggle, header.top + 1) || !hit(toggle, header.bottom - 1) ||
+                    header.bottom > answer.getBoundingClientRect().top) {
+                    throw Error("Clipped thinking header in " + mode);
+                }
+                if (mode === "minimum") button.scrollIntoView({block: "nearest"});
+                if (!hit(button, button.getBoundingClientRect().bottom - 1)) {
+                    throw Error("Inaccessible actions in " + mode);
+                }
+                answer.scrollTop = 50;
+                reasoning.scrollTop = 50;
+                if (answer.scrollTop !== 50 || (expanded && (reasoning.clientHeight < 20 || reasoning.scrollTop !== 50))) {
+                    throw Error("Content cannot be read in " + mode);
+                }
+            }
+        }
+        return "passed";
+    }, {}, css, {width: 520, height: 540});
+    assert.match(result, /passed/);
+});
 
 test("AI edit follows the source until moved and keeps the mobile bottom bar accessible", async () => {
     const sources = browserSources({position: "src/ai/editorPanelPosition.ts"});

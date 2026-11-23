@@ -1,11 +1,17 @@
 .ai-editor-panel {
   position: absolute;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template:
+    "grip" auto
+    "header" auto
+    "thinking-title" auto
+    "thinking-body" fit-content(50%)
+    "result" 1fr
+    "actions" auto / minmax(0, 1fr);
   box-sizing: border-box;
   width: min(520px, calc(100% - 32px));
   max-height: min(480px, 60%);
-  overflow: hidden;
+  overflow: auto;
   background: var(--b3-theme-background);
   border: 1px solid var(--b3-theme-surface-lighter);
   border-radius: var(--b3-border-radius-b);
@@ -15,24 +21,15 @@
     resize: both;
     min-width: min(280px, calc(100% - 16px));
     max-width: calc(100% - 16px);
-
-    .ai-editor-panel__body {
-      flex: 1 1 auto;
-    }
   }
 
   &--resized {
     min-height: min(128px, calc(100% - 16px));
     max-height: calc(100% - 16px);
-
-    .ai-editor-panel__thinking {
-      flex-shrink: 1;
-      min-height: 0;
-      overflow-y: auto;
-    }
   }
 
   &__header {
+    grid-area: header;
     cursor: move;
     touch-action: none;
     display: flex;
@@ -76,6 +73,7 @@
   }
 
   &__body.protyle-wysiwyg {
+    grid-area: result;
     box-sizing: border-box;
     min-height: 36px;
     padding: 6px 8px;
@@ -92,16 +90,39 @@
   }
 
   &__thinking {
-    flex-shrink: 0;
-    padding: 2px 8px;
+    display: contents;
+
+    .agent-chat__thinking-card,
+    .agent-chat__thinking-header,
+    .agent-chat__thinking-body {
+      opacity: inherit;
+    }
+
+    .agent-chat__thinking-card {
+      display: contents;
+    }
+
+    .agent-chat__thinking-header {
+      grid-area: thinking-title;
+      position: static;
+      margin: 2px 8px 0;
+    }
+
+    .agent-chat__thinking-body {
+      grid-area: thinking-body;
+      min-height: 0;
+      margin: 0 8px 2px;
+    }
 
     .agent-chat__thinking-body--expanded {
+      min-height: 1lh;
       max-height: 240px;
       overflow-y: auto;
     }
   }
 
   &__actions {
+    grid-area: actions;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
@@ -124,8 +145,9 @@
     }
 
     .ai-editor-panel__grip {
+      grid-area: grip;
       display: grid;
-      flex: 0 0 22px;
+      height: 22px;
       place-items: center;
       cursor: ns-resize;
       touch-action: none;
@@ -137,16 +159,6 @@
         border-radius: 2px;
         background: var(--b3-theme-on-surface-light);
       }
-    }
-
-    .ai-editor-panel__thinking {
-      min-height: 0;
-      flex-shrink: 1;
-      overflow-y: auto;
-    }
-
-    .ai-editor-panel__body {
-      flex: 1 1 auto;
     }
 
     .ai-editor-panel__actions .b3-button {

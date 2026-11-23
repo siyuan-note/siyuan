@@ -5,6 +5,7 @@
 package tools
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -102,7 +103,8 @@ Raw super-block DOM uses data-type="NodeSuperBlock" and data-sb-layout="row" or 
 		},
 		Required: []string{"action"},
 	},
-	Handler: blockHandler,
+	Handler:        blockHandler,
+	ContextHandler: blockContextHandler,
 }
 
 func init() {
@@ -110,6 +112,10 @@ func init() {
 }
 
 func blockHandler(args map[string]any) (CallToolResult, error) {
+	return blockContextHandler(context.Background(), args)
+}
+
+func blockContextHandler(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "get":
@@ -123,13 +129,13 @@ func blockHandler(args map[string]any) (CallToolResult, error) {
 	case "dom":
 		return blockDom(args)
 	case "insert":
-		return blockInsert(args)
+		return blockInsert(ctx, args)
 	case "append":
-		return blockAppend(args)
+		return blockAppend(ctx, args)
 	case "prepend":
-		return blockPrepend(args)
+		return blockPrepend(ctx, args)
 	case "update":
-		return blockUpdate(args)
+		return blockUpdate(ctx, args)
 	case "delete":
 		return blockDelete(args)
 	case "move":
@@ -228,7 +234,7 @@ func blockGetChildren(args map[string]any) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func blockInsert(args map[string]any) (CallToolResult, error) {
+func blockInsert(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -267,7 +273,7 @@ func blockInsert(args map[string]any) (CallToolResult, error) {
 
 	operation := &model.Operation{
 		Action:     "insert",
-		Data:       data,
+		Data:       markAgentWriteDOM(ctx, data),
 		ParentID:   parentID,
 		PreviousID: previousID,
 		NextID:     nextID,
@@ -292,7 +298,7 @@ func blockInsert(args map[string]any) (CallToolResult, error) {
 	return blockWriteSuccess("insert", operation.ID)
 }
 
-func blockAppend(args map[string]any) (CallToolResult, error) {
+func blockAppend(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -318,7 +324,7 @@ func blockAppend(args map[string]any) (CallToolResult, error) {
 
 	operation := &model.Operation{
 		Action:   "appendInsert",
-		Data:     data,
+		Data:     markAgentWriteDOM(ctx, data),
 		ParentID: parentID,
 	}
 	if _, err := model.PerformBlockOperation(operation); err != nil {
@@ -331,7 +337,7 @@ func blockAppend(args map[string]any) (CallToolResult, error) {
 	return blockWriteSuccess("append", operation.ID)
 }
 
-func blockPrepend(args map[string]any) (CallToolResult, error) {
+func blockPrepend(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -357,7 +363,7 @@ func blockPrepend(args map[string]any) (CallToolResult, error) {
 
 	operation := &model.Operation{
 		Action:   "prependInsert",
-		Data:     data,
+		Data:     markAgentWriteDOM(ctx, data),
 		ParentID: parentID,
 	}
 	if _, err := model.PerformBlockOperation(operation); err != nil {
@@ -391,7 +397,7 @@ func blockWriteSuccess(action, id string) (CallToolResult, error) {
 	}, nil
 }
 
-func blockUpdate(args map[string]any) (CallToolResult, error) {
+func blockUpdate(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -425,10 +431,11 @@ func blockUpdate(args map[string]any) (CallToolResult, error) {
 	}
 
 	_, rootIDs, err := model.PerformBlockUpdates([]model.BlockUpdateInput{{
-		ID:       id,
-		Data:     data,
-		DataType: dataType,
-		LockType: lockType,
+		ID:             id,
+		Data:           data,
+		DataType:       dataType,
+		LockType:       lockType,
+		AgentGenerated: isAgentWrite(ctx),
 	}})
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil

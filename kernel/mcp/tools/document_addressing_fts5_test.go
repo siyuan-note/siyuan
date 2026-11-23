@@ -8,6 +8,7 @@ package tools
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -142,7 +143,7 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 			t.Fatalf("invalid target silently selected a parent: %+v", target)
 		}
 	}
-	result, err := documentCreate(map[string]any{"notebook": box.ID, "parentID": literal.ID, "title": "Literal/child", "markdown": "Body"})
+	result, err := documentHandler(map[string]any{"action": "create", "notebook": box.ID, "parentID": literal.ID, "title": "Literal/child", "markdown": "Body"})
 	if err != nil || result.IsError {
 		t.Fatalf("structured creation failed: %+v, %v", result, err)
 	}
@@ -155,6 +156,41 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 	if err != nil || listed.IsError || !strings.Contains(listed.Content[0].Text, created) {
 		t.Fatalf("ID-based listing failed: %+v, %v", listed, err)
 	}
+	t.Run("AI provenance is scoped to agent writes", func(t *testing.T) {
+		ctx := ContextWithAgentWrite(context.Background())
+		agentDoc, err := DocumentTool.ContextHandler(ctx, map[string]any{
+			"action": "create", "notebook": box.ID, "parentID": "", "title": "Agent draft", "markdown": "Draft",
+		})
+		if err != nil || agentDoc.IsError {
+			t.Fatalf("agent document creation failed: %+v, %v", agentDoc, err)
+		}
+		agentID := strings.Fields(agentDoc.Content[0].Text)[2]
+		for _, id := range []string{created, agentID} {
+			result, err := BlockTool.ContextHandler(ctx, map[string]any{
+				"action": "append", "notebook": box.ID, "parentID": id, "data": "Agent addition",
+			})
+			if err != nil || result.IsError {
+				t.Fatalf("agent block append failed: %+v, %v", result, err)
+			}
+			tree, err := model.LoadTreeByBlockID(id)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var sources []string
+			for node := tree.Root.FirstChild; node != nil; node = node.Next {
+				if node.Type == ast.NodeParagraph {
+					sources = append(sources, node.IALAttr("custom-sy-ai-source"))
+				}
+			}
+			want := ",agent"
+			if id == agentID {
+				want = "agent,agent"
+			}
+			if got := strings.Join(sources, ","); got != want {
+				t.Fatalf("unexpected provenance in document %s: %q, want %q", id, got, want)
+			}
+		}
+	})
 	moved, err := documentMove(map[string]any{"notebook": box.ID, "parentID": child.ID, "id": source.ID})
 	if err != nil || moved.IsError {
 		t.Fatalf("ID-based move failed: %+v, %v", moved, err)
@@ -171,7 +207,7 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 	if err != nil || defaultTarget.path != "/" {
 		t.Fatalf("default root listing failed: %+v, %v", defaultTarget, err)
 	}
-	if result, err = documentCreate(map[string]any{"notebook": box.ID, "parentID": ""}); err != nil || !result.IsError {
+	if result, err = documentHandler(map[string]any{"action": "create", "notebook": box.ID, "parentID": ""}); err != nil || !result.IsError {
 		t.Fatal("structured creation without an explicit title was accepted", result, err)
 	}
 	if _, err := resolveDocumentTarget(box.ID, map[string]any{"path": ""}, false, true); err != nil {
@@ -226,7 +262,7 @@ func TestDocumentStructuredAddressing(t *testing.T) {
 	if err := os.MkdirAll(sortPath, 0755); err != nil {
 		t.Fatal(err)
 	}
-	failed, err := documentCreate(map[string]any{"notebook": box.ID, "parentID": "", "title": "Committed despite sort failure", "markdown": "retained body"})
+	failed, err := documentHandler(map[string]any{"action": "create", "notebook": box.ID, "parentID": "", "title": "Committed despite sort failure", "markdown": "retained body"})
 	if err != nil || !failed.IsError || !failed.HasStructuredContent() {
 		t.Fatalf("creation failure lost metadata: %+v, %v", failed, err)
 	}

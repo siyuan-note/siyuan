@@ -330,13 +330,21 @@ const getInsertRange = (task: EditorTarget) => {
     return range;
 };
 
-const getInsertHTML = (task: EditorTarget, range: Range, result: string, withInput: boolean) => {
+const getInsertHTML = (task: EditorTarget, range: Range, result: string, aiSource: "agent" | "editor") => {
     const inCode = hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
         hasClosestByTag(range.startContainer, "CODE");
-    const content = task.source.kind === "writing" && withInput ? `${task.source.input}\n\n${result}` : result;
+    const input = task.source.kind === "writing" && aiSource === "editor" ? task.source.input : "";
+    if (inCode) {
+        return {html: input ? `${input}\n\n${result}` : result, isBlock: false};
+    }
+    const generated = document.createElement("template");
+    generated.innerHTML = task.protyle.lute.Md2BlockDOM(result);
+    generated.content.querySelectorAll('[data-node-id][data-type^="Node"]').forEach(block => {
+        block.setAttribute(Constants.CUSTOM_SY_AI_SOURCE, aiSource);
+    });
     return {
-        html: inCode ? content : task.protyle.lute.Md2BlockDOM(content),
-        isBlock: !inCode,
+        html: (input ? task.protyle.lute.Md2BlockDOM(input) : "") + generated.innerHTML,
+        isBlock: true,
     };
 };
 
@@ -363,7 +371,7 @@ const cleanupTask = (task: IAIEditorTask) => {
     }
 };
 
-const insertEditorResult = (task: EditorTarget, content: string, withInput: boolean) => {
+const insertEditorResult = (task: EditorTarget, content: string, aiSource: "agent" | "editor") => {
     if (!content || !task.protyle.element.isConnected || task.protyle.disabled) {
         return false;
     }
@@ -377,8 +385,8 @@ const insertEditorResult = (task: EditorTarget, content: string, withInput: bool
         return false;
     }
     task.protyle.toolbar.range = range;
-    const insertion = getInsertHTML(task, range, content, withInput);
-    insertHTML(insertion.html, task.protyle, insertion.isBlock, true);
+    const insertion = getInsertHTML(task, range, content, aiSource);
+    insertHTML(insertion.html, task.protyle, insertion.isBlock, true, false, undefined, undefined, undefined, aiSource);
     renderInsertedContent(task.protyle);
     return true;
 };
@@ -723,7 +731,7 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         }
         switch (button.dataset.action) {
             case "source":
-                if (insertEditorResult(task, task.content, true)) {
+                if (insertEditorResult(task, task.content, "editor")) {
                     cleanupTask(task);
                 } else {
                     showMessage(window.siyuan.languages.aiSourceChanged, 5000, "error");
@@ -741,7 +749,7 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
                     task.agentSessionID ??= Lute.NewNodeID();
                     const opened = await chat.continueEditorTask(task.agentSessionID, task.prompt, task.content, result => {
                         const editor = origin.deref();
-                        return !!editor && insertEditorResult({protyle: editor, source}, result, false);
+                        return !!editor && insertEditorResult({protyle: editor, source}, result, "agent");
                     });
                     if (opened) cleanupTask(task);
                 } catch (error) {

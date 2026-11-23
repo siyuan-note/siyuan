@@ -41,3 +41,28 @@ test("AI editor sends a bounded context snapshot with the location of the select
     assert.equal(request.action.match(/\{\{input\}\}/g)?.length, 1);
     assert.ok(request.action.endsWith("Polish {{input}}"));
 });
+
+test("AI insertion identifies generated blocks and leaves the continuation prompt unmarked", async () => {
+    const result = await runBrowserCase(async modules => {
+        const attr = "custom-sy-ai-source";
+        const dependencies = {
+            Constants: {CUSTOM_SY_AI_SOURCE: attr},
+            hasClosestByAttribute: () => false,
+            hasClosestByTag: () => false,
+        };
+        const {getInsertHTML} = new Function("exports", "require", modules.editor +
+            ";return {getInsertHTML};")({}, () => dependencies);
+        const task = {
+            protyle: {lute: {Md2BlockDOM: (text: string) =>
+                `<div data-node-id="${text}" data-type="NodeParagraph">${text}</div>`}},
+            source: {kind: "writing", input: "original"},
+        };
+        const template = document.createElement("template");
+        const sources = (source: "editor" | "agent") => {
+            template.innerHTML = getInsertHTML(task, document.createRange(), "generated", source).html;
+            return Array.from(template.content.children, block => [block.textContent, block.getAttribute(attr)]);
+        };
+        return JSON.stringify([sources("editor"), sources("agent")]);
+    }, browserSources({editor: "src/ai/editor.ts"}));
+    assert.deepEqual(JSON.parse(result), [[["original", null], ["generated", "editor"]], [["generated", "agent"]]]);
+});

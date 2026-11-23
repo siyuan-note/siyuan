@@ -1377,15 +1377,19 @@ func createTreeTx(tree *parse.Tree) {
 var createDocLock = sync.Mutex{}
 
 func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]any) (tree *parse.Tree, err error) {
-	return createDocByMd(boxID, p, title, md, sorts, arg, false)
+	return createDocByMd(boxID, p, title, md, sorts, arg, false, false)
+}
+
+func CreateAgentDocByMd(boxID, p, title, md string) (tree *parse.Tree, err error) {
+	return createDocByMd(boxID, p, title, md, nil, nil, false, strings.TrimSpace(md) != "")
 }
 
 // CreateDocByMdSync 同步创建 Markdown 文档并返回事务落盘错误，供成功后需要清理源数据的调用方使用。
 func CreateDocByMdSync(boxID, p, title, md string, sorts []string, arg map[string]any) (tree *parse.Tree, err error) {
-	return createDocByMd(boxID, p, title, md, sorts, arg, true)
+	return createDocByMd(boxID, p, title, md, sorts, arg, true, false)
 }
 
-func createDocByMd(boxID, p, title, md string, sorts []string, arg map[string]any, syncWrite bool) (tree *parse.Tree, err error) {
+func createDocByMd(boxID, p, title, md string, sorts []string, arg map[string]any, syncWrite, agentGenerated bool) (tree *parse.Tree, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1410,7 +1414,7 @@ func createDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	dom := luteEngine.Md2BlockDOM(md, false)
-	tree, err = createDoc0(box.ID, p, title, dom, false, syncWrite)
+	tree, err = createDoc0(box.ID, p, title, dom, false, syncWrite, agentGenerated)
 	if err != nil {
 		return
 	}
@@ -2701,14 +2705,14 @@ func cleanBoxDocDir(p string) string {
 }
 
 func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
-	return createDoc0(boxID, p, title, dom, titleEmpty, false)
+	return createDoc0(boxID, p, title, dom, titleEmpty, false, false)
 }
 
 func createDocSync(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
-	return createDoc0(boxID, p, title, dom, titleEmpty, true)
+	return createDoc0(boxID, p, title, dom, titleEmpty, true, false)
 }
 
-func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool, attributes ...map[string]string) (tree *parse.Tree, err error) {
+func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite, agentGenerated bool, attributes ...map[string]string) (tree *parse.Tree, err error) {
 	validation, err := validateCreateDoc(boxID, p, title, titleEmpty)
 	if nil != err {
 		return
@@ -2721,6 +2725,9 @@ func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool, attribu
 	}
 	tree, err = buildCreateDocTree(boxID, validation, dom, attributes...)
 	if err == nil {
+		if agentGenerated {
+			markAgentBlocks(tree.Root, nil, util.NewLute())
+		}
 		err = performCreateDocTransaction(tree, syncWrite)
 	}
 	return

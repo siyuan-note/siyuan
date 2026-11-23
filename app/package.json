@@ -98,7 +98,7 @@
     "mini-css-extract-plugin": "2.10.2",
     "parse5": "8.1.1",
     "path-browserify": "^1.0.1",
-    "postcss": "^8.5.29",
+    "postcss": "^8.5.33",
     "postcss-scss": "^4.0.9",
     "postcss-selector-parser": "^7.2.1",
     "safer-buffer": "^2.1.2",

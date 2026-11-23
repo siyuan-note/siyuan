@@ -3,6 +3,7 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {ScriptTarget} from "typescript";
 import {loadModule} from "../../../testSupport/loadModule";
+import {getStoredCellValueByElement} from "./cellValue";
 
 const mountDate = (requireExplicitChange = false) => {
     const inputs = Array.from({length: 4}, (_, index) => {
@@ -187,6 +188,7 @@ test("date cell routing forwards explicit batch intent without changing ordinary
         document: {querySelector: (): null => null}, getComputedStyle: () => ({}),
         require: (name: string) => ({
             "./host": {getAVHost: () => block},
+            "./cellValue": {getStoredCellValueByElement},
             "./capabilities": {isAVRichTextType: () => false, isAVSelectType: () => false},
             "./viewType": {isTableLikeView: () => false},
             "../../util/hasClosest": {hasClosestByClassName: (): null => null},

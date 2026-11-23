@@ -97,6 +97,8 @@ const cases = async (sources: Record<string, string>, styles: Record<string, str
     pasteHost.remove();
     const attribute = load("attributeValue");
     Object.assign(dependencies, attribute);
+    const {getStoredCellValueByElement} = load("cellValue");
+    modules.cellValue = {...dependencies, getStoredCellValueByElement};
     const cell = load("cell");
     load("luteMarkdownSyntax");
     const parser = load("richTextEditorLute");
@@ -326,7 +328,7 @@ test("database rich text renders primary and text previews and preserves legacy 
     try {
         const sources = Object.fromEntries([
             ["primaryRich", "src/protyle/render/av/primaryRich.ts"], ["richText", "src/protyle/render/av/richText.ts"],
-            ["cell", "src/protyle/render/av/cell.ts"], ["attributeValue", "src/protyle/render/av/attributeValue.ts"],
+            ["cell", "src/protyle/render/av/cell.ts"], ["cellValue", "src/protyle/render/av/cellValue.ts"], ["attributeValue", "src/protyle/render/av/attributeValue.ts"],
             ["richTextValue", "src/protyle/render/av/richTextValue.ts"],
             ["luteMarkdownSyntax", "src/protyle/render/luteMarkdownSyntax.ts"],
             ["richTextEditorLute", "src/protyle/render/av/richTextEditorLute.ts"],

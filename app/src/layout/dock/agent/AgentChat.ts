@@ -25,7 +25,6 @@ import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import dayjs from "dayjs";
 import {sendNotification} from "../../../plugin/platformUtils";
-import {formatAIGeneratedClipboardText} from "../../../ai/clipboard";
 import {
     applyAgentUserEdit,
     buildAgentPresentationEntries,
@@ -4025,7 +4024,7 @@ export class AgentChat extends Model {
             e.stopPropagation();
             const userEntryID = this.findUserEntryIDBeforeElement(el);
             const turnContent = userEntryID && getAgentTurnContent(buildAgentPresentationEntries(this.entries), userEntryID);
-            void copyAgentText(formatAIGeneratedClipboardText(turnContent || content, L.aiGeneratedContent));
+            void copyAgentText(turnContent || content);
         });
         actions.appendChild(copyBtn);
 

@@ -23,7 +23,6 @@ import {BLOCK_SELECTION_MODE_CLASS} from "../protyle/wysiwyg/blockSelection";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../asset/html";
 import {bindEditorPanelPosition} from "./editorPanelPosition";
 import {isEncryptedBox} from "../util/pathName";
-import {formatAIGeneratedClipboardText} from "./clipboard";
 
 type TAIEditorSourceKind = "selection" | "blocks" | "writing";
 type TAIEditorTaskStatus = "streaming" | "done" | "stopped" | "error";
@@ -762,7 +761,7 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
                 break;
             }
             case "copy":
-                copyPlainText(formatAIGeneratedClipboardText(task.content, window.siyuan.languages.aiGeneratedContent));
+                copyPlainText(task.content);
                 showMessage(window.siyuan.languages.copied, 2000);
                 break;
             case "retry":

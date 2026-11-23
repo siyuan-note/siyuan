@@ -14,6 +14,7 @@ const setup = (mobile = true, detached = true, viewType: TAVView = "table") => {
     const events: string[] = [];
     const opened: Array<Record<string, unknown>> = [];
     const inserted: Array<{count: number; previousID: string; parentID?: string; groupID?: string}> = [];
+    const transactions: Array<{doOperations: IOperation[]; undoOperations: IOperation[]}> = [];
     const fields: IAVColumn[] = [];
     const viewData = {viewID: "active-view"};
     const panels: Array<{type: string; data?: typeof viewData}> = [];
@@ -75,6 +76,12 @@ const setup = (mobile = true, detached = true, viewType: TAVView = "table") => {
         "../../../menus/util": {openEditorTab: (): IMenu[] => []},
         "./subItems": {addSubItemsMenu() {}},
         "./row": {insertRows: (options: typeof inserted[number]) => inserted.push(options)},
+        "../../../constants": {Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view"}},
+        "./render": {setAVGroupFolded() {}, initUnfoldedGroupTables() {}},
+        "./groupFold": {updateGroupFoldedStates() {}},
+        "./coverPosition": {isCardCoverPositioning: () => false},
+        "../../wysiwyg/transaction": {transaction: (_protyle: unknown, doOperations: IOperation[], undoOperations: IOperation[]) =>
+            transactions.push({doOperations, undoOperations})},
         "./batchEdit": {getEditableAVFields: () => fields,
             openAVFieldBinding: () => events.push("binding-panel")},
         "../../../plugin/EventBus": {emitOpenMenu() {}},
@@ -90,11 +97,32 @@ const setup = (mobile = true, detached = true, viewType: TAVView = "table") => {
     } as unknown as MouseEvent & {target: HTMLElement});
     const more = () => click(target);
     const switcher = () => click({...target, getAttribute: () => "av-switcher"});
+    const foldGroup = (id: string) => click(Object.assign({}, target, {
+        getAttribute: (name: string) => name === "data-type" ? "av-group-fold" : null,
+        dataset: {id},
+        firstElementChild: {classList: {contains: () => true}},
+        setAttribute() {},
+    }));
     const context = () => exports.avContextmenu(protyle, undefined, {x: 10, y: 30}, {
         blockElement: block as unknown as HTMLElement, anchorElement: target as unknown as HTMLElement,
     });
-    return {more, context, items, events, opened, inserted, siyuan, protyle, cell, selected, fields, switcher, panels, viewData};
+    return {more, context, items, events, opened, inserted, siyuan, protyle, cell, selected, fields, switcher, panels, viewData,
+        foldGroup, transactions};
 };
+
+test("folding two database groups queues both changes before an operation can refresh the view", () => {
+    for (const mobile of [false, true]) {
+        const h = setup(mobile);
+        assert.equal(h.foldGroup("first"), true);
+        assert.equal(h.foldGroup("second"), true);
+        assert.deepEqual(h.transactions.map(({doOperations, undoOperations}) => [
+            doOperations[0].action, doOperations[0].id, doOperations[0].data, undoOperations[0].data,
+        ]), [
+            ["foldAttrViewGroup", "first", true, false],
+            ["foldAttrViewGroup", "second", true, false],
+        ]);
+    }
+});
 
 test("the mobile view name opens the switcher with rendered data while the editor is locked", () => {
     const h = setup();

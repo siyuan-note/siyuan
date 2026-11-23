@@ -240,6 +240,35 @@
 			]
 		},
 		{
+			"ID": "20261123123905-hex6yuc",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261123123905-hex6yuc",
+				"updated": "20261123123905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Проверка перед удалением или вырезанием"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261123123905-vqws36w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123123905-vqws36w",
+				"updated": "20261123123905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если проверка ссылок на блоки и привязок к базам данных затянулась, нажмите «Отмена» в окне проверки, чтобы прервать удаление или вырезание."
+				}
+			]
+		},
+		{
 			"ID": "20261122113000-1ttga9q",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

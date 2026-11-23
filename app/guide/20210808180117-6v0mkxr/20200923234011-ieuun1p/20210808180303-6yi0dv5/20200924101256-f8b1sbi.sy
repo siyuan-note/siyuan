@@ -282,6 +282,35 @@
 			]
 		},
 		{
+			"ID": "20261123123905-yw9b1tq",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261123123905-yw9b1tq",
+				"updated": "20261123123905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Checks before deleting or cutting"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261123123905-nab9czh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123123905-nab9czh",
+				"updated": "20261123123905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the check for block references and database bindings takes a while, select “Cancel” in the progress dialog to stop the pending delete or cut."
+				}
+			]
+		},
+		{
 			"ID": "20210104091542-v1yca4p",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

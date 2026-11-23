@@ -131,6 +131,26 @@ const browserCases = async (sources: string[]) => {
         }
     }
     document.body.classList.remove("body--ios");
+    document.documentElement.dataset.frontend = "mobile";
+    document.body.classList.add("body--android");
+    document.body.style.setProperty("--android-navigation-bar-height", "48px");
+    document.body.innerHTML = markup;
+    const flashcard = document.querySelector<HTMLElement>(".mobile-bottom-sheet-dialog");
+    flashcard.dataset.key = "dialog-opencard";
+    const flashcardPanel = flashcard.querySelector<HTMLElement>(".mobile-bottom-sheet");
+    check.equal(getComputedStyle(flashcardPanel).paddingBottom, "48px");
+    document.body.classList.add("mobile-keyboard--open");
+    check.equal(getComputedStyle(flashcardPanel).paddingBottom, "0px",
+        "flashcard ratings do not reserve the navigation area above the keyboard");
+    flashcard.removeAttribute("data-key");
+    check.equal(getComputedStyle(flashcardPanel).paddingBottom, "48px");
+    flashcard.dataset.key = "dialog-opencard";
+    document.body.classList.remove("mobile-keyboard--open");
+    check.equal(getComputedStyle(flashcardPanel).paddingBottom, "48px",
+        "flashcard ratings regain the Android navigation inset after input ends");
+    document.body.classList.remove("body--android");
+    delete document.documentElement.dataset.frontend;
+    document.body.style.removeProperty("--android-navigation-bar-height");
     document.body.style.setProperty("--mobile-bottom-bar-safe-area", "30px");
     viewport.bottom = 800;
     document.body.innerHTML = markup;

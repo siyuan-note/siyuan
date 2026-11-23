@@ -74,3 +74,36 @@ func TestSyncResultPersistenceAndLegacyConfiguration(t *testing.T) {
 		t.Fatalf("a late failure persisted an unexpected status: %+v", saved)
 	}
 }
+
+func TestManualSyncReturnsEachRequestOutcome(t *testing.T) {
+	prepareSyncDirectoryTest(t)
+	Conf.Sync.Load().Enabled = true
+	Conf.SetUser(&conf.User{UserSiYuanOneTimePayStatus: 1})
+	notCompleted := errors.New("sync did not complete")
+	laterFailed := errors.New("second sync failed")
+	started, finish := make(chan struct{}), make(chan struct{})
+	first, second := make(chan error, 1), make(chan error, 1)
+
+	go func() {
+		first <- runManualSync(false, notCompleted, func() error {
+			close(started)
+			<-finish
+			return nil
+		})
+	}()
+	select {
+	case <-started:
+	case err := <-first:
+		t.Fatalf("first sync was not attempted: %v", err)
+	}
+	go func() {
+		second <- runManualSync(false, notCompleted, func() error { return laterFailed })
+	}()
+	close(finish)
+	if err := <-first; err != nil {
+		t.Fatalf("first request did not report success: %v", err)
+	}
+	if err := <-second; !errors.Is(err, laterFailed) {
+		t.Fatalf("second request did not report its own failure: %v", err)
+	}
+}

@@ -50,17 +50,9 @@ func SyncDataDownload(decisions ...SyncSourceDecision) (err error) {
 	err = errors.New("sync download did not complete")
 	defer logging.Recover()
 
-	if !checkSync(false, false, true) {
-		return
-	}
-
-	unlock, ok := lockSyncRequest(&syncDownloadRequests)
-	if !ok {
-		return
-	}
-	defer unlock()
-	err = syncDataDownloadLocked(decisions...)
-	return
+	return runManualSync(false, err, func() error {
+		return syncDataDownloadLocked(decisions...)
+	})
 }
 
 func syncDataDownloadLocked(decisions ...SyncSourceDecision) (err error) {
@@ -122,26 +114,19 @@ func SyncDataUpload(decisions ...SyncSourceDecision) (err error) {
 	err = errors.New("sync upload did not complete")
 	defer logging.Recover()
 
-	if !checkSync(false, false, true) {
-		return
-	}
+	return runManualSync(false, err, func() error {
+		revision := pendingSync.begin()
+		util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
-	unlock, ok := lockSyncRequest(&syncUploadRequests)
-	if !ok {
-		return
-	}
-	defer unlock()
-	revision := pendingSync.begin()
-	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-
-	err = syncRepoUploadWithDNSRetry(decisions...)
-	code := 1
-	if err != nil {
-		code = 2
-	}
-	publishSyncResult(code, err)
-	pendingSync.finish(revision, err == nil, notifySyncPending)
-	return
+		syncErr := syncRepoUploadWithDNSRetry(decisions...)
+		code := 1
+		if syncErr != nil {
+			code = 2
+		}
+		publishSyncResult(code, syncErr)
+		pendingSync.finish(revision, syncErr == nil, notifySyncPending)
+		return syncErr
+	})
 }
 
 var (
@@ -328,32 +313,40 @@ func lockSyncRequest(state *syncRequestState) (unlock func(), ok bool) {
 	return unlock, true
 }
 
+// Explicit sync callers need the outcome of their own operation. In particular,
+// a direction and its source preview must be validated while holding the lock.
+func runManualSync(exit bool, notCompleted error, run func() error) error {
+	if !checkSync(false, exit, true) {
+		return notCompleted
+	}
+	lockSync()
+	defer unlockSync()
+	if !checkSync(false, exit, true) {
+		return notCompleted
+	}
+	return run()
+}
+
 func syncData(exit, byHand bool) (err error) {
 	err = errors.New("sync did not complete")
 	defer logging.Recover()
 
-	if !checkSync(false, exit, byHand) {
-		if byHand {
-			return err
-		}
+	if byHand {
+		return runManualSync(exit, err, func() error { return syncDataLocked(exit, true) })
+	}
+	if !checkSync(false, exit, false) {
 		return nil
 	}
-
 	requests := &syncAutoRequests
-	if byHand {
-		requests = &syncManualRequests
-	} else if exit {
+	if exit {
 		requests = &syncExitRequests
 	}
 	unlock, ok := lockSyncRequest(requests)
 	if !ok {
-		if byHand {
-			return err
-		}
 		return nil
 	}
 	defer unlock()
-	return syncDataLocked(exit, byHand)
+	return syncDataLocked(exit, false)
 }
 
 func syncDataLocked(exit, byHand bool) error {
@@ -852,13 +845,10 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 }
 
 var (
-	syncLock             = sync.Mutex{}
-	isSyncing            = atomic.Bool{}
-	syncAutoRequests     = syncRequestState{}
-	syncManualRequests   = syncRequestState{}
-	syncExitRequests     = syncRequestState{}
-	syncUploadRequests   = syncRequestState{}
-	syncDownloadRequests = syncRequestState{}
+	syncLock         = sync.Mutex{}
+	isSyncing        = atomic.Bool{}
+	syncAutoRequests = syncRequestState{}
+	syncExitRequests = syncRequestState{}
 )
 
 func CreateCloudSyncDir(name string) (err error) {

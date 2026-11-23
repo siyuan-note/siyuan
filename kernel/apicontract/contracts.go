@@ -449,7 +449,8 @@ var (
 
 var GetDocInfo = define[BlockQueryRequest, *DocInfo]("getDocInfo", "/api/block/getDocInfo", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
-// GetDocTitle 读取完整文档标题源及编辑用 BlockDOM，按文档 ID 寻址并保留加密笔记本响应租约。
+// GetDocTitle 按文档 ID 读取标题并保留加密笔记本响应租约。可编辑角色可读取完整标题源及编辑用 BlockDOM。
+// 发布只读角色读取可见标题，BlockDOM 不含行级备注正文，source 为 null，revision 为空字符串。
 // 旧纯文本不解释为 Markdown；纯文本摘要不能作为富标题完整源回写，写入使用 setDocTitle 事务。
 // 笔记本文档使用笔记本 ID 读取，其纯文本摘要与笔记本名称同步。
 var GetDocTitle = define[DocumentTitleRequest, DocumentTitleData]("getDocTitle", "/api/block/getDocTitle", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")

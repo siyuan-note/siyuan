@@ -21,7 +21,10 @@ import (
 
 func testAPIContractDocumentTitle(t *testing.T, engine *gin.Engine, boxID, docID string) {
 	t.Helper()
-	engine.POST("/api/block/getDocTitle", getDocTitle)
+	engine.POST("/api/block/getDocTitle", func(c *gin.Context) {
+		c.Set(model.RoleContextKey, model.RoleEditor)
+		c.Next()
+	}, getDocTitle)
 	post := func(route string, payload any) []byte {
 		t.Helper()
 		body, err := json.Marshal(payload)

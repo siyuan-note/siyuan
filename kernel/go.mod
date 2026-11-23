@@ -103,7 +103,7 @@ require (
 	golang.org/x/time v0.15.0
 )
 
-require github.com/88250/lute v1.7.9-0.20261113125822-61eb27b6d434
+require github.com/88250/lute v1.7.9-0.20261123131142-a654af9ca125
 
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect

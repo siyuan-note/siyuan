@@ -9,15 +9,20 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
+	"github.com/88250/lute/html/atom"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -25,6 +30,100 @@ import (
 
 const markdownImportBatchDocuments = 32
 const markdownImportBatchBytes = 8 * 1024 * 1024
+
+func rewriteMarkdownHTMLImageAssets(tree *parse.Tree, sourceDir, boxID, assetDir string, assetsDone map[string]string) {
+	var source *os.Root
+	defer func() {
+		if source != nil {
+			source.Close()
+		}
+	}()
+	encrypted := IsEncryptedBox(boxID)
+	rewrite := func(src string) string {
+		link, err := url.Parse(strings.TrimSpace(src))
+		if err != nil || link.IsAbs() || link.Host != "" {
+			return src
+		}
+		rel := filepath.FromSlash(link.Path)
+		if !filepath.IsLocal(rel) || strings.HasPrefix(rel, `\`) {
+			return src
+		}
+		query, err := url.ParseQuery(link.RawQuery)
+		if err != nil {
+			return src
+		}
+		if source == nil {
+			source, err = os.OpenRoot(sourceDir)
+			if err != nil {
+				return src
+			}
+		}
+		info, err := source.Stat(rel)
+		if err != nil || !info.Mode().IsRegular() {
+			return src
+		}
+		abs := filepath.Join(sourceDir, rel)
+		name := assetsDone[abs]
+		if name == "" {
+			data, err := source.ReadFile(rel)
+			if err != nil {
+				logging.LogErrorf("read asset [%s] failed: %s", abs, err)
+				return src
+			}
+			name, err = storeAssetForBox(boxID, assetDir, util.FilterUploadFileName(filepath.Base(rel)), data)
+			if err != nil {
+				logging.LogErrorf("store asset [%s] for box [%s] failed: %s", abs, boxID, err)
+				return src
+			}
+			assetsDone[abs] = name
+		}
+		query.Del("box")
+		if encrypted {
+			query.Set("box", boxID)
+		}
+		return (&url.URL{Path: "assets/" + name, RawQuery: query.Encode(), Fragment: link.Fragment}).String()
+	}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.Type == ast.NodeHTMLBlock {
+			n.Tokens = rewriteMarkdownHTMLImageSources(n.Tokens, rewrite)
+		}
+		return ast.WalkContinue
+	})
+}
+
+func rewriteMarkdownHTMLImageSources(tokens []byte, rewrite func(string) string) []byte {
+	tokenizer := html.NewTokenizer(bytes.NewReader(tokens))
+	var result bytes.Buffer
+	var offset, written int
+	for typ := tokenizer.Next(); typ != html.ErrorToken; typ = tokenizer.Next() {
+		start := offset
+		offset += len(tokenizer.Raw())
+		if typ != html.StartTagToken && typ != html.SelfClosingTagToken {
+			continue
+		}
+		tag := tokenizer.Token()
+		if tag.DataAtom != atom.Img {
+			continue
+		}
+		for _, attr := range tag.Attr {
+			if attr.Key != "src" {
+				continue
+			}
+			if dest := rewrite(attr.Val); dest != attr.Val {
+				attr.Val = dest
+				result.Write(tokens[written:start])
+				result.WriteString(tag.String())
+				written = offset
+			}
+			break
+		}
+	}
+	if written == 0 {
+		return tokens
+	}
+	result.Write(tokens[written:])
+	return result.Bytes()
+}
 
 type markdownImportEntry struct {
 	id, box, path, hpath string

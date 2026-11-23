@@ -891,7 +891,7 @@ export class Hint {
         return `${hintsHTML}</div>`;
     }
 
-    public genHTML(data: IHintData[], protyle: IProtyle, hide = false, source: THintSource) {
+    public genHTML(data: IHintData[], protyle: IProtyle, hide = false, source: THintSource, searchQuery?: string) {
         this.cancelLoadingAnimation();
         this.source = source;
         this.destroyEmojiPanel();
@@ -939,7 +939,7 @@ export class Hint {
         this.bindUploadEvent(protyle, this.element);
         if (this.source !== "hint") {
             const searchElement = this.element.querySelector("input.b3-text-field") as HTMLInputElement;
-            const oldValue = this.element.querySelector("mark")?.textContent || "";
+            const oldValue = searchQuery ?? this.element.querySelector("mark")?.textContent ?? "";
             searchElement.value = oldValue;
             searchElement.select();
             searchElement.addEventListener("keydown", (event: KeyboardEvent) => {

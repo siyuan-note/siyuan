@@ -3,16 +3,22 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {ScriptTarget} from "typescript";
 import {loadModule} from "../../../testSupport/loadModule";
+import * as cellValue from "./cellValue";
+import {DOMFixture} from "./testDOM";
 
 test("panel binding searches the primary text and anchors to the original field", () => {
     const requests: unknown[][] = [];
     let selected: HTMLElement;
     const range = {selectNodeContents: (element: HTMLElement) => { selected = element; }};
     const protyle = {options: {}, toolbar: {}} as IProtyle;
-    const field = {isConnected: true, dataset: {rowId: "item"},
-        querySelector: () => ({value: "  Current title  "})} as unknown as HTMLElement;
+    const dom = new DOMFixture();
+    const value = encodeURIComponent(JSON.stringify({type: "block", block: {content: "  Current title  "}}));
+    dom.body.innerHTML = `<div data-row-id="item" data-cell-value="${value}">
+        <div class="av__celltext"><strong>Rendered preview</strong></div>
+    </div>`;
+    const field = dom.body.firstElementChild as unknown as HTMLElement;
     const exports = loadModule<typeof import("./bindBlock")>(join(__dirname, "bindBlock.ts"), {
-        require: () => ({hintRef: (...args: unknown[]) => requests.push(args)}),
+        require: (id: string) => id === "./cellValue" ? cellValue : {hintRef: (...args: unknown[]) => requests.push(args)},
         document: {createRange: () => range},
         window: {siyuan: {menus: {menu: {remove() {}}}}},
     }, ScriptTarget.ES2020);
@@ -22,10 +28,13 @@ test("panel binding searches the primary text and anchors to the original field"
     assert.deepEqual(requests, [["Current title", protyle, "av"]]);
     exports.openAVBindBlock(protyle, field, "Hidden primary");
     assert.deepEqual(requests[1], ["Hidden primary", protyle, "av"]);
+    field.dataset.cellValue = encodeURIComponent(JSON.stringify({type: "block", block: {content: ""}}));
+    exports.openAVBindBlock(protyle, field);
+    assert.deepEqual(requests[2], ["", protyle, "av"]);
     protyle.disabled = true;
     exports.openAVBindBlock(protyle, field);
     protyle.disabled = false;
     protyle.options.history = {snapshot: "snapshot"} as IProtyle["options"]["history"];
     exports.openAVBindBlock(protyle, field);
-    assert.equal(requests.length, 2);
+    assert.equal(requests.length, 3);
 });

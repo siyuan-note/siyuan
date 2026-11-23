@@ -1,4 +1,5 @@
 import {hintRef} from "../../hint/extend";
+import {getStoredCellValueByElement} from "./cellValue";
 
 export const openAVBindBlock = (protyle: IProtyle, field: HTMLElement, query?: string) => {
     if (!field.isConnected || !field.dataset.rowId || protyle.disabled || window.siyuan.isPublish ||
@@ -8,6 +9,6 @@ export const openAVBindBlock = (protyle: IProtyle, field: HTMLElement, query?: s
     window.siyuan.menus.menu.remove();
     protyle.toolbar.range = document.createRange();
     protyle.toolbar.range.selectNodeContents(field);
-    hintRef(query ?? field.querySelector("input")?.value.trim() ?? "", protyle, "av");
+    hintRef(query ?? getStoredCellValueByElement(field)?.block?.content?.trim() ?? "", protyle, "av");
     return true;
 };

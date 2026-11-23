@@ -2472,18 +2472,6 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             updateTransaction(protyle, nodeElement, html);
         }
     });
-    otherMenus.push({
-        id: "tableHeaderRow",
-        label: window.siyuan.languages.tableHeaderRow,
-        checked: isTableHeaderEnabled(nodeElement, "row"),
-        click: () => toggleTableHeader(protyle, nodeElement, "row")
-    });
-    otherMenus.push({
-        id: "tableHeaderColumn",
-        label: window.siyuan.languages.tableHeaderColumn,
-        checked: isTableHeaderEnabled(nodeElement, "column"),
-        click: () => toggleTableHeader(protyle, nodeElement, "column")
-    });
     const pinColumn = nodeElement.getAttribute(Constants.CUSTOM_SY_TABLE_PIN_COLUMN) === "true";
     otherMenus.push({
         id: pinColumn ? "unpinTableHeaderColumn" : "pinTableHeaderColumn",
@@ -2498,6 +2486,18 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             }
             updateTransaction(protyle, nodeElement, html);
         }
+    });
+    otherMenus.push({
+        id: "tableHeaderRow",
+        label: window.siyuan.languages.tableHeaderRow,
+        checked: isTableHeaderEnabled(nodeElement, "row"),
+        click: () => toggleTableHeader(protyle, nodeElement, "row")
+    });
+    otherMenus.push({
+        id: "tableHeaderColumn",
+        label: window.siyuan.languages.tableHeaderColumn,
+        checked: isTableHeaderEnabled(nodeElement, "column"),
+        click: () => toggleTableHeader(protyle, nodeElement, "column")
     });
     otherMenus.push({
         id: "title",

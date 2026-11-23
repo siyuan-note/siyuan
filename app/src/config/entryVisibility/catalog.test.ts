@@ -1038,6 +1038,10 @@ test("table catalog follows the menu arrays and conditional declarations", () =>
         new RegExp(`${array}\\.push\\(\\{\\s*id: (?:"([^"]+)"|\\w+ \\? "([^"]+)" : "([^"]+)")`, "g"),
     )).flatMap(([, id, enabled, disabled]) => id ? [id] : [disabled, enabled]);
     const other = pushedIDs("otherMenus");
+    const pinStart = other.indexOf("pinTableHead");
+    assert.deepEqual(other.slice(pinStart, pinStart + 6), [
+        "pinTableHead", "unpinTableHead", "pinTableHeaderColumn", "unpinTableHeaderColumn", "tableHeaderRow", "tableHeaderColumn",
+    ]);
     const moves = pushedIDs("other2Menus");
     const inserts = pushedIDs("insertMenus");
     const removes = pushedIDs("removeMenus");

@@ -1975,7 +1975,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to keep the header visible while scrolling vertically. Cells merged across the first and later columns scroll as a whole. When the viewport is too narrow, the column temporarily scrolls with the table."
+					"Data": " to keep the header visible while scrolling vertically. Cells merged across the first and later columns scroll as a whole. When the viewport is too narrow, the column temporarily scrolls with the table. Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Header Row Background"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Header Column Background"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to toggle the corresponding background and bold text."
 				}
 			]
 		},

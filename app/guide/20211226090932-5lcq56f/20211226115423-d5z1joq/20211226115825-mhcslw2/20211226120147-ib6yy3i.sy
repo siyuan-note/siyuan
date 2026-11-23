@@ -2002,7 +2002,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，縱向捲動時也能看到表頭。橫跨第一欄和後續欄的合併儲存格隨表格整體捲動。可視區域過窄時，第一欄會暫時隨表格捲動。"
+					"Data": "，縱向捲動時也能看到表頭。橫跨第一欄和後續欄的合併儲存格隨表格整體捲動。可視區域過窄時，第一欄會暫時隨表格捲動。使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "標題列背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "標題欄背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可切換對應的背景和粗體。"
 				}
 			]
 		},

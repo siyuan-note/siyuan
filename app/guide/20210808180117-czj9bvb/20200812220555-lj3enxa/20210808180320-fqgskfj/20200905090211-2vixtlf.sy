@@ -2015,7 +2015,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，纵向滚动时也能看到表头。横跨第一列和后续列的合并单元格随表格整体滚动。可视区域过窄时，第一列会暂时随表格滚动。"
+					"Data": "，纵向滚动时也能看到表头。横跨第一列和后续列的合并单元格随表格整体滚动。可视区域过窄时，第一列会暂时随表格滚动。使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "标题行背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "标题列背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可切换对应的背景和粗体。"
 				}
 			]
 		},

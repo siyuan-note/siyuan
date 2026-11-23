@@ -2693,7 +2693,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadFlashcard = true
 		}
 
-		if strings.HasPrefix(file.Path, "/assets/ocr-texts.json") {
+		if file.Path == "/assets/ocr-texts.json" {
 			needReloadOcrTexts = true
 		}
 
@@ -2780,7 +2780,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadFlashcard = true
 		}
 
-		if strings.HasPrefix(file.Path, "/assets/ocr-texts.json") {
+		if file.Path == "/assets/ocr-texts.json" {
 			needReloadOcrTexts = true
 		}
 
@@ -2880,8 +2880,10 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		LoadFlashcards()
 	}
 
+	var changedOCRAssets map[string]bool
+	var refreshAllOCRAssets bool
 	if needReloadOcrTexts {
-		util.LoadAssetsTexts()
+		changedOCRAssets, refreshAllOCRAssets = util.ReloadSyncedAssetsTexts()
 	}
 
 	if needReloadPlugin {
@@ -2929,6 +2931,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if exit { // 退出时同步不用推送事件
+		indexOCRAssetTexts(changedOCRAssets, refreshAllOCRAssets)
 		return
 	}
 
@@ -3005,6 +3008,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		})
 	}
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
+	indexOCRAssetTexts(changedOCRAssets, refreshAllOCRAssets)
 	if immediateIndex {
 		sql.FlushQueue()
 	}

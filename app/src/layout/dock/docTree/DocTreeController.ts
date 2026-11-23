@@ -763,14 +763,14 @@ export class DocTreeController {
             this.model.project();
             this.evictPages();
             if (options.select !== false) {
-                await this.select(parent.occurrenceKey, {scroll: options.scroll}, false);
+                await this.select(parent.occurrenceKey, {scroll: false}, false);
             }
             this.options.onExpansionChange?.();
             if (options.scroll === false) {
                 this.render();
                 return this.getMountedElement(parent.occurrenceKey);
             }
-            return await this.ensureRendered(parent.occurrenceKey);
+            return await this.ensureRendered(parent.occurrenceKey, options.select === false ? "nearest" : "center");
         } catch (error) {
             if (isCurrent()) {
                 this.errors.add(rootDirectory.key);
@@ -864,7 +864,7 @@ export class DocTreeController {
         }
     }
 
-    public async ensureRendered(key: string): Promise<HTMLElement> {
+    public async ensureRendered(key: string, align: "nearest" | "center" = "nearest"): Promise<HTMLElement> {
         let position = this.positionOf(key);
         if (position < 0) {
             return;
@@ -881,9 +881,13 @@ export class DocTreeController {
         if (position < 0) { return; }
         const element = this.options.element;
         const top = position * this.rowHeight;
-        if (top < element.scrollTop) {
+        const aboveViewport = top < element.scrollTop;
+        const belowViewport = top + this.rowHeight > element.scrollTop + element.clientHeight;
+        if (align === "center" && element.clientHeight > 0 && (aboveViewport || belowViewport)) {
+            element.scrollTop = Math.max(0, top - (element.clientHeight - this.rowHeight) / 2);
+        } else if (aboveViewport) {
             element.scrollTop = top;
-        } else if (top + this.rowHeight > element.scrollTop + element.clientHeight) {
+        } else if (belowViewport) {
             element.scrollTop = Math.max(0, top + this.rowHeight - element.clientHeight);
         }
         this.render();

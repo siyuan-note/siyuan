@@ -4,8 +4,9 @@ import {test} from "node:test";
 import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} from "typescript";
 
 const source = createSourceFile("DocTreeController.ts", readFileSync("src/layout/dock/docTree/DocTreeController.ts", "utf8"), ScriptTarget.Latest, true);
-const method = source.statements.find(isClassDeclaration).members.find(member => member.name?.getText(source) === "locate");
-const Controller = new Function(transpileModule(`return class {${method.getText(source)}}`, {
+const methods = source.statements.find(isClassDeclaration).members.filter(member =>
+    ["locate", "ensureRendered"].includes(member.name?.getText(source)));
+const Controller = new Function(transpileModule(`return class {${methods.map(method => method.getText(source)).join("\n")}}`, {
     compilerOptions: {target: ScriptTarget.ES2022},
 }).outputText)();
 
@@ -32,4 +33,33 @@ test("automatic locate preserves selection when its document is unavailable and 
         assert.equal(requested, true);
         assert.deepEqual([...selected], ["existing"]);
     }
+});
+
+test("locating an offscreen document centers it while ordinary selection scrolls only as needed", async () => {
+    const row = {occurrenceKey: "box/document", id: "document", notebookId: "box", kind: "document"};
+    const element = {scrollTop: 0, clientHeight: 100};
+    const controller = new Controller();
+    Object.assign(controller, {
+        options: {element}, rowHeight: 20, positionOf: () => 10, itemAt: async () => row,
+        interaction: 0, operation: 0, generation: 0, navigationID: 0, expanding: new Map(),
+        model: {roots: [row], directory: () => ({}), project() {}},
+        async select(key: string, options: {scroll: boolean}) {
+            assert.equal(key, row.occurrenceKey);
+            assert.equal(options.scroll, false);
+        },
+        finishSelection() {}, evictPages() {}, render() {}, scheduleRender() {},
+        getMountedElement: (): HTMLElement | undefined => undefined,
+        trackRequest: (_key: string, _directory: unknown, pending: Promise<void>) => pending,
+    });
+    for (const initial of [0, 240]) {
+        element.scrollTop = initial;
+        await controller.locate("box", "document");
+        assert.equal(element.scrollTop, 160);
+    }
+    element.scrollTop = 180;
+    await controller.locate("box", "document");
+    assert.equal(element.scrollTop, 180);
+    element.scrollTop = 0;
+    await controller.ensureRendered(row.occurrenceKey);
+    assert.equal(element.scrollTop, 120);
 });

@@ -32,16 +32,11 @@ var getTag = contractHandler(apicontract.GetTag, func(c *gin.Context, request ap
 	if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
 		model.UpdateTagConf(func(s *conf.Tag) { s.Sort = int(request.Sort) })
 	}
-	sort := int(request.Sort)
-	readonly := model.IsReadOnlyRoleContext(c)
 	var visible func(string, string) bool
-	if readonly && sort == util.SortModeTagCreatedDESC {
+	if model.IsReadOnlyRoleContext(c) {
 		visible = model.TagPublishVisibility(c, model.GetPublishAccess())
 	}
-	tags := model.BuildTags(request.IgnoreMaxListHint, request.App, sort, visible)
-	if readonly && visible == nil {
-		tags = model.FilterTagsByPublishAccess(c, model.GetPublishAccess(), tags)
-	}
+	tags := model.BuildTags(request.IgnoreMaxListHint, request.App, int(request.Sort), visible)
 	if tags == nil {
 		return apicontract.Success[[]*apicontract.TagData](nil)
 	}

@@ -366,6 +366,7 @@ var (
 	ClearWorkspaceHistory     = define[EmptyRequest, Null]("clearWorkspaceHistory", "/api/history/clearWorkspaceHistory", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	BatchSetBlockAttrs        = define[BatchSetBlockAttrsRequest, Null]("batchSetBlockAttrs", "/api/attr/batchSetBlockAttrs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	// sort 为 6 时读取同级手动顺序，为 16 时按最新可见关联的添加时间降序排列同级标签。无记录的标签使用名称自然顺序。
+	// 发布只读角色仅使用其可访问的文档统计标签引用数、排序和截断列表。
 	// ignoreMaxListHint 为 true 时返回完整标签树。
 	GetTag = define[GetTagRequest, []*TagData]("getTag", "/api/tag/getTag", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "tag", Mode: SettingSilent}}, "POST")
 )

@@ -1871,31 +1871,6 @@ func FilterGraphByPublishAccess(c *gin.Context, publishAccess PublishAccess, nod
 	return
 }
 
-func FilterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags *Tags) (ret *Tags) {
-	return filterTagsByPublishAccess(c, publishAccess, tags, sql.QueryTagSpans(""))
-}
-
-func filterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags *Tags, spans []*sql.Span) (ret *Tags) {
-	visible := TagPublishVisibility(c, publishAccess)
-	labelCounts := make(map[string]int)
-	for _, span := range spans {
-		if !visible(span.Box, span.Path) {
-			continue
-		}
-		label := util.UnescapeHTML(span.Content)
-		labelCounts[label] += 1
-	}
-
-	ret = &Tags{}
-	for _, tag := range *tags {
-		tag := reassignTagCounts(tag, labelCounts)
-		if tag != nil {
-			*ret = append(*ret, tag)
-		}
-	}
-	return
-}
-
 func TagPublishVisibility(c *gin.Context, access PublishAccess) func(string, string) bool {
 	invisible := GetInvisiblePublishAccess(access)
 	disabled := GetDisablePublishAccess(access)
@@ -1907,22 +1882,6 @@ func TagPublishVisibility(c *gin.Context, access PublishAccess) func(string, str
 		id, password := GetPathPasswordByPublishAccess(box, path, access)
 		return password == "" || CheckPublishAuthCookie(c, id, password)
 	}
-}
-
-func reassignTagCounts(tag *Tag, counts map[string]int) (ret *Tag) {
-	var newChildren Tags
-	for _, child := range tag.Children {
-		child = reassignTagCounts(child, counts)
-		if child != nil {
-			newChildren = append(newChildren, child)
-		}
-	}
-	tag.Children = newChildren
-	tag.Count = counts[tag.Label]
-	if tag.Children == nil && tag.Count == 0 {
-		return nil
-	}
-	return tag
 }
 
 // 发布模式下默认不返回管理员的本地工作状态，新增键只有在确认不含敏感信息后才能加入白名单。

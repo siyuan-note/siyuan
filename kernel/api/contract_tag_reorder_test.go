@@ -18,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -155,6 +156,110 @@ func TestAPIContractTagReorderAndFullTree(t *testing.T) {
 	decodeAttributeViewContextFilterAPIResponse(t, response, &attrs)
 	if attrs.Code != 0 || !strings.HasPrefix(attrs.Data[treenode.TagCreatedAttr], `{"root519/recent":`) {
 		t.Fatalf("getBlockAttrs did not expose the new association: %s", response.Body.String())
+	}
+}
+
+func TestAPIContractTagPublishOrdering(t *testing.T) {
+	const helper = "SIYUAN_TEST_TAG_PUBLISH_ORDERING"
+	if os.Getenv(helper) == "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+		defer cancel()
+		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestAPIContractTagPublishOrdering$", "-test.v")
+		command.Env = append(os.Environ(), helper+"=1")
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("published tag test subprocess failed: %v\n%s", err, output)
+		}
+		return
+	}
+
+	setupAttributeViewContextFilterAPITest(t)
+	util.TempDir, util.ConfDir, util.QueueDir = t.TempDir(), t.TempDir(), t.TempDir()
+	dbDir := t.TempDir()
+	util.DBPath = filepath.Join(dbDir, "siyuan.db")
+	util.HistoryDBPath = filepath.Join(dbDir, "history.db")
+	util.AssetContentDBPath = filepath.Join(dbDir, "asset_content.db")
+	sql.InitDatabase(true)
+	sql.InitHistoryDatabase(true)
+	sql.InitAssetContentDatabase(true)
+	t.Cleanup(sql.CloseDatabase)
+	model.Conf.FileTree.Load().MaxListCount = 1
+
+	const boxID = "20261123000000-boxptag"
+	box := &model.Box{ID: boxID}
+	if err := box.SaveConf(conf.NewBoxConf()); err != nil {
+		t.Fatal(err)
+	}
+	addDoc := func(dir, tags string) string {
+		t.Helper()
+		id := ast.NewNodeID()
+		tree := treenode.NewTree(boxID, dir+"/"+id+".sy", "/"+id, id)
+		tree.Root.SetIALAttr("tags", tags)
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
+		sql.IndexTreeQueue(tree)
+		return id
+	}
+	addDoc("", "alpha,beta,gamma")
+	addDoc("", "alpha,beta")
+	addDoc("", "alpha")
+	protected := addDoc("", "gamma,locked-only")
+	for range 3 {
+		addDoc("/"+protected, "gamma")
+	}
+	sql.FlushQueue()
+
+	const password = "fixture-password"
+	if err := model.SetPublishAccess(model.PublishAccess{{ID: protected, Visible: true, Password: password}}); err != nil {
+		t.Fatal(err)
+	}
+	type tagCount struct {
+		label string
+		count int
+	}
+	for _, test := range []struct {
+		name     string
+		role     model.Role
+		sort     int
+		full     bool
+		unlocked bool
+		want     []tagCount
+	}{
+		{"reader descending", model.RoleReader, util.SortModeRefCountDESC, true, false, []tagCount{{"alpha", 3}, {"beta", 2}, {"gamma", 1}}},
+		{"visitor ascending", model.RoleVisitor, util.SortModeRefCountASC, true, false, []tagCount{{"gamma", 1}, {"beta", 2}, {"alpha", 3}}},
+		{"reader limited", model.RoleReader, util.SortModeRefCountDESC, false, false, []tagCount{{"alpha", 3}, {"beta", 2}}},
+		{"reader unlocked", model.RoleReader, util.SortModeRefCountDESC, true, true, []tagCount{{"gamma", 5}, {"alpha", 3}, {"beta", 2}, {"locked-only", 1}}},
+		{"editor workspace", model.RoleEditor, util.SortModeRefCountDESC, true, false, []tagCount{{"gamma", 5}, {"alpha", 3}, {"beta", 2}, {"locked-only", 1}}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			const route = "/api/tag/getTag"
+			body := fmt.Sprintf(`{"sort":%d,"ignoreMaxListHint":%t}`, test.sort, test.full)
+			recorder := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(recorder)
+			c.Request = httptest.NewRequest(http.MethodPost, route, strings.NewReader(body))
+			c.Request.Header.Set("Content-Type", "application/json")
+			c.Set(model.RoleContextKey, test.role)
+			if test.unlocked {
+				c.Request.AddCookie(&http.Cookie{
+					Name: "publish-auth-" + protected, Value: model.PublishAuthCookieValue(protected, password),
+				})
+			}
+			getTag(c)
+			requireAPIContract(t, http.MethodPost, route, recorder)
+			var response struct {
+				Code int
+				Data []*apicontract.TagData
+			}
+			decodeAttributeViewContextFilterAPIResponse(t, recorder, &response)
+			got := make([]tagCount, 0, len(response.Data))
+			for _, tag := range response.Data {
+				got = append(got, tagCount{tag.Label, tag.Count})
+			}
+			if response.Code != 0 || !slices.Equal(got, test.want) {
+				t.Fatalf("code %d: tags %v, want %v", response.Code, got, test.want)
+			}
+		})
 	}
 }
 

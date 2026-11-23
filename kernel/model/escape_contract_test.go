@@ -16,7 +16,7 @@ import (
 // 否则前端会对已转义文本再转义一次，含 & 或 < 的标签会显示为 a&amp;b
 func TestTagNameIsPlainTextForFrontend(t *testing.T) {
 	for _, label := range []string{"a&b", "a<b", "it's", `a"b`, "plain", "标题"} {
-		tags := buildTagTree(map[string]int{label: 1}, util.SortModeAlphanumASC, nil)
+		tags := buildTagTree(map[string]int{label: 1}, util.SortModeAlphanumASC, nil, nil)
 		if 1 > len(tags) {
 			t.Fatalf("buildTagTree(%q) returned nothing", label)
 		}

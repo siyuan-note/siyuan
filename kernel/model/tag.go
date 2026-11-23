@@ -148,31 +148,15 @@ func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int, visible fun
 	FlushTxQueue()
 	sql.FlushQueue()
 
-	if sortVal == util.SortModeTagCreatedDESC {
-		counts, created := map[string]int{}, tagDates{}
-		var previousAttrs string
-		var dates tagDates
-		err := sql.ReadTagAssociations(func(label, attrs, box, path string, count int) {
-			if visible != nil && !visible(box, path) {
-				return
-			}
-			label = util.UnescapeHTML(label)
-			counts[label] += count
-			if attrs != previousAttrs {
-				dates = readTagDates(attrs)
-				previousAttrs = attrs
-			}
-			created[label] = max(created[label], dates[label])
-		})
-		if err != nil {
-			logging.LogErrorf("query tag dates failed: %s", err)
-			return &Tags{}
-		}
-		tags := buildTagTreeWithDates(counts, sortVal, nil, created)
-		return limitTagTree(tags, ignoreMaxListHintArg, appID)
+	withDates := sortVal == util.SortModeTagCreatedDESC
+	var labels map[string]int
+	var created tagDates
+	var err error
+	if visible != nil || withDates {
+		labels, created, err = labelTagAssociations(visible, withDates)
+	} else {
+		labels, err = labelTagCounts()
 	}
-
-	labels, err := labelTagCounts()
 	if err != nil {
 		logging.LogErrorf("query tags failed: %s", err)
 		return &Tags{}
@@ -183,7 +167,7 @@ func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int, visible fun
 			logging.LogErrorf("read tag order failed: %s", err)
 		}
 	}
-	tags := buildTagTree(labels, sortVal, order)
+	tags := buildTagTree(labels, sortVal, order, created)
 	return limitTagTree(tags, ignoreMaxListHintArg, appID)
 }
 
@@ -328,11 +312,29 @@ func labelTagCounts() (map[string]int, error) {
 	return counts, nil
 }
 
-func buildTagTree(labels map[string]int, sortVal int, order tagSortGroups) Tags {
-	return buildTagTreeWithDates(labels, sortVal, order, nil)
+func labelTagAssociations(visible func(string, string) bool, withDates bool) (map[string]int, tagDates, error) {
+	counts := map[string]int{}
+	created := tagDates{}
+	var previousAttrs string
+	var dates tagDates
+	err := sql.ReadTagAssociations(withDates, func(label, attrs, box, path string, count int) {
+		if visible != nil && !visible(box, path) {
+			return
+		}
+		label = util.UnescapeHTML(label)
+		counts[label] += count
+		if withDates {
+			if attrs != previousAttrs {
+				dates = readTagDates(attrs)
+				previousAttrs = attrs
+			}
+			created[label] = max(created[label], dates[label])
+		}
+	})
+	return counts, created, err
 }
 
-func buildTagTreeWithDates(labels map[string]int, sortVal int, order tagSortGroups, created tagDates) Tags {
+func buildTagTree(labels map[string]int, sortVal int, order tagSortGroups, created tagDates) Tags {
 	tags := Tags{}
 	nodes := make(map[string]*Tag, len(labels))
 	for label, count := range labels {

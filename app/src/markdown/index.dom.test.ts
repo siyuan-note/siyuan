@@ -116,12 +116,27 @@ const browserCases = async (languages: Record<string, string>) => {
         }
     };
     const themeBootstrap = bridge.bootstrap;
+    const longText = "这段表格内容应随窗口宽度自动换行。".repeat(12);
+    const longLink = "https://example.com/" + "unbroken".repeat(28);
+    const wrappingTable = `\n| 说明 | 内容 |\n| --- | --- |\n| 长段落 | ${longText} |\n| 长链接 | [${longLink}](${longLink}) |\n`;
+    const longPath = "assets/" + "long-folder-name/".repeat(16) + "image.jpg";
     const attribution = "\n| `File` | Author | License | Source |\n| --- | --- | --- | --- |\n" +
         "| `02-风景/Landscape-Arnisee-region-640px.jpg` | Simon Koopmann | CC BY-SA 2.5 | Commons |\n" +
-        "| `03-城市/City-of-London-skyline-from-Lond-1024px.jpg` | David Illif with image-alignment and Photoshoping by User:Co | CC BY-SA 4.0 | Commons |\n";
+        `| \`${longPath}\` | David Illif with image-alignment and Photoshoping by User:Co | CC BY-SA 4.0 | Commons |\n`;
     const checkTableWidths = (mode: import("./editor").MarkdownEditorMode) => {
         const surface = document.querySelector(mode === "sv" ? ".vditor-preview .vditor-reset" : `.vditor-${mode} .vditor-reset`);
-        const table = surface.querySelectorAll<HTMLTableElement>("table")[1];
+        const [, wrapping, table] = surface.querySelectorAll<HTMLTableElement>("table");
+        check.ok(wrapping, `wrapping table rendered in ${mode}`);
+        for (const text of [longText, longLink]) {
+            const cell = Array.from(wrapping.querySelectorAll("td")).find(element => element.textContent.includes(text));
+            check.ok(cell, `${mode} renders the full cell text`);
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            check.ok(new Set(Array.from(range.getClientRects()).filter(rect => rect.width > 0).map(rect => rect.top)).size > 1,
+                `${mode} wraps long cell text across multiple lines`);
+        }
+        check.ok(wrapping.scrollWidth <= wrapping.clientWidth + 1,
+            `${mode} wrapping table needs no horizontal scrolling (${wrapping.scrollWidth} > ${wrapping.clientWidth})`);
         check.ok(table, `attribution table rendered in ${mode}`);
         for (const code of table.querySelectorAll("code")) {
             const style = getComputedStyle(code);
@@ -138,7 +153,7 @@ const browserCases = async (languages: Record<string, string>) => {
     for (const startup of [{theme: "dark", systemDark: false}, {theme: "system", systemDark: true}, {theme: "light", systemDark: true}] as const) {
         const dark = startup.theme !== "light";
         for (const mode of ["ir", "wysiwyg", "sv"] as const) {
-            bridge.bootstrap = async () => ({...await themeBootstrap(), content: (mode === "wysiwyg" ? "1. first\n2. second\n\n" : "") + original + '\nInline `code`\n\n```js\nconst answer = "readable";\n```\n' + attribution,
+            bridge.bootstrap = async () => ({...await themeBootstrap(), content: (mode === "wysiwyg" ? "1. first\n2. second\n\n" : "") + original + '\nInline `code`\n\n```js\nconst answer = "readable";\n```\n' + wrappingTable + attribution,
                 preferences: {...storedPreferences, mode, theme: startup.theme}, dark: startup.systemDark});
             const initial = await api.mountMarkdownApplication(bridge);
             await checkTheme(mode, dark);

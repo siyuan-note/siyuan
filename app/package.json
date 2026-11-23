@@ -102,7 +102,7 @@
     "postcss-scss": "^4.0.9",
     "postcss-selector-parser": "^7.2.1",
     "safer-buffer": "^2.1.2",
-    "sass": "^1.107.1",
+    "sass": "^1.108.2",
     "sass-loader": "^17.1.0",
     "sharp": "^0.35.5",
     "stylelint": "^17.16.0",

@@ -176,6 +176,60 @@ func TestAPIContractSyncBootRole(t *testing.T) {
 	}
 }
 
+func TestAPIContractSyncFailuresPreserveLastSuccess(t *testing.T) {
+	syncTestConfiguration(t)
+	langs, statusBar := util.Langs, util.StatusBarCfg.Load()
+	t.Cleanup(func() {
+		util.Langs = langs
+		util.StatusBarCfg.Store(statusBar)
+	})
+	util.StatusBarCfg.Store(&util.StatusBar{})
+	const missingKey = "Repository key is missing"
+	util.Langs = map[string]map[int]string{"en": {26: missingKey, 80: "Sync failed: %s"}}
+	model.Conf.SetUser(&conf.User{UserSiYuanOneTimePayStatus: 1})
+	model.Conf.Repo.Store(conf.NewRepo())
+	syncConf := model.Conf.Sync.Load()
+	syncConf.Enabled, syncConf.Provider, syncConf.Synced = true, conf.ProviderS3, 42
+
+	engine := gin.New()
+	engine.POST("/api/sync/performSync", performSync)
+	engine.POST("/api/sync/getSyncInfo", getSyncInfo)
+	for _, entry := range []struct {
+		name string
+		mode int
+		body string
+	}{
+		{"bidirectional", 1, `{}`},
+		{"upload", 3, `{"upload":true}`},
+		{"download", 3, `{"upload":false}`},
+	} {
+		t.Run(entry.name, func(t *testing.T) {
+			model.Conf.Sync.Load().Mode = entry.mode
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(entry.body)))
+			requireAPIContract(t, "POST", "/api/sync/performSync", recorder)
+			var response struct {
+				Code int
+				Msg  string
+				Data json.RawMessage
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 ||
+				response.Msg != missingKey || string(response.Data) != "null" {
+				t.Fatalf("unexpected sync failure response: %s (%v)", recorder.Body.String(), err)
+			}
+
+			recorder = httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/sync/getSyncInfo", nil))
+			requireAPIContract(t, "POST", "/api/sync/getSyncInfo", recorder)
+			var info struct{ Data apicontract.SyncInfoData }
+			if err := json.Unmarshal(recorder.Body.Bytes(), &info); err != nil || info.Data.Synced != 42 ||
+				!strings.Contains(info.Data.Stat, missingKey) {
+				t.Fatalf("unexpected sync status: %s (%v)", recorder.Body.String(), err)
+			}
+		})
+	}
+}
+
 func TestAPIContractSyncPermissionBeforeBody(t *testing.T) {
 	syncTestConfiguration(t)
 	for path, handler := range map[string]gin.HandlerFunc{

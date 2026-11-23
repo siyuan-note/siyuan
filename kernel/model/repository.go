@@ -2136,7 +2136,6 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 
 	resetAutoSyncErrors()
 	pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = util.CurrentTimeMillis() })
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomFloor(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
@@ -2242,7 +2241,6 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 
 	resetAutoSyncErrors()
 	pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = util.CurrentTimeMillis() })
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
@@ -2508,7 +2506,6 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, inde
 
 	resetAutoSyncErrors()
 	pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = util.CurrentTimeMillis() })
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })

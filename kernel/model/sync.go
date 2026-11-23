@@ -34,15 +34,16 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// publishSyncResult persists the completed outcome before publishing it to every frontend.
 func publishSyncResult(code int, syncErr error) {
-	UpdateSyncConf(func(s *conf.Sync) {
+	snapshot := UpdateSyncConf(func(s *conf.Sync) {
 		s.LastResult = code
 		if syncErr != nil {
 			s.Stat = formatSyncRepoErrorMsg(syncErr)
+		} else if code == 1 {
+			s.Synced = util.CurrentTimeMillis()
 		}
 	})
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+	util.BroadcastByType("main", "syncing", code, snapshot.Stat, nil)
 }
 
 func SyncDataDownload(decisions ...SyncSourceDecision) (err error) {
@@ -64,9 +65,6 @@ func SyncDataDownload(decisions ...SyncSourceDecision) (err error) {
 
 func syncDataDownloadLocked(decisions ...SyncSourceDecision) (err error) {
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-
-	now := util.CurrentTimeMillis()
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
 	err = syncRepoDownloadWithDNSRetry(decisions...)
 	code := 1
@@ -135,9 +133,6 @@ func SyncDataUpload(decisions ...SyncSourceDecision) (err error) {
 	defer unlock()
 	revision := pendingSync.begin()
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-
-	now := util.CurrentTimeMillis()
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
 	err = syncRepoUploadWithDNSRetry(decisions...)
 	code := 1
@@ -220,8 +215,6 @@ func bootSyncData() {
 		logging.LogInfof("sync before boot")
 	}
 
-	now := util.CurrentTimeMillis()
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 	revision := pendingSync.begin()
 	if afterBoot {
 		// 本地界面已可编辑，保持同步入口可见直到云端合并成功。
@@ -385,9 +378,6 @@ func syncDataLockedContext(ctx context.Context, exit, byHand bool) (err error) {
 			util.PushClearMsg(msgId)
 		}()
 	}
-
-	now := util.CurrentTimeMillis()
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
 	cloudPublished, err := syncRepoWithDNSRetryContext(ctx, exit, byHand)
 	code := 1

@@ -326,18 +326,20 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
         }
     });
     const barSyncElement = toolbarElement.querySelector("#barSync");
+    const syncNowLabel = window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom);
     barSyncElement.addEventListener("mouseenter", (event) => {
         event.stopPropagation();
         event.preventDefault();
         fetchPost("/api/sync/getSyncInfo", {}, (response) => {
-            let html = "";
-            if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
-                html = response.data.stat;
-            } else {
-                html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "<br>";
-                html += "&emsp;" + response.data.stat;
+            let html = response.data.stat;
+            if (window.siyuan.config.sync.enabled && (0 !== window.siyuan.config.sync.provider || !needSubscribe(""))) {
+                if (response.data.synced > 0) {
+                    html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "<br>&emsp;" + html;
+                }
                 if (response.data.kernels.length > 0) {
-                    html += "<br>";
+                    if (html) {
+                        html += "<br>";
+                    }
                     html += window.siyuan.languages.currentKernel + "<br>";
                     html += "&emsp;" + response.data.kernel + "/" + window.siyuan.config.system.kernelVersion + " (" + window.siyuan.config.system.os + "/" + window.siyuan.config.system.name + ")<br>";
                     html += window.siyuan.languages.otherOnlineKernels + "<br>";
@@ -351,10 +353,10 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
                     });
                 }
             }
-            barSyncElement.setAttribute("aria-label", html);
+            barSyncElement.setAttribute("aria-label", html || syncNowLabel);
         });
     });
-    barSyncElement.setAttribute("aria-label", window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom)));
+    barSyncElement.setAttribute("aria-label", window.siyuan.config.sync.stat || syncNowLabel);
     if (window.siyuan.config.appearance.hideToolbar) {
         document.body.classList.add("body--toolbar-hide");
     }

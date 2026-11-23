@@ -28,29 +28,49 @@ func TestSyncResultPersistenceAndLegacyConfiguration(t *testing.T) {
 	t.Cleanup(func() { util.Langs = previousLangs })
 	Conf.Lang = "en"
 	util.Langs = map[string]map[int]string{"en": {80: "Sync failed: %s"}}
-	for _, result := range []int{2, 1, 2} {
-		publishSyncResult(result, nil)
-		if Conf.Sync.Load().LastResult != result {
-			t.Fatal("completed result was not applied")
-		}
+	readSavedSync := func() conf.Sync {
+		t.Helper()
 		data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
 		if err != nil {
 			t.Fatal(err)
 		}
 		var saved struct{ Sync conf.Sync }
-		if err = json.Unmarshal(data, &saved); err != nil || saved.Sync.LastResult != result {
-			t.Fatalf("result was not persisted for restart: %v", err)
+		if err = json.Unmarshal(data, &saved); err != nil {
+			t.Fatal(err)
 		}
+		return saved.Sync
+	}
+	firstErr := errors.New("sync failed before completion")
+	publishSyncResult(2, firstErr)
+	if state := Conf.Sync.Load(); state.LastResult != 2 || state.Synced != 0 {
+		t.Fatalf("first failure recorded a success: %+v", state)
+	}
+	if saved := readSavedSync(); saved.LastResult != 2 || saved.Synced != 0 {
+		t.Fatalf("first failure persisted an unexpected result: %+v", saved)
+	}
+	before := util.CurrentTimeMillis()
+	publishSyncResult(1, nil)
+	if state := Conf.Sync.Load(); state.LastResult != 1 {
+		t.Fatalf("success result was not applied: %+v", state)
+	}
+	lastSuccess := Conf.Sync.Load().Synced
+	if lastSuccess < before || lastSuccess > util.CurrentTimeMillis() {
+		t.Fatalf("success did not record its completion time: %d", lastSuccess)
+	}
+	if saved := readSavedSync(); saved.LastResult != 1 || saved.Synced != lastSuccess {
+		t.Fatalf("success persisted an unexpected result: %+v", saved)
 	}
 	UpdateSyncConf(func(s *conf.Sync) { s.Stat = "Previous success" })
-	publishSyncResult(2, errors.New("post-sync processing failed"))
-	data, err := os.ReadFile(filepath.Join(util.ConfDir, "conf.json"))
-	if err != nil {
-		t.Fatal(err)
+	publishSyncResult(2, nil)
+	if saved := readSavedSync(); saved.LastResult != 2 || saved.Synced != lastSuccess || saved.Stat != "Previous success" {
+		t.Fatalf("a status-only failure changed the previous timestamp or message: %+v", saved)
 	}
-	var saved struct{ Sync conf.Sync }
-	if err = json.Unmarshal(data, &saved); err != nil || saved.Sync.LastResult != 2 ||
-		saved.Sync.Stat != "Sync failed: post-sync processing failed (Provider: S3)" {
-		t.Fatalf("a late failure must persist its own message and result: %v, %+v", err, saved.Sync)
+	publishSyncResult(2, errors.New("post-sync processing failed"))
+	if state := Conf.Sync.Load(); state.Synced != lastSuccess || state.LastResult != 2 {
+		t.Fatalf("a late failure changed its last successful timestamp or result: %+v", state)
+	}
+	if saved := readSavedSync(); saved.LastResult != 2 || saved.Synced != lastSuccess ||
+		saved.Stat != "Sync failed: post-sync processing failed (Provider: S3)" {
+		t.Fatalf("a late failure persisted an unexpected status: %+v", saved)
 	}
 }

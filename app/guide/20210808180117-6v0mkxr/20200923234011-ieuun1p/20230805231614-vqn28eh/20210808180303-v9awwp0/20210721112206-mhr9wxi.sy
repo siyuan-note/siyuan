@@ -574,7 +574,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " The sync icon retains the last completed result: a check mark means success, an error mark means failure or automatic sync paused, and a plain cloud means the result is unknown. The result is retained after restarting and changes after the next completed sync. While syncing, the icon keeps rotating; disabling sync shows the disabled icon."
+					"Data": " The sync icon retains the last completed result: a check mark means success, an error mark means failure or automatic sync paused, and a plain cloud means the result is unknown. The result is retained after restarting and changes after the next completed sync. While syncing, the icon keeps rotating; disabling sync shows the disabled icon. On desktop, hover over the sync icon to see the last recorded successful sync time. Failed attempts leave that time unchanged."
 				}
 			]
 		},

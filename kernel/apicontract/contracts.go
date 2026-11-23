@@ -1078,10 +1078,12 @@ var ListCloudSyncDir = define[EmptyRequest, CloudSyncDirsData]("listCloudSyncDir
 // The returned source/localID/cloudID must accompany an explicit performSync direction; stale previews are rejected.
 var GetSyncSourceState = define[EmptyRequest, SyncSourceState]("getSyncSourceState", "/api/sync/getSyncSourceState", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 
-// PerformSync retains automatic and fully manual mode behavior when source is omitted.
+// PerformSync 执行双向同步，完全手动模式按指定方向上传或下载。
+// 同步失败返回 code -1、错误消息和 null data。
+// 移动端切换前后台时，如果启动尚未完成、用户未登录或同步未启用，则直接返回成功。
 // A source decision requires upload, localID and cloudID from getSyncSourceState and performs one-way sync in any mode.
 // 来源和两个快照 ID 会在应用文件前重新校验；预览失效返回 code 2、空 msg 和 null data，需重新预览并确认。
-// 其他选择失败返回 code -1；code 2 不推送错误通知，避免通知记录使预览继续失效。
+// code 2 不推送错误通知，避免通知记录使预览继续失效。
 // Automatic sync rejects a changed nonempty source until an explicit direction succeeds; empty sources use local data.
 var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/performSync", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{2}}, "POST")
 
@@ -1104,6 +1106,9 @@ var GetSyncCheckout = define[SyncCheckoutClientRequest, SyncCheckoutSnapshot]("g
 var ConfirmSyncCheckout = define[ConfirmSyncCheckoutRequest, CancelSyncCheckoutData]("confirmSyncCheckout", "/api/sync/confirmSyncCheckout", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformBootSync = define[EmptyRequest, Null]("performBootSync", "/api/sync/performBootSync", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBootSync = define[EmptyRequest, Null]("getBootSync", "/api/sync/getBootSync", AuthenticatedAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// GetSyncInfo 返回同步信息。synced 是上次成功同步的 Unix 毫秒时间戳，无记录时为 0。
+// 同步失败时保留该时间戳，升级后沿用工作空间中已有的记录。stat 是本地化状态文本。
 var GetSyncInfo = define[EmptyRequest, SyncInfoData]("getSyncInfo", "/api/sync/getSyncInfo", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var ExportSyncProviderS3 = define[EmptyRequest, SyncProviderExportData]("exportSyncProviderS3", "/api/sync/exportSyncProviderS3", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var ImportSyncProviderS3 = define[SyncProviderImportRequest, SyncS3Data]("importSyncProviderS3", "/api/sync/importSyncProviderS3", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "sync"}}, "POST")

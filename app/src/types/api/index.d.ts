@@ -8459,6 +8459,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 返回同步信息。synced 是上次成功同步的 Unix 毫秒时间戳，无记录时为 0。
+     * 同步失败时保留该时间戳，升级后沿用工作空间中已有的记录。stat 是本地化状态文本。
+     */
     "/api/sync/getSyncInfo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SyncInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -8531,10 +8535,12 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * retains automatic and fully manual mode behavior when source is omitted.
+     * 执行双向同步，完全手动模式按指定方向上传或下载。
+     * 同步失败返回 code -1、错误消息和 null data。
+     * 移动端切换前后台时，如果启动尚未完成、用户未登录或同步未启用，则直接返回成功。
      * A source decision requires upload, localID and cloudID from getSyncSourceState and performs one-way sync in any mode.
      * 来源和两个快照 ID 会在应用文件前重新校验；预览失效返回 code 2、空 msg 和 null data，需重新预览并确认。
-     * 其他选择失败返回 code -1；code 2 不推送错误通知，避免通知记录使预览继续失效。
+     * code 2 不推送错误通知，避免通知记录使预览继续失效。
      * Automatic sync rejects a changed nonempty source until an explicit direction succeeds; empty sources use local data.
      */
     "/api/sync/performSync": {

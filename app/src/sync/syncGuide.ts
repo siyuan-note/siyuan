@@ -271,10 +271,17 @@ const syncNow = () => {
             return;
         }
         if (!response.data.pending && window.siyuan.config.sync.mode !== 3) {
-            fetchPost("/api/sync/performSync", {});
+            requestSync({});
             return;
         }
         chooseSyncDirection(response.data);
+    });
+};
+
+const requestSync = (request: {upload?: boolean}) => {
+    // 同步进度和错误提示由内核推送，避免同时显示接口返回的错误。
+    void fetchSyncPost("/api/sync/performSync", request, undefined, false).catch(error => {
+        console.warn("Sync request failed", error);
     });
 };
 
@@ -368,7 +375,7 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState, refr
         const upload = uploadElement.value === "true";
         if (!state.source) {
             manualDialog.destroy();
-            fetchPost("/api/sync/performSync", {upload});
+            requestSync({upload});
             return;
         }
         void manualDialog.runPending(async () => {

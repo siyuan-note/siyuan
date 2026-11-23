@@ -17,7 +17,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
         document.head.replaceChildren(style);
         for (const initializeKey of [false, true]) {
             document.body.innerHTML = "";
-            const requests: {url: string, data: unknown, reply: (response: unknown) => void}[] = [];
+            const requests: {url: string, data: unknown, process?: boolean, reply: (response: unknown) => void}[] = [];
             const confirmations: (() => void)[] = [];
 			const messages: string[] = [];
             const config = {readonly: false, sync: {provider: 0, enabled: false, cloudName: "main", mode: 0},
@@ -55,8 +55,8 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 "../dialog/confirmDialog": {confirmDialog: ({confirm}: {confirm: () => void}) =>
                     confirmations.push(confirm)},
                 "../util/fetch": {fetchPost: (url: string, data: unknown, reply: (response: unknown) => void) =>
-                    requests.push({url, data, reply}), fetchSyncPost: (url: string, data: unknown) =>
-                    new Promise(resolve => requests.push({url, data, reply: resolve}))},
+                    requests.push({url, data, reply}), fetchSyncPost: (url: string, data: unknown, _headers: unknown, process = true) =>
+                    new Promise(resolve => requests.push({url, data, process, reply: resolve}))},
                 "../config/util/configApi": {config: {set: (name: string, value: unknown, applied: () => void) =>
                     new Promise<void>((resolve, reject) => {
                         requests.push({url: "/api/setting/patch", data: {[name]: value}, reply: (response: {code: number}) => {
@@ -208,7 +208,8 @@ const browserCases = async (sources: string[], styles: string[]) => {
             } else {
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {});
-                requests.shift();
+                check.equal(requests[0].process, false);
+                requests.shift().reply({code: -1});
                 guide.syncGuide();
                 check.equal(requests[0].url, "/api/sync/getSyncSourceState");
                 requests.shift().reply({data: {pending: false, source: "empty-source", localID: "local", cloudID: ""}});
@@ -237,8 +238,9 @@ const browserCases = async (sources: string[], styles: string[]) => {
             check.equal(requests.length, 1);
             check.equal(requests[0].url, "/api/sync/performSync");
             check.deepEqual(requests[0].data, {upload: !mobile});
+            check.equal(requests[0].process, false);
             check.equal(manualConfirm.isConnected, false, "manual sync leaves the editor usable while the request is pending");
-            requests.shift();
+            requests.shift().reply({code: -1});
         }
     }
     return "Sync setup directory cases passed";

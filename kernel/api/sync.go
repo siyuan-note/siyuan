@@ -443,7 +443,9 @@ func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest)
 		return
 	}
 	if 3 != confSyncSnapshot.Mode {
-		model.SyncData(true)
+		if err := model.SyncData(true); err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
 		return
 	}
 
@@ -453,9 +455,12 @@ func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest)
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if upload {
-		model.SyncDataUpload()
+		err = model.SyncDataUpload()
 	} else {
-		model.SyncDataDownload()
+		err = model.SyncDataDownload()
+	}
+	if err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	return
 }

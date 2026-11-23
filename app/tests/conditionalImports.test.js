@@ -19,3 +19,14 @@ test("shared editor sanitization remains bound after conditional preprocessing",
         }
     }
 });
+
+test("desktop database row tab restoration only enters desktop bundles", () => {
+    const layout = readFileSync(path.join(__dirname, "../src/layout/util.ts"), "utf8");
+    const mobile = parse(layout, {BROWSER: true, MOBILE: true}, false, true);
+    const desktop = parse(layout, {BROWSER: true, MOBILE: false}, false, true);
+
+    assert.doesNotMatch(mobile, /\.\.\/editor\/databaseRow|newDatabaseRowModel|showDatabaseRowPreview/);
+    assert.match(desktop, /newDatabaseRowModel\(\{/);
+    assert.match(desktop, /showDatabaseRowPreview\(editorModel, json\.databaseRow, editor\.protyle\)/);
+    assert.match(mobile, /databaseAttributePanel\?\.expand\(\)/);
+});

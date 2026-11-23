@@ -28,8 +28,10 @@ import {showMessage} from "../dialog/message";
 import {isEncryptedBox, parseUriInfo} from "../util/pathName";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
+/// #if !MOBILE
 import {newDatabaseRowModel} from "../editor/databaseRow";
 import {showDatabaseRowPreview} from "../protyle/render/av/openDatabaseRow";
+/// #endif
 import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {resolveCustomModelFactory} from "../plugin/customTabOwner";
@@ -1003,12 +1005,14 @@ export const newModelByInitData = (app: App, tab: Tab, json: any, afterInitProty
                 tab: tab,
                 data: json.customModelData
             });
+        /// #if !MOBILE
         } else if (json.customModelType === "siyuan-database-row") {
             model = newDatabaseRowModel({
                 app,
                 tab,
                 data: json.customModelData,
             });
+        /// #endif
         } else {
             const factory = resolveCustomModelFactory(app, json.customModelType, tab);
             if (factory) {
@@ -1053,9 +1057,12 @@ export const newModelByInitData = (app: App, tab: Tab, json: any, afterInitProty
             scrollAttr: json.scrollAttr,
             action,
             afterInitProtyle(editor) {
+                /// #if !MOBILE
                 if (json.databaseRow?.navigation) {
                     showDatabaseRowPreview(editorModel, json.databaseRow, editor.protyle);
-                } else if (json.databaseRowId) {
+                } else
+                /// #endif
+                if (json.databaseRowId) {
                     editor.protyle.databaseAttributePanel?.expand();
                     editor.protyle.contentElement.scrollTop = 0;
                 }

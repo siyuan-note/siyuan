@@ -23,6 +23,10 @@ import {BLOCK_SELECTION_MODE_CLASS} from "../protyle/wysiwyg/blockSelection";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../asset/html";
 import {bindEditorPanelPosition} from "./editorPanelPosition";
 import {isEncryptedBox} from "../util/pathName";
+import {mountGroupedModelPicker} from "../config/tabs/ai/aiProviderUi";
+import {toggleMenu} from "../menus/menuToggle";
+import {Menu} from "../plugin/Menu";
+import {getReasoningEffortOptions, type ReasoningEffort} from "./reasoningEffort";
 
 type TAIEditorSourceKind = "selection" | "blocks" | "writing";
 type TAIEditorTaskStatus = "streaming" | "done" | "stopped" | "error";
@@ -66,7 +70,8 @@ interface IAIEditorTask {
     thinkingLatestElement: HTMLElement;
     thinkingStartedAt: number;
     thinkingTimer?: number;
-    modelElement: HTMLElement;
+    modelId: string;
+    reasoningEffort: ReasoningEffort;
     statusElement: HTMLElement;
     stopButton: HTMLButtonElement;
     actionsElement: HTMLElement;
@@ -92,28 +97,6 @@ const getState = (protyle: IProtyle) => {
         states.set(protyle, state);
     }
     return state;
-};
-
-const getEditingModelName = () => {
-    const aiConfig = window.siyuan.config.ai;
-    const modelID = aiConfig.editing?.modelId || "";
-    if (!modelID) {
-        return "";
-    }
-    for (const provider of aiConfig.providers) {
-        if (!provider.enabled) {
-            continue;
-        }
-        const model = provider.models.find(item => item.enabled && (item.id === modelID || item.name === modelID));
-        if (model) {
-            return model.displayName || model.name;
-        }
-    }
-    return "";
-};
-
-const updateTaskModel = (task: IAIEditorTask) => {
-    task.modelElement.textContent = getEditingModelName();
 };
 
 const normalizeSourceElement = (element: HTMLElement) => {
@@ -594,7 +577,6 @@ const startTaskStream = (task: IAIEditorTask) => {
     task.thinkingElement.querySelector(".agent-chat__thinking-arrow--contract")?.classList.add("fn__none");
     task.body.classList.remove("fn__none");
     task.body.textContent = "";
-    updateTaskModel(task);
     task.statusElement.textContent = "";
     task.stopButton.classList.remove("fn__none");
     task.actionsElement.classList.add("fn__none");
@@ -604,6 +586,8 @@ const startTaskStream = (task: IAIEditorTask) => {
         input: task.source.input,
         action,
         history: task.source.kind === "writing" ? task.historySnapshot : [],
+        modelId: task.modelId,
+        reasoningEffort: task.reasoningEffort,
     }, event => {
         if (task.abortController === abortController) {
             handleTaskEvent(task, event);
@@ -654,6 +638,9 @@ const createTaskIconButton = (action: string, label: string, icon: string) => {
 const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
     const panel = document.createElement("div");
     const mobile = isMobile();
+    const languages = window.siyuan.languages;
+    const effortOptions = getReasoningEffortOptions(languages);
+    const selectedEffort = effortOptions.find(({value}) => value === window.siyuan.config.ai.editing?.reasoningEffort) || effortOptions[0];
     panel.className = `ai-editor-panel${mobile ? " ai-editor-panel--mobile" : ""}`;
     panel.setAttribute("contenteditable", "false");
     panel.style.zIndex = (++window.siyuan.zIndex).toString();
@@ -661,13 +648,16 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
 <div class="ai-editor-panel__header"${mobile ? "" : ` tabindex="0" aria-label="${escapeAriaLabel(window.siyuan.languages.move)}"`}>
     ${mobile ? `<span class="ai-editor-panel__title fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}</span>
     <span class="b3-chip b3-chip--middle b3-chip--info fn__flex-shrink">${escapeHtml(window.siyuan.languages.aiGeneratedContent)}</span>
-    <span class="ai-editor-panel__details fn__flex fn__flex-1">
-        <span class="ai-editor-panel__model fn__ellipsis"></span>
-        <span class="ai-editor-panel__status"></span>
-    </span>` : `<span class="fn__flex-1 fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}<span class="ai-editor-panel__model"></span></span>
+    <span class="ai-editor-panel__status fn__flex-1"></span>` : `<span class="fn__flex-1 fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}</span>
     <span class="ai-editor-panel__status"></span>`}
     <button class="ai-editor-panel__stop agent-chat__stop b3-button b3-button--icon b3-button--cancel ariaLabel" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.agentStop)}"><svg><use xlink:href="#iconSquareStop"></use></svg></button>
     <button class="block__icon block__icon--show ariaLabel ai-editor-panel__close" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.close)}"><svg><use xlink:href="#iconClose"></use></svg></button>
+</div>
+<div class="ai-editor-panel__options">
+    <button class="b3-select fn__ellipsis ariaLabel" data-type="groupedModelPicker" data-group="editing" data-menu="true" type="button" aria-label="${escapeAriaLabel(languages.apiModel)}">
+        <span data-type="groupedModelPickerLabel"></span>
+    </button>
+    <button class="b3-select fn__ellipsis ariaLabel" data-type="reasoningEffort" data-menu="true" type="button" aria-label="${escapeAriaLabel(languages.reasoningEffortTooltip)}"></button>
 </div>
 <div class="ai-editor-panel__thinking agent-chat__msg--thinking fn__none">
     <div class="agent-chat__thinking-card">
@@ -712,7 +702,8 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         thinkingTextElement: panel.querySelector(".agent-chat__thinking-text") as HTMLElement,
         thinkingLatestElement: panel.querySelector(".agent-chat__thinking-latest") as HTMLElement,
         thinkingStartedAt: Date.now(),
-        modelElement: panel.querySelector(".ai-editor-panel__model") as HTMLElement,
+        modelId: window.siyuan.config.ai.editing?.modelId || "",
+        reasoningEffort: selectedEffort.value,
         statusElement: panel.querySelector(".ai-editor-panel__status") as HTMLElement,
         stopButton: panel.querySelector(".ai-editor-panel__stop") as HTMLButtonElement,
         actionsElement,
@@ -721,6 +712,42 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         historyCommitted: false,
         updatePosition: () => undefined,
     };
+    mountGroupedModelPicker(panel, "editing", {
+        menuId: "ai-editor-model",
+        getSelectedModelId: () => task.modelId,
+        onSelect: (modelId) => {
+            if (panel.isConnected && !task.continuing) {
+                task.modelId = modelId;
+                retryTask(task);
+            }
+        },
+    });
+    const effortButton = panel.querySelector<HTMLButtonElement>('[data-type="reasoningEffort"]');
+    effortButton.textContent = selectedEffort.label;
+    effortButton.addEventListener("click", () => {
+        const rect = effortButton.getBoundingClientRect();
+        toggleMenu({
+            target: effortButton,
+            build: (_menu, session) => {
+                const menu = new Menu("ai-editor-reasoning-effort");
+                effortOptions.forEach(({value, label}) => {
+                    menu.addItem({
+                        iconHTML: "",
+                        label: escapeHtml(label),
+                        current: value === task.reasoningEffort,
+                        click: () => {
+                            if (panel.isConnected && !task.continuing && value !== task.reasoningEffort) {
+                                task.reasoningEffort = value;
+                                effortButton.textContent = label;
+                                retryTask(task);
+                            }
+                        },
+                    });
+                });
+                session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: effortButton}));
+            },
+        });
+    });
     (panel.querySelector(".ai-editor-panel__close") as HTMLButtonElement).addEventListener("click", () => cleanupTask(task));
     bindThinkingCardToggle(task.thinkingElement);
     task.stopButton.addEventListener("click", () => stopTask(task));

@@ -100,6 +100,47 @@
 			]
 		},
 		{
+			"ID": "20261123193455-tn2qs49",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123193455-tn2qs49",
+				"updated": "20261123193455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "智慧編輯"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇智慧編輯的預設模型和思考強度。選擇「預設」時，由模型決定思考強度。在結果面板切換模型或思考強度，會依新選項重新產生目前的任務結果。"
+				}
+			]
+		},
+		{
 			"ID": "20260804170004-xvmu96u",
 			"Type": "NodeList",
 			"ListData": {

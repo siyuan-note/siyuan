@@ -201,6 +201,7 @@ declare namespace Config {
      */
     export interface IEditing {
         modelId: string;
+        reasoningEffort: string;
         maxHistoryMessages: number;
         temperature: number;
         maxCompletionTokens: number;

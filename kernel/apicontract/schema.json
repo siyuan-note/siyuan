@@ -1010,6 +1010,26 @@
             }
           ]
         },
+        "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasoningEffort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "taskID": {
           "anyOf": [
             {
@@ -49677,6 +49697,9 @@
         "modelId": {
           "type": "string"
         },
+        "reasoningEffort": {
+          "type": "string"
+        },
         "temperature": {
           "type": "number"
         }
@@ -49685,6 +49708,7 @@
         "maxCompletionTokens",
         "maxHistoryMessages",
         "modelId",
+        "reasoningEffort",
         "temperature"
       ],
       "additionalProperties": false
@@ -49713,6 +49737,16 @@
           ]
         },
         "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasoningEffort": {
           "anyOf": [
             {
               "type": "string"

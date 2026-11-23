@@ -114,6 +114,47 @@
 			]
 		},
 		{
+			"ID": "20261123193455-ifou442",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123193455-ifou442",
+				"updated": "20261123193455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI Edit"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", choose the default model and reasoning effort for AI editing. The Default effort leaves the choice to the model. Changing either option in the result panel regenerates the current task with that selection."
+				}
+			]
+		},
+		{
 			"ID": "20260804170004-9yg5i8j",
 			"Type": "NodeList",
 			"ListData": {

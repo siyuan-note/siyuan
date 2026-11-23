@@ -114,6 +114,43 @@
 			]
 		},
 		{
+			"ID": "20261123193455-n7667uj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123193455-n7667uj",
+				"updated": "20261123193455"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI 編集"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、AI 編集のデフォルトモデルと思考の強さを選べます。思考の強さを「デフォルト」にすると、モデルが強さを決めます。結果パネルでモデルや思考の強さを変更すると、新しい設定で現在のタスクを再実行します。"
+				}
+			]
+		},
+		{
 			"ID": "20260804170004-pwxfq0o",
 			"Type": "NodeList",
 			"ListData": {

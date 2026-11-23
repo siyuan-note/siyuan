@@ -23,6 +23,7 @@ import (
 )
 
 type aiEditorChatReq struct {
+	Options model.AIEditorChatOptions
 	TaskID  string                  `json:"taskID"`
 	IDs     []string                `json:"ids"`
 	Input   string                  `json:"input"`
@@ -97,7 +98,7 @@ var aiEditorChat = contractHandler(apicontract.AIEditorChat, aiEditorChatContrac
 
 func aiEditorChatContract(c *gin.Context, request apicontract.AIEditorChatRequest) apicontract.Response[apicontract.Null] {
 	req := aiEditorRequest(request)
-	stream, err := model.NewAIEditorChatStream(c.Request.Context(), req.IDs, req.Input, req.Action, req.History)
+	stream, err := model.NewAIEditorChatStream(c.Request.Context(), req.IDs, req.Input, req.Action, req.History, req.Options)
 	if nil != err {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}

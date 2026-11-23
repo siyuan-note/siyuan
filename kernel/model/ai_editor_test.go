@@ -38,7 +38,7 @@ func TestAIEditorZeroTemperature(t *testing.T) {
 	}))
 	defer server.Close()
 	cfg.Providers[0].BaseURL = server.URL + "/v1"
-	stream, err := NewAIEditorChatStream(context.Background(), nil, "hello", "", nil)
+	stream, err := NewAIEditorChatStream(context.Background(), nil, "hello", "", nil, AIEditorChatOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}

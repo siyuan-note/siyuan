@@ -4,6 +4,7 @@
   grid-template:
     "grip" auto
     "header" auto
+    "options" auto
     "thinking-title" auto
     "thinking-body" fit-content(50%)
     "result" 1fr
@@ -42,20 +43,19 @@
     font-size: 13px;
   }
 
-  &__title,
-  &__details {
+  &__title {
     white-space: nowrap;
   }
 
-  &__details {
-    gap: 4px;
+  &__options {
+    grid-area: options;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    padding: 4px 8px;
 
-    > :empty {
-      display: none;
-    }
-
-    .ai-editor-panel__model {
-      margin-inline-start: 0;
+    > button {
+      max-width: 100%;
     }
   }
 
@@ -64,12 +64,6 @@
     color: var(--b3-theme-on-surface-light);
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  &__model {
-    margin-inline-start: 4px;
-    color: var(--b3-theme-on-surface-light);
-    font-weight: normal;
   }
 
   &__body.protyle-wysiwyg {

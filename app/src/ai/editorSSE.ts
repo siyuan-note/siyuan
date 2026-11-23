@@ -1,14 +1,13 @@
 import {fetchWithAppId} from "../util/fetchWithAppId";
+import type {AIEditorChatRequestInput} from "../types/api";
+
 export interface IAIEditorMessage {
     role: "user" | "assistant";
     content: string;
 }
 
-export interface IAIEditorChatRequest {
+interface IAIEditorChatRequest extends AIEditorChatRequestInput {
     taskID: string;
-    ids?: string[];
-    input?: string;
-    action?: string;
     history?: IAIEditorMessage[];
 }
 

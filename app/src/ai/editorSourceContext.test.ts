@@ -27,7 +27,7 @@ test("AI editor sends a bounded context snapshot with the location of the select
         editable.textContent = "subsequent document edit";
         const element = document.createElement("div");
         api.startTaskStream({source, id: "edit", thinkingElement: element, thinkingBody: element, thinkingReasoningElement: element,
-            thinkingLatestElement: element, thinkingTextElement: element, body: element, modelElement: element,
+            thinkingLatestElement: element, thinkingTextElement: element, body: element,
             statusElement: element, stopButton: element, actionsElement: element});
         return JSON.stringify(payload);
     }, browserSources({editor: "src/ai/editor.ts"}), "");
@@ -40,6 +40,72 @@ test("AI editor sends a bounded context snapshot with the location of the select
     assert.equal(context.after, " today.");
     assert.equal(request.action.match(/\{\{input\}\}/g)?.length, 1);
     assert.ok(request.action.endsWith("Polish {{input}}"));
+});
+
+test("AI editor applies panel selections to the current task on desktop and mobile", async () => {
+    const result = await runBrowserCase(async modules => {
+        const config = {ai: {editing: {modelId: "default-id", reasoningEffort: "high"}}, readonly: true};
+        window.siyuan = {config, languages: {}, zIndex: 1} as typeof window.siyuan;
+        const {getReasoningEffortOptions} = new Function("exports", modules.effort + ";return exports;")({});
+        return JSON.stringify([false, true].map(mobile => {
+            document.body.innerHTML = "<main><div></div></main>";
+            const element = document.querySelector("main");
+            const protyle = {element, wysiwyg: {element: element.firstElementChild}};
+            const ids: string[] = [];
+            const parts: never[] = [];
+            const source = {kind: "selection", ids, parts, input: "sample", action: "Polish {{input}}"};
+            const requests: {modelId: string, reasoningEffort: string}[] = [];
+            const signals: AbortSignal[] = [];
+            let selectModel: (id: string) => void;
+            let defaultEffort: () => void;
+            const dependencies = {
+                genUUID: () => "task-id",
+                isMobile: () => mobile,
+                escapeHtml: (value: string) => value,
+                escapeAriaLabel: (value: string) => value,
+                isEncryptedBox: () => false,
+                bindThinkingCardToggle: () => {},
+                bindEditorPanelPosition: () => ({update() {}, destroy() {}}),
+                getReasoningEffortOptions,
+                mountGroupedModelPicker: (root: HTMLElement, group: string, options: {onSelect: typeof selectModel}) => {
+                    if (group === "editing" && root.querySelector('[data-group="editing"]')) {
+                        selectModel = options.onSelect;
+                    }
+                },
+                toggleMenu: ({build}: {build: (menu: unknown, session: unknown) => void}) => build(null, {show() {}}),
+                Menu: class {
+                    addItem({label, click}: {label: string, click: () => void}) {
+                        if (label === "Default") {
+                            defaultEffort = click;
+                        }
+                    }
+                },
+                fetchAIEditorSSE: (request: typeof requests[number], _onEvent: unknown, signal: AbortSignal) => {
+                    requests.push(request);
+                    signals.push(signal);
+                    return Promise.resolve();
+                },
+            };
+            const {createTask, startTaskStream, cleanupTask} = new Function("exports", "require", modules.editor +
+                ";return {createTask,startTaskStream,cleanupTask};")({}, () => dependencies);
+            const task = createTask(protyle, source);
+            startTaskStream(task);
+            selectModel("other-id");
+            task.panel.querySelector('[data-type="reasoningEffort"]').click();
+            defaultEffort();
+            cleanupTask(task);
+            const next = createTask(protyle, source);
+            startTaskStream(next);
+            const states = signals.map(signal => signal.aborted);
+            cleanupTask(next);
+            return {options: requests.map(({modelId, reasoningEffort}) => [modelId, reasoningEffort]), states};
+        }));
+    }, browserSources({editor: "src/ai/editor.ts", effort: "src/ai/reasoningEffort.ts"}), "");
+    const expected = {
+        options: [["default-id", "high"], ["other-id", "high"], ["other-id", ""], ["default-id", "high"]],
+        states: [true, true, true, false],
+    };
+    assert.deepEqual(JSON.parse(result), [expected, expected]);
 });
 
 test("AI insertion identifies generated blocks and leaves the continuation prompt unmarked", async () => {

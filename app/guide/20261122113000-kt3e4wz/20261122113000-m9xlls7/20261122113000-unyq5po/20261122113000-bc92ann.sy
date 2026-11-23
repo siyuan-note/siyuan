@@ -100,6 +100,47 @@
 			]
 		},
 		{
+			"ID": "20261123193455-qhn8xo9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123193455-qhn8xo9",
+				"updated": "20261123193455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Искусственный интеллект"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактирование с ИИ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " выберите модель и усилие рассуждения для редактирования по умолчанию. При выборе «По умолчанию» усилие определяет модель. Если изменить модель или усилие в панели результатов, текущая задача будет выполнена заново с выбранными параметрами."
+				}
+			]
+		},
+		{
 			"ID": "20261122113000-43c382g",
 			"Type": "NodeList",
 			"ListData": {

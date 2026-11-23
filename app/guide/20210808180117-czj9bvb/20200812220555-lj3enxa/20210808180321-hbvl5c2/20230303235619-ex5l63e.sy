@@ -100,6 +100,47 @@
 			]
 		},
 		{
+			"ID": "20261123193455-yyv2k8s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123193455-yyv2k8s",
+				"updated": "20261123193455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "智能编辑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择智能编辑的默认模型和思考强度。选择「默认」时，由模型决定思考强度。在结果面板中切换模型或思考强度，会按新选择重新生成当前任务。"
+				}
+			]
+		},
+		{
 			"ID": "20260804170004-q7ds60m",
 			"Type": "NodeList",
 			"ListData": {

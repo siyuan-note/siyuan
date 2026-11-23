@@ -48,7 +48,7 @@ export type AIEditorActionIDRequestInput = { "id": string; };
 
 export type AIEditorActionSaveRequestInput = { "action": string; "id"?: string | null; "name": string; };
 
-export type AIEditorChatRequestInput = { "action"?: string | null; "history"?: Array<AIEditorMessageInput> | null; "ids"?: Array<string> | null; "input"?: string | null; "taskID"?: string | null; };
+export type AIEditorChatRequestInput = { "action"?: string | null; "history"?: Array<AIEditorMessageInput> | null; "ids"?: Array<string> | null; "input"?: string | null; "modelId"?: string | null; "reasoningEffort"?: string | null; "taskID"?: string | null; };
 
 export type AIEditorContext = { "activeDocID"?: string; "activeDocTitle"?: string; "focusedBlockID"?: string; "notebookID"?: string; "selectedBlockIDs"?: Array<string>; "visibleBlockIDs"?: Array<string>; };
 
@@ -2296,9 +2296,9 @@ export type SettingDecisionProfile = { "apiKey": string; "endpoint": string; "na
 
 export type SettingDecisionProfileInput = { "apiKey": string; "endpoint": string; "name": string; "timeout": number; };
 
-export type SettingEditing = { "maxCompletionTokens": number; "maxHistoryMessages": number; "modelId": string; "temperature": number; };
+export type SettingEditing = { "maxCompletionTokens": number; "maxHistoryMessages": number; "modelId": string; "reasoningEffort": string; "temperature": number; };
 
-export type SettingEditingInput = { "maxCompletionTokens"?: number | null; "maxHistoryMessages"?: number | null; "modelId"?: string | null; "temperature"?: number | null; };
+export type SettingEditingInput = { "maxCompletionTokens"?: number | null; "maxHistoryMessages"?: number | null; "modelId"?: string | null; "reasoningEffort"?: string | null; "temperature"?: number | null; };
 
 export type SettingEditor = { "allowHTMLBLockScript": boolean; "allowSVGScript": boolean; "assetOpen": SettingAssetOpen | null; "autoCloseRefBrackets": boolean; "autoDirection": boolean; "backlinkBlockSort": number; "backlinkContainChildren": boolean; "backlinkExpandCount": number; "backlinkGlobalSort": number; "backlinkHideReference": boolean; "backlinkMentionExclude": string; "backlinkShowBottom": boolean; "backlinkSort": number | null; "backmentionExpandCount": number; "backmentionSort": number | null; "blockGutterMode": boolean; "blockRefDynamicAnchorTextMaxLen": number; "checkBlockRef": boolean | null; "codeFontFamilies": Array<SettingEditorFont | null> | null; "codeLigatures": boolean; "codeLineWrap": boolean; "codeSyntaxHighlightLineNum": boolean; "codeTabSpaces": number; "cursorSurroundingLines": number; "databaseAttrClickMode": number; "databaseAttrHideEmpty": boolean; "databaseAttrLayout": number | null; "databaseAttrShow": boolean | null; "databaseAttrUseTabs": boolean | null; "databaseAttrViewMode": number; "databaseShowIcon": boolean | null; "databaseShowRelationIcon": boolean | null; "displayBookmarkIcon": boolean; "displayImgAlt": boolean; "displayImgName": boolean; "displayNetImgMark": boolean; "dragHTMLFileToIframe": boolean; "dynamicLoadBlocks": number; "embedBlockBreadcrumb": boolean; "embedBlockBreadcrumbParentPath": boolean | null; "emoji": Array<string> | null; "floatWindowDelay": number | null; "floatWindowMode": number; "fontFamilies": Array<SettingEditorFont | null> | null; "fontFamily": string; "fontFamilyDisplay": string; "fontSize": number; "fontSizeScrollZoom": boolean; "fontWeight": number; "fullWidth": boolean; "generateHistoryInterval": number; "globalBreadcrumb": boolean; "hashTagSearch": boolean | null; "headingEmbedMode": number; "headingNumber": boolean; "headingNumberFormat": string; "hideBreadcrumbIcons": boolean; "historyRetentionDays": number; "justify": boolean; "katexMacros": string; "keepLoadedContent": boolean; "listItemDotNumberClickFocus": boolean; "listLogicalOutdent": boolean; "markdown": SettingMarkdown | null; "mathDelimiterCompatibility": boolean | null; "onlySearchForDoc": boolean; "pageScrollButtons": boolean; "pasteURLAutoConvert": boolean; "plantUMLServePath": string; "readOnly": boolean; "rtl": boolean; "spellcheck": boolean; "spellcheckLanguages": Array<string> | null; "virtualBlockRef": boolean; "virtualBlockRefExclude": string; "virtualBlockRefInclude": string; };
 
@@ -3454,6 +3454,9 @@ export interface APIPOSTRoutes {
     };
     /**
      * 按块请求的 start 事件携带本轮实际展开的 prompt，供显式转入智能体时保留原文快照。
+     * modelId 可覆盖智能编辑的模型，必须是已启用模型的 ID；省略、null 或空字符串沿用设置。
+     * reasoningEffort 省略或为 null 时沿用设置，空字符串使用模型默认值。覆盖仅作用于本次请求。
+     * 可选档位为 none、low、medium、high、xhigh、max，实际支持范围由供应商和模型决定。
      */
     "/api/ai/editor/chat": {
         request: AIEditorChatRequestInput;
@@ -7967,6 +7970,7 @@ export interface APIPOSTRoutes {
      * 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
      * 旧客户端的平铺 decision.endpoint、apiKey、name、timeout 迁移到 profiles.typesafe；提交 profiles 时以该对象为准。
      * ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
+     * editing.reasoningEffort 配置智能编辑的默认思考强度。省略保留当前设置，null 或空字符串使用模型默认值。
      */
     "/api/setting/setAI": {
         request: SetAIRequestInput;

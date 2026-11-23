@@ -80,7 +80,7 @@ const mainWindowSetup = (t: any, {remote = false} = {}) => {
     // 夹具保持扁平字段，这些字段桥接回共享运行期状态，模块与用例读写同一份数据。
     resetRuntimeState();
     resetElectronStub();
-    mockElectron(t, {
+    const electronStub = mockElectron(t, {
         app: appStub as unknown as App,
         BrowserWindow: Window as unknown as typeof ElectronBrowserWindow,
         screen: screenStub as unknown as Record<string, unknown>,
@@ -136,7 +136,7 @@ const mainWindowSetup = (t: any, {remote = false} = {}) => {
             isOpenAsHidden: () => context.isOpenAsHidden(),
         },
     });
-    return {context: Object.assign(context, {initMainWindow}), ipcMain, timers, Window};
+    return {context: Object.assign(context, {initMainWindow}), ipcMain, timers, Window, electronStub};
 };
 
 test("main windows close their own boot windows in either frontend readiness order", (t) => {
@@ -302,6 +302,51 @@ test("closing to the tray or hiding allows another close immediately after relau
         window.destroy();
         assert.equal(timers.size, 0);
     }
+});
+
+test("only the requesting workspace receives new global shortcut failures", (t) => {
+    const {context, ipcMain, electronStub} = mainWindowSetup(t);
+    context.initMainWindow(6806);
+    context.initMainWindow(6807);
+    type TestWindow = InstanceType<ReturnType<typeof mainWindowSetup>["Window"]>;
+    const [first, second]: TestWindow[] = context.workspaces.map(workspace => workspace.browserWindow);
+    const occupied = new Set(["Shift+Alt+M", "Alt+P"]);
+    electronStub.globalShortcut = {
+        unregister: () => {},
+        register: (accelerator: string) => !occupied.has(accelerator),
+    };
+    const {registerShellIntegrationIpc} = require("../ipc/shellIntegration") as typeof import("../ipc/shellIntegration");
+    registerShellIntegrationIpc();
+    const sync = (window: typeof first, hotkeys: string[], suspended = false) => {
+        ipcMain.emit("siyuan-hotkey", {sender: window.webContents}, {hotkeys, suspended});
+    };
+    const notification = (newlyFailed: string[]) => ["siyuan-hotkey", {newlyFailed}];
+
+    sync(first, ["⌥⇧M"]);
+    assert.deepEqual(first.messages, [notification(["⌥⇧M"])]);
+    assert.equal(second.messages, undefined);
+
+    sync(first, ["⇧⌥M"]);
+    sync(second, ["⌥⇧M"]);
+    sync(second, ["⌥⇧M", "⌥P"]);
+    assert.deepEqual(first.messages, [notification(["⌥⇧M"]), notification([])]);
+    assert.deepEqual(second.messages, [notification([]), notification(["⌥P"])]);
+
+    sync(second, [], true);
+    sync(first, ["⇧⌥M"]);
+    assert.equal(first.messages.length, 2);
+    assert.equal(second.messages.length, 2);
+    sync(second, ["⌥⇧M", "⌥P"]);
+    assert.deepEqual(second.messages.at(-1), notification([]));
+
+    occupied.delete("Shift+Alt+M");
+    sync(first, ["⇧⌥M"]);
+    occupied.add("Shift+Alt+M");
+    sync(first, ["⇧⌥M"]);
+    assert.deepEqual(first.messages.slice(-2), [notification([]), notification(["⇧⌥M"])]);
+    sync(second, ["⌥⇧M"]);
+    sync(second, ["⌥⇧M", "⌥P"]);
+    assert.deepEqual(second.messages.slice(-2), [notification([]), notification(["⌥P"])]);
 });
 
 test("main window timeout and closure clean up their own boot windows and readiness listeners", (t) => {

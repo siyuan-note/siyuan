@@ -45,6 +45,11 @@ export const bindEditorPanelPosition = (host: HTMLElement, scroll: HTMLElement, 
     const reset = () => {
         manual = undefined;
         height = undefined;
+        if (!mobile) {
+            panel.style.width = "";
+            panel.style.height = "";
+            panel.classList.remove("ai-editor-panel--resized");
+        }
         update();
     };
     handle.addEventListener("pointerdown", (event) => {
@@ -101,6 +106,15 @@ export const bindEditorPanelPosition = (host: HTMLElement, scroll: HTMLElement, 
         event.stopPropagation();
     });
     const observer = new ResizeObserver(update);
+    // 原生缩放先写入行内尺寸。面板达到默认高度上限时，边框尺寸可能暂时没有变化。
+    const nativeResize = mobile ? undefined : new MutationObserver(() => {
+        if ((panel.style.width || panel.style.height) && !panel.classList.contains("ai-editor-panel--resized")) {
+            manual ??= {left: panel.offsetLeft, top: panel.offsetTop};
+            panel.classList.add("ai-editor-panel--resized");
+            update();
+        }
+    });
+    nativeResize?.observe(panel, {attributes: true, attributeFilter: ["style"]});
     observer.observe(host);
     observer.observe(panel);
     scroll.addEventListener("scroll", update);
@@ -110,6 +124,7 @@ export const bindEditorPanelPosition = (host: HTMLElement, scroll: HTMLElement, 
     update();
     return {update, destroy: () => {
         observer.disconnect();
+        nativeResize?.disconnect();
         view.removeEventListener("resize", update);
         view.visualViewport?.removeEventListener("resize", update);
         view.visualViewport?.removeEventListener("scroll", update);

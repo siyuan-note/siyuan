@@ -254,9 +254,20 @@ const browserCases = async (source: string) => {
     const refs: import("../../../types/api").AIReference[] = [];
     api.projectAgentQuotes(clone, refs);
     const sent = lute.BlockDOM2StdMd(clone.innerHTML).replaceAll("\u200b", "").trim();
-    check.equal(refs.length, 1);
-    check.equal(refs[0].messageID, "reply");
+    check.equal(refs.length, 2);
+    check.equal(refs[0].id, "note");
+    check.deepEqual(JSON.parse(refs[0].title), {startOffset: 2, endBlockID: "note", endOffset: 6, excerpt: "a<&b"});
+    check.equal(refs[1].messageID, "reply");
     check.equal(api.quotePreview(sent, refs), "“a<&b” vs “Line one\nLine two” vs “excerpt”");
+    const spanning = document.createElement("div");
+    spanning.innerHTML = api.createAgentQuote({text: "across cells", source: {
+        kind: "selection", id: "first", endID: "last", start: 2, end: 4, startCell: 1, endCell: 3,
+    }});
+    const spanRefs: typeof refs = [];
+    api.projectAgentQuotes(spanning, spanRefs);
+    check.equal(spanRefs[0].id, "first");
+    check.deepEqual(JSON.parse(spanRefs[0].title),
+        {startOffset: 2, endBlockID: "last", endOffset: 4, startCell: 1, endCell: 3, excerpt: "across cells"});
     select(marks[1].firstChild, 2);
     check.equal(deleteSkill(), true);
     check.equal(editor.querySelectorAll(api.AGENT_QUOTE_SELECTOR).length, 2);

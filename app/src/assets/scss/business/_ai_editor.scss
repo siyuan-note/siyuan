@@ -11,6 +11,27 @@
   border-radius: var(--b3-border-radius-b);
   box-shadow: var(--b3-dialog-shadow);
 
+  &:not(.ai-editor-panel--mobile) {
+    resize: both;
+    min-width: min(280px, calc(100% - 16px));
+    max-width: calc(100% - 16px);
+
+    .ai-editor-panel__body {
+      flex: 1 1 auto;
+    }
+  }
+
+  &--resized {
+    min-height: min(128px, calc(100% - 16px));
+    max-height: calc(100% - 16px);
+
+    .ai-editor-panel__thinking {
+      flex-shrink: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
+  }
+
   &__header {
     cursor: move;
     touch-action: none;

@@ -52,7 +52,12 @@ export const projectAgentQuotes = (root: HTMLElement, references: AIReference[])
         }
         const source = quote.source;
         let text = "“" + quote.text + "”";
-        if (source.kind !== "selection" && source.whole) {
+        if (source.kind === "selection") {
+            references.push({id: source.id, title: JSON.stringify({
+                startOffset: source.start, endBlockID: source.endID, endOffset: source.end,
+                startCell: source.startCell, endCell: source.endCell, excerpt: Array.from(quote.text).slice(0, 80).join(""),
+            })});
+        } else if (source.whole) {
             const id = source.id + "-" + references.length;
             references.push({id, messageID: source.id, title: quote.text});
             text = "⟦" + id + "⟧";

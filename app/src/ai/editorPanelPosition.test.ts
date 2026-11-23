@@ -61,3 +61,43 @@ test("AI edit follows the source until moved and keeps the mobile bottom bar acc
     }, sources, css, {width: 800, height: 540});
     assert.match(result, /passed/);
 });
+
+test("desktop AI edit resizes past the initial height limit and restores the anchored size", async () => {
+    const sources = browserSources({position: "src/ai/editorPanelPosition.ts"});
+    const css = compileString(readFileSync("src/assets/scss/business/_ai_editor.scss", "utf8")).css;
+    const result = await runBrowserCase(async (modules, sheet) => {
+        const mod = {exports: {} as typeof import("./editorPanelPosition")};
+        new Function("exports", modules.position)(mod.exports);
+        const style = document.createElement("style");
+        style.textContent = sheet + "main{width:800px;height:500px;position:relative}.ai-editor-panel__body{height:600px}";
+        document.head.appendChild(style);
+        document.body.innerHTML = '<main><p>source</p><div class="ai-editor-panel"><header class="ai-editor-panel__header">Title</header>' +
+            '<div class="ai-editor-panel__body protyle-wysiwyg">result</div><footer class="ai-editor-panel__actions">insert</footer></div></main>';
+        const host = document.querySelector("main");
+        mod.exports.bindEditorPanelPosition(host, host, host.querySelector(".ai-editor-panel"), false, () => host.querySelector("p"));
+        return "ready";
+    }, sources, css, {width: 900, height: 620, interact: async win => {
+        const web = win.webContents;
+        const rect = () => web.executeJavaScript('document.querySelector(".ai-editor-panel").getBoundingClientRect().toJSON()');
+        const dragCorner = async (dx: number, dy: number) => {
+            const start = await rect();
+            const x = start.right - 4, y = start.bottom - 4;
+            for (const [type, offsetX, offsetY] of [["mousePressed", 0, 0], ["mouseMoved", dx, dy], ["mouseReleased", dx, dy]] as const) {
+                await web.debugger.sendCommand("Input.dispatchMouseEvent", {type, x: x + offsetX, y: y + offsetY,
+                    button: "left", buttons: type === "mouseReleased" ? 0 : 1, clickCount: 1});
+            }
+            await web.executeJavaScript("new Promise(done => requestAnimationFrame(() => requestAnimationFrame(() => done(true))))");
+        };
+        const start = await rect();
+        await dragCorner(0, 40);
+        const taller = await rect();
+        await dragCorner(60, 0);
+        const wider = await rect();
+        if (taller.height < start.height + 35 || wider.width < start.width + 55) throw Error("Native resize did not grow the panel");
+        await web.executeJavaScript('document.querySelector("header").dispatchEvent(new MouseEvent("dblclick"))');
+        const restored = await rect();
+        if (restored.height !== start.height || restored.width !== start.width) throw Error("Default size was not restored");
+        return "resized";
+    }});
+    assert.match(result, /resized/);
+});

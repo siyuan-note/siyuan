@@ -602,7 +602,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Select text in a note and choose Quote in Agent Chat. To quote a chat message, use its quote button. To quote a passage, release the mouse button or lift your finger after selecting it, then choose Quote text next to the selection. Quotes appear inline with your instructions. You can add several, remove them individually, and click a sent quote to return to its source."
+					"Data": "Select text in a note and choose Quote in Agent Chat. A note excerpt includes the starting and ending block IDs and selection offsets. To quote a chat message, use its quote button. To quote a passage, release the mouse button or lift your finger after selecting it, then choose Quote text next to the selection. Quotes appear inline with your instructions. You can add several, remove them individually, and click a sent quote to return to its source."
 				}
 			]
 		},

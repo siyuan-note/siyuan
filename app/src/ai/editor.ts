@@ -3,7 +3,8 @@ import {fetchAIEditorSSE, IAIEditorMessage, TAIEditorSSEEvent} from "./editorSSE
 import {genUUID} from "../util/genID";
 import {
     focusByOffset,
-    getBlockRanges
+    getBlockRanges,
+    type IBlockRange
 } from "../protyle/util/selection";
 import {getSelectionOffset, setLastNodeRange} from "../protyle/util/selectionOffsets";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
@@ -30,6 +31,7 @@ interface IAIEditorSourcePart {
     id: string;
     start: number;
     end: number;
+    cell?: number;
     signature: string;
 }
 
@@ -39,6 +41,7 @@ interface IAIEditorSource {
     ids: string[];
     input: string;
     action: string;
+    surroundings?: {before: string, after: string};
     insertSupported: boolean;
 }
 
@@ -184,6 +187,26 @@ const sourcePartMarkdown = (protyle: IProtyle, range: Range, editableElement: El
     return protyle.lute.BlockDOM2StdMd(element.innerHTML).trimEnd() || text;
 };
 
+const selectionContext = (part: IBlockRange, before: boolean) => {
+    const range = part.range.cloneRange();
+    range.selectNodeContents(part.editableElement);
+    if (before) {
+        range.setEnd(part.range.startContainer, part.range.startOffset);
+    } else {
+        range.setStart(part.range.endContainer, part.range.endOffset);
+    }
+    let text = range.toString().replaceAll(Constants.ZWSP, "");
+    // 选区触及段首或段尾时，仅补充同层紧邻的正文，避免读取嵌入块或整个文档。
+    if (!text.trim()) {
+        const sibling = before ? part.blockElement.previousElementSibling : part.blockElement.nextElementSibling;
+        if (sibling?.matches('[data-type="NodeParagraph"], [data-type="NodeHeading"]')) {
+            text = getContenteditableElement(sibling)?.textContent || text;
+        }
+    }
+    const characters = Array.from(text);
+    return (before ? characters.slice(-400) : characters.slice(0, 400)).join("");
+};
+
 const buildSelectionSource = (protyle: IProtyle, range: Range, action: string): IAIEditorSource | undefined => {
     const blockRanges = getBlockRanges(protyle.wysiwyg.element, range);
     if (blockRanges.length === 0) {
@@ -193,10 +216,13 @@ const buildSelectionSource = (protyle: IProtyle, range: Range, action: string): 
         id: item.blockElement.getAttribute("data-node-id") || "",
         start: item.start,
         end: item.end,
+        cell: item.editableElement.matches("th, td") ?
+            Array.from(item.blockElement.querySelectorAll("th, td")).indexOf(item.editableElement) : undefined,
         signature: normalizeSourceElement(item.blockElement),
     }));
     return {
         kind: "selection",
+        surroundings: {before: selectionContext(blockRanges[0], true), after: selectionContext(blockRanges[blockRanges.length - 1], false)},
         parts,
         ids: [],
         input: blockRanges.map(item => sourcePartMarkdown(protyle, item.range, item.editableElement))
@@ -522,15 +548,23 @@ const handleTaskEvent = (task: IAIEditorTask, event: TAIEditorSSEEvent) => {
     }
 };
 
+const buildEditorAction = (source: IAIEditorSource) => {
+    const locations = source.parts.map(({id, start, end, cell}) => source.kind === "blocks" ? {blockID: id} :
+        {blockID: id, startOffset: start, endOffset: end, cell});
+    // 引用材料里的占位符按字面值发送，只有用户的动作模板参与内核替换。
+    const context = JSON.stringify({kind: source.kind, locations, ...source.surroundings}).replaceAll("{{input}}", "\\u007b\\u007binput}}");
+    const instruction = source.action.trim();
+    const template = !instruction ? "{{input}}" : instruction.includes("{{input}}") ? instruction : instruction + ":\n\n{{input}}";
+    return "Read-only source context (use for orientation; edit only the input):\n" + context + "\n\n" + template;
+};
+
 const startTaskStream = (task: IAIEditorTask) => {
     const abortController = new AbortController();
     task.abortController = abortController;
     task.status = "streaming";
-    const input = task.source.input;
-    const action = task.source.action.trim();
+    const action = buildEditorAction(task.source);
     task.agentSessionID = undefined;
-    task.prompt = task.source.kind === "blocks" ? undefined : !action ? input :
-        action.includes("{{input}}") ? action.split("{{input}}").join(input) : action + ":\n\n" + input;
+    task.prompt = task.source.kind === "blocks" ? undefined : action.split("{{input}}").join(task.source.input);
     task.content = "";
     task.notice = "";
     task.reasoning = false;
@@ -560,7 +594,7 @@ const startTaskStream = (task: IAIEditorTask) => {
         taskID: task.id,
         ids: task.source.ids,
         input: task.source.input,
-        action: task.source.action,
+        action,
         history: task.source.kind === "writing" ? task.historySnapshot : [],
     }, event => {
         if (task.abortController === abortController) {

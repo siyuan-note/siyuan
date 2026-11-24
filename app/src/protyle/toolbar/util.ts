@@ -248,8 +248,9 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         icon: "iconQuote",
         tipPosition: "n",
         click(editor) {
-            const range = editor.protyle.toolbar.range?.cloneRange();
-            if (range) void import("../../ai/editorAgent").then(({quoteEditorSelection}) => quoteEditorSelection(editor.protyle, range));
+            const protyle = editor.protyle;
+            const range = protyle.toolbar.range?.cloneRange();
+            void import("../../ai/editorAgent").then(({quoteEditorSelection}) => quoteEditorSelection(protyle, range));
         },
     }, {
         name: "strong",

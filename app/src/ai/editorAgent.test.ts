@@ -7,18 +7,20 @@ import type {AgentQuote} from "../layout/dock/agent/agentQuote";
 
 const {parse} = require("ifdef-loader/preprocessor");
 
-test("editor quotes reveal a floating agent once and report later hidden insertions", async () => {
+test("editor quotes reveal a floating agent once and report hidden insertions or failed attempts", async () => {
     const methods = {} as typeof import("./editorAgent");
     const events: unknown[] = [];
     let active = true;
     let panelVisible = true;
+    let canInsert = true;
+    let dockAvailable = true;
     let count = 0;
     const dock = {
         data: {agentChat: {
             insertBlockMentions() {},
             async insertQuote(quote: AgentQuote, inBackground: boolean) {
                 events.push([quote.text, inBackground]);
-                return ++count;
+                return canInsert ? ++count : undefined;
             },
         }},
         isFloating: () => true,
@@ -40,9 +42,9 @@ test("editor quotes reveal a floating agent once and report later hidden inserti
     }).outputText, {
         exports: methods,
         document: {querySelector: () => active},
-        window: {siyuan: {config: {}, languages: {agentQuoteAdded: "Quotes: ${count}"}}},
+        window: {siyuan: {config: {}, languages: {agentQuoteAdded: "Quotes: ${count}", confirmActionFailed: "Could not quote"}}},
         require: (name: string) => ({
-            "../layout/tabUtil": {getDockByType: () => dock},
+            "../layout/tabUtil": {getDockByType: () => dockAvailable ? dock : undefined},
             "../dialog/message": {showMessage: (message: string) => events.push(message)},
             "../protyle/util/compatibility": {isDisabledFeature: () => false},
             "../util/pathName": {isEncryptedBox: () => false},
@@ -64,9 +66,15 @@ test("editor quotes reveal a floating agent once and report later hidden inserti
     panelVisible = false;
     await quote("closed");
     await quote("first in another editor", {...editor});
+    canInsert = false;
+    await quote("insertion failed");
+    dockAvailable = false;
+    await quote("dock unavailable");
+    await methods.quoteEditorSelection(editor, {collapsed: true} as Range);
     assert.deepEqual(events, [
         "reveal", ["first", false], ["visible", false],
         ["hover-hidden", true], "Quotes: 3", ["closed", true], "Quotes: 4",
         "reveal", ["first in another editor", false],
+        ["insertion failed", false], "Could not quote", "Could not quote", "Could not quote",
     ]);
 });

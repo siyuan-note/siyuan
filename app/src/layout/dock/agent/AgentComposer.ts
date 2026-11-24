@@ -506,7 +506,11 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             const previousCount = inBackground ? wysiwyg.element.querySelectorAll(AGENT_QUOTE_SELECTOR).length : 0;
             const saved = p.toolbar.range;
             if (!saved || !wysiwyg.element.contains(saved.commonAncestorContainer)) {
-                if (inBackground) {
+                if (!inBackground) fragment.focus(true);
+                const active = !inBackground && selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+                if (active && wysiwyg.element.contains(active.commonAncestorContainer)) {
+                    p.toolbar.range = active.cloneRange();
+                } else {
                     const editables = wysiwyg.element.querySelectorAll('[contenteditable="true"]');
                     const last = editables[editables.length - 1];
                     if (!last) return;
@@ -514,10 +518,6 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                     end.selectNodeContents(last);
                     end.collapse(false);
                     p.toolbar.range = end;
-                } else {
-                    fragment.focus(true);
-                    if (!selection?.rangeCount || !wysiwyg.element.contains(selection.anchorNode)) return;
-                    p.toolbar.range = selection.getRangeAt(0).cloneRange();
                 }
             }
             if (inBackground) {

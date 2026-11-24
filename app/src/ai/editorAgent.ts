@@ -8,8 +8,8 @@ import {isInEmbedBlock} from "../protyle/util/hasClosest";
 import type {AgentQuote} from "../layout/dock/agent/agentQuote";
 import type {Editor} from "../editor";
 import {Constants} from "../constants";
-/// #if !MOBILE
 import {showMessage} from "../dialog/message";
+/// #if !MOBILE
 import {getDockByType} from "../layout/tabUtil";
 
 const quotedEditors = new WeakSet<IProtyle>();
@@ -91,17 +91,27 @@ export const openQuotedSelection = async (app: App, quote: AgentQuote) => {
 };
 
 export const quoteEditorSelection = async (editor: IProtyle, range: Range) => {
-    if (!editor.block.rootID || isEncryptedBox(editor.notebookId) || !range || range.collapsed) {
+    if (!editor.block.rootID || isEncryptedBox(editor.notebookId)) {
+        return;
+    }
+    const showFailure = () => showMessage(window.siyuan.languages.confirmActionFailed, 3000, "error");
+    if (!range || range.collapsed) {
+        showFailure();
         return;
     }
     const parts = getBlockRanges(editor.wysiwyg.element, range);
     if (!parts.length) {
+        showFailure();
         return;
     }
     const first = parts[0];
     const last = parts[parts.length - 1];
     const text = parts.map(part => part.range.toString()).join("\n");
-    if (text.trim()) {
+    if (!text.trim()) {
+        showFailure();
+        return;
+    }
+    try {
         const cellIndex = (part: typeof first) => part.editableElement.matches("th, td") ?
             Array.from(part.blockElement.querySelectorAll("th, td")).indexOf(part.editableElement) : undefined;
         const quote: AgentQuote = {text, source: {kind: "selection", id: first.blockElement.dataset.nodeId,
@@ -109,21 +119,29 @@ export const quoteEditorSelection = async (editor: IProtyle, range: Range) => {
             startCell: cellIndex(first), endCell: cellIndex(last)}};
         /// #if MOBILE
         const mobileChat = await openEditorAgent(editor.app);
-        await mobileChat?.insertQuote(quote);
+        if (!await mobileChat?.insertQuote(quote)) showFailure();
         /// #else
         const chat = await openEditorAgent(editor.app, quotedEditors.has(editor) ? "repeat" : "first");
-        if (!chat) return;
+        if (!chat) {
+            showFailure();
+            return;
+        }
         const dock = getDockByType("agentChat");
         const floating = dock?.isFloating();
         const inBackground = !!floating && (!dock.isPanelVisible() ||
             dock.layout.element.style.opacity !== "1" || !document.querySelector(agentDockItem));
         const count = await chat.insertQuote(quote, inBackground);
-        if (floating && count) {
+        if (!count) {
+            showFailure();
+        } else if (floating) {
             quotedEditors.add(editor);
             if (inBackground) {
                 showMessage(window.siyuan.languages.agentQuoteAdded.replace("${count}", count.toString()), 3000, "info", "agent-quote-added");
             }
         }
         /// #endif
+    } catch (error) {
+        console.error(error);
+        showFailure();
     }
 };

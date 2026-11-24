@@ -290,7 +290,7 @@ const browserCases = async (source: string) => {
     const starter = draft.querySelector("[contenteditable]").firstChild;
     select(editor.querySelector(api.AGENT_QUOTE_SELECTOR).nextSibling, 0);
     const sourceAnchor = getSelection().anchorNode;
-    const fragment = {focus: () => check.fail("a hidden composer cannot take focus")};
+    const fragment = {focus: () => check.notEqual(draft.style.display, "none", "a hidden composer cannot take focus")};
     const instance = {insert: (html: string) => {
         toolbar.range.insertNode(toolbar.range.createContextualFragment(html));
         dependencies.focusByRange(toolbar.range);
@@ -302,6 +302,12 @@ const browserCases = async (source: string) => {
     check.equal(api.insertQuote(fragment, composer, instance, quotes[1], true), 2);
     check.equal(getSelection().anchorNode, sourceAnchor);
     check.deepEqual(Array.from(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), quotes.slice(0, 2));
+
+    draft.style.display = "";
+    toolbar.range = undefined;
+    check.equal(api.insertQuote(fragment, composer, instance, quotes[2], false), 3);
+    check.ok(draft.contains(getSelection().anchorNode));
+    check.deepEqual(Array.from(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), quotes);
     return "Agent skill cases passed";
 };
 

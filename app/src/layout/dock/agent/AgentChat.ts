@@ -7,6 +7,7 @@ import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult, IToolEffects}
 import {genUUID} from "../../../util/genID";
 import {AGENT_QUOTE_SELECTOR, AgentQuote, quotePreview, readAgentQuote} from "./agentQuote";
 import {bindSelectionQuote} from "./selectionQuote";
+import {rangeMarkdown} from "../../../ai/selectionMarkdown";
 import {mountComposer, type AgentComposerData} from "./AgentComposer";
 import {bindAgentComposerResize} from "./AgentComposerResize";
 import {disabledWYSIWYG} from "../../../protyle/util/disabledWYSIWYG";
@@ -813,26 +814,32 @@ export class AgentChat extends Model {
         button.className = "block__icon block__icon--show ariaLabel";
         button.setAttribute("aria-label", window.siyuan.languages.agentQuote);
         button.innerHTML = '<svg><use xlink:href="#iconQuote"></use></svg>';
-        let selected = "";
-        const selectionText = () => {
+        const getPassage = () => {
             const sel = body.ownerDocument.getSelection();
-            return sel?.rangeCount && body.contains(sel.getRangeAt(0).commonAncestorContainer) ? sel.toString() : "";
+            const range = sel?.rangeCount ? sel.getRangeAt(0) : undefined;
+            if (range && !range.collapsed && body.contains(range.commonAncestorContainer)) {
+                return {text: range.toString(), range: range.cloneRange()};
+            }
         };
+        let selected: ReturnType<typeof getPassage>;
         button.addEventListener("pointerdown", (event) => {
-            selected = selectionText();
+            selected = getPassage();
             event.preventDefault();
         });
         button.addEventListener("click", (event) => {
             event.stopPropagation();
-            const excerpt = selected || selectionText();
-            selected = "";
-            this.quoteMessage(message, excerpt || content, !excerpt);
+            const passage = selected || getPassage();
+            selected = undefined;
+            this.quoteMessage(message, passage?.text || content, !passage?.text, passage?.range);
         });
         actions.prepend(button);
     }
 
-    private quoteMessage(message: HTMLElement, text: string, whole: boolean) {
-        void this.insertQuote({text, source: {
+    private quoteMessage(message: HTMLElement, text: string, whole: boolean, range?: Range) {
+        const body = message.querySelector(".agent-chat__body");
+        const markdown = !whole && range && body?.contains(range.commonAncestorContainer) && range.toString() === text ?
+            rangeMarkdown(this.lute, range, body) : undefined;
+        void this.insertQuote({text, markdown: markdown?.trim() !== text.trim() ? markdown : undefined, source: {
             id: message.dataset.messageId, sessionID: this.sessionId,
             kind: message.classList.contains("agent-chat__msg--user") ? "user" : "assistant", whole,
         }});
@@ -1342,8 +1349,8 @@ export class AgentChat extends Model {
     }
 
     private bindEvents() {
-        this.unbindSelectionQuote = bindSelectionQuote(this.messagesContainer, (message, text) =>
-            this.quoteMessage(message, text, false));
+        this.unbindSelectionQuote = bindSelectionQuote(this.messagesContainer, (message, text, range) =>
+            this.quoteMessage(message, text, false, range));
         // hover 底部 tokens 数字弹出分类明细面板。
         // 仅在支持 hover 的设备绑定 mouseenter/mouseleave（移动端 tap 会合成 mouse 事件导致闪烁）；
         // 不支持 hover 的设备（移动端）用 click 切换。

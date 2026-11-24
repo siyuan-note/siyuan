@@ -15,7 +15,10 @@ test("AI editor sends a bounded context snapshot with the location of the select
         range.setEnd(editable.firstChild, start + 5);
         const protyle = {wysiwyg: {element: block.parentElement}, lute: {BlockDOM2StdMd: (s: string) => s}};
         let payload: {input: string, action: string};
+        const selection = new Function("exports", "require", modules.selection + ";return exports;")({},
+            () => ({Constants: {ZWSP: "\u200b"}}));
         const deps = {
+            ...selection,
             Constants: {ZWSP: "\u200b", ATTRIBUTE_EDITING: "data-editing"},
             BLOCK_SELECTION_MODE_CLASS: "selected",
             getBlockRanges: () => [{blockElement: block, editableElement: editable, range, start, end: start + 5}],
@@ -30,7 +33,7 @@ test("AI editor sends a bounded context snapshot with the location of the select
             thinkingLatestElement: element, thinkingTextElement: element, body: element,
             statusElement: element, stopButton: element, actionsElement: element});
         return JSON.stringify(payload);
-    }, browserSources({editor: "src/ai/editor.ts"}), "");
+    }, browserSources({editor: "src/ai/editor.ts", selection: "src/ai/selectionMarkdown.ts"}), "");
     const request = JSON.parse(result);
     assert.equal(request.input, "users");
     const context = JSON.parse(request.action.split("\n")[1]);

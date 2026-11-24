@@ -1,4 +1,4 @@
-export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLElement, text: string) => void) => {
+export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLElement, text: string, range: Range) => void) => {
     const doc = messages.ownerDocument;
     const host = messages.parentElement;
     const controller = new AbortController();
@@ -19,7 +19,7 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
         if (!message || message.classList.contains("agent-chat__msg--editing") ||
             !message.querySelector(".agent-chat__msg-actions")) return;
         const text = selection.toString();
-        if (text.trim()) return {message, text, range};
+        if (text.trim()) return {message, text, range: range.cloneRange()};
     };
     const capture = {...options, capture: true};
     let shown: ReturnType<typeof selectedPassage>;
@@ -102,7 +102,7 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
     button.addEventListener("click", () => {
         const passage = shown;
         hide();
-        if (passage && messages.contains(passage.message)) quote(passage.message, passage.text);
+        if (passage && messages.contains(passage.message)) quote(passage.message, passage.text, passage.range);
     }, options);
     doc.addEventListener("scroll", hide, {...options, capture: true});
     doc.defaultView.addEventListener("resize", hide, options);

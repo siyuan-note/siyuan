@@ -48,7 +48,7 @@ const browserCases = async (source: string) => {
     };
     const api = new Function(...Object.keys(dependencies), source +
         "\nreturn {hintSkill, mountLiteSlashMenu, normalizeAgentTokens, expandAgentTokenSelection, deleteAgentToken, " +
-        "AGENT_SKILL_SELECTOR, AGENT_QUOTE_SELECTOR, createAgentQuote, readAgentQuote, projectAgentQuotes, quotePreview, " +
+        "AGENT_SKILL_SELECTOR, AGENT_QUOTE_SELECTOR, createAgentQuote, readAgentQuote, projectAgentQuotes, quotePreview, rangeMarkdown, " +
         "Hint, isBuiltinSlashHint, bindComposerInput, applyPhrase, insertQuote};")(...Object.values(dependencies));
     const element = document.createElement("div");
     element.className = "protyle-hint fn__none";
@@ -239,10 +239,26 @@ const browserCases = async (source: string) => {
             check.ok(editor.contains(getSelection().anchorNode));
         }
     }
+    const note = document.createElement("div");
+    note.innerHTML = '<span data-type="s text" style="color:red">old</span> <span data-type="text" style="background-color:green">new</span>';
+    const noteRange = document.createRange();
+    noteRange.selectNodeContents(note);
+    const markdown = api.rangeMarkdown(lute, noteRange, note);
+    check.match(markdown, /~~old~~/);
+    check.match(markdown, /background-color:\s*green[^>]*>new<\/span>/);
+    const message = document.createElement("div");
+    message.innerHTML = "<del>older</del> <ins>newer</ins>";
+    const messageRange = document.createRange();
+    messageRange.setStart(message.firstElementChild.firstChild, 1);
+    messageRange.setEnd(message.lastElementChild.firstChild, 3);
+    const excerpt = api.rangeMarkdown(lute, messageRange, message);
+    check.equal(excerpt, "<del>lder</del> <ins>new</ins>");
+
     const quotes = [
-        {source: {kind: "selection", id: "note", endID: "note", start: 2, end: 6}, text: "a<&b"},
+        {source: {kind: "selection", id: "note", endID: "note", start: 2, end: 9}, text: "old new", markdown},
         {source: {kind: "assistant", sessionID: "chat", id: "reply", whole: true}, text: "Line one\nLine two"},
-        {source: {kind: "user", sessionID: "chat", id: "prompt", whole: false}, text: "excerpt"},
+        {source: {kind: "user", sessionID: "chat", id: "prompt", whole: false}, text: "lder new", markdown: excerpt},
+        {source: {kind: "user", sessionID: "chat", id: "plain", whole: false}, text: "a<&b"},
     ];
     editor.innerHTML = lute.SpinBlockDOM('<div data-node-id="20260921000000-abcdefg" data-type="NodeParagraph">' +
         '<div contenteditable="true">' + quotes.map(q => api.createAgentQuote(q)).join(" vs ") + "</div></div>");
@@ -256,9 +272,9 @@ const browserCases = async (source: string) => {
     const sent = lute.BlockDOM2StdMd(clone.innerHTML).replaceAll("\u200b", "").trim();
     check.equal(refs.length, 2);
     check.equal(refs[0].id, "note");
-    check.deepEqual(JSON.parse(refs[0].title), {startOffset: 2, endBlockID: "note", endOffset: 6, excerpt: "a<&b"});
+    check.deepEqual(JSON.parse(refs[0].title), {startOffset: 2, endBlockID: "note", endOffset: 9, excerpt: "old new"});
     check.equal(refs[1].messageID, "reply");
-    check.equal(api.quotePreview(sent, refs), "“a<&b” vs “Line one\nLine two” vs “excerpt”");
+    check.equal(api.quotePreview(sent, refs), "“" + markdown + "” vs “Line one\nLine two” vs “" + excerpt + "” vs “a<&b”");
     const spanning = document.createElement("div");
     spanning.innerHTML = api.createAgentQuote({text: "across cells", source: {
         kind: "selection", id: "first", endID: "last", start: 2, end: 4, startCell: 1, endCell: 3,
@@ -270,7 +286,7 @@ const browserCases = async (source: string) => {
         {startOffset: 2, endBlockID: "last", endOffset: 4, startCell: 1, endCell: 3, excerpt: "across cells"});
     select(marks[1].firstChild, 2);
     check.equal(deleteSkill(), true);
-    check.equal(editor.querySelectorAll(api.AGENT_QUOTE_SELECTOR).length, 2);
+    check.equal(editor.querySelectorAll(api.AGENT_QUOTE_SELECTOR).length, quotes.length - 1);
     editor.innerHTML = deletions.at(-1).before;
     api.normalizeAgentTokens(editor);
     check.deepEqual(Array.from(editor.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), quotes);
@@ -307,7 +323,7 @@ const browserCases = async (source: string) => {
     toolbar.range = undefined;
     check.equal(api.insertQuote(fragment, composer, instance, quotes[2], false), 3);
     check.ok(draft.contains(getSelection().anchorNode));
-    check.deepEqual(Array.from(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), quotes);
+    check.deepEqual(Array.from(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), quotes.slice(0, 3));
     return "Agent skill cases passed";
 };
 
@@ -340,6 +356,8 @@ test("mobile commands, atomic skills, inline quotes and phrase templates coexist
         ["fill", "getHTMLByData", "consumeRefBracketClose"].includes(member.name.getText(hint))).map(member => member.getText(hint)).join("\n");
     const source = transpileModule([read("../../../protyle/hint/builtinSlash.ts"),
         read("../../../protyle/hint/blockHintRange.ts"), read("agentHintState.ts"),
+        read("../../../ai/selectionMarkdown.ts"),
+        read("../../../protyle/util/clipboardData.ts"),
         read("agentQuote.ts"), read("agentSkill.ts"), read("../../../mobile/util/liteSlashMenu.ts"), composerSource,
         "class Hint {" + hintSource + "}",
         "const applyPhrase = (fragment, p, getBlockHTML, instruction) => ({" + phrase.getText(composer) + "}).applyPhrase(instruction);",

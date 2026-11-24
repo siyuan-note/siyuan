@@ -9,6 +9,7 @@ import type {AgentQuote} from "../layout/dock/agent/agentQuote";
 import type {Editor} from "../editor";
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
+import {rangeMarkdown} from "./selectionMarkdown";
 /// #if !MOBILE
 import {getDockByType} from "../layout/tabUtil";
 
@@ -114,7 +115,9 @@ export const quoteEditorSelection = async (editor: IProtyle, range: Range) => {
     try {
         const cellIndex = (part: typeof first) => part.editableElement.matches("th, td") ?
             Array.from(part.blockElement.querySelectorAll("th, td")).indexOf(part.editableElement) : undefined;
-        const quote: AgentQuote = {text, source: {kind: "selection", id: first.blockElement.dataset.nodeId,
+        const markdown = parts.map(part => rangeMarkdown(editor.lute, part.range, part.editableElement)).join("\n");
+        const quote: AgentQuote = {text, markdown: markdown.trim() !== text.trim() ? markdown : undefined,
+            source: {kind: "selection", id: first.blockElement.dataset.nodeId,
             endID: last.blockElement.dataset.nodeId, start: first.start, end: last.end,
             startCell: cellIndex(first), endCell: cellIndex(last)}};
         /// #if MOBILE

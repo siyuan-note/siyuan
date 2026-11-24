@@ -20,6 +20,7 @@ test("editor quotes reveal a floating agent once and report hidden insertions or
             insertBlockMentions() {},
             async insertQuote(quote: AgentQuote, inBackground: boolean) {
                 events.push([quote.text, inBackground]);
+                if (quote.text === "formatted") events.push(quote.markdown);
                 return canInsert ? ++count : undefined;
             },
         }},
@@ -48,6 +49,8 @@ test("editor quotes reveal a floating agent once and report hidden insertions or
             "../dialog/message": {showMessage: (message: string) => events.push(message)},
             "../protyle/util/compatibility": {isDisabledFeature: () => false},
             "../util/pathName": {isEncryptedBox: () => false},
+            "./selectionMarkdown": {rangeMarkdown: (_lute: unknown, range: Range) =>
+                range.toString() === "formatted" ? "~~formatted~~" : range.toString()},
             "../protyle/util/selection": {getBlockRanges: (_element: unknown, range: Range) => [{
                 range, blockElement: {dataset: {nodeId: "source"}},
                 editableElement: {matches: () => false}, start: 0, end: range.toString().length,
@@ -60,6 +63,7 @@ test("editor quotes reveal a floating agent once and report hidden insertions or
 
     await quote("first");
     await quote("visible");
+    await quote("formatted");
     dock.layout.element.style.opacity = "0";
     await quote("hover-hidden");
     active = false;
@@ -72,8 +76,8 @@ test("editor quotes reveal a floating agent once and report hidden insertions or
     await quote("dock unavailable");
     await methods.quoteEditorSelection(editor, {collapsed: true} as Range);
     assert.deepEqual(events, [
-        "reveal", ["first", false], ["visible", false],
-        ["hover-hidden", true], "Quotes: 3", ["closed", true], "Quotes: 4",
+        "reveal", ["first", false], ["visible", false], ["formatted", false], "~~formatted~~",
+        ["hover-hidden", true], "Quotes: 4", ["closed", true], "Quotes: 5",
         "reveal", ["first in another editor", false],
         ["insertion failed", false], "Could not quote", "Could not quote", "Could not quote",
     ]);

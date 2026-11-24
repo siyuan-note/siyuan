@@ -27,6 +27,7 @@ import {mountGroupedModelPicker} from "../config/tabs/ai/aiProviderUi";
 import {toggleMenu} from "../menus/menuToggle";
 import {Menu} from "../plugin/Menu";
 import {getReasoningEffortOptions, type ReasoningEffort} from "./reasoningEffort";
+import {rangeMarkdown} from "./selectionMarkdown";
 
 type TAIEditorSourceKind = "selection" | "blocks" | "writing";
 type TAIEditorTaskStatus = "streaming" | "done" | "stopped" | "error";
@@ -148,28 +149,6 @@ const getSourceConflict = (task: EditorTarget) => {
     return {missing, changed};
 };
 
-const isMarkdownInlineElement = (element: Element) => {
-    return element.matches("span[data-type], code, strong, em, b, i, s, del, u, mark, sub, sup, kbd, a");
-};
-
-const sourcePartMarkdown = (protyle: IProtyle, range: Range, editableElement: Element) => {
-    const text = range.toString().replaceAll(Constants.ZWSP, "");
-    let fragment: Node = range.cloneContents();
-    let ancestor = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE ?
-        range.commonAncestorContainer as Element : range.commonAncestorContainer.parentElement;
-    while (ancestor && ancestor !== editableElement && editableElement.contains(ancestor)) {
-        if (isMarkdownInlineElement(ancestor)) {
-            const clone = ancestor.cloneNode(false) as Element;
-            clone.append(fragment);
-            fragment = clone;
-        }
-        ancestor = ancestor.parentElement;
-    }
-    const element = document.createElement("div");
-    element.append(fragment);
-    return protyle.lute.BlockDOM2StdMd(element.innerHTML).trimEnd() || text;
-};
-
 const selectionContext = (part: IBlockRange, before: boolean) => {
     const range = part.range.cloneRange();
     range.selectNodeContents(part.editableElement);
@@ -208,7 +187,7 @@ const buildSelectionSource = (protyle: IProtyle, range: Range, action: string): 
         surroundings: {before: selectionContext(blockRanges[0], true), after: selectionContext(blockRanges[blockRanges.length - 1], false)},
         parts,
         ids: [],
-        input: blockRanges.map(item => sourcePartMarkdown(protyle, item.range, item.editableElement))
+        input: blockRanges.map(item => rangeMarkdown(protyle.lute, item.range, item.editableElement))
             .filter(Boolean).join("\n\n"),
         action,
         insertSupported: !protyle.disabled,

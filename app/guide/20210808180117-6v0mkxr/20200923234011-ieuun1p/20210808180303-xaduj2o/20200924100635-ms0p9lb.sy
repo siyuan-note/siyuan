@@ -224,6 +224,38 @@
 			]
 		},
 		{
+			"ID": "20261124191611-a6d0w2k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261124191611-a6d0w2k",
+				"updated": "20261124191611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, tap "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Add tag"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the document header to open the tag picker. A checkmark shows which tags are applied to the document. Tap "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Close"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " after adding tags."
+				}
+			]
+		},
+		{
 			"ID": "20261118205131-c06a361",
 			"Type": "NodeParagraph",
 			"Properties": {

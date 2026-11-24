@@ -2,7 +2,7 @@ import {openInputDialog} from "../../dialog/inputDialog";
 import {toggleMenu} from "../../menus/menuToggle";
 import {markMenuInnerScroll} from "../../menus/Menu";
 import {hasClosestByClassName} from "../util/hasClosest";
-import {getRandom} from "../../util/functions";
+import {getRandom, isMobile} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {uploadFiles} from "../upload";
 import {fetchPost} from "../../util/fetch";
@@ -827,11 +827,17 @@ export class Background {
             target: target,
             build: (_menu, session) => {
                 const menu = new Menu();
+                const mobile = isMobile();
+                const input = `<input class="b3-text-field ${mobile ? "fn__flex-1" : "fn__flex-shrink"}" placeholder="${window.siyuan.languages.tag}"/>`;
                 menu.addItem({
                     iconHTML: "",
                     type: "empty",
                     label: `<div class="fn__flex-column b3-menu__filter">
-            <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.tag}"/>
+            ${mobile ? `<div class="fn__flex fn__flex-shrink">
+                ${input}
+                <span class="fn__space"></span>
+                <button type="button" class="b3-button b3-button--cancel fn__flex-shrink" data-type="close">${window.siyuan.languages.close}</button>
+            </div>` : input}
             <div class="fn__hr"></div>
             <div class="b3-list fn__flex-1 b3-list--background">
                 <div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div>
@@ -871,6 +877,9 @@ export class Background {
                             renderTagList(html);
                         });
                         const inputElement = element.querySelector("input");
+                        element.querySelector('[data-type="close"]')?.addEventListener("click", () => {
+                            window.siyuan.menus.menu.closeSheet();
+                        });
                         const selectTag = (item?: HTMLElement) => {
                             if (!item || item.dataset.type === "new") {
                                 const tag = (item?.querySelector("mark").textContent || inputElement.value).trim();

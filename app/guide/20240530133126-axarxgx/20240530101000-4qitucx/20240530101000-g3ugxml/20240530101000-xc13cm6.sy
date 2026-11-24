@@ -233,6 +233,38 @@
 			]
 		},
 		{
+			"ID": "20261124191611-x4j8c1r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261124191611-x4j8c1r",
+				"updated": "20261124191611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "モバイルでは、ドキュメントのヘッダーにある "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "タグを追加"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をタップすると、タグ選択パネルが開きます。一覧にチェックマークが付いているタグは、すでにドキュメントに追加されています。追加が終わったら "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "閉じる"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " をタップします。"
+				}
+			]
+		},
+		{
 			"ID": "20261118205131-28a04da",
 			"Type": "NodeParagraph",
 			"Properties": {

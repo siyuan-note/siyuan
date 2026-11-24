@@ -224,6 +224,38 @@
 			]
 		},
 		{
+			"ID": "20261124191611-m3n9h5v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261124191611-m3n9h5v",
+				"updated": "20261124191611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在移动端，点击文档页头的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "添加标签"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 打开标签选择面板。候选列表中的勾选标记表示该标签已添加到文档。添加完毕后，点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "关闭"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
 			"ID": "20261118205131-bd54f93",
 			"Type": "NodeParagraph",
 			"Properties": {

@@ -5,7 +5,7 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
     const options = {signal: controller.signal};
     const button = doc.createElement("button");
     button.type = "button";
-    button.className = "b3-button b3-button--small b3-button--secondary agent-chat__selection-quote";
+    button.className = "b3-button b3-button--small b3-button--secondary b3-button--overlay agent-chat__selection-quote";
     button.textContent = window.siyuan.languages.agentQuoteText;
     const selectedPassage = () => {
         const selection = doc.getSelection();

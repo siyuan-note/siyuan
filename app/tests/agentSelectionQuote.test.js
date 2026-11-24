@@ -5,6 +5,7 @@ const {tmpdir} = require("node:os");
 const path = require("node:path");
 const {test} = require("node:test");
 const {promisify} = require("node:util");
+const sass = require("sass");
 const ts = require("typescript");
 
 function checkGestures(source) {
@@ -96,10 +97,60 @@ function checkGestures(source) {
     }
 }
 
-test("agent selection quotes wait for mouse or touch release and follow keyboard selections", async () => {
+async function checkAppearance(contents, css, themes, source) {
+    const assert = require("node:assert/strict");
+    await contents.insertCSS(css);
+    await contents.executeJavaScript(`(() => {
+        document.body.innerHTML = '<div style="position:relative"><main style="height:120px">' +
+            '<div class="agent-chat__msg" data-message-id="m"><div class="agent-chat__body">A quote</div>' +
+            '<div class="agent-chat__msg-actions"></div></div></main></div>';
+        window.siyuan = {languages: {agentQuoteText: "Quote text"}};
+        const mod = {};
+        new Function("exports", ${JSON.stringify(source)})(mod);
+        mod.bindSelectionQuote(document.querySelector("main"), () => {});
+        getSelection().selectAllChildren(document.querySelector(".agent-chat__body"));
+        document.dispatchEvent(new Event("selectionchange"));
+    })()`);
+    const debuggerSession = contents.debugger;
+    debuggerSession.attach("1.3");
+    try {
+        await debuggerSession.sendCommand("DOM.enable");
+        await debuggerSession.sendCommand("CSS.enable");
+        const {root} = await debuggerSession.sendCommand("DOM.getDocument", {depth: 0});
+        const {nodeId} = await debuggerSession.sendCommand("DOM.querySelector", {
+            nodeId: root.nodeId, selector: ".agent-chat__selection-quote",
+        });
+        const appearance = () => contents.executeJavaScript(`(() => {
+            const style = getComputedStyle(document.querySelector(".agent-chat__selection-quote"));
+            return {color: style.backgroundColor, layers: style.backgroundImage};
+        })()`);
+        for (const [theme, stylesheet] of Object.entries(themes)) {
+            const key = await contents.insertCSS(stylesheet);
+            await debuggerSession.sendCommand("CSS.forcePseudoState", {nodeId, forcedPseudoClasses: []});
+            const idle = await appearance();
+            assert.match(idle.color, /^rgb\(/, theme + ": resting background is opaque");
+            for (const state of [["hover"], ["focus", "focus-visible"]]) {
+                await debuggerSession.sendCommand("CSS.forcePseudoState", {nodeId, forcedPseudoClasses: state});
+                const active = await appearance();
+                assert.equal(active.color, idle.color, theme + ": opaque background stays visible");
+                assert.notEqual(active.layers, idle.layers, theme + ": interactive state adds contrast");
+            }
+            await contents.removeInsertedCSS(key);
+        }
+    } finally {
+        debuggerSession.detach();
+    }
+}
+
+test("agent selection quotes handle selection gestures and show opaque hover and focus states", async () => {
     const source = ts.transpileModule(readFileSync("src/layout/dock/agent/selectionQuote.ts", "utf8"), {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
     }).outputText;
+    const css = sass.compileString('@use "component/button"; @use "business/ai_agent";', {
+        loadPaths: ["src/assets/scss"],
+    }).css;
+    const themes = Object.fromEntries(["daylight", "midnight"].map(theme =>
+        [theme, readFileSync(path.join("appearance/themes", theme, "theme.css"), "utf8")]));
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-selection-quote-"));
     const script = path.join(temporary, "test.cjs");
     const renderer = `(() => {
@@ -115,6 +166,7 @@ test("agent selection quotes wait for mouse or touch release and follow keyboard
             await win.loadURL("data:text/html,<body></body>");
             const failure = await win.webContents.executeJavaScript(${JSON.stringify(renderer)});
             if (failure) throw new Error(failure);
+            await (${checkAppearance.toString()})(win.webContents, ${JSON.stringify(css)}, ${JSON.stringify(themes)}, ${JSON.stringify(source)});
             console.log("gestures passed");
             app.exit(0);
         }).catch(error => { console.error(error); app.exit(1); });`);

@@ -7,6 +7,7 @@ package api
 import (
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -475,8 +476,16 @@ func syncSourceDecisionFailure(c *gin.Context, err error) apicontract.Response[a
 }
 
 func performSyncFailure(c *gin.Context, err error) apicontract.Response[apicontract.Null] {
-	if c.GetHeader(syncNoticeHeader) == "1" && model.SyncErrorWasPushed(err) {
-		c.Header(syncNoticeHeader, "pushed")
+	if version := c.GetHeader(syncNoticeHeader); version == "1" || version == "2" {
+		notice, pushed := model.SyncErrorNoticeFor(err)
+		if version == "2" && notice.ID != "" {
+			// 同步向导通过私有响应头读取通知元数据，提示文案由 msg 承载。
+			c.Header(syncNoticeHeader, fmt.Sprintf("%s;%d;%d", notice.ID, notice.Code, notice.CloseTimeout))
+			return apicontract.Failure[apicontract.Null](-1, notice.Message)
+		}
+		if version == "1" && pushed {
+			c.Header(syncNoticeHeader, "pushed")
+		}
 	}
 	return apicontract.Failure[apicontract.Null](-1, err.Error())
 }

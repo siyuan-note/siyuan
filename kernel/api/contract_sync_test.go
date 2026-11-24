@@ -222,6 +222,16 @@ func TestAPIContractSyncFailuresPreserveLastSuccess(t *testing.T) {
 			if withoutOptIn.Body.String() != recorder.Body.String() {
 				t.Fatalf("opt-in changed the sync response: %s", withoutOptIn.Body.String())
 			}
+			withNoticeID := httptest.NewRecorder()
+			request = httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(entry.body))
+			request.Header.Set(syncNoticeHeader, "2")
+			engine.ServeHTTP(withNoticeID, request)
+			requireAPIContract(t, "POST", "/api/sync/performSync", withNoticeID)
+			notice := withNoticeID.Header().Get(syncNoticeHeader)
+			if !strings.HasPrefix(notice, "sync-notice-") || !strings.HasSuffix(notice, ";-1;0") ||
+				len(notice) != len("sync-notice-")+16+len(";-1;0") || withNoticeID.Body.String() != recorder.Body.String() {
+				t.Fatalf("unexpected sync notice response: %q %s", notice, withNoticeID.Body.String())
+			}
 			var response struct {
 				Code int
 				Msg  string
@@ -241,6 +251,33 @@ func TestAPIContractSyncFailuresPreserveLastSuccess(t *testing.T) {
 				t.Fatalf("unexpected sync status: %s (%v)", recorder.Body.String(), err)
 			}
 		})
+	}
+}
+
+func TestAPIContractSyncAdmissionNotice(t *testing.T) {
+	syncTestConfiguration(t)
+	langs := util.Langs
+	t.Cleanup(func() { util.Langs = langs })
+	const disabled = "Sync is disabled"
+	util.Langs = map[string]map[int]string{"en": {124: disabled}}
+	model.Conf.Sync.Load().Enabled = false
+	engine := gin.New()
+	engine.POST("/api/sync/performSync", performSync)
+	request := httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(`{}`))
+	request.Header.Set(syncNoticeHeader, "2")
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, request)
+	requireAPIContract(t, "POST", "/api/sync/performSync", recorder)
+	notice := recorder.Header().Get(syncNoticeHeader)
+	if !strings.HasPrefix(notice, "sync-notice-") || !strings.HasSuffix(notice, ";0;5000") {
+		t.Fatalf("unexpected admission notice: %q", notice)
+	}
+	var response struct {
+		Code int
+		Msg  string
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 || response.Msg != disabled {
+		t.Fatalf("unexpected admission failure: %s (%v)", recorder.Body.String(), err)
 	}
 }
 

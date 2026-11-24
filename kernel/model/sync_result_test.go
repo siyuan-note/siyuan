@@ -22,23 +22,27 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestSyncErrorWasPushed(t *testing.T) {
+func TestSyncErrorNoticeFor(t *testing.T) {
 	unknown := errors.New("asset recovery failed")
-	pushed := notifiedSyncError{errors.New("cloud unavailable")}
+	cloudNotice := SyncErrorNotice{ID: "cloud-notice", Message: "Cloud unavailable", Code: -1}
+	pushed := notifiedSyncError{errors.New("cloud unavailable"), cloudNotice}
+	canceled := notifiedSyncError{context.Canceled, SyncErrorNotice{ID: "cancellation-notice"}}
 	for _, test := range []struct {
-		name string
-		err  error
-		want bool
+		name   string
+		err    error
+		notice SyncErrorNotice
+		pushed bool
 	}{
-		{"unhandled", unknown, false},
-		{"pushed", errors.Join(pushed, nil), true},
-		{"cancellation without a notice", fmt.Errorf("upload: %w", context.Canceled), false},
-		{"pushed and notified cancellation", errors.Join(pushed, notifiedSyncError{context.Canceled}), true},
-		{"pushed and unhandled", errors.Join(pushed, unknown), false},
+		{"unhandled", unknown, SyncErrorNotice{}, false},
+		{"wrapped", fmt.Errorf("upload: %w", pushed), cloudNotice, true},
+		{"one notice covers joined errors", errors.Join(pushed, pushed), cloudNotice, true},
+		{"cancellation without a notice", context.Canceled, SyncErrorNotice{}, false},
+		{"multiple notices", errors.Join(pushed, canceled), SyncErrorNotice{}, true},
+		{"pushed and unhandled", errors.Join(pushed, unknown), SyncErrorNotice{}, false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if got := SyncErrorWasPushed(test.err); got != test.want {
-				t.Fatalf("unexpected sync notice for %v: got %t, want %t", test.err, got, test.want)
+			if notice, pushed := SyncErrorNoticeFor(test.err); notice != test.notice || pushed != test.pushed {
+				t.Fatalf("unexpected sync notice for %v: got %+v, pushed %t", test.err, notice, pushed)
 			}
 		})
 	}

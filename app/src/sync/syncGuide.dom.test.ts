@@ -166,7 +166,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 check.equal(buttons[1].isConnected, true);
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {upload: !mobile, source: "new-source", localID: "local", cloudID: "cloud"});
-                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "1");
+                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "2");
                 requests.shift().reply({code: -1, msg: "lock cloud repo failed", data: null});
                 await new Promise(resolve => setTimeout(resolve, 0));
                 check.deepEqual(messages, ["plsChoose"]);
@@ -216,7 +216,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
             } else {
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {});
-                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "1");
+                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "2");
                 const messageCount = messages.length;
                 requests.shift().reply({code: -1, msg: "context canceled", data: null});
                 await new Promise(resolve => setTimeout(resolve, 0));
@@ -226,7 +226,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 requests.shift().reply({data: {pending: false, source: "empty-source", localID: "local", cloudID: ""}});
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {upload: true, source: "empty-source", localID: "local", cloudID: ""});
-                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "1");
+                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "2");
                 requests.shift().reply({code: 2, msg: "", data: null});
                 await new Promise(resolve => setTimeout(resolve, 0));
                 check.equal(requests[0].url, "/api/sync/getSyncSourceState");
@@ -251,7 +251,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
             check.equal(requests.length, 1);
             check.equal(requests[0].url, "/api/sync/performSync");
             check.deepEqual(requests[0].data, {upload: !mobile});
-            check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "1");
+            check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "2");
             check.equal(manualConfirm.isConnected, false, "manual sync leaves the editor usable while the request is pending");
             requests.shift().reply({code: -1, msg: "Sync unavailable", data: {closeTimeout: 5000}});
             await new Promise(resolve => setTimeout(resolve, 0));

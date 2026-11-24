@@ -266,7 +266,7 @@ const requestSync = async (request: PerformSyncRequestInput) => {
     let code: number | undefined;
     await fetchPost("/api/sync/performSync", request, response => {
         code = response.code;
-    }, {[Constants.SIYUAN_SYNC_NOTICE_HEADER]: "1"});
+    }, {[Constants.SIYUAN_SYNC_NOTICE_HEADER]: "2"});
     return code;
 };
 

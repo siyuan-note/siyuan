@@ -333,8 +333,7 @@ func checkManualSync(exit bool, notCompleted error) error {
 		return nil
 	}
 	if notice != "" {
-		util.PushMsg(notice, 5000)
-		return notifiedSyncError{notCompleted}
+		return notifiedSyncError{notCompleted, pushSyncNotice(notice, 0, 5000)}
 	}
 	return notCompleted
 }

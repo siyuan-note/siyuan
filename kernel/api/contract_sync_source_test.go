@@ -62,7 +62,7 @@ func TestAPIContractSyncSourcePreviewFailure(t *testing.T) {
 			}))
 		recorder := httptest.NewRecorder()
 		request := httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(`{}`))
-		request.Header.Set(syncNoticeHeader, "1")
+		request.Header.Set(syncNoticeHeader, "2")
 		engine.ServeHTTP(recorder, request)
 		requireAPIContract(t, "POST", "/api/sync/performSync", recorder)
 		if notice := recorder.Header().Get(syncNoticeHeader); notice != "" {

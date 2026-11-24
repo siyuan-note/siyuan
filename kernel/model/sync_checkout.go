@@ -263,6 +263,9 @@ func (task *syncCheckoutTask) finish(repo *dejavu.Repo, syncErr *error) {
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
 		util.PushMsg(msg, 10000)
+		if msg != "" && allSyncErrorCauses(*syncErr, func(cause error) bool { return cause == context.Canceled }) {
+			*syncErr = notifiedSyncError{*syncErr}
+		}
 	}
 	close(task.done)
 	task.worker.Wait()

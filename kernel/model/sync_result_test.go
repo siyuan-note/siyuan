@@ -6,8 +6,10 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime/pprof"
@@ -19,6 +21,28 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestSyncErrorWasPushed(t *testing.T) {
+	unknown := errors.New("asset recovery failed")
+	pushed := notifiedSyncError{errors.New("cloud unavailable")}
+	for _, test := range []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{"unhandled", unknown, false},
+		{"pushed", errors.Join(pushed, nil), true},
+		{"cancellation without a notice", fmt.Errorf("upload: %w", context.Canceled), false},
+		{"pushed and notified cancellation", errors.Join(pushed, notifiedSyncError{context.Canceled}), true},
+		{"pushed and unhandled", errors.Join(pushed, unknown), false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := SyncErrorWasPushed(test.err); got != test.want {
+				t.Fatalf("unexpected sync notice for %v: got %t, want %t", test.err, got, test.want)
+			}
+		})
+	}
+}
 
 func TestSyncResultPersistenceAndLegacyConfiguration(t *testing.T) {
 	var legacy conf.Sync

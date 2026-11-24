@@ -152,8 +152,9 @@ func applySyncSourceDecision(context map[string]interface{}, decisions []SyncSou
 }
 
 // 预览失效由方向对话框就地处理，通知记录插件写入数据会使刚刷新的预览再次失效。
-func pushSyncSourceDecisionError(msg string, err error) {
-	if !errors.Is(err, dejavu.ErrSyncSourcePreviewChanged) {
-		util.PushErrMsg(msg, 0)
+func pushSyncSourceDecisionError(msg string, err error) error {
+	if errors.Is(err, dejavu.ErrSyncSourcePreviewChanged) {
+		return err
 	}
+	return pushSyncError(msg, err)
 }

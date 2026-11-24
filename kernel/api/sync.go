@@ -410,6 +410,8 @@ func getSyncSourceStateContract(c *gin.Context, _ apicontract.EmptyRequest) apic
 
 var performSync = contractHandler(apicontract.PerformSync, performSyncContract)
 
+const syncNoticeHeader = "X-Siyuan-Sync-Notice"
+
 func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest) (ret apicontract.Response[apicontract.Null]) {
 	confSyncSnapshot := model.Conf.LoadSync()
 
@@ -438,13 +440,13 @@ func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest)
 			err = model.SyncDataDownload(decision)
 		}
 		if err != nil {
-			return syncSourceDecisionFailure(err)
+			return syncSourceDecisionFailure(c, err)
 		}
 		return
 	}
 	if 3 != confSyncSnapshot.Mode {
 		if err := model.SyncData(true); err != nil {
-			return apicontract.Failure[apicontract.Null](-1, err.Error())
+			return performSyncFailure(c, err)
 		}
 		return
 	}
@@ -460,14 +462,21 @@ func performSyncContract(c *gin.Context, request apicontract.PerformSyncRequest)
 		err = model.SyncDataDownload()
 	}
 	if err != nil {
-		return apicontract.Failure[apicontract.Null](-1, err.Error())
+		return performSyncFailure(c, err)
 	}
 	return
 }
 
-func syncSourceDecisionFailure(err error) apicontract.Response[apicontract.Null] {
+func syncSourceDecisionFailure(c *gin.Context, err error) apicontract.Response[apicontract.Null] {
 	if errors.Is(err, dejavu.ErrSyncSourcePreviewChanged) {
 		return apicontract.Failure[apicontract.Null](2, "")
+	}
+	return performSyncFailure(c, err)
+}
+
+func performSyncFailure(c *gin.Context, err error) apicontract.Response[apicontract.Null] {
+	if c.GetHeader(syncNoticeHeader) == "1" && model.SyncErrorWasPushed(err) {
+		c.Header(syncNoticeHeader, "pushed")
 	}
 	return apicontract.Failure[apicontract.Null](-1, err.Error())
 }

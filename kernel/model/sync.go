@@ -316,15 +316,27 @@ func lockSyncRequest(state *syncRequestState) (unlock func(), ok bool) {
 // Explicit sync callers need the outcome of their own operation. In particular,
 // a direction and its source preview must be validated while holding the lock.
 func runManualSync(exit bool, notCompleted error, run func() error) error {
-	if !checkSync(false, exit, true) {
-		return notCompleted
+	if err := checkManualSync(exit, notCompleted); err != nil {
+		return err
 	}
 	lockSync()
 	defer unlockSync()
-	if !checkSync(false, exit, true) {
-		return notCompleted
+	if err := checkManualSync(exit, notCompleted); err != nil {
+		return err
 	}
 	return run()
+}
+
+func checkManualSync(exit bool, notCompleted error) error {
+	ok, notice := syncAdmission(false, exit, true)
+	if ok {
+		return nil
+	}
+	if notice != "" {
+		util.PushMsg(notice, 5000)
+		return notifiedSyncError{notCompleted}
+	}
+	return notCompleted
 }
 
 func syncData(exit, byHand bool) (err error) {
@@ -425,56 +437,64 @@ func finishSyncPerception(cloudPublished bool, err error, reconnect bool) {
 }
 
 func checkSync(boot, exit, byHand bool) bool {
+	ok, notice := syncAdmission(boot, exit, byHand)
+	if notice != "" {
+		util.PushMsg(notice, 5000)
+	}
+	return ok
+}
+
+func syncAdmission(boot, exit, byHand bool) (bool, string) {
 	if util.IsExiting.Load() {
-		return false
+		return false, ""
 	}
 	if !boot && !exit && !byHand && bootSyncScheduled.Load() {
-		return false
+		return false, ""
 	}
 	confSyncReadSnapshot := Conf.LoadSync()
 
 	if 2 == confSyncReadSnapshot.Mode && !boot && !exit && !byHand { // 手动模式下只有启动和退出进行同步
-		return false
+		return false, ""
 	}
 
 	if 3 == confSyncReadSnapshot.Mode && !byHand { // 完全手动模式下只有手动进行同步
-		return false
+		return false, ""
 	}
 
 	if !confSyncReadSnapshot.Enabled {
 		if byHand {
-			util.PushMsg(Conf.Language(124), 5000)
+			return false, Conf.Language(124)
 		}
-		return false
+		return false, ""
 	}
 
 	if conf.ProviderS3 != confSyncReadSnapshot.Provider && !cloud.IsValidCloudDirName(confSyncReadSnapshot.CloudName) {
 		if byHand {
-			util.PushMsg(Conf.Language(123), 5000)
+			return false, Conf.Language(123)
 		}
-		return false
+		return false, ""
 	}
 	if nil == Conf.GetUser() {
-		return false
+		return false, ""
 	}
 
 	switch confSyncReadSnapshot.Provider {
 	case conf.ProviderSiYuan:
 		if !IsSubscriber() {
 			UpdateSyncConf(func(s *conf.Sync) { s.Enabled = false })
-			return false
+			return false, ""
 		}
 	case conf.ProviderWebDAV, conf.ProviderS3, conf.ProviderLocal:
 		if !IsPaidUser() {
 			UpdateSyncConf(func(s *conf.Sync) { s.Enabled = false })
-			return false
+			return false, ""
 		}
 	}
 
 	if !byHand && !exit && notifyAutoSyncPaused() {
-		return false
+		return false, ""
 	}
-	return true
+	return true, ""
 }
 
 // incReindex 增量重建索引。

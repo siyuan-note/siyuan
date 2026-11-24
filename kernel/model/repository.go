@@ -2060,8 +2060,7 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 
 		msg := Conf.Language(26)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		err = errors.New(msg)
+		err = pushSyncError(msg, errors.New(msg))
 		return
 	}
 
@@ -2074,7 +2073,7 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 		msg := fmt.Sprintf("sync repo failed: %s", err)
 		logging.LogError(msg)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		err = pushSyncError(msg, err)
 		return
 	}
 
@@ -2109,7 +2108,7 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		err = pushSyncError(msg, err)
 		return
 	}
 
@@ -2130,7 +2129,7 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 		msg := formatSyncRepoErrorMsg(err)
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		pushSyncSourceDecisionError(msg, err)
+		err = pushSyncSourceDecisionError(msg, err)
 		return
 	}
 
@@ -2167,8 +2166,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 
 		msg := Conf.Language(26)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		err = errors.New(msg)
+		err = pushSyncError(msg, errors.New(msg))
 		return
 	}
 
@@ -2181,7 +2179,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 		msg := fmt.Sprintf("sync repo failed: %s", err)
 		logging.LogError(msg)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		err = pushSyncError(msg, err)
 		return
 	}
 
@@ -2213,7 +2211,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
 		if !errors.Is(err, context.Canceled) {
-			util.PushErrMsg(msg, 0)
+			err = pushSyncError(msg, err)
 		}
 		return
 	}
@@ -2234,7 +2232,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
 		if !errors.Is(err, context.Canceled) {
-			pushSyncSourceDecisionError(msg, err)
+			err = pushSyncSourceDecisionError(msg, err)
 		}
 		return
 	}
@@ -2413,8 +2411,7 @@ func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished
 
 		msg := Conf.Language(26)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		err = errors.New(msg)
+		err = pushSyncError(msg, errors.New(msg))
 		return
 	}
 
@@ -2428,7 +2425,7 @@ func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished
 		msg := fmt.Sprintf("sync repo failed: %s", err)
 		logging.LogError(msg)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		err = pushSyncError(msg, err)
 		return
 	}
 
@@ -2455,7 +2452,7 @@ func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
 		if !errors.Is(err, context.Canceled) && (1 > autoSyncErrCount.Load() || byHand) {
-			util.PushErrMsg(msg, 0)
+			err = pushSyncError(msg, err)
 		}
 		return
 	}
@@ -2492,7 +2489,7 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, inde
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
 		if !errors.Is(err, context.Canceled) && (1 > autoSyncErrCount.Load() || byHand) {
-			util.PushErrMsg(msg, 0)
+			err = pushSyncError(msg, err)
 		}
 		return
 	}

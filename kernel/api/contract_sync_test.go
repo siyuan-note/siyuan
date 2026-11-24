@@ -202,12 +202,26 @@ func TestAPIContractSyncFailuresPreserveLastSuccess(t *testing.T) {
 		{"bidirectional", 1, `{}`},
 		{"upload", 3, `{"upload":true}`},
 		{"download", 3, `{"upload":false}`},
+		{"source decision", 1, `{"upload":true,"source":"source","localID":"local","cloudID":"cloud"}`},
 	} {
 		t.Run(entry.name, func(t *testing.T) {
 			model.Conf.Sync.Load().Mode = entry.mode
 			recorder := httptest.NewRecorder()
-			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(entry.body)))
+			request := httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(entry.body))
+			request.Header.Set(syncNoticeHeader, "1")
+			engine.ServeHTTP(recorder, request)
 			requireAPIContract(t, "POST", "/api/sync/performSync", recorder)
+			if notice := recorder.Header().Get(syncNoticeHeader); notice != "pushed" {
+				t.Fatalf("missing kernel sync notice: %q", notice)
+			}
+			withoutOptIn := httptest.NewRecorder()
+			engine.ServeHTTP(withoutOptIn, httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(entry.body)))
+			if notice := withoutOptIn.Header().Get(syncNoticeHeader); notice != "" {
+				t.Fatalf("unexpected kernel sync notice without opt-in: %q", notice)
+			}
+			if withoutOptIn.Body.String() != recorder.Body.String() {
+				t.Fatalf("opt-in changed the sync response: %s", withoutOptIn.Body.String())
+			}
 			var response struct {
 				Code int
 				Msg  string

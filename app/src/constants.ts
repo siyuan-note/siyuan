@@ -60,6 +60,7 @@ export abstract class Constants {
     public static readonly SIYUAN_HOTKEY: string = "siyuan-hotkey";
     public static readonly SIYUAN_SYNC_APP_MENU: string = "siyuan-sync-app-menu";
     public static readonly SIYUAN_SYNC_MARKDOWN_KEYMAP: string = "siyuan-sync-markdown-keymap";
+    public static readonly SIYUAN_SYNC_NOTICE_HEADER: string = "X-Siyuan-Sync-Notice";
     public static readonly SIYUAN_INIT: string = "siyuan-init";
     public static readonly SIYUAN_READY_TO_SHOW: string = "siyuan-ready-to-show";
     public static readonly SIYUAN_SEND_WINDOWS: string = "siyuan-send-windows"; // 主窗口和各新窗口之间的通信

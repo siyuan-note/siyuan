@@ -17,10 +17,9 @@ const browserCases = async (sources: string[], styles: string[]) => {
         document.head.replaceChildren(style);
         for (const initializeKey of [false, true]) {
             document.body.innerHTML = "";
-            const requests: {url: string, data: unknown, process?: boolean, reply: (response: unknown) => void}[] = [];
+            const requests: {url: string, data: unknown, headers?: Record<string, string>, reply: (response: unknown) => void}[] = [];
             const confirmations: (() => void)[] = [];
 			const messages: string[] = [];
-            let lastMessageTimeout: number | undefined;
             const config = {readonly: false, sync: {provider: 0, enabled: false, cloudName: "main", mode: 0},
                 repo: {key: initializeKey ? "" : "fixture-key"}};
             class Dialog {
@@ -45,22 +44,25 @@ const browserCases = async (sources: string[], styles: string[]) => {
             }
             const dependencies: Record<string, unknown> = {
                 "../dialog/adaptiveDialog": {AdaptiveDialog: Dialog},
-                "../dialog/message": {showMessage: (message: string, timeout?: number) => {
-                    messages.push(message);
-                    lastMessageTimeout = timeout;
-                }},
+                "../dialog/message": {showMessage: (message: string) => messages.push(message)},
                 "../util/escape": {escapeHtml: (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")},
                 "../util/needSubscribe": {needSubscribe: () => false, isPaidUser: () => true},
                 "./checkoutProgress": {openSyncCheckoutProgress: () => false},
                 "../util/functions": {isMobile: () => !!mobile},
-                "../constants": {Constants: {DIALOG_SYNCCHOOSEDIR: "choose-dir", DIALOG_SETPASSWORD: "set-password"}},
+                "../constants": {Constants: {DIALOG_SYNCCHOOSEDIR: "choose-dir", DIALOG_SETPASSWORD: "set-password",
+                    SIYUAN_SYNC_NOTICE_HEADER: "X-Siyuan-Sync-Notice"}},
                 "../util/hostCapabilities": {sanitizeKernelHTML: (value: string) => value},
                 "../dialog/processSystem": {processSync() {}},
                 "../dialog/confirmDialog": {confirmDialog: ({confirm}: {confirm: () => void}) =>
                     confirmations.push(confirm)},
-                "../util/fetch": {fetchPost: (url: string, data: unknown, reply: (response: unknown) => void) =>
-                    requests.push({url, data, reply}), fetchSyncPost: (url: string, data: unknown, _headers: unknown, process = true) =>
-                    new Promise(resolve => requests.push({url, data, process, reply: resolve}))},
+                "../util/fetch": {
+                    fetchPost: (url: string, data: unknown, reply: (response: unknown) => void, headers: Record<string, string>) =>
+                        new Promise<void>(resolve => requests.push({url, data, headers, reply: (response: {code?: number}) => {
+                            if (response.code >= 0 || typeof response.code === "undefined") reply(response);
+                            resolve();
+                        }})),
+                    fetchSyncPost: (url: string, data: unknown) => new Promise(resolve => requests.push({url, data, reply: resolve})),
+                },
                 "../config/util/configApi": {config: {set: (name: string, value: unknown, applied: () => void) =>
                     new Promise<void>((resolve, reject) => {
                         requests.push({url: "/api/setting/patch", data: {[name]: value}, reply: (response: {code: number}) => {
@@ -164,7 +166,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 check.equal(buttons[1].isConnected, true);
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {upload: !mobile, source: "new-source", localID: "local", cloudID: "cloud"});
-                check.equal(requests[0].process, false);
+                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "1");
                 requests.shift().reply({code: -1, msg: "lock cloud repo failed", data: null});
                 await new Promise(resolve => setTimeout(resolve, 0));
                 check.deepEqual(messages, ["plsChoose"]);
@@ -214,7 +216,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
             } else {
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {});
-                check.equal(requests[0].process, false);
+                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "1");
                 const messageCount = messages.length;
                 requests.shift().reply({code: -1, msg: "context canceled", data: null});
                 await new Promise(resolve => setTimeout(resolve, 0));
@@ -224,7 +226,7 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 requests.shift().reply({data: {pending: false, source: "empty-source", localID: "local", cloudID: ""}});
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {upload: true, source: "empty-source", localID: "local", cloudID: ""});
-                check.equal(requests[0].process, false);
+                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "1");
                 requests.shift().reply({code: 2, msg: "", data: null});
                 await new Promise(resolve => setTimeout(resolve, 0));
                 check.equal(requests[0].url, "/api/sync/getSyncSourceState");
@@ -249,12 +251,11 @@ const browserCases = async (sources: string[], styles: string[]) => {
             check.equal(requests.length, 1);
             check.equal(requests[0].url, "/api/sync/performSync");
             check.deepEqual(requests[0].data, {upload: !mobile});
-            check.equal(requests[0].process, false);
+            check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "1");
             check.equal(manualConfirm.isConnected, false, "manual sync leaves the editor usable while the request is pending");
             requests.shift().reply({code: -1, msg: "Sync unavailable", data: {closeTimeout: 5000}});
             await new Promise(resolve => setTimeout(resolve, 0));
-            check.equal(messages.at(-1), "Sync unavailable");
-            check.equal(lastMessageTimeout, 5000);
+            check.equal(manualConfirm.isConnected, false);
         }
     }
     return "Sync setup directory cases passed";

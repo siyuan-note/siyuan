@@ -263,16 +263,11 @@ export const syncGuide = (app?: App, openSettings = () => openSyncSetting(app)) 
 };
 
 const requestSync = async (request: PerformSyncRequestInput) => {
-    try {
-        // 同步状态和执行错误由内核推送，接口拒绝请求时可附带单独的提示时长。
-        const response = await fetchSyncPost("/api/sync/performSync", request, undefined, false);
-        if (response.code === -1 && response.data) {
-            showMessage(response.msg, response.data.closeTimeout, "error");
-        }
-        return response;
-    } catch (error) {
-        console.warn("Sync request failed", error);
-    }
+    let code: number | undefined;
+    await fetchPost("/api/sync/performSync", request, response => {
+        code = response.code;
+    }, {[Constants.SIYUAN_SYNC_NOTICE_HEADER]: "1"});
+    return code;
 };
 
 const syncNow = () => {
@@ -280,7 +275,7 @@ const syncNow = () => {
         if (response.data.source && !response.data.cloudID) {
             void requestSync({upload: true, source: response.data.source,
                 localID: response.data.localID, cloudID: ""}).then(result => {
-                if (result?.code === 2) chooseSyncDirection(response.data, true);
+                if (result === 2) chooseSyncDirection(response.data, true);
             });
             return;
         }
@@ -386,14 +381,14 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState, refr
             return;
         }
         void manualDialog.runPending(async () => {
-            const response = await requestSync({
+            const code = await requestSync({
                 upload, source: state.source, localID: state.localID, cloudID: state.cloudID,
             });
-            if (response?.code === 2) {
+            if (code === 2) {
                 await refreshPreview();
                 return false;
             }
-            return response?.code === 0;
+            return code === 0;
         });
     });
     if (refresh) {

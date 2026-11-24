@@ -15,7 +15,9 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
     const timeouts: number[] = [];
     const notifications: unknown[][] = [];
     const scheduled: unknown[][] = [];
+    const timers: {callback: () => void; delay: number}[] = [];
     let kernelChecks = 0;
+    let reloads = 0;
     const exports: {
         fetchPost?: (...args: any[]) => Promise<void>;
         fetchSyncPost?: (...args: any[]) => Promise<IWebSocketData>;
@@ -31,7 +33,7 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
                 case "../template/http": return {beginTemplateHTTPRequest: () => templateRequest,
                     getTemplateHTTPWindow: () => ({app: "app", session: "main"})};
                 case "../protyle/render/av/automaticHTTP": return {scheduleAutomaticHTTP: (jobs: unknown[]) => scheduled.push(jobs)};
-                case "../constants": return {Constants: {SIYUAN_QUIT: "quit"}};
+                case "../constants": return {Constants: {SIYUAN_QUIT: "quit", SIYUAN_SYNC_NOTICE_HEADER: "X-Siyuan-Sync-Notice"}};
                 case "electron": return {ipcRenderer: {send: (...args: unknown[]) => sends.push(args)}};
                 case "./processMessage": return {processMessage: processResponse};
                 case "./kernelFault": return {kernelError: () => { kernelChecks++; }};
@@ -49,12 +51,15 @@ const loadFetchPost = (fetchImplementation: typeof fetch = () => new Promise(() 
         },
         fetch: fetchImplementation,
         FormData,
+        WebSocket: {OPEN: 1},
+        setTimeout: (callback: () => void, delay: number) => timers.push({callback, delay}),
         location: {port: "6806"},
         console: {warn: () => {}},
-        window: {siyuan: {reqIds: {}, ws: interactive ? {ws: {}} : undefined, languages: {transactionSaveUnconfirmed: "Save unconfirmed"}}},
+        window: {location: {reload: () => reloads++}, siyuan: {reqIds: {}, ws: interactive ? {ws: {readyState: 1}} : undefined,
+            languages: {transactionSaveUnconfirmed: "Save unconfirmed"}}},
     });
-    return {fetchPost: exports.fetchPost, fetchSyncPost: exports.fetchSyncPost, sends, timeouts, notifications, scheduled,
-        kernelChecks: () => kernelChecks};
+    return {fetchPost: exports.fetchPost, fetchSyncPost: exports.fetchSyncPost, sends, timeouts, notifications, scheduled, timers,
+        kernelChecks: () => kernelChecks, reloads: () => reloads};
 };
 
 it("editing transport attaches the live main window and schedules HTTP only after acknowledging the save", async () => {
@@ -139,6 +144,60 @@ it("keeps positive business errors in the callback and filters negative errors",
         const received: IWebSocketData[] = [];
         await fetchPost("/api/block/getBlockInfo", {id: "id"}, (response: IWebSocketData) => received.push(response));
         assert.deepEqual(received, code < 0 ? [] : [payload]);
+    }
+});
+
+it("processes sync admission errors even when their response data is null", async () => {
+    const processed: IWebSocketData[] = [];
+    const {fetchPost} = loadFetchPost(async () => new Response(JSON.stringify({
+        code: -1, msg: "Finish recovering imported data before syncing", data: null,
+    }), {headers: {"Content-Type": "application/json"}}), response => {
+        processed.push(response);
+        return false;
+    });
+    await fetchPost("/api/sync/performSync", {}, () => assert.fail("rejected sync reached the success callback"),
+        {"X-Siyuan-Sync-Notice": "1"});
+    assert.deepEqual(processed, [{code: -1, msg: "Finish recovering imported data before syncing", data: null}]);
+});
+
+it("reloads after the sync request encounters an expired session", async () => {
+    const processed: IWebSocketData[] = [];
+    const {fetchPost, reloads, timers} = loadFetchPost(async () => new Response(null, {
+        status: 401, statusText: "Unauthorized",
+    }), response => {
+        processed.push(response);
+        return false;
+    });
+    await fetchPost("/api/sync/performSync", {}, () => assert.fail("unauthorized sync reached the success callback"),
+        {"X-Siyuan-Sync-Notice": "1"});
+    assert.equal(processed.length, 1);
+    assert.equal(processed[0].code, -401);
+    assert.equal(processed[0].msg, "Unauthorized");
+    assert.deepEqual(timers.map(timer => timer.delay), [3000]);
+    assert.equal(reloads(), 0);
+    timers[0].callback();
+    assert.equal(reloads(), 1);
+});
+
+it("deduplicates sync errors only when the matching request can receive the kernel notice", async () => {
+    const payload: {code: number; msg: string; data: null} = {code: -1, msg: "Sync failed", data: null};
+    const noticeHeader = "X-Siyuan-Sync-Notice";
+    for (const {notice, interactive, optIn, expected} of [
+        {notice: "pushed", interactive: true, optIn: true, expected: []},
+        {notice: "pushed", interactive: false, optIn: true, expected: [payload]},
+        {notice: "pushed", interactive: true, optIn: false, expected: [payload]},
+        {notice: "unknown", interactive: true, optIn: true, expected: [payload]},
+    ]) {
+        const processed: IWebSocketData[] = [];
+        const {fetchPost} = loadFetchPost(async () => new Response(JSON.stringify(payload), {
+            headers: {"Content-Type": "application/json", [noticeHeader]: notice},
+        }), response => {
+            processed.push(response);
+            return false;
+        }, undefined, interactive);
+        await fetchPost("/api/sync/performSync", {}, () => assert.fail("failed sync reached the success callback"),
+            optIn ? {[noticeHeader]: "1"} : undefined);
+        assert.deepEqual(processed, expected, `${notice} with socket ${interactive} and opt-in ${optIn}`);
     }
 });
 

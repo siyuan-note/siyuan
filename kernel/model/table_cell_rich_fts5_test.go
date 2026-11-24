@@ -12,10 +12,107 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAutoSpacePersistsRichTableCells(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	paragraph := tree.Root.FirstChild
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("正文SiYuan")})
+	paragraphID := paragraph.ID
+	table := parse.Parse("", []byte("| 表头SiYuan | Inline | Unchanged |\n| --- | --- | --- |\n| rich | 单元格SiYuan | rich |"), util.NewLute().ParseOptions).Root.FirstChild
+	tableID := ast.NewNodeID()
+	table.ID = tableID
+	table.SetIALAttr("id", tableID)
+	table.LastChild.SetIALAttr("style", "height: 80px;")
+	table.LastChild.FirstChild.SetIALAttr("style", "text-align: right;")
+	const source = "- [x] 列表SiYuan\n  - **中文SiYuan** [链接SiYuan](https://example.com/SiYuan)\n\n> 引述SiYuan\n\n" +
+		"行内`中文SiYuan`示例\n\n````go\n中文SiYuan\n```\n````\n" +
+		`{: id="20260921000000-code001" linewrap="false" linenumber="true"}` + "\n\n$$\nx^2\n$$\n\n![图](assets/example.png)\n\n" +
+		`<span data-type="custom_symble_strong_CJK_rectangle_yin" style="--custom-symble-strong: #abc;">样式SiYuan</span>`
+	const unchanged = "- only English\n- second"
+	table.LastChild.FirstChild.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: source}
+	table.LastChild.LastChild.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: unchanged}
+	tree.Root.AppendChild(table)
+	if err = treenode.RefreshTableCellRichProjection(tree.Root); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+
+	var formatted string
+	for pass := range 2 {
+		if err = AutoSpace(tree.ID); err != nil {
+			t.Fatal(err)
+		}
+		saved, err := filesys.LoadTree(tree.Box, tree.Path, util.NewLute())
+		if err != nil {
+			t.Fatal(err)
+		}
+		table := treenode.GetNodeInTree(saved, tableID)
+		paragraph := treenode.GetNodeInTree(saved, paragraphID)
+		if paragraph == nil || !strings.Contains(paragraph.Text(), "正文 SiYuan") || table == nil {
+			t.Fatal("document text or block identities changed unexpectedly")
+		}
+		row := table.LastChild
+		cell := row.FirstChild
+		if row.IALAttr("style") != "height: 80px;" || cell.IALAttr("style") != "text-align: right;" ||
+			table.IALAttr(treenode.TableCellRichTableAttribute) != "1" {
+			t.Fatal("table, row, or cell properties changed")
+		}
+		if !strings.Contains(table.FirstChild.FirstChild.FirstChild.Text(), "表头 SiYuan") ||
+			!strings.Contains(cell.Next.Text(), "单元格 SiYuan") {
+			t.Fatal("ordinary table cells were not formatted")
+		}
+		if cell.TableCellRich == nil || row.LastChild.TableCellRich == nil || row.LastChild.TableCellRich.Content != unchanged {
+			t.Fatal("rich cell source or unmodified fragment changed unexpectedly")
+		}
+		for _, want := range []string{"列表 SiYuan", "中文 SiYuan", "链接 SiYuan", "引述 SiYuan", "行内 中文SiYuan 示例", "样式 SiYuan"} {
+			if !strings.Contains(cell.Text(), want) {
+				t.Errorf("rich cell projection is missing %q: %s", want, cell.Text())
+			}
+		}
+		fragment, err := av.ParseTableCellRich(cell.TableCellRich)
+		if err != nil {
+			t.Fatal(err)
+		}
+		list := fragment.Root.ChildByType(ast.NodeList)
+		code := fragment.Root.ChildByType(ast.NodeCodeBlock)
+		math := fragment.Root.ChildByType(ast.NodeMathBlock)
+		if list == nil || !list.FirstChild.ListData.Checked || list.FirstChild.ChildByType(ast.NodeList) == nil ||
+			fragment.Root.ChildByType(ast.NodeBlockquote) == nil ||
+			math == nil || math.ChildByType(ast.NodeMathBlockContent).TokensStr() != "x^2" ||
+			code == nil || code.ChildByType(ast.NodeCodeBlockCode).TokensStr() != "中文SiYuan\n```\n" ||
+			code.IALAttr("linewrap") != "false" || code.IALAttr("linenumber") != "true" ||
+			!strings.Contains(cell.TableCellRich.Content, "https://example.com/SiYuan") ||
+			!strings.Contains(cell.TableCellRich.Content, "assets/example.png") {
+			t.Fatalf("rich cell structure, code, math, or targets changed: %s", cell.TableCellRich.Content)
+		}
+		var strong, styled bool
+		for _, mark := range fragment.Root.ChildrenByType(ast.NodeTextMark) {
+			strong = strong || mark.IsTextMarkType("strong") && mark.TextMarkTextContent == "中文 SiYuan"
+			styled = styled || mark.IsTextMarkType("custom_symble_strong_CJK_rectangle_yin") &&
+				mark.TextMarkTextContent == "样式 SiYuan" && mark.IALAttr("style") == "--custom-symble-strong: #abc;"
+		}
+		if !strong || !styled {
+			t.Fatal("rich cell inline formatting changed")
+		}
+		if pass > 0 && cell.TableCellRich.Content != formatted {
+			t.Fatalf("a second pass changed the rich cell:\n%s\n%s", formatted, cell.TableCellRich.Content)
+		}
+		formatted = cell.TableCellRich.Content
+	}
+}
 
 func TestTableCellRichUpgradeUndoRedo(t *testing.T) {
 	fixture := setupStructureTransactionTest(t)

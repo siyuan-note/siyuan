@@ -12,6 +12,8 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -29,6 +31,9 @@ func AutoSpace(rootID string) (err error) {
 
 	generateOpTypeHistory(tree, HistoryOpFormat)
 	newTree := autoSpaceTree(tree)
+	if err = autoSpaceRichTableCells(newTree.Root); err != nil {
+		return
+	}
 	err = writeTreeUpsertQueue(newTree)
 	if err != nil {
 		return
@@ -36,6 +41,29 @@ func AutoSpace(rootID string) (err error) {
 	invalidateDocumentHistory(newTree.ID)
 	logging.LogInfof("formatted tree [%s]", rootID)
 	util.RandomSleep(500, 700)
+	return
+}
+
+func autoSpaceRichTableCells(root *ast.Node) (err error) {
+	ast.Walk(root, func(cell *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || cell.TableCellRich == nil {
+			return ast.WalkContinue
+		}
+
+		var content string
+		if content, err = av.AutoSpaceTableCellRich(cell.TableCellRich); err != nil {
+			return ast.WalkStop
+		}
+		if content != cell.TableCellRich.Content {
+			rich := *cell.TableCellRich
+			rich.Content = content
+			cell.TableCellRich = &rich
+			if err = treenode.RefreshTableCellRichProjection(cell); err != nil {
+				return ast.WalkStop
+			}
+		}
+		return ast.WalkSkipChildren
+	})
 	return
 }
 

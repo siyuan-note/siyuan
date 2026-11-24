@@ -138,10 +138,23 @@ const browserCases = async (sources: string[]) => {
     const flashcard = document.querySelector<HTMLElement>(".mobile-bottom-sheet-dialog");
     flashcard.dataset.key = "dialog-opencard";
     const flashcardPanel = flashcard.querySelector<HTMLElement>(".mobile-bottom-sheet");
+    flashcardPanel.querySelector(".b3-dialog__body").innerHTML = `<div class="card__main" style="height:100%">
+<div class="card__block protyle fn__flex-1"><div class="protyle-content">Card</div></div>
+<div class="card__action"><button class="b3-button">Rate</button></div></div>`;
     check.equal(getComputedStyle(flashcardPanel).paddingBottom, "48px");
     document.body.classList.add("mobile-keyboard--open");
     check.equal(getComputedStyle(flashcardPanel).paddingBottom, "0px",
         "flashcard ratings do not reserve the navigation area above the keyboard");
+    document.body.insertAdjacentHTML("beforeend", '<div id="keyboardToolbar" style="position:fixed;top:450px;height:48px;width:100%"></div>');
+    const flashcardLayout = dependencies.bindMobileSheetLayout(flashcard.querySelector(".b3-dialog"), flashcardPanel,
+        {initiallyExpanded: true});
+    const editor = flashcardPanel.querySelector<HTMLElement>(".card__block");
+    const rate = flashcardPanel.querySelector("button");
+    const gap = () => flashcardPanel.getBoundingClientRect().bottom - rate.getBoundingClientRect().bottom;
+    const normalGap = gap();
+    dependencies.getMobileToolbarPaddingElement({element: editor})?.style.setProperty("padding-bottom", "48px");
+    check.equal(gap(), normalGap, "the flashcard drawer already positions its ratings above the keyboard toolbar");
+    flashcardLayout.dispose();
     flashcard.removeAttribute("data-key");
     check.equal(getComputedStyle(flashcardPanel).paddingBottom, "48px");
     flashcard.dataset.key = "dialog-opencard";
@@ -308,7 +321,7 @@ test("real sheet geometry preserves its selected height, safe areas and guarded 
     // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
     timeout: 45000,
 }, async () => {
-    const sources = ["protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu", "mobile/util/keyboardSheetState",
+    const sources = ["protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu", "protyle/lite/mobileToolbar", "mobile/util/keyboardSheetState",
         "mobile/util/mobileSheetGesture", "mobile/util/mobileSheetLayout", "mobile/util/bindBottomSheetDrag",
         "mobile/util/bindBottomSheetDialog"].map(id => transpileModule(
         readFileSync(`src/${id}.ts`, "utf8"), {

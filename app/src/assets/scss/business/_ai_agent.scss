@@ -265,7 +265,9 @@
 }
 
 .agent-chat__selection-quote {
-  position: fixed;
+  position: absolute;
+  max-width: 100%;
+  z-index: 1;
 }
 
 .agent-chat__msg-time--ai {

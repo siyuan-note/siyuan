@@ -8,12 +8,17 @@ const {promisify} = require("node:util");
 const ts = require("typescript");
 
 function checkGestures(source) {
-    document.body.innerHTML = '<main><div class="agent-chat__msg" data-message-id="m"><div class="agent-chat__body">alpha bravo charlie</div><div class="agent-chat__msg-actions"></div></div></main>';
-    window.siyuan = {languages: {agentQuoteText: "Quote text"}, zIndex: 1};
+    document.body.innerHTML = "<style>.agent-chat__selection-quote {position: absolute}</style>" +
+        '<aside style="position: absolute; top: 40px; left: 360px; width: 220px">' +
+        '<div style="position: relative"><main style="height: 120px; overflow: auto">' +
+        '<div class="agent-chat__msg" data-message-id="m"><div class="agent-chat__body">alpha bravo charlie</div>' +
+        '<div class="agent-chat__msg-actions"></div></div></main></div></aside>';
+    window.siyuan = {languages: {agentQuoteText: "Quote text"}};
+    const panel = document.querySelector("aside");
     const messages = document.querySelector("main");
     const body = messages.querySelector(".agent-chat__body");
     const mod = {};
-    new Function("exports", "require", source)(mod, () => ({getTopBarHeight: () => 0, setPosition() {}}));
+    new Function("exports", source)(mod);
     let quoted;
     const dispose = mod.bindSelectionQuote(messages, (msg, text) => { quoted = text; });
     const button = () => document.querySelector(".agent-chat__selection-quote");
@@ -64,6 +69,12 @@ function checkGestures(source) {
         touch(document, "touchend");
         equal(!!button(), false, "collapsed selection");
         select(0, 5);
+        const visible = button().getBoundingClientRect();
+        equal(panel.contains(document.elementFromPoint(visible.left + 1, visible.top + 1)), true, "hover stays in the panel");
+        equal(panel.contains(button()), true, "quote button belongs to the panel");
+        panel.style.transform = "translateX(300px)";
+        equal(button().getBoundingClientRect().left, visible.left + 300, "quote button follows the collapsing panel");
+        panel.style.transform = "";
         quote("keyboard selection", "alpha");
     } finally {
         dispose();

@@ -1,8 +1,6 @@
-import {getTopBarHeight} from "../../../layout/getTopBarHeight";
-import {setPosition} from "../../../util/setPosition";
-
 export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLElement, text: string) => void) => {
     const doc = messages.ownerDocument;
+    const host = messages.parentElement;
     const controller = new AbortController();
     const options = {signal: controller.signal};
     const button = doc.createElement("button");
@@ -33,16 +31,17 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
         if (!passage) return hide();
         const rect = passage.range.getBoundingClientRect();
         const bounds = messages.getBoundingClientRect();
-        if (!rect.width || rect.bottom <= bounds.top || rect.top >= bounds.bottom) return hide();
+        if (!rect.width || !bounds.width || !bounds.height || rect.bottom <= bounds.top || rect.top >= bounds.bottom) return hide();
         if (!button.isConnected) {
-            button.style.zIndex = (++window.siyuan.zIndex).toString();
-            doc.body.appendChild(button);
+            host.appendChild(button);
         }
+        const origin = host.getBoundingClientRect();
         const gap = 4;
         const above = rect.top - button.offsetHeight - gap;
-        const top = above >= Math.max(bounds.top, getTopBarHeight()) ? above : Math.min(bounds.bottom, rect.bottom) + gap;
+        const top = above >= bounds.top ? above : Math.max(bounds.top, Math.min(rect.bottom + gap, bounds.bottom - button.offsetHeight));
         const left = Math.max(bounds.left, Math.min(rect.left + (rect.width - button.offsetWidth) / 2, bounds.right - button.offsetWidth));
-        setPosition(button, left, top, rect.height + 2 * gap);
+        button.style.top = top - origin.top + "px";
+        button.style.left = left - origin.left + "px";
     };
     messages.addEventListener("pointerdown", event => {
         if (event.button !== 0 || !event.isPrimary) return;

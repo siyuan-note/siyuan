@@ -8,6 +8,7 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {processSync} from "../dialog/processSystem";
 import {openSyncCheckoutProgress} from "./checkoutProgress";
+import type {PerformSyncRequestInput} from "../types/api";
 /// #if !MOBILE
 import {openSetting} from "../config";
 /// #endif
@@ -261,17 +262,30 @@ export const syncGuide = (app?: App, openSettings = () => openSyncSetting(app)) 
     syncNow();
 };
 
+const requestSync = async (request: PerformSyncRequestInput) => {
+    try {
+        // 同步状态和执行错误由内核推送，接口拒绝请求时可附带单独的提示时长。
+        const response = await fetchSyncPost("/api/sync/performSync", request, undefined, false);
+        if (response.code === -1 && response.data) {
+            showMessage(response.msg, response.data.closeTimeout, "error");
+        }
+        return response;
+    } catch (error) {
+        console.warn("Sync request failed", error);
+    }
+};
+
 const syncNow = () => {
     fetchPost("/api/sync/getSyncSourceState", {}, response => {
         if (response.data.source && !response.data.cloudID) {
-            fetchPost("/api/sync/performSync", {upload: true, source: response.data.source,
-                localID: response.data.localID, cloudID: ""}, result => {
-                if (result.code === 2) chooseSyncDirection(response.data, true);
+            void requestSync({upload: true, source: response.data.source,
+                localID: response.data.localID, cloudID: ""}).then(result => {
+                if (result?.code === 2) chooseSyncDirection(response.data, true);
             });
             return;
         }
         if (!response.data.pending && window.siyuan.config.sync.mode !== 3) {
-            fetchPost("/api/sync/performSync", {});
+            void requestSync({});
             return;
         }
         chooseSyncDirection(response.data);
@@ -368,18 +382,18 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState, refr
         const upload = uploadElement.value === "true";
         if (!state.source) {
             manualDialog.destroy();
-            fetchPost("/api/sync/performSync", {upload});
+            void requestSync({upload});
             return;
         }
         void manualDialog.runPending(async () => {
-            const response = await fetchSyncPost("/api/sync/performSync", {
+            const response = await requestSync({
                 upload, source: state.source, localID: state.localID, cloudID: state.cloudID,
             });
-            if (response.code === 2) {
+            if (response?.code === 2) {
                 await refreshPreview();
                 return false;
             }
-            return response.code === 0;
+            return response?.code === 0;
         });
     });
     if (refresh) {

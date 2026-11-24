@@ -5,11 +5,16 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime/pprof"
+	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -80,30 +85,56 @@ func TestManualSyncReturnsEachRequestOutcome(t *testing.T) {
 	Conf.Sync.Load().Enabled = true
 	Conf.SetUser(&conf.User{UserSiYuanOneTimePayStatus: 1})
 	notCompleted := errors.New("sync did not complete")
-	laterFailed := errors.New("second sync failed")
-	started, finish := make(chan struct{}), make(chan struct{})
+	secondErr := errors.New("second sync failed")
 	first, second := make(chan error, 1), make(chan error, 1)
 
-	go func() {
-		first <- runManualSync(false, notCompleted, func() error {
-			close(started)
-			<-finish
-			return nil
-		})
+	syncLock.Lock()
+	locked := true
+	var requests sync.WaitGroup
+	defer func() {
+		if locked {
+			syncLock.Unlock()
+		}
+		requests.Wait()
 	}()
-	select {
-	case <-started:
-	case err := <-first:
-		t.Fatalf("first sync was not attempted: %v", err)
+	requests.Go(func() {
+		first <- runManualSync(false, notCompleted, func() error { return nil })
+	})
+	requests.Go(func() {
+		second <- runManualSync(false, notCompleted, func() error { return secondErr })
+	})
+
+	// 两个请求都排在同一个同步锁后，才能覆盖先执行的请求将另一个标记为已完成的情形。
+	deadline := time.After(10 * time.Second)
+	poll := time.NewTicker(time.Millisecond)
+	defer poll.Stop()
+	for {
+		var stacks bytes.Buffer
+		if err := pprof.Lookup("goroutine").WriteTo(&stacks, 2); err != nil {
+			t.Fatal(err)
+		}
+		waiting := 0
+		for stack := range strings.SplitSeq(stacks.String(), "\n\n") {
+			header, _, _ := strings.Cut(stack, "\n")
+			if strings.Contains(header, "[sync.Mutex.Lock") && strings.Contains(stack, "/model.TestManualSyncReturnsEachRequestOutcome.func") {
+				waiting++
+			}
+		}
+		if waiting == 2 {
+			break
+		}
+		select {
+		case <-poll.C:
+		case <-deadline:
+			t.Fatal("manual sync requests did not both wait for the sync lock")
+		}
 	}
-	go func() {
-		second <- runManualSync(false, notCompleted, func() error { return laterFailed })
-	}()
-	close(finish)
+	syncLock.Unlock()
+	locked = false
 	if err := <-first; err != nil {
 		t.Fatalf("first request did not report success: %v", err)
 	}
-	if err := <-second; !errors.Is(err, laterFailed) {
+	if err := <-second; !errors.Is(err, secondErr) {
 		t.Fatalf("second request did not report its own failure: %v", err)
 	}
 }

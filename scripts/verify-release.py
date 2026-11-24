@@ -354,6 +354,8 @@ def frontend_versions(text):
         if marker < 0:
             minified = re.search(
                 r"\b(?P<binding>[A-Za-z_$][\w$]*)\s*=\s*class\s*\{\s*\}\s*;\s*"
+                r"(?:(?P=binding)\.[A-Z][A-Z0-9_]*\s*=\s*"
+                r"""(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')\s*[,;]\s*)*"""
                 r"(?P=binding)\.\s*$", prefix) or re.search(
                 r"\b(?P<binding>[A-Za-z_$][\w$]*)\s*=\s*class\s*\{\s*\}\s*;\s*"
                 r"(?:let|const|var)\s+(?P<receiver>[A-Za-z_$][\w$]*)\s*=\s*(?P=binding)\s*;\s*"

@@ -76,6 +76,21 @@ function checkGestures(source) {
         equal(button().getBoundingClientRect().left, visible.left + 300, "quote button follows the collapsing panel");
         panel.style.transform = "";
         quote("keyboard selection", "alpha");
+
+        select(6, 11);
+        const pressed = button();
+        pointer(pressed, "pointerdown", "mouse", 1);
+        select(6, 6);
+        pointer(pressed, "pointerup", "mouse", 1);
+        equal(button(), pressed, "selection change does not remove the pressed button");
+        quote("selection collapsed before click", "bravo");
+
+        select(0, 5);
+        pointer(button(), "pointerdown", "touch", 2);
+        select(0, 0);
+        pointer(document, "pointercancel", "touch", 2);
+        equal(!!button(), false, "cancelled press releases the selection button");
+        equal(quoted, "bravo", "cancelled press does not quote");
     } finally {
         dispose();
     }

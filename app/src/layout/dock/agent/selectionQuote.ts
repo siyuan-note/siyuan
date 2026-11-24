@@ -7,7 +7,6 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
     button.type = "button";
     button.className = "b3-button b3-button--small b3-button--secondary agent-chat__selection-quote";
     button.textContent = window.siyuan.languages.agentQuoteText;
-    const hide = () => button.remove();
     const selectedPassage = () => {
         const selection = doc.getSelection();
         if (!selection || selection.isCollapsed || selection.rangeCount !== 1) return;
@@ -23,15 +22,23 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
         if (text.trim()) return {message, text, range};
     };
     const capture = {...options, capture: true};
+    let shown: ReturnType<typeof selectedPassage>;
+    let buttonPointerId: number;
     let pointerId: number;
     let touching = false;
+    const hide = () => {
+        shown = undefined;
+        buttonPointerId = undefined;
+        button.remove();
+    };
     const update = () => {
-        if (pointerId !== undefined || touching) return;
+        if (pointerId !== undefined || buttonPointerId !== undefined || touching) return;
         const passage = selectedPassage();
         if (!passage) return hide();
         const rect = passage.range.getBoundingClientRect();
         const bounds = messages.getBoundingClientRect();
         if (!rect.width || !bounds.width || !bounds.height || rect.bottom <= bounds.top || rect.top >= bounds.bottom) return hide();
+        shown = passage;
         if (!button.isConnected) {
             host.appendChild(button);
         }
@@ -49,12 +56,24 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
         hide();
     }, capture);
     doc.addEventListener("pointerup", event => {
+        if (event.pointerId === buttonPointerId) {
+            // 等待 click 处理按下时的摘录；拖离按钮时也需要结束本次操作。
+            doc.defaultView.setTimeout(() => {
+                if (buttonPointerId !== event.pointerId) return;
+                buttonPointerId = undefined;
+                update();
+            }, 0);
+        }
         if (event.pointerId !== pointerId) return;
         pointerId = undefined;
         update();
     }, capture);
     doc.addEventListener("pointercancel", event => {
         if (event.pointerId === pointerId) pointerId = undefined;
+        if (event.pointerId === buttonPointerId) {
+            buttonPointerId = undefined;
+            update();
+        }
     }, capture);
     // 原生长按选词可能先取消指针事件，手指抬起前仍要等待触摸结束。
     messages.addEventListener("touchstart", () => {
@@ -75,11 +94,15 @@ export const bindSelectionQuote = (messages: HTMLElement, quote: (message: HTMLE
         hide();
     }, options);
     doc.addEventListener("selectionchange", update, options);
-    button.addEventListener("pointerdown", event => event.preventDefault(), options);
+    button.addEventListener("pointerdown", event => {
+        if (event.button !== 0 || !event.isPrimary) return;
+        buttonPointerId = event.pointerId;
+        event.preventDefault();
+    }, options);
     button.addEventListener("click", () => {
-        const passage = selectedPassage();
+        const passage = shown;
         hide();
-        if (passage) quote(passage.message, passage.text);
+        if (passage && messages.contains(passage.message)) quote(passage.message, passage.text);
     }, options);
     doc.addEventListener("scroll", hide, {...options, capture: true});
     doc.defaultView.addEventListener("resize", hide, options);

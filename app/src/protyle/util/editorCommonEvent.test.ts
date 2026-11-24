@@ -3,6 +3,8 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ScriptTarget, transpileModule} from "typescript";
+import {isProtyleBlockDropAsReference, registerProtyleRuntimeCapabilities} from "../runtimeCapabilities";
+import {isCopyBlockDrag, isFragmentBlockDrag, uniqueDragIds} from "./dragDocument";
 
 const source = readFileSync("src/protyle/util/editorCommonEvent.ts", "utf8");
 const fileTreeDrop = source.indexOf("const ids = event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)");
@@ -57,3 +59,97 @@ for (const count of [1, 3]) {
         }
     });
 }
+
+const bindDropEvent = transpileModule(source.slice(source.indexOf("export const dropEvent"),
+    source.indexOf("\nconst highlightByLevel")).replace("export const dropEvent", "const dropEvent") + "\ndropEvent;", {
+    compilerOptions: {target: ScriptTarget.ES2021},
+}).outputText;
+
+test("agent block drop uses source block IDs and the reference caret", async () => {
+    const Constants = {
+        SIYUAN_DROP_BLOCK: "application/siyuan-block",
+        SIYUAN_DROP_BLOCK_REF: "application/siyuan-block-ref",
+        SIYUAN_DROP_GUTTER: "application/siyuan-gutter",
+        ZWSP: "\u200b",
+    };
+    const databaseID = "20261122000000-abcdefg";
+    const listItemID = "20261122000001-hijklmn";
+    const handlers = new Map<string, (event: object) => void | Promise<void>>();
+    const target = {
+        lastElementChild: {getBoundingClientRect: () => ({bottom: 50})},
+        querySelectorAll: (): Element[] => [],
+        addEventListener: (type: string, handler: (event: object) => void | Promise<void>) => handlers.set(type, handler),
+    };
+    const protyle = {
+        lite: true,
+        wysiwyg: {element: target},
+        contentElement: {clientWidth: 100, getBoundingClientRect: () => ({left: 0})},
+        lute: {Md2BlockDOM: (markdown: string) => markdown},
+    } as unknown as IProtyle;
+    registerProtyleRuntimeCapabilities(protyle, {blockDropAsReference: true});
+
+    const range = {startContainer: {}};
+    const refLookups: string[] = [];
+    const inserted: string[] = [];
+    const titles: string[] = [];
+    const positions: number[][] = [];
+    let focused = false;
+    const dropEvent = runInNewContext(bindDropEvent, {
+        Constants, isProtyleBlockDropAsReference, isCopyBlockDrag, isFragmentBlockDrag, uniqueDragIds,
+        window: {siyuan: {
+            config: {system: {workspaceDir: "D:/Workspace"}},
+            dragElement: {closest: (): Element | null => null},
+            languages: {dragTipRef: "reference"},
+        }},
+        document: {addEventListener: () => {}, elementFromPoint: () => target},
+        createListDragTarget: () => {},
+        cleanupDragIndicators: () => {},
+        hideDragTip: () => {},
+        showDragTip: (_title: string, action: string) => titles.push(action),
+        hideCaretLine: () => {},
+        showCaretLine: (...point: number[]) => positions.push(point),
+        getRangeByPoint: () => range,
+        getCaretRect: () => ({left: 30, top: 20, height: 10}),
+        getComputedStyle: () => ({paddingLeft: "0px", paddingRight: "0px"}),
+        hasClosestByClassName: () => false,
+        hasClosestByTag: () => false,
+        hasClosestBlock: () => false,
+        hasClosestByAttribute: () => false,
+        getContenteditableElement: () => false,
+        isAttributeViewTitleTarget: () => false,
+        isBlockRefDropTargetDisabled: () => false,
+        focusByRange: (dropRange: typeof range) => {focused = dropRange === range;},
+        fetchSyncPost: async (url: string, {id}: {id: string}) => {
+            assert.equal(url, "/api/block/getRefText");
+            refLookups.push(id);
+            return {data: id === databaseID ? "Database" : "Item"};
+        },
+        insertHTML: (html: string) => inserted.push(html),
+    });
+    dropEvent(protyle, target);
+
+    const gutter = (type: string, ids: string, workspace?: string) =>
+        Constants.SIYUAN_DROP_GUTTER + [type, "", ids, ...(workspace ? [workspace] : [])].join(Constants.ZWSP);
+    const fire = (gutterType: string) => {
+        const dataTransfer = {types: [Constants.SIYUAN_DROP_BLOCK, gutterType], dropEffect: "move", getData: () => ""};
+        const event = {dataTransfer, target, clientX: 30, clientY: 20, y: 20, preventDefault: () => {}, stopPropagation: () => {}};
+        return {dataTransfer, event};
+    };
+
+    const {dataTransfer, event} = fire(gutter("nodeattributeview", `${databaseID},${listItemID},${databaseID}`, "d:/workspace"));
+    await handlers.get("dragover")(event);
+    assert.equal(dataTransfer.dropEffect, "copy");
+    assert.deepEqual(titles, ["reference"]);
+    assert.deepEqual(positions, [[30, 20, 10]]);
+    await handlers.get("drop")(event);
+    assert.ok(focused);
+    assert.deepEqual(refLookups, [databaseID, listItemID]);
+    assert.deepEqual(inserted, [`- ((${databaseID} 'Database'))\n- ((${listItemID} 'Item'))`]);
+
+    await handlers.get("drop")(fire(gutter("nodelistitem", listItemID)).event);
+    assert.equal(inserted[1], `((${listItemID} 'Item'))`);
+
+    await handlers.get("drop")(fire(gutter("nodeparagraph", databaseID, "d:/another-workspace")).event);
+    assert.equal(inserted.length, 2);
+    assert.deepEqual(refLookups, [databaseID, listItemID, listItemID]);
+});

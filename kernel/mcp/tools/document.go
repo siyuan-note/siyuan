@@ -5,12 +5,14 @@
 package tools
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -44,7 +46,8 @@ var DocumentTool = &Tool{
 		},
 		Required: []string{"action"},
 	},
-	Handler: documentHandler,
+	Handler:        documentHandler,
+	ContextHandler: documentContextHandler,
 }
 
 func init() {
@@ -52,12 +55,16 @@ func init() {
 }
 
 func documentHandler(args map[string]any) (CallToolResult, error) {
+	return documentContextHandler(context.Background(), args)
+}
+
+func documentContextHandler(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "get":
 		return documentGet(args)
 	case "create":
-		return documentCreate(args)
+		return documentCreate(ctx, args)
 	case "list":
 		return documentList(args)
 	case "delete":
@@ -101,7 +108,7 @@ func documentGet(args map[string]any) (CallToolResult, error) {
 	)}}}, nil
 }
 
-func documentCreate(args map[string]any) (CallToolResult, error) {
+func documentCreate(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	notebook, _ := args["notebook"].(string)
 	if notebook == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook is required"}}, IsError: true}, nil
@@ -117,7 +124,7 @@ func documentCreate(args map[string]any) (CallToolResult, error) {
 			return documentTargetFailure(errors.New("title is required with parentID")), nil
 		}
 		doc, err := model.CreateDocByParent(model.DocumentCreateRequest{Notebook: notebook, ParentID: target.id,
-			ID: ast.NewNodeID(), TitleFormat: "plain", Title: title, Markdown: markdown})
+			ID: ast.NewNodeID(), TitleFormat: "plain", Title: title, Markdown: markdown, AgentGenerated: isAgentWrite(ctx)})
 		if err != nil {
 			return documentTargetFailure(fmt.Errorf("create doc failed: %w", err)), nil
 		}
@@ -134,7 +141,12 @@ func documentCreate(args map[string]any) (CallToolResult, error) {
 
 	id := ast.NewNodeID()
 	docPath := strings.TrimSuffix(strings.TrimRight(target.path, "/"), ".sy") + "/" + id + ".sy"
-	tree, err := model.CreateDocByMd(notebook, docPath, title, markdown, nil, nil)
+	var tree *parse.Tree
+	if isAgentWrite(ctx) {
+		tree, err = model.CreateAgentDocByMd(notebook, docPath, title, markdown)
+	} else {
+		tree, err = model.CreateDocByMd(notebook, docPath, title, markdown, nil, nil)
+	}
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("create doc failed: %s", err)}}, IsError: true}, nil
 	}

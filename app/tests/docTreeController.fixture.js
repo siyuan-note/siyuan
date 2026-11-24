@@ -107,6 +107,41 @@ exports.cases = async sources => {
         return {controller, element, directories, requests, locates, source, progress,
             revise: value => { revision = value; }, destroy: () => { controller.destroy(); element.remove(); }};
     };
+    for (const userScrolled of [false, true]) {
+        const fixture = make(256);
+        const {controller, element, source} = fixture;
+        await controller.toggle("notebook:box", true);
+        const range = source.range;
+        let loadStarted, finishLoad;
+        const loading = new Promise(resolve => { loadStarted = resolve; });
+        const delay = new Promise(resolve => { finishLoad = resolve; });
+        source.range = async request => {
+            loadStarted();
+            await delay;
+            return range(request);
+        };
+        const guide = {id: "guide", notebookId: "guide", kind: "notebook", name: "Guide", path: "/", subFileCount: 0};
+        controller.revealNotebookOnMount(guide.id);
+        controller.handleMessage({cmd: "mount", data: {box: {id: guide.id}}});
+        await loading;
+        controller.setRoots([...controller.model.roots, guide]);
+        controller.handleMessage({cmd: "reloadFiletree"});
+        await frame();
+        check.equal(element.scrollTop, 0, "guide positioning waits for in-flight and queued directory refreshes");
+        if (userScrolled) {
+            element.dispatchEvent(new WheelEvent("wheel"));
+            element.scrollTop = 96;
+        }
+        finishLoad();
+        await frame();
+        if (userScrolled) {
+            check.equal(element.scrollTop, 96, "positioning preserves a newer scroll interaction");
+        } else {
+            fullyVisible(controller.getMountedElement("notebook:guide"), element);
+            check.equal(controller.getSelectedItems().length, 0, "positioning leaves the tree selection alone");
+        }
+        fixture.destroy();
+    }
     for (const nested of [false, true]) {
         for (const expanded of [false, true]) {
             const fixture = make(1);

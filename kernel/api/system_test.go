@@ -343,6 +343,72 @@ func TestGetConfUILayoutByRole(t *testing.T) {
 	}
 }
 
+// TestGetConfOmitsWorkspaceStatForReader 校验非管理员拿不到包含未发布内容的全库统计，管理员保持原样。
+func TestGetConfOmitsWorkspaceStatForReader(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldConf := model.Conf
+	model.Conf = model.NewAppConf()
+	model.Conf.Sync.Store(conf.NewSync())
+	model.Conf.Sync.Load().Enabled = true
+	model.Conf.Sync.Load().Provider = 1
+	model.Conf.System.Store(&conf.System{})
+	model.Conf.Stat.Store(&conf.Stat{TreeCount: 41, CTreeCount: 17, BlockCount: 401, CBlockCount: 171,
+		DataSize: 41001, CDataSize: 17001, AssetsSize: 41002, CAssetsSize: 17002})
+	t.Cleanup(func() {
+		model.Conf = oldConf
+	})
+
+	for _, test := range []struct {
+		name       string
+		role       model.Role
+		expectStat bool
+	}{
+		{name: "administrator", role: model.RoleAdministrator, expectStat: true},
+		{name: "reader", role: model.RoleReader},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(func(c *gin.Context) {
+				c.Set(model.RoleContextKey, test.role)
+				c.Next()
+			})
+			engine.POST("/api/system/getConf", getConf)
+
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, "/api/system/getConf", nil)
+			engine.ServeHTTP(recorder, request)
+
+			response := &struct {
+				Code int `json:"code"`
+				Data struct {
+					Conf struct {
+						Stat *struct {
+							TreeCount  int `json:"treeCount"`
+							BlockCount int `json:"blockCount"`
+						} `json:"stat"`
+					} `json:"conf"`
+				} `json:"data"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal getConf response failed: %v", err)
+			}
+			if response.Code != 0 {
+				t.Fatalf("getConf failed: %s", recorder.Body.String())
+			}
+			if !test.expectStat {
+				if response.Data.Conf.Stat != nil {
+					t.Fatalf("reader received workspace statistics: %s", recorder.Body.String())
+				}
+				return
+			}
+			if response.Data.Conf.Stat == nil || response.Data.Conf.Stat.TreeCount != 41 || response.Data.Conf.Stat.BlockCount != 401 {
+				t.Fatalf("administrator workspace statistics missing: %s", recorder.Body.String())
+			}
+		})
+	}
+}
+
 func TestPreserveImportedAISecrets(t *testing.T) {
 	currentMCP := &conf.MCP{Servers: []conf.MCPServer{{ID: "server", Headers: map[string]string{"Authorization": "secret"}}}}
 	current := &conf.AI{

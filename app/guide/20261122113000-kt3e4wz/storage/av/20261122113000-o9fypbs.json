@@ -1,0 +1,216 @@
+{
+  "spec": 1,
+  "id": "20261122113000-o9fypbs",
+  "name": "Счета",
+  "keyValues": [
+    {
+      "key": {
+        "id": "20261122113000-wibqcgg",
+        "name": "Участник",
+        "type": "block",
+        "icon": "",
+        "desc": "",
+        "numberFormat": "",
+        "template": ""
+      },
+      "values": [
+        {
+          "id": "20261122113000-b85f2nl",
+          "keyID": "20261122113000-wibqcgg",
+          "blockID": "20261122113000-axevib9",
+          "type": "block",
+          "isDetached": true,
+          "createdAt": 1707381561000,
+          "updatedAt": 1707381561000,
+          "block": {
+            "id": "20261122113000-axevib9",
+            "icon": "",
+            "content": "Daniel",
+            "created": 1707381561387,
+            "updated": 1707381900674
+          }
+        },
+        {
+          "id": "20261122113000-72fz1ta",
+          "keyID": "20261122113000-wibqcgg",
+          "blockID": "20261122113000-47pj434",
+          "type": "block",
+          "isDetached": true,
+          "createdAt": 1707381848000,
+          "updatedAt": 1707381848000,
+          "block": {
+            "id": "20261122113000-47pj434",
+            "icon": "",
+            "content": "Vanessa",
+            "created": 1707381848145,
+            "updated": 1707381890239
+          }
+        }
+      ]
+    },
+    {
+      "key": {
+        "id": "20261122113000-sr9tq87",
+        "name": "Питание",
+        "type": "number",
+        "icon": "",
+        "desc": "",
+        "numberFormat": "",
+        "template": ""
+      },
+      "values": [
+        {
+          "id": "20261122113000-tmi52wq",
+          "keyID": "20261122113000-sr9tq87",
+          "blockID": "20261122113000-47pj434",
+          "type": "number",
+          "createdAt": 1707381855000,
+          "updatedAt": 1707381855000,
+          "number": {
+            "content": 200,
+            "isNotEmpty": true,
+            "format": "",
+            "formattedContent": ""
+          }
+        },
+        {
+          "id": "20261122113000-8me4g8a",
+          "keyID": "20261122113000-sr9tq87",
+          "blockID": "20261122113000-axevib9",
+          "type": "number",
+          "createdAt": 1707381890000,
+          "updatedAt": 1707381890000,
+          "number": {
+            "content": 100,
+            "isNotEmpty": true,
+            "format": "",
+            "formattedContent": ""
+          }
+        }
+      ]
+    },
+    {
+      "key": {
+        "id": "20261122113000-2sc4x09",
+        "name": "Одежда",
+        "type": "number",
+        "icon": "",
+        "desc": "",
+        "numberFormat": "",
+        "template": ""
+      },
+      "values": [
+        {
+          "id": "20261122113000-rebglw5",
+          "keyID": "20261122113000-2sc4x09",
+          "blockID": "20261122113000-47pj434",
+          "type": "number",
+          "createdAt": 1707381881000,
+          "updatedAt": 1707381881000,
+          "number": {
+            "content": 200,
+            "isNotEmpty": true,
+            "format": "",
+            "formattedContent": ""
+          }
+        },
+        {
+          "id": "20261122113000-uzzzqo5",
+          "keyID": "20261122113000-2sc4x09",
+          "blockID": "20261122113000-axevib9",
+          "type": "number",
+          "createdAt": 1707381897000,
+          "updatedAt": 1707381897000,
+          "number": {
+            "content": 100,
+            "isNotEmpty": true,
+            "format": "",
+            "formattedContent": ""
+          }
+        }
+      ]
+    },
+    {
+      "key": {
+        "id": "20261122113000-w8y5lmv",
+        "name": "Шаблоны",
+        "type": "template",
+        "icon": "",
+        "desc": "",
+        "numberFormat": "",
+        "template": ".action{ addf .Питание .Одежда }"
+      }
+    },
+    {
+      "key": {
+        "id": "20261122113000-06a2k1u",
+        "name": "Поля, доступные шаблону",
+        "type": "template",
+        "icon": "",
+        "desc": "",
+        "numberFormat": "",
+        "template": ".action{ toPrettyJson . }"
+      }
+    }
+  ],
+  "keyIDs": null,
+  "viewID": "20261122113000-a4hys49",
+  "views": [
+    {
+      "id": "20261122113000-a4hys49",
+      "icon": "",
+      "name": "Таблица",
+      "hideAttrViewName": false,
+      "desc": "",
+      "type": "table",
+      "table": {
+        "spec": 0,
+        "id": "20261122113000-tmk2sc9",
+        "columns": [
+          {
+            "id": "20261122113000-wibqcgg",
+            "wrap": false,
+            "hidden": false,
+            "pin": false,
+            "width": "152px"
+          },
+          {
+            "id": "20261122113000-sr9tq87",
+            "wrap": false,
+            "hidden": false,
+            "pin": false,
+            "width": "97px"
+          },
+          {
+            "id": "20261122113000-2sc4x09",
+            "wrap": false,
+            "hidden": false,
+            "pin": false,
+            "width": "126px"
+          },
+          {
+            "id": "20261122113000-w8y5lmv",
+            "wrap": false,
+            "hidden": false,
+            "pin": false,
+            "width": "129px"
+          },
+          {
+            "id": "20261122113000-06a2k1u",
+            "wrap": false,
+            "hidden": false,
+            "pin": false,
+            "width": "252px"
+          }
+        ],
+        "rowIds": [
+          "20261122113000-47pj434",
+          "20261122113000-axevib9"
+        ],
+        "filters": [],
+        "sorts": [],
+        "pageSize": 50
+      }
+    }
+  ]
+}

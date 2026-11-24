@@ -54,7 +54,7 @@ func validateCapabilityCall(ctx context.Context, registration *capabilityRegistr
 func executeCapability(ctx context.Context, tc openai.ToolCall, sessionID string,
 	registration *capabilityRegistration) executedToolResult {
 	if registration != nil && registration.Tool != nil && (registration.Tool.Source == "native" || registration.Tool.Source == "") {
-		ctx = pluginWorkflowContext(ctx, sessionID)
+		ctx = tools.ContextWithAgentWrite(pluginWorkflowContext(ctx, sessionID))
 	}
 	args, err := parseToolArgs(tc.Function.Arguments)
 	if err != nil {

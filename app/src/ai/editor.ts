@@ -3,7 +3,8 @@ import {fetchAIEditorSSE, IAIEditorMessage, TAIEditorSSEEvent} from "./editorSSE
 import {genUUID} from "../util/genID";
 import {
     focusByOffset,
-    getBlockRanges
+    getBlockRanges,
+    type IBlockRange
 } from "../protyle/util/selection";
 import {getSelectionOffset, setLastNodeRange} from "../protyle/util/selectionOffsets";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
@@ -20,6 +21,12 @@ import {Constants} from "../constants";
 import {bindThinkingCardToggle, updateThinkingBody} from "./thinkingCard";
 import {BLOCK_SELECTION_MODE_CLASS} from "../protyle/wysiwyg/blockSelection";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../asset/html";
+import {bindEditorPanelPosition} from "./editorPanelPosition";
+import {isEncryptedBox} from "../util/pathName";
+import {mountGroupedModelPicker} from "../config/tabs/ai/aiProviderUi";
+import {toggleMenu} from "../menus/menuToggle";
+import {Menu} from "../plugin/Menu";
+import {getReasoningEffortOptions, type ReasoningEffort} from "./reasoningEffort";
 
 type TAIEditorSourceKind = "selection" | "blocks" | "writing";
 type TAIEditorTaskStatus = "streaming" | "done" | "stopped" | "error";
@@ -28,6 +35,7 @@ interface IAIEditorSourcePart {
     id: string;
     start: number;
     end: number;
+    cell?: number;
     signature: string;
 }
 
@@ -37,6 +45,7 @@ interface IAIEditorSource {
     ids: string[];
     input: string;
     action: string;
+    surroundings?: {before: string, after: string};
     insertSupported: boolean;
 }
 
@@ -46,6 +55,9 @@ interface IAIEditorTask {
     source: IAIEditorSource;
     status: TAIEditorTaskStatus;
     content: string;
+    prompt?: string;
+    continuing?: boolean;
+    agentSessionID?: string;
     notice: string;
     reasoning: boolean;
     reasoningContent: string;
@@ -58,13 +70,14 @@ interface IAIEditorTask {
     thinkingLatestElement: HTMLElement;
     thinkingStartedAt: number;
     thinkingTimer?: number;
-    modelElement: HTMLElement;
+    modelId: string;
+    reasoningEffort: ReasoningEffort;
     statusElement: HTMLElement;
     stopButton: HTMLButtonElement;
     actionsElement: HTMLElement;
     abortController: AbortController;
     mutationObserver?: MutationObserver;
-    resizeObserver?: ResizeObserver;
+    disposePosition?: () => void;
     historySnapshot: IAIEditorMessage[];
     historyCommitted: boolean;
     renderFrame?: number;
@@ -86,28 +99,6 @@ const getState = (protyle: IProtyle) => {
     return state;
 };
 
-const getEditingModelName = () => {
-    const aiConfig = window.siyuan.config.ai;
-    const modelID = aiConfig.editing?.modelId || "";
-    if (!modelID) {
-        return "";
-    }
-    for (const provider of aiConfig.providers) {
-        if (!provider.enabled) {
-            continue;
-        }
-        const model = provider.models.find(item => item.enabled && (item.id === modelID || item.name === modelID));
-        if (model) {
-            return model.displayName || model.name;
-        }
-    }
-    return "";
-};
-
-const updateTaskModel = (task: IAIEditorTask) => {
-    task.modelElement.textContent = getEditingModelName();
-};
-
 const normalizeSourceElement = (element: HTMLElement) => {
     const clone = element.cloneNode(true) as HTMLElement;
     clone.classList.remove("protyle-wysiwyg--select", BLOCK_SELECTION_MODE_CLASS, "protyle-wysiwyg--hl");
@@ -126,7 +117,9 @@ const findSourceElement = (protyle: IProtyle, id: string) => {
         !isInEmbedBlock(item));
 };
 
-const getSourceConflict = (task: IAIEditorTask) => {
+type EditorTarget = Pick<IAIEditorTask, "protyle" | "source">;
+
+const getSourceConflict = (task: EditorTarget) => {
     let missing = false;
     let changed = false;
     const orderedElements: HTMLElement[] = [];
@@ -177,6 +170,26 @@ const sourcePartMarkdown = (protyle: IProtyle, range: Range, editableElement: El
     return protyle.lute.BlockDOM2StdMd(element.innerHTML).trimEnd() || text;
 };
 
+const selectionContext = (part: IBlockRange, before: boolean) => {
+    const range = part.range.cloneRange();
+    range.selectNodeContents(part.editableElement);
+    if (before) {
+        range.setEnd(part.range.startContainer, part.range.startOffset);
+    } else {
+        range.setStart(part.range.endContainer, part.range.endOffset);
+    }
+    let text = range.toString().replaceAll(Constants.ZWSP, "");
+    // 选区触及段首或段尾时，仅补充同层紧邻的正文，避免读取嵌入块或整个文档。
+    if (!text.trim()) {
+        const sibling = before ? part.blockElement.previousElementSibling : part.blockElement.nextElementSibling;
+        if (sibling?.matches('[data-type="NodeParagraph"], [data-type="NodeHeading"]')) {
+            text = getContenteditableElement(sibling)?.textContent || text;
+        }
+    }
+    const characters = Array.from(text);
+    return (before ? characters.slice(-400) : characters.slice(0, 400)).join("");
+};
+
 const buildSelectionSource = (protyle: IProtyle, range: Range, action: string): IAIEditorSource | undefined => {
     const blockRanges = getBlockRanges(protyle.wysiwyg.element, range);
     if (blockRanges.length === 0) {
@@ -186,10 +199,13 @@ const buildSelectionSource = (protyle: IProtyle, range: Range, action: string): 
         id: item.blockElement.getAttribute("data-node-id") || "",
         start: item.start,
         end: item.end,
+        cell: item.editableElement.matches("th, td") ?
+            Array.from(item.blockElement.querySelectorAll("th, td")).indexOf(item.editableElement) : undefined,
         signature: normalizeSourceElement(item.blockElement),
     }));
     return {
         kind: "selection",
+        surroundings: {before: selectionContext(blockRanges[0], true), after: selectionContext(blockRanges[blockRanges.length - 1], false)},
         parts,
         ids: [],
         input: blockRanges.map(item => sourcePartMarkdown(protyle, item.range, item.editableElement))
@@ -260,7 +276,7 @@ const buildWritingSource = (protyle: IProtyle, element: HTMLElement, input: stri
     };
 };
 
-const rebuildSourceRange = (task: IAIEditorTask) => {
+const rebuildSourceRange = (task: EditorTarget) => {
     const firstPart = task.source.parts[0];
     const lastPart = task.source.parts[task.source.parts.length - 1];
     const firstElement = findSourceElement(task.protyle, firstPart.id);
@@ -282,7 +298,7 @@ const rebuildSourceRange = (task: IAIEditorTask) => {
     return range;
 };
 
-const getInsertRange = (task: IAIEditorTask) => {
+const getInsertRange = (task: EditorTarget) => {
     if (task.source.kind === "writing") {
         return rebuildSourceRange(task);
     }
@@ -297,13 +313,21 @@ const getInsertRange = (task: IAIEditorTask) => {
     return range;
 };
 
-const getInsertHTML = (task: IAIEditorTask, range: Range) => {
+const getInsertHTML = (task: EditorTarget, range: Range, result: string, aiSource: "agent" | "editor") => {
     const inCode = hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
         hasClosestByTag(range.startContainer, "CODE");
-    const content = task.source.kind === "writing" ? `${task.source.input}\n\n${task.content}` : task.content;
+    const input = task.source.kind === "writing" && aiSource === "editor" ? task.source.input : "";
+    if (inCode) {
+        return {html: input ? `${input}\n\n${result}` : result, isBlock: false};
+    }
+    const generated = document.createElement("template");
+    generated.innerHTML = task.protyle.lute.Md2BlockDOM(result);
+    generated.content.querySelectorAll('[data-node-id][data-type^="Node"]').forEach(block => {
+        block.setAttribute(Constants.CUSTOM_SY_AI_SOURCE, aiSource);
+    });
     return {
-        html: inCode ? content : task.protyle.lute.Md2BlockDOM(content),
-        isBlock: !inCode,
+        html: (input ? task.protyle.lute.Md2BlockDOM(input) : "") + generated.innerHTML,
+        isBlock: true,
     };
 };
 
@@ -322,9 +346,7 @@ const cleanupTask = (task: IAIEditorTask) => {
         cancelAnimationFrame(task.renderFrame);
     }
     task.mutationObserver?.disconnect();
-    task.resizeObserver?.disconnect();
-    task.protyle.contentElement.removeEventListener("scroll", task.updatePosition);
-    window.removeEventListener("resize", task.updatePosition);
+    task.disposePosition?.();
     task.panel.remove();
     const state = getState(task.protyle);
     if (state.task === task) {
@@ -332,25 +354,24 @@ const cleanupTask = (task: IAIEditorTask) => {
     }
 };
 
-const applyTaskResult = (task: IAIEditorTask) => {
-    if (!task.content) {
-        return;
+const insertEditorResult = (task: EditorTarget, content: string, aiSource: "agent" | "editor") => {
+    if (!content || !task.protyle.element.isConnected || task.protyle.disabled) {
+        return false;
     }
     const conflict = getSourceConflict(task);
     const range = getInsertRange(task);
     if (!task.source.insertSupported || conflict.missing ||
         (task.source.kind === "writing" && conflict.changed)) {
-        return;
+        return false;
     }
     if (!range || !task.protyle.wysiwyg.element.contains(range.startContainer)) {
-        showMessage(window.siyuan.languages.aiSourceChanged, 5000, "error");
-        return;
+        return false;
     }
     task.protyle.toolbar.range = range;
-    const insertion = getInsertHTML(task, range);
-    insertHTML(insertion.html, task.protyle, insertion.isBlock, true);
+    const insertion = getInsertHTML(task, range, content, aiSource);
+    insertHTML(insertion.html, task.protyle, insertion.isBlock, true, false, undefined, undefined, undefined, aiSource);
     renderInsertedContent(task.protyle);
-    cleanupTask(task);
+    return true;
 };
 
 const renderTaskPreview = (task: IAIEditorTask, rich = false) => {
@@ -439,6 +460,10 @@ const updateTaskActions = (task: IAIEditorTask) => {
     if (copyButton) {
         copyButton.disabled = !task.content;
     }
+    const continueButton = task.actionsElement.querySelector<HTMLButtonElement>('[data-action="continue"]');
+    if (continueButton) {
+        continueButton.disabled = !task.content || !task.prompt || task.continuing;
+    }
     if (conflict.missing || conflict.changed) {
         task.statusElement.textContent = window.siyuan.languages.aiSourceChanged;
     } else if (task.status === "streaming") {
@@ -484,7 +509,9 @@ const stopTask = (task: IAIEditorTask) => {
 };
 
 const handleTaskEvent = (task: IAIEditorTask, event: TAIEditorSSEEvent) => {
-    if (event.type === "reasoning") {
+    if (event.type === "start" && event.prompt) {
+        task.prompt = event.prompt;
+    } else if (event.type === "reasoning") {
         task.reasoningContent += event.token;
         if (!task.content) {
             startTaskReasoning(task);
@@ -512,10 +539,23 @@ const handleTaskEvent = (task: IAIEditorTask, event: TAIEditorSSEEvent) => {
     }
 };
 
+const buildEditorAction = (source: IAIEditorSource) => {
+    const locations = source.parts.map(({id, start, end, cell}) => source.kind === "blocks" ? {blockID: id} :
+        {blockID: id, startOffset: start, endOffset: end, cell});
+    // 引用材料里的占位符按字面值发送，只有用户的动作模板参与内核替换。
+    const context = JSON.stringify({kind: source.kind, locations, ...source.surroundings}).replaceAll("{{input}}", "\\u007b\\u007binput}}");
+    const instruction = source.action.trim();
+    const template = !instruction ? "{{input}}" : instruction.includes("{{input}}") ? instruction : instruction + ":\n\n{{input}}";
+    return "Read-only source context (use for orientation; edit only the input):\n" + context + "\n\n" + template;
+};
+
 const startTaskStream = (task: IAIEditorTask) => {
     const abortController = new AbortController();
     task.abortController = abortController;
     task.status = "streaming";
+    const action = buildEditorAction(task.source);
+    task.agentSessionID = undefined;
+    task.prompt = task.source.kind === "blocks" ? undefined : action.split("{{input}}").join(task.source.input);
     task.content = "";
     task.notice = "";
     task.reasoning = false;
@@ -537,7 +577,6 @@ const startTaskStream = (task: IAIEditorTask) => {
     task.thinkingElement.querySelector(".agent-chat__thinking-arrow--contract")?.classList.add("fn__none");
     task.body.classList.remove("fn__none");
     task.body.textContent = "";
-    updateTaskModel(task);
     task.statusElement.textContent = "";
     task.stopButton.classList.remove("fn__none");
     task.actionsElement.classList.add("fn__none");
@@ -545,8 +584,10 @@ const startTaskStream = (task: IAIEditorTask) => {
         taskID: task.id,
         ids: task.source.ids,
         input: task.source.input,
-        action: task.source.action,
+        action,
         history: task.source.kind === "writing" ? task.historySnapshot : [],
+        modelId: task.modelId,
+        reasoningEffort: task.reasoningEffort,
     }, event => {
         if (task.abortController === abortController) {
             handleTaskEvent(task, event);
@@ -596,14 +637,27 @@ const createTaskIconButton = (action: string, label: string, icon: string) => {
 
 const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
     const panel = document.createElement("div");
-    panel.className = `ai-editor-panel${isMobile() ? " ai-editor-panel--mobile" : ""}`;
+    const mobile = isMobile();
+    const languages = window.siyuan.languages;
+    const effortOptions = getReasoningEffortOptions(languages);
+    const selectedEffort = effortOptions.find(({value}) => value === window.siyuan.config.ai.editing?.reasoningEffort) || effortOptions[0];
+    panel.className = `ai-editor-panel${mobile ? " ai-editor-panel--mobile" : ""}`;
     panel.setAttribute("contenteditable", "false");
     panel.style.zIndex = (++window.siyuan.zIndex).toString();
-    panel.innerHTML = `<div class="ai-editor-panel__header">
-    <span class="fn__flex-1 fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}<span class="ai-editor-panel__model"></span></span>
-    <span class="ai-editor-panel__status"></span>
+    panel.innerHTML = `${mobile ? `<div class="ai-editor-panel__grip" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="${escapeAriaLabel(window.siyuan.languages.height)}"></div>` : ""}
+<div class="ai-editor-panel__header"${mobile ? "" : ` tabindex="0" aria-label="${escapeAriaLabel(window.siyuan.languages.move)}"`}>
+    ${mobile ? `<span class="ai-editor-panel__title fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}</span>
+    <span class="b3-chip b3-chip--middle b3-chip--info fn__flex-shrink">${escapeHtml(window.siyuan.languages.aiGeneratedContent)}</span>
+    <span class="ai-editor-panel__status fn__flex-1"></span>` : `<span class="fn__flex-1 fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}</span>
+    <span class="ai-editor-panel__status"></span>`}
     <button class="ai-editor-panel__stop agent-chat__stop b3-button b3-button--icon b3-button--cancel ariaLabel" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.agentStop)}"><svg><use xlink:href="#iconSquareStop"></use></svg></button>
     <button class="block__icon block__icon--show ariaLabel ai-editor-panel__close" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.close)}"><svg><use xlink:href="#iconClose"></use></svg></button>
+</div>
+<div class="ai-editor-panel__options">
+    <button class="b3-select fn__ellipsis ariaLabel" data-type="groupedModelPicker" data-group="editing" data-menu="true" type="button" aria-label="${escapeAriaLabel(languages.apiModel)}">
+        <span data-type="groupedModelPickerLabel"></span>
+    </button>
+    <button class="b3-select fn__ellipsis ariaLabel" data-type="reasoningEffort" data-menu="true" type="button" aria-label="${escapeAriaLabel(languages.reasoningEffortTooltip)}"></button>
 </div>
 <div class="ai-editor-panel__thinking agent-chat__msg--thinking fn__none">
     <div class="agent-chat__thinking-card">
@@ -628,6 +682,9 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
     actionsElement.append(createTaskButton("source", source.kind === "writing" ?
         window.siyuan.languages.aiInsertAtOriginal : window.siyuan.languages.insertAfter, true));
 
+    if (!isEncryptedBox(protyle.notebookId) && !window.siyuan.config.readonly && !window.siyuan.isPublish) {
+        actionsElement.append(createTaskButton("continue", window.siyuan.languages.agentContinueEditing));
+    }
     const task: IAIEditorTask = {
         id: genUUID(),
         protyle,
@@ -645,7 +702,8 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         thinkingTextElement: panel.querySelector(".agent-chat__thinking-text") as HTMLElement,
         thinkingLatestElement: panel.querySelector(".agent-chat__thinking-latest") as HTMLElement,
         thinkingStartedAt: Date.now(),
-        modelElement: panel.querySelector(".ai-editor-panel__model") as HTMLElement,
+        modelId: window.siyuan.config.ai.editing?.modelId || "",
+        reasoningEffort: selectedEffort.value,
         statusElement: panel.querySelector(".ai-editor-panel__status") as HTMLElement,
         stopButton: panel.querySelector(".ai-editor-panel__stop") as HTMLButtonElement,
         actionsElement,
@@ -654,41 +712,81 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         historyCommitted: false,
         updatePosition: () => undefined,
     };
+    mountGroupedModelPicker(panel, "editing", {
+        menuId: "ai-editor-model",
+        getSelectedModelId: () => task.modelId,
+        onSelect: (modelId) => {
+            if (panel.isConnected && !task.continuing) {
+                task.modelId = modelId;
+                retryTask(task);
+            }
+        },
+    });
+    const effortButton = panel.querySelector<HTMLButtonElement>('[data-type="reasoningEffort"]');
+    effortButton.textContent = selectedEffort.label;
+    effortButton.addEventListener("click", () => {
+        const rect = effortButton.getBoundingClientRect();
+        toggleMenu({
+            target: effortButton,
+            build: (_menu, session) => {
+                const menu = new Menu("ai-editor-reasoning-effort");
+                effortOptions.forEach(({value, label}) => {
+                    menu.addItem({
+                        iconHTML: "",
+                        label: escapeHtml(label),
+                        current: value === task.reasoningEffort,
+                        click: () => {
+                            if (panel.isConnected && !task.continuing && value !== task.reasoningEffort) {
+                                task.reasoningEffort = value;
+                                effortButton.textContent = label;
+                                retryTask(task);
+                            }
+                        },
+                    });
+                });
+                session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: effortButton}));
+            },
+        });
+    });
     (panel.querySelector(".ai-editor-panel__close") as HTMLButtonElement).addEventListener("click", () => cleanupTask(task));
     bindThinkingCardToggle(task.thinkingElement);
-    task.updatePosition = () => {
-        if (!task.panel.isConnected || task.panel.classList.contains("ai-editor-panel--mobile")) {
-            return;
-        }
-        const anchorPart = task.source.parts[task.source.parts.length - 1];
-        const anchorElement = findSourceElement(protyle, anchorPart.id);
-        const protyleRect = protyle.element.getBoundingClientRect();
-        const panelRect = panel.getBoundingClientRect();
-        if (!anchorElement) {
-            panel.style.left = `${Math.max(8, protyle.element.clientWidth - panelRect.width - 16)}px`;
-            panel.style.top = `${Math.max(8, protyle.element.clientHeight - panelRect.height - 16)}px`;
-            return;
-        }
-        const anchorRect = anchorElement.getBoundingClientRect();
-        const left = Math.min(Math.max(8, anchorRect.left - protyleRect.left),
-            Math.max(8, protyle.element.clientWidth - panelRect.width - 16));
-        let top = anchorRect.bottom - protyleRect.top + 4;
-        if (top + panelRect.height > protyle.element.clientHeight - 8) {
-            top = Math.max(8, anchorRect.top - protyleRect.top - panelRect.height - 4);
-        }
-        panel.style.left = `${left}px`;
-        panel.style.top = `${top}px`;
-    };
     task.stopButton.addEventListener("click", () => stopTask(task));
-    actionsElement.addEventListener("click", event => {
+    actionsElement.addEventListener("click", async event => {
         const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-action]");
         if (!button || button.disabled) {
             return;
         }
         switch (button.dataset.action) {
             case "source":
-                applyTaskResult(task);
+                if (insertEditorResult(task, task.content, "editor")) {
+                    cleanupTask(task);
+                } else {
+                    showMessage(window.siyuan.languages.aiSourceChanged, 5000, "error");
+                }
                 break;
+            case "continue": {
+                if (!task.content || !task.prompt) return;
+                task.continuing = true;
+                button.disabled = true;
+                try {
+                    const {openEditorAgent} = await import("./editorAgent");
+                    const chat = await openEditorAgent(protyle.app);
+                    if (!chat || !task.panel.isConnected) return;
+                    const origin = new WeakRef(protyle);
+                    task.agentSessionID ??= Lute.NewNodeID();
+                    const opened = await chat.continueEditorTask(task.agentSessionID, task.prompt, task.content, result => {
+                        const editor = origin.deref();
+                        return !!editor && insertEditorResult({protyle: editor, source}, result, "agent");
+                    });
+                    if (opened) cleanupTask(task);
+                } catch (error) {
+                    showMessage(String(error), 5000, "error");
+                } finally {
+                    task.continuing = false;
+                    updateTaskActions(task);
+                }
+                break;
+            }
             case "copy":
                 copyPlainText(task.content);
                 showMessage(window.siyuan.languages.copied, 2000);
@@ -706,11 +804,10 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         childList: true,
         subtree: true,
     });
-    task.resizeObserver = new ResizeObserver(task.updatePosition);
-    task.resizeObserver.observe(panel);
-    protyle.contentElement.addEventListener("scroll", task.updatePosition);
-    window.addEventListener("resize", task.updatePosition);
-    requestAnimationFrame(task.updatePosition);
+    const position = bindEditorPanelPosition(protyle.element, protyle.contentElement, panel, mobile,
+        () => findSourceElement(protyle, task.source.parts[task.source.parts.length - 1].id));
+    task.updatePosition = position.update;
+    task.disposePosition = position.destroy;
     return task;
 };
 

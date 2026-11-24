@@ -96,7 +96,7 @@ test("related date filters save only the panel's temporary filters and invalidat
 
 test("shared configuration warning remains available in every language for retained safety guards", () => {
     const languages = readdirSync("appearance/langs").filter(file => file.endsWith(".json"));
-    assert.equal(languages.length, 22);
+    assert.ok(languages.includes("en.json") && languages.includes("vi.json"));
     for (const file of languages) {
         const language = JSON.parse(readFileSync(`appearance/langs/${file}`, "utf8"));
         assert.ok(language._attrView.relatedDatabaseViewSharedTip, file);

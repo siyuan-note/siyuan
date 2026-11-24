@@ -16,6 +16,36 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestAISourceBlockUpdatePreservesUnchangedDescendants(t *testing.T) {
+	engine := util.NewLute()
+	tree := engine.BlockDOM2Tree(engine.Md2BlockDOM("> Original\n>\n> Prior AI\n>\n> To replace", true))
+	quote := tree.Root.FirstChild
+	tree.ID, tree.Root.ID, tree.Box = ast.NewNodeID(), ast.NewNodeID(), updateTestBoxID
+	original := blockChildrenOf(quote)
+	original[1].SetIALAttr(nodeAttrAISource, "editor")
+
+	ops, _, err := buildBlockUpdateOperations([]BlockUpdateInput{{
+		ID: quote.ID, DataType: "markdown", AgentGenerated: true,
+		Data: "> Original\n>\n> Prior AI\n>\n> Replacement\n>\n> Added",
+	}}, func(id string) *treenode.BlockTree {
+		return &treenode.BlockTree{ID: id, RootID: tree.ID, BoxID: tree.Box}
+	}, func(string) (*parse.Tree, error) { return tree, nil })
+	if err != nil {
+		t.Fatal(err)
+	}
+	updated := engine.BlockDOM2Tree(ops[0].Data.(string)).Root.FirstChild
+	children := blockChildrenOf(updated)
+	want := []string{"", "editor", "agent", "agent"}
+	if len(children) != len(want) {
+		t.Fatalf("unexpected updated body: %v", ops[0].Data)
+	}
+	for i, source := range want {
+		if got := children[i].IALAttr(nodeAttrAISource); got != source {
+			t.Errorf("block %d provenance = %q, want %q", i, got, source)
+		}
+	}
+}
+
 func TestNormalizeListItemBlockUpdateTree(t *testing.T) {
 	root := &ast.Node{Type: ast.NodeDocument}
 	list := &ast.Node{Type: ast.NodeList}

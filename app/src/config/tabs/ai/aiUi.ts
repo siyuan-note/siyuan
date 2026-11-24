@@ -307,7 +307,8 @@ export const getModelPickerKeywords = (group: ModelPickerGroup): string[] => {
     ];
     if (group === "editing") {
         keywords.push(
-            window.siyuan.languages.aiEditingModelPickerTip
+            window.siyuan.languages.aiEditingModelPickerTip,
+            window.siyuan.languages.aiEdit,
         );
     } else if (group === "agent") {
         keywords.push(

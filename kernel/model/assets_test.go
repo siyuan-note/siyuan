@@ -462,6 +462,25 @@ func TestGetAssetAbsPathWithSymlinkedWorkspaceAncestor(t *testing.T) {
 		t.Fatalf("get global asset path: got %q, want %q", got, assetPath)
 	}
 
+	const boxID = "20260723000000-abcdefg"
+	notebookAssetPath := filepath.Join(util.DataDir, boxID, "assets", "photo.jpeg")
+	if err = os.MkdirAll(filepath.Dir(notebookAssetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(notebookAssetPath, []byte("asset"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	got, err = GetAssetAbsPathInBox("assets/photo.jpeg", boxID)
+	if err != nil || got != notebookAssetPath {
+		t.Errorf("get notebook asset path: got [%q, %v], want %q", got, err, notebookAssetPath)
+	}
+	if err = os.Symlink(filepath.Dir(assetPath), filepath.Join(filepath.Dir(notebookAssetPath), "global")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = GetAssetAbsPathInBox("assets/global/image.png", boxID); err == nil {
+		t.Error("notebook asset symlink outside notebook assets should be rejected")
+	}
+
 	outsideDir := t.TempDir()
 	outsidePath := filepath.Join(outsideDir, "outside.png")
 	if err = os.WriteFile(outsidePath, []byte("outside"), 0644); err != nil {
@@ -782,9 +801,9 @@ func TestGetAttributeViewAssetsLinkDestsFiltersItems(t *testing.T) {
 		}},
 	}
 
-	filter := func(_ *av.AttributeView, itemID string) bool {
+	filter := &attributeViewItemFilter{item: func(_ *av.AttributeView, itemID string) bool {
 		return "public-item" == itemID
-	}
+	}}
 	want := []string{
 		"assets/public.png",
 		"assets/public-url.png",
@@ -815,6 +834,52 @@ func TestGetAttributeViewAssetsLinkDestsFiltersItems(t *testing.T) {
 	}
 	if got := getAttributeViewAssetsLinkDests(attrView, false, nil); !reflect.DeepEqual(got, want) {
 		t.Fatalf("get unfiltered attribute view asset links: got %v, want %v", got, want)
+	}
+}
+
+func TestGetAttributeViewAssetsLinkDestsFiltersNestedValues(t *testing.T) {
+	const (
+		privatePath = "assets/private-nested.png"
+		publicPath  = "assets/public-nested.png"
+	)
+	attrView := &av.AttributeView{
+		KeyValues: []*av.KeyValues{{
+			Key: &av.Key{Type: av.KeyTypeRollup},
+			Values: []*av.Value{{
+				BlockID: "outer-row",
+				Relation: &av.ValueRelation{Contents: []*av.Value{{
+					BlockID: "hidden-row",
+					URL:     &av.ValueURL{Content: privatePath},
+				}}},
+				Rollup: &av.ValueRollup{Contents: []*av.Value{
+					{
+						BlockID: "hidden-row",
+						MAsset:  []*av.ValueAsset{{Type: av.AssetTypeImage, Content: privatePath}},
+					},
+					{
+						BlockID: "visible-row",
+						MAsset:  []*av.ValueAsset{{Type: av.AssetTypeImage, Content: publicPath}},
+					},
+				}},
+			}},
+		}},
+	}
+
+	filter := &attributeViewItemFilter{
+		item: func(_ *av.AttributeView, itemID string) bool {
+			return "outer-row" == itemID
+		},
+		nested: func(value *av.Value) bool {
+			return "hidden-row" != value.BlockID
+		},
+	}
+	if got := getAttributeViewAssetsLinkDests(attrView, false, filter); !reflect.DeepEqual(got, []string{publicPath}) {
+		t.Fatalf("get filtered nested attribute view asset links: got %v, want %v", got, []string{publicPath})
+	}
+
+	if got := getAttributeViewAssetsLinkDests(attrView, false, nil); !reflect.DeepEqual(got,
+		[]string{privatePath, publicPath}) {
+		t.Fatalf("get unfiltered nested attribute view asset links: got %v", got)
 	}
 }
 

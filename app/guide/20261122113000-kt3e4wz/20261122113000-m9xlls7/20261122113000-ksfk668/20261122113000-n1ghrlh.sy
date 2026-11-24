@@ -1,0 +1,845 @@
+{
+	"ID": "20261122113000-n1ghrlh",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-n1ghrlh",
+		"title": "Автономный редактор Markdown",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-tvp24av",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-tvp24av",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Открытие и редактирование"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pfefi2z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-pfefi2z",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На компьютерах с Windows, macOS и Linux передайте при запуске SiYuan параметр "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--markdown"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы открыть отдельное окно без запуска рабочей области или локального ядра."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bqubrqm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-bqubrqm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На мобильных устройствах Android, iOS и HarmonyOS можно выбрать SiYuan для открытия файлов Markdown из системного файлового менеджера."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-y3kuyyn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-y3kuyyn",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В заголовке окна отображается имя текущего файла (для нового несохранённого документа — «Без названия»), а также кнопки панели файлов, структуры, отмены, повтора и меню "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Отдельная панель форматирования в тексте не отображается. На компьютере используйте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Shift+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для переключения инструментов разработчика, на macOS — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+Alt+I"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-edgpllt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-edgpllt",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Отмена и повтор выполняются по каждому завершённому действию редактирования."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rjqn0fz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rjqn0fz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В режимах мгновенного рендеринга и WYSIWYG блоки кода подсвечиваются и во время редактирования."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3b3ha0k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3b3ha0k",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Нажмите кнопку структуры рядом с кнопкой панели файлов в левом верхнем углу, чтобы показать или скрыть оглавление. На Windows и Linux по умолчанию используется "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt+2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", на macOS — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Control+2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; пользовательские горячие клавиши указаны во всплывающей подсказке. Структура обновляется в реальном времени."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-c8807ak",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-c8807ak",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В локальной рабочей области меню "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Открыть"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Открыть во встроенном редакторе Markdown"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для обычных ссылок на ресурсы Markdown позволяет напрямую редактировать исходный файл."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jbm6n2n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-jbm6n2n",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Этот редактор напрямую редактирует обычные файлы .md и .markdown в кодировке UTF-8, не импортируя их в блокнот и не преобразуя в документы .sy."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ybfn3xm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ybfn3xm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После установки настольного пакета с поддержкой ассоциаций файлов SiYuan можно выбрать в системном меню «Открыть с помощью». В редакторе можно использовать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Открыть"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " или перетащить файл Markdown."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7yjkrue",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7yjkrue",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Создаётся через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Режим редактирования"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " выберите мгновенный рендеринг, WYSIWYG или разделённый предпросмотр. В версиях с выбором источника оформления можно через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Внешний вид"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " раздельно выбрать рабочую область или независимую конфигурацию для темы, размера шрифта и шрифтов."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-d4gtrww",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-d4gtrww",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поиск и замена"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-at0dmmu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-at0dmmu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Создаётся через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Поиск"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " открывает панель поиска; также можно нажать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+F"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", на macOS — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cmd+F"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Заменить"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы раскрыть поле замены."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-czyjxs3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-czyjxs3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Режимы мгновенного рендеринга и WYSIWYG ищут по тексту и блокам кода, а режим исходного кода — по всему исходному тексту Markdown."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-iqsqags",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-iqsqags",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Заменённое содержимое сохраняется автоматически. Можно заменить текущее совпадение или все сразу; массовая замена отменяется за один шаг."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-nquyho3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-nquyho3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Просмотр файлов Markdown"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fr234qb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-fr234qb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При открытии A.md его каталог по умолчанию становится корнем дерева файлов. В дереве отображаются реальные папки и файлы .md, .markdown в естественном порядке (например, file2.md перед file10.md)."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-338sbmw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-338sbmw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Нажмите кнопку панели файлов в левом верхнем углу, чтобы открыть или закрыть боковую панель. На Windows и Linux по умолчанию используется "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt+1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", на macOS — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Control+1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". При открытии из рабочей области используются её горячие клавиши."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xmu7pub",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xmu7pub",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Одиночный клик по файлу переключает документ в том же окне. Через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Открыть папку"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " позволяет заново выбрать корневой каталог навигации без изменения текста документа. Выбор сохраняется, даже если текущий документ находится за пределами выбранного корневого каталога. При «Сохранить как» в пределах корневого каталога он остаётся прежним, а при сохранении за его пределами переключается на родительский каталог нового файла. В настольной версии можно нажимать относительные ссылки вроде docs/next.md, чтобы открыть Markdown-документ в том же редакторе. Ссылка вычисляется относительно каталога текущего документа, а целевой файл должен находиться внутри корневого каталога дерева файлов. Если файл не существует или выходит за пределы корневого каталога, в строке состояния появится сообщение о невозможности открыть ссылку."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1h8eoo0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-1h8eoo0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Состояние раскрытия и ширина панели запоминаются. Панель предназначена только для навигации."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ohq61eh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ohq61eh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сохранение и разрешение конфликтов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rzhtmvt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rzhtmvt",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Доступные для записи файлы сохраняются автоматически после остановки ввода. Через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сохранить"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " можно сохранить немедленно. При обычном редактировании нижняя строка состояния скрыта и появляется только при конфликтах или ошибках."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-yauxegl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-yauxegl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На Android «Сохранить как» использует системный выбор файлов; на iOS и HarmonyOS сначала выбирается папка, затем вводится имя файла."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4k6w98c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-4k6w98c",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если файл изменён другим приложением, при отсутствии локальных правок его можно перезагрузить; при наличии локальных правок автозапись приостанавливается."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xcgsa8r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xcgsa8r",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "«Сохранить как» резервирует целевой файл перед записью и переключает сеанс только после успешного сохранения."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vqg2r46",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-vqg2r46",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При сохранении сохраняются исходный UTF-8 BOM и выбранный стиль переносов строк. Файлы неподдерживаемой кодировки или размером более 8 МиБ отклоняются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-866fkfo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-866fkfo",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Изображения и предпросмотр"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-a3nru7k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-a3nru7k",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Перед вставкой изображения сохраните документ Markdown, затем используйте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Вставить изображение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы выбрать исходное изображение и место сохранения ресурса."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lkmtv7e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-lkmtv7e",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Создаётся через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Разрешить доступ к папке ресурсов"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " позволяет просмотреть каталоги с локальными ссылками на изображения. Авторизация действует только в текущем сеансе редактирования."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cdabvjp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-cdabvjp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сетевые изображения HTTP и HTTPS отображаются напрямую без авторизации каталога."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ju4llgz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ju4llgz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Локальное восстановление и конфиденциальность"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-j867f71",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-j867f71",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Новые пустые документы, которые не редактировались, закрываются без подтверждения. Для изменённых несохранённых документов сохраняется защита от закрытия. В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Восстановить черновик"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " можно просмотреть и восстановить записи без перезаписи исходного файла."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-kx96ecb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-kx96ecb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На мобильных устройствах используется каталог home/.config/siyuan/markdown/recovery/. Черновики восстановления хранятся в незашифрованном виде вне рабочей области и не синхронизируются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-avd51ur",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-avd51ur",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поддерживаются файлы UTF-8 размером до 8 МиБ. При превышении 256 КиБ автоматически включается режим исходного кода."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ni3wlqb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ni3wlqb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сложные документы с большим количеством таблиц или кода могут вызывать задержки при рендеринге или сохранении."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-marlec3",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-marlec3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Быстрый просмотр на macOS"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-d0vsxsl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-d0vsxsl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После установки SiYuan на macOS и включения расширения Quick Look можно выбрать файл .md или .markdown в Finder и нажать пробел для просмотра только для чтения без запуска основного приложения."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ll0f63m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ll0f63m",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Предпросмотр использует встроенные ресурсы и системную тему без загрузки удалённых изображений."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wp3ikr2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-wp3ikr2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Быстрый просмотр следует выбору источника шрифтов автономного редактора Markdown."
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,1320 @@
+{
+	"ID": "20261122113000-369mcst",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-369mcst",
+		"title": "Цитирование блоков контента",
+		"type": "doc",
+		"updated": "20261122171459"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-dgnw045",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-dgnw045",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-exy1pwf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-exy1pwf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ссылка на блок позволяет ссылаться на существующее содержимое и использовать одну заметку в разных контекстах."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-les5pqn",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-les5pqn",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вставка ссылки"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-ci1etnu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ci1etnu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Введите в редакторе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и продолжайте ввод ключевых слов для поиска блока. Выберите вариант стрелками вверх/вниз и нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для вставки ссылки."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-if8jozs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-if8jozs",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Блок контента/Ссылка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8zpv6wi",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-8zpv6wi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Создать документ и сослаться"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-uw71xmr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-uw71xmr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После ввода "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " или "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[["
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и заголовка документа в списке кандидатов можно выбрать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Выбрать расположение и создать документ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", указав корень блокнота или родительский документ."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-d5mimho",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-d5mimho",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Автозакрытие и автодополнение"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-xnenvda",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xnenvda",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Двусторонние ссылки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Автозакрытие [[ или 【【"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " можно включить автозакрытие (по умолчанию выключено)."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7wswlwz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7wswlwz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При вводе ]] или 】】 сначала выполняется поиск документа с точным совпадением заголовка."
+				}
+			]
+		},
+		{
+			"ID": "20261123123905-hex6yuc",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261123123905-hex6yuc",
+				"updated": "20261123123905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Проверка перед удалением или вырезанием"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261123123905-vqws36w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123123905-vqws36w",
+				"updated": "20261123123905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если проверка ссылок на блоки и привязок к базам данных затянулась, нажмите «Отмена» в окне проверки, чтобы прервать удаление или вырезание."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1ttga9q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-1ttga9q",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Направление ссылок"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ctktool",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20261122113000-ctktool",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-elewwos",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-elewwos",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-kmtnz0c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-kmtnz0c",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Прямая ссылка (Forwardlink) — какие другие блоки используются в текущем блоке"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-jr5bb3g",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-jr5bb3g",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-kxqibyd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-kxqibyd",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Обратная ссылка (Backlink) — в каких других блоках используется текущий блок"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-l7ktvwk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-l7ktvwk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Прямые ссылки отображаются непосредственно в текущем тексте; обратные ссылки показывают, где цитируется текущий блок. Просмотреть их можно двумя способами:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-s4vm82x",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-s4vm82x",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-5i2joug",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-5i2joug",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-b23c0cb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-b23c0cb",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-eprn71x",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Граф"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": просмотр связей между "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "блоками контента"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (прямых и "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "Обратные ссылки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ")"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-f7ofg9q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-f7ofg9q",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-abd00jz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-abd00jz",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-ng4nveh",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Обратные ссылки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": отображение в виде текстового списка для текущего "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "блоками контента"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "Обратные ссылки"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5jnhfvr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-5jnhfvr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Фильтрация обратных ссылок по полям базы данных"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-eeo3q98",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-eeo3q98",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На панели обратных ссылок или в нижней панели откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Фильтровать источники обратных ссылок"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Поля базы данных"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", выберите базу данных и задайте условия фильтрации."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-f4h770h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-f4h770h",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В меню базы данных выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сбросить"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для очистки условий базы данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pvaomg1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-pvaomg1",
+				"updated": "20261122171459"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Текст якоря"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-dziavco",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-dziavco",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Текст якоря — это текст, отображаемый при рендеринге ссылки; он бывает статическим и динамическим:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xchweed",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-xchweed",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-j6w5p3p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-j6w5p3p",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-u7fuj9r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-u7fuj9r",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Статический текст якоря: не меняется при изменении исходного блока"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-a9gy403",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-a9gy403",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-l7jhm5i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-l7jhm5i",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Динамический текст якоря: обновляется вместе с исходным блоком; максимальную длину можно задать в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Редактор"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Максимальная длина динамического текста якоря ссылки блока"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " (поддерживается до "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "5120"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " символов)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-eqyu3lx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-eqyu3lx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Изменить текст якоря можно следующими способами:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-po061o9",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-po061o9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-7rn788x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-7rn788x",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-bfyxm4l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-bfyxm4l",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Поместите курсор внутрь элемента "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "Ссылки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " и измените текст — это сделает текст якоря "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "Ссылки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "статическим"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ar7yafp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ar7yafp",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-anlbxd6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-anlbxd6",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Нажмите правой кнопкой мыши на элемент "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "Ссылки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " и измените текст якоря в контекстном меню — он также станет статическим"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-yzidehm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-yzidehm",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ectfade",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ectfade",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Нажмите правой кнопкой мыши на элемент "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "Ссылки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " и очистите текст якоря в меню — тогда будет использоваться динамический текст якоря"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ypti56w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ypti56w",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ В списке результатов поиска:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gw83gdp",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-gw83gdp",
+				"updated": "20261122171459"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-bkwqlwz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-bkwqlwz",
+						"updated": "20261122171459"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-zlueogl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-zlueogl",
+								"updated": "20261122171459"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Нажатие "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ или "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Клик"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ использует динамический текст якоря"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-fr8b4qy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-fr8b4qy",
+						"updated": "20261122171459"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-dmmguek",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-dmmguek",
+								"updated": "20261122171459"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Удерживайте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ или "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Клик"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ использует статический текст якоря"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rluut83",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-rluut83",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Фильтр"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jrro521",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-jrro521",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " включите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "[[ Искать только документы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ci5f100",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-ci5f100",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-e9rdhlo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-e9rdhlo",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-pwth63x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-pwth63x",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "(("
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ Поиск среди "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-heqg3qd",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "всех типов блоков"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " для поиска"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-p4o1rnh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-p4o1rnh",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-gliyun8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-gliyun8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ Поиск только среди "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-4dbzt20",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "блоков документов"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ovrjzx4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ovrjzx4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Синтаксис"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6gxpiep",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-6gxpiep",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Помимо использования "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для вызова поиска ссылок, можно напрямую использовать синтаксис "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "((id \"текст якоря\"))"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-r32ynnb",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-r32ynnb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-7l07kxe",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-7l07kxe",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-uk15ba4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-uk15ba4",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": " оборачивает статический текст якоря"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-mypo3qd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-mypo3qd",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-3ngsupi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-3ngsupi",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При использовании "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "&apos;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " оборачивает динамический текст якоря (перезаписывается при перестроении индекса)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-omi00ft",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-omi00ft",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Прямое использование синтаксиса в основном применяется для создания через внешние инструменты или API"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Ссылки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", а в большинстве случаев удобнее использовать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ для вызова"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Ссылки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "поиска"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Ссылки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

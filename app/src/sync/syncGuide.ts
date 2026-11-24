@@ -8,6 +8,7 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {processSync} from "../dialog/processSystem";
 import {openSyncCheckoutProgress} from "./checkoutProgress";
+import type {PerformSyncRequestInput} from "../types/api";
 /// #if !MOBILE
 import {openSetting} from "../config";
 /// #endif
@@ -229,7 +230,7 @@ export const refreshSyncCloudDirBlock = (root: Element) => {
     }
 };
 
-export const syncGuide = (app?: App) => {
+export const syncGuide = (app?: App, openSettings = () => openSyncSetting(app)) => {
     if (openSyncCheckoutProgress()) return;
     if (window.siyuan.config.readonly) {
         return;
@@ -238,16 +239,16 @@ export const syncGuide = (app?: App) => {
         return;
     }
     if (window.siyuan.config.sync.provider === 0 && needSubscribe()) {
-        openSyncSetting(app);
+        openSettings();
         showMessage(window.siyuan.languages._kernel[29].replaceAll("${accountServer}", getCloudURL("")));
         return;
     } else if (!isPaidUser()) {
-        openSyncSetting(app);
+        openSettings();
         showMessage(window.siyuan.languages._kernel[214].replaceAll("${accountServer}", getCloudURL("")));
         return;
     }
     if (!window.siyuan.config.sync.enabled && window.siyuan.config.sync.provider !== 0) {
-        openSyncSetting(app);
+        openSettings();
         return;
     }
     if (!window.siyuan.config.repo.key) {
@@ -261,17 +262,25 @@ export const syncGuide = (app?: App) => {
     syncNow();
 };
 
+const requestSync = async (request: PerformSyncRequestInput) => {
+    let code: number | undefined;
+    await fetchPost("/api/sync/performSync", request, response => {
+        code = response.code;
+    }, {[Constants.SIYUAN_SYNC_NOTICE_HEADER]: "2"});
+    return code;
+};
+
 const syncNow = () => {
     fetchPost("/api/sync/getSyncSourceState", {}, response => {
         if (response.data.source && !response.data.cloudID) {
-            fetchPost("/api/sync/performSync", {upload: true, source: response.data.source,
-                localID: response.data.localID, cloudID: ""}, result => {
-                if (result.code === 2) chooseSyncDirection(response.data, true);
+            void requestSync({upload: true, source: response.data.source,
+                localID: response.data.localID, cloudID: ""}).then(result => {
+                if (result === 2) chooseSyncDirection(response.data, true);
             });
             return;
         }
         if (!response.data.pending && window.siyuan.config.sync.mode !== 3) {
-            fetchPost("/api/sync/performSync", {});
+            void requestSync({});
             return;
         }
         chooseSyncDirection(response.data);
@@ -350,6 +359,9 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState, refr
         manualDialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
+        if (!manualDialog.element.isConnected || manualDialog.element.dataset.dialogClosing === "true") {
+            return;
+        }
         if (!previewReady) {
             void manualDialog.runPending(async () => {
                 await refreshPreview();
@@ -362,16 +374,21 @@ const chooseSyncDirection = (state: import("../types/api").SyncSourceState, refr
             showMessage(window.siyuan.languages.plsChoose);
             return;
         }
+        const upload = uploadElement.value === "true";
+        if (!state.source) {
+            manualDialog.destroy();
+            void requestSync({upload});
+            return;
+        }
         void manualDialog.runPending(async () => {
-            const response = await fetchSyncPost("/api/sync/performSync", {
-                upload: uploadElement.value === "true",
-                ...(state.source ? {source: state.source, localID: state.localID, cloudID: state.cloudID} : {}),
+            const code = await requestSync({
+                upload, source: state.source, localID: state.localID, cloudID: state.cloudID,
             });
-            if (response.code === 2) {
+            if (code === 2) {
                 await refreshPreview();
                 return false;
             }
-            return response.code === 0;
+            return code === 0;
         });
     });
     if (refresh) {

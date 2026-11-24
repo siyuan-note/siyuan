@@ -177,7 +177,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "所有打過標簽的內容區塊會在標簽分頁（"
+					"Data": "開啟標籤面板（"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -213,7 +213,71 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​）中列出。如果需要取消標簽，在內容區塊中刪掉該標簽即可。"
+					"Data": "​）。在桌面端點選標籤，會在全域搜尋中顯示相符的內容區塊。若要移除內容區塊上的標籤，直接在區塊中刪除該標籤即可。"
+				}
+			]
+		},
+		{
+			"ID": "20261118205131-60be77f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118205131-60be77f",
+				"updated": "20261118205131"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在標籤面板中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "自訂排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可直接拖曳標籤列調整同層順序。行動裝置請長按標籤列後拖曳。自訂順序隨工作空間資料儲存。從標籤面板刪除標籤後重新建立同名標籤，該標籤會排在已有排序位置的同層標籤之後。篩選標籤時，請先清除篩選條件再排序。"
+				}
+			]
+		},
+		{
+			"ID": "20261118220329-b5e193c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118220329-b5e193c",
+				"updated": "20261118220329"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在標籤面板中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "排序"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "最近新增"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，即可依標籤最近一次新增到文件或內容區塊的時間排列同層標籤。新增時間未知的標籤排在最後。"
 				}
 			]
 		},

@@ -1,11 +1,10 @@
-import {moveSheetGesture, SheetGesture} from "./mobileSheetGesture";
+import {getMobileSheetDragAction} from "./mobileSheetGesture";
 import {isIOSPlatform} from "../../protyle/util/browserCompatibility";
 import {isNativeTextSelectionHandleTouch} from "../../protyle/wysiwyg/nativeTextMenu";
 
 type SheetDragOptions = {
     grip?: HTMLElement,
-    getBounds?: () => {min: number, max: number},
-    resize?: (height: number) => void,
+    expand?: () => void,
     canStart?: () => boolean,
     isClosing?: () => boolean,
     scrimOpacity?: number,
@@ -13,15 +12,13 @@ type SheetDragOptions = {
 
 export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement,
                                     close: () => Promise<void | boolean>, options: SheetDragOptions = {}) => {
-    let start: {x: number, y: number, time: number, id: number};
-    let gesture: SheetGesture;
+    let start: {x: number, y: number, time: number, id: number, fromGrip: boolean};
     let dragging = false;
     let closing = false;
     let disposed = false;
     let suppressClickUntil = 0;
     const clearGesture = () => {
         start = undefined;
-        gesture = undefined;
         dragging = false;
     };
     const exitOwnsVisuals = () => {
@@ -36,10 +33,14 @@ export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement,
         clearGesture();
     };
     const onStart = (event: TouchEvent) => {
-        if (closing || disposed || options.isClosing?.() || options.canStart?.() === false) return;
+        if (exitOwnsVisuals()) return;
+        if (options.canStart?.() === false || event.touches.length !== 1) {
+            onCancel();
+            return;
+        }
         reset();
         const target = event.target as HTMLElement;
-        if (event.touches.length !== 1 || target.closest('input, textarea, select, button, [contenteditable="true"], .protyle, .block__icon, .b3-dialog__close, [draggable="true"]')) return;
+        if (target.closest('input, textarea, select, button, [contenteditable="true"], .protyle, .block__icon, .b3-dialog__close, [draggable="true"]')) return;
         if (isIOSPlatform(navigator)) {
             const editor = element.ownerDocument.activeElement?.closest<HTMLElement>(".protyle-wysiwyg");
             if (editor && element.contains(editor) && isNativeTextSelectionHandleTouch(event, editor)) return;
@@ -51,12 +52,8 @@ export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement,
             parent = parent.parentElement;
         }
         const touch = event.touches[0];
-        start = {x: touch.clientX, y: touch.clientY, time: performance.now(), id: touch.identifier};
-        if (options.grip?.contains(target) && options.getBounds && options.resize) {
-            const height = element.getBoundingClientRect().height;
-            const bounds = options.getBounds();
-            gesture = {height, ...bounds, min: Math.min(bounds.min, height), offset: 0, time: start.time};
-        }
+        start = {x: touch.clientX, y: touch.clientY, time: performance.now(), id: touch.identifier,
+            fromGrip: !!options.grip?.contains(target)};
     };
     const findTouch = (touches: TouchList) => Array.from(touches).find(touch => touch.identifier === start?.id);
     const onMove = (event: TouchEvent) => {
@@ -73,19 +70,16 @@ export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement,
             return;
         }
         if (!dragging && Math.abs(offset) < 4) return;
-        if (!gesture && offset <= 0) {
+        if (!dragging && !start.fromGrip && offset <= 0) {
             onCancel();
             return;
         }
         dragging = true;
         element.style.transition = "none";
-        const result = gesture ? moveSheetGesture(gesture, offset, performance.now()) : undefined;
-        if (result) options.resize(result.height);
-        if (exitOwnsVisuals()) return;
-        const excess = result ? result.excess : Math.max(0, offset);
+        const excess = Math.max(0, offset);
         element.style.transform = `translateY(${excess}px)`;
         scrim.style.opacity = Math.max(0, (options.scrimOpacity ?? 1) *
-            (1 - excess / Math.max(result ? result.height : element.clientHeight, 1))).toString();
+            (1 - excess / Math.max(element.clientHeight, 1))).toString();
         if (event.cancelable) event.preventDefault();
     };
     const onEnd = (event: TouchEvent) => {
@@ -101,19 +95,12 @@ export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement,
             return;
         }
         const offset = touch.clientY - start.y;
-        const result = gesture ? moveSheetGesture(gesture, offset, performance.now()) : undefined;
-        if (result) options.resize(result.height);
-        if (exitOwnsVisuals()) return;
-        const duration = Math.max(performance.now() - start.time, 1);
-        const shouldClose = result ? result.close : offset > Math.min(120, element.clientHeight * .25) ||
-            (offset > 20 && offset / duration > .6);
+        const action = getMobileSheetDragAction(offset, performance.now() - start.time, element.clientHeight, start.fromGrip);
         suppressClickUntil = performance.now() + 300;
         void element.offsetHeight;
         element.style.transition = "";
-        start = undefined;
-        gesture = undefined;
-        dragging = false;
-        if (shouldClose) {
+        clearGesture();
+        if (action === "close") {
             closing = true;
             void Promise.resolve().then(close).then(accepted => {
                 if (disposed) return;
@@ -128,7 +115,10 @@ export const bindBottomSheetDrag = (element: HTMLElement, scrim: HTMLElement,
                     reset();
                 }
             });
-        } else reset();
+        } else {
+            reset();
+            if (action === "expand") options.expand?.();
+        }
     };
     const onCancel = () => {
         if (exitOwnsVisuals() || !start) return;

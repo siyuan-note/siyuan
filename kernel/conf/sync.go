@@ -4,7 +4,10 @@
 
 package conf
 
+import "strings"
+
 type Sync struct {
+	Configured          bool     `json:"configured"`
 	CloudName           string   `json:"cloudName"`           // 云端同步目录名称
 	Enabled             bool     `json:"enabled"`             // 是否开启同步
 	Perception          bool     `json:"perception"`          // 是否开启感知
@@ -86,4 +89,19 @@ func ProviderToStr(provider int) string {
 		return "Local File System"
 	}
 	return "Unknown"
+}
+
+func (s *Sync) HasConfiguredSync() bool {
+	if s == nil {
+		return false
+	}
+	if s.Configured || s.Enabled || s.Synced != 0 || s.LastResult != 0 {
+		return true
+	}
+	if name := strings.TrimSpace(s.CloudName); name != "" && name != "main" {
+		return true
+	}
+	return (s.S3 != nil && strings.TrimSpace(s.S3.Endpoint) != "" && strings.TrimSpace(s.S3.Bucket) != "") ||
+		(s.WebDAV != nil && strings.TrimSpace(s.WebDAV.Endpoint) != "") ||
+		(s.Local != nil && strings.TrimSpace(s.Local.Endpoint) != "")
 }

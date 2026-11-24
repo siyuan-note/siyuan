@@ -8,12 +8,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
@@ -144,19 +146,149 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 	return
 }
 
-// getInstalledPackageREADME 获取集市包的本地 README。
+// installedReadmeCacheEntry 保存已安装包 README 的渲染结果，按 README 文件的大小与修改时间校验。
+type installedReadmeCacheEntry struct {
+	readmePath string
+	stamp      installedManifestStamp
+	html       string
+}
+
+const (
+	installedReadmeCacheEntryLimit = 64
+	installedReadmeCacheByteLimit  = 8 << 20
+)
+
+var installedReadmeCache = struct {
+	mu      sync.Mutex
+	entries map[string]installedReadmeCacheEntry
+	keys    []string // 按写入顺序淘汰
+	bytes   int
+}{entries: map[string]installedReadmeCacheEntry{}}
+
+var installedReadmeRenderer = renderPackageREADMEWithImageResolver // 渲染入口，便于测试替换
+
+// installedReadmeCacheKey 汇总影响渲染结果的输入：目录、链接前缀、图片来源、版本与语言。
+func installedReadmeCacheKey(installPath, localRootURL, repoURL, repoRef string, cacheVersion int64) string {
+	return installPath + "\x00" + localRootURL + "\x00" + repoURL + "\x00" + repoRef + "\x00" +
+		strconv.FormatInt(cacheVersion, 10) + "\x00" + util.Lang
+}
+
+func lookupInstalledPackageReadme(key, readmePath string) (string, bool) {
+	installedReadmeCache.mu.Lock()
+	entry, ok := installedReadmeCache.entries[key]
+	installedReadmeCache.mu.Unlock()
+	// 文件校验放在锁外，避免文件系统调用阻塞其他调用方
+	if !ok || entry.readmePath != readmePath || !manifestStampMatches(readmePath, entry.stamp) {
+		return "", false
+	}
+	return entry.html, true
+}
+
+func storeInstalledPackageReadme(key, readmePath string, stamp installedManifestStamp, html string) {
+	if 0 == len(html) || installedReadmeCacheByteLimit < len(html) {
+		return
+	}
+	installedReadmeCache.mu.Lock()
+	defer installedReadmeCache.mu.Unlock()
+	deleteInstalledReadmeCacheEntryLocked(key)
+	installedReadmeCache.entries[key] = installedReadmeCacheEntry{readmePath: readmePath, stamp: stamp, html: html}
+	installedReadmeCache.keys = append(installedReadmeCache.keys, key)
+	installedReadmeCache.bytes += len(html)
+	for installedReadmeCacheEntryLimit < len(installedReadmeCache.keys) ||
+		(installedReadmeCacheByteLimit < installedReadmeCache.bytes && 1 < len(installedReadmeCache.keys)) {
+		oldest := installedReadmeCache.keys[0]
+		installedReadmeCache.keys = installedReadmeCache.keys[1:]
+		deleteInstalledReadmeCacheEntryLocked(oldest)
+	}
+}
+
+func deleteInstalledReadmeCacheEntryLocked(key string) {
+	entry, ok := installedReadmeCache.entries[key]
+	if !ok {
+		return
+	}
+	installedReadmeCache.bytes -= len(entry.html)
+	delete(installedReadmeCache.entries, key)
+	for i, cachedKey := range installedReadmeCache.keys {
+		if cachedKey == key {
+			installedReadmeCache.keys = append(installedReadmeCache.keys[:i], installedReadmeCache.keys[i+1:]...)
+			break
+		}
+	}
+}
+
+// installedReadmeCacheInstallPath 取出缓存键前缀中的安装目录。
+func installedReadmeCacheInstallPath(key string) string {
+	if i := strings.IndexByte(key, 0); 0 <= i {
+		return key[:i]
+	}
+	return key
+}
+
+// InvalidateInstalledPackageReadmeCache 丢弃指定安装目录的 README 渲染结果。
+func InvalidateInstalledPackageReadmeCache(installPath string) {
+	prefix := installPath + "\x00"
+	installedReadmeCache.mu.Lock()
+	defer installedReadmeCache.mu.Unlock()
+	for key := range installedReadmeCache.entries {
+		if strings.HasPrefix(key, prefix) {
+			deleteInstalledReadmeCacheEntryLocked(key)
+		}
+	}
+}
+
+func retainInstalledPackageReadmeCache(basePath string, installPaths []string) {
+	keep := make(map[string]struct{}, len(installPaths))
+	for _, installPath := range installPaths {
+		keep[installPath] = struct{}{}
+	}
+	installedReadmeCache.mu.Lock()
+	defer installedReadmeCache.mu.Unlock()
+	for key := range installedReadmeCache.entries {
+		installPath := installedReadmeCacheInstallPath(key)
+		if filepath.Dir(installPath) != basePath {
+			continue
+		}
+		if _, ok := keep[installPath]; !ok {
+			deleteInstalledReadmeCacheEntryLocked(key)
+		}
+	}
+}
+
+func readInstalledPackageReadme(readmePath string) (data []byte, info os.FileInfo, err error) {
+	file, err := os.Open(readmePath)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	// 使用读取内容的文件句柄取属性，避免文件被替换时混用两个版本。
+	info, _ = file.Stat()
+	data, err = io.ReadAll(file)
+	return
+}
+
 func getInstalledPackageREADME(installPath, localRootURL, repoURL, repoRef string, cacheVersion int64,
 	readme LocaleStrings) (ret string) {
+	cacheKey := installedReadmeCacheKey(installPath, localRootURL, repoURL, repoRef, cacheVersion)
 	candidates := getReadmeFileCandidates(readme)
 	var errMsgs []string
 	for _, name := range candidates {
-		readmeData, readErr := os.ReadFile(filepath.Join(installPath, name))
+		readmePath := filepath.Join(installPath, name)
+		if cached, ok := lookupInstalledPackageReadme(cacheKey, readmePath); ok {
+			return cached
+		}
+		readmeData, info, readErr := readInstalledPackageReadme(readmePath)
 		if readErr == nil {
 			remoteRoot := packageRemoteRootURL(repoURL, repoRef, false)
 			linkBase := readmeDirectoryURL(localRootURL, name)
-			ret = renderPackageREADMEWithImageResolver(linkBase, readmeData, func(src string) string {
+			ret = installedReadmeRenderer(linkBase, readmeData, func(src string) string {
 				return resolvePackageREADMEImage(src, installPath, localRootURL, remoteRoot, name, cacheVersion)
 			})
+			if info != nil {
+				storeInstalledPackageReadme(cacheKey, readmePath,
+					installedManifestStamp{size: info.Size(), modTime: info.ModTime().UnixNano()}, ret)
+			}
 			return
 		}
 		logging.LogWarnf("read installed %s failed: %s", name, readErr)

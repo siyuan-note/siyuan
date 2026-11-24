@@ -13,7 +13,7 @@ const classList = () => {
         remove: (...names: string[]) => names.forEach(name => values.delete(name)), contains: (name: string) => values.has(name)};
 };
 
-test("opening flashcards preserves the expanded mobile layout and close guard", async () => {
+test("flashcard review opens the mobile drawer at full height with a close guard", async () => {
     type DialogOptions = ConstructorParameters<typeof import("../dialog/adaptiveDialog").AdaptiveDialog>[0];
     let options: DialogOptions;
     const stopped = new Error("Captured dialog options");
@@ -31,7 +31,7 @@ test("opening flashcards preserves the expanded mobile layout and close guard", 
     });
     await assert.rejects(openCardByData({plugins: []} as unknown as Parameters<typeof openCardByData>[0],
         {cards: []} as unknown as ICardData, "all"), error => error === stopped);
-    assert.equal(options.mobileSheet.mode, "expanded");
+    assert.equal(options.mobileSheet.initiallyExpanded, true);
     assert.equal(options.mobileSheet.beforeClose, guard);
 });
 

@@ -16,7 +16,8 @@ test("asset menu previews preserve list geometry and pointer selection during im
 }, async () => {
     const names = ["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen",
         "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState", "util/setPosition",
-        "protyle/util/hasClosest", "plugin/Menu", "menus/overlayOwnership", "asset/renderAssets", "asset/previewPath", "util/escape"];
+        "protyle/util/hasClosest", "plugin/Menu", "menus/overlayOwnership", "asset/renderAssets", "asset/previewPath", "util/escape",
+        "util/searchHighlight"];
     const sources = Object.fromEntries(names.map(name => [name, compile(fs.readFileSync(path.join(root, "src", name + ".ts"), "utf8"))]));
     const menuSource = ts.createSourceFile("protyle.ts", fs.readFileSync(path.join(root, "src/menus/protyle.ts"), "utf8"), ts.ScriptTarget.Latest, true);
     const declarations = ["renderAssetPreview", "renderAssetList", "buildAssetMenu"].map(name => menuSource.statements.find(node => ts.isVariableStatement(node) && node.declarationList.declarations.some(item => item.name.getText(menuSource) === name)).getText(menuSource)).join("\n");
@@ -36,7 +37,10 @@ test("asset menu previews preserve list geometry and pointer selection during im
             "plugin/EventBusCore": {forEachPluginSubscriber() {}}, "mobile/util/keyboardToolbar": {activeBlur() {}},
             "block/popoverLifecycle": {setPopoverMenuOpen() {}}, "config/entryVisibility/runtime": {applyMenuEntryVisibility() {}},
             "menus/menuToggle": {},
-            "util/pathName": {getAssetExtension: value => value.slice(value.lastIndexOf("."))},
+            "util/pathName": {
+                getAssetExtension: value => value.slice(value.lastIndexOf(".")),
+                getAssetName: value => value.slice(value.lastIndexOf("/") + 1, value.lastIndexOf(".")),
+            },
             "layout/getAll": {}, dayjs: {}, "asset/html": {}, "util/imageURL": {},
         };
         const load = name => {
@@ -58,19 +62,22 @@ test("asset menu previews preserve list geometry and pointer selection during im
         const style = document.createElement("style");
         style.textContent = css + ":root{--b3-font-size:16px;--b3-font-family:Arial;--b3-theme-surface-lighter:#999;--b3-menu-background:#fff;--b3-theme-on-surface:#333;}body{margin:0;}button,input{font:inherit;}";
         document.head.append(style);
-        window.siyuan = {zIndex: 0, config: {appearance: {}}, languages: {back: "Back", emptyContent: "Empty"}, menus: {}, storage: {}, mobile: {size: {portrait: {height1: innerHeight}}}};
+        window.siyuan = {zIndex: 0, config: {appearance: {}, search: {caseSensitive: false}}, languages: {back: "Back", emptyContent: "Empty"}, menus: {}, storage: {}, mobile: {size: {portrait: {height1: innerHeight}}}};
         const {Menu} = load("menus/Menu");
         const {Menu: PluginMenu} = load("plugin/Menu");
         const {renderAssetsPreview} = load("asset/renderAssets");
         const {escapeHtmlTextAndAttr} = load("util/escape");
+        const {highlightSearchText} = load("util/searchHighlight");
+        const {getAssetName, getAssetExtension} = load("util/pathName");
         const items = ["portrait-one", "portrait-two", "landscape"].map(name => ({path: origin + "/" + name + ".png", hName: name + ".png"}));
         const build = new Function("Menu", "Constants", "isMobile", "fetchPost", "renderAssetsPreview", "escapeHtmlTextAndAttr",
             "hasClosestByClassName", "hasClosestByAttribute", "upDownHint", "hintRenderAssets", "focusByRange",
+            "getAssetName", "getAssetExtension", "highlightSearchText",
             declarations + "\nreturn buildAssetMenu;")(
             PluginMenu, constants, () => mobile, (_url, _data, callback) => setTimeout(() => callback({data: _data.k === "no results" ? [] : items}), 0),
             renderAssetsPreview, escapeHtmlTextAndAttr,
             load("protyle/util/hasClosest").hasClosestByClassName, load("protyle/util/hasClosest").hasClosestByAttribute,
-            () => null, () => {}, () => {});
+            () => null, () => {}, () => {}, getAssetName, getAssetExtension, highlightSearchText);
         const element = document.createElement("div");
         element.id = "commonMenu"; element.className = "b3-menu fn__none";
         element.innerHTML = '<div class="b3-menu__title fn__none"><span class="b3-menu__label"></span></div><div class="b3-menu__items"></div>';
@@ -116,6 +123,10 @@ test("asset menu previews preserve list geometry and pointer selection during im
         await sleep(30);
         assert.deepEqual(clicks, [row.dataset.value]);
         const input = element.querySelector("input");
+        input.value = "portrait";
+        input.dispatchEvent(new InputEvent("input", {bubbles: true}));
+        await sleep(100); await frame();
+        assert.deepEqual(Array.from(element.querySelectorAll(".b3-list-item mark"), mark => mark.textContent), ["portrait", "portrait"]);
         input.value = "no results";
         input.dispatchEvent(new InputEvent("input", {bubbles: true}));
         await sleep(100); await frame();

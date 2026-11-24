@@ -547,7 +547,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On Windows, macOS, and Linux, when tabs are merged into the top bar, drag the gap between the tab switcher and the top bar buttons on its right to move the window."
+					"Data": "On Windows, macOS, and Linux, when tabs are merged into the top bar, drag the gap beside the window controls to move the window. The gap is hidden while a feature is in full screen and returns when you exit full screen."
 				}
 			]
 		},

@@ -45,6 +45,7 @@ const bridge: MarkdownBridge = {
     insertImage: () => invoke("insert-image"),
     resolveResource: reference => invoke("resource", reference),
     openLink: url => invoke("link", url),
+    prepareDocumentLink: reference => invoke("prepare-document-link", reference),
     preferences: patch => invoke("preferences", patch),
     systemFonts: () => invoke("system-fonts"),
     appearance: patch => invoke("appearance", patch),

@@ -5,6 +5,7 @@ import {test} from "node:test";
 import {setImmediate} from "node:timers/promises";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {getAVBindingCandidateSubtype} from "../render/av/cellValue";
 
 const extend = createSourceFile("extend.ts", readFileSync(join(__dirname, "extend.ts"), "utf8"), ScriptTarget.Latest);
 const functions = ["genHintItemHTML", "hintRef"].map(name => extend.statements.find(statement =>
@@ -13,33 +14,37 @@ const functions = ["genHintItemHTML", "hintRef"].map(name => extend.statements.f
 const index = createSourceFile("index.ts", readFileSync(join(__dirname, "index.ts"), "utf8"), ScriptTarget.Latest);
 const hintClass = index.statements.find(statement => isClassDeclaration(statement) && statement.name.text === "Hint");
 assert.ok(hintClass && isClassDeclaration(hintClass));
-const searchMethod = hintClass.members.find(member => member.name?.getText(index) === "genSearchHTML").getText(index);
+const methods = hintClass.members.filter(member => ["genHTML", "genSearchHTML"].includes(member.name?.getText(index)))
+    .map(member => member.getText(index)).join("\n");
 const searchSource = readFileSync(join(__dirname, "searchRef.ts"), "utf8")
     .replace(/^import .*;\r?\n/gm, "").replace("export ", "");
-const code = transpileModule(`${searchSource}\n${functions.join("\n")}\nclass Hint { ${searchMethod} }\n({hintRef, Hint});`, {
+const code = transpileModule(`${searchSource}\n${functions.join("\n")}\nclass Hint { ${methods} }\n({hintRef, Hint});`, {
     compilerOptions: {target: ScriptTarget.ES2020},
 }).outputText;
 
 const fixture = (pendingCreate = false, hiddenEntries: string[] = [], hideConfiguredCreate = false) => {
-    const requests: Array<{callback: (response: unknown) => void, resolve: () => void, reject: (error: Error) => void}> = [];
-    const element = {lastElementChild: {innerHTML: ""}, style: {left: "0", right: "0"}};
+    const requests: Array<{params: unknown, callback: (response: unknown) => void, resolve: () => void, reject: (error: Error) => void}> = [];
+    const search = {value: "", select() {}, addEventListener() {}};
+    const element = {lastElementChild: {innerHTML: ""}, style: {left: "0", right: "0"},
+        classList: {add() {}, remove() {}}, querySelector: (selector: string) => selector === "input.b3-text-field" ? search : null};
     const block = {getAttribute: () => "block"};
     let generation = 0;
     let hidden = false;
     const rendered: IHintData[][] = [];
     const api = runInNewContext(code, {
         window: {siyuan: {config: {editor: {}}, languages: {emptyContent: "Empty", ref: "Reference"}}},
-        Constants: {ZWSP: "\u200b"},
+        Constants: {ZWSP: "\u200b", CUSTOM_SY_AV_STATIC_TEXT: "custom-sy-av-s-text-"},
         getEditorRange: () => ({startContainer: block}), hasClosestBlock: () => block,
+        getAVBindingCandidateSubtype,
         isEncryptedBox: () => false, getDailyNoteHints: async (): Promise<IHintData[]> => [],
         getConfiguredEntryVisibility: (path: string) => !hiddenEntries.includes(path),
         Lute: {Caret: "caret", UnEscapeHTMLStr: (text: string) => text},
         getIconByType: () => "iconFile", unicode2Emoji: () => "icon",
         stripSearchMark: (value: string) => value, escapeSearchHighlight: (value: string) => value,
         escapeHtml: (value: string) => value,
-        setPosition() {},
-        fetchPost: (_url: string, _params: unknown, callback: (response: unknown) => void) =>
-            new Promise<void>((resolve, reject) => requests.push({callback, resolve, reject})),
+        setPosition() {}, getAVBindingCell: (): null => null, isAbnormalItem: () => false,
+        fetchPost: (_url: string, params: unknown, callback: (response: unknown) => void) =>
+            new Promise<void>((resolve, reject) => requests.push({params, callback, resolve, reject})),
     });
     const hint = new api.Hint();
     Object.assign(hint, {
@@ -50,20 +55,25 @@ const fixture = (pendingCreate = false, hiddenEntries: string[] = [], hideConfig
                 isCurrent: () => current === generation && !hidden};
         },
         genLoading() { hidden = false; element.lastElementChild.innerHTML = "loading"; },
-        genHTML(data: IHintData[]) {
+        cancelLoadingAnimation() {}, destroyEmojiPanel() {}, bindUploadEvent() {},
+        getHTMLByData: () => "results",
+        genHTML(data: IHintData[], protyle: IProtyle, hide: boolean, source: string, searchQuery?: string) {
             rendered.push(data);
             hidden = data.length === 0;
             element.lastElementChild.innerHTML = hidden ? "hidden" : "results";
+            if (source === "av" && !hidden) {
+                api.Hint.prototype.genHTML.call(hint, data, protyle, hide, source, searchQuery);
+            }
         },
     });
     const protyle = {notebookId: "box", element: {clientWidth: 320}, block: {rootID: "root"},
         toolbar: {range: {startContainer: block}}, wysiwyg: {element: {}}, hint};
-    return {requests, element, rendered,
-        start(source = "hint", searchInput = false) {
+    return {requests, element, rendered, search,
+        start(source = "hint", searchInput = false, key = "") {
             if (searchInput) {
                 hint.genSearchHTML(protyle, {value: ""}, block, "Original anchor", source);
             } else {
-                api.hintRef("", protyle, source);
+                api.hintRef(key, protyle, source);
             }
         },
         async respond(response: unknown, request = 0, callback = true) {
@@ -75,6 +85,15 @@ const fixture = (pendingCreate = false, hiddenEntries: string[] = [], hideConfig
         },
     };
 };
+
+test("database binding prefills the complete query even when candidates contain no highlights", async () => {
+    const f = fixture(false, ["editor.ref.newFile", "editor.ref.newSubDoc", "editor.ref.newFileAtPath"]);
+    const title = "A & B";
+    f.start("av", false, title);
+    assert.equal((f.requests[0].params as {k: string}).k, title);
+    await f.respond({code: 0, data: {k: "A &amp; B", newDoc: true, blocks: []}});
+    assert.equal(f.search.value, title);
+});
 
 for (const source of ["hint", "search", "av"]) {
     test(`${source} reference loading ends on empty, invalid, rejected and discarded responses`, async () => {
@@ -114,6 +133,27 @@ for (const source of ["hint", "search", "av"]) {
         }
     });
 }
+
+test("database binding candidates derive their reference subtype from the static anchor text", async () => {
+    const blocks = [
+        {id: "static", type: "NodeParagraph", refText: "Static", name: "", content: "Static", hPath: "/",
+            ial: {"custom-sy-av-s-text-block": "Anchor"}},
+        {id: "dynamic", type: "NodeParagraph", refText: "Dynamic", name: "", content: "Dynamic", hPath: "/", ial: {}},
+    ];
+    for (const searchInput of [false, true]) {
+        const f = fixture();
+        f.start("av", searchInput);
+        await f.respond({code: 0, data: {k: "", newDoc: false, blocks}});
+        const values: string[] = searchInput ?
+            Array.from(f.element.lastElementChild.innerHTML.matchAll(/data-value="([^"]*)"/g), match => decodeURIComponent(match[1])) :
+            (f.rendered.at(-1) || []).map(item => item.value);
+        assert.match(values.find(value => value.includes('data-id="static"')) || "", /data-subtype="s"/,
+            "the static anchor text marks the bound reference as static");
+        assert.ok(values.find(value => value.includes('data-id="static"'))?.includes("Anchor"));
+        assert.match(values.find(value => value.includes('data-id="dynamic"')) || "", /data-subtype="d"/,
+            "a block without static anchor text keeps the kernel default dynamic reference");
+    }
+});
 
 test("a failing reference request can be followed by a successful query without resetting the editor", async () => {
     const f = fixture();

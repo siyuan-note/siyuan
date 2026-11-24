@@ -1,0 +1,54 @@
+{
+	"ID": "20261122113000-2riheq6",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f4c4",
+		"id": "20261122113000-2riheq6",
+		"title": "Политика конфиденциальности и пользовательское соглашение",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-ki4ngt4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ki4ngt4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/privacy.html",
+					"TextMarkTextContent": "Политика конфиденциальности SiYuan"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-43o41h8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-43o41h8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/eula.html",
+					"TextMarkTextContent": "Пользовательское соглашение SiYuan"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wj7eaqa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-wj7eaqa",
+				"updated": "20261122113000"
+			}
+		}
+	]
+}

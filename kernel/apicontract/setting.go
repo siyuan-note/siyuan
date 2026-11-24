@@ -161,6 +161,7 @@ type SettingAgentSkills struct {
 }
 
 type SettingEditing struct {
+	ReasoningEffort     string  `json:"reasoningEffort" api:"optional,nullable"`
 	ModelID             string  `json:"modelId" api:"optional,nullable"`
 	MaxHistoryMessages  int     `json:"maxHistoryMessages" api:"optional,nullable"`
 	Temperature         float64 `json:"temperature" api:"optional,nullable"`

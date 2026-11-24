@@ -472,29 +472,37 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
     };
     const messageBox = async (record: MarkdownWindowRecord, message: string, buttons: string[]): Promise<number> => (await dialog.showMessageBox(record.window,
         {type: "question", title: "SiYuan", message, buttons, cancelId: buttons.length - 1, defaultId: buttons.length - 1, noLink: true})).response;
-    const prepareTreeOpen = (record: MarkdownWindowRecord, location: MarkdownTreeLocation): MarkdownTreeOpen | Promise<MarkdownTreeOpen> => {
+    const prepareDocumentOpen = (record: MarkdownWindowRecord,
+        resolve: () => ReturnType<MarkdownTree["file"]>): MarkdownTreeOpen | Promise<MarkdownTreeOpen> => {
         if (quitting || record.closing || record.crashed || record.treeTask || record.imageTask || record.candidate) {
             return {kind: "blocked", error: {code: "unavailable", recoverable: true}};
         }
         const current = record.current;
+        const generation = host.sessions.get(current.sessionId)?.generation;
+        const valid = () => record.current === current && generation === host.sessions.get(current.sessionId)?.generation &&
+            !quitting && !record.closing && !record.crashed && !record.window.isDestroyed();
         let candidateSession: string | undefined;
         const task = (async (): Promise<MarkdownTreeOpen> => {
             try {
-                const node = await record.tree.file(location);
+                const node = await resolve();
+                if (!valid()) throw new Error("Markdown switch cancelled");
                 if (currentTarget(record)?.descriptor.path === node.path) return {kind: "current"};
-                if (quitting || record.closing || record.current !== current || record.window.isDestroyed()) throw new Error("Markdown switch cancelled");
                 candidateSession = host.createSession();
-                const opened = await host.authorizeOpen(candidateSession, node.selection);
+                const opened = await host.authorizeOpen(candidateSession, node.selection, node);
+                if (opened.kind === "blocked") return opened;
+                const verified = await resolve();
+                if (!valid()) throw new Error("Markdown switch cancelled");
+                if (verified.path !== node.path || verified.identity !== node.identity) {
+                    return {kind: "blocked", error: {code: "identity-changed", recoverable: true}};
+                }
                 if (opened.kind === "occupied") {
                     if (opened.sessionId === current.sessionId) return {kind: "current"};
                     focus(owner(opened.sessionId));
                     return {kind: "occupied"};
                 }
-                if (opened.kind !== "opened") return opened;
-                await record.tree.file(location);
                 const initial = {sessionId: candidateSession, content: opened.content, target: opened.target};
                 const value = await bootstrap(initial, record.shortcutSource, record.appearance);
-                if (quitting || record.closing || record.crashed || record.current !== current || record.window.isDestroyed()) throw new Error("Markdown switch cancelled");
+                if (!valid()) throw new Error("Markdown switch cancelled");
                 const ticket = createAvailableMarkdownId(value => record.candidate?.ticket === value || record.committedSwitch?.ticket === value);
                 record.candidate = {ticket, initial, bootstrap: value, current};
                 candidateSession = undefined;
@@ -582,7 +590,12 @@ const createMarkdownWindows = ({app, BrowserWindow, ipcMain, dialog, shell, root
             }
             case "tree-list": return record.tree.list(payload as MarkdownTreeLocation);
             case "tree-save-view": return record.tree.saveView(payload as MarkdownTreeView);
-            case "tree-prepare-open": return prepareTreeOpen(record, payload as MarkdownTreeLocation);
+            case "tree-prepare-open": return prepareDocumentOpen(record, () => record.tree.file(payload as MarkdownTreeLocation));
+            case "prepare-document-link": {
+                const documentPath = currentTarget(record)?.descriptor.path;
+                if (record.treeError) return {kind: "blocked", error: record.treeError};
+                return prepareDocumentOpen(record, () => record.tree.linkedFile(payload, documentPath));
+            }
             case "tree-commit-open": return commitTreeOpen(record, payload);
             case "tree-cancel-open": {
                 if (typeof payload !== "string") throw new Error("Invalid Markdown switch ticket");

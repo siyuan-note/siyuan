@@ -7,6 +7,8 @@ package apicontract
 type AIReference struct {
 	ID    string `json:"id" api:"optional,nullable"`
 	Title string `json:"title" api:"optional,nullable"`
+	// 整条消息引用的来源消息 ID。此时 id 对应消息正文中的行内占位符，title 为发送时的快照；省略时仍表示块引用。
+	MessageID string `json:"messageID,omitempty" api:"optional,nullable"`
 }
 
 type AIEditorContext struct {
@@ -175,6 +177,7 @@ type AISessionSaveData struct {
 
 type AISSEStart struct {
 	TaskID string `json:"taskID"`
+	Prompt string `json:"prompt,omitempty"`
 }
 type AISSEToken struct {
 	Token string `json:"token"`
@@ -184,6 +187,11 @@ type AISSEFinish struct {
 }
 type AISSEMessage struct {
 	Message string `json:"message"`
+}
+type AISSEAgentError struct {
+	Message string `json:"message"`
+	// 自动快照失败，当前工具的工作空间写入未执行。
+	SnapshotFailed bool `json:"snapshotFailed,omitempty"`
 }
 type AISSETurn struct {
 	TurnID string `json:"turnID"`
@@ -245,7 +253,7 @@ func aiEditorSSEOptions() ResponseOptions {
 	return SSEOptions(SSEEvent[AISSEStart]("start"), SSEEvent[AISSEToken]("reasoning"), SSEEvent[AISSEToken]("content"), SSEEvent[AISSEMessage]("error"), SSEEvent[AISSEMessage]("truncated"), SSEEvent[AISSEFinish]("done"))
 }
 func aiAgentSSEOptions() ResponseOptions {
-	options := SSEOptions(SSEEvent[AISSETurn]("turn"), SSEEvent[AISSEToken]("content"), SSEEvent[AISSEThinking]("thinking"), SSEEvent[AISSEToken]("reasoning"), SSEEvent[AISSEConfirm]("confirm"), SSEEvent[AIPermissionData]("permission"), SSEEvent[AISSEToolCall]("tool_call"), SSEEvent[AISSEToolResult]("tool_result"), SSEEvent[AISSEMessage]("error"), SSEEvent[AISSEMessage]("interrupted"), SSEEvent[AISSEUsage]("usage"), SSEEvent[AISSETurn]("done"), SSEEvent[AISSERetry]("retry"), SSEEvent[AISSEQuestion]("question"), SSEEvent[AISSEBrowserCapabilityCall]("browser_capability_call"), SSEEvent[AISSESnapshot]("snapshot"))
+	options := SSEOptions(SSEEvent[AISSETurn]("turn"), SSEEvent[AISSEToken]("content"), SSEEvent[AISSEThinking]("thinking"), SSEEvent[AISSEToken]("reasoning"), SSEEvent[AISSEConfirm]("confirm"), SSEEvent[AIPermissionData]("permission"), SSEEvent[AISSEToolCall]("tool_call"), SSEEvent[AISSEToolResult]("tool_result"), SSEEvent[AISSEAgentError]("error"), SSEEvent[AISSEMessage]("interrupted"), SSEEvent[AISSEUsage]("usage"), SSEEvent[AISSETurn]("done"), SSEEvent[AISSERetry]("retry"), SSEEvent[AISSEQuestion]("question"), SSEEvent[AISSEBrowserCapabilityCall]("browser_capability_call"), SSEEvent[AISSESnapshot]("snapshot"))
 	options.AdditionalErrorStatuses = []int{409}
 	return options
 }

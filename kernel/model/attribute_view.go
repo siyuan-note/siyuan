@@ -957,55 +957,89 @@ func removeAttributeViewGroup0(view *av.View) {
 }
 
 func (tx *Transaction) doSyncAttrViewTableColWidth(operation *Operation) (ret *TxErr) {
-	err := syncAttrViewTableColWidth(operation)
+	err := tx.syncAttrViewTableColWidth(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func syncAttrViewTableColWidth(operation *Operation) (err error) {
+func (tx *Transaction) syncAttrViewTableColWidth(operation *Operation) (err error) {
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if err != nil {
 		return
 	}
 
-	view := attrView.GetView(operation.ID)
-	if nil == view {
-		err = av.ErrViewNotFound
-		logging.LogErrorf("view [%s] not found in attribute view [%s]", operation.ID, operation.AvID)
-		return
-	}
-
-	var width string
-	switch view.LayoutType {
-	case av.LayoutTypeList, av.LayoutTypeCalendar:
-		return
-	case av.LayoutTypeTable:
-		for _, column := range view.Table.Columns {
-			if column.ID == operation.KeyID {
-				width = column.Width
-				break
-			}
+	widths := operation.attributeViewColumnWidths
+	if widths == nil {
+		view := attrView.GetView(operation.ID)
+		if view == nil {
+			return av.ErrViewNotFound
 		}
-	case av.LayoutTypeGallery, av.LayoutTypeKanban:
-		return
-	}
-
-	for _, v := range attrView.Views {
-		if av.LayoutTypeTable == v.LayoutType {
-			for _, column := range v.Table.Columns {
-				if column.ID == operation.KeyID {
-					column.Width = width
-					break
-				}
+		column := attributeViewTableColumn(view, operation.KeyID)
+		if column == nil {
+			return nil
+		}
+		widths = map[string]string{}
+		for _, view := range attrView.Views {
+			target := attributeViewTableColumn(view, operation.KeyID)
+			if target != nil && target.Width != column.Width {
+				widths[view.ID] = column.Width
 			}
 		}
 	}
-
-	err = av.SaveAttributeView(attrView)
+	if len(widths) == 0 {
+		return nil
+	}
+	previous := make(map[string]string, len(widths))
+	targets := make(map[string]*av.ViewTableColumn, len(widths))
+	for viewID := range widths {
+		column := attributeViewTableColumn(attrView.GetView(viewID), operation.KeyID)
+		if column == nil {
+			return av.ErrViewNotFound
+		}
+		previous[viewID] = column.Width
+		targets[viewID] = column
+	}
+	if err = tx.rememberAttributeViewMutationTree(operation.BlockID); err != nil {
+		return err
+	}
+	if tx.attributeViewRollback != nil {
+		key := av.GetAVBoxID(attrView.ID) + "/" + attrView.ID
+		if tx.attributeViewRollback.views[key] == nil {
+			original, cloneErr := cloneAttributeViewForFieldMutation(attrView)
+			if cloneErr != nil {
+				return cloneErr
+			}
+			tx.attributeViewRollback.views[key] = original
+		}
+	}
+	for viewID, width := range widths {
+		targets[viewID].Width = width
+	}
+	if err = av.SaveAttributeView(attrView); err != nil {
+		return err
+	}
+	if tx.fromAPI && !tx.isReplay && operation.BlockID != "" {
+		// 重做沿用本次同步的目标和宽度，后续新增的视图不参与回放。
+		operation.attributeViewColumnWidths = widths
+		inverse := *operation
+		inverse.attributeViewColumnWidths = previous
+		tx.UndoOperations = append([]*Operation{&inverse}, tx.UndoOperations...)
+	}
 	ReloadAttrView(attrView.ID)
-	return
+	return nil
+}
+
+func attributeViewTableColumn(view *av.View, keyID string) *av.ViewTableColumn {
+	if view != nil && view.LayoutType == av.LayoutTypeTable && view.Table != nil {
+		for _, column := range view.Table.Columns {
+			if column.ID == keyID {
+				return column
+			}
+		}
+	}
+	return nil
 }
 
 func (tx *Transaction) doHideAttrViewGroup(operation *Operation) (ret *TxErr) {
@@ -5354,12 +5388,15 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 
 		view.GroupItemIDs = masterView.GroupItemIDs
 		regenAttrViewGroups(attrView)
-		foldedGroups := make(map[string]bool, len(masterView.Groups))
+		sourceGroups := make(map[string]*av.View, len(masterView.Groups))
 		for _, group := range masterView.Groups {
-			foldedGroups[group.GetGroupValue()] = group.GroupFolded
+			sourceGroups[group.GetGroupValue()] = group
 		}
 		for _, group := range view.Groups {
-			group.GroupFolded = foldedGroups[group.GetGroupValue()]
+			if source := sourceGroups[group.GetGroupValue()]; source != nil {
+				group.GroupFolded = source.GroupFolded
+				group.GroupSort = source.GroupSort
+			}
 		}
 	}
 
@@ -7129,6 +7166,9 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doSetAttrViewColumnWidth(operation *Operation) (ret *TxErr) {
+	if err := tx.rememberAttributeViewMutationTree(operation.BlockID); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	err := setAttributeViewColWidth(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -7142,7 +7182,7 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 		return
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	view, err := getAttrViewOperationView(attrView, operation)
 	if err != nil {
 		return
 	}
@@ -7164,6 +7204,9 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doSetAttrViewColumnsWidth(operation *Operation) (ret *TxErr) {
+	if err := tx.rememberAttributeViewMutationTree(operation.BlockID); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
 	err := setAttributeViewColsWidth(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -7189,7 +7232,7 @@ func setAttributeViewColsWidth(operation *Operation) (err error) {
 	if err != nil {
 		return err
 	}
-	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	view, err := getAttrViewOperationView(attrView, operation)
 	if err != nil {
 		return err
 	}

@@ -1,26 +1,15 @@
 import {toggleMenu} from "../../menus/menuToggle";
 import {bindPanelSearch} from "../../layout/dock/panelSearch";
-import {Tree} from "../../util/Tree";
-import {fetchPost} from "../../util/fetch";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {MenuItem} from "../../menus/Menu";
+import {TagTree} from "../../layout/dock/TagTree";
 import {popSearch} from "../menu/search";
 import type {App} from "../../index";
 import {openTagMenu} from "../../menus/tag";
-import {Constants} from "../../constants";
-import {filterTagData, getTagFilterKeywords} from "../../layout/dock/tagFilter";
+import {appendTagSortMenu} from "../../layout/dock/tagSortMenu";
 import {showMobileFilterInput} from "./mobileFilterInput";
 
 export class MobileTags {
     public element: HTMLElement;
-    private tree: Tree;
-    private openNodes: string[];
-    private preFilterOpenNodes: string[];
-    private data: IBlockTree[] = [];
-    private filterData: IBlockTree[];
-    private updating = false;
-    private pendingUpdate: boolean;
-    private filterLoadPending = false;
+    private tree: TagTree;
 
     constructor(app: App, element: HTMLElement) {
         this.element = element;
@@ -43,34 +32,26 @@ export class MobileTags {
 <div class="fn__loading" style="left:0"><span class="b3-loading b3-loading--large" aria-hidden="true"></span></div>`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
         bindPanelSearch(inputElement,
-            this.element.querySelector('[data-type="search"]'), () => this.filter(), {
+            this.element.querySelector('[data-type="search"]'), () => this.tree.filter(), {
                 activeClass: "toolbar__icon--active", updateLabel: false,
             });
 
-        this.tree = new Tree({
-            element: this.element.querySelector(".tagList") as HTMLElement,
-            data: null,
-            click: (element: HTMLElement, event?: MouseEvent) => {
-                const labelName = element.getAttribute("data-label");
-                if (event) {
-                    const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
-                    if (actionElement) {
-                        openTagMenu(actionElement.parentElement, event, labelName);
-                        return;
-                    }
-                }
-                popSearch(app, {
-                    hasReplace: false,
-                    method: 0,
-                    hPath: "",
-                    idPath: [],
-                    k: `#${labelName}#`,
-                    r: "",
-                    page: 1,
-                });
-            },
-            blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
-            topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>'
+        const loadingElement = this.element.lastElementChild;
+        this.tree = new TagTree({
+            element: this.element.querySelector<HTMLElement>(".tagList"),
+            input: inputElement,
+            mobile: true,
+            open: label => popSearch(app, {
+                hasReplace: false,
+                method: 0,
+                hPath: "",
+                idPath: [],
+                k: `#${label}#`,
+                r: "",
+                page: 1,
+            }),
+            menu: openTagMenu,
+            setLoading: loading => loadingElement.classList.toggle("fn__none", !loading),
         });
         this.element.addEventListener("click", (event) => {
             if ((event.target as HTMLElement).tagName === "INPUT") {
@@ -99,54 +80,7 @@ export class MobileTags {
                             toggleMenu({
                                 target: target,
                                 build: (_menu, session) => {
-                                    window.siyuan.menus.menu.append(new MenuItem({
-                                        icon: window.siyuan.config.tag.sort === 0 ? "iconSelect" : undefined,
-                                        label: window.siyuan.languages.fileNameASC,
-                                        click: () => {
-                                            window.siyuan.config.tag.sort = 0;
-                                            this.update();
-                                        },
-                                    }).element);
-                                    window.siyuan.menus.menu.append(new MenuItem({
-                                        icon: window.siyuan.config.tag.sort === 1 ? "iconSelect" : undefined,
-                                        label: window.siyuan.languages.fileNameDESC,
-                                        click: () => {
-                                            window.siyuan.config.tag.sort = 1;
-                                            this.update();
-                                        },
-                                    }).element);
-                                    window.siyuan.menus.menu.append(new MenuItem({
-                                        icon: window.siyuan.config.tag.sort === 4 ? "iconSelect" : undefined,
-                                        label: window.siyuan.languages.fileNameNatASC,
-                                        click: () => {
-                                            window.siyuan.config.tag.sort = 4;
-                                            this.update();
-                                        },
-                                    }).element);
-                                    window.siyuan.menus.menu.append(new MenuItem({
-                                        icon: window.siyuan.config.tag.sort === 5 ? "iconSelect" : undefined,
-                                        label: window.siyuan.languages.fileNameNatDESC,
-                                        click: () => {
-                                            window.siyuan.config.tag.sort = 5;
-                                            this.update();
-                                        },
-                                    }).element);
-                                    window.siyuan.menus.menu.append(new MenuItem({
-                                        icon: window.siyuan.config.tag.sort === 7 ? "iconSelect" : undefined,
-                                        label: window.siyuan.languages.refCountASC,
-                                        click: () => {
-                                            window.siyuan.config.tag.sort = 7;
-                                            this.update();
-                                        },
-                                    }).element);
-                                    window.siyuan.menus.menu.append(new MenuItem({
-                                        icon: window.siyuan.config.tag.sort === 8 ? "iconSelect" : undefined,
-                                        label: window.siyuan.languages.refCountDESC,
-                                        click: () => {
-                                            window.siyuan.config.tag.sort = 8;
-                                            this.update();
-                                        },
-                                    }).element);
+                                    appendTagSortMenu(() => this.update());
                                     session.show(() => window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY}));
 
                                 },
@@ -159,102 +93,10 @@ export class MobileTags {
                 target = target.parentElement;
             }
         });
-        this.update(false);
+        this.update();
     }
 
-    public update(ignoreMaxListHint = true) {
-        if (this.updating) {
-            this.pendingUpdate = ignoreMaxListHint;
-            return;
-        }
-        this.updating = true;
-        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
-        const ignoreMaxListHintArg = getTagFilterKeywords(inputElement.value).length > 0 || ignoreMaxListHint;
-        this.element.lastElementChild.classList.remove("fn__none");
-        fetchPost("/api/tag/getTag", {
-            sort: window.siyuan.config.tag.sort,
-            app: Constants.SIYUAN_APPID,
-            ignoreMaxListHint: ignoreMaxListHintArg,
-        }, response => {
-            if (this.pendingUpdate !== undefined) {
-                const pendingUpdate = this.pendingUpdate;
-                this.pendingUpdate = undefined;
-                this.updating = false;
-                this.update(pendingUpdate);
-                return;
-            }
-            this.data = response.data;
-            this.filterData = ignoreMaxListHintArg ? response.data : undefined;
-            this.filter();
-            this.updating = false;
-            this.element.lastElementChild.classList.add("fn__none");
-            if (this.filterLoadPending) {
-                this.filterLoadPending = false;
-                this.loadFilterData();
-            }
-        });
-    }
-
-    private loadFilterData() {
-        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
-        if (getTagFilterKeywords(inputElement.value).length === 0 || this.filterData) {
-            this.filter();
-            return;
-        }
-        if (this.updating) {
-            this.filterLoadPending = true;
-            return;
-        }
-        this.updating = true;
-        this.element.lastElementChild.classList.remove("fn__none");
-        fetchPost("/api/tag/getTag", {
-            sort: window.siyuan.config.tag.sort,
-            app: Constants.SIYUAN_APPID,
-            ignoreMaxListHint: true,
-        }, response => {
-            if (this.pendingUpdate !== undefined) {
-                const pendingUpdate = this.pendingUpdate;
-                this.pendingUpdate = undefined;
-                this.filterLoadPending = false;
-                this.updating = false;
-                this.update(pendingUpdate);
-                return;
-            }
-            this.filterData = response.data;
-            this.filterLoadPending = false;
-            this.filter();
-            this.updating = false;
-            this.element.lastElementChild.classList.add("fn__none");
-        });
-    }
-
-    private filter() {
-        const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
-        const keywords = getTagFilterKeywords(inputElement.value);
-        const hasKeyword = keywords.length > 0;
-        if (hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
-            this.preFilterOpenNodes = this.tree.getExpandIds();
-        } else if (!hasKeyword && this.preFilterOpenNodes === undefined && this.openNodes !== undefined) {
-            this.openNodes = this.tree.getExpandIds();
-        }
-        if (hasKeyword && !this.filterData) {
-            this.loadFilterData();
-            return;
-        }
-        const data = hasKeyword ? filterTagData(this.filterData, keywords) : this.data;
-        this.tree.updateData(data);
-        if (hasKeyword) {
-            this.tree.expandAll();
-        } else if (this.preFilterOpenNodes !== undefined) {
-            this.tree.collapseAll();
-            this.tree.setExpandIds(this.preFilterOpenNodes);
-            this.openNodes = this.preFilterOpenNodes;
-            this.preFilterOpenNodes = undefined;
-        } else if (this.openNodes !== undefined) {
-            this.tree.collapseAll();
-            this.tree.setExpandIds(this.openNodes);
-        } else {
-            this.openNodes = this.tree.getExpandIds();
-        }
+    public update() {
+        void this.tree.update();
     }
 }

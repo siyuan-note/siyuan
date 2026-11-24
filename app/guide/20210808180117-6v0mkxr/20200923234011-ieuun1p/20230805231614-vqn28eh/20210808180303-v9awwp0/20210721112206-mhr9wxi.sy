@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20261105042900"
+		"updated": "20261122184916"
 	},
 	"Children": [
 		{
@@ -460,6 +460,38 @@
 			]
 		},
 		{
+			"ID": "20261122184916-ucidw1n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122184916-ucidw1n",
+				"updated": "20261122184916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When configuring WebDAV sync, use an explicit https:// endpoint with a trusted server certificate and set "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "TLS Verify"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Verify"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
 			"ID": "20261102113000-c64909d",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -520,7 +552,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Automatic sync normally runs in the background without opening a panel. Click the sync icon to view the current file, written bytes, speed, and estimated remaining time. While restoring indexes after files are written, the panel shows the current indexing status with an animated progress bar. The collapsed panel shows an expand button when more information is available. "
+					"Data": "Automatic sync and ordinary manual upload or download normally run in the background without opening a panel. Click the sync icon to view the current file, written bytes, speed, and estimated remaining time. While restoring indexes after files are written, the panel shows the current indexing status with an animated progress bar. The collapsed panel shows an expand button when more information is available. "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -542,7 +574,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " The sync icon retains the last completed result: a check mark means success, an error mark means failure or automatic sync paused, and a plain cloud means the result is unknown. The result is retained after restarting and changes after the next completed sync. While syncing, the icon keeps rotating; disabling sync shows the disabled icon."
+					"Data": " The sync icon retains the last completed result: a check mark means success, an error mark means failure or automatic sync paused, and a plain cloud means the result is unknown. The result is retained after restarting and changes after the next completed sync. While syncing, the icon keeps rotating; disabling sync shows the disabled icon. On desktop, hover over the sync icon to see the last recorded successful sync time. Failed attempts leave that time unchanged."
 				}
 			]
 		},

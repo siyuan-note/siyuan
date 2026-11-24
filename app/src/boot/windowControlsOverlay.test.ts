@@ -14,22 +14,27 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     const sent: Array<{cmd: string, height: number, symbolColor?: string}> = [];
     document.body.innerHTML = `<style>${css}
     :root{--b3-ui-panel-height:42px;--b3-ui-toolbar-height:32px;--b3-toolbar-color:#555555}
-    .fn__flex{display:flex}.fn__flex-1{flex:1;min-width:0}.fn__none{display:none!important}
+    .fn__flex{display:flex}.fn__flex-1{flex:1;min-width:0}.fn__none{display:none!important}.fn__hidden{visibility:hidden!important}
     .toolbar{padding:0}body{margin:0}#tooltip{--b3-tooltips-background:black;--b3-tooltips-color:white}
     </style><div id="toolbar" class="toolbar fn__flex"><div id="captionColor" class="toolbar__item"></div><div id="drag" class="fn__flex-1"></div>
+    <div class="toolbar__item" id="rightToolbarButton"></div><div class="toolbar__window-gap"></div>
     <div id="windowControls" class="fn__flex"></div></div>
     <div id="tooltip" class="tooltip fn__none"></div>`;
+    document.documentElement.dataset.frontend = "desktop";
     window.siyuan = {isReady: true, languages: {min: "Minimize", max: "Maximize", restore: "Restore", close: "Close"},
-        storage: {zoom: 1}} as unknown as typeof window.siyuan;
+        storage: {zoom: 1}, config: {appearance: {hideToolbar: true}, system: {os: "windows"}}, layout: {},
+        zIndex: 10} as unknown as typeof window.siyuan;
     window.DOMPurify = {sanitize: (value: string) => value} as typeof window.DOMPurify;
     let resizeCalls = 0;
     const overlay = {} as typeof import("./windowControlsOverlay");
     const controls = {} as typeof import("./windowControls");
     const tooltip = {} as typeof import("../dialog/tooltip");
     const color = {} as typeof import("../util/color");
-    const dependencies = {Constants: {SIYUAN_CMD: "siyuan-cmd", LOCAL_ZOOM: "zoom"},
+    const dependencies = {Constants: {SIYUAN_CMD: "siyuan-cmd", LOCAL_ZOOM: "zoom", TIMEOUT_TRANSITION: 0},
         resizeTopBar: () => { resizeCalls++; }, setToolbarLeftMac() {},
-        isMobile: () => false, isTouchHoverInput: () => false, emitToPlugins() {}, forEachPluginSubscriber() {}};
+        isMobile: () => false, isWindow: () => false, isTouchHoverInput: () => false, emitToPlugins() {},
+        forEachPluginSubscriber() {}, getAllWnds() {}, hideAllElements() {},
+        hasClosestByClassName: (element: Element, name: string) => element.closest("." + name)};
     const load = (code: string, exports: object) => new Function("exports", "require", code)(exports, (id: string) => {
         if (id === "electron") return {webFrame, ipcRenderer: {send: (channel: string, data: typeof sent[number]) => {
             if (data?.cmd === "setTitleBarOverlay") sent.push(data);
@@ -43,7 +48,57 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     load(sources[0], overlay);
     load(sources[1], controls);
     load(sources[2], tooltip);
+    const panelFullscreen = {} as typeof import("../protyle/breadcrumb/action");
+    load(sources[4], panelFullscreen);
     const container = document.getElementById("windowControls");
+    const checkPanelFullscreen = async (platform: "windows" | "linux" | "mac", native = false) => {
+        document.body.className = `body--${platform} body--toolbar-hide`;
+        window.siyuan.config.system.os = platform === "mac" ? "darwin" : platform;
+        const gap = document.querySelector<HTMLElement>(".toolbar__window-gap");
+        const gapRect = gap.getBoundingClientRect();
+        check.ok(Math.abs(gapRect.width - 24) < 0.1, `${platform} shows the window drag region in the regular layout`);
+        check.equal(getComputedStyle(gap).getPropertyValue("-webkit-app-region"), "drag");
+        if (platform === "mac") {
+            check.ok(gapRect.right <= document.getElementById("captionColor").getBoundingClientRect().left,
+                "macOS keeps the window drag region to the left of the toolbar buttons");
+        }
+        const panel = document.createElement("section");
+        panel.className = "sy__graph";
+        panel.innerHTML = '<div class="block__icons" style="display:flex;justify-content:flex-end"><button type="button" style="width:32px;height:30px"><svg><use xlink:href="#iconFullscreen"/></svg></button></div>';
+        document.body.append(panel);
+        const button = panel.querySelector("button");
+        button.addEventListener("click", () => panelFullscreen.fullscreen(panel, button));
+        button.click();
+        check.ok(panel.classList.contains("fullscreen"));
+        check.ok(document.getElementById("drag").classList.contains("fn__hidden"));
+        check.equal(gap.getBoundingClientRect().width, 0, `${platform} hides the drag region during panel fullscreen`);
+        let testPoint: {x: number; y: number};
+        const waitForPaint = () => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        if (native) {
+            const buttonRect = button.getBoundingClientRect();
+            const x = (buttonRect.left + buttonRect.right) / 2;
+            const y = (buttonRect.top + buttonRect.bottom) / 2;
+            check.ok(x > gapRect.left && x < gapRect.right && y > gapRect.top && y < gapRect.bottom,
+                "the fullscreen toggle occupies the previous drag region");
+            check.equal(document.elementFromPoint(x, y)?.closest("button"), button);
+            testPoint = {x: x / innerWidth, y: y / innerHeight};
+            await waitForPaint();
+            check.deepEqual(await ipcRenderer.invoke("overlay-test-hit", [testPoint]), [1], "the fullscreen toggle receives clicks");
+        }
+        button.click();
+        check.ok(!panel.classList.contains("fullscreen"));
+        check.ok(Math.abs(gap.getBoundingClientRect().width - 24) < 0.1,
+            `${platform} restores the drag region after panel fullscreen`);
+        check.equal(getComputedStyle(gap).getPropertyValue("-webkit-app-region"), "drag");
+        if (testPoint) {
+            await waitForPaint();
+            check.deepEqual(await ipcRenderer.invoke("overlay-test-hit", [testPoint]), [2], "the window can be dragged again");
+        }
+        document.body.classList.add("body--fullscreen");
+        check.equal(gap.getBoundingClientRect().width, 0, `${platform} hides the drag region during window fullscreen`);
+        document.body.classList.remove("body--fullscreen");
+        panel.remove();
+    };
     document.body.className = "body--linux";
     let closed = 0;
     controls.initWindowControls(container, () => { closed++; });
@@ -58,6 +113,9 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
         check.equal(container.querySelectorAll("#minWindow,#maxWindow,#restoreWindow,#closeWindow").length, 4,
             "Windows hosts without an enabled overlay retain self-drawn controls after a frontend refresh");
         check.equal(document.documentElement.classList.contains("window-controls-overlay"), false);
+        await checkPanelFullscreen("windows");
+        await checkPanelFullscreen("linux");
+        await checkPanelFullscreen("mac");
         return "Window controls overlay cases passed";
     }
     const api = (navigator as Navigator & {windowControlsOverlay: import("./windowControlsOverlay").IWindowControlsOverlay}).windowControlsOverlay;
@@ -142,6 +200,19 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
                 `${label} caption keeps ${expected}px`);
             check.ok(Math.abs(document.getElementById("toolbar").getBoundingClientRect().height - expected) < 1.5,
                 `${label} toolbar keeps ${expected}px`);
+            const gap = document.querySelector(".toolbar__window-gap");
+            const gapRect = gap.getBoundingClientRect();
+            check.ok(Math.abs(gapRect.width - (fused ? 24 : 0)) < 0.1,
+                `${label} reserves the drag area only for fused tabs`);
+            if (fused) {
+                check.equal(getComputedStyle(gap).getPropertyValue("-webkit-app-region"), "drag");
+                const buttonRight = document.getElementById("rightToolbarButton").getBoundingClientRect().right;
+                check.ok(Math.abs(buttonRight - gapRect.left) < 3,
+                    `${label} toolbar button ends at ${buttonRight}, drag area begins at ${gapRect.left}`);
+                const controlsLeft = container.getBoundingClientRect().left;
+                check.ok(Math.abs(controlsLeft - gapRect.right - 2) < 1,
+                    `${label} drag area ends at ${gapRect.right}, controls begin at ${controlsLeft}`);
+            }
         }
         document.documentElement.style.removeProperty("--b3-ui-toolbar-height");
         document.documentElement.style.removeProperty("--b3-ui-panel-height");
@@ -186,6 +257,7 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     document.body.classList.remove("body--fullscreen");
     overlay.updateWindowControlsOverlay();
     check.ok(container.getBoundingClientRect().width > 0);
+    await checkPanelFullscreen("windows", true);
     const wide = document.createElement("div");
     wide.style.cssText = "width:2000px;flex-shrink:0";
     document.getElementById("toolbar").prepend(wide);
@@ -196,10 +268,10 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
 };
 
 test("native Windows captions reserve geometry, preserve legacy controls and keep tooltips clear", {
-    skip: process.platform !== "win32", timeout: 30000,
+    skip: process.platform !== "win32", timeout: 90000,
 }, async () => {
     const sources = ["src/boot/windowControlsOverlay.ts", "src/boot/windowControls.ts", "src/dialog/tooltip.ts",
-        "src/util/color.ts"].map(file =>
+        "src/util/color.ts", "src/protyle/breadcrumb/action.ts"].map(file =>
         transpileModule(readFileSync(file, "utf8"), {compilerOptions: {
             module: ModuleKind.CommonJS, target: ScriptTarget.ES2021,
         }}).outputText);
@@ -208,12 +280,15 @@ test("native Windows captions reserve geometry, preserve legacy controls and kee
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-window-controls-overlay-"));
     const script = path.join(temporary, "run.cjs");
     const html = path.join(temporary, "index.html");
+    const hitTestScript = path.resolve("tests/fixtures/windowHitTest.ps1");
+    const hitTestAssembly = path.join(temporary, "WindowHitTest.dll");
     // 主进程模块是 TypeScript，Electron 子进程无法直接 require，先转译到同一临时目录再加载。
     const overlayModule = path.join(temporary, "windowControlsOverlay.cjs");
     writeFileSync(overlayModule, transpileModule(readFileSync("electron/window/windowControlsOverlay.ts", "utf8"),
         {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText, "utf8");
     writeFileSync(html, "<!doctype html><html><head></head><body></body></html>", "utf8");
     writeFileSync(script, `const {app,BrowserWindow,ipcMain}=require("electron");
+ const {promisify}=require("node:util"),execFile=promisify(require("node:child_process").execFile);
  const {updateTitleBarOverlay,withWindowControlsOverlay}=require(${JSON.stringify(overlayModule)});
 app.setPath("userData",${JSON.stringify(path.join(temporary, "profile"))});
 app.whenReady().then(async()=>{
@@ -229,6 +304,13 @@ app.whenReady().then(async()=>{
  };
  ipcMain.handle("overlay-test-state",()=>({...state}));
  ipcMain.handle("overlay-test-reject-color",()=>{rejectColor=true;});
+ ipcMain.handle("overlay-test-hit",async(_event,points)=>{
+  const buffer=win.getNativeWindowHandle();
+  const handle=buffer.length===8?buffer.readBigUInt64LE().toString():String(buffer.readUInt32LE());
+  const {stdout}=await execFile("powershell.exe",["-NoProfile","-NonInteractive","-File",${JSON.stringify(hitTestScript)},
+   handle,JSON.stringify(points),"-AssemblyPath",${JSON.stringify(hitTestAssembly)}],{windowsHide:true,timeout:10000});
+  return JSON.parse(stdout);
+ });
  ipcMain.on("siyuan-cmd",(event,data)=>{if(data.cmd==="setTitleBarOverlay")updateTitleBarOverlay(win,data);});
  try{
  const legacy=new BrowserWindow({show:false,width:800,height:600,frame:false,titleBarStyle:"hidden",
@@ -260,8 +342,10 @@ app.whenReady().then(async()=>{
     const env = {...process.env};
     delete env.ELECTRON_RUN_AS_NODE;
     try {
+        await promisify(execFile)("powershell.exe", ["-NoProfile", "-NonInteractive", "-File", hitTestScript,
+            "-Prepare", "-AssemblyPath", hitTestAssembly], {windowsHide: true, timeout: 45000});
         const result = await promisify(execFile)(require("electron") as unknown as string, [script],
-            {env, timeout: 25000, windowsHide: true});
+            {env, timeout: 40000, windowsHide: true});
         assert.match(result.stdout, /Window controls overlay cases passed/);
     } finally {
         if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) &&

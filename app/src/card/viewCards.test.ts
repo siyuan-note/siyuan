@@ -3,11 +3,38 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {loadModule} from "../testSupport/loadModule";
 
 const source = readFileSync(__dirname + "/viewCards.ts", "utf8");
 const code = transpileModule(source.slice(source.indexOf("const getArticle =")).replace("const getArticle =", "export const getArticle ="), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
+
+test("card browsing opens the mobile drawer at full height with a close guard", () => {
+    type DialogOptions = ConstructorParameters<typeof import("../dialog/adaptiveDialog").AdaptiveDialog>[0];
+    let options: DialogOptions;
+    const stopped = new Error("Captured dialog options");
+    const guard = () => false;
+    const dependencies = {
+        AdaptiveDialog: class {constructor(value: DialogOptions) {options = value; throw stopped;}},
+        createMobileSecondaryEditorCloseGuard: () => guard,
+        fetchPost: (_url: string, _data: unknown, callback: (response: unknown) => void) => {
+            callback({data: {pageCount: 1, total: 0, blocks: []}});
+        },
+        isMobile: () => true,
+        escapeHtml: (value: string) => value,
+        Constants: {DIALOG_VIEWCARDS: "cards"},
+    };
+    const {viewCards} = loadModule<typeof import("./viewCards")>("src/card/viewCards.ts", {
+        require: () => dependencies,
+        window: {siyuan: {languages: {}}},
+    });
+    assert.throws(() => viewCards({plugins: []} as unknown as Parameters<typeof viewCards>[0], "", "Cards", ""),
+        error => error === stopped);
+    assert.equal(options.mobileSheet.initiallyExpanded, true);
+    assert.equal(options.mobileSheet.beforeClose, guard);
+});
+
 const tick = () => new Promise<void>(resolve => setImmediate(resolve));
 const setup = () => {
     const requests: Array<{url: string, resolve: (response: unknown) => void}> = [];

@@ -174,6 +174,20 @@
 			]
 		},
 		{
+			"ID": "20261122110827-lndiiil",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122110827-lndiiil",
+				"updated": "20261122110827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the published view, virtual references only link to blocks you can access. A match based on anchor text also requires access to the document containing the reference."
+				}
+			]
+		},
+		{
 			"ID": "20221003214846-p9q1wvx",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

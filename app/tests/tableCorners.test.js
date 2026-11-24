@@ -3,6 +3,118 @@ const {readFileSync, mkdtempSync, rmSync} = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
 
+const runPinnedHeader = () => {
+    const check = require("node:assert/strict");
+    const root = document.createElement("div");
+    root.className = "protyle-wysiwyg";
+    root.innerHTML = '<div class="table" data-node-id="table" custom-pinthead="true"><div style="width:240px;max-height:140px">' +
+        '<table style="width:480px"><thead><tr><th>Left</th><th>Right</th></tr></thead><tbody>' +
+        "<tr><td>1</td><td>2</td></tr>".repeat(16) + '</tbody></table><div class="protyle-action__table"></div></div></div>';
+    document.body.append(root);
+    try {
+        const table = root.querySelector("table");
+        const viewport = table.parentElement;
+        const head = table.tHead;
+        const border = getComputedStyle(head, "::after");
+        check.equal(getComputedStyle(table).borderTopWidth, "0px");
+        check.equal(border.borderTopWidth, "1px");
+        check.equal(border.pointerEvents, "none");
+        check.equal(border.borderTopLeftRadius, getComputedStyle(table).borderTopLeftRadius);
+        check.equal(border.borderTopRightRadius, getComputedStyle(table).borderTopRightRadius);
+        const cornerOverlay = getComputedStyle(table.nextElementSibling, "::before");
+        check.equal(cornerOverlay.backgroundPosition, "0% 100%, 100% 100%");
+        for (const [left, top] of [[0, 0], [0, 70], [90, 70], [0, 0]]) {
+            viewport.scrollTo(left, top);
+            const rect = viewport.getBoundingClientRect();
+            check.equal(viewport.scrollTop, top);
+            check.equal(viewport.scrollLeft, left);
+            check.equal(head.getBoundingClientRect().top, rect.top);
+            check.equal(table.getBoundingClientRect().top, rect.top - top);
+        }
+    } finally {
+        root.remove();
+    }
+};
+
+const runPinnedColumn = async () => {
+    const check = require("node:assert/strict");
+    const {observeTableCorners, destroyTableCorners} = window.corners;
+    const pin = "custom-sy-table-pin-column";
+    const marker = "data-table-pinned-column-cell";
+    const active = "data-table-pinned-column-active";
+    const settle = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const root = document.createElement("div");
+    root.className = "protyle-wysiwyg";
+    root.innerHTML = '<div class="table" data-node-id="table" data-type="NodeTable" custom-pinthead="true">' +
+        '<div style="width:350px;max-height:140px"><table style="width:600px;table-layout:fixed">' +
+        '<colgroup><col style="width:150px"><col style="width:190px"><col></colgroup>' +
+        "<thead><tr><th>Heading</th><th>Second</th><th>Third</th></tr></thead>" +
+        '<tbody><tr><td rowspan="2">Vertical</td><td>One</td><td>Two</td></tr><tr><td>Three</td><td>Four</td></tr>' +
+        '<tr><td colspan="2">Horizontal</td><td>Five</td></tr>' +
+        "<tr><td>6</td><td>7</td><td>8</td></tr>".repeat(16) + "</tbody></table></div></div>";
+    document.body.append(root);
+    observeTableCorners(root);
+    try {
+        const block = root.firstElementChild;
+        const table = block.querySelector("table");
+        const viewport = table.parentElement;
+        const firstHeader = table.tHead.rows[0].cells[0];
+        const [vertical, second, horizontal] = Array.from(table.tBodies[0].rows).map(row => row.cells[0]);
+        const left = () => viewport.getBoundingClientRect().left;
+        viewport.scrollTo(125, 65);
+        check.ok(firstHeader.getBoundingClientRect().left < left(), "existing tables scroll until pinning is enabled");
+        block.setAttribute(pin, "true");
+        await settle();
+        check.ok(table.hasAttribute(active));
+        check.ok(firstHeader.hasAttribute(marker));
+        check.ok(vertical.hasAttribute(marker), "a vertical merge in the first column is pinned");
+        check.ok(!second.hasAttribute(marker), "the first DOM cell can occupy the second logical column");
+        check.ok(!horizontal.hasAttribute(marker), "the whole horizontal merge scrolls");
+        check.equal(firstHeader.getBoundingClientRect().left, left());
+        check.equal(vertical.getBoundingClientRect().left, left());
+        check.ok(horizontal.getBoundingClientRect().left < left());
+        check.ok(second.getBoundingClientRect().left < firstHeader.getBoundingClientRect().right);
+        check.equal(table.tHead.getBoundingClientRect().top, viewport.getBoundingClientRect().top);
+        const headerRect = firstHeader.getBoundingClientRect();
+        check.equal(document.elementFromPoint(headerRect.left + 50, headerRect.top + headerRect.height / 2), firstHeader,
+            "the pinned intersection covers and receives input over scrolled cells");
+        check.notEqual(getComputedStyle(vertical).backgroundColor, "rgba(0, 0, 0, 0)");
+        viewport.style.width = "195px";
+        await settle();
+        check.ok(!table.hasAttribute(active));
+        check.equal(block.getAttribute(pin), "true", "a narrow viewport does not change the saved setting");
+        check.ok(firstHeader.getBoundingClientRect().left < left());
+        viewport.style.width = "350px";
+        await settle();
+        check.equal(firstHeader.getBoundingClientRect().left, left());
+        horizontal.removeAttribute("colspan");
+        horizontal.insertAdjacentHTML("afterend", "<td>New cell</td>");
+        await settle();
+        check.equal(horizontal.getBoundingClientRect().left, left(), "splitting a merge restores pinning");
+        block.removeAttribute(pin);
+        await settle();
+        check.ok(!table.hasAttribute(active) && !firstHeader.hasAttribute(marker));
+        check.ok(firstHeader.getBoundingClientRect().left < left());
+        check.equal(table.tHead.getBoundingClientRect().top, viewport.getBoundingClientRect().top,
+            "unpinning the column leaves header pinning enabled");
+
+        const lute = window.Lute.New();
+        lute.SetProtyleWYSIWYG(true);
+        lute.SetKramdownIAL(true);
+        root.innerHTML = lute.Md2BlockDOM("| A | B |\n| --- | --- |\n| C | D |\n");
+        root.firstElementChild.setAttribute(pin, "true");
+        await settle();
+        check.ok(root.querySelector(`[${marker}]`));
+        for (const html of [lute.SpinBlockDOM(root.innerHTML), lute.Md2BlockDOM(lute.BlockDOM2Md(root.innerHTML))]) {
+            check.match(html, new RegExp(`${pin}="true"`), "the block attribute survives editing and reload");
+            check.ok(!html.includes(marker) && !html.includes(active), "DOM markers do not persist");
+        }
+    } finally {
+        destroyTableCorners(root);
+        root.remove();
+    }
+};
+
 const runCases = async (preview) => {
     const check = require("node:assert/strict");
     const {renderTableCorners, observeTableCorners, destroyTableCorners} = window.corners;
@@ -121,8 +233,12 @@ const runElectron = async () => {
         const source = ts.transpileModule(readFileSync(path.join(__dirname, "../src/protyle/render/tableCorners.ts"), "utf8"), {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
         }).outputText;
-        await win.webContents.executeJavaScript(`(() => {const exports = {}; const require = () => ({Constants: {
-            TABLE_CORNERS: "data-table-corners", TABLE_CELL_CORNER: "data-table-cell-corner"
+        await win.webContents.executeJavaScript(`(() => {const exports = {}; const require = () => ({
+            TABLE_VIRTUAL_ROWS: "data-sy-table-virtual-rows", Constants: {
+            TABLE_CORNERS: "data-table-corners", TABLE_CELL_CORNER: "data-table-cell-corner",
+            TABLE_PINNED_COLUMN_CELL: "data-table-pinned-column-cell",
+            TABLE_PINNED_COLUMN_ACTIVE: "data-table-pinned-column-active",
+            CUSTOM_SY_TABLE_PIN_COLUMN: "custom-sy-table-pin-column"
         }}); ${source}; window.corners = exports;})()`);
         await win.webContents.executeJavaScript(readFileSync(path.join(__dirname, "../stage/protyle/js/lute/lute.min.js"), "utf8"));
         const sass = require("sass");
@@ -134,6 +250,10 @@ const runElectron = async () => {
                     `../appearance/themes/${theme}/theme.css`), "utf8"));
                 for (const preview of [false, true]) {
                     await win.webContents.executeJavaScript(`(${runCases.toString()})(${preview})`);
+                }
+                if (entry !== "export") {
+                    await win.webContents.executeJavaScript(`(${runPinnedHeader.toString()})()`);
+                    await win.webContents.executeJavaScript(`(${runPinnedColumn.toString()})()`);
                 }
                 await win.webContents.removeInsertedCSS(themeKey);
             }
@@ -155,7 +275,7 @@ if (process.versions.electron && process.type === "browser") {
         require("electron").app.exit(1);
     });
 } else {
-    require("node:test").it("renders merged table corners across editor, mobile, preview and export styles", {
+    require("node:test").it("renders merged corners, pinned headers and pinned columns with editor, mobile, preview and export styles", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 60000,
     }, async () => {

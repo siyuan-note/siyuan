@@ -34,7 +34,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The AI agent can do more than answer questions. It can use SiYuan's built-in tools, skills, MCP services, and plugin capabilities to search, read, and operate on the knowledge base. It works through tasks step by step and requests confirmation before changing data."
+					"Data": "The AI agent can do more than answer questions. It can use SiYuan's built-in tools, skills, MCP services, and plugin capabilities to search, read, and operate on the knowledge base. It works through tasks step by step and requests confirmation before changing data. On mobile, the chat header displays the AI-generated label."
 				}
 			]
 		},
@@ -158,7 +158,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
+					"Data": ". If you use MiniMax-H3-Image or MiniMax-H3-Image-Highspeed with MiniMax’s official API, set the image generation timeout to 600 seconds as MiniMax recommends."
 				}
 			]
 		},
@@ -440,7 +440,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Drag blocks into the agent input"
+									"Data": "Drag blocks from a document into the agent input to insert block references"
 								}
 							]
 						}
@@ -593,6 +593,34 @@
 			]
 		},
 		{
+			"ID": "20261122191701-0o75l48",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122191701-0o75l48",
+				"updated": "20261122191701"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select text in a note and choose Quote in Agent Chat. On desktop, the first quote from an editor opens the floating Agent Chat panel. If the panel is hidden when you add another quote, a brief notification shows the total number of quotes in the draft. A note excerpt includes the starting and ending block IDs and selection offsets. To quote a chat message, use its quote button. To quote a passage, release the mouse button or lift your finger after selecting it, then choose Quote text next to the selection. Quotes appear inline with your instructions. You can add several, remove them individually, and click a sent quote to return to its source."
+				}
+			]
+		},
+		{
+			"ID": "20261122191702-d2ctxp8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122191702-d2ctxp8",
+				"updated": "20261122191702"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose Quick phrases beside the input to send a phrase with the current draft. Agent Chat and AI Edit share custom actions. Use Manage to add, edit, or delete them. In a template, {{input}} stands for the draft."
+				}
+			]
+		},
+		{
 			"ID": "20261115062149-v84vob9",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -659,6 +687,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "After the tool call round limit is reached or repeated calls cause a stop, if the model provides no valid text reply, the system displays and saves an explicit interruption notice stating that the task may still be incomplete. Stopping tool use does not mean the task is complete and does not undo completed actions."
+				}
+			]
+		},
+		{
+			"ID": "20261122115000-5j2n0xw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122115000-5j2n0xw",
+				"updated": "20261122115000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the Android app, tap Insert image below the input to open the system photo picker when available. Tap Choose image from files next to it to browse folders. Both options let you select multiple PNG, JPEG, GIF, or WebP images."
 				}
 			]
 		},
@@ -849,7 +891,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The agent supports creating, searching, switching, renaming, and deleting sessions. Sessions preserve messages, references, tool calls, and results and can be viewed across synchronized instances."
+					"Data": "The agent supports creating, searching, switching, renaming, and deleting sessions. Sessions preserve messages, references, tool calls, and results and can be viewed across synchronized instances. If a send conflicts with a saved session revision, the agent reloads the saved conversation when available. Review the draft before sending again."
 				}
 			]
 		},
@@ -1773,7 +1815,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before the first write to workspace data in a task turn, the agent automatically creates a data snapshot, with at most one snapshot per turn. Initialize a local data repository key before requesting workspace writes; no cloud account is required. Without a key, the agent reports this prerequisite before requesting write confirmation, and read operations remain available. If the result is not acceptable, use the rollback action on the snapshot notice in the session."
+					"Data": "Before the first write to workspace data in a task turn, the agent automatically creates a data snapshot, with at most one snapshot per turn. Initialize a local data repository key before requesting workspace writes; no cloud account is required. Without a key, the agent reports this prerequisite before requesting write confirmation, and read operations remain available. If the automatic snapshot fails, the write is blocked. Select Restore draft on the error card to bring the original message, references, and attachments back to the input for review before sending. If the result is not acceptable, use the rollback action on the snapshot notice in the session."
 				}
 			]
 		},

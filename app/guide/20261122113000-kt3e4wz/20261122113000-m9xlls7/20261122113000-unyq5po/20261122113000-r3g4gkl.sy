@@ -1,0 +1,452 @@
+{
+	"ID": "20261122113000-r3g4gkl",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-r3g4gkl",
+		"title": "Сетевой прокси",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-nb5vc8j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-nb5vc8j",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-uqwhm91",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-uqwhm91",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan поддерживает перенаправление сетевых запросов через прокси-сервер, что полезно при сетевых ограничениях или необходимости доступа к сервисам через прокси."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lpvm3g3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-lpvm3g3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-45li3kb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-45li3kb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Приложение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Общие"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сетевой прокси"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " выполните настройку:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jfv5glx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-jfv5glx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-29wb1rd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-29wb1rd",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-b1422ko",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-b1422ko",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Протокол: прямое подключение (без прокси), системный прокси, HTTP, HTTPS или SOCKS5; для прямого подключения и системного прокси указывать хост и порт не требуется"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-hu16reg",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261122113000-hu16reg",
+						"updated": "20261122113000"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-axz1jz0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-axz1jz0",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Системный режим использует поддерживаемые настройки ОС или переменные окружения прокси, унаследованные при запуске ядра. Ядро поддерживает чтение ручных настроек прокси в Windows, Linux GNOME, Linux KDE и macOS; в Linux и macOS явно заданные переменные окружения прокси имеют приоритет. Автоматическая настройка PAC не поддерживается, как и автоопределение в Windows и macOS; на остальных платформах ядро сохраняет окружение прокси на момент запуска и не считывает системные настройки"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-385h720",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20261122113000-385h720",
+						"updated": "20261122113000"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-vbmfn14",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-vbmfn14",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В macOS поддерживаются ручные прокси HTTP, HTTPS и SOCKS5. Список исключений преобразуется в правила NO_PROXY с поддержкой IP-адресов, подсетей CIDR (включая 169.254/16), доменных имён, шаблонов доменов вида *. и хвостовых масок IPv4 вроде 10.*. Опция «Исключать простые имена хостов» и другие шаблоны подстановок не поддерживаются — используйте явные записи исключений. При ошибке чтения или преобразования ядро записывает предупреждение и сохраняет окружение прокси на момент запуска. После изменения системного прокси в macOS перезапустите ядро либо переключитесь на другой режим прокси и вернитесь обратно к системному"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-n76e9vl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-n76e9vl",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-uf93s6p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-uf93s6p",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Хост"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": укажите адрес прокси-сервера в формате "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "IP"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ или "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "логин:пароль@IP"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (если требуется аутентификация)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-9fvu5nf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9fvu5nf",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-11a1izu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-11a1izu",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Порт"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": укажите порт прокси-сервера"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fqo9d4v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-fqo9d4v",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После настройки нажмите «Подтвердить» — изменения вступят в силу без перезапуска."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4obk3qk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-4obk3qk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Область действия"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gl9sx5t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-gl9sx5t",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройки сетевого прокси применяются к следующим функциям:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-67t0b7m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-67t0b7m",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-32npiwz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-32npiwz",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-vhl2jde",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-vhl2jde",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Облачная синхронизация и резервное копирование данных"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-30cvxfe",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-30cvxfe",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-hethj04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-hethj04",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Проверка обновлений версии"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-queahqm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-queahqm",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-zvtdr8b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-zvtdr8b",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Запросы ИИ-функций"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-787ej89",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-787ej89",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-fdgu8w3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-fdgu8w3",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Прочие сетевые запросы через управляемый прокси-клиент SiYuan; внешние браузеры, плагины и дочерние процессы stdio могут использовать собственные настройки прокси"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

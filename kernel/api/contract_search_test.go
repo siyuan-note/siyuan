@@ -171,14 +171,14 @@ func TestAPIContractSearchEmbedConversion(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		actual, err := json.Marshal(embedBlockContracts(blocks))
+		actual, err := json.Marshal(embedBlockContracts(blocks, false))
 		if err != nil || string(actual) != string(expected) {
 			t.Fatalf("embed serialization changed: %s != %s, %v", actual, expected, err)
 		}
 	}
 	value := []*model.EmbedBlock{{Block: &model.Block{ID: "child", RootID: "document"},
 		BlockPaths: []*model.BlockPath{{ID: "document", Name: "Notebook/Parent/Title / Section", DocumentTitle: "Title / Section"}}}}
-	converted := embedBlockContracts(value)
+	converted := embedBlockContracts(value, false)
 	if converted[0].BlockPaths[0].DocumentTitle != "Title / Section" || converted[0].BlockPaths[0].Name != value[0].BlockPaths[0].Name {
 		t.Fatalf("embed document title conversion lost data: %+v", converted[0].BlockPaths[0])
 	}
@@ -392,5 +392,48 @@ func testSearchAssetMetadataContract(t *testing.T) {
 		if !reflect.DeepEqual(paths, tc.want) {
 			t.Fatalf("metadata search %s: got %v, want %v", tc.body, paths, tc.want)
 		}
+	}
+}
+
+// TestReaderSearchBlockContractsRedactMemo 校验读者响应剔除块备注字段和 IAL 中的备注，管理员保持原样。
+func TestReaderSearchBlockContractsRedactMemo(t *testing.T) {
+	blocks := []*model.Block{{
+		ID: "block", Memo: "PRIVATE_MEMO_CANARY",
+		IAL:      map[string]string{"id": "block", "memo": "PRIVATE_MEMO_CANARY", "custom-key": "value"},
+		Refs:     []*model.Block{{ID: "ref", Memo: "REF_MEMO_CANARY", IAL: map[string]string{"memo": "REF_MEMO_CANARY"}}},
+		Children: []*model.Block{{ID: "child", Memo: "CHILD_MEMO_CANARY", IAL: map[string]string{"memo": "CHILD_MEMO_CANARY"}}},
+	}}
+	reader := searchReaderBlockContracts(blocks)
+	if 1 != len(reader) || "" != reader[0].Memo || "" != reader[0].IAL["memo"] {
+		t.Fatalf("reader received block memo: %#v", reader)
+	}
+	if "value" != reader[0].IAL["custom-key"] {
+		t.Fatal("reader lost non-editor block attributes")
+	}
+	if 1 != len(reader[0].Refs) || "" != reader[0].Refs[0].Memo || "" != reader[0].Refs[0].IAL["memo"] {
+		t.Fatalf("reader received referenced block memo: %#v", reader[0].Refs)
+	}
+	if 1 != len(reader[0].Children) || "" != reader[0].Children[0].Memo || "" != reader[0].Children[0].IAL["memo"] {
+		t.Fatalf("reader received child block memo: %#v", reader[0].Children)
+	}
+	if "PRIVATE_MEMO_CANARY" != blocks[0].Memo || "PRIVATE_MEMO_CANARY" != blocks[0].IAL["memo"] {
+		t.Fatal("reader serialization mutated the model block")
+	}
+	admin := searchBlockContracts(blocks)
+	if "PRIVATE_MEMO_CANARY" != admin[0].Memo || "PRIVATE_MEMO_CANARY" != admin[0].IAL["memo"] {
+		t.Fatalf("administrator lost block memo: %#v", admin)
+	}
+
+	paths := []*model.Path{{
+		Blocks:   []*model.Block{{ID: "heading", Memo: "PATH_MEMO_CANARY", IAL: map[string]string{"memo": "PATH_MEMO_CANARY"}}},
+		Children: []*model.Path{{Blocks: []*model.Block{{ID: "child-heading", Memo: "CHILD_PATH_MEMO_CANARY"}}}},
+	}}
+	readerPaths := searchReaderPathContracts(paths)
+	if "" != readerPaths[0].Blocks[0].Memo || "" != readerPaths[0].Blocks[0].IAL["memo"] ||
+		"" != readerPaths[0].Children[0].Blocks[0].Memo {
+		t.Fatalf("reader received outline block memo: %#v", readerPaths)
+	}
+	if "PATH_MEMO_CANARY" != searchPathContracts(paths)[0].Blocks[0].Memo {
+		t.Fatal("administrator lost outline block memo")
 	}
 }

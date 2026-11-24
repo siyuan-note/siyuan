@@ -7,6 +7,7 @@ import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
 import {restoreInlineElementBoundaryHTML} from "../util/inlineElementBoundary";
 import {suspendLongTextRuns} from "../util/longTextWrap";
+import {getTableCellRichContext} from "../util/tableCellRichContext";
 import {
     fixAdjacentTags,
     getContenteditableElement,
@@ -385,7 +386,8 @@ const inputBlock = async (protyle: IProtyle, blockElement: HTMLElement, range: R
     normalizeInlineFontFamilyStyles(editElement);
     let html = blockElement.outerHTML;
     let focusHR = false;
-    if (["---", "___", "***"].includes(editElement.textContent) && type !== "NodeCodeBlock") {
+    if (["---", "___", "***"].includes(editElement.textContent) && type !== "NodeCodeBlock" &&
+        !getTableCellRichContext(protyle)) {
         html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`;
         // https://github.com/siyuan-note/siyuan/issues/12593
         const nextBlockElement = getNextBlockSibling(blockElement);

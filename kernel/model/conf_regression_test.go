@@ -17,6 +17,40 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestConfLoadsLegacyAppearanceIcons(t *testing.T) {
+	c := loadConfFixture(t, `{
+		"appearance":{"icons":["material","custom-icon"],"icon":"custom-icon"},
+		"sync":{"enabled":true,"provider":2,"s3":{"endpoint":"https://storage.example.test","bucket":"test-repo"}},
+		"repo":{"key":"MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="}
+	}`)
+	appearance := c.LoadAppearance()
+	if appearance.Icon != "custom-icon" || !reflect.DeepEqual(appearance.Icons, []*conf.AppearanceIcon{
+		{Name: "material", Label: "material"},
+		{Name: "custom-icon", Label: "custom-icon"},
+	}) {
+		t.Fatalf("legacy icon configuration was not loaded: %+v", appearance)
+	}
+	syncConf := c.LoadSync()
+	if syncConf == nil || !syncConf.Enabled || syncConf.Provider != conf.ProviderS3 || syncConf.S3 == nil ||
+		syncConf.S3.Endpoint != "https://storage.example.test" || syncConf.S3.Bucket != "test-repo" {
+		t.Fatal("legacy icon configuration interrupted loading S3 settings")
+	}
+	if repo := c.LoadRepo(); repo == nil || !bytes.Equal(repo.Key, []byte("0123456789abcdef0123456789abcdef")) {
+		t.Fatal("legacy icon configuration interrupted loading the repository key")
+	}
+	encoded, err := json.Marshal(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(encoded, []byte(`"icons":[{"name":"material","label":"material"},{"name":"custom-icon","label":"custom-icon"}]`)) {
+		t.Fatal("legacy icons were not saved in object format")
+	}
+	reloaded := loadConfFixture(t, string(encoded))
+	if !reflect.DeepEqual(reloaded.LoadAppearance().Icons, appearance.Icons) {
+		t.Fatal("saved icon objects could not be reloaded")
+	}
+}
+
 func TestConfAllSectionsShareStartupAndWriteNormalization(t *testing.T) {
 	prepareConfConsistencyTest(t)
 	raw := []byte(`{

@@ -1,3 +1,4 @@
+import {escapeAttr} from "../../util/escape";
 import {BAZAAR_PACKAGE_CONFIG} from "./packageConfig";
 
 const genSortOptionsHTML = (sortValue: string) => `<option ${sortValue === "0" ? "selected" : ""} value="0">${window.siyuan.languages.sortByUpdateTimeDesc}</option>
@@ -35,7 +36,7 @@ export const genBazaarPackagePanelHTML = (
             <button type="button" class="block__icon block__icon--show block__icon--touch block__icon--inset block__icon--tap ariaLabel" data-bazaar-filter-menu aria-label="${window.siyuan.languages.filter}" data-position="north" aria-haspopup="menu" aria-expanded="false">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </button>
-            <input spellcheck="false" class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
+            <input spellcheck="false" class="b3-text-field" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
     </div>

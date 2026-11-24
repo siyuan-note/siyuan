@@ -5243,7 +5243,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Table cells support paragraphs, headings, lists, blockquotes, code, and math without manual conversion. Existing Markdown-looking text stays literal, and existing bold text, links, and other inline formatting are preserved. Use the slash or plus menu to insert images, create a document and reference it, or apply inline styles."
+					"Data": "Table cells support paragraphs, headings, lists, blockquotes, code, and math without manual conversion. Existing Markdown-looking text stays literal, and existing bold text, links, and other inline formatting are preserved. Standalone divider markers such as --- stay as text. Use the slash or plus menu to insert images, create a document and reference it, or apply inline styles."
 				}
 			]
 		},

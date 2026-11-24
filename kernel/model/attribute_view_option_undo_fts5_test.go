@@ -72,6 +72,15 @@ func TestAttributeViewOptionUndoRedo(t *testing.T) {
 				if action == "merge" && field.Key.GetOption("B").Desc != "Target description" {
 					t.Fatal("merge changed the target option definition")
 				}
+				if action == "rename" {
+					for _, view := range source.Views {
+						original := view.GetGroupByGroupValue("A")
+						renamed := after.GetView(view.ID).GetGroupByGroupValue("Renamed")
+						if renamed == nil || renamed.ID != original.ID || renamed.GroupSort != original.GroupSort {
+							t.Fatalf("renaming an option must preserve the group ID and position in layout %q", view.LayoutType)
+						}
+					}
+				}
 				for range 3 {
 					replayAttributeViewFieldsTest(t, entry.UndoOperationsForReplay())
 					assertAttributeViewFieldsTest(t, source, readAttributeViewItemsTest(t, source.ID))
@@ -339,7 +348,7 @@ func setupAttributeViewOptionUndoTest(t *testing.T, action string, typ av.KeyTyp
 	for _, view := range source.Views {
 		view.Filters = fieldFilterRoot(&av.ViewFilter{Combination: av.FilterCombinationOr,
 			Filters: []*av.ViewFilter{optionFilter("A"), optionFilter("A", "B")}}, optionFilter("B"))
-		view.Group = &av.ViewGroup{Field: field.Key.ID, Method: av.GroupMethodValue}
+		view.Group = &av.ViewGroup{Field: field.Key.ID, Method: av.GroupMethodValue, Order: av.GroupOrderMan}
 		if view.Table != nil {
 			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.Key.ID}})
 		}

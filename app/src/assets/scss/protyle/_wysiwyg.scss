@@ -639,6 +639,7 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
       }
 
       table {
+        border-top: 0;
         border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
         box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
       }
@@ -650,8 +651,49 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         box-shadow: 0 -1px 0 var(--b3-border-color) inset;
         background-color: var(--b3-parent-background);
 
+        &::after {
+          content: "";
+          position: absolute;
+          inset: 0 0 auto -1px;
+          z-index: 2;
+          height: var(--b3-border-radius-s);
+          border-top: 1px solid var(--b3-theme-surface-lighter);
+          border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) 0 0;
+          pointer-events: none;
+        }
+
         th {
           border-top: 0;
+        }
+      }
+    }
+
+    &.table[custom-sy-table-pin-column="true"] {
+      --b3-table-pinned-column-background: transparent;
+      --b3-table-pinned-column-header-background: var(--b3-table-even-background);
+
+      &[custom-sy-table-header-row="false"] {
+        --b3-table-pinned-column-header-background: transparent;
+      }
+
+      &[custom-sy-table-header-column="true"] {
+        --b3-table-pinned-column-background: var(--b3-table-even-background);
+        --b3-table-pinned-column-header-background: var(--b3-table-even-background);
+      }
+
+      > div:first-child > table[data-table-pinned-column-active] {
+        > thead {
+          --b3-table-pinned-column-background: var(--b3-table-pinned-column-header-background);
+        }
+
+        > thead > tr > [data-table-pinned-column-cell],
+        > tbody > tr > [data-table-pinned-column-cell],
+        > tfoot > tr > [data-table-pinned-column-cell] {
+          position: sticky;
+          inset-inline-start: 0;
+          z-index: 1;
+          background-color: var(--b3-parent-background);
+          background-image: linear-gradient(var(--b3-table-pinned-column-background), var(--b3-table-pinned-column-background));
         }
       }
     }
@@ -1221,7 +1263,7 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
     .av__row--util svg[data-type="set-page-size"],
     .av__row--header > .block__icons,
     .av__views .fn__space,
-    .av__views .block__icon:not([data-type="av-search-icon"]):not(.av__readonly-sort),
+    .av__views .block__icon:not([data-type="av-search-icon"]):not(.av__readonly-sort):not(.av__mobile-view),
     .av__widthdrag,
     .av__gallery-actions,
     .av__gallery-add,

@@ -1,7 +1,6 @@
 import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {bindBottomSheetDialog} from "../mobile/util/bindBottomSheetDialog";
-import type {MobileSheetMode} from "../mobile/util/mobileSheetLayout";
 import {Constants} from "../constants";
 import {callMobileAppShowKeyboard} from "../mobile/util/mobileAppUtil";
 import {scrollInputIntoView} from "../mobile/util/visibleViewport";
@@ -10,7 +9,7 @@ import {showMessage} from "./message";
 
 export type DialogCloseReason = "confirm" | "cancel" | "scrim" | "drag" | "back" | "escape" | "programmatic" | "invalidate";
 export type MobileSheetOptions = {
-    mode?: MobileSheetMode,
+    initiallyExpanded?: boolean,
     beforeClose?: (reason: DialogCloseReason) => boolean | Promise<boolean>
 };
 const passive = (reason: DialogCloseReason) => ["scrim", "drag", "back", "escape"].includes(reason);
@@ -29,7 +28,6 @@ export interface AdaptiveDialog extends Dialog {
     runPending(task: () => Promise<boolean>, options?: TPendingOptions): Promise<boolean>;
     focusWhenReady(target: () => HTMLElement, options?: {select?: boolean, showKeyboard?: boolean}): void;
     bindInput(input: HTMLInputElement | HTMLTextAreaElement, enter?: () => void, bindEnter?: boolean, focus?: boolean): void;
-    setSheetMode(mode: MobileSheetMode): void;
 }
 
 const createAdaptiveDialogClass = () => {
@@ -82,8 +80,10 @@ const createAdaptiveDialogClass = () => {
                 this.ready = true;
                 this.focusTask?.();
                 this.focusTask = undefined;
-            }, {mode: this.sheetOptions.mode,
-                canStart: () => !this.pending && !this.checking && !this.disposed && this.topmost()});
+            }, {
+                initiallyExpanded: this.sheetOptions.initiallyExpanded,
+                canStart: () => !this.pending && !this.checking && !this.disposed && this.topmost(),
+            });
             const click = (event: MouseEvent) => {
                 const target = event.target as HTMLElement;
                 if (target.closest(".b3-dialog__scrim")) {
@@ -233,10 +233,6 @@ const createAdaptiveDialogClass = () => {
             };
             if (!this.mobile || this.ready) focus();
             else this.focusTask = focus;
-        }
-
-        public setSheetMode(mode: MobileSheetMode) {
-            this.disposeSheet?.setMode(mode);
         }
 
         public bindInput(input: HTMLInputElement | HTMLTextAreaElement, enter?: () => void, bindEnter = true, focus = true) {

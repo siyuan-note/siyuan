@@ -1,6 +1,6 @@
 import {getTopBarHeight} from "../../../layout/getTopBarHeight";
-import {setPosition} from "../../../util/setPosition";
 import {isMobile} from "../../../util/functions";
+import {setAVCellPanelPosition} from "./cellPanelPosition";
 
 // 日期范围、时间及年月编辑器都会改变内容高度；滚动仍由原菜单 items 承担。
 export const bindDatePanelPosition = (menu: HTMLElement, getAnchor: () => DOMRect) => {
@@ -14,13 +14,7 @@ export const bindDatePanelPosition = (menu: HTMLElement, getAnchor: () => DOMRec
         if (disposed || !menu.isConnected || !content?.isConnected) { return; }
         menu.style.maxHeight = Math.max(0, view.innerHeight - getTopBarHeight()) + "px";
         const anchor = getAnchor();
-        if (anchor) { setPosition(menu, anchor.left, anchor.bottom, anchor.height, 0, true); }
-    };
-    const onResize = () => {
-        delete menu.dataset.positionTop;
-        delete menu.dataset.positionBottom;
-        delete menu.dataset.positionX;
-        update();
+        if (anchor) { setAVCellPanelPosition(menu, anchor); }
     };
     const resize = new view.ResizeObserver(update);
     resize.observe(menu);
@@ -30,14 +24,14 @@ export const bindDatePanelPosition = (menu: HTMLElement, getAnchor: () => DOMRec
         disposed = true;
         resize.disconnect();
         removal.disconnect();
-        view.removeEventListener("resize", onResize);
+        view.removeEventListener("resize", update);
         view.removeEventListener("pagehide", destroy);
     };
     const removal = new view.MutationObserver(() => {
         if (!menu.isConnected || !content?.isConnected) { destroy(); }
     });
     removal.observe(doc.body, {childList: true, subtree: true});
-    view.addEventListener("resize", onResize);
+    view.addEventListener("resize", update);
     view.addEventListener("pagehide", destroy);
     update();
     return destroy;

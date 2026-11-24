@@ -1,3 +1,4 @@
+import type {AIReference} from "../../../types/api";
 export type AgentHistoryEntry = {
     id?: string;
     type: string;
@@ -75,19 +76,17 @@ export const formatAgentThinkingStats = (seconds: number | undefined, toolCount:
     return labels.agentThinkingDoneTime ? labels.agentThinkingDoneTime.replace("%s", secondsText) : fallback;
 };
 
-export type AgentHistoryReference = { id: string; title: string };
-
 export type AgentHistoryUserEntry = {
     content: string;
     timestamp?: number;
     blockHTML?: string;
-    references?: AgentHistoryReference[];
+    references?: AIReference[];
 };
 
 export type AgentHistoryEditData = {
     text: string;
     blockHTML: string;
-    references: AgentHistoryReference[];
+    references: AIReference[];
 };
 
 export const applyAgentUserEdit = (entry: AgentHistoryUserEntry, data: AgentHistoryEditData) => {

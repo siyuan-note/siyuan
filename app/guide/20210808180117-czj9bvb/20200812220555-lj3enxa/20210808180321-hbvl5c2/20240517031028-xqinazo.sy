@@ -348,6 +348,34 @@
 			]
 		},
 		{
+			"ID": "20261122110827-26n69o6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122110827-26n69o6",
+				"updated": "20261122110827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在发布页面中，文档的字数和字符数只统计文档本身，查询嵌入块中的内容不计入统计。"
+				}
+			]
+		},
+		{
+			"ID": "20261122115437-h2k5sxc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122115437-h2k5sxc",
+				"updated": "20261122115437"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "发布服务按访问权限提供反向链接和数据库名称。自定义表情目录仅列出读者有权访问的文档引用的表情。"
+				}
+			]
+		},
+		{
 			"ID": "20260613195219-mibifya",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

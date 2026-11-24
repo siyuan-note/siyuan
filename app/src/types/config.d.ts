@@ -201,6 +201,7 @@ declare namespace Config {
      */
     export interface IEditing {
         modelId: string;
+        reasoningEffort: string;
         maxHistoryMessages: number;
         temperature: number;
         maxCompletionTokens: number;
@@ -1948,6 +1949,11 @@ declare namespace Config {
      * SiYuan synchronization related configuration
      */
     export interface ISync {
+        /**
+         * Whether this workspace has a current or prior sync association, including paused sync.
+         * Maintained by the kernel; may be omitted by older kernels.
+         */
+        readonly configured?: boolean;
         /**
          * Cloud workspace name
          */

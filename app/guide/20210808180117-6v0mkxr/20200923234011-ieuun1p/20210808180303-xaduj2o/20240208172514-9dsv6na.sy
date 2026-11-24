@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261112174810"
+		"updated": "20261123215221"
 	},
 	"Children": [
 		{
@@ -81,7 +81,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20261024161058"
+				"updated": "20261121231653"
 			},
 			"Children": [
 				{
@@ -369,11 +369,25 @@
 			]
 		},
 		{
+			"ID": "20261121231653-f9e7b2w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261121231653-f9e7b2w",
+				"updated": "20261121231653"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, tap the current database view name to open the view switcher. While editing is locked, selecting a view switches to it temporarily. Unlock editing to change view settings."
+				}
+			]
+		},
+		{
 			"ID": "20261024161058-v4cp9kf",
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-v4cp9kf",
-				"updated": "20261111211629"
+				"updated": "20261123215221"
 			},
 			"Children": [
 				{
@@ -382,6 +396,20 @@
 				}
 			],
 			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261123215221-fe33ce8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123215221-fe33ce8",
+				"updated": "20261123215221"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When you hide the current view’s tab, the database switches to the nearest visible tab to its left, or to the nearest one on its right if none are visible on the left. Undo restores both the tab and the current view."
+				}
+			]
 		},
 		{
 			"ID": "20261110134234-mano130",
@@ -512,7 +540,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613162855-gkemixn",
-				"updated": "20260613162855"
+				"updated": "20261122174056"
 			},
 			"Children": [
 				{
@@ -526,12 +554,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613162855-6ui96ya",
-				"updated": "20260613162855"
+				"updated": "20261122174056"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The default database view, displaying data in a tabular row-and-column format."
+					"Data": "The default database view, displaying data in a tabular row-and-column format. In a desktop editor, a wide table shows a horizontal scrollbar at the bottom of the visible area when the scrollbar at the end of the table is out of view."
 				}
 			]
 		},
@@ -604,7 +632,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Each column represents a field. Drag to resize columns and reorder them. Right-click the column header to edit, delete, or hide the field"
+									"Data": ": Each column represents a field. Drag to resize columns and reorder them. Right-click the column header to edit, delete, or hide the field. Undo restores the previous width after resizing and restores each affected view's previous width after applying a width to other views"
 								}
 							]
 						}
@@ -6357,7 +6385,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Primary keys share the text field block editor, supporting paragraphs, headings, lists, blockquotes, code and math blocks while retaining text styles, links, images, inline formulas and block references. On desktop, double-click an inline image while editing a primary key or text field to preview it and browse the other images in that field. Enter creates paragraphs or list items; Shift+Enter inserts an inline line break. During range entry, use Ctrl+Enter (Cmd+Enter on macOS) or the mobile Confirm button to save and continue. Table, list, gallery, kanban, calendar, entry details, relations and rollups display the complete source. Filtering, sorting, search and plain-text copying use the text projection; existing Markdown-looking primary keys remain literal."
+					"Data": "Primary keys share the text field block editor, supporting paragraphs, headings, lists, blockquotes, code and math blocks while retaining text styles, links, images, inline formulas and block references. In desktop table and list views, creating a blank entry selects its primary cell. Start typing in a selected text or primary-key cell to open its editor. When using an input method, the editor opens with the confirmed text. On desktop, double-click an inline image while editing a primary key or text field to preview it and browse the other images in that field. Enter creates paragraphs or list items; Shift+Enter inserts an inline line break. During range entry, use Ctrl+Enter (Cmd+Enter on macOS) or the mobile Confirm button to save and continue. Table, list, gallery, kanban, calendar, entry details, relations and rollups display the complete source. Filtering, sorting, search and plain-text copying use the text projection; existing Markdown-looking primary keys remain literal."
 				}
 			]
 		},

@@ -2411,16 +2411,15 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime
 	}
 
 	content2Time := time.UnixMilli(content2)
-	if hasEndDate {
+	isNotEmpty2 := 0 != content2 && !content2Time.IsZero()
+	if hasEndDate && isNotEmpty2 {
 		var formattedContent2 string
 		if isNotTime {
 			formattedContent2 = content2Time.Format("2006-01-02")
 		} else {
 			formattedContent2 = content2Time.Format("2006-01-02 15:04")
 		}
-		if !content2Time.IsZero() {
-			formatted += " → " + formattedContent2
-		}
+		formatted += " → " + formattedContent2
 	}
 	switch format {
 	case DateFormatNone:
@@ -2433,7 +2432,7 @@ func NewFormattedValueDate(content, content2 int64, format DateFormat, isNotTime
 		Content:          content,
 		Content2:         content2,
 		IsNotEmpty:       true,
-		IsNotEmpty2:      !content2Time.IsZero(),
+		IsNotEmpty2:      isNotEmpty2,
 		HasEndDate:       hasEndDate,
 		IsNotTime:        isNotTime,
 		FormattedContent: formatted,

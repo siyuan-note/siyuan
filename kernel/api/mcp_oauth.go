@@ -307,13 +307,14 @@ func mcpOAuthServerAuthorizeContract(c *gin.Context, _ apicontract.EmptyRequest)
 		return mcpOAuthHTML(c, 400, "", apicontract.MCPOAuthClient{})
 	}
 	// 授权页允许跨站顶层导航；确认提交仍要求登录会话、同源表单及浏览器绑定。
-	if !model.IsWorkspaceSessionAuthenticated(util.GetWorkspaceSession(util.GetSession(c))) {
+	sessionID := mcpOAuthSessionID(c)
+	if sessionID == "" {
 		return apicontract.RedirectHTTPContent(302, "/check-auth?to="+url.QueryEscape(c.Request.URL.RequestURI()))
 	}
 	var b [32]byte
 	_, _ = rand.Read(b[:])
 	binding := base64.RawURLEncoding.EncodeToString(b[:])
-	ticket, client, err := s.Begin(query, binding)
+	ticket, client, err := s.Begin(query, binding, sessionID)
 	if err != nil {
 		return mcpOAuthHTML(c, 400, "", client)
 	}
@@ -333,16 +334,30 @@ var mcpOAuthConsent = contractHandler(apicontract.MCPOAuthConsent, mcpOAuthConse
 
 func mcpOAuthConsentContract(c *gin.Context, req apicontract.MCPOAuthConsentRequest) apicontract.Response[apicontract.BinaryContent] {
 	s, err := activeMCPOAuth(c)
-	if err != nil || !model.IsWorkspaceSessionAuthenticated(util.GetWorkspaceSession(util.GetSession(c))) ||
+	sessionID := mcpOAuthSessionID(c)
+	if err != nil || sessionID == "" ||
 		!util.IsSessionOriginAllowedRequest(c.Request) || c.GetHeader("Origin") != s.Status().PublicURL ||
 		(req.Decision != "approve" && req.Decision != "deny") || util.ReadOnly {
 		return mcpOAuthHTML(c, 400, "", apicontract.MCPOAuthClient{})
 	}
 	binding, _ := c.Cookie("__Host-siyuan-mcp")
-	location, err := s.Consent(req.Ticket, binding, req.Decision == "approve")
+	location, err := s.Consent(req.Ticket, binding, sessionID, req.Decision == "approve")
 	if err != nil {
 		return mcpOAuthHTML(c, 400, "", apicontract.MCPOAuthClient{})
 	}
 	c.Header("Content-Type", "text/html; charset=utf-8")
 	return apicontract.RedirectHTTPContent(302, location)
+}
+
+func mcpOAuthSessionID(c *gin.Context) string {
+	session := util.GetWorkspaceSession(util.GetSession(c))
+	if !model.IsWorkspaceSessionAuthenticated(session) {
+		return ""
+	}
+	if session.AuthSessionID != "" {
+		return session.AuthSessionID
+	}
+	// 已登录的旧会话没有独立标识，使用通过认证的会话 Cookie 作为标识。
+	cookie, _ := c.Cookie(util.SessionCookieName)
+	return cookie
 }

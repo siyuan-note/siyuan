@@ -20,7 +20,8 @@ var listInvalidBlockRefs = contractHandler(apicontract.ListInvalidBlockRefs, fun
 	page, pageSize := request.Pagination()
 	var blocks []*model.Block
 	var matchedBlockCount, matchedRootCount, pageCount int
-	if model.IsReadOnlyRoleContext(c) {
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	if isReadOnlyRole {
 		denyAll, excludeBoxIDs, excludeDocIDs := model.GetPublishAccessSearchExclusion(c)
 		if denyAll {
 			blocks = []*model.Block{}
@@ -33,7 +34,13 @@ var listInvalidBlockRefs = contractHandler(apicontract.ListInvalidBlockRefs, fun
 	} else {
 		blocks, matchedBlockCount, matchedRootCount, pageCount = model.ListInvalidBlockRefs(page, pageSize, nil, nil)
 	}
-	return apicontract.Success(apicontract.SearchBlocksData{Blocks: searchBlockContracts(blocks), MatchedBlockCount: matchedBlockCount, MatchedRootCount: matchedRootCount, PageCount: pageCount})
+	var contracts []*apicontract.SearchBlock
+	if isReadOnlyRole {
+		contracts = searchReaderBlockContracts(blocks)
+	} else {
+		contracts = searchBlockContracts(blocks)
+	}
+	return apicontract.Success(apicontract.SearchBlocksData{Blocks: contracts, MatchedBlockCount: matchedBlockCount, MatchedRootCount: matchedRootCount, PageCount: pageCount})
 })
 var getAssetContent = contractHandler(apicontract.GetAssetContent, func(c *gin.Context, request apicontract.AssetContentRequest) apicontract.Response[apicontract.AssetContentData] {
 	assetContent := model.GetAssetContent(request.ID, request.Query, int(request.QueryMethod))
@@ -218,7 +225,7 @@ var getEmbedBlock = contractHandler(apicontract.GetEmbedBlock, func(c *gin.Conte
 			blocks = model.GetEmbedBlockInBox(embedBlockID, includeIDs, headingMode, breadcrumb, notebook)
 		}
 	}
-	return apicontract.Success(apicontract.EmbedBlocksData{Blocks: embedBlockContracts(blocks)})
+	return apicontract.Success(apicontract.EmbedBlocksData{Blocks: embedBlockContracts(blocks, isReadOnlyRole)})
 })
 
 var updateEmbedBlock = contractHandler(apicontract.UpdateEmbedBlock, func(c *gin.Context, request apicontract.UpdateEmbedBlockRequest) apicontract.Response[apicontract.Null] {
@@ -271,7 +278,7 @@ var searchEmbedBlock = contractHandler(apicontract.SearchEmbedBlock, func(c *gin
 	} else {
 		blocks = model.SearchEmbedBlockInBox(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb, boxID)
 	}
-	return apicontract.Success(apicontract.EmbedBlocksData{Blocks: embedBlockContracts(blocks)})
+	return apicontract.Success(apicontract.EmbedBlocksData{Blocks: embedBlockContracts(blocks, isReadOnlyRole)})
 })
 
 var searchRefBlock = contractHandler(apicontract.SearchRefBlock, func(c *gin.Context, request apicontract.SearchRefBlockRequest) apicontract.Response[apicontract.SearchRefData] {
@@ -313,7 +320,8 @@ var searchRefBlock = contractHandler(apicontract.SearchRefBlock, func(c *gin.Con
 	} else {
 		blocks, newDoc = model.SearchRefBlock(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase)
 	}
-	if model.IsReadOnlyRoleContext(c) {
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	if isReadOnlyRole {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 		if params.ExactDocTitle && 0 == len(blocks) {
@@ -321,7 +329,13 @@ var searchRefBlock = contractHandler(apicontract.SearchRefBlock, func(c *gin.Con
 			newDoc = true
 		}
 	}
-	return apicontract.Success(apicontract.SearchRefBlocks(apicontract.SearchRefResult{SearchRefCorrelation: apicontract.SearchRefCorrelation{ReqID: request.ReqID}, Blocks: searchBlockContracts(blocks), NewDoc: newDoc, K: util.EscapeHTML(keyword)}))
+	var contracts []*apicontract.SearchBlock
+	if isReadOnlyRole {
+		contracts = searchReaderBlockContracts(blocks)
+	} else {
+		contracts = searchBlockContracts(blocks)
+	}
+	return apicontract.Success(apicontract.SearchRefBlocks(apicontract.SearchRefResult{SearchRefCorrelation: apicontract.SearchRefCorrelation{ReqID: request.ReqID}, Blocks: contracts, NewDoc: newDoc, K: util.EscapeHTML(keyword)}))
 })
 
 var fullTextSearchBlock = contractHandler(apicontract.FullTextSearchBlock, func(c *gin.Context, request apicontract.FullTextSearchBlockRequest) apicontract.Response[*apicontract.FullTextSearchBlockData] {
@@ -351,7 +365,8 @@ var fullTextSearchBlock = contractHandler(apicontract.FullTextSearchBlock, func(
 	}
 	// 加密笔记本的全文搜索走 InBox 版（查加密 content db + blocks_fts）
 	var excludeBoxIDs, excludeDocIDs []string
-	if model.IsReadOnlyRoleContext(c) {
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	if isReadOnlyRole {
 		denyAll, deniedBoxIDs, deniedDocIDs := model.GetPublishAccessSearchExclusion(c)
 		if denyAll {
 			return apicontract.Success(&apicontract.FullTextSearchBlockData{SearchBlocksData: apicontract.SearchBlocksData{Blocks: []*apicontract.SearchBlock{}}})
@@ -401,11 +416,17 @@ var fullTextSearchBlock = contractHandler(apicontract.FullTextSearchBlock, func(
 	if c.Request.Context().Err() != nil {
 		return apicontract.Success[*apicontract.FullTextSearchBlockData](nil)
 	}
-	if model.IsReadOnlyRoleContext(c) {
+	if isReadOnlyRole {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	return apicontract.Success(&apicontract.FullTextSearchBlockData{SearchBlocksData: apicontract.SearchBlocksData{Blocks: searchBlockContracts(blocks), MatchedBlockCount: matchedBlockCount, MatchedRootCount: matchedRootCount, PageCount: pageCount}, DocMode: docMode})
+	var contracts []*apicontract.SearchBlock
+	if isReadOnlyRole {
+		contracts = searchReaderBlockContracts(blocks)
+	} else {
+		contracts = searchBlockContracts(blocks)
+	}
+	return apicontract.Success(&apicontract.FullTextSearchBlockData{SearchBlocksData: apicontract.SearchBlocksData{Blocks: contracts, MatchedBlockCount: matchedBlockCount, MatchedRootCount: matchedRootCount, PageCount: pageCount}, DocMode: docMode})
 })
 
 func parseSearchBlockRequest(request apicontract.SearchBlockRequest) (page, pageSize int, query string, paths, boxes []string, types, subTypes map[string]bool, method, orderBy, groupBy int) {
@@ -441,7 +462,8 @@ var semanticSearchBlock = contractHandler(apicontract.SemanticSearchBlock, func(
 	page, pageSize, query, paths, boxes, types, subTypes, _, _, _ := parseSearchBlockRequest(request)
 
 	var excludeBoxIDs, excludeDocIDs []string
-	if model.IsReadOnlyRoleContext(c) {
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	if isReadOnlyRole {
 		denyAll, deniedBoxIDs, deniedDocIDs := model.GetPublishAccessSearchExclusion(c)
 		if denyAll {
 			return apicontract.Success(apicontract.SearchBlocksData{Blocks: []*apicontract.SearchBlock{}})
@@ -450,21 +472,27 @@ var semanticSearchBlock = contractHandler(apicontract.SemanticSearchBlock, func(
 	}
 
 	blocks, matchedBlockCount, matchedRootCount, pageCount := model.SemanticSearchBlock(query, boxes, paths, types, subTypes, page, pageSize, excludeBoxIDs, excludeDocIDs)
-	if model.IsReadOnlyRoleContext(c) {
+	if isReadOnlyRole {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	return apicontract.Success(apicontract.SearchBlocksData{Blocks: searchBlockContracts(blocks), MatchedBlockCount: matchedBlockCount, MatchedRootCount: matchedRootCount, PageCount: pageCount})
+	var contracts []*apicontract.SearchBlock
+	if isReadOnlyRole {
+		contracts = searchReaderBlockContracts(blocks)
+	} else {
+		contracts = searchBlockContracts(blocks)
+	}
+	return apicontract.Success(apicontract.SearchBlocksData{Blocks: contracts, MatchedBlockCount: matchedBlockCount, MatchedRootCount: matchedRootCount, PageCount: pageCount})
 })
 
-func embedBlockContracts(values []*model.EmbedBlock) []*apicontract.EmbedBlock {
+func embedBlockContracts(values []*model.EmbedBlock, forReader bool) []*apicontract.EmbedBlock {
 	if values == nil {
 		return nil
 	}
 	result := make([]*apicontract.EmbedBlock, len(values))
 	for i, value := range values {
 		if value != nil {
-			result[i] = &apicontract.EmbedBlock{Block: searchBlockContracts([]*model.Block{value.Block})[0], BlockPaths: blockPathContracts(value.BlockPaths), AllowChildOperation: value.AllowChildOperation}
+			result[i] = &apicontract.EmbedBlock{Block: searchBlockContractsWithReader([]*model.Block{value.Block}, forReader)[0], BlockPaths: blockPathContracts(value.BlockPaths), AllowChildOperation: value.AllowChildOperation}
 		}
 	}
 	return result

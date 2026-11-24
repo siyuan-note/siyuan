@@ -11,7 +11,7 @@ for (const [name, excludeSelected, attributePanel] of [
     test(name, {
         timeout: 45000, skip: !canRunBrowser,
     }, async () => {
-        const sources = browserSources({relation: join(__dirname, "relation.ts"), cell: join(__dirname, "cell.ts"),
+        const sources = browserSources({relation: join(__dirname, "relation.ts"), cell: join(__dirname, "cell.ts"), cellValue: join(__dirname, "cellValue.ts"),
             relationPosition: join(__dirname, "relationPosition.ts"), relationKeyboard: join(__dirname, "relationKeyboard.ts")});
         sources.excludeSelected = JSON.stringify(excludeSelected);
         sources.attributePanel = JSON.stringify(attributePanel);
@@ -84,6 +84,9 @@ for (const [name, excludeSelected, attributePanel] of [
                 const exports = modules["./" + name] = {};
                 new Function("exports", "require", source[name])(exports, (path: string) => modules[path] || {});
             }
+            const cellValues = {} as typeof import("./cellValue");
+            new Function("exports", "require", source.cellValue)(cellValues, (path: string) => modules[path] || {});
+            modules["./cellValue"].getStoredCellValueByElement = cellValues.getStoredCellValueByElement;
             const cellModule = {};
             new Function("exports", "require", source.cell)(cellModule, (path: string) => modules[path] || {});
             const {bindRelationEvent, setRelationCell} = modules["./relation"];

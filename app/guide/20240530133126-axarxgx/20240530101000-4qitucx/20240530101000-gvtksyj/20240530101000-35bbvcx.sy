@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20261116005812"
+		"updated": "20261120112341"
 	},
 	"Children": [
 		{
@@ -2034,6 +2034,65 @@
 				{
 					"Type": "NodeText",
 					"Data": "結合セルや複数行のヘッダーを含むテーブルは、構造を保持するため、コピーやエクスポートした Markdown 内で HTML テーブルとして表現されます。"
+				}
+			]
+		},
+		{
+			"ID": "20261120112341-i1ns6br",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261120112341-i1ns6br",
+				"updated": "20261120112341"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロックメニューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "表ブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "見出し列を固定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、横にスクロールしても先頭列が表示されます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "見出し行を固定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " も同時に有効にすると、縦にスクロールしてもヘッダーが表示されます。先頭列と後続の列にまたがる結合セルは、表と一緒にスクロールします。表示領域が狭すぎる場合は、先頭列も一時的に表と一緒にスクロールします。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "見出し行の背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "見出し列の背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、該当する見出しの背景色と太字を切り替えられます。"
 				}
 			]
 		},

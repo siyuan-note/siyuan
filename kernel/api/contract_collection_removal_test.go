@@ -177,7 +177,7 @@ func TestAPIContractCollectionRemovalTransactionAcknowledgement(t *testing.T) {
 	sql.InitAssetContentDatabase(true)
 	defer func() { model.FlushTxQueue(); sql.FlushQueue(); sql.CloseDatabase() }()
 	model.GlobalUndoLog.Clear("")
-	util.IncBootProgress(100-util.GetBootProgress(), "")
+	util.IncBootProgress(100-util.GetBootProgress(), util.BootStageNone)
 	paragraph := treenode.GetNodeInTree(tree, fixture.paragraphID)
 	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "block-ref", TextMarkBlockRefID: tree.ID,
 		TextMarkBlockRefSubtype: "d", TextMarkTextContent: "Target"})

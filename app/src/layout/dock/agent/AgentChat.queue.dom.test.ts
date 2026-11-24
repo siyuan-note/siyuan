@@ -12,7 +12,10 @@ const browserCases = async (sources: Record<string, string>) => {
     const check: typeof assert = require("node:assert/strict");
     const queueModule = {exports: {} as any};
     new Function("exports", sources.queue)(queueModule.exports);
+    const quotes = {} as typeof import("./agentQuote");
+    new Function("exports", "require", sources.quotes)(quotes, () => ({}));
     const dependencies = {
+        quotePreview: quotes.quotePreview,
         module: {exports: undefined as any},
         window: {siyuan: {languages: {
             agentQueuedMessages: "Queued messages (${count})", agentQueueMessage: "Queue message",
@@ -49,7 +52,8 @@ const browserCases = async (sources: Record<string, string>) => {
             });
             for (let index = 0; index < 20; index++) {
                 chat.queuedMessages.add("first", {id: String(index), sessionID: "first",
-                    data: {text: index === 0 ? "<img src=x onerror=alert(1)>" : "Long queued message ".repeat(20)}});
+                    data: index === 0 ? {text: "Reply to ⟦quote⟧", references: [{id: "quote", messageID: "previous", title: "<img src=x onerror=alert(1)>"}]} :
+                        {text: "Long queued message ".repeat(20)}});
             }
             chat.updateSendButtonState();
             check.equal(chat.composerHost.classList.contains("agent-chat__composer-host--disabled"), false);
@@ -57,6 +61,7 @@ const browserCases = async (sources: Record<string, string>) => {
             check.equal(chat.sendBtn.getAttribute("aria-label"), "Queue message");
             check.equal(queueElement.querySelector("button").disabled, true);
             check.equal(queueElement.querySelector("img"), null);
+            check.equal(queueElement.querySelector(".b3-list-item__text").textContent, "Reply to “<img src=x onerror=alert(1)>”");
             check.ok(queueElement.scrollHeight > queueElement.clientHeight);
             check.ok(queueElement.scrollWidth <= queueElement.clientWidth + 1);
             const firstRow = queueElement.children[1];
@@ -96,6 +101,7 @@ test("queued-message controls preserve drafts, cancellation and narrow desktop/m
     const sources = {
         chat: compile(`class Chat { ${methods.join("\n")} } module.exports = Chat;`),
         queue: compile(readFileSync("src/layout/dock/agent/AgentMessageQueue.ts", "utf8")),
+        quotes: compile(readFileSync("src/layout/dock/agent/agentQuote.ts", "utf8")),
         desktopCSS: sass.compile("src/assets/scss/base.scss", {logger: sass.Logger.silent}).css,
         mobileCSS: sass.compile("src/assets/scss/mobile.scss", {logger: sass.Logger.silent}).css,
         daylight: readFileSync("appearance/themes/daylight/theme.css", "utf8"),

@@ -4,7 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {createSourceFile, isClassDeclaration, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import type {Menu} from "./Menu";
-import {getMobileSheetBounds, moveSheetGesture} from "../mobile/util/mobileSheetGesture";
+import {getMobileSheetDragAction, getMobileSheetHeight} from "../mobile/util/mobileSheetGesture";
 import {getVisibleSheetViewport} from "./sheetOpen";
 
 const source = createSourceFile("Menu.ts", readFileSync("src/menus/Menu.ts", "utf8"), ScriptTarget.ES2021, true);
@@ -13,7 +13,7 @@ const compiled = transpileModule(declaration.getText(source), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const createSheet = (expandable = false, realSizing = false, borderHeight = 0) => {
+const createSheet = () => {
     let closes = 0;
     let now = 1000;
     let busy = false;
@@ -21,10 +21,10 @@ const createSheet = (expandable = false, realSizing = false, borderHeight = 0) =
     const classes = new Set(["b3-menu--sheet"]);
     const element = {
         id: "testMenu",
-        style: {transform: "", transition: "", height: "448px"},
+        style: {transform: "", transition: "", height: "400px"},
         classList: {contains: (name: string) => classes.has(name)},
-        getAttribute: (name: string) => name === "aria-busy" ? String(busy) : expandable ? "true" : null,
-        get clientHeight() { return parseFloat(this.style.height) - borderHeight; },
+        getAttribute: (name: string) => name === "aria-busy" ? String(busy) : null,
+        get clientHeight() { return parseFloat(this.style.height); },
         getBoundingClientRect() { return {height: parseFloat(this.style.height)}; },
         firstElementChild: {getBoundingClientRect: () => ({height: 16})},
         lastElementChild: {style: {flex: ""}, scrollHeight: 1000, get clientHeight() { return element.clientHeight - 16; }},
@@ -38,7 +38,7 @@ const createSheet = (expandable = false, realSizing = false, borderHeight = 0) =
         exports,
         fullscreenCloseTimeout: undefined,
         clearTimeout() {}, Constants: {TIMEOUT_DBLCLICK: 200},
-        getMobileSheetBounds, moveSheetGesture, getVisibleSheetViewport,
+        getMobileSheetDragAction, getMobileSheetHeight, getVisibleSheetViewport,
         isMobile: () => true,
         setSheetExpanded: (_element: unknown, expanded: boolean) => {
             if (expanded) {
@@ -58,11 +58,7 @@ const createSheet = (expandable = false, realSizing = false, borderHeight = 0) =
     menu.closeSheet = () => { closes++; };
     (menu as unknown as {hideFullscreenScrim: () => void}).hideFullscreenScrim = () => {};
     (menu as unknown as {updateSheetTitle: () => void}).updateSheetTitle = () => {};
-    if (!realSizing) (menu as unknown as {setSheetHeight: () => void}).setSheetHeight = () => {
-        const preferred = (menu as unknown as {sheetPreferredHeight?: number}).sheetPreferredHeight;
-        element.style.height = classes.has("b3-menu--expanded") ? "800px" : (preferred ?? 448) + "px";
-    };
-    if (realSizing) menu.resetPosition();
+    menu.resetPosition();
     const swipe = (options: {sortable?: boolean, title?: boolean, scrollTop?: number}, offset: number) => {
         const items = {scrollHeight: 1000, clientHeight: 400, scrollTop: options.scrollTop || 0, parentElement: element};
         const target = {
@@ -133,67 +129,48 @@ test("pulling ordinary content at the top downward still dismisses it", () => {
     assert.equal(sheet.closes(), 1);
 });
 
-test("dragging a menu grip retains arbitrary height rather than snapping between two sizes", () => {
-    const sheet = createSheet(true);
-    assert.equal(sheet.swipe({title: true}, -100).prevented, true);
-    assert.equal(sheet.classes.has("b3-menu--expanded"), false);
-    assert.equal(sheet.element.style.height, "548px");
-    sheet.swipe({title: true}, 200);
-    assert.equal(sheet.classes.has("b3-menu--expanded"), false);
-    assert.equal(sheet.element.style.height, "348px");
-    assert.equal(sheet.closes(), 0);
-});
-
-test("repeated grip resizing preserves the border-box height", () => {
-    const sheet = createSheet(true, true, 2);
-    sheet.swipe({title: true}, -100);
-    assert.equal(sheet.element.style.height, "548px");
-    sheet.swipe({title: true}, 40);
-    assert.equal(sheet.element.style.height, "508px");
-    sheet.swipe({title: true}, -40);
-    assert.equal(sheet.element.style.height, "548px");
-    assert.equal(sheet.closes(), 0);
-});
-
-test("a single grip gesture shrinks to minimum then closes only with additional downward distance", () => {
+test("a menu grip expands to full height on release and swipes down to dismiss", () => {
     const sheet = createSheet();
-    sheet.swipe({title: true}, 312);
-    assert.equal(sheet.element.style.height, "136px");
-    assert.equal(sheet.closes(), 0);
-    sheet.swipe({title: true}, 20);
-    assert.equal(sheet.closes(), 0);
-    sheet.swipe({title: true}, 40);
+    const grip = sheet.startGrip();
+    grip.move(-100);
+    assert.equal(sheet.element.style.height, "400px");
+    grip.end();
+    assert.equal(sheet.classes.has("b3-menu--expanded"), true);
+    assert.equal(sheet.element.style.height, "800px");
+    sheet.swipe({title: true}, 80);
     assert.equal(sheet.closes(), 1);
-    const expanded = createSheet();
-    expanded.element.style.height = "800px";
-    expanded.classes.add("b3-menu--expanded");
-    expanded.swipe({title: true}, 705);
-    assert.equal(expanded.closes(), 1);
+});
+
+test("a downward menu grip drag from half height dismisses it", () => {
+    const sheet = createSheet();
+    sheet.swipe({title: true}, 80);
+    assert.equal(sheet.closes(), 1);
 });
 
 test("scrolling database menu content upward keeps the half-height menu", () => {
-    const sheet = createSheet(true);
+    const sheet = createSheet();
     assert.equal(sheet.swipe({}, -100).prevented, false);
     assert.equal(sheet.classes.has("b3-menu--expanded"), false);
-    assert.equal(sheet.element.style.height, "448px");
+    assert.equal(sheet.element.style.height, "400px");
 });
 
 for (const moved of [false, true]) {
-    test(`viewport changes cancel ${moved ? "active" : "pending"} grip resizing before stale excess is applied`, () => {
-        const f = createSheet(true, true);
+    test(`viewport changes cancel a ${moved ? "moving" : "pending"} grip gesture`, () => {
+        const f = createSheet();
         const grip = f.startGrip();
         if (moved) grip.move(100);
         f.window.visualViewport.height = 260;
+        f.menu.resetPosition();
         grip.move(600);
         grip.end();
         assert.equal(f.closes(), 0);
-        assert.equal(f.element.style.transform, "translateY(0px)");
+        assert.equal(f.element.style.transform, moved ? "translateY(0px)" : "");
         assert.ok(parseFloat(f.element.style.height) <= 260);
     });
 }
 
-test("pending begun after a resize move prevents a release-only close", () => {
-    const f = createSheet(true, true);
+test("a sheet that becomes busy during a drag stays open on release", () => {
+    const f = createSheet();
     const grip = f.startGrip();
     grip.move(350);
     f.setBusy();
@@ -205,7 +182,7 @@ test("pending begun after a resize move prevents a release-only close", () => {
 });
 
 test("an external menu close abandons the gesture without overwriting its exit transform", () => {
-    const f = createSheet(true, true);
+    const f = createSheet();
     const grip = f.startGrip();
     grip.move(100);
     f.externalClose();
@@ -217,12 +194,12 @@ test("an external menu close abandons the gesture without overwriting its exit t
     assert.equal(f.closes(), 0);
 });
 
-test("a horizontal grip gesture cannot become a later vertical resize", () => {
-    const f = createSheet(true, true);
+test("a horizontal grip gesture cannot become a later vertical drag", () => {
+    const f = createSheet();
     const grip = f.startGrip();
     grip.move(5, 130);
     grip.move(600);
     grip.end();
     assert.equal(f.closes(), 0);
-    assert.ok(Math.abs(parseFloat(f.element.style.height) - 448) < .001);
+    assert.ok(Math.abs(parseFloat(f.element.style.height) - 400) < .001);
 });

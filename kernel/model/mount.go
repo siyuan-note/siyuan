@@ -654,7 +654,7 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 	return false, nil
 }
 
-var userGuideIDs = []string{"20210808180117-6v0mkxr", "20210808180117-czj9bvb", "20211226090932-5lcq56f", "20240530133126-axarxgx"}
+var userGuideIDs = []string{"20210808180117-6v0mkxr", "20210808180117-czj9bvb", "20211226090932-5lcq56f", "20240530133126-axarxgx", "20261122113000-kt3e4wz"}
 
 func checkMountDocumentAddressing(boxID string) error {
 	if err := filesys.CheckDocumentAddressing(boxID); err != nil {

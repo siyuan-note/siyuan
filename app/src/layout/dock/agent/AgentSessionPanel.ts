@@ -1,5 +1,5 @@
 import {SessionIndexItem, SessionStore} from "./SessionStore";
-import {escapeHtml} from "../../../util/escape";
+import {escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByClassName} from "../../../protyle/util/hasClosest";
 import {upDownHint} from "../../../util/upDownHint";
@@ -246,7 +246,7 @@ export class AgentSessionPanel {
                     (isActive ? " b3-list-item--focus" : "") + '" data-id="' + s.id + '">' +
                     statusHTML +
                     (s.pinnedAt ? '<svg class="b3-list-item__graphic ariaLabel" aria-label="' + escapeHtml(L.pinDoc) + '"><use xlink:href="#iconPin"></use></svg>' : "") +
-                    '<span class="b3-list-item__text ariaLabel" data-position="parentW" aria-label="' + escapeHtml(title) + '">' + escapeHtml(title) + "</span>" +
+                    '<span class="b3-list-item__text ariaLabel" data-position="parentW" aria-label="' + escapeHtmlTextAndAttr(title) + '">' + escapeHtmlTextAndAttr(title) + "</span>" +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.rename + '"><svg><use xlink:href="#iconEdit"></use></svg></span>' +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw agent-session-more" data-id="' + s.id + '" aria-label="' + (L.more || "More") + '">' +
                         '<svg><use xlink:href="#iconMore"></use></svg>' +

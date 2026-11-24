@@ -11,6 +11,7 @@ test("mobile default actions start with add and block without replacing saved or
     assert.deepEqual(defaults.slice(0, 4), [
         "mobile-add", "mobile-block", "mobile-outdent", "mobile-indent",
     ]);
+    assert.equal(defaults[defaults.indexOf("ai") + 1], "agentQuote");
     assert.equal(defaults.includes("mobile-copy"), false);
     assert.equal(defaults.includes("mobile-cut"), false);
     const saved = ["mobile-copy", "mobile-indent", "mobile-block", "mobile-add", "mobile-outdent"];

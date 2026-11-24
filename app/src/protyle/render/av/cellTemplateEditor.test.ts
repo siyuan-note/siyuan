@@ -71,7 +71,7 @@ test("unchanged template source is not saved and intentional edits preserve the 
 });
 
 const cellValues = loadModule<typeof import("./cellValue")>("src/protyle/render/av/cellValue.ts", {require: () => ({})});
-const cellDeclarations = ["getStoredCellValueByElement", "getStableTextCells", "popTextCell"].map(name =>
+const cellDeclarations = ["getStableTextCells", "hasAVPrimaryTemplate", "popTextCell"].map(name =>
     source.statements.find(node => node.getText(source).startsWith(`const ${name} =`) ||
         node.getText(source).startsWith(`export const ${name} =`)).getText(source)).join("\n");
 const cellCode = transpileModule(cellDeclarations, {compilerOptions: {
@@ -112,6 +112,7 @@ const textCellFixture = (template: boolean, rich = false, type: "text" | "block"
         isTableLikeView: () => true,
         getFieldIdByCellElement: () => "row", getColId: () => "column",
         createAVStableTextCell: cellValues.createAVStableTextCell,
+        getStoredCellValueByElement: cellValues.getStoredCellValueByElement,
         genCellValueByElement: () => value,
         openAVRichTextEditor: (options: typeof editor) => { editor = options; },
         updateCellsValue: async (...args: unknown[]) => { saves.push(args); },

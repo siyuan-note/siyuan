@@ -12,15 +12,18 @@ import (
 	"reflect"
 	"runtime/debug"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/88250/lute"
+	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -31,6 +34,8 @@ var (
 	dbQueueLock    = sync.Mutex{}
 	dbQueueCond    = sync.NewCond(&dbQueueLock)
 )
+
+const indexRecoveryBatchSize = 512
 
 type dbQueueOperation struct {
 	inQueueTime                   time.Time
@@ -47,7 +52,24 @@ type dbQueueOperation struct {
 	removeAssetHashes             []string // delete_assets
 	refreshDefIDs                 []string // refresh_def_refs
 	recoveryEntry                 *indexEntry
+	recoveryEnd                   int64
 	recoveredIndex                bool
+	repairedEmbed                 *indexQueueRepair
+}
+
+type indexQueueRepair struct {
+	box, path, rootID, embedID string
+}
+
+func (repair *indexQueueRepair) currentLocation() bool {
+	source := treenode.GetBlockTreeInBox(repair.embedID, repair.box)
+	return source != nil && source.BoxID == repair.box && source.Path == repair.path && source.RootID == repair.rootID &&
+		!isIndexIgnored(&parse.Tree{Box: repair.box, Path: repair.path})
+}
+
+func (repair *indexQueueRepair) matches(block *Block) bool {
+	return block != nil && block.Box == repair.box && block.Path == repair.path && block.RootID == repair.rootID &&
+		repair.currentLocation() && isServerEmbedQuery(embedBlockQueryStatement(block))
 }
 
 type backlinkIndexChange struct {
@@ -153,6 +175,11 @@ func (op *dbQueueOperation) boxID() string {
 }
 
 func FlushTxJob() {
+	if IndexRecoveryPending() {
+		// 历史索引恢复在独立任务中分批执行，重建索引等串行任务可以在批次之间取得执行锁。
+		task.AppendAsyncTaskWithDelay(task.DatabaseIndexCommit, 0, FlushQueue)
+		return
+	}
 	task.AppendTask(task.DatabaseIndexCommit, FlushQueue)
 }
 
@@ -191,6 +218,8 @@ func WaitFlushTx() {
 func ClearQueue() {
 	HPathRefreshLock.Lock()
 	defer HPathRefreshLock.Unlock()
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
 	clearQueue()
 }
 
@@ -199,6 +228,7 @@ func clearQueue() {
 	defer dbQueueLock.Unlock()
 	operationQueue = nil
 	clearIndexQueueEntries()
+	dbQueueCond.Broadcast()
 }
 
 var flushingTx = atomic.Bool{}
@@ -213,6 +243,11 @@ func IndexQueueIdle() bool {
 }
 
 func FlushQueue() {
+	for flushQueueBatch() {
+	}
+}
+
+func flushQueueBatch() (more bool) {
 	timing := util.BeginPerformance("index.flush")
 	timing.Stage("wait_lock")
 	diagnostic := util.WatchOperation("flush database index", "wait for index lock")
@@ -222,7 +257,16 @@ func FlushQueue() {
 
 	diagnostic.Stage("take queued operations")
 	timing.Stage("take_queue")
-	ops, indexSnapshot := getOperations()
+	var ops []*dbQueueOperation
+	var recoveryEnds []int64
+	if IndexRecoveryPending() {
+		ops, recoveryEnds = takeIndexRecoveryBatch()
+	}
+	recovering := len(recoveryEnds) > 0
+	var indexSnapshot int64
+	if !recovering {
+		ops, indexSnapshot = getOperations()
+	}
 	total := len(ops)
 	if 1 > total && !flushingTx.Load() {
 		return
@@ -231,9 +275,28 @@ func FlushQueue() {
 	timing.Count("operations", int64(total))
 
 	flushingTx.Store(true)
+	backlinkChange := newBacklinkIndexChange()
 	defer func() {
+		var recovered int
+		if recovering {
+			diagnostic.Stage("persist index queue completion")
+			for _, op := range ops {
+				if op != nil {
+					break
+				}
+				recovered++
+			}
+			if recovered > 0 {
+				checkpointIndexRecovery(recoveryEnds[recovered-1])
+			}
+			if backlinkChange.changed {
+				util.BroadcastByType("main", "databaseIndexCommit", 0, "", backlinkChange.data())
+			}
+		}
+
 		// 中断或恢复失败时保留尚未完成的操作，并排在刷新期间追加的操作之前。
 		dbQueueLock.Lock()
+		defer dbQueueLock.Unlock()
 		var pending []*dbQueueOperation
 		for _, op := range ops {
 			if op != nil {
@@ -246,7 +309,10 @@ func FlushQueue() {
 		flushingTx.Store(false)
 		// 通知等待的协程队列已刷新完成
 		dbQueueCond.Broadcast()
-		dbQueueLock.Unlock()
+		if recovered > 0 && indexRecoveryRemaining.Add(-int64(recovered)) == 0 && len(operationQueue) == 0 {
+			more = false
+			eventbus.Publish(eventbus.EvtSQLIndexFlushed)
+		}
 	}()
 
 	start := time.Now()
@@ -276,7 +342,6 @@ func FlushQueue() {
 	}
 
 	groupOpsCurrent := map[string]int{}
-	backlinkChange := newBacklinkIndexChange()
 	var recoveryLute *lute.Lute
 	for i, op := range ops {
 		if util.IsExiting.Load() {
@@ -294,6 +359,11 @@ func FlushQueue() {
 			if recoveryLute == nil {
 				recoveryLute = lute.New()
 			}
+			repairScope := op.repairedEmbed
+			if repairScope != nil && !repairScope.currentLocation() {
+				ops[i] = nil
+				continue
+			}
 			var err error
 			op, err = indexEntryToOp(*op.recoveryEntry, recoveryLute, "recover index queue")
 			if err != nil {
@@ -304,6 +374,10 @@ func FlushQueue() {
 				// 损坏或认证失败的文档保留恢复记录，不能当作已处理而删除。
 				logging.LogErrorf("recover index queue failed: %s", err)
 				return
+			}
+			if repairScope != nil && !repairScope.matches(op.block) {
+				ops[i] = nil
+				continue
 			}
 		}
 
@@ -321,7 +395,8 @@ func FlushQueue() {
 		diagnostic.Stage("execute " + op.action)
 		timing.Stage("execute")
 		context["docTreeRefsChanged"] = true
-		if err = execOp(op, tx, context); err != nil {
+		repair, err := execOp(op, tx, context)
+		if err != nil {
 			tx.Rollback()
 			closeTxPreparedStmts(tx)
 			invalidateRefsCacheForOperation(op)
@@ -344,6 +419,27 @@ func FlushQueue() {
 		invalidateRefsCacheForOperation(op)
 		backlinkChange.addOperation(op)
 		finishDocTreeRefs()
+		if repair != nil {
+			eventbus.Publish(eventbus.EvtEmbeddingDirty, repair.rootID)
+			if repair.embedID != "" {
+				// 嵌入查询等待修复事务提交，持久队列仍保留本项以便重新计算失败时重试。
+				entry := indexEntry{Action: "update_block_content", Box: repair.box, ID: repair.embedID}
+				recoveryEnd := ops[i].recoveryEnd
+				ops[i] = newRecoveredIndexOperation(entry)
+				ops[i].recoveryEnd = recoveryEnd
+				ops[i].repairedEmbed = repair
+				if err = refreshRepairedEmbed(entry, repair); err != nil {
+					if !recovering {
+						committed := newBacklinkIndexChange()
+						committed.changed = true
+						committed.addRootID(repair.rootID)
+						util.BroadcastByType("main", "databaseIndexCommit", 0, "", committed.data())
+					}
+					logging.LogErrorf("queue operation [%s] failed after repairing index: %s", op.action, err)
+					return
+				}
+			}
+		}
 
 		switch op.action {
 		case "index":
@@ -373,6 +469,10 @@ func FlushQueue() {
 		logging.LogInfof("database op tx [%dms]", elapsed)
 	}
 
+	if recovering {
+		return true
+	}
+
 	// Push database index commit event https://github.com/siyuan-note/siyuan/issues/8814
 	diagnostic.Stage("notify index completion")
 	timing.Stage("notify")
@@ -384,6 +484,7 @@ func FlushQueue() {
 	diagnostic.Stage("persist index queue completion")
 	timing.Stage("persist_queue")
 	clearIndexQueue(indexSnapshot)
+	return false
 }
 
 func invalidateRefsCacheForOperation(op *dbQueueOperation) {
@@ -397,7 +498,7 @@ func invalidateRefsCacheForOperation(op *dbQueueOperation) {
 	}
 }
 
-func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error) {
+func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (repair *indexQueueRepair, err error) {
 	// 排队中的内容快照保留编辑内容，但路径采用已经提交的文档元数据。
 	currentOp := *op
 	op = &currentOp
@@ -405,17 +506,17 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		doc := treenode.GetBlockTreeInBox(op.indexTree.ID, op.indexTree.Box)
 		if doc == nil || doc.BoxID != op.indexTree.Box || doc.Path != op.indexTree.Path {
 			// 移动或删除后的文档由对应操作维护，旧重命名快照不能写回原路径。
-			return nil
+			return nil, nil
 		}
 	}
 	if op.indexTree != nil && op.action != "rename" {
 		if op.indexTree, err = currentDocumentIndexSnapshot(op.indexTree); err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if op.upsertTree != nil && op.action == "upsert" {
 		if op.upsertTree, err = currentDocumentIndexSnapshot(op.upsertTree); err != nil {
-			return err
+			return nil, err
 		}
 	}
 	updateEmbeddings := func(stmt string, args ...any) error {
@@ -470,6 +571,22 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		}
 
 		err = updateRootContent(tx, treenode.ReadDocumentTitle(op.indexTree.Root).Text, op.indexTree.Root.IALAttr("updated"), treenode.IALStr(op.indexTree.Root), op.indexTree.ID)
+		if errors.Is(err, sql.ErrNoRows) {
+			doc := treenode.GetBlockTreeInBox(op.indexTree.ID, op.indexTree.Box)
+			if doc != nil && (doc.BoxID != op.indexTree.Box || doc.Path != op.indexTree.Path) {
+				return nil, nil
+			}
+			var current *parse.Tree
+			current, err = loadIndexRepairTree(op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
+			if err != nil || current == nil || isIndexIgnored(current) {
+				return
+			}
+			err = upsertTree(tx, current, context)
+			if err != nil {
+				return
+			}
+			repair = &indexQueueRepair{box: current.Box, path: current.Path, rootID: current.ID}
+		}
 		if nil == err {
 			err = updateEmbeddings("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
 		}
@@ -497,6 +614,9 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		err = refreshDefinitionRefLocations(tx, op.box, op.refreshDefIDs)
 	case "update_block_content":
 		err = updateBlockContent(tx, op.block)
+		if errors.Is(err, sql.ErrNoRows) {
+			repair, err = repairMissingEmbedIndex(tx, op.block, context)
+		}
 	case "delete_assets":
 		err = deleteAssetsByHashes(tx, op.removeAssetHashes)
 	case "index_node":
@@ -638,6 +758,79 @@ func DeleteBoxQueue(boxID string) {
 	appendOperation(newOp)
 }
 
+// 缺少派生行时，以磁盘中同一路径的文档为准，不能用旧队列的正文快照补树。
+func loadIndexRepairTree(box, path, rootID string) (*parse.Tree, error) {
+	tree, _, err := filesys.LoadTreeSnapshot(box, path, util.NewLute())
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if tree.ID != rootID {
+		return nil, fmt.Errorf("index repair document [%s] does not match queued root [%s]", tree.ID, rootID)
+	}
+	return tree, nil
+}
+
+func repairMissingEmbedIndex(tx *sql.Tx, block *Block, context map[string]any) (*indexQueueRepair, error) {
+	source := treenode.GetBlockTreeInBox(block.ID, block.Box)
+	if source == nil || source.BoxID != block.Box || source.RootID != block.RootID {
+		return nil, nil
+	}
+	tree, err := loadIndexRepairTree(block.Box, source.Path, block.RootID)
+	if err != nil || tree == nil || isIndexIgnored(tree) {
+		return nil, err
+	}
+	node := treenode.GetNodeInTree(tree, block.ID)
+	if node == nil || node.Type != ast.NodeBlockQueryEmbed {
+		return nil, nil
+	}
+	if err = upsertTree(tx, tree, context); err != nil {
+		return nil, err
+	}
+	repair := &indexQueueRepair{box: tree.Box, path: tree.Path, rootID: tree.ID}
+	if script := node.FirstChild; script != nil && strings.HasPrefix(strings.TrimSpace(script.TokensStr()), "//!js") {
+		// JavaScript 结果来自渲染器，只在脚本未变化时保留本次待写入的结果。
+		current, _ := buildBlockFromNode(node, tree)
+		if block.Markdown == current.Markdown {
+			current.Content = block.Content
+			if err = updateBlockContent(tx, current); err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		repair.embedID = block.ID
+	}
+	return repair, nil
+}
+
+func refreshRepairedEmbed(entry indexEntry, repair *indexQueueRepair) error {
+	if !repair.currentLocation() {
+		return nil
+	}
+	op, err := indexEntryToOp(entry, util.NewLute(), "refresh repaired embed index")
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if !repair.matches(op.block) {
+		return nil
+	}
+	tx, err := beginTxForBox(entry.Box)
+	if err != nil {
+		return err
+	}
+	if err = updateBlockContent(tx, op.block); err != nil {
+		tx.Rollback()
+		closeTxPreparedStmts(tx)
+		return err
+	}
+	return commitTx(tx)
+}
+
 func IndexTreeQueue(tree *parse.Tree) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
@@ -770,6 +963,24 @@ func getOperations() (ops []*dbQueueOperation, indexSnapshot int64) {
 	return
 }
 
+func takeIndexRecoveryBatch() (ops []*dbQueueOperation, journalEnds []int64) {
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	limit := min(len(operationQueue), indexRecoveryBatchSize)
+	journalEnds = make([]int64, 0, limit)
+	for _, op := range operationQueue[:limit] {
+		if op.recoveryEnd == 0 {
+			break
+		}
+		journalEnds = append(journalEnds, op.recoveryEnd)
+	}
+	n := len(journalEnds)
+	ops = operationQueue[:n:n]
+	operationQueue = operationQueue[n:]
+	return
+}
+
 func appendOperation(op *dbQueueOperation) {
 	operationQueue = append(operationQueue, op)
 	recordIndexOperation(op)
@@ -780,6 +991,10 @@ func appendOperation(op *dbQueueOperation) {
 // in-memory operation is coalesced. Unchanged descriptors already reload the
 // latest document from disk and do not need another journal entry.
 func replaceOperation(index int, op *dbQueueOperation) {
+	if operationQueue[index].recoveryEnd > 0 {
+		appendOperation(op)
+		return
+	}
 	previous := dbOpToIndexEntry(operationQueue[index])
 	operationQueue[index] = op
 	if !reflect.DeepEqual(previous, dbOpToIndexEntry(op)) {

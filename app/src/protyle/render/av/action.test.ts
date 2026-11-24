@@ -14,7 +14,10 @@ const setup = (mobile = true, detached = true, viewType: TAVView = "table") => {
     const events: string[] = [];
     const opened: Array<Record<string, unknown>> = [];
     const inserted: Array<{count: number; previousID: string; parentID?: string; groupID?: string}> = [];
+    const transactions: Array<{doOperations: IOperation[]; undoOperations: IOperation[]}> = [];
     const fields: IAVColumn[] = [];
+    const viewData = {viewID: "active-view"};
+    const panels: Array<{type: string; data?: typeof viewData}> = [];
     const siyuan = {config: {readonly: false, keymap: {editor: {general: {
         newNameSettingFile: {custom: ""}, newNameFile: {custom: ""},
     }}}}, isPublish: false, languages: new Proxy({}, {get: (_target, key) => String(key)})};
@@ -28,6 +31,7 @@ const setup = (mobile = true, detached = true, viewType: TAVView = "table") => {
     const block = {dataset: {avId: "database", nodeId: "carrier"},
         getAttribute: () => viewType, querySelector: () => row, querySelectorAll: (): HTMLElement[] => []};
     const target = {getAttribute: () => "av-row-more", closest: (): null => null,
+        classList: {contains: (name: string) => mobile && name === "av__mobile-view"},
         isEqualNode: () => false, getBoundingClientRect: () => ({left: 10, bottom: 30, width: 28, height: 28})};
     const protyle = {app: {}, notebookId: "notebook", toolbar: {}, disabled: false, options: {history: {}}} as IProtyle;
     class Menu {
@@ -60,16 +64,24 @@ const setup = (mobile = true, detached = true, viewType: TAVView = "table") => {
         "../../hint/extend": {hintRef: (content: string) => events.push("bind:" + content)},
         "../../ui/hideElements": {hideElements() {}},
         "./virtualScroll": {
+            getAVData: () => viewData,
             getAVSelectedItemInfos: () => selected, getAVSelectedItems: () => selected.map(() => ({isDetached: detached})),
             getAVSelectedItemPoints: (): unknown[] => [],
             getAVSelectedItemIDs: () => selected.map(item => item.itemID),
         },
         "./viewType": {isTableLikeView},
+        "./openMenuPanel": {openMenuPanel: (options: typeof panels[number]) => panels.push(options)},
         "./itemLink": {genAVItemLink: () => "link"},
         "./viewVisibility": {getAVCurrentViewID: () => "view"},
         "../../../menus/util": {openEditorTab: (): IMenu[] => []},
         "./subItems": {addSubItemsMenu() {}},
         "./row": {insertRows: (options: typeof inserted[number]) => inserted.push(options)},
+        "../../../constants": {Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view"}},
+        "./render": {setAVGroupFolded() {}, initUnfoldedGroupTables() {}},
+        "./groupFold": {updateGroupFoldedStates() {}},
+        "./coverPosition": {isCardCoverPositioning: () => false},
+        "../../wysiwyg/transaction": {transaction: (_protyle: unknown, doOperations: IOperation[], undoOperations: IOperation[]) =>
+            transactions.push({doOperations, undoOperations})},
         "./batchEdit": {getEditableAVFields: () => fields,
             openAVFieldBinding: () => events.push("binding-panel")},
         "../../../plugin/EventBus": {emitOpenMenu() {}},
@@ -80,14 +92,48 @@ const setup = (mobile = true, detached = true, viewType: TAVView = "table") => {
         exports, require: (name: string) => dependencies[name] || {}, window: {siyuan},
         document: {createRange: () => ({selectNodeContents() { events.push("range"); }})},
     });
-    const more = () => exports.avClick(protyle, {target,
+    const click = (clickTarget: typeof target) => exports.avClick(protyle, {target: clickTarget,
         preventDefault: () => events.push("prevent"), stopPropagation: () => events.push("stop"),
     } as unknown as MouseEvent & {target: HTMLElement});
+    const more = () => click(target);
+    const switcher = () => click({...target, getAttribute: () => "av-switcher"});
+    const foldGroup = (id: string) => click(Object.assign({}, target, {
+        getAttribute: (name: string) => name === "data-type" ? "av-group-fold" : null,
+        dataset: {id},
+        firstElementChild: {classList: {contains: () => true}},
+        setAttribute() {},
+    }));
     const context = () => exports.avContextmenu(protyle, undefined, {x: 10, y: 30}, {
         blockElement: block as unknown as HTMLElement, anchorElement: target as unknown as HTMLElement,
     });
-    return {more, context, items, events, opened, inserted, siyuan, protyle, cell, selected, fields};
+    return {more, context, items, events, opened, inserted, siyuan, protyle, cell, selected, fields, switcher, panels, viewData,
+        foldGroup, transactions};
 };
+
+test("folding two database groups queues both changes before an operation can refresh the view", () => {
+    for (const mobile of [false, true]) {
+        const h = setup(mobile);
+        assert.equal(h.foldGroup("first"), true);
+        assert.equal(h.foldGroup("second"), true);
+        assert.deepEqual(h.transactions.map(({doOperations, undoOperations}) => [
+            doOperations[0].action, doOperations[0].id, doOperations[0].data, undoOperations[0].data,
+        ]), [
+            ["foldAttrViewGroup", "first", true, false],
+            ["foldAttrViewGroup", "second", true, false],
+        ]);
+    }
+});
+
+test("the mobile view name opens the switcher with rendered data while the editor is locked", () => {
+    const h = setup();
+    h.protyle.disabled = true;
+    assert.equal(h.switcher(), true);
+    assert.equal(h.panels[0].type, "switcher");
+    assert.equal(h.panels[0].data, h.viewData);
+    h.protyle.disabled = false;
+    assert.equal(h.switcher(), true);
+    assert.equal(h.panels[1].data, undefined);
+});
 
 test("desktop and mobile insertion menus keep table/list siblings under the selected entry's parent", () => {
     for (const mobile of [false, true]) {

@@ -608,13 +608,18 @@ func multimodalValueOrDefault(value, fallback string) string {
 	return value
 }
 
-type attributeViewItemFilter func(attrView *av.AttributeView, itemID string) bool
+// attributeViewItemFilter 判定属性视图行及其嵌套值是否可收集，nil 表示不做过滤。
+// item 判定顶层行，为空时不收集；nested 判定关联或汇总内容中的嵌套值，为空时收集全部嵌套值。
+type attributeViewItemFilter struct {
+	item   func(attrView *av.AttributeView, itemID string) bool
+	nested func(value *av.Value) bool
+}
 
 func DocAssets(rootID string, retainQueryStr bool) (ret []string, err error) {
 	return docAssets(rootID, retainQueryStr, nil)
 }
 
-func docAssets(rootID string, retainQueryStr bool, itemFilter attributeViewItemFilter) (ret []string, err error) {
+func docAssets(rootID string, retainQueryStr bool, itemFilter *attributeViewItemFilter) (ret []string, err error) {
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {
 		return
@@ -1338,18 +1343,24 @@ func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
 		if !gulu.File.IsSubPath(util.WorkspaceDir, p) {
 			return "", fmt.Errorf("[%s] is not sub path of workspace", p)
 		}
-		// 解析符号链接/目录联接，防止软链接跳出资产根目录
-		if realP, evalErr := filepath.EvalSymlinks(p); evalErr == nil && realP != p {
-			if !gulu.File.IsSubPath(util.WorkspaceDir, realP) {
-				return "", fmt.Errorf("symlink [%s] resolves outside workspace: [%s]", p, realP)
+		resolvedPath, err := util.ResolveRealPath(p)
+		if err != nil {
+			return "", err
+		}
+		if resolvedPath != p {
+			// iOS 沙箱路径可能含有系统目录别名。只解析工作空间根目录，笔记本资源目录仍以工作空间内的原位置为边界。
+			resolvedWorkspace, err := util.ResolveRealPath(util.WorkspaceDir)
+			if err != nil {
+				return "", err
 			}
-			// 验证解析后的路径仍在 <boxID>/assets/ 或全局 data/assets/ 下
-			expectedPrefix := filepath.Join(util.DataDir, "assets")
-			if boxID != "" {
-				expectedPrefix = filepath.Join(util.DataDir, boxID, "assets")
+			assetRoot := filepath.Join(util.DataDir, boxID, "assets")
+			relativeRoot, err := filepath.Rel(util.WorkspaceDir, assetRoot)
+			if err != nil {
+				return "", err
 			}
-			if !gulu.File.IsSubPath(expectedPrefix, realP) {
-				return "", fmt.Errorf("symlink [%s] resolves outside assets directory: [%s]", p, realP)
+			if !gulu.File.IsSubPath(resolvedWorkspace, resolvedPath) ||
+				!gulu.File.IsSubPath(filepath.Join(resolvedWorkspace, relativeRoot), resolvedPath) {
+				return "", fmt.Errorf("asset [%s] resolves outside notebook assets directory: [%s]", p, resolvedPath)
 			}
 		}
 		return p, nil
@@ -2624,7 +2635,7 @@ func getAssetsLinkDests(node *ast.Node, includeServePath bool, normalize ...func
 func getAssetsLinkDestsWithAttributeViewItemFilter(
 	node *ast.Node,
 	includeServePath bool,
-	itemFilter attributeViewItemFilter,
+	itemFilter *attributeViewItemFilter,
 	normalize ...func(string) string,
 ) (ret []string) {
 	return getAssetsLinkDestsWithOptions(node, includeServePath, itemFilter, assetLinkScanOptions{resolveAttributeViews: true}, normalize...)
@@ -2637,7 +2648,7 @@ type assetLinkScanOptions struct {
 
 // getAssetsLinkDestsWithOptions 控制数据库加载与资源列表展开；保守展开仅用于已有完整资源清单的扫描。
 func getAssetsLinkDestsWithOptions(
-	node *ast.Node, includeServePath bool, itemFilter attributeViewItemFilter, options assetLinkScanOptions,
+	node *ast.Node, includeServePath bool, itemFilter *attributeViewItemFilter, options assetLinkScanOptions,
 	normalize ...func(string) string,
 ) (ret []string) {
 	ret = []string{}
@@ -2801,7 +2812,7 @@ func fileAnnotationAssetLinkDest(reference string, includeServePath bool, normal
 func getAttributeViewAssetsLinkDests(
 	attrView *av.AttributeView,
 	includeServePath bool,
-	itemFilter attributeViewItemFilter,
+	itemFilter *attributeViewItemFilter,
 	normalize ...func(string) string,
 ) (ret []string) {
 	if nil == attrView {
@@ -2818,10 +2829,10 @@ func getAttributeViewAssetsLinkDests(
 				continue
 			}
 			for _, value := range keyValues.Values {
-				if nil == value || !itemFilter(attrView, value.BlockID) {
+				if nil == value || nil == itemFilter.item || !itemFilter.item(attrView, value.BlockID) {
 					continue
 				}
-				visitAttributeViewValue(value, collectValue)
+				visitAttributeViewValue(value, itemFilter, collectValue)
 			}
 		}
 	}
@@ -2829,11 +2840,12 @@ func getAttributeViewAssetsLinkDests(
 	return
 }
 
-func visitAttributeViewValue(value *av.Value, visit func(*av.Value)) {
-	visitAttributeViewValue0(value, visit, map[*av.Value]struct{}{})
+func visitAttributeViewValue(value *av.Value, itemFilter *attributeViewItemFilter, visit func(*av.Value)) {
+	visitAttributeViewValue0(value, itemFilter, visit, map[*av.Value]struct{}{})
 }
 
-func visitAttributeViewValue0(value *av.Value, visit func(*av.Value), visited map[*av.Value]struct{}) {
+func visitAttributeViewValue0(value *av.Value, itemFilter *attributeViewItemFilter, visit func(*av.Value),
+	visited map[*av.Value]struct{}) {
 	if nil == value {
 		return
 	}
@@ -2842,14 +2854,21 @@ func visitAttributeViewValue0(value *av.Value, visit func(*av.Value), visited ma
 	}
 	visited[value] = struct{}{}
 	visit(value)
+	visitContent := func(content *av.Value) {
+		// 嵌套值先按发布访问判定，不可访问时不收集其自身的资源，也不再继续递归。
+		if nil == content || (nil != itemFilter && nil != itemFilter.nested && !itemFilter.nested(content)) {
+			return
+		}
+		visitAttributeViewValue0(content, itemFilter, visit, visited)
+	}
 	if nil != value.Relation {
 		for _, content := range value.Relation.Contents {
-			visitAttributeViewValue0(content, visit, visited)
+			visitContent(content)
 		}
 	}
 	if nil != value.Rollup {
 		for _, content := range value.Rollup.Contents {
-			visitAttributeViewValue0(content, visit, visited)
+			visitContent(content)
 		}
 	}
 }

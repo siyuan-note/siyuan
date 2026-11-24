@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 
@@ -82,6 +83,24 @@ func CheckEmojiAccessableByPublishAccess(c *gin.Context, relativePath string, pu
 		return false
 	}
 	return checkResourceAccessableByPublishAccess(c, relativePath, publishAccess, false)
+}
+
+func PublishedEmojiPaths(c *gin.Context, publishAccess PublishAccess) []string {
+	publishDisable := filterDisablePublishAccess(publishAccess)
+	paths := map[string]struct{}{}
+	for _, bt := range treenode.GetBlockTreesByType("d") {
+		if getBlockTreePublishAccessStatus(c, publishAccess, publishDisable, bt) == PublishAccessAllowed {
+			for emoji := range getPublishResourceRefs(bt).emojis {
+				paths[emoji] = struct{}{}
+			}
+		}
+	}
+	ret := make([]string, 0, len(paths))
+	for emoji := range paths {
+		ret = append(ret, emoji)
+	}
+	slices.Sort(ret)
+	return ret
 }
 
 func checkResourceAccessableByPublishAccess(c *gin.Context, resource string, publishAccess PublishAccess, widget bool) bool {

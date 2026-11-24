@@ -378,6 +378,7 @@ func NormalizeSync(sync *Sync) *Sync {
 		sync.LAN.MaxConcurrentReqs = 16
 	}
 	sync.LAN.MaxConcurrentReqs = min(128, sync.LAN.MaxConcurrentReqs)
+	sync.Configured = sync.HasConfiguredSync()
 	return sync
 }
 

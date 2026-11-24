@@ -165,6 +165,14 @@ func TestManualUpdateNotification(t *testing.T) {
 			t.Fatal("notification without a download action has an empty action layout")
 		}
 	}
+	Conf.System.Load().DownloadInstallPkg = true
+	release.Packages = map[string]*updatePackage{currentInstallPackageName("99.0.0"): {
+		URLs: []string{"http://127.0.0.1:0/package"}, Checksum: strings.Repeat("a", 64),
+	}}
+	pushNewVersionNotification(release)
+	if events := read(); len(events) != 1 || strings.Contains(events[0].Msg, `data-type="download-update"`) {
+		t.Fatalf("automatic download offered a manual action: %+v", events)
+	}
 }
 
 func TestManualUpdateDownloadsVerifiedBytesWithAutoDownloadDisabled(t *testing.T) {

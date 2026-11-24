@@ -19,6 +19,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -27,7 +28,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// TestPublishReaderBoundary 校验发布读者在字数统计、标题存在性与面包屑标签三处都拿不到越界信息。
 func TestPublishReaderBoundary(t *testing.T) {
 	const helper = "SIYUAN_TEST_PUBLISH_READER_BOUNDARY"
 	if os.Getenv(helper) != "1" {
@@ -77,6 +77,8 @@ func TestPublishReaderBoundary(t *testing.T) {
 		visibleText = "visible paragraph text"
 		memoCanary  = "INLINE-MEMO-CANARY-4c7a1d"
 		protTitle   = "Protected Canary Doc"
+		titleLabel  = "Visible title"
+		titleMemo   = "Private title memo"
 	)
 
 	box := &model.Box{ID: boxID}
@@ -87,6 +89,16 @@ func TestPublishReaderBoundary(t *testing.T) {
 	}
 
 	tree := treenode.NewTree(boxID, "/"+docID+".sy", "/"+docID, "Public Source Doc")
+	titleParagraph := &ast.Node{Type: ast.NodeParagraph}
+	titleParagraph.AppendChild(&ast.Node{
+		Type:                      ast.NodeTextMark,
+		TextMarkType:              "strong inline-memo",
+		TextMarkTextContent:       titleLabel,
+		TextMarkInlineMemoContent: titleMemo,
+	})
+	if err := treenode.SetDocumentTitleParagraph(tree.Root, titleParagraph); err != nil {
+		t.Fatal(err)
+	}
 	tree.Root.FirstChild.Unlink()
 	paragraph := treenode.NewParagraph(paragraphID)
 	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(visibleText)})
@@ -122,12 +134,12 @@ func TestPublishReaderBoundary(t *testing.T) {
 		t.Fatalf("set publish access: %v", err)
 	}
 
-	post := func(path, body string, handler gin.HandlerFunc) map[string]any {
+	postAs := func(role model.Role, path, body string, handler gin.HandlerFunc) *httptest.ResponseRecorder {
 		t.Helper()
 		gin.SetMode(gin.TestMode)
 		engine := gin.New()
 		engine.Use(func(c *gin.Context) {
-			c.Set(model.RoleContextKey, model.RoleReader)
+			c.Set(model.RoleContextKey, role)
 			c.Next()
 		})
 		engine.POST(path, handler)
@@ -135,12 +147,46 @@ func TestPublishReaderBoundary(t *testing.T) {
 		request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
 		request.Header.Set("Content-Type", "application/json")
 		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+	post := func(path, body string, handler gin.HandlerFunc) map[string]any {
+		t.Helper()
+		recorder := postAs(model.RoleReader, path, body, handler)
 		var response map[string]any
 		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
 			t.Fatalf("%s: invalid response %q: %v", path, recorder.Body.String(), err)
 		}
 		return response
 	}
+
+	t.Run("DocumentTitleContract", func(t *testing.T) {
+		const route = "/api/block/getDocTitle"
+		body := fmt.Sprintf(`{"id":%q,"notebook":%q}`, docID, boxID)
+		for _, role := range []model.Role{model.RoleReader, model.RoleVisitor, model.RoleEditor, model.RoleAdministrator} {
+			recorder := postAs(role, route, body, getDocTitle)
+			requireAPIContract(t, http.MethodPost, route, recorder)
+			var response struct {
+				Code int
+				Data apicontract.DocumentTitleData
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 {
+				t.Fatalf("title read for role %d failed: code %d, %v", role, response.Code, err)
+			}
+			title := response.Data
+			if title.Text != titleLabel || title.Format != "inline-ast" ||
+				!strings.Contains(title.BlockDOM, titleLabel) || !strings.Contains(title.BlockDOM, "strong") {
+				t.Fatalf("role %d lost the visible rich title", role)
+			}
+			if model.IsReadOnlyRole(role) {
+				if title.Source != nil || title.Revision != "" || strings.Contains(recorder.Body.String(), titleMemo) {
+					t.Fatalf("role %d received private title data", role)
+				}
+			} else if title.Source == nil || !strings.Contains(title.Source.Content, titleMemo) ||
+				title.Revision == "" || !strings.Contains(title.BlockDOM, titleMemo) {
+				t.Fatalf("role %d lost the editable title", role)
+			}
+		}
+	})
 
 	// 面包屑子块标签只保留可见文字
 	children := post("/api/block/getBlockBreadcrumbChildren",

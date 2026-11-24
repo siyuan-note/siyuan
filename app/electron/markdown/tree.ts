@@ -3,7 +3,7 @@ import * as fs from "node:fs/promises";
 import {watch} from "node:fs";
 import * as path from "node:path";
 import {createMarkdownInstanceId} from "../../src/markdown/identity";
-import {inside} from "./resources";
+import {inside, isRelativeMarkdownReference} from "./resources";
 import type {BigIntStats, FSWatcher} from "node:fs";
 import type {MarkdownErrorCode, MarkdownFailure} from "../../src/markdown/contracts";
 import type {MarkdownTreeListing, MarkdownTreeLocation, MarkdownTreeNode, MarkdownTreeState, MarkdownTreeView} from "../../src/markdown/treeContracts";
@@ -205,6 +205,26 @@ class MarkdownTree {
     async file(location: MarkdownTreeLocation): Promise<TreeEntry> {
         const node = await this.checked(location);
         if (node.kind !== "file") throw fail("protocol");
+        return node;
+    }
+
+    async linkedFile(reference: unknown, documentPath?: string): Promise<TreeEntry> {
+        if (!this.root || !documentPath || typeof reference !== "string" || reference.length > 8192 ||
+            !isRelativeMarkdownReference(reference)) throw fail("permission");
+        let relative: string;
+        try {
+            relative = decodeURIComponent(reference.split(/[?#]/, 1)[0]);
+        } catch {
+            throw fail("protocol");
+        }
+        const markdownExtension = /\.(md|markdown)$/i;
+        if (!isRelativeMarkdownReference(relative) || /[:\\]/.test(relative) || !markdownExtension.test(relative)) {
+            throw fail("permission");
+        }
+        const selection = path.resolve(path.dirname(documentPath), relative);
+        if (!inside(this.root.path, selection)) throw fail("permission");
+        const node = await this.resolve(path.relative(this.root.path, selection));
+        if (node.kind !== "file" || !markdownExtension.test(node.path)) throw fail("permission");
         return node;
     }
 

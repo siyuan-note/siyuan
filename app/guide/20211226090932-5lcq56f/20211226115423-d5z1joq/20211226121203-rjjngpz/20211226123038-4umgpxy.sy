@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20261112034624"
+		"updated": "20261122235513"
 	},
 	"Children": [
 		{
@@ -493,6 +493,20 @@
 			]
 		},
 		{
+			"ID": "20261120223328-e7a2761",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261120223328-e7a2761",
+				"updated": "20261120223328"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在行動裝置上預覽圖片時，雙指捏合或張開可縮放圖片。點兩下圖片可放大至初始顯示大小的兩倍，再點兩下可恢復初始檢視。底部工具列可旋轉圖片或重置檢視。有多張圖片時，可使用底部工具列的上一張和下一張按鈕切換。"
+				}
+			]
+		},
+		{
 			"ID": "20261105133656-802e0oo",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -686,6 +700,112 @@
 				{
 					"Type": "NodeText",
 					"Data": " 取消。點擊輸入框外部或離開輸入框也會儲存，行動裝置返回時會先儲存並關閉輸入框。修改僅作用於目前的圖片引用，不會重新命名資源文件。唯讀文檔不支援編輯標題。"
+				}
+			]
+		},
+		{
+			"ID": "20261122120803-gw2su8t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122120803-gw2su8t",
+				"updated": "20261122235513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在行動裝置上分享和儲存資料文件"
+				}
+			]
+		},
+		{
+			"ID": "20261122120803-26re8p5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122120803-26re8p5",
+				"updated": "20261122120803"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android 和 HarmonyOS 上，開啟圖片、附件連結或資料庫附件的選單，選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "分享"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。若要分享音訊、影片或嵌入的本機 HTML 檔案，請開啟其區塊選單並選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "分享"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。系統分享面板會以原始格式傳送附件。在 iOS 上，可在提供匯出的資源選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "匯出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開啟系統分享面板。"
+				}
+			]
+		},
+		{
+			"ID": "20261122235513-72669f0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122235513-72669f0",
+				"updated": "20261122235513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 Android 上，長按本機圖片，選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "儲存到相簿"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。若要儲存本機影片，請開啟區塊選單並選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "儲存到相簿"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。思源會將原始檔案儲存到系統相簿。"
 				}
 			]
 		},

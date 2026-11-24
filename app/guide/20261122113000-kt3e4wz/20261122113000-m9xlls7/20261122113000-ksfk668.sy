@@ -1,0 +1,656 @@
+{
+	"ID": "20261122113000-ksfk668",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f371",
+		"id": "20261122113000-ksfk668",
+		"title": "Редактор",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-uvekc9a",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20261122113000-uvekc9a",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-2emetup",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-2emetup",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-6myv522",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-6myv522",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Редактирование и вёрстка на основе блоков контента"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-lcmw9gg",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-lcmw9gg",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-6nxnxwq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-6nxnxwq",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Структура списков с поддержкой отступов подуровней и без них"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-vamozil",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-vamozil",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-wd7873m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-wd7873m",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Фокус на блоке контента — фокусировка редактора на одном блоке"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-tb0mmbx",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-tb0mmbx",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-12c8k8w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-12c8k8w",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Динамическая загрузка для устранения тормозов в больших документах"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-tvar060",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-tvar060",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-91cuhiq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-91cuhiq",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Горизонтальная вёрстка перетаскиванием маркеров блоков"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-nye9p47",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-nye9p47",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-vajyl16",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Элементы форматирования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0kp17j3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0kp17j3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-1wdonhz",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Выбор и операции с блоками содержимого"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m1tgasp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-m1tgasp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-vrxoxii",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Оптимизация форматирования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-un3ne06",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-un3ne06",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-ltz5kix",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Смешанное форматирование заголовков и списков"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0nb8cha",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0nb8cha",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-n1ghrlh",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Автономный редактор Markdown"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cofugyx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-cofugyx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Проверка орфографии"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7xzhhng",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7xzhhng",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Проверка орфографии"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " включите эту функцию. Орфографические ошибки подчёркиваются волнистой линией."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xlmcdl6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xlmcdl6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На компьютере: нажмите правой кнопкой мыши на подчёркнутое слово и выберите вариант исправления в меню SiYuan или добавьте слово в словарь. Используйте обычный клик правой кнопкой без удержания "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vty87lb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-vty87lb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В браузере: включите проверку орфографии в настройках браузера и выберите язык. В Chrome удерживайте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и нажмите правой кнопкой мыши на подчёркнутое слово для вызова встроенного меню браузера."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jiy6s1p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-jiy6s1p",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Момент запуска проверки орфографии зависит от среды выполнения."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gmse5nz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-gmse5nz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка слеш-меню и панели инструментов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lcotswr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-lcotswr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На мобильном устройстве откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Внешний вид"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Видимость и порядок меню и кнопок"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", отредактируйте пользовательскую схему и выберите категорию меню «/»."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3cn6f5o",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-3cn6f5o",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Редактирование и сохранение схем"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261122113000-4qxzvdq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-4qxzvdq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Новые рабочие области по умолчанию используют полную схему. Встроенные схемы доступны только для чтения; их можно скопировать, настроить и активировать."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5mddb29",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-5mddb29",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Старые схемы сохраняют прежнее поведение видимости."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gz5rvfo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-gz5rvfo",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После очистки поиска можно нажать значок сброса для сброса порядка на уровне."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3qkfls3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3qkfls3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На компьютере и мобильных устройствах откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Внешний вид"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Видимость и порядок меню и кнопок"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", отредактируйте пользовательскую схему и выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ссылки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " категорию, чтобы скрыть в списке кандидатов "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Новый документ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Создать под документ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Выбрать расположение и создать документ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; по умолчанию отображаются все три пункта."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ssb210h",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-ssb210h",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обратные ссылки внизу документа"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-0bm0qse",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0bm0qse",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Как на настольных, так и на мобильных устройствах в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Двусторонние ссылки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Показывать панель обратных ссылок внизу документа"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " включите эту функцию, чтобы просматривать обратные ссылки и упоминания в конце документа."
+				}
+			]
+		}
+	]
+}

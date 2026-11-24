@@ -24,6 +24,10 @@ import {renderAVAttribute} from "./blockAttr";
 import {escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {isInMobileApp} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
+/// #if !MOBILE
+import {registerAVHorizontalScrollbar} from "./horizontalScrollbar";
+/// #endif
+import {selectNewAVPrimary} from "./cellTyping";
 import {renderGallery} from "./gallery/render";
 import {getFieldsByData, getViewIcon} from "./view";
 import {openMenuPanel} from "./openMenuPanel";
@@ -476,6 +480,11 @@ const afterRenderTable = (options: ITableOptions) => {
     options.blockElement.setAttribute("data-render", "true");
     options.blockElement.querySelector(".av__scroll").scrollLeft = options.resetData.left;
     options.blockElement.style.alignSelf = options.resetData.alignSelf;
+    /// #if !MOBILE
+    if (options.protyle.model) {
+        registerAVHorizontalScrollbar(options.protyle, options.blockElement);
+    }
+    /// #endif
     const editRect = options.protyle.contentElement.getBoundingClientRect();
     if (options.resetData.headerTransform) {
         const headerTransformElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.resetData.headerTransform.groupId}"] .av__row--header`) as HTMLElement;
@@ -1340,7 +1349,11 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                             genCellValueByElement("block", result.cellElement).block?.content) {
                                             return;
                                         }
-                                        popTextCell(protyle, [result.cellElement], "block", {scrollIntoView: false});
+                                        if (isMobile()) {
+                                            popTextCell(protyle, [result.cellElement], "block", {scrollIntoView: false});
+                                        } else {
+                                            selectNewAVPrimary(protyle, result.blockElement, result.cellElement);
+                                        }
                                     });
                                 }
                             }

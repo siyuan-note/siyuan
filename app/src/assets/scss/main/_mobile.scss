@@ -48,6 +48,10 @@ html[data-frontend="mobile"] body.body--android {
     padding-bottom: calc(24px + var(--android-navigation-bar-height, 0px));
   }
 
+  &.mobile-keyboard--open .mobile-bottom-sheet-dialog[data-key="dialog-opencard"] .mobile-bottom-sheet {
+    padding-bottom: 0;
+  }
+
   .side-panel > .b3-list--mobile {
     > [data-type="sidebar-bookmark"] > .bookmarkList::after,
     > [data-type="sidebar-tag"] > .tagList::after,
@@ -2228,6 +2232,45 @@ body.mobile-topbar--merged {
     }
   }
 
+}
+
+.editor-tool-sheet {
+  &__content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    gap: 8px;
+  }
+
+  &__search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    > input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__list,
+  &__preview {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  &__text {
+    flex: 1;
+    min-height: 0;
+    resize: none;
+  }
+
+  &__source {
+    font-family: var(--b3-font-family-editor-code, var(--b3-font-family-code));
+  }
 }
 
 .mobile-attributes-sheet .b3-dialog__body > .fn__flex-column {

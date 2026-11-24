@@ -174,32 +174,36 @@ for (const scenario of ["database shortcut", "database mobile toolbar", "tag sea
     });
 }
 
-test("selecting a database binding candidate retains its field and creates a binding transaction", () => {
-    let operations: IOperation[];
-    const cell = {isConnected: true, hasAttribute: () => false};
-    const row = {dataset: {id: "item"}};
-    const block = {dataset: {nodeId: "database-block"}, getAttribute: () => "database"};
-    const range = {startContainer: cell};
-    const previousValue = {type: "block", isDetached: true, block: {content: "Draft"}};
-    const hint = runInNewContext(code, {
-        Constants: {BLOCK_HINT_KEYS: ["(("]},
-        window: {siyuan: {}}, hideElements() {}, isProtyleListItemFragment: () => false,
-        hasClosestBlock: () => block, getAVBindingCell: () => cell,
-        isTableLikeView: () => true, hasClosestByClassName: () => row,
-        genCellValueByElement: () => previousValue, getAVBindingOperations,
-        document: {createElement: () => ({innerHTML: "", firstElementChild: {
-            getAttribute: () => "target-block", textContent: "Target",
-        }})},
-        getEditorRange: () => { throw new Error("binding candidate replaced its saved field range"); },
-        transaction: (_protyle: unknown, doOperations: IOperation[]) => { operations = doOperations; },
-        updateAttrViewCellAnimation() {},
+for (const subtype of ["s", "d"] as const) {
+    test(`selecting a database ${subtype === "s" ? "static" : "dynamic"} binding candidate previews its reference subtype`, () => {
+        let operations: IOperation[];
+        let preview: IAVCellValue | undefined;
+        const cell = {isConnected: true, hasAttribute: () => false};
+        const row = {dataset: {id: "item"}};
+        const block = {dataset: {nodeId: "database-block"}, getAttribute: () => "database"};
+        const range = {startContainer: cell};
+        const previousValue = {type: "block", isDetached: true, block: {content: "Draft"}};
+        const hint = runInNewContext(code, {
+            Constants: {BLOCK_HINT_KEYS: ["(("]},
+            window: {siyuan: {}}, hideElements() {}, isProtyleListItemFragment: () => false,
+            hasClosestBlock: () => block, getAVBindingCell: () => cell,
+            isTableLikeView: () => true, hasClosestByClassName: () => row,
+            genCellValueByElement: () => previousValue, getAVBindingOperations,
+            document: {createElement: () => ({innerHTML: "", firstElementChild: {
+                getAttribute: (name: string) => name === "data-id" ? "target-block" : subtype, textContent: "Target",
+            }})},
+            getEditorRange: () => { throw new Error("binding candidate replaced its saved field range"); },
+            transaction: (_protyle: unknown, doOperations: IOperation[]) => { operations = doOperations; },
+            updateAttrViewCellAnimation: (_element: unknown, value: IAVCellValue) => { preview = value; },
+        });
+        Object.assign(hint, {source: "av", splitChar: "/", lastIndex: -1});
+        const protyle = {id: "editor", toolbar: {range}, options: {}};
+        hint.fill(`<span data-id="target-block" data-subtype="${subtype}">Target</span>`, protyle);
+        assert.equal(protyle.toolbar.range, range);
+        assert.equal(operations.length, 1);
+        assert.equal(operations[0].action, "replaceAttrViewBlock");
+        assert.equal(operations[0].previousID, "item");
+        assert.equal(operations[0].nextID, "target-block");
+        assert.equal(preview?.block?.refSubtype, subtype, "the preview keeps the candidate subtype until the kernel returns");
     });
-    Object.assign(hint, {source: "av", splitChar: "/", lastIndex: -1});
-    const protyle = {id: "editor", toolbar: {range}, options: {}};
-    hint.fill('<span data-id="target-block">Target</span>', protyle);
-    assert.equal(protyle.toolbar.range, range);
-    assert.equal(operations.length, 1);
-    assert.equal(operations[0].action, "replaceAttrViewBlock");
-    assert.equal(operations[0].previousID, "item");
-    assert.equal(operations[0].nextID, "target-block");
-});
+}

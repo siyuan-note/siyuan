@@ -26,7 +26,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     if (!nodeElement.classList.contains("av") || !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         return false;
     }
-    if (event.isComposing || event.keyCode === 229) {
+    if (event.isComposing || event.keyCode === 229 || event.key === "Process" || event.key === "Dead") {
         return true;
     }
     prepareAVColumnWindow(nodeElement);

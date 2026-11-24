@@ -399,6 +399,25 @@ func CheckBlockIdAccessableByPublishAccessInBox(c *gin.Context, publishAccess Pu
 	return checkBlockTreeAccessableByPublishAccess(c, publishAccess, bt)
 }
 
+func NewPublishRefAccessChecker(c *gin.Context) func(string, string) bool {
+	if !IsReadOnlyRoleContext(c) {
+		return nil
+	}
+	publishAccess := GetPublishAccess()
+	publishDisable := filterDisablePublishAccess(publishAccess)
+	checked := map[[2]string]bool{}
+	return func(id, boxID string) bool {
+		key := [2]string{id, boxID}
+		if allowed, ok := checked[key]; ok {
+			return allowed
+		}
+		bt := treenode.GetBlockTreeInExactBox(id, boxID)
+		allowed := getBlockTreePublishAccessStatus(c, publishAccess, publishDisable, bt) == PublishAccessAllowed
+		checked[key] = allowed
+		return allowed
+	}
+}
+
 func CheckBlockIdMetadataAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockID string) bool {
 	return CheckBlockIdMetadataAccessableByPublishAccessInBox(c, publishAccess, blockID, "")
 }
@@ -599,22 +618,49 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 	return false
 }
 
-func newPublishAccessItemFilter(c *gin.Context, publishAccess PublishAccess) attributeViewItemFilter {
+func newPublishAccessItemFilter(c *gin.Context, publishAccess PublishAccess) *attributeViewItemFilter {
 	itemAccessCache := map[*av.AttributeView]map[string]bool{}
-	return func(attrView *av.AttributeView, itemID string) bool {
-		itemAccess := itemAccessCache[attrView]
-		if nil == itemAccess {
-			itemAccess = map[string]bool{}
-			itemAccessCache[attrView] = itemAccess
-		}
-		if accessable, ok := itemAccess[itemID]; ok {
-			return accessable
-		}
+	nestedBlockAccessCache := map[string]bool{}
+	return &attributeViewItemFilter{
+		item: func(attrView *av.AttributeView, itemID string) bool {
+			itemAccess := itemAccessCache[attrView]
+			if nil == itemAccess {
+				itemAccess = map[string]bool{}
+				itemAccessCache[attrView] = itemAccess
+			}
+			if accessable, ok := itemAccess[itemID]; ok {
+				return accessable
+			}
 
-		accessable := checkAttributeViewItemIDAccessableByPublishAccess(c, publishAccess, attrView, itemID)
-		itemAccess[itemID] = accessable
-		return accessable
+			accessable := checkAttributeViewItemIDAccessableByPublishAccess(c, publishAccess, attrView, itemID)
+			itemAccess[itemID] = accessable
+			return accessable
+		},
+		nested: func(value *av.Value) bool {
+			blockID := attributeViewNestedValueBlockID(value)
+			if "" == blockID {
+				return nil != value && value.IsDetached
+			}
+			if accessable, ok := nestedBlockAccessCache[blockID]; ok {
+				return accessable
+			}
+
+			accessable := CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockID)
+			nestedBlockAccessCache[blockID] = accessable
+			return accessable
+		},
 	}
+}
+
+// attributeViewNestedValueBlockID 返回嵌套值绑定的块 ID；非绑定行或缺少绑定信息时返回空串。
+func attributeViewNestedValueBlockID(value *av.Value) string {
+	if nil == value || value.IsDetached {
+		return ""
+	}
+	if nil != value.Block && "" != value.Block.ID {
+		return value.Block.ID
+	}
+	return value.BlockID
 }
 
 func checkAssetPathAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, assetPath, boxID, ownerAbsPath string) bool {
@@ -740,22 +786,20 @@ func checkAttributeViewBlockTreesAccessableByPublishAccess(c *gin.Context, publi
 	return false
 }
 
-// FilterBlockAttrsByPublishAccess 返回读者可用的块属性副本，
-// 移除指向读者不可访问属性视图的 custom-avs 绑定。
+// FilterBlockAttrsByPublishAccess 返回读者可读取的块属性副本，移除编辑器专属备注和不可访问属性视图绑定。
 func FilterBlockAttrsByPublishAccess(c *gin.Context, publishAccess PublishAccess, attrs map[string]string) map[string]string {
-	avIDs, ok := attrs[av.NodeAttrNameAvs]
-	if !ok {
-		return attrs
-	}
-	filtered := filterAttributeViewIDsByPublishAccess(c, publishAccess, avIDs)
-	if filtered == avIDs {
-		return attrs
-	}
-
 	ret := make(map[string]string, len(attrs))
 	for name, value := range attrs {
+		if "memo" == name {
+			continue
+		}
 		ret[name] = value
 	}
+	avIDs, ok := ret[av.NodeAttrNameAvs]
+	if !ok {
+		return ret
+	}
+	filtered := filterAttributeViewIDsByPublishAccess(c, publishAccess, avIDs)
 	if "" == filtered {
 		delete(ret, av.NodeAttrNameAvs)
 	} else {
@@ -764,11 +808,18 @@ func FilterBlockAttrsByPublishAccess(c *gin.Context, publishAccess PublishAccess
 	return ret
 }
 
-// FilterBlockIALByPublishAccess 返回移除不可访问属性视图绑定后的 IAL 副本。
+// FilterBlockIALByPublishAccess 返回读者可读取的 IAL 副本，移除编辑器专属备注和不可访问属性视图绑定。
 func FilterBlockIALByPublishAccess(c *gin.Context, publishAccess PublishAccess, ial [][]string) [][]string {
 	ret := make([][]string, 0, len(ial))
 	for _, attr := range ial {
-		if 2 > len(attr) || av.NodeAttrNameAvs != attr[0] {
+		if 2 > len(attr) {
+			ret = append(ret, attr)
+			continue
+		}
+		if "memo" == attr[0] {
+			continue
+		}
+		if av.NodeAttrNameAvs != attr[0] {
 			ret = append(ret, attr)
 			continue
 		}
@@ -1668,31 +1719,55 @@ func filterBlockTreesByPublishAccess(c *gin.Context, publishAccess PublishAccess
 	return
 }
 
-func FilterRefDefsByPublishAccess(c *gin.Context, publishAccess PublishAccess, refDefs []*RefDefs) (retRefDefs []*RefDefs, originalRefBlockIDs map[string]string) {
-	retRefDefs = []*RefDefs{}
+func GetPublishedBlockRefsInBox(c *gin.Context, defID, boxID string) ([]*RefDefs, map[string]string) {
+	bt := treenode.GetBlockTreeInBox(defID, boxID)
+	if bt == nil {
+		return []*RefDefs{}, map[string]string{}
+	}
+	publishAccess := GetPublishAccess()
+	invisible := GetInvisiblePublishAccess(publishAccess)
+	disabled := GetDisablePublishAccess(publishAccess)
+	restricted := make(map[string]*PublishAccessItem, len(publishAccess))
+	for _, item := range publishAccess {
+		restricted[item.ID] = item
+	}
+	allowed := func(bt *treenode.BlockTree) bool {
+		if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) ||
+			!CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, invisible) ||
+			!CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, disabled) {
+			return false
+		}
+		if item := restricted[bt.ID]; item != nil {
+			if item.Disable || !item.Visible || (item.Password != "" && !CheckPublishAuthCookie(c, bt.ID, item.Password)) {
+				return false
+			}
+		}
+		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+		return password == "" || CheckPublishAuthCookie(c, passwordID, password)
+	}
+	if !allowed(bt) {
+		return []*RefDefs{}, map[string]string{}
+	}
+
+	refDefs := queryBlockRefDefsInBox(bt, bt.BoxID)
 	IDs := []string{}
 	for _, refDef := range refDefs {
 		IDs = append(IDs, refDef.RefID)
 		IDs = append(IDs, refDef.DefIDs...)
 	}
-	IDs = gulu.Str.RemoveDuplicatedElem(IDs)
-	bts := treenode.GetBlockTrees(IDs)
-	bts = filterBlockTreesByPublishAccess(c, publishAccess, bts)
 	visibles := make(map[string]bool)
-	for _, ID := range IDs {
-		visibles[ID] = false
+	for id, refTree := range treenode.GetBlockTrees(gulu.Str.RemoveDuplicatedElem(IDs)) {
+		visibles[id] = allowed(refTree)
 	}
-	for _, bt := range bts {
-		visibles[bt.ID] = true
-	}
+	retRefDefs := []*RefDefs{}
 	for _, refDef := range refDefs {
 		if !visibles[refDef.RefID] {
 			continue
 		}
 		newDefIDs := []string{}
-		for i, defID := range refDef.DefIDs {
+		for _, defID := range refDef.DefIDs {
 			if visibles[defID] {
-				newDefIDs = append(newDefIDs, refDef.DefIDs[i])
+				newDefIDs = append(newDefIDs, defID)
 			}
 		}
 		refDef.DefIDs = newDefIDs
@@ -1700,8 +1775,9 @@ func FilterRefDefsByPublishAccess(c *gin.Context, publishAccess PublishAccess, r
 			retRefDefs = append(retRefDefs, refDef)
 		}
 	}
-	retRefDefs, originalRefBlockIDs = buildBacklinkListItemRefs(retRefDefs)
-	return
+	return buildBacklinkListItemRefsInBox(retRefDefs, bt.BoxID, func(id string) bool {
+		return allowed(treenode.GetBlockTree(id))
+	})
 }
 
 func FilterRefIDsByPublishAccess(c *gin.Context, publishAccess PublishAccess, refIDs []string) (ret []string) {
@@ -1795,51 +1871,17 @@ func FilterGraphByPublishAccess(c *gin.Context, publishAccess PublishAccess, nod
 	return
 }
 
-func FilterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags *Tags) (ret *Tags) {
-	return filterTagsByPublishAccess(c, publishAccess, tags, sql.QueryTagSpans(""))
-}
-
-func filterTagsByPublishAccess(c *gin.Context, publishAccess PublishAccess, tags *Tags, spans []*sql.Span) (ret *Tags) {
-	publishInvisible := GetInvisiblePublishAccess(publishAccess)
-	publishDisable := GetDisablePublishAccess(publishAccess)
-	labelCounts := make(map[string]int)
-	for _, span := range spans {
-		if !CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishInvisible) ||
-			!CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishDisable) {
-			continue
+func TagPublishVisibility(c *gin.Context, access PublishAccess) func(string, string) bool {
+	invisible := GetInvisiblePublishAccess(access)
+	disabled := GetDisablePublishAccess(access)
+	return func(box, path string) bool {
+		if !CheckPathAccessableByPublishIgnore(box, path, invisible) ||
+			!CheckPathAccessableByPublishIgnore(box, path, disabled) {
+			return false
 		}
-		passwordID, password := GetPathPasswordByPublishAccess(span.Box, span.Path, publishAccess)
-		if password != "" && !CheckPublishAuthCookie(c, passwordID, password) {
-			continue
-		}
-		label := util.UnescapeHTML(span.Content)
-		labelCounts[label] += 1
+		id, password := GetPathPasswordByPublishAccess(box, path, access)
+		return password == "" || CheckPublishAuthCookie(c, id, password)
 	}
-
-	ret = &Tags{}
-	for _, tag := range *tags {
-		tag := reassignTagCounts(tag, labelCounts)
-		if tag != nil {
-			*ret = append(*ret, tag)
-		}
-	}
-	return
-}
-
-func reassignTagCounts(tag *Tag, counts map[string]int) (ret *Tag) {
-	var newChildren Tags
-	for _, child := range tag.Children {
-		child = reassignTagCounts(child, counts)
-		if child != nil {
-			newChildren = append(newChildren, child)
-		}
-	}
-	tag.Children = newChildren
-	tag.Count = counts[tag.Label]
-	if tag.Children == nil && tag.Count == 0 {
-		return nil
-	}
-	return tag
 }
 
 // 发布模式下默认不返回管理员的本地工作状态，新增键只有在确认不含敏感信息后才能加入白名单。
@@ -1855,7 +1897,7 @@ func FilterLocalStorageByPublishAccess(localStorage map[string]any) (ret map[str
 	return
 }
 
-// DocAssetsForPublishAccess 返回发布读者可见的文档资源，属性视图行按其绑定文档的发布访问过滤。
+// DocAssetsForPublishAccess 返回发布读者可见的文档资源，属性视图行及其关联、汇总内容按其绑定文档的发布访问过滤。
 func DocAssetsForPublishAccess(c *gin.Context, publishAccess PublishAccess, rootID string, retainQueryStr bool) ([]string, error) {
 	return docAssets(rootID, retainQueryStr, newPublishAccessItemFilter(c, publishAccess))
 }

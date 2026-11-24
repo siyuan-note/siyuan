@@ -3,7 +3,7 @@
 const VERSION_QUERY_ATTEMPTS = 14;
 // 进度查询连续失败累计到该值即放弃，实际请求次数等于该值。
 const PROGRESS_FAILURE_LIMIT = 15;
-const BOOT_TIMEOUT_MS = 300000;
+const BOOT_PROGRESS_TIMEOUT_MS = 300000;
 const LOCK_RETRY_DEADLINE_MS = 90000;
 const VERSION_RETRY_INTERVAL_MS = 500;
 const PROGRESS_POLL_INTERVAL_MS = 100;
@@ -34,14 +34,15 @@ const canRetryProgress = (error: unknown, consecutiveFailures: number): boolean 
     return consecutiveFailures < PROGRESS_FAILURE_LIMIT;
 };
 
-const bootTimedOut = (now: number, startedAt: number): boolean => BOOT_TIMEOUT_MS < now - startedAt;
+const bootProgressTimedOut = (now: number, lastProgressAt: number): boolean =>
+    BOOT_PROGRESS_TIMEOUT_MS < now - lastProgressAt;
 
 const lockRetryExpired = (now: number, deadline?: number): boolean => deadline !== undefined && now >= deadline;
 
 export {
     VERSION_QUERY_ATTEMPTS,
     PROGRESS_FAILURE_LIMIT,
-    BOOT_TIMEOUT_MS,
+    BOOT_PROGRESS_TIMEOUT_MS,
     LOCK_RETRY_DEADLINE_MS,
     VERSION_RETRY_INTERVAL_MS,
     PROGRESS_POLL_INTERVAL_MS,
@@ -51,6 +52,6 @@ export {
     isLocalKernelRequestTimeout,
     exhaustedVersionAttempts,
     canRetryProgress,
-    bootTimedOut,
+    bootProgressTimedOut,
     lockRetryExpired,
 };

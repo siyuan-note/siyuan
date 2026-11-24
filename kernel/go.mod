@@ -49,7 +49,7 @@ require (
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/klauspost/compress v1.19.2
+	github.com/klauspost/compress v1.20.4
 	github.com/klippa-app/go-pdfium v1.19.8
 	github.com/lxzan/gws v1.10.1
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
@@ -74,7 +74,7 @@ require (
 	github.com/sashabaranov/go-openai v1.42.0
 	github.com/shirou/gopsutil/v4 v4.26.7
 	github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17
-	github.com/siyuan-note/dejavu v0.0.0-20261112025505-e0cb9a7a8346
+	github.com/siyuan-note/dejavu v0.0.0-20261122112707-1ccd0f3114b3
 	github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044
 	github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce
 	github.com/siyuan-note/filelock v0.0.0-20261117030440-cd4f949beba4
@@ -103,7 +103,7 @@ require (
 	golang.org/x/time v0.15.0
 )
 
-require github.com/88250/lute v1.7.9-0.20261113125822-61eb27b6d434
+require github.com/88250/lute v1.7.9-0.20261123131142-a654af9ca125
 
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect

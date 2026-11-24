@@ -38,6 +38,12 @@ func RefreshRhyResultJob() {
 	}
 }
 
+func CachedRhyResult() map[string]any {
+	rhyResultLock.RLock()
+	defer rhyResultLock.RUnlock()
+	return cachedRhyResult
+}
+
 func GetRhyResult(ctx context.Context, force bool) (map[string]any, error) {
 	cacheDuration := RhyCacheDuration
 	if ContainerDocker == Container {

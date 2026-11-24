@@ -586,6 +586,49 @@ test("explicit links permit only web and email schemes", async t => {
     assert.deepEqual(opens, ["https://example.com/path", "mailto:test@example.com"]);
 });
 
+test("relative document links switch within the file-tree root and reuse an occupied window", async t => {
+    const {directory, manager, host, windows, call, dialog, opens} = await fixture(t);
+    const docs = path.join(directory, "docs");
+    const nested = path.join(docs, "nested");
+    await fs.mkdir(nested, {recursive: true});
+    const first = path.join(nested, "first.md");
+    const second = path.join(nested, "next page.MARKDOWN");
+    const parent = path.join(docs, "parent.md");
+    const outside = path.join(directory, "outside.md");
+    await Promise.all([fs.writeFile(first, "first"), fs.writeFile(second, "next"),
+        fs.writeFile(parent, "parent"), fs.writeFile(outside, "outside")]);
+    const window = await manager.open(first);
+    const initial = await call(window, "bootstrap");
+    assert.deepEqual(await call(window, "prepare-document-link", "./first.md"), {kind: "current"});
+    assert.equal((await call(window, "prepare-document-link", "../parent.md")).error.code, "permission");
+    dialog.showOpenDialog = async () => ({canceled: false, filePaths: [docs]});
+    assert.equal(await call(window, "authorize-resources"), true);
+    assert.equal((await call(window, "prepare-document-link", "../parent.md")).error.code, "permission");
+    const root = await call(window, "tree-choose-root");
+    assert.equal(root.kind, "ready");
+    for (const reference of [null, parent, "//host/file.md", "file:///outside.md", "siyuan://blocks/example",
+        "../../outside.md", "%2Foutside.md", "..%5Cparent.md", "../photo.png", "bad%ZZ.md"]) {
+        assert.equal((await call(window, "prepare-document-link", reference)).kind, "blocked", reference);
+    }
+    assert.equal((await call(window, "prepare-document-link", "missing.md")).error.code, "deleted");
+    assert.equal((await call(window, "bootstrap")).sessionId, initial.sessionId);
+    assert.equal(host.sessions.size, 1);
+    const occupied = await manager.open(parent);
+    assert.deepEqual(await call(window, "prepare-document-link", "../parent.md"), {kind: "occupied"});
+    assert.equal(occupied.focused, true);
+
+    const candidate = await call(window, "prepare-document-link", "./next%20page.MARKDOWN#heading");
+    assert.equal(candidate.kind, "ready");
+    await assert.rejects(call(window, "tree-commit-open", candidate.ticket));
+    await call(window, "host:releaseSession", {sessionId: initial.sessionId, targetGeneration: 0});
+    const next = await call(window, "tree-commit-open", candidate.ticket);
+    assert.equal(next.sessionId, candidate.sessionId);
+    assert.equal(next.content, "next");
+    assert.equal((await call(window, "tree-state")).rootId, root.rootId);
+    assert.equal(windows.length, 2);
+    assert.deepEqual(opens, []);
+});
+
 test("quit during an authorized file read drains the open and never creates a late window", async t => {
     const {directory, manager, host, windows} = await fixture(t);
     const file = path.join(directory, "note.md");

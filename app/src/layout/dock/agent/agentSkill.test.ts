@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
-import {createSourceFile, isClassDeclaration, isExpressionStatement, isFunctionDeclaration, isMethodDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isClassDeclaration, isExpressionStatement, isFunctionDeclaration, isMethodDeclaration, isObjectLiteralExpression, isReturnStatement, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (source: string) => {
     const check: typeof assert = require("node:assert/strict");
@@ -47,8 +47,9 @@ const browserCases = async (source: string) => {
         insertHTML: (html: string) => { inserted = html; },
     };
     const api = new Function(...Object.keys(dependencies), source +
-        "\nreturn {hintSkill, mountLiteSlashMenu, normalizeAgentSkills, expandAgentSkillSelection, deleteAgentSkill, " +
-        "AGENT_SKILL_SELECTOR, Hint, isBuiltinSlashHint, bindComposerInput};")(...Object.values(dependencies));
+        "\nreturn {hintSkill, mountLiteSlashMenu, normalizeAgentTokens, expandAgentTokenSelection, deleteAgentToken, " +
+        "AGENT_SKILL_SELECTOR, AGENT_QUOTE_SELECTOR, createAgentQuote, readAgentQuote, projectAgentQuotes, quotePreview, " +
+        "Hint, isBuiltinSlashHint, bindComposerInput, applyPhrase, insertQuote};")(...Object.values(dependencies));
     const element = document.createElement("div");
     element.className = "protyle-hint fn__none";
     document.body.appendChild(element);
@@ -130,7 +131,7 @@ const browserCases = async (source: string) => {
     const prepare = (content = skillValue) => {
         editor.innerHTML = lute.SpinBlockDOM('<div data-node-id="20260921000000-skill01" data-type="NodeParagraph">' +
             '<div contenteditable="true">before ' + content + " after</div></div>");
-        api.normalizeAgentSkills(editor);
+        api.normalizeAgentTokens(editor);
         const skill = editor.querySelector<HTMLElement>(api.AGENT_SKILL_SELECTOR);
         check.ok(skill, "Lute retains skill identity: " + editor.innerHTML);
         check.equal(skill.contentEditable, "false");
@@ -155,27 +156,27 @@ const browserCases = async (source: string) => {
         check.ok(editor.textContent.includes("before"));
         check.ok(editor.textContent.includes("after"));
         document.execCommand("undo");
-        api.normalizeAgentSkills(editor);
+        api.normalizeAgentTokens(editor);
         check.equal(editor.querySelector(api.AGENT_SKILL_SELECTOR)?.textContent, "test111");
         document.execCommand("redo");
         check.equal(editor.querySelector(api.AGENT_SKILL_SELECTOR), null);
     }
     let skill = prepare(skillValue.replace(' contenteditable="false"', ""));
     const partial = select(skill.firstChild, 2, skill.firstChild, 5);
-    api.expandAgentSkillSelection(partial);
+    api.expandAgentTokenSelection(partial);
     check.equal(partial.toString(), "test111");
     document.execCommand("insertText", false, "replacement");
     check.equal(editor.querySelector(api.AGENT_SKILL_SELECTOR), null);
     check.ok(editor.textContent.includes("replacement"));
     skill = prepare();
-    api.expandAgentSkillSelection(select(skill.firstChild, 2));
+    api.expandAgentTokenSelection(select(skill.firstChild, 2));
     document.execCommand("insertText", false, "suffix");
     check.equal(skill.textContent, "test111");
     check.ok(editor.textContent.includes("test111suffix"));
 
     const deleteSkill = (inputType = "deleteContentBackward", isComposing = false) => {
         const event = new InputEvent("beforeinput", {inputType, isComposing, cancelable: true});
-        const handled = api.deleteAgentSkill(protyle, event);
+        const handled = api.deleteAgentToken(protyle, event);
         check.equal(event.defaultPrevented, handled);
         return handled;
     };
@@ -199,7 +200,7 @@ const browserCases = async (source: string) => {
             check.ok(editor.contains(getSelection().anchorNode));
             const operation = deletions.at(-1);
             editor.innerHTML = operation.before;
-            api.normalizeAgentSkills(editor);
+            api.normalizeAgentTokens(editor);
             check.equal(editor.querySelector(api.AGENT_SKILL_SELECTOR).textContent, "test111", "undo snapshot preserves skill");
             editor.innerHTML = operation.after;
             check.equal(editor.querySelector(api.AGENT_SKILL_SELECTOR), null, "redo snapshot removes skill");
@@ -238,10 +239,73 @@ const browserCases = async (source: string) => {
             check.ok(editor.contains(getSelection().anchorNode));
         }
     }
+    const quotes = [
+        {source: {kind: "selection", id: "note", endID: "note", start: 2, end: 6}, text: "a<&b"},
+        {source: {kind: "assistant", sessionID: "chat", id: "reply", whole: true}, text: "Line one\nLine two"},
+        {source: {kind: "user", sessionID: "chat", id: "prompt", whole: false}, text: "excerpt"},
+    ];
+    editor.innerHTML = lute.SpinBlockDOM('<div data-node-id="20260921000000-abcdefg" data-type="NodeParagraph">' +
+        '<div contenteditable="true">' + quotes.map(q => api.createAgentQuote(q)).join(" vs ") + "</div></div>");
+    api.normalizeAgentTokens(editor);
+    const marks = Array.from(editor.querySelectorAll<HTMLElement>(api.AGENT_QUOTE_SELECTOR));
+    check.deepEqual(marks.map(mark => api.readAgentQuote(mark)), quotes);
+    check.ok(marks.every(mark => mark.contentEditable === "false"));
+    const clone = editor.cloneNode(true) as HTMLElement;
+    const refs: import("../../../types/api").AIReference[] = [];
+    api.projectAgentQuotes(clone, refs);
+    const sent = lute.BlockDOM2StdMd(clone.innerHTML).replaceAll("\u200b", "").trim();
+    check.equal(refs.length, 2);
+    check.equal(refs[0].id, "note");
+    check.deepEqual(JSON.parse(refs[0].title), {startOffset: 2, endBlockID: "note", endOffset: 6, excerpt: "a<&b"});
+    check.equal(refs[1].messageID, "reply");
+    check.equal(api.quotePreview(sent, refs), "“a<&b” vs “Line one\nLine two” vs “excerpt”");
+    const spanning = document.createElement("div");
+    spanning.innerHTML = api.createAgentQuote({text: "across cells", source: {
+        kind: "selection", id: "first", endID: "last", start: 2, end: 4, startCell: 1, endCell: 3,
+    }});
+    const spanRefs: typeof refs = [];
+    api.projectAgentQuotes(spanning, spanRefs);
+    check.equal(spanRefs[0].id, "first");
+    check.deepEqual(JSON.parse(spanRefs[0].title),
+        {startOffset: 2, endBlockID: "last", endOffset: 4, startCell: 1, endCell: 3, excerpt: "across cells"});
+    select(marks[1].firstChild, 2);
+    check.equal(deleteSkill(), true);
+    check.equal(editor.querySelectorAll(api.AGENT_QUOTE_SELECTOR).length, 2);
+    editor.innerHTML = deletions.at(-1).before;
+    api.normalizeAgentTokens(editor);
+    check.deepEqual(Array.from(editor.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), quotes);
+    const original = editor.innerHTML;
+    api.applyPhrase({setBlockHTML: (html: string) => { editor.innerHTML = html; }}, {lute}, () => original,
+        "First {{input}} then {{input}}");
+    check.deepEqual(Array.from(editor.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), [...quotes, ...quotes]);
+    const ids = Array.from(editor.querySelectorAll<HTMLElement>("[data-node-id]")).map(block => block.dataset.nodeId);
+    check.equal(new Set(ids).size, ids.length, "repeated placeholders keep editor block IDs unique");
+
+    const draft = document.createElement("div");
+    draft.innerHTML = '<div data-node-id="paragraph"><div contenteditable="true">Draft</div></div>';
+    draft.style.display = "none";
+    document.body.appendChild(draft);
+    const toolbar = {range: undefined as Range};
+    const composer = {toolbar, wysiwyg: {element: draft}};
+    const starter = draft.querySelector("[contenteditable]").firstChild;
+    select(editor.querySelector(api.AGENT_QUOTE_SELECTOR).nextSibling, 0);
+    const sourceAnchor = getSelection().anchorNode;
+    const fragment = {focus: () => check.fail("a hidden composer cannot take focus")};
+    const instance = {insert: (html: string) => {
+        toolbar.range.insertNode(toolbar.range.createContextualFragment(html));
+        dependencies.focusByRange(toolbar.range);
+    }};
+    check.equal(api.insertQuote(fragment, composer, instance, quotes[0], true), 1);
+    check.equal(getSelection().anchorNode, sourceAnchor);
+    check.equal(starter.textContent, "Draft");
+    toolbar.range.selectNodeContents(draft.querySelector("[contenteditable]"));
+    check.equal(api.insertQuote(fragment, composer, instance, quotes[1], true), 2);
+    check.equal(getSelection().anchorNode, sourceAnchor);
+    check.deepEqual(Array.from(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), quotes.slice(0, 2));
     return "Agent skill cases passed";
 };
 
-test("agent mobile commands coexist with skills and skill names remain atomic", {
+test("mobile commands, atomic skills, inline quotes and phrase templates coexist in the composer", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -253,6 +317,11 @@ test("agent mobile commands coexist with skills and skill names remain atomic", 
         .map(statement => statement.getText(composer)).join("\n");
     const mount = composer.statements.find(statement => isFunctionDeclaration(statement) && statement.name?.text === "mountComposer");
     assert.ok(mount && isFunctionDeclaration(mount));
+    const handle = mount.body.statements.find(isReturnStatement)?.expression;
+    assert.ok(handle && isObjectLiteralExpression(handle));
+    const phrase = handle.properties.find(property => property.name?.getText(composer) === "applyPhrase");
+    const quote = handle.properties.find(property => property.name?.getText(composer) === "insertQuote");
+    assert.ok(phrase && quote);
     const inputBindings = mount.body.statements.filter(statement => {
         if (isVariableStatement(statement)) {
             return statement.declarationList.declarations.some(declaration =>
@@ -265,8 +334,11 @@ test("agent mobile commands coexist with skills and skill names remain atomic", 
         ["fill", "getHTMLByData", "consumeRefBracketClose"].includes(member.name.getText(hint))).map(member => member.getText(hint)).join("\n");
     const source = transpileModule([read("../../../protyle/hint/builtinSlash.ts"),
         read("../../../protyle/hint/blockHintRange.ts"), read("agentHintState.ts"),
-        read("agentSkill.ts"), read("../../../mobile/util/liteSlashMenu.ts"), composerSource,
+        read("agentQuote.ts"), read("agentSkill.ts"), read("../../../mobile/util/liteSlashMenu.ts"), composerSource,
         "class Hint {" + hintSource + "}",
+        "const applyPhrase = (fragment, p, getBlockHTML, instruction) => ({" + phrase.getText(composer) + "}).applyPhrase(instruction);",
+        "const insertQuote = (fragment, p, protyle, value, background) => { const wysiwyg = p.wysiwyg; return ({" +
+            quote.getText(composer) + "}).insertQuote(value, background); };",
         "const bindComposerInput = p => { const wysiwyg = p.wysiwyg; " + inputBindings + "};"].join("\n").replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;

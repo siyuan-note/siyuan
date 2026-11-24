@@ -192,7 +192,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "タグ付けされたコンテンツブロックはタグタブ ("
+					"Data": "タグパネル ("
 				},
 				{
 					"Type": "NodeTextMark",
@@ -228,7 +228,71 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​) に一覧表示されます。タグを解除するには、対象のブックマークを右クリックするかドロップダウンメニューから削除を選ぶか、コンテンツブロック内のタグを削除します。"
+					"Data": "​) を開きます。デスクトップ版でタグをクリックすると、一致するコンテンツブロックがグローバル検索に表示されます。タグを解除するには、タグの右クリックメニューやドロップダウンメニューから削除を選ぶか、コンテンツブロック内のタグを削除します。"
+				}
+			]
+		},
+		{
+			"ID": "20261118205131-28a04da",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118205131-28a04da",
+				"updated": "20261118205131"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タグパネルで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "並べ替え"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "カスタムソート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、タグの行をドラッグして同じ階層内で並べ替えられます。モバイルではタグの行を長押ししてからドラッグします。カスタム順序はワークスペースデータとともに保存されます。タグパネルでタグを削除した後に同じ名前で作成し直すと、同じ階層で並び順が保存されているタグの後に表示されます。タグの絞り込み中は、絞り込みを解除してから並べ替えてください。"
+				}
+			]
+		},
+		{
+			"ID": "20261118220329-f3816c6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118220329-f3816c6",
+				"updated": "20261118220329"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タグパネルで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "並べ替え"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "最近追加"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選ぶと、同じ階層のタグが文書やコンテンツブロックに最後に追加された順に並びます。追加時刻が不明なタグは末尾に表示されます。"
 				}
 			]
 		},

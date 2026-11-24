@@ -12,11 +12,14 @@ const compiled = transpileModule(readFileSync("src/layout/dock/agent/AgentChat.t
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
+class SessionRevisionConflict extends Error {}
+
 const createChat = (load: (id: string) => Promise<AgentSession>) => {
     const exports = {} as {AgentChat: {prototype: object}};
     runInNewContext(compiled, {
         exports,
-        require: () => ({AgentRunController, Model: class {}, SessionStore: {load}, clearAgentInteractionNotifications: () => {}}),
+        require: () => ({AgentRunController, Model: class {}, SessionStore: {load}, SessionRevisionConflict,
+            clearAgentInteractionNotifications: () => {}}),
         window: {
             siyuan: {languages: {}},
             setTimeout: (callback: () => void) => { queueMicrotask(callback); return 1; },
@@ -72,6 +75,14 @@ const createChat = (load: (id: string) => Promise<AgentSession>) => {
     }
     return {chat, attributes};
 };
+
+test("navigation can leave a conflicted session while other save failures still block it", async () => {
+    const {chat} = createChat(async () => null);
+    chat.saveSession = async () => { throw new SessionRevisionConflict("revision changed"); };
+    await chat.saveSessionBeforeNavigation();
+    chat.saveSession = async () => { throw new Error("network unavailable"); };
+    await assert.rejects(chat.saveSessionBeforeNavigation(), /network unavailable/);
+});
 
 const session = (overrides: Partial<AgentSession> = {}): AgentSession => ({
     id: "first",

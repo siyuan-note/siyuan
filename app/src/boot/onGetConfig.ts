@@ -227,10 +227,10 @@ export const initWindow = async (app: App) => {
         onWindowsMsg(ipcData);
     });
     ipcRenderer.on(Constants.SIYUAN_HOTKEY, (e, data) => {
-        if (Array.isArray(data.failed)) {
-            if (data.failed.length) {
+        if (Array.isArray(data.newlyFailed)) {
+            if (data.newlyFailed.length) {
                 showMessage(window.siyuan.languages.keymapSystemScope + " " + window.siyuan.languages.conflict +
-                    " [" + data.failed.map(updateHotkeyTip).join("] [") + "]");
+                    " [" + data.newlyFailed.map(updateHotkeyTip).join("] [") + "]");
             }
         } else if (!isWindow()) {
             dispatchPluginGlobalShortcut(app.plugins, data.hotkey, window.siyuan.config.keymap.plugin, isMac());

@@ -157,7 +157,7 @@ func currentPaddleConfig() ocr.PaddleConfig {
 		filename = "libonnxruntime.dylib"
 	}
 	result := ocr.PaddleConfig{Directory: ocrModelDirectory(value.Model), Library: filepath.Join(directory, filename), Thresholds: ocr.Thresholds(value.Thresholds)}
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS == "linux" && linuxOCRWorker {
 		result.Worker = filepath.Join(directory, "siyuan-ocr")
 	}
 	if runtime.GOOS == "android" {
@@ -241,7 +241,14 @@ func SetOCRAssetText(path, text string) {
 }
 
 func indexOCRAssetText(path string) {
-	documents, err := sql.QueryOCRAssetDocuments(path)
+	indexOCRAssetTexts(map[string]bool{path: true}, false)
+}
+
+func indexOCRAssetTexts(paths map[string]bool, refreshAll bool) {
+	if len(paths) == 0 && !refreshAll {
+		return
+	}
+	documents, err := sql.QueryOCRAssetDocuments(paths, refreshAll)
 	if err != nil {
 		logging.LogErrorf("query OCR asset documents failed: %s", err)
 		return
@@ -261,7 +268,7 @@ func indexOCRAssetText(path string) {
 				return ast.WalkContinue
 			}
 			destination := node.ChildByType(ast.NodeLinkDest)
-			if destination == nil || util.OCRAssetKey(destination.TokensStr()) != path {
+			if destination == nil || !refreshAll && !paths[util.OCRAssetKey(destination.TokensStr())] {
 				return ast.WalkContinue
 			}
 			for parent := node.Parent; parent != nil && parent.Type != ast.NodeDocument; parent = parent.Parent {

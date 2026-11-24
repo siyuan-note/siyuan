@@ -31,6 +31,7 @@ import {zoomOut} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {genAssetHTML} from "../../asset/renderAssets";
 import {unicode2Emoji} from "../../emoji";
+import {getAVBindingCandidateSubtype} from "../render/av/cellValue";
 import {addWidgetCacheVersion} from "../util/widgetCache";
 import {
     getEntryCatalogNode,
@@ -785,17 +786,16 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
                     createItemCount++;
                 }
             }
+            const avStaticTextKey = "av" === source && nodeElement ?
+                Constants.CUSTOM_SY_AV_STATIC_TEXT + (nodeElement.getAttribute("data-av-id") || "") : "";
             response.blocks.forEach((item: IBlock) => {
                 const name = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replaceAll(Constants.ZWSP, "");
                 let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${name}</span>`;
                 if (source === "search") {
                     value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${key}${Constants.ZWSP}${name}</span>`;
                 } else if (source === "av") {
-                    let refText = name;
-                    if (nodeElement) {
-                        refText = escapeHtml(item.ial[Constants.CUSTOM_SY_AV_STATIC_TEXT + nodeElement.getAttribute("data-av-id")] || "") || refText;
-                    }
-                    value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
+                    const staticText = avStaticTextKey ? item.ial?.[avStaticTextKey] : "";
+                    value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="${getAVBindingCandidateSubtype(item.ial, avStaticTextKey)}">${staticText ? escapeHtml(staticText) : name}</span>`;
                 }
                 dataList.push({
                     value,
@@ -823,7 +823,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
             } else if (createItemCount > 0 && dataList.length > createItemCount) {
                 dataList[createItemCount].focus = true;
             }
-            protyle.hint.genHTML(dataList, protyle, true, source);
+            protyle.hint.genHTML(dataList, protyle, true, source, source === "av" ? key : undefined);
         });
     }).catch(() => {
         if (createTarget.isCurrent()) {

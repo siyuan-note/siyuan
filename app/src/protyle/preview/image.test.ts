@@ -87,6 +87,7 @@ const createPreviewHarness = async (language = "en", zIndex = 10) => {
         require: () => ({
             Constants: {PROTYLE_CDN: ""},
             escapeHtmlTextAndAttr,
+            isMobile: () => false,
             addScript: () => Promise.resolve(),
             fetchPost: (_url: string, data: {id: string}, callback: (response: {data: string[]}) => void) => {
                 requests.push(data);
@@ -242,7 +243,6 @@ for (const rejected of [false, true]) {
 
 test("image address copy uses a complete translated phrase in every supported language", async () => {
     const files = readdirSync("appearance/langs").filter(file => file.endsWith(".json"));
-    assert.equal(files.length, 22);
     for (const file of files) {
         const {copyURLButton, languages} = await createPreviewHarness(file.slice(0, -5));
         assert.ok(languages.copyImageURL?.trim(), file);

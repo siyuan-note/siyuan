@@ -36,7 +36,7 @@ const fixture = () => {
 
 test("registers multiple window-toggle keys and deduplicates accelerators", () => {
     const f = fixture();
-    assert.deepEqual(f.update(0, ["a", "A", "b", "c"], ["a", "b"]), []);
+    assert.deepEqual(f.update(0, ["a", "A", "b", "c"], ["a", "b"]), new Map());
     assert.equal(f.callbacks.size, 3);
     f.callbacks.get("A")();
     f.callbacks.get("B")();
@@ -79,7 +79,7 @@ test("reports host rejection and thrown registration errors", () => {
         }
         return false;
     };
-    assert.deepEqual(f.update(0, ["a", "b"]), ["a", "b"]);
+    assert.deepEqual(f.update(0, ["a", "b"]), new Map([["A", "a"], ["B", "b"]]));
     assert.equal(f.errors.length, 1);
 });
 
@@ -87,10 +87,12 @@ test("recording suspends all workspace shortcuts and restores their bindings aft
     const f = fixture();
     f.update(0, ["a"]);
     f.update(1, ["b"]);
-    updateGlobalShortcutBindings(f.workspaces[0], {hotkeys: [], suspended: true}, f.options as unknown as ShortcutBindingsOptions);
+    const suspended = updateGlobalShortcutBindings(f.workspaces[0], {hotkeys: [], suspended: true},
+        f.options as unknown as ShortcutBindingsOptions);
+    assert.equal(suspended, undefined);
     assert.equal(f.callbacks.size, 0);
     assert.deepEqual(f.workspaces[0].hotkeys, ["a"]);
-    f.update(1, ["c"]);
+    assert.equal(f.update(1, ["c"]), undefined);
     assert.equal(f.callbacks.size, 0);
     f.update(0, ["a"]);
     assert.deepEqual([...f.callbacks.keys()].sort(), ["A", "C"]);

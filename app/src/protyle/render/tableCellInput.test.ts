@@ -9,7 +9,7 @@ import {createSourceFile, forEachChild, isCallExpression, isClassDeclaration, is
 
 const browserCases = async (source: string, queueSource: string, editorSource: string, menuSource: string,
                             transactionSource: string, copyPlainSource: string, gutterSource: string, mouseDownSource: string,
-                            commandSource: string, columnResizeSource: string) => {
+                            commandSource: string, columnResizeSource: string, protyleCSS: string) => {
     const check: typeof assert = require("node:assert/strict");
     const noop = () => {};
     const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -40,7 +40,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         matchHotKey: (binding: {custom?: string}, event: KeyboardEvent) => !!binding?.custom &&
             binding.custom === event.key && event.ctrlKey && !event.altKey && !event.shiftKey && !event.isComposing,
         isNotCtrl: (event: KeyboardEvent) => !event.ctrlKey && !event.metaKey,
-        mathRender: noop, hideElements: (names: string[], protyle?: IProtyle) => {
+        mathRender: noop, highlightRender: noop, renderBlockDirection: noop, hideElements: (names: string[], protyle?: IProtyle) => {
             if (names.includes("gutter")) {
                 gutterHidden = true;
             }
@@ -63,17 +63,20 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
     };
     const api = new Function(...Object.keys(dependencies), source + "\nreturn {input, insertRow, insertRowAbove, insertColumn, " +
         "getAgentLute, configureAVRichTextLute, getTableCellEditorLute, getAVRichTextLute, " +
-        "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, buildTableGrid, " +
+        "getTableCellRichBlockDOM, serializeTableCellRich, cleanTableCellRichHTML, renderTableCellRich, renderTableCellRichElements, buildTableGrid, " +
         "setTableCellRich, getTableCellInlineHTML, getTableCellPlainText, getSelectionOffset, focusByOffset, getTableBlockHTML, updateTableCellEditingValue, fixTable, isNativeTextSelectionHandleTouch, " +
         "updateTableCellContentLayout, captureRichCellSelection, captureRichCellSelectionAtPoint, restoreRichCellSelection, setTableCellRichEventTarget, " +
         "LargeTableVirtualizer, getTableVirtualCellIndex, getTableVirtualRowIndex, restoreTableVirtualizationDOM, finishTableCellEditing, TABLE_DEFAULT_COLUMN_WIDTH, " +
-        "hasClosestBlock, hasClosestByClassName, hasClosestByTag, isInEmbedBlock, getEmbedChildOperationContext, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
+        "hasClosestBlock, hasClosestByClassName, hasClosestByTag, isInEmbedBlock, getEmbedChildOperationContext, " +
+        "setTableCellRichContext, setTaskListItemMarker, nextTaskListMarker};")(...Object.values(dependencies)) as
         typeof import("../wysiwyg/input") & typeof import("../util/table") & typeof import("./setLute") &
         typeof import("./av/richText") & typeof import("./av/richTextValue") & typeof import("../util/tableCellRichLute") &
         typeof import("../util/tableCellRich") & typeof import("../util/selection") & typeof import("../util/tableVirtualizationDOM") &
+        typeof import("../util/tableCellRichContext") &
         typeof import("../wysiwyg/tableVirtualization") & typeof import("../util/tableCellRichContext") & typeof import("../util/tableCellRichSelection") &
         typeof import("../util/hasClosest") & typeof import("../wysiwyg/getBlock") & typeof import("../wysiwyg/list") &
-        typeof import("../wysiwyg/taskListMarker") & typeof import("../wysiwyg/nativeTextMenu") & typeof import("../util/tableColumnWidth");
+        typeof import("../wysiwyg/taskListMarker") & typeof import("../wysiwyg/nativeTextMenu") & typeof import("../util/tableColumnWidth") &
+        typeof import("./tableCellRich");
     const lute = api.configureAVRichTextLute(api.getAgentLute({emojiSite: "/emojis", emojis: {},
         headingAnchor: false, listStyle: false, paragraphBeginningSpace: true, sanitize: true}));
     const Queue = new Function(queueSource + "\nreturn InputQueue;")() as new () => {
@@ -240,6 +243,31 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         element.remove();
         await tick();
     };
+
+    for (const text of ["---", "___", "***", "----", "before\n\n---"]) {
+        const {owner, element, table, range} = fixture();
+        const cell = table.querySelector("td");
+        const host = document.createElement("div");
+        host.className = "protyle-wysiwyg table__cell-editor";
+        host.innerHTML = api.getTableCellRichBlockDOM(cell);
+        cell.replaceChildren(host);
+        const block = host.firstElementChild as HTMLElement;
+        const editable = block.querySelector('[contenteditable="true"]');
+        const cellEditor = {...owner, element: host, lute: api.getTableCellEditorLute(lute)};
+        Object.assign(cellEditor.wysiwyg, {element: host, lastHTMLs: {[block.dataset.nodeId]: block.outerHTML}});
+        api.setTableCellRichContext(cellEditor, {owner, cell, finish: noop});
+        editable.textContent = text;
+        range.selectNodeContents(editable);
+        range.collapse(false);
+        focusByRange(range);
+        await api.input(cellEditor, block, range, true, new InputEvent("input", {inputType: "insertText"}));
+        check.equal(host.querySelector('[data-type="NodeThematicBreak"]'), null, text);
+        api.updateTableCellEditingValue(cell, api.serializeTableCellRich(host.innerHTML));
+        host.remove();
+        api.renderTableCellRich(cell);
+        check.equal(api.getTableCellPlainText(cell), text);
+        await finish(element);
+    }
 
     for (const platform of [false, true]) {
         mobile = platform;
@@ -537,19 +565,39 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         await finish(element);
     }
 
+    const protyleStyle = document.createElement("style");
+    protyleStyle.textContent = protyleCSS + "\n.fn__none { display: none !important; }";
+    document.head.append(protyleStyle);
     for (const isMobile of [false, true]) {
         mobile = isMobile;
         for (const marker of [" ", "X"]) {
             for (const switchCell of [false, true]) {
-                const {owner, element, table} = fixture();
+                const {owner, element, table, wysiwyg} = fixture();
+                element.classList.add("protyle");
                 const cell = table.querySelectorAll("td")[1];
                 api.setTableCellRich(cell, `- [ ] First\n  - [${marker}] Nested\n- [ ] Last`);
-                cell.querySelector(".table__cell-rich").innerHTML = api.getTableCellRichBlockDOM(cell);
+                api.renderTableCellRichElements(cell);
+                const action = cell.querySelectorAll(".protyle-action--task")[1];
+                const checkboxPoint = () => {
+                    const bounds = action.getBoundingClientRect();
+                    const x = bounds.left + bounds.width / 2;
+                    const y = bounds.top + bounds.height / 2;
+                    return {x, y, target: document.elementFromPoint(x, y)};
+                };
+                wysiwyg.dataset.readonly = "true";
+                check.notEqual(checkboxPoint().target?.closest(".protyle-action--task"), action,
+                    "the read-only preview ignores clicks on the checkbox");
+                wysiwyg.dataset.readonly = "false";
                 if (switchCell) {
                     await open(owner, table.querySelector("th"));
+                } else {
+                    const outside = document.createElement("button");
+                    element.append(outside);
+                    outside.focus();
                 }
-                const action = cell.querySelectorAll(".protyle-action--task")[1];
-                await open(owner, cell, undefined, {x: 10, y: 20, target: action.querySelector("use")});
+                const point = checkboxPoint();
+                check.equal(point.target?.closest(".protyle-action--task"), action, "the click reaches the preview checkbox");
+                await open(owner, cell, undefined, point);
                 const tasks = cell.querySelectorAll('[data-type="NodeListItem"][data-subtype="t"]');
                 check.deepEqual(Array.from(tasks, task => task.getAttribute("data-task") ?? " "),
                     [" ", marker === " " ? "X" : " ", " "], "the first click toggles only the nested task");
@@ -571,6 +619,7 @@ const browserCases = async (source: string, queueSource: string, editorSource: s
         }
     }
     mobile = true;
+    protyleStyle.remove();
 
     for (const index of [0, 1]) {
         const {owner, element, table} = fixture();
@@ -1294,7 +1343,8 @@ test("table cell editors preserve input, viewport and alignment, and consume tab
         "../wysiwyg/taskListMarker.ts", "../util/tableCellRichLute.ts", "../util/tableCellRichValue.ts", "../util/tableCellRich.ts",
         "../util/tableCellRichContext.ts", "../util/tableCellRichSelection.ts", "../util/tableColumnWidth.ts",
         "../util/tableSelection.ts", "../util/tableRowHeight.ts", "../wysiwyg/tableVirtualization.ts",
-        "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/input.ts", "../wysiwyg/nativeTextMenu.ts"]
+        "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/blockquote.ts",
+        "../wysiwyg/input.ts", "../wysiwyg/nativeTextMenu.ts", "tableCellRich.ts"]
         .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource) + "\n" + compile(taskSource);
     const wysiwyg = createSourceFile("wysiwyg.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);
     const tableControl = createSourceFile("tableControl.ts", read("../util/tableControl.ts"), ScriptTarget.Latest, true);
@@ -1353,6 +1403,7 @@ test("table cell editors preserve input, viewport and alignment, and consume tab
         "const {getBlockSelectionModeElement, clearBlockSelectionMode} = (() => {" +
         compile(read("../wysiwyg/blockSelection.ts")) +
         "return {getBlockSelectionModeElement, clearBlockSelectionMode};})();\n" + compile(mouseDownBinding.getText(wysiwyg));
+    const protyleCSS = require("sass").compile(path.resolve(__dirname, "../../assets/scss/protyle/_protyle.scss")).css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-table-cell-input-test-"));
     const script = path.join(temporary, "run.cjs");
     const lutePath = path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js");
@@ -1367,7 +1418,7 @@ app.whenReady().then(async () => {
         await win.loadURL("data:text/html,<html><body></body></html>");
         await win.webContents.executeJavaScript(require("node:fs").readFileSync(${JSON.stringify(lutePath)}, "utf8"));
         console.log(await win.webContents.executeJavaScript(${JSON.stringify("const __name = value => value; (" +
-        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource, gutterSource, mouseDownSource, commandSource, columnResizeSource]
+        browserCases.toString() + ")(" + [source, queue, compile(read("tableCellRichEditor.ts")), menuSource, transactionSource, copyPlainSource, gutterSource, mouseDownSource, commandSource, columnResizeSource, protyleCSS]
             .map(value => JSON.stringify(value)).join(",") + ")")}));
         win.destroy();
         app.exit(0);

@@ -1,0 +1,756 @@
+{
+	"ID": "20261122113000-f3c2104",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f50d",
+		"id": "20261122113000-f3c2104",
+		"title": "Расширенный поиск",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-kixu2on",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-kixu2on",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rcvhl1d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rcvhl1d",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Глобальный поиск предназначен для поиска блоков содержимого в рабочей области и поддерживает ключевые слова, синтаксис запросов, регулярные выражения и SQL; после настройки семантического индекса также доступен семантический поиск. Откройте поиск, выберите режим и введите ключевые слова или условие запроса. В этой главе описаны доступные параметры каждого режима, а также настройки индексации и области поиска."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-coqftnh",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-coqftnh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Элементы управления для разных режимов поиска"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-nzfv8d2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-nzfv8d2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поиск по ключевым словам и синтаксису запросов поддерживает фильтрацию по типам блоков, блокнотам и путям документов, включение поддокументов, а также сортировку, группировку и замену. Сортировка по порядку содержимого доступна только при группировке по документам. При прямом вводе ID блока также применяются фильтры по блокнотам, путям документов, типам и подтипам блоков и правила исключения. В режиме ключевых слов многословный поиск ищет символы %, _ и обратную косую черту буквально. Группировка по документам упорядочивает только результаты текущей страницы и не меняет единицу пагинации текущего режима; при постраничном выводе по блокам совпадения из одного документа могут оказаться на разных страницах."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-r24kx97",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-r24kx97",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В панели поиска через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Больше"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сгруппированные результаты"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Разворачивать по умолчанию"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " или "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сворачивать по умолчанию"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". По умолчанию группы развёрнуты; параметр действует только при группировке по документам. Он применяется при новом поиске и обновлении результатов, при этом группы по-прежнему можно разворачивать и сворачивать вручную. В настольной версии первый результат всё равно отображается в предпросмотре, а при навигации с клавиатуры группа выбранного результата автоматически разворачивается."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4qg8jj3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-4qg8jj3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если в однострочном результате поиска первое совпадение не помещается в видимую область, часть текста перед ним сокращается, чтобы выделенный фрагмент оставался видимым."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-h7vzdku",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-h7vzdku",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поиск по регулярным выражениям поддерживает те же фильтры, группировку и замену, а также сортировку по типу, времени создания и времени обновления. Сортировка по релевантности не поддерживается; сортировка по порядку содержимого действует только внутри групп документов."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pnpwwo7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-pnpwwo7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SQL-поиск использует условия фильтрации и порядок результатов, заданные в самом запросе. Фильтры панели по типам блоков и путям (включая область текущего документа и включение поддокументов) не действуют, замена также не поддерживается. Группировка по документам по-прежнему доступна; после группировки результаты можно упорядочивать по типу, времени создания, времени обновления и порядку содержимого, но сортировка по релевантности не поддерживается."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cp3v86n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-cp3v86n",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SQL-поиск в настольной и мобильной версиях поддерживает вставку многострочных запросов с сохранением комментариев. В режиме SQL нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для переноса строки; сохраняйте перенос строки после строчных комментариев --, чтобы последующая часть запроса не попала в комментарий. Другие режимы поиска используют однострочный ввод: вставленные переносы строк, а также переносы, оставшиеся в поле после переключения с SQL, заменяются пробелами. Окну поиска требуются полные поля блока, например SELECT b.* FROM blocks b; запросы отдельных полей или агрегированной статистики следует передавать инструменту агента sql.query."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vkpuu1q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-vkpuu1q",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Семантический поиск поддерживает фильтрацию по типам блоков, блокнотам и путям документов, а также включение поддокументов. Результаты упорядочиваются по семантической релевантности; сортировка, группировка и замена в панели не поддерживаются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6bw6d6t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-6bw6d6t",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Элементы управления, не поддерживаемые текущим режимом поиска, отключаются и показывают поясняющую подсказку. В режимах SQL и семантического поиска строка ввода замены скрывается, но введённый текст и состояние раскрытия сохраняются и восстанавливаются при возврате к режиму с поддержкой замены. В настольной версии условия запроса сохраняются и сбрасываются кнопками в интерфейсе поиска, в мобильной — через меню «Ещё». Параметры сортировки и группировки запоминаются при повторном открытии поиска и сохраняются вместе с условиями запроса; в настольной версии макет результатов запоминается отдельно. При отключении группировки по документам сортировка по порядку содержимого переключается на сортировку по типу, остальные способы сортировки сохраняются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5z8qzkw",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261122113000-5z8qzkw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поиск по интеллект-картам"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261122113000-ew3epmu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ew3epmu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Поиск"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " включите «Блок интеллект-карты», чтобы находить всю интеллект-карту по тексту узлов в подсказках ссылок на блоки и встроенных блоков. Для глобального поиска отметьте «Блок интеллект-карты» в разделе «Типы поиска». Также можно отдельно включить «Блок элемента интеллект-карты» для поиска отдельных ветвей. По умолчанию «Блок интеллект-карты» включён, а «Блок элемента интеллект-карты» отключён. Если в старых сохранённых настройках поиска этих параметров нет, они наследуются из глобальных настроек поиска; явно выбранное состояние переключателей сохраняется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lkaatwv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-lkaatwv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Учёт регистра"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3krwsyo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3krwsyo",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Поиск"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Регистронезависимый"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " — настраивается здесь. По умолчанию отключено, то есть поиск "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Hello"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "hello"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ даёт одинаковые результаты. При включении поиск строго учитывает регистр. После переключения этого параметра дождитесь завершения перестроения индекса, чтобы изменения вступили в силу."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5zcc37w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-5zcc37w",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Различение упрощённых и традиционных иероглифов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4wfeewf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-4wfeewf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Поиск"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Различать упрощённые и традиционные иероглифы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " — настраивается здесь. По умолчанию включено, то есть поиск «经济» не найдёт «經濟». При отключении поиск «经济» найдёт и «经济», и «經濟». После переключения этого параметра дождитесь завершения перестроения индекса, чтобы изменения вступили в силу."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qc3ben1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-qc3ben1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Замена"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7vsjc53",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7vsjc53",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В диалог поиска встроена функция замены текста, позволяющая выполнять массовую замену по результатам поиска."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-yr9yr80",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-yr9yr80",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-fvguw55",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-fvguw55",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-lqopiyo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-lqopiyo",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Точка входа"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": в диалоге поиска ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "P"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​) нажмите кнопку со значком замены, чтобы раскрыть строку замены"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ozxcipq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ozxcipq",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-44pzvt0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-44pzvt0",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Выполнение замены"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-flvbo71",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-flvbo71",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-49wpi23",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-49wpi23",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-5y8tf9w",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-5y8tf9w",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Выберите запись в списке результатов поиска и нажмите «↵ Заменить», чтобы заменить это совпадение"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-88pm1gp",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-88pm1gp",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-erxd8pa",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-erxd8pa",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Нажмите «Заменить всё», чтобы сразу заменить все совпадения в текущих результатах поиска"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-n55bixm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-n55bixm",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-vm8n5ea",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-vm8n5ea",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Область замены"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите фильтр замены, чтобы выбрать область замены (текст блока, имя, псевдоним, примечание и т. д.)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-69y4m3n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-69y4m3n",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-y5hlz31",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-y5hlz31",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Примечания"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": после замены отмена через "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Z"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ не поддерживается; перед выполнением система автоматически создаёт запись в истории данных, и при необходимости можно откатить изменения через историю данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". В обычных и зашифрованных документах правки, внесённые во время замены, сохраняются. Если документ был изменён или удалён до сохранения, замена остановится с ошибкой, сохранив текущее содержимое этого документа; ранее сохранённые документы сохранят результат замены. После завершения редактирования можно снова выполнить замену"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-h37mpy6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-h37mpy6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-bmoiyps",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Синтаксис запросов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-shanhd1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-shanhd1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-w6iicxw",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Таблицы индексов SQL"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-u19bhcb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-u19bhcb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-o8cd56s",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Фильтр по типу"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-kpz3o3g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-kpz3o3g",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-grd1b2k",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Игнорирование индексации"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-iewmoji",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-iewmoji",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-0jdn249",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Игнорирование поиска"
+				}
+			]
+		}
+	]
+}

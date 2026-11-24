@@ -11,6 +11,7 @@ import (
 
 	"github.com/88250/vitess-sqlparser/sqlparser"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
 // 标签候选条件使用确定性函数，部分索引不受搜索的 LIKE 大小写设置影响。
@@ -161,6 +162,52 @@ func QueryTagSpans(p string) (ret []*Span) {
 		return
 	}
 	return scanSpans(rows, "QueryTagSpans")
+}
+
+func QueryTagCounts() (map[string]int, error) {
+	rows, err := query("SELECT content, COUNT(*) FROM spans WHERE " + tagSpanPredicate + " GROUP BY content")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	counts := map[string]int{}
+	for rows.Next() {
+		var content string
+		var count int
+		if err := rows.Scan(&content, &count); err != nil {
+			return nil, err
+		}
+		counts[content] = count
+	}
+	return counts, rows.Err()
+}
+
+func ReadTagAssociations(withDates bool, consume func(label, attrs, box, path string, count int)) error {
+	var rows *sql.Rows
+	var err error
+	if withDates {
+		rows, err = query("SELECT s.content, COALESCE((SELECT a.value FROM attributes a "+
+			"WHERE a.block_id = s.block_id AND a.root_id = s.root_id AND a.box = s.box AND a.path = s.path "+
+			"AND a.name = ? AND a.type = 'b' LIMIT 1), ''), "+
+			"s.box, s.path, COUNT(*) FROM spans s WHERE "+tagSpanPredicate+
+			" GROUP BY s.block_id, s.content, s.box, s.path", treenode.TagCreatedAttr)
+	} else {
+		rows, err = query("SELECT content, '', box, path, COUNT(*) FROM spans WHERE " + tagSpanPredicate +
+			" GROUP BY content, box, path")
+	}
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var label, attrs, box, path string
+		var count int
+		if err = rows.Scan(&label, &attrs, &box, &path, &count); err != nil {
+			return err
+		}
+		consume(label, attrs, box, path, count)
+	}
+	return rows.Err()
 }
 
 func scanSpans(rows *sql.Rows, source string) (ret []*Span) {

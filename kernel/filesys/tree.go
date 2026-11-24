@@ -184,6 +184,12 @@ func validateTreePathMode(boxID, p string) (int, error) {
 }
 
 func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, needFix bool, err error) {
+	ret, needFix, _, err = LoadTreeWithSourceVersion(boxID, p, luteEngine, 0)
+	return
+}
+
+// 普通文档缓存版本相同且路径有效时返回空树和原版本；加密文档按完整加载流程读取。
+func LoadTreeWithSourceVersion(boxID, p string, luteEngine *lute.Lute, previous uint64) (ret *parse.Tree, needFix bool, version uint64, err error) {
 	mode, err := validateTreePathMode(boxID, p)
 	if err != nil {
 		logging.LogErrorf("cannot load tree [%s] for box [%s]: %s", p, boxID, err)
@@ -199,12 +205,25 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 
 	rootID := util.GetTreeID(p)
 	filePath := filepath.Join(util.DataDir, boxID, p)
-	if raw, ok := cache.GetTreeDataInBox(rootID, boxID); ok {
+	if !encrypted && previous != 0 && previous == cache.TreeDataVersionInBox(rootID, boxID) {
+		if err = checkTreeFile(filePath); err != nil {
+			return
+		}
+		if _, parentErr := loadTreeParentHPath(boxID, p, mode, false); parentErr == nil &&
+			previous == cache.TreeDataVersionInBox(rootID, boxID) {
+			version = previous
+			return
+		}
+	}
+	if raw, cachedVersion, ok := cache.GetTreeDataWithVersionInBox(rootID, boxID); ok {
 		// 内容缓存不代表请求路径仍然有效，移动或删除后的旧路径不能触发补树。
 		if err = checkTreeFile(filePath); err != nil {
 			return
 		}
-		ret, err = loadTreeByDataInMode(raw, boxID, p, luteEngine, mode)
+		ret, err = loadTreeByDataWithParentRecovery(raw, boxID, p, luteEngine, mode, true, !encrypted)
+		if err == nil && !encrypted {
+			version = cachedVersion
+		}
 		return
 	}
 
@@ -228,7 +247,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		return
 	}
 
-	ret, err = loadTreeByDataInMode(data, boxID, p, luteEngine, mode)
+	ret, err = loadTreeByDataWithParentRecovery(data, boxID, p, luteEngine, mode, true, !encrypted)
 	if nil == err {
 		cache.SetTreeDataFromReadInBox(rootID, boxID, data, readVersion)
 	}
@@ -271,12 +290,12 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 }
 
 func loadTreeByDataInMode(data []byte, boxID, p string, luteEngine *lute.Lute, mode int) (ret *parse.Tree, err error) {
-	return loadTreeByDataWithParentRecovery(data, boxID, p, luteEngine, mode, true)
+	return loadTreeByDataWithParentRecovery(data, boxID, p, luteEngine, mode, true, false)
 }
 
 func loadTreeByDataWithParentRecovery(data []byte, boxID, p string, luteEngine *lute.Lute, mode int,
-	recoverParents bool) (ret *parse.Tree, err error) {
-	ret, err = parseJSON2TreeInMode(boxID, p, data, luteEngine, mode)
+	recoverParents, cacheSpec bool) (ret *parse.Tree, err error) {
+	ret, err = parseJSON2TreeWithSpecCache(boxID, p, data, luteEngine, cacheSpec)
 	if nil != err {
 		logging.LogErrorf("parse tree [%s] failed: %s", p, err)
 		return
@@ -285,23 +304,29 @@ func loadTreeByDataWithParentRecovery(data []byte, boxID, p string, luteEngine *
 }
 
 func finishLoadedTree(tree *parse.Tree, boxID, p string, luteEngine *lute.Lute, mode int, recoverParents bool) (ret *parse.Tree, err error) {
+	prefix, err := loadTreeParentHPath(boxID, p, mode, recoverParents)
+	if err != nil {
+		return nil, err
+	}
 	ret = tree
 	ret.Path = p
 	ret.Root.Path = p
+	ret.HPath = prefix + treenode.ReadDocumentTitle(ret.Root).Text
+	ret.Hash = treenode.NodeHash(ret.Root, ret, luteEngine)
+	return
+}
 
+func loadTreeParentHPath(boxID, p string, mode int, recoverParents bool) (string, error) {
 	hPath := "/" + strings.TrimPrefix(filepath.ToSlash(p), "/")
 	parts := strings.Split(hPath, "/")
 	if len(parts) < 2 {
 		logging.LogErrorf("parse tree [%s] failed: invalid path", p)
-		err = errors.New("invalid path")
-		return
+		return "", errors.New("invalid path")
 	}
 
 	parts = parts[1 : len(parts)-1] // 去掉开头的斜杆和结尾的自己
 	if 1 > len(parts) {
-		ret.HPath = "/" + treenode.ReadDocumentTitle(ret.Root).Text
-		ret.Hash = treenode.NodeHash(ret.Root, ret, luteEngine)
-		return
+		return "/", nil
 	}
 
 	// 构造 HPath
@@ -320,21 +345,21 @@ func finishLoadedTree(tree *parse.Tree, boxID, p string, luteEngine *lute.Lute, 
 
 		parentHeader, parentErr := readDocumentHeaderInMode(parentAbsPath, false, mode)
 		if parentErr != nil && !errors.Is(parentErr, os.ErrNotExist) {
-			return nil, parentErr
+			return "", parentErr
 		}
 		if errors.Is(parentErr, os.ErrNotExist) {
 			if !recoverParents {
-				return nil, parentErr
+				return "", parentErr
 			}
 			// 直接解析数据的调用也必须确认子文档仍在磁盘上，避免旧数据重建已删除的父链。
-			if err = checkTreeFile(filepath.Join(util.DataDir, boxID, p)); err != nil {
-				return nil, err
+			if err := checkTreeFile(filepath.Join(util.DataDir, boxID, p)); err != nil {
+				return "", err
 			}
 			// 子文档缺失父文档时自动补全 https://github.com/siyuan-note/siyuan/issues/7376
 			parentTree := treenode.NewTree(boxID, parentPath, hPathBuilder.String()+"Untitled", "Untitled")
 			if _, writeErr := WriteTree(parentTree); nil != writeErr {
 				logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
-				return nil, writeErr
+				return "", writeErr
 			} else {
 				logging.LogInfof("rebuilt parent tree [%s]", parentAbsPath)
 				treenode.UpsertBlockTree(parentTree)
@@ -350,10 +375,7 @@ func finishLoadedTree(tree *parse.Tree, boxID, p string, luteEngine *lute.Lute, 
 		hPathBuilder.WriteString(title)
 		hPathBuilder.WriteString("/")
 	}
-	hPathBuilder.WriteString(treenode.ReadDocumentTitle(ret.Root).Text)
-	ret.HPath = hPathBuilder.String()
-	ret.Hash = treenode.NodeHash(ret.Root, ret, luteEngine)
-	return
+	return hPathBuilder.String(), nil
 }
 
 func checkTreeFile(absPath string) error {
@@ -929,11 +951,16 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 }
 
 func parseJSON2TreeInMode(boxID, p string, jsonData []byte, luteEngine *lute.Lute, mode int) (ret *parse.Tree, err error) {
+	return parseJSON2TreeWithSpecCache(boxID, p, jsonData, luteEngine, false)
+}
+
+func parseJSON2TreeWithSpecCache(boxID, p string, jsonData []byte, luteEngine *lute.Lute, cacheSpec bool) (ret *parse.Tree, err error) {
 	jsonData = bytes.TrimPrefix(jsonData, []byte("\xef\xbb\xbf"))
-	if err = treenode.CheckSpecJSON(jsonData); nil != err {
-		return
+	parseSource := treenode.ParseJSON
+	if cacheSpec {
+		parseSource = treenode.ParseJSONWithSpecCache
 	}
-	ret, _, err = treenode.ParseJSON(jsonData, luteEngine.ParseOptions)
+	ret, _, err = parseSource(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
 		err = fmt.Errorf("parse json [%s] to tree failed: %w", boxID+p, err)

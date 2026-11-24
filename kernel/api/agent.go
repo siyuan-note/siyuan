@@ -536,7 +536,7 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 			Result:  event.Result,
 		})
 	case "error":
-		return writeSSEEvent(c, "error", apicontract.AISSEMessage{Message: event.Error})
+		return writeSSEEvent(c, "error", apicontract.AISSEAgentError{Message: event.Error, SnapshotFailed: event.SnapshotFailed})
 	case "interrupted":
 		return writeSSEEvent(c, "interrupted", apicontract.AISSEMessage{Message: event.Error})
 	case "usage":
@@ -588,7 +588,7 @@ func writeSSEEvent[Payload any](c *gin.Context, eventType string, data Payload) 
 }
 
 func writeSSEError(c *gin.Context, message string) error {
-	return writeSSEEvent(c, "error", apicontract.AISSEMessage{Message: message})
+	return writeSSEEvent(c, "error", apicontract.AISSEAgentError{Message: message})
 }
 
 func writeAgentSSE(c *gin.Context, event agent.AgentEvent) error {

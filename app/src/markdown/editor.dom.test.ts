@@ -418,6 +418,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         '```echarts\n{"title":{"text":"static diagram"}}\n```\n\n:doge: 🐶 👨‍👩‍👧‍👦\n\nEnd\n';
     const imageURL = URL.createObjectURL(new Blob([new Uint8Array([137, 80, 78, 71])], {type: "image/png"}));
     const links: string[] = [];
+    const documentLinks: string[] = [];
     for (const mode of ["ir", "wysiwyg", "sv"] as const) {
         const element = document.createElement("div");
         element.style.height = "600px";
@@ -429,7 +430,8 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         const editor = await api.createMarkdownEditor({element, initialValue: source, mode, cdn, lutePath, lang: "en-US",
             resolveResource: reference => reference === "assets/photo.png" ? imageURL : undefined,
             onEdit: snapshot => edits.push(snapshot), onEditPending: value => pending.push(value),
-            onModeChange: value => modes.push(value), onLink: url => links.push(url), onHistoryChange: state => history.push(state)});
+            onModeChange: value => modes.push(value), onLink: url => links.push(url),
+            onDocumentLink: reference => documentLinks.push(reference), onHistoryChange: state => history.push(state)});
         check.equal(element.querySelector<HTMLElement>(".vditor-toolbar").hidden, true);
         if (mode === "sv") check.ok(element.querySelector(".vditor-preview .vditor-reset").textContent.includes("End"), "initial source preview is ready before revealing the editor");
         check.deepEqual(editor.flush(), {content: source, edited: false, composing: false});
@@ -523,6 +525,17 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         await new Promise(resolve => setTimeout(resolve, 850));
         check.deepEqual(editor.flush(), {content: "Reloaded\n", edited: false, composing: false});
         check.equal(edits.length, afterReload);
+        editor.setMode(mode);
+        const relativeSource = "| File |\n| --- |\n| [Next](docs/next.md) |\n\nOutside\n";
+        editor.setValue(relativeSource);
+        const relativeLink = () => element.querySelector(mode === "ir" ? '.vditor-ir [data-type="a"]' :
+            mode === "wysiwyg" ? ".vditor-wysiwyg a" : ".vditor-preview a");
+        await waitFor(() => Boolean(relativeLink()), `relative document link in ${mode}`);
+        const linksBefore = documentLinks.length;
+        relativeLink().dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+        check.equal(documentLinks.length, linksBefore + 1, `one relative document open request in ${mode}`);
+        check.equal(documentLinks.at(-1), "docs/next.md");
+        check.deepEqual(editor.flush(), {content: relativeSource, edited: false, composing: false});
         if (mode !== "sv") {
             editor.setMode(mode);
             const keyboardSource = "- first\n- second\n";
@@ -566,6 +579,24 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
             check.equal(editor.flush().content, keyboardSource, `keyboard undo in ${mode}`);
             editor.redo(); await tick();
             check.equal(editor.flush().content, keyboardEdit.content, `keyboard redo in ${mode}`);
+
+            editor.setValue("###\n\n### Next\n");
+            await new Promise(resolve => setTimeout(resolve, 350));
+            placeCaret(richSurface.querySelector("h3"));
+            const headingBackspace = new KeyboardEvent("keydown", {key: "Backspace", bubbles: true, cancelable: true});
+            richSurface.dispatchEvent(headingBackspace);
+            check.equal(headingBackspace.defaultPrevented, true, `Vditor handles empty heading Backspace in ${mode}`);
+            const paragraph = richSurface.firstElementChild;
+            check.equal(paragraph.tagName, "P");
+            check.ok(paragraph.contains(getSelection().anchorNode));
+            check.deepEqual(editor.flush(), {content: "### Next\n", edited: true, composing: false},
+                `empty heading replacement flushes in ${mode}`);
+            await new Promise(resolve => setTimeout(resolve, 350));
+            check.equal(edits.at(-1).content, "### Next\n");
+            editor.undo(); await tick();
+            check.match(editor.flush().content, /^### ?\n\n### Next\n$/, `empty heading undo in ${mode}`);
+            editor.redo(); await tick();
+            check.equal(editor.flush().content, "### Next\n");
 
             editor.setValue(keyboardSource);
             await new Promise(resolve => setTimeout(resolve, 350));
@@ -728,7 +759,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     return "Markdown editor DOM cases passed";
 };
 
-test("Vditor 4.0.2-alpha.9 adapter preserves content and isolates programmatic, input, composition and preview events", {
+test("Vditor 4.0.2-alpha.11 adapter preserves content and isolates programmatic, input, composition and preview events", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

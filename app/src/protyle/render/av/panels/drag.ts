@@ -7,7 +7,7 @@ import { updateCellsValue } from "../cell";
 import { getLanguageByIndex } from "../groups";
 import { hasClosestByAttribute } from "../../../util/hasClosest";
 import { getPropertiesHTML } from "./properties";
-import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "../viewVisibility";
+import {getAVVisibleViewIDs, updateAVVisibleViews} from "../viewVisibility";
 import {isAVCardView} from "../viewType";
 import {setPosition} from "../../../../util/setPosition";
 import type { IAVPanelContext } from "./types";
@@ -188,11 +188,10 @@ export const bindAVPanelDrag = (context: IAVPanelContext) => {
             }
             if (wasVisible !== visible) {
                 const viewIDs = visible ? visibleViewIDs.concat(sourceId) : visibleViewIDs.filter(id => id !== sourceId);
-                operations.push({action: "setAttrViewBlockVisibleViews", avID: context.avID,
-                    blockID: context.blockID, viewIDs});
-                undoOperations.push({action: "setAttrViewBlockVisibleViews", avID: context.avID,
-                    blockID: context.blockID, viewIDs: visibleViewIDs});
-                setAVVisibleViewIDs(context.options.blockElement, viewIDs);
+                const visibility = updateAVVisibleViews(context.options.blockElement,
+                    oldViews.map(view => view.id), visibleViewIDs, viewIDs);
+                operations.push(...visibility.operations);
+                undoOperations.push(...visibility.undoOperations);
             }
             if (operations.length > 0) {
                 context.data.views = views;

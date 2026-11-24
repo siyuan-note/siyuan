@@ -67,10 +67,24 @@ const browserCases = (progressSource: string, touchSource: string, backSource: s
     back.goBack();
     check(backCalls === 0, "repeated system back must not reach background navigation");
 
+    document.documentElement.style.setProperty("--b3-mask-background", "rgba(0, 0, 0, 0.35)");
+    for (const theme of ["light", "dark"]) {
+        document.documentElement.dataset.themeMode = theme;
+        api.progressLoading({code: 1, msg: "Cleaning"} as IWebSocketData, "setting-task-test", undefined, "standard");
+        const settingsScrim = document.getElementById("setting-task-test").firstElementChild;
+        const settingsStyle = getComputedStyle(settingsScrim);
+        check(settingsStyle.backgroundColor === "rgba(0, 0, 0, 0.35)", "settings tasks must use the standard scrim");
+        check(settingsStyle.backdropFilter === "none", "settings tasks must not blur the background");
+        check(settingsStyle.touchAction === "none" && document.elementFromPoint(1, 1) === settingsScrim,
+            "settings scrim must block input and cover the viewport");
+        api.progressLoading({code: 2} as IWebSocketData, "setting-task-test");
+    }
+
     let clicks = 0;
     api.progressLoading({code: 1, msg: "Exiting"} as IWebSocketData, "exitProgress",
         {label: "Cancel", callback: () => clicks++});
     const exit = document.getElementById("exitProgress");
+    check(getComputedStyle(exit.firstElementChild).animationName === "exit-progress-blur", "exit must retain the blur animation");
     const button = exit.querySelector("button");
     check(document.activeElement === button, "explicit progress action must retain focus");
     back.goBack();
@@ -103,7 +117,14 @@ test("progress overlays cover dialogs, isolate mobile gestures and preserve scro
     const css = compileString(readFileSync("src/assets/scss/component/_dialog.scss", "utf8")).css;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-progress-test-"));
     const script = path.join(temporary, "run.cjs");
-    const code = `const __name = value => value; (${browserCases.toString()})(${JSON.stringify(progress)}, ${JSON.stringify(touch)}, ${JSON.stringify(back)}, ${JSON.stringify(css)})`;
+    const code = `(() => {
+        const __name = value => value;
+        try {
+            return {result: (${browserCases.toString()})(${JSON.stringify(progress)}, ${JSON.stringify(touch)}, ${JSON.stringify(back)}, ${JSON.stringify(css)})};
+        } catch (error) {
+            return {error: String(error.stack || error)};
+        }
+    })()`;
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(path.join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");
@@ -112,7 +133,40 @@ app.whenReady().then(async () => {
         webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false}});
     try {
         await win.loadURL("about:blank");
-        console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));
+        win.webContents.enableDeviceEmulation({screenPosition: "desktop", screenSize: {width: 384, height: 808},
+            viewPosition: {x: 0, y: 0}, viewSize: {width: 384, height: 808}, deviceScaleFactor: 1, scale: 1});
+        win.webContents.debugger.attach();
+        const features = [
+            {name: "prefers-reduced-motion", value: "no-preference"},
+            {name: "prefers-reduced-transparency", value: "no-preference"},
+            {name: "forced-colors", value: "none"},
+        ];
+        const setMedia = async (index = -1) => {
+            const emulated = features.map((feature, current) => current === index ?
+                {...feature, value: feature.name === "forced-colors" ? "active" : "reduce"} : feature);
+            await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {features: emulated});
+            const queries = emulated.map(({name, value}) => "(" + name + ": " + value + ")");
+            if (!await win.webContents.executeJavaScript(JSON.stringify(queries) + ".every(query => matchMedia(query).matches)")) {
+                throw new Error("Progress test media emulation failed: " + queries.join(", "));
+            }
+        };
+        await setMedia();
+        await win.webContents.executeJavaScript("new Promise(requestAnimationFrame)");
+        const {result, error} = await win.webContents.executeJavaScript(${JSON.stringify(code)});
+        if (error) throw new Error(error);
+        for (let index = 0; index < features.length; index++) {
+            await setMedia(index);
+            const animation = await win.webContents.executeJavaScript(${JSON.stringify(`(() => {
+                const api = {};
+                new Function("exports", ${JSON.stringify(progress)})(api);
+                api.progressLoading({code: 1, msg: "Exiting"}, "exitProgress");
+                const name = getComputedStyle(document.getElementById("exitProgress").firstElementChild).animationName;
+                api.progressLoading({code: 2}, "exitProgress");
+                return name;
+            })()`)});
+            if (animation !== "none") throw new Error(features[index].name + " must disable the exit animation: " + animation);
+        }
+        console.log(result);
         win.destroy(); app.exit(0);
     } catch (error) {
         console.error(error); win.destroy(); app.exit(1);

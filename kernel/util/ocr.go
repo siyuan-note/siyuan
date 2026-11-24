@@ -38,6 +38,7 @@ var (
 	assetsTexts        = map[string]string{}
 	assetsTextAliases  = map[string][]string{}
 	assetsTextsLock    = sync.Mutex{}
+	assetsTextsLoaded  bool
 	assetsTextsChanged = atomic.Bool{}
 )
 
@@ -62,26 +63,54 @@ func CleanNotExistAssetsTexts(exists func(string) bool) {
 }
 
 func LoadAssetsTexts() {
+	loadAssetsTexts(false)
+}
+
+func ReloadSyncedAssetsTexts() (changed map[string]bool, refreshAll bool) {
+	return loadAssetsTexts(true)
+}
+
+func loadAssetsTexts(syncReload bool) (changed map[string]bool, refreshAll bool) {
+	start := time.Now()
 	assetsPath := GetDataAssetsAbsPath()
 	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
-	if !filelock.IsExist(assetsTextsPath) {
-		return
-	}
 
-	start := time.Now()
+	assetsTextsLock.Lock()
 	data, err := filelock.ReadFile(assetsTextsPath)
-	if err != nil {
-		logging.LogErrorf("read assets texts failed: %s", err)
-		return
-	}
-
 	loaded := map[string]string{}
-	if err = gulu.JSON.UnmarshalJSON(data, &loaded); err == nil && loaded == nil {
-		err = errors.New("OCR texts must be an object")
+	if err == nil {
+		if err = gulu.JSON.UnmarshalJSON(data, &loaded); err == nil && loaded == nil {
+			err = errors.New("OCR texts must be an object")
+		}
+	} else if os.IsNotExist(err) {
+		if !syncReload {
+			assetsTextsLoaded = true
+			assetsTextsLock.Unlock()
+			return nil, false
+		}
+		err = nil
 	}
 	if err != nil {
-		logging.LogErrorf("unmarshal assets texts failed: %s", err)
-		return
+		assetsTextsLock.Unlock()
+		logging.LogErrorf("load assets texts failed: %s", err)
+		return nil, false
+	}
+	if syncReload {
+		// 启动同步可能先于 OCR 缓存初始化，此时索引中的旧文本没有可供比较的内存副本。
+		refreshAll = !assetsTextsLoaded
+		if !refreshAll {
+			changed = map[string]bool{}
+			for reference, oldText := range assetsTexts {
+				if newText, exists := loaded[reference]; !exists || newText != oldText {
+					changed[OCRAssetKey(reference)] = true
+				}
+			}
+			for reference, newText := range loaded {
+				if oldText, exists := assetsTexts[reference]; !exists || oldText != newText {
+					changed[OCRAssetKey(reference)] = true
+				}
+			}
+		}
 	}
 	aliases := map[string][]string{}
 	for reference := range loaded {
@@ -89,19 +118,27 @@ func LoadAssetsTexts() {
 			aliases[key] = append(aliases[key], reference)
 		}
 	}
-	assetsTextsLock.Lock()
 	assetsTexts = loaded
 	assetsTextAliases = aliases
+	assetsTextsLoaded = true
+	if syncReload {
+		assetsTextsChanged.Store(false)
+	}
 	assetsTextsLock.Unlock()
-	debug.FreeOSMemory()
+	if len(data) > 0 {
+		debug.FreeOSMemory()
+	}
 
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
 		logging.LogWarnf("read assets texts [%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(uint64(len(data)), 2), assetsTextsPath, elapsed)
 	}
+	return
 }
 
 func SaveAssetsTexts() {
+	assetsTextsLock.Lock()
 	if !assetsTextsChanged.Load() {
+		assetsTextsLock.Unlock()
 		return
 	}
 
@@ -110,11 +147,10 @@ func SaveAssetsTexts() {
 	assetsPath := GetDataAssetsAbsPath()
 	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
 
-	assetsTextsLock.Lock()
 	// OCR 功能未开启且 ocr-texts.json 不存在时，如果 assetsTexts 为空则不创建文件
 	if !filelock.IsExist(assetsTextsPath) && 0 == len(assetsTexts) {
-		assetsTextsLock.Unlock()
 		assetsTextsChanged.Store(false)
+		assetsTextsLock.Unlock()
 		return
 	}
 	data, err := gulu.JSON.MarshalIndentJSON(assetsTexts, "", "  ")
@@ -140,9 +176,9 @@ func SaveAssetsTexts() {
 func SetAssetText(asset, text string) {
 	asset = OCRAssetKey(asset)
 	assetsTextsLock.Lock()
+	defer assetsTextsLock.Unlock()
 	oldText, ok := assetsTexts[asset]
 	assetsTexts[asset] = text
-	assetsTextsLock.Unlock()
 	if !ok || oldText != text {
 		assetsTextsChanged.Store(true)
 	}
@@ -179,8 +215,8 @@ func RemoveAssetText(asset string) {
 		delete(assetsTexts, reference)
 	}
 	delete(assetsTextAliases, key)
-	assetsTextsLock.Unlock()
 	assetsTextsChanged.Store(true)
+	assetsTextsLock.Unlock()
 }
 
 // OCRAssetKey 保留本地资源的笔记本身份，只合并显示参数和片段；外部地址保留完整查询参数。

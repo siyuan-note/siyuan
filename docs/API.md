@@ -1550,6 +1550,8 @@ Block insert, prepend, append and update operations validate block IDs throughou
   }
   ```
 
+When present, `data["custom-sy-tag-created"]` is a JSON string mapping complete tag names to Unix milliseconds. Each value records when the tag was added to this block. Missing entries have an unknown addition time.
+
 ## SQL
 
 ### Execute SQL query
@@ -1757,6 +1759,8 @@ Without a live interactive window, `httpGet` returns `interaction_required` and 
 ### Put file
 
 * `/api/file/putFile`
+
+When sync retries local snapshot indexing after detecting a file change, writes to files included in sync may wait after the form has been received. Canceling a request while it waits leaves its destination untouched.
 
 For `.sy` document paths composed of notebook and document IDs, both the incoming content and any existing document are checked. Unknown formats, invalid document sources, or slash-containing titles without the required Spec 6 declaration return `code: -1`, preserving the original file and modification time. Successful writes retain the request bytes without normalizing titles. Files ending in `.sy` inside asset or plugin directories are not parsed as documents.
 
@@ -2157,6 +2161,7 @@ Incoming titles containing ASCII `/` must declare `Spec` at least `6`; otherwise
 
 * `/api/system/bootProgress`
 * No parameters
+* `details` contains the localized startup stage and may include work counters. It omits workspace paths and identifiers
 * Return value
 
   ```json

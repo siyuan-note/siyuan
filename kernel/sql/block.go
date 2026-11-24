@@ -50,21 +50,9 @@ type Block struct {
 // blockRowIDByBlockID 返回指定 block 的 blocks 表隐式 rowid。
 // external content 模式下，blocks_fts 的写操作需以此为定位键。
 func blockRowIDByBlockID(tx *sql.Tx, id string) (rowID int64, err error) {
-	stmt := "SELECT ROWID FROM blocks WHERE id = ?"
-	rows, err := tx.Query(stmt, id)
-	if err != nil {
-		logging.LogErrorf("query block rowid failed: %s", err)
-		return
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		logging.LogErrorf("query block rowid failed: id=%s not found", id)
-		err = fmt.Errorf("block rowid not found: %s", id)
-		return
-	}
-	if err = rows.Scan(&rowID); err != nil {
-		logging.LogErrorf("scan block rowid failed: %s", err)
-		return
+	err = tx.QueryRow("SELECT ROWID FROM blocks WHERE id = ?", id).Scan(&rowID)
+	if err == sql.ErrNoRows {
+		err = fmt.Errorf("block rowid not found: %s: %w", id, err)
 	}
 	return
 }
@@ -126,17 +114,14 @@ func updateRootContent(tx *sql.Tx, content, updated, ialContent, id string) (err
 func updateBlockContent(tx *sql.Tx, block *Block) (err error) {
 	var rowID int64
 	if rowID, err = blockRowIDByBlockID(tx, block.ID); err != nil {
-		tx.Rollback()
 		return
 	}
 	stmt := "UPDATE blocks_fts SET content = ? WHERE rowid = ?"
 	if err = execStmtTx(tx, stmt, block.Content, rowID); err != nil {
-		tx.Rollback()
 		return
 	}
 	stmt = "UPDATE blocks SET content = ? WHERE id = ?"
 	if err = execStmtTx(tx, stmt, block.Content, block.ID); err != nil {
-		tx.Rollback()
 		return
 	}
 

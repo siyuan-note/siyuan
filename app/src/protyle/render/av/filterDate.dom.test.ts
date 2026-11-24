@@ -346,7 +346,7 @@ for (const [width, scheme, frontend] of [[400, "daylight", "browser-desktop"], [
                 if (source.frontend === "mobile") {
                     // Match the sheet shell and height installed by bindMobileAVPanel.
                     menu.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
-                    menu.style.height = `${innerHeight * .56}px`;
+                    menu.style.height = `${innerHeight / 2}px`;
                     menu.style.maxHeight = `${innerHeight}px`;
                 }
                 if (innerWidth === 1000) { menu.style.width = "730px"; }

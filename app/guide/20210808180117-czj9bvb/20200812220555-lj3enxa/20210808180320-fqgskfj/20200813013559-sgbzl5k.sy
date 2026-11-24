@@ -240,6 +240,35 @@
 			]
 		},
 		{
+			"ID": "20261123123905-o8d029n",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261123123905-o8d029n",
+				"updated": "20261123123905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "删除或剪切前检查"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261123123905-1hr7zqn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123123905-1hr7zqn",
+				"updated": "20261123123905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果块引用和数据库绑定的检查耗时较长，可以在进度弹窗中点击「取消」，停止本次删除或剪切。"
+				}
+			]
+		},
+		{
 			"ID": "20210104090557-841hf2w",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

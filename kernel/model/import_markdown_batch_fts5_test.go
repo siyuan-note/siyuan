@@ -10,12 +10,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -42,6 +44,9 @@ func testMarkdownImportBatches(t *testing.T, parentTitle, parentExtension string
 		t.Run(map[bool]string{false: "plain", true: "encrypted"}[encrypted], func(t *testing.T) {
 			const boxID = "20261010000000-batch01"
 			setupExportRelatedTest(t, boxID)
+			workspace := util.WorkspaceDir
+			util.WorkspaceDir = filepath.Dir(util.DataDir)
+			t.Cleanup(func() { util.WorkspaceDir = workspace })
 			Conf.Editor.Store(conf.NewEditor())
 			setupNotebookDocumentImportDatabase(t)
 			t.Cleanup(func() { cache.ClearTreeCache(); cache.ClearDocsIAL(); cache.ClearBlocksIAL() })
@@ -87,9 +92,17 @@ func testMarkdownImportBatches(t *testing.T, parentTitle, parentExtension string
 			if err := os.WriteFile(filepath.Join(source, "assets", "file.txt"), []byte("private asset content"), 0600); err != nil {
 				t.Fatal(err)
 			}
+			const imageContent = "image fixture"
+			if err := os.WriteFile(filepath.Join(source, "assets", "figure 1.jpg"), []byte(imageContent), 0600); err != nil {
+				t.Fatal(err)
+			}
 			count := 2*markdownImportBatchDocuments + 1
 			for i := range count {
 				markdown := fmt.Sprintf("# Heading %03d\n\n[[doc-%03d|next]] [[doc-%03d#Heading %03d|heading]] [[doc-%03d]]\n\n[asset](assets/file.txt)\n\nText[^note].\n\n[^note]: footnote %03d\n", i, (i+1)%count, (i+1)%count, (i+1)%count, (i+1)%count, i)
+				if i == 0 {
+					markdown += "\n" + `<div style="text-align: center;"><img src='assets/figure%201.jpg?size=small#preview' width="10%" alt="Diagram" /><div>Caption</div></div>` + "\n\n" +
+						`<table><tr><td><img src="assets/figure%201.jpg" /></td><td><img src="https://example.test/image.png" /></td></tr></table>` + "\n"
+				}
 				if err := os.WriteFile(filepath.Join(source, fmt.Sprintf("doc-%03d.md", i)), []byte(markdown), 0600); err != nil {
 					t.Fatal(err)
 				}
@@ -153,6 +166,9 @@ func testMarkdownImportBatches(t *testing.T, parentTitle, parentExtension string
 				if footnotes != 1 {
 					t.Fatal("footnote did not survive staging")
 				}
+				if i == 0 {
+					assertMarkdownImportedHTMLImages(t, tree, boxID, []byte(imageContent), encrypted)
+				}
 				data, err := os.ReadFile(filepath.Join(util.DataDir, boxID, current.Path))
 				if err != nil || encrypted && !IsEncryptedNotebookData(data) {
 					t.Fatal("encrypted import wrote a plaintext document")
@@ -178,6 +194,44 @@ func testMarkdownImportBatches(t *testing.T, parentTitle, parentExtension string
 				}
 			}
 		})
+	}
+}
+
+func assertMarkdownImportedHTMLImages(t *testing.T, tree *parse.Tree, boxID string, content []byte, encrypted bool) {
+	t.Helper()
+	var figure, table *ast.Node
+	for n := tree.Root.FirstChild; n != nil; n = n.Next {
+		if n.Type == ast.NodeHTMLBlock && strings.Contains(n.TokensStr(), "Caption") {
+			figure = n
+		}
+		if n.Type == ast.NodeHTMLBlock && strings.Contains(n.TokensStr(), "<table>") {
+			table = n
+		}
+	}
+	if figure == nil || table == nil || !strings.Contains(figure.TokensStr(), `style="text-align: center;"`) ||
+		!strings.Contains(figure.TokensStr(), `width="10%"`) || !strings.Contains(figure.TokensStr(), `alt="Diagram"`) ||
+		!strings.Contains(table.TokensStr(), `<td><img src="https://example.test/image.png" /></td>`) {
+		t.Fatal("import lost the figure layout, table, or remote image")
+	}
+	figureAssets, tableAssets := getAssetsLinkDests(figure, false), getAssetsLinkDests(table, false)
+	if len(figureAssets) != 1 || len(tableAssets) != 1 {
+		t.Fatalf("expected one local asset in each HTML block, got %v and %v", figureAssets, tableAssets)
+	}
+	figurePath, _ := url.Parse(figureAssets[0])
+	tablePath, _ := url.Parse(tableAssets[0])
+	if figurePath == nil || tablePath == nil || figurePath.Path != tablePath.Path ||
+		figurePath.Query().Get("size") != "small" || figurePath.Fragment != "preview" {
+		t.Fatalf("HTML asset links do not share the same file or lost their suffixes: %v and %v", figureAssets, tableAssets)
+	}
+	wantBox := ""
+	if encrypted {
+		wantBox = boxID
+	}
+	if figurePath.Query().Get("box") != wantBox || tablePath.Query().Get("box") != wantBox {
+		t.Fatalf("incorrect notebook routing for HTML assets: %v and %v", figureAssets, tableAssets)
+	}
+	if actual, err := ReadAssetBytesInBox(boxID, tablePath.Path); err != nil || !bytes.Equal(actual, content) {
+		t.Fatalf("HTML image does not resolve to the imported asset: %v", err)
 	}
 }
 

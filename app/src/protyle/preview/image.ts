@@ -9,6 +9,7 @@ import {writeClipboardData} from "../util/compatibility";
 import {showMessage} from "../../dialog/message";
 import {getZIndex} from "../../util/zIndex";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
+import {isMobile} from "../../util/functions";
 
 type ImageSource = {src: string, video?: string, notebook?: string};
 
@@ -31,6 +32,8 @@ const getCopyFileMenu = (src: string) => {
 
 const showImageGallery = (sources: Array<ImageSource & {url: string}>, initialViewIndex: number, onHidden?: () => void) => {
     addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.14.0`, "protyleViewerScript").then(() => {
+        const mobile = isMobile();
+        const mobileNavigation = mobile && sources.length > 1;
         const imagesElement = document.createElement("ul");
         imagesElement.innerHTML = sources.map(({url}) => `<li><img src="${escapeHtmlTextAndAttr(url)}"></li>`).join("");
         let cleanedUp = false;
@@ -62,8 +65,11 @@ const showImageGallery = (sources: Array<ImageSource & {url: string}>, initialVi
                 return `${currentIndex + 1}/${imagesElement.childElementCount} ${name} [${imageData.naturalWidth} × ${imageData.naturalHeight}]`;
             }],
             button: false,
+            className: mobile ? "viewer-container--mobile" : "",
             magnifier: false,
-            navigation: true,
+            navigation: !mobile,
+            rotateOnTouch: !mobile,
+            rotateOnGesture: !mobile,
             transition: false,
             ready: () => {
                 window.siyuan.zIndex = Math.max(window.siyuan.zIndex + 1, getZIndex(viewer.viewer));
@@ -138,12 +144,16 @@ const showImageGallery = (sources: Array<ImageSource & {url: string}>, initialVi
                 copyFileElement.classList.add("fn__none");
                 const languages = window.siyuan.languages;
                 ["prev", "next"].forEach((action) => {
-                    const button = viewer.viewer.querySelector(`.viewer-navigation > .viewer-${action}`);
+                    const button = mobile ? viewer.toolbar.querySelector(`.viewer-${action}`) :
+                        viewer.viewer.querySelector(`.viewer-navigation > .viewer-${action}`);
+                    if (!button) {
+                        return;
+                    }
                     button.innerHTML = action === "prev" ? '<svg><use xlink:href="#iconLeft"></use></svg>' :
                         '<svg><use xlink:href="#iconRight"></use></svg>';
                     button.classList.add("ariaLabel");
                     button.setAttribute("aria-label", action === "prev" ? languages.previous : languages.next);
-                    button.setAttribute("data-position", action === "prev" ? "east" : "west");
+                    button.setAttribute("data-position", mobile ? "north" : action === "prev" ? "east" : "west");
                 });
                 const labels: Record<string, string> = {
                     "zoom-in": languages.zoomIn,
@@ -170,18 +180,44 @@ const showImageGallery = (sources: Array<ImageSource & {url: string}>, initialVi
                 stopLive();
                 currentIndex = event?.detail?.index ?? currentIndex;
                 liveButton?.classList.toggle("fn__none", !sources[currentIndex]?.video);
-                viewer.toolbar.querySelector(".viewer-copy-file").classList.add("fn__none");
+                const image = event?.detail?.image;
+                viewer.toolbar.querySelector(".viewer-copy-file").classList.toggle("fn__none", !mobile || !image || !getCopyFileMenu(image.src));
             },
             viewed: () => {
                 viewer.toolbar.querySelector(".viewer-copy-file").classList.toggle("fn__none", !getCopyFileMenu(viewer.image.src));
             },
+            zoom: mobile ? event => {
+                const originalEvent = event.detail.originalEvent;
+                // 预览器用第二次触摸抬起事件合成双击。
+                if (!originalEvent || !["dblclick", "pointerup", "touchend", "pointercancel", "touchcancel"].includes(originalEvent.type)) {
+                    return;
+                }
+                event.preventDefault();
+                if (originalEvent.type.endsWith("cancel")) {
+                    return;
+                }
+                const point = "changedTouches" in originalEvent ? originalEvent.changedTouches[0] : originalEvent;
+                if (!point) {
+                    return;
+                }
+                const initialRatio = viewer.initialImageData.ratio;
+                if (event.detail.oldRatio > initialRatio) {
+                    viewer.reset();
+                    return;
+                }
+                const bounds = viewer.viewer.getBoundingClientRect();
+                viewer.zoomTo(initialRatio * 2, false, {
+                    x: point.clientX - bounds.left,
+                    y: point.clientY - bounds.top,
+                });
+            } : undefined,
             toolbar: {
+                prev: mobileNavigation,
+                next: mobileNavigation,
                 zoomIn: true,
                 zoomOut: true,
                 oneToOne: true,
-                prev: false,
                 play: true,
-                next: false,
                 rotateLeft: true,
                 rotateRight: true,
                 flipHorizontal: true,

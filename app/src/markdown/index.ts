@@ -6,7 +6,7 @@ import {MarkdownSession, MarkdownSessionState} from "./session";
 import {createNativeMarkdownBridge} from "./nativeBridge";
 import {markdownErrorKey} from "./errors";
 import {createMarkdownTree, MarkdownTree} from "./tree";
-import {MarkdownTreeLocation} from "./treeContracts";
+import type {MarkdownTreeOpen} from "./treeContracts";
 import {createMarkdownChoice, createMarkdownSubmenu, MarkdownChoice} from "./choiceMenu";
 import {createMarkdownWindowChrome} from "./windowChrome";
 import {createMarkdownTooltips} from "./tooltip";
@@ -28,9 +28,10 @@ interface MarkdownApplication {
 export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = document.getElementById("markdownApp"), initial?: MarkdownBootstrap): Promise<MarkdownApplication> => {
     let bootstrap: MarkdownBootstrap = initial ?? await bridge.bootstrap();
     const text = (key: string) => bootstrap.languages[key] ?? key;
+    const prepareDocumentLink = bridge.prepareDocumentLink;
     let preferences = bootstrap.preferences;
     let appearance = bridge.appearance ? bootstrap.appearance : undefined;
-    const fontAppearance = createMarkdownFontAppearance(root);
+    const fontAppearance = createMarkdownFontAppearance(root.ownerDocument.body);
     const appearanceTheme = () => appearance?.theme ?? preferences.theme ?? "system";
     let activeMode = preferences.mode;
     let systemDark = bootstrap.dark;
@@ -379,6 +380,11 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
                     scheduleResourcePrompt();
                 },
                 onLink: url => {if (current()) void bridge.openLink(url).catch(() => {if (current()) reportError();});},
+                onDocumentLink: prepareDocumentLink && (reference => {
+                    if (current()) runAction(() => {
+                        if (current()) return openDocumentTarget(() => prepareDocumentLink(reference), "markdownLinkUnavailable");
+                    });
+                }),
                 onEditPending(pending) {
                     if (!current()) return;
                     editPending = pending;
@@ -800,7 +806,7 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             if (!disposed) root.setAttribute("aria-busy", "false");
         }
     };
-    const openTreeFile = async (location: MarkdownTreeLocation): Promise<boolean> => {
+    const openDocumentTarget = async (prepareOpen: () => Promise<MarkdownTreeOpen>, blockedMessage?: string): Promise<boolean> => {
         if (frozen || disposed || switching) return false;
         switching = true; freeze(true);
         let ticket: string;
@@ -809,10 +815,13 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
             try {
                 await pendingFileAction;
                 if (!await session.checkpoint(editor)) return false;
-                const candidate = await bridge.tree.prepareOpen(location);
+                const candidate = await prepareOpen();
                 if (candidate.kind === "current") return true;
                 if (candidate.kind !== "ready") {
-                    if (candidate.kind === "blocked") {actionMessage = text(markdownErrorKey(candidate.error)); render(session.getState());}
+                    if (candidate.kind === "blocked") {
+                        actionMessage = text(blockedMessage ?? markdownErrorKey(candidate.error));
+                        render(session.getState());
+                    }
                     return false;
                 }
                 ticket = candidate.ticket;
@@ -839,7 +848,8 @@ export const mountMarkdownApplication = async (bridge: MarkdownBridge, root = do
     tree = createMarkdownTree({
         element: control("markdownTree"), toggles: [control<HTMLButtonElement>("markdownTreeToggle")],
         bridge: bridge.tree, text,
-        mobile: ["android", "ios", "harmony"].includes(bootstrap.platform), onOpen: openTreeFile,
+        mobile: ["android", "ios", "harmony"].includes(bootstrap.platform), onOpen: location =>
+            openDocumentTarget(() => bridge.tree.prepareOpen(location)),
         onError() {actionMessage = text("markdownFolderError"); render(session.getState());},
     });
     tree.freeze(frozen);

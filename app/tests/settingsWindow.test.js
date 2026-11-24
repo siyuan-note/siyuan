@@ -518,9 +518,13 @@ const runCases = async (sources) => {
 if (process.versions.electron && process.type === "browser") {
     const {app, BrowserWindow, ipcMain, screen} = require("electron");
     // 主进程异常直接交给测试父进程，避免原生错误框阻塞到子进程超时。
+    let exitingAfterFailure = false;
     const fail = error => {
+        if (exitingAfterFailure) return;
+        exitingAfterFailure = true;
         fs.writeSync(2, String(error?.stack || error) + "\n");
-        app.exit(1);
+        // 等待异常回调退出后再拆除 Electron 环境，避免在处理 Promise 拒绝时退出。
+        setImmediate(() => app.exit(1));
     };
     process.on("uncaughtException", fail);
     process.on("unhandledRejection", fail);

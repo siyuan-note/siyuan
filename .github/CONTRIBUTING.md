@@ -21,10 +21,10 @@ Do not mix this method with pnpm's standalone installation scripts (`@pnpm/exe`)
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.10.0 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.11.5 -D`
 * Windows:
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@44.10.0 -D`
+  * `pnpm install electron@44.11.5 -D`
 
 NPM mirror:
 
@@ -34,7 +34,7 @@ NPM mirror:
 
 Enter the app folder and execute:
 
-* `pnpm install electron@44.10.0 -D`
+* `pnpm install electron@44.11.5 -D`
 * `pnpm run install:electron`
 * `pnpm run dev`
 * `pnpm run start`
@@ -71,6 +71,7 @@ Desktop packaging runs `scripts/prepare-ocr.py` to prepare the pinned models and
 
 * Windows: the release builder must have redistribution rights under its Visual Studio license and the matching x64/ARM64 **release** CRT files from `VC/Redist/MSVC`. The script discovers installed Visual Studio through `vswhere` or `VCToolsRedistDir`. Set `SIYUAN_OCR_VC_REDIST_DIR` to `VC/Redist/MSVC/<version>` (containing `x64` and/or `arm64`) or the target's `Microsoft.VC*.CRT` directory for a custom location or cross-host packaging. Use official Visual Studio redist files, not DLLs copied from `System32`, debug runtimes, or third-party DLL download sites. The preparation step checks architecture and required exports, bundles the transitive CRT dependencies beside ONNX Runtime, and records their SHA-256 digests and licensing notice. Keep this app-local runtime updated when preparing releases. See Microsoft's [redistribution terms](https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution#visual-c-runtime-files). It does not install system-wide runtimes or require elevation on end-user machines
 * Linux: the desktop OCR worker targets **glibc 2.28** on both AMD64 and ARM64, independently of the kernel's musl toolchain. The preparation script downloads the pinned Zig compiler from `scripts/ocr-assets.json`, verifies its checksum, and caches it in `.cache/ocr/`; the compiler is not distributed in the application. Install `binutils` for the `readelf` compatibility check. Optional `SIYUAN_OCR_CC_AMD64` and `SIYUAN_OCR_CC_ARM64` overrides select compiler commands with a glibc 2.28 or older sysroot; newer headers and artifacts requiring newer glibc symbols are rejected. `--check-only` validates the default toolchain selection without downloading it. Docker uses its separate Alpine/musl OCR build and is unchanged
+  * Downstream Linux distributions that build a dynamically linked kernel with CGO and glibc may add the `ocr_inprocess` Go build tag alongside `fts5 sqlcipher`. Package a compatible `libonnxruntime.so` in `stage/ocr/runtime/linux-<arch>/` and the usual OCR models. This build loads the library directly and does not need `siyuan-ocr`. Official builds keep the default worker path
 
 ### iOS
 

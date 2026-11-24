@@ -667,17 +667,7 @@ var removeFile = contractHandler(apicontract.RemoveFile, func(c *gin.Context, re
 var putFileLock sync.Mutex
 
 var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request apicontract.PutFileRequest) apicontract.Response[apicontract.Null] {
-	// 表单已由 contractHandler 接收完成，串行保护路径检查、文件写入、时间更新和变更通知。
-	putFileLock.Lock()
-	defer putFileLock.Unlock()
-
-	isDirStr := request.IsDir
-	isDir, _ := strconv.ParseBool(isDirStr)
-	app := resolveRequestAppID(c, request.App)
-
-	var err error
-	filePath := request.Path
-	filePath = strings.TrimSpace(filePath)
+	filePath := strings.TrimSpace(request.Path)
 	if filePath == "" {
 		return apicontract.Failure[apicontract.Null](http.StatusBadRequest, "path must not be empty")
 	}
@@ -685,6 +675,26 @@ var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request 
 	if err != nil {
 		return apicontract.Failure[apicontract.Null](http.StatusForbidden, err.Error())
 	}
+
+	ctx := c.Request.Context()
+	isDir, _ := strconv.ParseBool(request.IsDir)
+	if !isDir {
+		release, waitErr := model.HoldPutFileForSync(ctx, fileAbsPath)
+		if waitErr != nil {
+			return apicontract.Failure[apicontract.Null](-1, waitErr.Error())
+		}
+		if release != nil {
+			defer release()
+		}
+	}
+
+	// 等待期间允许其他上传写入不参与同步的路径。
+	putFileLock.Lock()
+	defer putFileLock.Unlock()
+	if err = ctx.Err(); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	app := resolveRequestAppID(c, request.App)
 
 	// 加密笔记本的任何文件都不允许通过原始文件 API 写入（不只 .sy）：
 	if util.IsPluginDevelopmentRawPathForbidden(fileAbsPath, true) {
@@ -743,6 +753,9 @@ var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request 
 			}
 
 			if err = model.CheckDocumentAddressingFileWrite(fileAbsPath, data, false); err != nil {
+				break
+			}
+			if err = ctx.Err(); err != nil {
 				break
 			}
 			dir := filepath.Dir(fileAbsPath)

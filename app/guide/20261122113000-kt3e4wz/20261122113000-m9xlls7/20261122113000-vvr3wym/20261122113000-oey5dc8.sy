@@ -1,0 +1,691 @@
+{
+	"ID": "20261122113000-oey5dc8",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-oey5dc8",
+		"title": "Преобразование блоков документов и заголовков",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-d4qjy2d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-d4qjy2d",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Соответствие между блоками документов и заголовков"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bgcx1cs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-bgcx1cs",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Блоки заголовков и документов имеют естественное соответствие, поскольку:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9mazh83",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20261122113000-9mazh83",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-5cir2s2",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-5cir2s2",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-l6ebe72",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-l6ebe72",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "У каждого блока документа есть название"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-4282jm7",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-4282jm7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-cv8k9d3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-cv8k9d3",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "У каждого блока заголовка также есть название"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-w82m8xy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-w82m8xy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Поэтому их можно преобразовывать друг в друга, а поскольку ссылки строятся по ID, существующие связи не нарушаются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2qmcwqh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-2qmcwqh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Преобразование блока документа в блок заголовка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4vzoyr2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-4vzoyr2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выберите документ на панели документов, удерживайте клавишу Alt и перетащите его в нужное место на вкладке редактора. Возможны два случая:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-v017fwl",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"id": "20261122113000-v017fwl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-g27j7ad",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261122113000-g27j7ad",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-9j3eriy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-9j3eriy",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если поместить блок документа на существующий заголовок, он вставится ниже как узел того же уровня"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-z41gwf0",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261122113000-z41gwf0",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-gld8ata",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-gld8ata",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если поместить блок документа на обычный блок, он вставится как дочерний узел заголовка, которому принадлежит этот блок"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-elxpn1k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-elxpn1k",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После преобразования документа в заголовок:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-62mnoml",
+			"Type": "NodeList",
+			"ListData": {
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20261122113000-62mnoml",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-jxaw5tn",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-jxaw5tn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-kkl3gwg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-kkl3gwg",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Исходное название документа станет названием заголовка"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-s87a5iq",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-s87a5iq",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-56jtuk5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-56jtuk5",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Логически документ является заголовком 1-го уровня и меняет уровень относительно места вставки"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-lr63n7y",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-lr63n7y",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-37yndng",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-37yndng",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Уровни заголовков внутри документа корректируются в зависимости от места вставки"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-1r6t6s2",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 42,
+								"Padding": 2,
+								"Marker": "Kg==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20261122113000-1r6t6s2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-09708yi",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20261122113000-09708yi",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-lo5aiy2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-lo5aiy2",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Для первого случая: если документ содержал заголовки 1–3 уровней и вставлен на заголовок 2-го уровня, он станет заголовком 2-го уровня, а внутренние заголовки станут 2, 3 и 4-го уровней"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-eg1786t",
+									"Type": "NodeListItem",
+									"Data": "*",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 42,
+										"Padding": 2,
+										"Marker": "Kg==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20261122113000-eg1786t",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-e3pjmaj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-e3pjmaj",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Для второго случая: если документ вставлен на абзац под заголовком 2-го уровня, он станет заголовком 3-го уровня, а внутренние заголовки — 3, 4 и 5-го уровней"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-o2ittr6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-o2ittr6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Преобразование блока заголовка в блок документа"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3byxcwq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3byxcwq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Удерживайте маркер нужного блока заголовка в редакторе и перетащите его на панель документов:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2z8ob4q",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-2z8ob4q",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-6tmm0bg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-6tmm0bg",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-troxsli",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-troxsli",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Название заголовка станет названием документа"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-1hhojnd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-1hhojnd",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-7bnpvt1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7bnpvt1",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если под заголовком были подзаголовки, их уровни сдвигаются так, чтобы самый высокий стал заголовком 2-го уровня в новом документе"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-02yfq6d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-02yfq6d",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Преобразование элемента списка в блок документа"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3khp7iz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3khp7iz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Также можно перетащить маркер элемента списка на панель документов для преобразования в документ:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fxajczw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-fxajczw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-gfz3p6f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-gfz3p6f",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-uuekrga",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-uuekrga",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Содержимое первого дочернего блока элемента списка станет названием документа"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-bmbjx84",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-bmbjx84",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5wtonxv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5wtonxv",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В теле нового документа сохраняется весь элемент списка и вложенное содержимое"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-2z4uj63",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-2z4uj63",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-4bfiqf7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-4bfiqf7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ID исходного элемента списка становится ID нового документа, поэтому существующие ссылки продолжают указывать на него"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -62,6 +62,7 @@ interface AVRichTextEditorOptions {
     nodeElement: HTMLElement;
     anchorElement: HTMLElement;
     value: IAVCellValue;
+    initialInput?: string;
     stableCells: import("./selectionState").IAVSelectedCell[];
     onSave: (value: IAVCellValue, nodeElement: HTMLElement,
              stableCells: import("./selectionState").IAVSelectedCell[]) => void | Promise<void>;
@@ -366,6 +367,9 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         });
     } else {
         fragment.focus(true);
+        if (options.initialInput) {
+            document.execCommand("insertText", false, options.initialInput);
+        }
     }
     // 浮层编辑器自行接管焦点，编辑区收不到块级点击，需在此按所属数据库块同步大纲高亮
     updateOutlineCurrentBlock(options.protyle, options.nodeElement);

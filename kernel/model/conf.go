@@ -430,6 +430,7 @@ func InitConf() {
 	}
 
 	flashcardWarning := normalizeAppConf(Conf)
+	enrollLegacySyncAssociation(Conf)
 	if err := LoadChatGPTAccountBindings(Conf.AI.Load()); err != nil {
 		logging.LogErrorf("load local ChatGPT account bindings failed: %s", err)
 	}
@@ -1237,6 +1238,8 @@ func HideConfSecret(c *AppConf) {
 	}
 	c.Flashcard.Store(&conf.Flashcard{})
 	c.ServerAddrs = []string{}
+	// 全库统计包含未发布内容，非管理员不返回
+	c.Stat.Store(nil)
 	c.Publish.Store(&conf.Publish{})
 	c.Repo.Store(&conf.Repo{})
 	c.Sync.Store(&conf.Sync{})

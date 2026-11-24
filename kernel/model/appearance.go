@@ -20,7 +20,7 @@ import (
 )
 
 func InitAppearance() {
-	util.SetBootDetails(Conf.Language(302))
+	util.SetBootStage(util.BootStageAppearance)
 	if err := MigrateAppearancePackages(); err != nil {
 		logging.LogErrorf("migrate appearance packages failed: %s", err)
 		util.ReportFileSysFatalError(err)

@@ -1486,11 +1486,12 @@ func prepareRepoCheckout(repo *dejavu.Repo) (*syncCheckoutTask, error) {
 	}
 	// A full restore refreshes all indexes as one operation. Do not release the
 	// guard through incremental sync Applied callbacks or repeat a partial refresh.
+	prepare := func() error { return checkout.prepareWriteProtection(false) }
 	repo.SetCheckoutHooks(dejavu.CheckoutHooks{
-		Context: checkout.ctx, Apply: checkout.prepareApply, Before: checkCheckoutSpace,
+		Context: checkout.ctx, Apply: prepare, Before: checkCheckoutSpace,
 		Preflight: documentAddressingPreflight(repo),
 	})
-	if err := checkout.prepareApply(); err != nil {
+	if err := prepare(); err != nil {
 		checkout.finish(repo, &err)
 		return nil, err
 	}
@@ -2059,8 +2060,7 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 
 		msg := Conf.Language(26)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		err = errors.New(msg)
+		err = pushSyncError(msg, errors.New(msg))
 		return
 	}
 
@@ -2073,7 +2073,7 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 		msg := fmt.Sprintf("sync repo failed: %s", err)
 		logging.LogError(msg)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		err = pushSyncError(msg, err)
 		return
 	}
 
@@ -2098,7 +2098,7 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 	if len(decisions) > 0 {
 		err = indexRepoForSourceDecision(repo, false)
 	} else {
-		_, _, err = indexRepoBeforeCloudSync0(repo)
+		_, _, err = indexRepoBeforeCloudSync0(checkoutTask.indexContext(context.Background()), repo)
 	}
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
@@ -2108,7 +2108,7 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		err = pushSyncError(msg, err)
 		return
 	}
 
@@ -2129,13 +2129,12 @@ func syncRepoDownloadWithDecision(decisions []SyncSourceDecision) (err error) {
 		msg := formatSyncRepoErrorMsg(err)
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
-		pushSyncSourceDecisionError(msg, err)
+		err = pushSyncSourceDecisionError(msg, err)
 		return
 	}
 
 	resetAutoSyncErrors()
 	pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = util.CurrentTimeMillis() })
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomFloor(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
@@ -2167,8 +2166,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 
 		msg := Conf.Language(26)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		err = errors.New(msg)
+		err = pushSyncError(msg, errors.New(msg))
 		return
 	}
 
@@ -2181,7 +2179,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 		msg := fmt.Sprintf("sync repo failed: %s", err)
 		logging.LogError(msg)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		err = pushSyncError(msg, err)
 		return
 	}
 
@@ -2202,7 +2200,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 	if len(decisions) > 0 {
 		err = indexRepoForSourceDecision(repo, true)
 	} else {
-		_, _, err = indexRepoBeforeCloudSync(repo)
+		_, _, err = indexRepoBeforeCloudSync(checkoutTask.indexContext(context.Background()), repo)
 	}
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
@@ -2213,7 +2211,7 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
 		if !errors.Is(err, context.Canceled) {
-			util.PushErrMsg(msg, 0)
+			err = pushSyncError(msg, err)
 		}
 		return
 	}
@@ -2234,14 +2232,13 @@ func syncRepoUploadWithDecision(decisions []SyncSourceDecision) (err error) {
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
 		if !errors.Is(err, context.Canceled) {
-			pushSyncSourceDecisionError(msg, err)
+			err = pushSyncSourceDecisionError(msg, err)
 		}
 		return
 	}
 
 	resetAutoSyncErrors()
 	pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = util.CurrentTimeMillis() })
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
@@ -2300,7 +2297,7 @@ func bootSyncRepo(complete func(error)) (scheduled bool, err error) {
 		defer logging.Recover()
 
 		start := time.Now()
-		_, _, indexErr = indexRepoBeforeCloudSync(repo)
+		_, _, indexErr = indexRepoBeforeCloudSync(context.Background(), repo)
 		logging.LogInfof("boot index repo elapsed [%.2fs]", time.Since(start).Seconds())
 	})
 	var cloudLatest *entity.Index
@@ -2383,7 +2380,7 @@ func bootSyncRepo(complete func(error)) (scheduled bool, err error) {
 			logging.LogInfof("syncing prepared boot data repo [device=%s, kernel=%s, provider=%d]", Conf.System.Load().ID, KernelID, confSyncSnapshot.Provider)
 			syncStart := time.Now()
 			indexStart := time.Now()
-			_, _, syncErr = indexRepoBeforeCloudSync(repo)
+			_, _, syncErr = indexRepoBeforeCloudSync(context.Background(), repo)
 			indexElapsed := time.Since(indexStart)
 			if nil == syncErr {
 				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, syncStart, indexElapsed, prefetchTraffic)
@@ -2414,8 +2411,7 @@ func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished
 
 		msg := Conf.Language(26)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		err = errors.New(msg)
+		err = pushSyncError(msg, errors.New(msg))
 		return
 	}
 
@@ -2429,7 +2425,7 @@ func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished
 		msg := fmt.Sprintf("sync repo failed: %s", err)
 		logging.LogError(msg)
 		pushSyncStatusBar(msg)
-		util.PushErrMsg(msg, 0)
+		err = pushSyncError(msg, err)
 		return
 	}
 
@@ -2437,6 +2433,7 @@ func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished
 	if !exit {
 		checkoutTask := startSyncCheckout(repo)
 		defer checkoutTask.finish(repo, &err)
+		ctx = checkoutTask.indexContext(ctx)
 	} else {
 		hooks, finish := exitSyncHooks(repo, ctx)
 		repo.SetCheckoutHooks(hooks)
@@ -2444,7 +2441,7 @@ func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished
 	}
 	start := time.Now()
 	indexStart := time.Now()
-	_, _, err = indexRepoBeforeCloudSync(repo)
+	_, _, err = indexRepoBeforeCloudSync(ctx, repo)
 	indexElapsed := time.Since(indexStart)
 	if err != nil {
 		recordAutoSyncFailure(err)
@@ -2455,7 +2452,7 @@ func syncRepoWithContext(ctx context.Context, exit, byHand bool) (cloudPublished
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
 		if !errors.Is(err, context.Canceled) && (1 > autoSyncErrCount.Load() || byHand) {
-			util.PushErrMsg(msg, 0)
+			err = pushSyncError(msg, err)
 		}
 		return
 	}
@@ -2492,7 +2489,7 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, inde
 		UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
 		pushSyncStatusBar(msg)
 		if !errors.Is(err, context.Canceled) && (1 > autoSyncErrCount.Load() || byHand) {
-			util.PushErrMsg(msg, 0)
+			err = pushSyncError(msg, err)
 		}
 		return
 	}
@@ -2506,7 +2503,6 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, start time.Time, inde
 
 	resetAutoSyncErrors()
 	pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = util.CurrentTimeMillis() })
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
 	UpdateSyncConf(func(s *conf.Sync) { s.Stat = msg })
@@ -2568,6 +2564,14 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	elapsed time.Duration, immediateIndex bool, previousNotebookConfs map[string][]byte) {
 	memorySyncSourcesChanged(mergeResult)
 	reloadSyncedDAV(mergeResult, &calendars, &contacts)
+	if !exit {
+		for _, files := range [][]*entity.File{mergeResult.Upserts, mergeResult.Removes} {
+			if slices.ContainsFunc(files, func(file *entity.File) bool { return file.Path == "/"+tagSortPath }) {
+				ReloadTag()
+				break
+			}
+		}
+	}
 	confSyncSnapshot := Conf.LoadSync()
 
 	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s, pfc=%d, pcc=%d, pb=%s, pf=%d] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
@@ -2683,7 +2687,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadFlashcard = true
 		}
 
-		if strings.HasPrefix(file.Path, "/assets/ocr-texts.json") {
+		if file.Path == "/assets/ocr-texts.json" {
 			needReloadOcrTexts = true
 		}
 
@@ -2770,7 +2774,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadFlashcard = true
 		}
 
-		if strings.HasPrefix(file.Path, "/assets/ocr-texts.json") {
+		if file.Path == "/assets/ocr-texts.json" {
 			needReloadOcrTexts = true
 		}
 
@@ -2870,8 +2874,10 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		LoadFlashcards()
 	}
 
+	var changedOCRAssets map[string]bool
+	var refreshAllOCRAssets bool
 	if needReloadOcrTexts {
-		util.LoadAssetsTexts()
+		changedOCRAssets, refreshAllOCRAssets = util.ReloadSyncedAssetsTexts()
 	}
 
 	if needReloadPlugin {
@@ -2919,6 +2925,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if exit { // 退出时同步不用推送事件
+		indexOCRAssetTexts(changedOCRAssets, refreshAllOCRAssets)
 		return
 	}
 
@@ -2995,6 +3002,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		})
 	}
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
+	indexOCRAssetTexts(changedOCRAssets, refreshAllOCRAssets)
 	if immediateIndex {
 		sql.FlushQueue()
 	}
@@ -3152,15 +3160,15 @@ func needFullReindex(upsertTrees int) bool {
 
 var promotedPurgeDataRepo bool
 
-func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
+func indexRepoBeforeCloudSync(ctx context.Context, repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
 	if err = checkRepositoryPasswordMigration(); err != nil {
 		return
 	}
-	return indexRepoBeforeCloudSync0(repo)
+	return indexRepoBeforeCloudSync0(ctx, repo)
 }
 
 // Download-only recovery keeps the existing local safety index, without publishing it.
-func indexRepoBeforeCloudSync0(repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
+func indexRepoBeforeCloudSync0(ctx context.Context, repo *dejavu.Repo) (beforeIndex, afterIndex *entity.Index, err error) {
 	start := time.Now()
 
 	beforeIndex, _ = repo.Latest()
@@ -3177,9 +3185,8 @@ func indexRepoBeforeCloudSync0(repo *dejavu.Repo) (beforeIndex, afterIndex *enti
 
 	afterIndex, err = repo.Index("[Sync] Cloud sync", checkChunks, newSyncContext())
 	if errors.Is(err, dejavu.ErrIndexFileChanged) {
-		// 索引期间工作空间文件被修改属于瞬时竞态，重试一次以避免同步无谓中止
 		logging.LogWarnf("index data repo before cloud sync aborted because files changed, retry once: %s", err)
-		afterIndex, err = repo.Index("[Sync] Cloud sync", checkChunks, newSyncContext())
+		afterIndex, err = retrySyncIndex(ctx, repo, checkChunks)
 	}
 	if err != nil {
 		logging.LogErrorf("index data repo before cloud sync failed: %s", err)
@@ -3333,7 +3340,7 @@ func init() {
 func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtIndexBeforeWalkData, func(context map[string]any, path string) {
 		msg := fmt.Sprintf(Conf.Language(158), path)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageIndexingDocuments)
 		util.ContextPushMsg(context, msg)
 	})
 
@@ -3341,70 +3348,73 @@ func subscribeRepoEvents() {
 	eventbus.Subscribe(eventbus.EvtIndexWalkData, func(context map[string]any, path string) {
 		msg := fmt.Sprintf(Conf.Language(158), filepath.Base(path))
 		if 0 == indexWalkDataCount%1024 {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(indexWalkDataCount+1), 0)
 			util.ContextPushMsg(context, msg)
 		}
 		indexWalkDataCount++
 	})
 	eventbus.Subscribe(eventbus.EvtIndexBeforeGetLatestFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(159), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageIndexingDocuments, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtIndexGetLatestFile, func(context map[string]any, count int, total int) {
 		msg := fmt.Sprintf(Conf.Language(159), count, total)
 		if 0 == count%64 {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(count), int64(total))
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtIndexUpsertFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(160), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageIndexingDocuments, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtIndexUpsertFile, func(context map[string]any, count int, total int) {
 		msg := fmt.Sprintf(Conf.Language(160), count, total)
 		if 0 == count%32 {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(count), int64(total))
 			util.ContextPushMsg(context, msg)
 		}
 	})
 
+	var checkoutWalkCount atomic.Int64
 	eventbus.Subscribe(eventbus.EvtCheckoutBeforeWalkData, func(context map[string]any, path string) {
+		checkoutWalkCount.Store(0)
 		msg := fmt.Sprintf(Conf.Language(161), path)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCheckoutWalkData, func(context map[string]any, path string) {
 		msg := fmt.Sprintf(Conf.Language(161), filepath.Base(path))
+		count := checkoutWalkCount.Add(1)
 		if repoProgressDue("checkout-walk", false) {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageSyncing, count, 0)
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(162), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCheckoutUpsertFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(162), count, total)
-		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		util.UpdateBootProgress(repoBootIncrement(count, total), util.BootStageSyncing, int64(count), int64(total))
 		if repoProgressDue("checkout-upsert", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(163), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtCheckoutRemoveFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(163), count, total)
-		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		util.UpdateBootProgress(repoBootIncrement(count, total), util.BootStageSyncing, int64(count), int64(total))
 		if repoProgressDue("checkout-remove", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
@@ -3412,66 +3422,66 @@ func subscribeRepoEvents() {
 
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadIndex, func(context map[string]any, id string) {
 		msg := fmt.Sprintf(Conf.Language(164), id[:7])
-		util.IncBootProgress(1, msg)
+		util.IncBootProgress(1, util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(165), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(165), count, total)
-		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		util.UpdateBootProgress(repoBootIncrement(count, total), util.BootStageSyncing, int64(count), int64(total))
 		if repoProgressDue("download-files", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunks, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(166), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadChunk, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(166), count, total)
-		util.IncBootProgress(repoBootIncrement(count, total), msg)
+		util.UpdateBootProgress(repoBootIncrement(count, total), util.BootStageSyncing, int64(count), int64(total))
 		if repoProgressDue("download-chunks", count >= total) {
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeDownloadRef, func(context map[string]any, ref string) {
 		msg := fmt.Sprintf(Conf.Language(167), ref)
-		util.IncBootProgress(1, msg)
+		util.IncBootProgress(1, util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadIndex, func(context map[string]any, id string) {
 		msg := fmt.Sprintf(Conf.Language(168), id[:7])
-		util.IncBootProgress(1, msg)
+		util.IncBootProgress(1, util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadFiles, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(169), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadFile, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(169), count, total)
 		if 0 == count%8 {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageSyncing, int64(count), int64(total))
 			util.ContextPushMsg(context, msg)
 		}
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadChunks, func(context map[string]any, total int) {
 		msg := fmt.Sprintf(Conf.Language(170), 0, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, 0, int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadChunk, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(170), count, total)
 		if 0 == count%8 {
-			util.SetBootDetails(msg)
+			util.UpdateBootProgress(0, util.BootStageSyncing, int64(count), int64(total))
 			util.ContextPushMsg(context, msg)
 		}
 	})
@@ -3480,37 +3490,37 @@ func subscribeRepoEvents() {
 			uploadingRef.Store(true)
 		}
 		msg := fmt.Sprintf(Conf.Language(171), ref)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudLock, func(context map[string]any) {
 		msg := Conf.Language(186)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudUnlock, func(context map[string]any) {
 		msg := Conf.Language(187)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadIndexes, func(context map[string]any) {
 		msg := Conf.Language(208)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadCheckIndex, func(context map[string]any) {
 		msg := Conf.Language(209)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeFixObjects, func(context map[string]any, count, total int) {
 		msg := fmt.Sprintf(Conf.Language(210), count, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageSyncing, int64(count), int64(total))
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudAfterFixObjects, func(context map[string]any) {
 		msg := Conf.Language(211)
-		util.SetBootDetails(msg)
+		util.SetBootStage(util.BootStageSyncing)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudCorrupted, func() {

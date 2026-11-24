@@ -8,8 +8,9 @@ const ts = require("typescript");
 const directory = path.join(__dirname, "../src/protyle/render/av");
 const source = ts.createSourceFile("cell.ts", readFileSync(path.join(directory, "cell.ts"), "utf8"),
     ts.ScriptTarget.ES2022, true);
-const functionNames = new Set(["getStoredCellValueByElement", "genCellValueByElement", "genCellValue",
-    "getStableTextCells", "createCellInputTarget", "transformCellValue", "popTextCell", "updateCellValueByInput", "updateCellsValue"]);
+const functionNames = new Set(["genCellValueByElement", "genCellValue",
+    "hasAVPrimaryTemplate", "getStableTextCells", "createCellInputTarget", "transformCellValue", "popTextCell",
+    "updateCellValueByInput", "updateCellsValue"]);
 const compile = text => ts.transpileModule(text, {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
 }).outputText;

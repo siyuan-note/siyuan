@@ -27,6 +27,14 @@ type DocumentTitleData struct {
 }
 
 func GetDocTitle(id, boxID string) (*DocumentTitleData, error) {
+	return getDocTitle(id, boxID, false)
+}
+
+func GetDocTitleForReader(id, boxID string) (*DocumentTitleData, error) {
+	return getDocTitle(id, boxID, true)
+}
+
+func getDocTitle(id, boxID string, forReader bool) (*DocumentTitleData, error) {
 	FlushTxQueue()
 	tree, err := loadTreeByBlockIDInBox(id, boxID)
 	if err != nil {
@@ -40,6 +48,9 @@ func GetDocTitle(id, boxID string) (*DocumentTitleData, error) {
 		return nil, err
 	}
 	paragraph.Parent = nil
+	if forReader {
+		paragraph = stripInlineMemoContent(paragraph)
+	}
 	paragraph.ID = id
 	paragraph.SetIALAttr("id", id)
 	luteEngine := util.NewLute()
@@ -48,9 +59,13 @@ func GetDocTitle(id, boxID string) (*DocumentTitleData, error) {
 	dom := luteEngine.Tree2BlockDOM(fragment, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	dom = strings.Replace(dom, "<div ", "<div data-document-title=\"true\" ", 1)
 	summary := treenode.ReadDocumentTitle(tree.Root)
-	return &DocumentTitleData{ID: id, Notebook: tree.Box, Format: summary.Format, Text: summary.Text,
-		Empty: summary.Empty, BlockDOM: dom, Source: tree.Root.DocumentTitle,
-		Revision: treenode.DocumentTitleRevision(tree.Root)}, nil
+	ret := &DocumentTitleData{ID: id, Notebook: tree.Box, Format: summary.Format, Text: summary.Text,
+		Empty: summary.Empty, BlockDOM: dom}
+	if !forReader {
+		ret.Source = tree.Root.DocumentTitle
+		ret.Revision = treenode.DocumentTitleRevision(tree.Root)
+	}
+	return ret, nil
 }
 
 type documentTitleSnapshot struct {
@@ -154,8 +169,15 @@ func (tx *Transaction) doSetDocTitle(operation *Operation) *TxErr {
 		logging.LogErrorf("set document title [%s] failed: %s", operation.ID, err)
 		return &TxErr{code: TxErrCodePushMsg, msg: Conf.Language(447), id: operation.ID, cause: err}
 	}
+	// 标题必须单独更新；仅撤销/重做可附带内核为同一文档根生成的标签时间快照。
 	if len(tx.DoOperations) != 1 {
-		return fail(errors.New("document title requires a separate transaction"))
+		if !tx.isReplay || len(tx.DoOperations) != 2 || tx.DoOperations[0] != operation {
+			return fail(errors.New("document title requires a separate transaction"))
+		}
+		extra := tx.DoOperations[1]
+		if extra == nil || !extra.tagDatesReplay || extra.Action != "setAttrs" || extra.ID != operation.ID {
+			return fail(errors.New("document title requires a separate transaction"))
+		}
 	}
 	tree, err := tx.loadDocumentTitleTree(operation.ID)
 	if err != nil {

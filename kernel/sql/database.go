@@ -91,7 +91,7 @@ func initDatabase(forceRebuild bool) {
 	disableCache()
 	defer enableCache()
 
-	util.IncBootProgress(2, util.BootL10n(301, "Initializing database..."))
+	util.IncBootProgress(2, util.BootStageDatabase)
 
 	if forceRebuild {
 		closeDatabase()
@@ -773,7 +773,7 @@ func buildAttributeFromNode(n *ast.Node, rootID, boxID, p string) (attributes []
 	case ast.NodeKramdownBlockIAL:
 		attrs := parse.IALValMap(n)
 		for name, val := range attrs {
-			if !isAttr(name) {
+			if name == treenode.TagCreatedAttr || !isAttr(name) {
 				continue
 			}
 
@@ -902,7 +902,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string, b
 		if asset := docTitleImgAsset(n, boxLocalPath, docDirLocalPath); nil != asset {
 			assets = append(assets, asset)
 		}
-		if tags := docTagSpans(n); 0 < len(tags) {
+		if tags := docTagSpans(n, boxID, p); 0 < len(tags) {
 			spans = append(spans, tags...)
 		}
 	case ast.NodeInlineHTML, ast.NodeHTMLBlock, ast.NodeIFrame, ast.NodeWidget, ast.NodeAudio, ast.NodeVideo:

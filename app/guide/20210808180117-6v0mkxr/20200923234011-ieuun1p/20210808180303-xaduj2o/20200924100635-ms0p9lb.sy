@@ -183,7 +183,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "All tagged content blocks will be listed in the tag tab ("
+					"Data": "Open the tag panel ("
 				},
 				{
 					"Type": "NodeTextMark",
@@ -219,7 +219,71 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​). If you need to cancel the tag, just delete the tag in the content block."
+					"Data": "​). On desktop, click a tag to find matching blocks in global search. To remove a tag from a content block, delete it in the block."
+				}
+			]
+		},
+		{
+			"ID": "20261118205131-c06a361",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118205131-c06a361",
+				"updated": "20261118205131"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the tag panel, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Sort"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Custom Sorting"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reorder sibling tags by dragging their rows. On mobile, touch and hold a row before dragging it. The custom order is saved with your workspace data. If you delete a tag from the tag panel and later recreate it, it appears after sibling tags with a saved position. Clear the tag filter before reordering."
+				}
+			]
+		},
+		{
+			"ID": "20261118220329-d6b4aaa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261118220329-d6b4aaa",
+				"updated": "20261118220329"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the tag panel, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Sort"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Recently added"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to order tags at each level by their latest addition to a document or content block. Tags with no recorded addition time appear last."
 				}
 			]
 		},

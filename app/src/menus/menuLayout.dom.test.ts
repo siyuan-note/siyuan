@@ -29,7 +29,8 @@ const browserCases = async (sources: Record<string, string>, css: string,
             CUSTOM_SY_EMBED_BREADCRUMB_PARENT_PATH: "custom-sy-embed-breadcrumb-parent-path"}},
         "protyle/render/blockRender": {blockRender() {}},
         "protyle/undo": {electronUndo() {}},
-        "util/escape": {escapeAttr: (value: string) => value || "", escapeHtml: (value: string) => value || ""},
+        "util/escape": {escapeAttr: (value: string) => value || "", escapeHtml: (value: string) => value || "",
+            escapeHtmlTextAndAttr: (value: string) => value || ""},
         "menus/menuKeyboard": {setMenuInputCurrent() {}},
         "plugin/EventBusCore": {forEachPluginSubscriber() {}},
         "mobile/util/keyboardToolbar": {activeBlur() {}},
@@ -870,7 +871,6 @@ const browserCases = async (sources: Record<string, string>, css: string,
     keyboardToolbar.style.cssText = "position:fixed;bottom:0;height:40px;width:100%";
     document.body.append(keyboardToolbar);
     const sheet = createMenu();
-    sheet.element.classList.add("b3-menu--fit");
     addItems(sheet, 2);
     sheet.fullscreen("bottom", undefined, {preserveKeyboard: true});
     await settle();
@@ -885,8 +885,11 @@ const browserCases = async (sources: Record<string, string>, css: string,
     pointer(sheetItems, .3);
     pointer(sheetItems, .7);
     check.equal(sheetItems.scrollTop, 0, "Mobile sheets ignore mouse-follow scrolling even with a saved preference");
-    check.ok(sheet.element.getBoundingClientRect().height > sheetHeight);
-    check.ok(sheet.element.getBoundingClientRect().height <= innerHeight * .9 + .5);
+    const updatedSheetHeight = sheet.element.getBoundingClientRect().height;
+    // A compositor transform can round the same CSS height differently across frames.
+    check.ok(Math.abs(updatedSheetHeight - sheetHeight) < .01,
+        `Updating menu contents preserves the sheet height: ${sheetHeight}px -> ${updatedSheetHeight}px`);
+    check.ok(sheet.element.getBoundingClientRect().height <= innerHeight / 2 + .5);
     check.equal(sheetResets, 1);
     await settle();
     check.equal(sheetResets, 1, "Sheet title updates must not cause a layout loop");
@@ -974,7 +977,7 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     timeout: 45000,
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
-        "util/setPosition", "util/zIndex", "protyle/util/hasClosest", "plugin/Menu", "menus/overlayOwnership", "protyle/render/av/openMenuPanel", "protyle/render/av/renderData",
+        "util/setPosition", "util/zIndex", "protyle/util/hasClosest", "plugin/Menu", "menus/overlayOwnership", "protyle/render/av/openMenuPanel", "protyle/render/av/cellPanelPosition", "protyle/render/av/renderData", "protyle/render/av/viewVisibility",
         "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated", "protyle/gutter/embedBreadcrumbMenu",
         "layout/dock/agent/AgentSessionPanel", "protyle/render/listMindmap/appearance"].map(name => [name,
         transpileModule(readFileSync(path.join(__dirname, "..", name.endsWith(".js") ? name : name + ".ts"), "utf8"), {

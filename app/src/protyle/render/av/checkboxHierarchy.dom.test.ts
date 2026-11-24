@@ -31,7 +31,8 @@ const updateCellsValue = (_protyle, _block, value, elements) => {
     writes.push(value.checked);
     elements[0].querySelector(".av__checkbox use").setAttribute("xlink:href", value.checked ? "#iconCheck" : "#iconUncheck");
 };
-${declarations("cell.ts", ["getStoredCellValueByElement", "genCellValueByElement", "updateCellValueByInput"])}
+${declarations("cellValue.ts", ["getStoredCellValueByElement"])}
+${declarations("cell.ts", ["genCellValueByElement", "updateCellValueByInput"])}
 ${declarations("subItemsState.ts", ["getSubItemsPaging", "getSubItemsControlHTML"])}
 (async () => {
     for (const layout of ["table", "list"]) {

@@ -28,10 +28,12 @@ import (
 )
 
 var (
-	indexMu               sync.Mutex
-	indexQueueSize        atomic.Int64
-	indexFlock            *flock.Flock
-	indexQueueWriteFailed atomic.Bool
+	indexMu                 sync.Mutex
+	indexQueueSize          atomic.Int64
+	indexFlock              *flock.Flock
+	indexQueueWriteFailed   atomic.Bool
+	indexRecoveryRemaining  atomic.Int64
+	indexRecoveryCheckpoint int64 // 由 initDatabaseLock 保护
 
 	// HPathRefreshLock 在重建索引前阻止路径任务写回；锁顺序为路径任务锁、数据库初始化锁、索引队列锁。
 	HPathRefreshLock sync.Mutex
@@ -48,7 +50,15 @@ type indexEntry struct {
 	Hashes []string `json:"hashes,omitempty"`
 }
 
+type indexQueueRecord struct {
+	indexEntry
+	end int64
+}
+
 func initIndexQueue() {
+	indexQueueSize.Store(0)
+	indexRecoveryRemaining.Store(0)
+	indexRecoveryCheckpoint = 0
 	indexQueuePath := filepath.Join(util.QueueDir, "index.queue")
 	os.MkdirAll(util.QueueDir, 0755)
 	indexFlock = flock.New(indexQueuePath + ".lock")
@@ -170,8 +180,11 @@ func dbOpToIndexEntry(op *dbQueueOperation) *indexEntry {
 	}
 }
 
-func clearIndexQueue(snapshotSize int64) {
-	_ = indexFlock.Lock()
+func clearIndexQueue(snapshotSize int64) bool {
+	if err := indexFlock.Lock(); err != nil {
+		logging.LogErrorf("lock index queue for checkpoint failed: %s", err)
+		return false
+	}
 	defer func() { _ = indexFlock.Unlock() }()
 
 	indexMu.Lock()
@@ -182,22 +195,35 @@ func clearIndexQueue(snapshotSize int64) {
 	data, err := os.ReadFile(indexQueuePath)
 	if err != nil {
 		if os.IsNotExist(err) && snapshotSize == 0 {
-			return
+			return true
 		}
 		logging.LogErrorf("read index queue file failed: %s", err)
-		return
+		return false
 	}
 	if snapshotSize < 0 || snapshotSize > int64(len(data)) {
 		logging.LogErrorf("invalid index queue snapshot [%d/%d]", snapshotSize, len(data))
-		return
+		return false
 	}
 	// 安全移除已提交的前缀，保留刷新期间追加的原始记录，写入失败时原队列仍可恢复。
 	remaining := data[snapshotSize:]
 	if err = gulu.File.WriteFileSafer(indexQueuePath, remaining, 0644); err != nil {
 		logging.LogErrorf("save index queue failed: %s", err)
-		return
+		return false
 	}
 	indexQueueSize.Store(int64(len(remaining)))
+	return true
+}
+
+func checkpointIndexRecovery(end int64) {
+	// 恢复记录的偏移基于启动时的文件。写入失败时保留上次成功确认的偏移，下批可以重试。
+	if clearIndexQueue(end - indexRecoveryCheckpoint) {
+		indexRecoveryCheckpoint = end
+	}
+}
+
+// IndexRecoveryPending 供同步应用准入检查，涵盖正在处理和等待处理的历史记录。
+func IndexRecoveryPending() bool {
+	return 0 < indexRecoveryRemaining.Load()
 }
 
 func clearIndexQueueEntries() {
@@ -217,9 +243,11 @@ func clearIndexQueueEntries() {
 		}
 	}
 	indexQueueSize.Store(0)
+	indexRecoveryRemaining.Store(0)
+	indexRecoveryCheckpoint = 0
 }
 
-func loadIndexQueue() (entries []indexEntry) {
+func loadIndexQueue() (entries []indexQueueRecord) {
 	indexQueuePath := filepath.Join(util.QueueDir, "index.queue")
 	f, err := os.Open(indexQueuePath)
 	if err != nil {
@@ -231,6 +259,7 @@ func loadIndexQueue() (entries []indexEntry) {
 	defer f.Close()
 
 	reader := bufio.NewReader(f)
+	var end int64
 	for {
 		// Batch operations have no fixed record-size limit. Read one complete line
 		// instead of stopping recovery at Scanner's default 64 KiB token limit.
@@ -239,40 +268,49 @@ func loadIndexQueue() (entries []indexEntry) {
 			logging.LogErrorf("read index queue failed: %s", readErr)
 			return
 		}
+		end += int64(len(line))
 		if len(line) > 0 && string(line) != "\n" && string(line) != "\r\n" {
 			var entry indexEntry
 			if err = json.Unmarshal(line, &entry); err != nil {
 				logging.LogWarnf("skip corrupted index queue line: %s", err)
 			} else {
-				entries = append(entries, entry)
+				entries = append(entries, indexQueueRecord{indexEntry: entry, end: end})
 			}
 		}
 		if readErr == io.EOF {
+			if len(entries) > 0 {
+				entries[len(entries)-1].end = end
+			}
 			return
 		}
 	}
 }
 
 func recoverIndexQueue() {
+	dbQueueLock.Lock()
 	entries := loadIndexQueue()
+	indexRecoveryRemaining.Store(int64(len(entries)))
 	if 1 > len(entries) {
+		dbQueueLock.Unlock()
 		return
 	}
 
 	logging.LogInfof("recovering [%d] index queue operations", len(entries))
 
-	dbQueueLock.Lock()
 	for _, e := range entries {
 		// 只恢复操作描述，执行时再读取文档，避免启动时同时持有所有文档树。
-		entry := e
-		operationQueue = append(operationQueue, &dbQueueOperation{
-			action: e.Action, box: e.Box, id: e.ID, recoveryEntry: &entry, inQueueTime: time.Now(),
-		})
+		op := newRecoveredIndexOperation(e.indexEntry)
+		op.recoveryEnd = e.end
+		operationQueue = append(operationQueue, op)
 	}
 	dbQueueLock.Unlock()
 
 	eventbus.Publish(eventbus.EvtSQLIndexChanged)
 	logging.LogInfof("recovered [%d] index queue operations, will be flushed soon", len(entries))
+}
+
+func newRecoveredIndexOperation(entry indexEntry) *dbQueueOperation {
+	return &dbQueueOperation{action: entry.Action, box: entry.Box, id: entry.ID, recoveryEntry: &entry, inQueueTime: time.Now()}
 }
 
 func indexEntryToOp(e indexEntry, luteEngine *lute.Lute, prefix string) (*dbQueueOperation, error) {

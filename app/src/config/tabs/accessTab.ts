@@ -747,21 +747,32 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.encryptedNotebook,
             window.siyuan.languages.enableEncryptedNotebook,
             window.siyuan.languages.masterPassword,
-            window.siyuan.languages.changeMasterPassword,
         ],
         html: () =>
             // 开关行：结构与标准 group.switch 一致（label + config-item + b3-switch fn__flex-center）
-            `<label class="fn__flex b3-label config-item">
+            `<label class="fn__flex b3-label config-item" data-config-item-id="access.__slot.encryptedNotebookStatus">
 	    ${genConfigItemMainHtml(window.siyuan.languages.enableEncryptedNotebook, window.siyuan.languages.encryptedNotebookTip + "<br><span class=\"ft__error\">" + window.siyuan.languages.encryptedNotebookRiskTip + "</span><br>" + window.siyuan.languages.featurePreview)}
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="encryptedNotebookSwitch" type="checkbox">
 </label>
-<div class="b3-label config-item fn__none" id="encryptedNotebookMigrationAlert">
-    <div class="ft__error">${window.siyuan.languages.masterPasswordMigrationPending}</div>
+<div class="b3-label config-item fn__none" id="encryptedNotebookSyncAlert" data-config-item-id="access.__slot.encryptedNotebookStatus">
+    <div class="ft__error">${window.siyuan.languages["_kernel"]["474"]}</div>
 </div>
-<div class="b3-label config-item fn__none" id="encryptedNotebookActions">
+<div class="b3-label config-item fn__none" id="encryptedNotebookMigrationAlert" data-config-item-id="access.__slot.encryptedNotebookStatus">
+    <div class="ft__error">${window.siyuan.languages.masterPasswordMigrationPending}</div>
+</div>`,
+        afterMount: mountEncryptedNotebook,
+    });
+    group.slot({
+        key: "encryptedNotebookActions",
+        keywords: [
+            window.siyuan.languages.changeMasterPassword,
+            ...(disableImportExport ? [] : [window.siyuan.languages.exportNotebookCryptoBackup,
+                window.siyuan.languages.importNotebookCryptoBackup, window.siyuan.languages.importNotebookCryptoBackupDesc]),
+        ],
+        html: () => `<div class="b3-label config-item fn__none" id="encryptedNotebookActions">
     <div class="fn__flex fn__flex-center">
-        <div class="fn__flex-1"></div>
+        <div class="fn__flex-1"><div id="importCryptoBackupDesc">${genConfigItemMainHtml(window.siyuan.languages.importNotebookCryptoBackup, window.siyuan.languages.importNotebookCryptoBackupDesc)}</div></div>
         <div class="fn__flex fn__flex-center" id="encryptedNotebookEnabledActions">
             <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="changeMasterPasswordBtn">
                 <svg class="svg"><use xlink:href="#iconLock"></use></svg>
@@ -779,7 +790,6 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
         </button>
     </div>
 </div>`,
-        afterMount: mountEncryptedNotebook,
     });
     if (!disableImportExport) {
         group.button({
@@ -831,19 +841,37 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
     }
 };
 
+const isEncryptedNotebookDisableBlockedBySync = () => {
+    const sync = window.siyuan.config.sync;
+    const cloudName = sync?.cloudName?.trim();
+    return Boolean(sync?.configured || sync?.enabled || sync?.synced || sync?.lastResult || (cloudName && cloudName !== "main") ||
+        (sync?.s3?.endpoint?.trim() && sync.s3.bucket?.trim()) || sync?.webdav?.endpoint?.trim() || sync?.local?.endpoint?.trim());
+};
+
 const refreshEncryptedNotebookStatus = (root: HTMLElement) => {
     fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
+        if (response.code !== 0) {
+            return;
+        }
         const enabled = response.data.state === "Enabled";
         const switchElement = root.querySelector<HTMLInputElement>("#encryptedNotebookSwitch");
         if (!switchElement) {
             return;
         }
-        // 待恢复配置也允许关闭；内核仍会阻止清除尚有笔记本或历史依赖的密钥。
         switchElement.checked = response.data.state !== "Disabled";
+        switchElement.disabled = switchElement.checked && isEncryptedNotebookDisableBlockedBySync();
+        root.querySelector("#encryptedNotebookSyncAlert").classList.toggle("fn__none", !switchElement.disabled);
+        if (switchElement.disabled) {
+            switchElement.setAttribute("aria-describedby", "encryptedNotebookSyncAlert");
+        } else {
+            switchElement.removeAttribute("aria-describedby");
+        }
         window.siyuan.config.notebookCrypto.enabled = enabled;
         root.querySelector("#encryptedNotebookEnabledActions").classList.toggle("fn__none", !enabled);
-        root.querySelector("#importCryptoBackupBtn").classList.toggle("fn__none", enabled || !getHostCapabilities().importExport);
-        root.querySelector("#encryptedNotebookActions").classList.remove("fn__none");
+        const canImport = !enabled && getHostCapabilities().importExport;
+        root.querySelector("#importCryptoBackupBtn").classList.toggle("fn__none", !canImport);
+        root.querySelector("#importCryptoBackupDesc")?.classList.toggle("fn__none", !canImport);
+        root.querySelector("#encryptedNotebookActions").classList.toggle("fn__none", !enabled && !canImport);
         root.querySelector("#encryptedNotebookMigrationAlert").classList.toggle("fn__none", !response.data.migrationPending);
         const restoreButton = root.querySelector<HTMLButtonElement>("#restoreEncryptedNotebooks");
         if (restoreButton) {
@@ -916,34 +944,47 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
         fileInput.click();
     });
 
-    switchElement.addEventListener("change", () => {
+    let disablePending = false;
+    switchElement.addEventListener("change", async () => {
+        if (disablePending) {
+            return;
+        }
         if (switchElement.checked) {
             // 切到 ON：弹设密码框
             // onSuccess/onCancel 都用 refresh：开关状态以后端 enabled 真相为准，
             // 避免成功后 destroy 的 setTimeout 回调把开关错误地翻回 OFF（曾因 onCancel 直接置 false 而覆盖成功态）
             openEnableEncryptedDialog(refresh, refresh);
         } else {
-            // 切到 OFF：没有加密笔记本时允许关闭
-            fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
-                if (response.data.count > 0) {
+            disablePending = true;
+            switchElement.disabled = true;
+            try {
+                const response = await fetchSyncPost("/api/notebook/getEncryptedNotebookStatus", {});
+                if (response.code !== 0 || isEncryptedNotebookDisableBlockedBySync()) {
+                    switchElement.checked = true;
+                    refresh();
+                } else if (response.data.count > 0) {
                     showMessage(window.siyuan.languages.encryptedNotebookDisableTip.replace("${x}", String(response.data.count)), 4000);
                     switchElement.checked = true;
                 } else if (response.data.hasHistoryDependency) {
-                    // 已删除加密笔记本的历史仍依赖当前密钥备份，禁用会让其永久锁死（详见设计 §19）
                     showMessage(window.siyuan.languages["_kernel"]["323"], 6000, "error");
                     switchElement.checked = true;
                 } else {
-                    // 用 sync 调用以便后端因任何原因拒绝时回滚开关，避免 UI 与后端状态不一致
-                    fetchSyncPost("/api/notebook/disableEncryptedNotebooks", {}).then((res: IWebSocketData) => {
-                        if (res.code === -1) {
-                            switchElement.checked = true; // processMessage 已弹出错误，这里只回滚开关
-                            return;
-                        }
+                    const result = await fetchSyncPost("/api/notebook/disableEncryptedNotebooks", {});
+                    if (result.code !== 0) {
+                        switchElement.checked = true;
+                    } else {
                         showMessage(window.siyuan.languages.encryptedNotebookDisabled);
-                        refresh();
-                    });
+                    }
+                    refresh();
                 }
-            });
+            } catch {
+                switchElement.checked = true;
+                showMessage(window.siyuan.languages.confirmActionFailed, 6000, "error");
+                refresh();
+            } finally {
+                disablePending = false;
+                switchElement.disabled = switchElement.checked && isEncryptedNotebookDisableBlockedBySync();
+            }
         }
     });
 };

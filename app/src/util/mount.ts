@@ -6,6 +6,8 @@ import {fetchPost, fetchSyncPost} from "./fetch";
 import {ContractFormData} from "./contractFormData";
 import {AdaptiveDialog as Dialog} from "../dialog/adaptiveDialog";
 import {getOpenNotebookCount} from "./pathName";
+import {getDockByType} from "../layout/tabUtil";
+import type {Files} from "../layout/dock/Files";
 import {normalizeNotebookName, validateName} from "../editor/rename";
 import {escapeHtml} from "../util/escape";
 import {setStorageVal} from "../protyle/util/compatibility";
@@ -128,9 +130,18 @@ export const newDailyNoteFromLastNotebook = (app: App) => {
 export const mountHelp = () => {
     const notebookId = Constants.HELP_PATH[window.siyuan.config.appearance.lang];
     fetchPost("/api/notebook/removeNotebook", {notebook: notebookId}, () => {
-        fetchPost("/api/notebook/openNotebook", {
+        const files = isMobile() ? window.siyuan.mobile?.docks?.file : window.siyuan.layout && getDockByType("file")?.data.file as Files;
+        const cancelReveal = files?.docTree?.revealNotebookOnMount(notebookId);
+        void fetchSyncPost("/api/notebook/openNotebook", {
             notebook: notebookId,
             app: Constants.SIYUAN_APPID,
+        }).then(response => {
+            if (response.code !== 0) {
+                cancelReveal?.();
+            }
+        }).catch(error => {
+            cancelReveal?.();
+            console.warn("open user guide failed", error);
         });
     });
 };

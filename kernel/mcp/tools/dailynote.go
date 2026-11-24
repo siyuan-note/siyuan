@@ -5,6 +5,7 @@
 package tools
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -30,7 +31,8 @@ var DailynoteTool = &Tool{
 		},
 		Required: []string{"action", "notebook"},
 	},
-	Handler: dailynoteHandler,
+	Handler:        dailynoteHandler,
+	ContextHandler: dailynoteContextHandler,
 }
 
 func init() {
@@ -38,14 +40,18 @@ func init() {
 }
 
 func dailynoteHandler(args map[string]any) (CallToolResult, error) {
+	return dailynoteContextHandler(context.Background(), args)
+}
+
+func dailynoteContextHandler(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "create":
 		return dailynoteCreate(args)
 	case "append":
-		return dailynoteAppend(args)
+		return dailynoteAppend(ctx, args)
 	case "prepend":
-		return dailynotePrepend(args)
+		return dailynotePrepend(ctx, args)
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [create, append, prepend]"}},
@@ -76,7 +82,7 @@ func dailynoteCreate(args map[string]any) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("daily note %s: %s (path: %s)", status, id, p)}}}, nil
 }
 
-func dailynoteAppend(args map[string]any) (CallToolResult, error) {
+func dailynoteAppend(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -103,7 +109,7 @@ func dailynoteAppend(args map[string]any) (CallToolResult, error) {
 	transactions := []*model.Transaction{{
 		DoOperations: []*model.Operation{{
 			Action:   "appendInsert",
-			Data:     data,
+			Data:     markAgentWriteDOM(ctx, data),
 			ParentID: parentID,
 		}},
 	}}
@@ -114,7 +120,7 @@ func dailynoteAppend(args map[string]any) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("block appended to daily note: %s", parentID)}}}, nil
 }
 
-func dailynotePrepend(args map[string]any) (CallToolResult, error) {
+func dailynotePrepend(ctx context.Context, args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -141,7 +147,7 @@ func dailynotePrepend(args map[string]any) (CallToolResult, error) {
 	transactions := []*model.Transaction{{
 		DoOperations: []*model.Operation{{
 			Action:   "prependInsert",
-			Data:     data,
+			Data:     markAgentWriteDOM(ctx, data),
 			ParentID: parentID,
 		}},
 	}}

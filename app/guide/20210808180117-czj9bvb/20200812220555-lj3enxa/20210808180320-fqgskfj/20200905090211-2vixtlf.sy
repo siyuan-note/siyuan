@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20261116005812"
+		"updated": "20261120112341"
 	},
 	"Children": [
 		{
@@ -1975,6 +1975,65 @@
 				{
 					"Type": "NodeText",
 					"Data": "表格包含合并单元格或多行表头时，复制和导出的 Markdown 会使用 HTML 表格保留结构。"
+				}
+			]
+		},
+		{
+			"ID": "20261120112341-u4q2n7v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261120112341-u4q2n7v",
+				"updated": "20261120112341"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打开块菜单，选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "表格块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "固定标题列"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，横向滚动时第一列会保持可见。可同时启用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "固定标题行"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，纵向滚动时也能看到表头。横跨第一列和后续列的合并单元格随表格整体滚动。可视区域过窄时，第一列会暂时随表格滚动。使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "标题行背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "标题列背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可切换对应的背景和粗体。"
 				}
 			]
 		},

@@ -14,6 +14,7 @@ export const getInlineDateType = (input: HTMLInputElement) =>
 
 const validationErrors = new WeakMap<HTMLInputElement, string>();
 const composingInputs = new WeakSet<HTMLInputElement>();
+const dateDraftNormalizers = new WeakMap<HTMLInputElement, (value: string) => string>();
 const splitInputs = new WeakMap<HTMLInputElement, {time: HTMLInputElement; element: HTMLElement}>();
 const getConstraints = (input: HTMLInputElement): IDateConstraints => {
     const type = getInlineDateType(input);
@@ -21,12 +22,23 @@ const getConstraints = (input: HTMLInputElement): IDateConstraints => {
     return {type, min: input.min, max: input.max, step: input.step, required: input.required,
         stepBase: input.getAttribute("value") || ""};
 };
-export const getInlineDateValue = (input: HTMLInputElement) => {
-    if (getInlineDateType(input) !== "datetime-local") { return input.value; }
-    const split = splitInputs.get(input);
-    if (!split || /[T ]/.test(input.value)) { return input.value.replace(" ", "T"); }
-    return input.value || split.time.value ? `${input.value}T${normalizeTimeDraft(split.time.value)}` : "";
+const getDateTimeDraft = (value: string, normalizeDate?: (value: string) => string) => {
+    const draft = value.replace(" ", "T");
+    if (!normalizeDate) { return draft; }
+    const separator = draft.indexOf("T");
+    return separator < 0 ? normalizeDate(draft) : normalizeDate(draft.substring(0, separator)) + draft.substring(separator);
 };
+const readInlineDateValue = (input: HTMLInputElement, normalizeDate?: (value: string) => string) => {
+    const type = getInlineDateType(input);
+    if (type === "date") { return normalizeDate?.(input.value) ?? input.value; }
+    if (type !== "datetime-local") { return input.value; }
+    const value = getDateTimeDraft(input.value, normalizeDate);
+    const split = splitInputs.get(input);
+    if (!split || value.includes("T")) { return value; }
+    return value || split.time.value ? `${value}T${normalizeTimeDraft(split.time.value)}` : "";
+};
+export const getInlineDateValue = (input: HTMLInputElement) =>
+    readInlineDateValue(input, dateDraftNormalizers.get(input));
 export const setInlineDateValue = (input: HTMLInputElement, value: string) => {
     const type = getInlineDateType(input);
     const normalized = type === "datetime-local" ? value.replace(" ", "T") : value;
@@ -78,6 +90,7 @@ export const validateInlineDateInput = (input: HTMLInputElement, message = input
 
 export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement | HTMLInputElement[], options: {
     languages?: Record<string, string>;
+    normalizeDateDraft?: (value: string) => string;
     onChange?: (input: HTMLInputElement, state: IInlineDateState) => void;
 } = {}) => {
     const inputs = Array.isArray(source) ? source : [source];
@@ -216,7 +229,8 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
             const reportDescriptor = Object.getOwnPropertyDescriptor(input, "reportValidity");
             const reportValidity = input.reportValidity.bind(input);
             Object.defineProperty(input, "reportValidity", {configurable: true, value: () =>
-                validateDateValue(input.value, {type: "date"}) === "valid" && input.value && !time.validity.valid ?
+                validateDateValue(options.normalizeDateDraft?.(input.value) ?? input.value, {type: "date"}) === "valid" &&
+                    input.value && !time.validity.valid ?
                     time.reportValidity() : reportValidity()});
             let forwarding = false;
             let changed = false;
@@ -231,7 +245,7 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
                 const target = event.target as HTMLInputElement;
                 editingParts.set(input, target === time || /[T ]/.test(target.value) ? "time" : "date");
                 if (!composing.has(input) && /[T ]/.test(target.value)) {
-                    const full = target.value.replace(" ", "T");
+                    const full = getDateTimeDraft(target.value, options.normalizeDateDraft);
                     if (validateDateValue(full, {type: "datetime-local", step: "any"}) === "valid") {
                         setInlineDateValue(input, full);
                     }
@@ -277,7 +291,7 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
             time.addEventListener("compositionstart", onComposition);
             time.addEventListener("compositionend", onComposition);
             splitReleases.set(input, () => {
-                const value = getInlineDateValue(input);
+                const value = readInlineDateValue(input);
                 if (input.parentElement === dateField) { element.replaceWith(input); }
                 else { element.remove(); }
                 splitInputs.delete(input);
@@ -315,6 +329,7 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
         view.removeEventListener("pagehide", destroy);
     };
     inputs.forEach(input => {
+        if (options.normalizeDateDraft) { dateDraftNormalizers.set(input, options.normalizeDateDraft); }
         restoreTypes.set(input, input.type);
         const hadClass = input.classList.contains("date-picker-input");
         const descriptor = Object.getOwnPropertyDescriptor(input, "showPicker");
@@ -390,6 +405,7 @@ export const bindInlineDatePicker = (host: HTMLElement, source: HTMLInputElement
                 input.setAttribute("aria-invalid", String(!valid));
             }
             composingInputs.delete(input);
+            dateDraftNormalizers.delete(input);
             if (input.showPicker === open) {
                 if (descriptor) { Object.defineProperty(input, "showPicker", descriptor); }
                 else { delete input.showPicker; }

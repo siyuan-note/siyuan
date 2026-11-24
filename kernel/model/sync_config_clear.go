@@ -50,6 +50,7 @@ func persistClearedSyncProviderConfig(provider int) error {
 	next := Conf.cloneSettings()
 	// 深复制同步配置段，避免与生效配置共享子结构
 	syncConfig := cloneConfSection(Conf.Sync.Load())
+	syncConfig.Configured = syncConfig.HasConfiguredSync()
 	if provider == syncConfig.Provider {
 		syncConfig.Enabled = false
 	}

@@ -7,7 +7,7 @@ import {
 import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {goBack, goForward} from "../util/backForward";
 import {syncGuide} from "../sync/syncGuide";
-import {workspaceMenu} from "../menus/workspace";
+import {mainMenu} from "../menus/mainMenu";
 import {initTopBarMenu} from "../menus/topBar";
 import {MenuItem} from "../menus/Menu";
 import {hideTooltip} from "../dialog/tooltip";
@@ -81,7 +81,7 @@ export const updateBarModeIcon = () => {
 export const initBar = (app: App) => {
     const toolbarElement = document.getElementById("toolbar");
     toolbarElement.innerHTML = `
-<div id="barWorkspace" class="ariaLabel toolbar__item" aria-label="${window.siyuan.languages.mainMenu} ${updateHotkeyTip(window.siyuan.config.keymap.general.mainMenu.custom)}">
+<div id="${Constants.MENU_BAR_MAIN_MENU}" class="ariaLabel toolbar__item" aria-label="${window.siyuan.languages.mainMenu} ${updateHotkeyTip(window.siyuan.config.keymap.general.mainMenu.custom)}">
     <span class="toolbar__text">${getWorkspaceName()}</span>
     <svg class="toolbar__svg"><use xlink:href="#iconDown"></use></svg>
 </div>
@@ -124,6 +124,7 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
 <div id="barMore" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.more}">
     <svg><use xlink:href="#iconMore"></use></svg>
 </div>
+<div class="toolbar__window-gap" aria-hidden="true"></div>
 <div class="fn__flex" id="windowControls"></div>`;
     applyTopBarEntryVisibility();
     bindTopBarDrag(toolbarElement, (order) => setEntryOrderValue(TOP_BAR_ROOT_PATH, order));
@@ -206,8 +207,8 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
                 syncGuide(app);
                 event.stopPropagation();
                 break;
-            } else if (targetId === "barWorkspace") {
-                workspaceMenu(app, target.getBoundingClientRect(), false, target);
+            } else if (targetId === Constants.MENU_BAR_MAIN_MENU) {
+                mainMenu(app, target.getBoundingClientRect(), false, target);
                 event.stopPropagation();
                 break;
             } else if (targetId === "barExit") {
@@ -325,18 +326,20 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
         }
     });
     const barSyncElement = toolbarElement.querySelector("#barSync");
+    const syncNowLabel = window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom);
     barSyncElement.addEventListener("mouseenter", (event) => {
         event.stopPropagation();
         event.preventDefault();
         fetchPost("/api/sync/getSyncInfo", {}, (response) => {
-            let html = "";
-            if (!window.siyuan.config.sync.enabled || (0 === window.siyuan.config.sync.provider && needSubscribe(""))) {
-                html = response.data.stat;
-            } else {
-                html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "<br>";
-                html += "&emsp;" + response.data.stat;
+            let html = response.data.stat;
+            if (window.siyuan.config.sync.enabled && (0 !== window.siyuan.config.sync.provider || !needSubscribe(""))) {
+                if (response.data.synced > 0) {
+                    html = window.siyuan.languages._kernel[82].replace("%s", dayjs(response.data.synced).format("YYYY-MM-DD HH:mm")) + "<br>&emsp;" + html;
+                }
                 if (response.data.kernels.length > 0) {
-                    html += "<br>";
+                    if (html) {
+                        html += "<br>";
+                    }
                     html += window.siyuan.languages.currentKernel + "<br>";
                     html += "&emsp;" + response.data.kernel + "/" + window.siyuan.config.system.kernelVersion + " (" + window.siyuan.config.system.os + "/" + window.siyuan.config.system.name + ")<br>";
                     html += window.siyuan.languages.otherOnlineKernels + "<br>";
@@ -350,10 +353,10 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
                     });
                 }
             }
-            barSyncElement.setAttribute("aria-label", html);
+            barSyncElement.setAttribute("aria-label", html || syncNowLabel);
         });
     });
-    barSyncElement.setAttribute("aria-label", window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom)));
+    barSyncElement.setAttribute("aria-label", window.siyuan.config.sync.stat || syncNowLabel);
     if (window.siyuan.config.appearance.hideToolbar) {
         document.body.classList.add("body--toolbar-hide");
     }

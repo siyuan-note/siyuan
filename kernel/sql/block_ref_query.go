@@ -7,6 +7,8 @@ package sql
 import (
 	"bytes"
 	"database/sql"
+	"encoding/json"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -409,21 +411,84 @@ func getRefText(defBlockID string) string {
 	return block.Content
 }
 
-func QueryBlockDefIDsByRefText(refText string) (ret []string) {
-	ret = queryDefIDsByDefText(refText)
-	ret = append(ret, queryDefIDsByNameAliasAndDocTitle(refText)...)
-	ret = gulu.Str.RemoveDuplicatedElem(ret)
+func QueryBlockDefIDsByRefTextInBox(refText, boxID string, accessible func(string, string) bool) (ret []string) {
+	ret = queryDefIDsByDefText(refText, boxID, accessible)
+	ret = append(ret, queryDefIDsByNameAliasAndDocTitle(refText, boxID, accessible)...)
+	return gulu.Str.RemoveDuplicatedElem(ret)
+}
+
+// FilterVirtualRefKeywordsByAccess 批量校验文档中的候选关键字，避免逐个扫描引用与块索引。
+func FilterVirtualRefKeywordsByAccess(keywords []string, boxID string, accessible func(string, string) bool) (ret []string) {
+	if len(keywords) == 0 {
+		return
+	}
+	values, err := json.Marshal(keywords)
+	if err != nil {
+		return
+	}
+	collation := "NOCASE"
+	if caseSensitive.Load() {
+		collation = "BINARY"
+	}
+	stmt := fmt.Sprintf(`
+WITH keywords AS MATERIALIZED (SELECT value AS text FROM json_each(?))
+SELECT k.text, r.def_block_id, r.block_id, r.box
+FROM refs r JOIN keywords k ON r.content COLLATE %[1]s = k.text
+UNION ALL
+SELECT k.text, b.id, b.id, b.box
+FROM blocks b JOIN keywords k ON b.name COLLATE %[1]s = k.text
+UNION ALL
+SELECT k.text, b.id, b.id, b.box
+FROM blocks b JOIN keywords k ON b.content COLLATE %[1]s = k.text
+WHERE b.type = 'd'
+UNION ALL
+SELECT k.text, b.id, b.id, b.box
+FROM blocks b
+JOIN json_each('[' || replace(json_quote(b.alias), ',', '","') || ']') a
+JOIN keywords k ON a.value COLLATE %[1]s = k.text
+WHERE b.alias <> ''
+`, collation)
+	rows, err := queryForBox(boxID, stmt, string(values))
+	if err != nil {
+		logging.LogErrorf("query virtual reference candidates failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	allowed := map[string]bool{}
+	for rows.Next() {
+		var keyword, targetID, sourceID, sourceBox string
+		if err = rows.Scan(&keyword, &targetID, &sourceID, &sourceBox); err != nil {
+			logging.LogErrorf("scan virtual reference candidate failed: %s", err)
+			return
+		}
+		if !allowed[keyword] && sourceBox != "" && accessible(sourceID, sourceBox) && accessible(targetID, boxID) {
+			allowed[keyword] = true
+		}
+	}
+	if err = rows.Err(); err != nil {
+		logging.LogErrorf("read virtual reference candidates failed: %s", err)
+		return
+	}
+	for _, keyword := range keywords {
+		if allowed[keyword] {
+			ret = append(ret, keyword)
+		}
+	}
 	return
 }
 
-func QueryBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
-	var q, arg string
+func queryDefIDsByDefText(keyword, boxID string, accessible func(string, string) bool) (ret []string) {
+	columns := "def_block_id"
+	if accessible != nil {
+		columns += ", block_id, box"
+	}
+	q := "SELECT DISTINCT " + columns + " FROM refs WHERE content"
+	arg := keyword
 	if caseSensitive.Load() {
-		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content = ?"
-		arg = refText
+		q += " = ?"
 	} else {
-		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content LIKE ? ESCAPE '\\'"
-		arg = escapeLikePattern(refText)
+		q += " LIKE ? ESCAPE '\\'"
+		arg = escapeLikePattern(keyword)
 	}
 	rows, err := queryForBox(boxID, q, arg)
 	if err != nil {
@@ -432,75 +497,25 @@ func QueryBlockDefIDsByRefTextInBox(refText, boxID string) (ret []string) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var id string
-		if err = rows.Scan(&id); err != nil {
+		var id, sourceID, sourceBox string
+		if accessible == nil {
+			err = rows.Scan(&id)
+		} else {
+			err = rows.Scan(&id, &sourceID, &sourceBox)
+		}
+		if err != nil {
 			logging.LogErrorf("query scan field failed: %s", err)
 			return
 		}
-		ret = append(ret, id)
-	}
-
-	escaped := escapeLikePattern(refText)
-	aliasArg := "%," + escaped + ",%"
-	var nameCond, docCond, exactArg string
-	if caseSensitive.Load() {
-		nameCond = "name = ?"
-		docCond = "content = ?"
-		exactArg = refText
-	} else {
-		nameCond = "name LIKE ? ESCAPE '\\'"
-		docCond = "content LIKE ? ESCAPE '\\'"
-		exactArg = escaped
-	}
-	q = "SELECT id FROM blocks WHERE " + nameCond + " OR (',' || alias || ',') LIKE ? ESCAPE '\\'" +
-		" UNION ALL SELECT id FROM (SELECT id FROM blocks WHERE type = 'd' AND " + docCond + " LIMIT ?)"
-	rows, err = queryForBox(boxID, q, exactArg, aliasArg, exactArg, 32)
-	if err != nil {
-		logging.LogErrorf("sql query failed: %s", err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var id string
-		if err = rows.Scan(&id); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
-		}
-		ret = append(ret, id)
-	}
-	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	return
-}
-
-func queryDefIDsByDefText(keyword string) (ret []string) {
-	ret = []string{}
-	var q, arg string
-	if caseSensitive.Load() {
-		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content = ?"
-		arg = keyword
-	} else {
-		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content LIKE ? ESCAPE '\\'"
-		arg = escapeLikePattern(keyword)
-	}
-	rows, err := query(q, arg)
-	if err != nil {
-		logging.LogErrorf("sql query failed: %s", err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var id string
-		if err = rows.Scan(&id); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
+		if accessible != nil && (sourceBox == "" || !accessible(sourceID, sourceBox) || !accessible(id, boxID)) {
+			continue
 		}
 		ret = append(ret, id)
 	}
 	return
 }
 
-func queryDefIDsByNameAliasAndDocTitle(keyword string) (ret []string) {
-	ret = []string{}
+func queryDefIDsByNameAliasAndDocTitle(keyword, boxID string, accessible func(string, string) bool) (ret []string) {
 	escaped := escapeLikePattern(keyword)
 	aliasArg := "%," + escaped + ",%"
 	var nameCond, docCond, exactArg string
@@ -513,25 +528,46 @@ func queryDefIDsByNameAliasAndDocTitle(keyword string) (ret []string) {
 		docCond = "content LIKE ? ESCAPE '\\'"
 		exactArg = escaped
 	}
-	// 命名精确匹配；别名按逗号整段匹配（','||alias||',' LIKE '%,kw,%'）；文档标题单独 LIMIT 32
-	// 大小写均跟随 caseSensitive / case_sensitive_like 配置；LIKE 参数转义 %/_/\ 以免通配符改变语义
-	q := "SELECT id FROM blocks WHERE " + nameCond + " OR (',' || alias || ',') LIKE ? ESCAPE '\\'" +
-		" UNION ALL SELECT id FROM (" +
-		"SELECT id FROM blocks WHERE type = 'd' AND " + docCond + " LIMIT ?" +
-		")"
-	rows, err := query(q, exactArg, aliasArg, exactArg, 32)
+
+	const titleLimit = 32
+	limit := titleLimit
+	matchColumns, titleColumns := "id", "id"
+	if accessible != nil {
+		limit = -1
+		matchColumns, titleColumns = "id, box, 0", "id, box, 1"
+	}
+	q := "SELECT " + matchColumns + " FROM blocks WHERE " + nameCond + " OR (',' || alias || ',') LIKE ? ESCAPE '\\'" +
+		" UNION ALL SELECT " + titleColumns + " FROM (" +
+		"SELECT id, box FROM blocks WHERE type = 'd' AND " + docCond + " LIMIT ?)"
+	rows, err := queryForBox(boxID, q, exactArg, aliasArg, exactArg, limit)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
 	}
 	defer rows.Close()
+	titleCount := 0
 	for rows.Next() {
-		var id string
-		if err = rows.Scan(&id); err != nil {
+		var id, matchBox string
+		var title bool
+		if accessible == nil {
+			err = rows.Scan(&id)
+		} else {
+			err = rows.Scan(&id, &matchBox, &title)
+		}
+		if err != nil {
 			logging.LogErrorf("query scan field failed: %s", err)
 			return
 		}
+		if accessible != nil && (matchBox == "" || !accessible(id, matchBox)) {
+			continue
+		}
 		ret = append(ret, id)
+		if title {
+			titleCount++
+			if titleLimit == titleCount {
+				break
+			}
+		}
 	}
 	return
 }

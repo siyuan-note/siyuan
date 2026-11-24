@@ -1,0 +1,1338 @@
+{
+	"ID": "20261122113000-8q8xgxj",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-8q8xgxj",
+		"title": "Вход через OIDC",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-fh21ccf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-fh21ccf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ubveflp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ubveflp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вход через OIDC (OpenID Connect) позволяет настроить в SiYuan единый вход (SSO) через существующего провайдера удостоверений в дополнение к паролю блокировки браузера. Поддерживаются провайдеры Custom, Google, Microsoft и GitHub."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-61xlfke",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-61xlfke",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Любая учётная запись, прошедшая правила допуска OIDC, получает права администратора текущего рабочего пространства. OIDC не обеспечивает разделение прав между пользователями или сопоставление ролей, поэтому перед включением строго ограничьте список разрешённых учётных записей."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-tqa6bpi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-tqa6bpi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Подготовка перед использованием"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-d47fhoi",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-d47fhoi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-z301uog",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-z301uog",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-454j984",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-454j984",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Зарегистрируйте приложение у провайдера удостоверений, получите ID клиента и при необходимости создайте секрет клиента"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-wkeqi0i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-wkeqi0i",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-jq2lmpo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-jq2lmpo",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Определите необходимые URL обратного вызова для браузера, десктопного и мобильного приложений и зарегистрируйте каждый из них у провайдера удостоверений"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-cwfjfrc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-cwfjfrc",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-u4ltips",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-u4ltips",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Сохраните рабочий пароль блокировки браузера или локальный способ доступа, чтобы из-за ошибки конфигурации не заблокировать себе удалённый доступ"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8tnk9qg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-8tnk9qg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rm9l79k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rm9l79k",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Аутентификация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Вход через OIDC"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " заполните параметры конфигурации и включите вход через OIDC."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jfzic73",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-jfzic73",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Провайдеры и учётные данные"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-otq3d7m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-otq3d7m",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-88pl18m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-88pl18m",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-00x7n8z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-00x7n8z",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Custom: укажите URL издателя (Issuer URL), поддерживающий OpenID Connect Discovery, ID клиента и при необходимости секрет клиента"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-avdhl8y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-avdhl8y",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-3t4bspr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-3t4bspr",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Google: укажите ID клиента и секрет клиента Google OAuth; URL издателя SiYuan подставит автоматически (фиксированный адрес Google)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-73cw888",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-73cw888",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-zdzcx51",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-zdzcx51",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Microsoft: укажите URL издателя для вашего клиента (tenant), ID клиента и при необходимости секрет клиента согласно настройкам приложения"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-aj4dahg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-aj4dahg",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ioiqvbe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ioiqvbe",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "GitHub: укажите ID клиента и секрет клиента OAuth App; SiYuan автоматически скорректирует область действия (scope) по умолчанию"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-eg594kt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-eg594kt",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При создании приложения и регистрации URL обратного вызова обратитесь к "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "документации Google OpenID Connect",
+					"TextMarkAHref": "https://developers.google.com/identity/openid-connect/openid-connect"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "документации по регистрации приложений Microsoft Entra",
+					"TextMarkAHref": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "документации GitHub OAuth App",
+					"TextMarkAHref": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Интерфейс консоли провайдера может меняться — ориентируйтесь на его актуальную документацию."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ztjvnz1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-ztjvnz1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "URL обратного вызова"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-q9puvy5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-q9puvy5",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-ksp8611",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-ksp8611",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-t3b4517",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-t3b4517",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Локальный браузер и десктопное приложение: URL обратного вызова использует текущий локальный протокол доступа SiYuan; при включённом HTTPS это "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://127.0.0.1:<порт>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", а без HTTPS — "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "http://127.0.0.1:<порт>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Адрес, зарегистрированный у провайдера удостоверений, должен в точности совпадать по протоколу, хосту, порту, пути и завершающему слешу"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-u99rn79",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-u99rn79",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-v9m9j2v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-v9m9j2v",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Удалённый браузер: укажите публичный HTTPS-адрес в поле URL обратного вызова OIDC; путь должен быть ровно "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", без параметров запроса, фрагментов или учётных данных"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-v8hpoaw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-v8hpoaw",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-7yyu1g8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7yyu1g8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Нативные мобильные клиенты: всегда используется "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan:/oidc-callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; этот адрес нужно зарегистрировать у провайдера удостоверений без изменений. Google не принимает такой формат обратного вызова, поэтому вход через Google поддерживается только в браузере и на десктопе"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-r4fhpd9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-r4fhpd9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Область действия (Scope)"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-dsjse2r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-dsjse2r",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Область действия по умолчанию — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "openid profile email"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Обычно изменять её не требуется; перед настройкой собственной области убедитесь, что возвращаемые провайдером утверждения (claims) по-прежнему удовлетворяют правилам допуска. Для GitHub область по умолчанию автоматически преобразуется в права, необходимые для чтения профиля пользователя и подтверждённого адреса электронной почты."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-g1r252k",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-g1r252k",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Правила допуска"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m7mdk5n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-m7mdk5n",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если отключить параметр «Предоставить права администратора всем аутентифицированным пользователям», необходимо настроить хотя бы одно правило допуска. Правила задаются в виде JSON-массива: несколько "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "values"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " внутри одного правила объединяются логикой «ИЛИ», а разные правила между собой — логикой «И»; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "operator"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " поддерживает "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "equals"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "contains"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qfropoe",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20261122113000-qfropoe",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "[\n  {\n    \"claim\": \"email\",\n    \"operator\": \"equals\",\n    \"values\": [\"alice@example.com\", \"bob@example.com\"]\n  },\n  {\n    \"claim\": \"email_verified\",\n    \"operator\": \"equals\",\n    \"values\": [\"true\"]\n  }\n]\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qju6v8y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-qju6v8y",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Приведённый выше пример разрешает вход только двум указанным адресам электронной почты и требует, чтобы провайдер подтвердил их проверку. Если провайдер возвращает утверждения в виде массивов, например "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "groups"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", можно использовать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "contains"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для сопоставления имён групп. Имена и значения в правилах должны в точности соответствовать утверждениям, которые фактически возвращает провайдер."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bmz8p69",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-bmz8p69",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При использовании GitHub вставьте приведённый ниже пример в правила утверждений и замените YOUR_GITHUB_USERNAME на имя пользователя GitHub (логин, а не отображаемое имя), которому разрешён вход. Оставьте параметр «Предоставить права администратора всем аутентифицированным пользователям» отключённым, затем нажмите «Проверить и сохранить» и выполните вход с этой учётной записью GitHub. Пустой массив [] не удовлетворяет обязательному требованию; конфигурация вступит в силу только после успешной проверки."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-tiivud5",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20261122113000-tiivud5",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "[\n  {\n    \"claim\": \"login\",\n    \"operator\": \"equals\",\n    \"values\": [\n      \"YOUR_GITHUB_USERNAME\"\n    ]\n  }\n]\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0s8uzx4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-0s8uzx4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Проверить и сохранить"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3ietfpq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3ietfpq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После включения OIDC нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Проверить и сохранить"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". SiYuan откроет системный браузер, и новая конфигурация активируется только после одного успешного реального входа с прохождением правил допуска; при ошибке проверки продолжит действовать прежняя конфигурация. Изменение настроек OIDC аннулирует все текущие сессии OIDC — пользователям потребуется войти заново."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-75tfj4z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-75tfj4z",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вход на разных клиентах"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0ddzt11",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-0ddzt11",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-vz6t85k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-vz6t85k",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-om82qsu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-om82qsu",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Браузер: выберите вход через OIDC на странице входа; после аутентификации произойдёт возврат на исходный адрес"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-urlqi6c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-urlqi6c",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-lbcgizn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-lbcgizn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Десктопное приложение: аутентификация проходит в системном браузере, после чего SiYuan автоматически получает результат входа"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-eu1z7bv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-eu1z7bv",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-3j4g5fw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-3j4g5fw",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Мобильное приложение: после аутентификации в системном браузере используется "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan:/oidc-callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " для возврата в SiYuan; провайдер удостоверений должен поддерживать этот пользовательский адрес обратного вызова"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-q1xnhxe",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-q1xnhxe",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка в Docker"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rco50ww",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rco50ww",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При развёртывании в Docker настройки OIDC рабочего пространства можно переопределить с помощью следующих переменных окружения. Как минимум нужно включить OIDC, выбрать провайдера и задать ID клиента; остальные переменные заполняются в зависимости от провайдера, URL обратного вызова и политики допуска."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8g978nj",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "dGV4dA==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20261122113000-8g978nj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGV4dA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "SIYUAN_OIDC_ENABLED\nSIYUAN_OIDC_PROVIDER\nSIYUAN_OIDC_ISSUER_URL\nSIYUAN_OIDC_CLIENT_ID\nSIYUAN_OIDC_CLIENT_SECRET\nSIYUAN_OIDC_SCOPES\nSIYUAN_OIDC_REDIRECT_URL\nSIYUAN_OIDC_ALLOW_ALL\nSIYUAN_OIDC_CLAIM_RULES\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-13zzqw8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-13zzqw8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Переменные окружения применяются при запуске ядра. Для удалённого развёртывания Docker также обязательно должен быть настроен пароль блокировки браузера, валидная конфигурация OIDC либо явно включён обход аутентификации — иначе SiYuan откажется запускаться, чтобы не оставить рабочее пространство открытым без аутентификации."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-f3b55wa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-f3b55wa",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Частые вопросы"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pak2u9o",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-pak2u9o",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-bjczhud",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-bjczhud",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-lsy0ebo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-lsy0ebo",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "redirect_uri mismatch"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": проверьте, что URL обратного вызова, зарегистрированный у провайдера удостоверений, полностью совпадает с фактическим протоколом, хостом, портом, путём и завершающим слешем"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-n7k3xf4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-n7k3xf4",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-gcv6k7s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-gcv6k7s",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ошибка обнаружения провайдера (Discovery): проверьте правильность URL издателя для Custom или Microsoft, использование HTTPS и доступность адреса Discovery со стороны SiYuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-rfayeoc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-rfayeoc",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5ymz70y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5ymz70y",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ошибка обмена кода авторизации: проверьте ID клиента, секрет клиента и URL обратного вызова"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-n0cwhy7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-n0cwhy7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-on0zlq1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-on0zlq1",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Отказ в доступе после входа: проверьте фактические утверждения (claims) и типы данных, возвращаемые провайдером, а также имена, операторы и значения в правилах допуска"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-17qp0h0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-17qp0h0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Примечание"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-j9x2czu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-j9x2czu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-xeg8npn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-xeg8npn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-f0tddvh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-f0tddvh",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Не открывайте вход для всех пользователей недоверенного провайдера удостоверений без правил допуска"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-8zoyl9p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-8zoyl9p",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-77es7qj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-77es7qj",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При допуске по адресу электронной почты рекомендуется одновременно требовать, чтобы "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "email_verified"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " было равно "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "true"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-6jzj2kn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-6jzj2kn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-c23x39r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-c23x39r",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Секрет клиента является конфиденциальной информацией — не записывайте его в публичные документы, журналы или общедоступные файлы развёртывания"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-3lwo5ky",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-3lwo5ky",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-fvypjkp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-fvypjkp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "OIDC отвечает только за аутентификацию; аутентифицированный пользователь получает права администратора, поэтому OIDC нельзя использовать для изоляции данных разных пользователей"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

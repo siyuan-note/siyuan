@@ -14,6 +14,14 @@ const declaration = source.statements.filter(isVariableStatement).flatMap(statem
     Array.from(statement.declarationList.declarations)).find(item => item.name.getText(source) === "videoMenu");
 const menuCode = transpileModule("const videoMenu = " + declaration.initializer.getText(source) + "; videoMenu;",
     {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
+const utilSource = createSourceFile("util.ts", readFileSync(join(__dirname, "util.ts"), "utf8"), ScriptTarget.Latest, true);
+const utilDeclarations = utilSource.statements.filter(isVariableStatement).flatMap(statement =>
+    Array.from(statement.declarationList.declarations));
+const assetFunctions = ["getAssetShareItem", "getAssetExportItems", "getMediaAssetExportItems"] as const;
+const assetMenuCode = transpileModule(assetFunctions.map(name =>
+    "const " + utilDeclarations.find(item => item.name.getText(utilSource) === name).getText(utilSource) + ";"
+).join("\n") + `\n({${assetFunctions.join(", ")}});`,
+    {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
 
 const gutterSource = createSourceFile("gutter.ts", readFileSync(join(__dirname, "../protyle/gutter/index.ts"), "utf8"),
     ScriptTarget.Latest, true);
@@ -30,8 +38,11 @@ const findMediaBranch = (node: import("typescript").Node) => {
 findMediaBranch(gutterSource);
 assert.ok(gutterCode);
 
-const createHarness = (disabled: boolean, src: string | null, canExport = true, initialLoop = false) => {
+const createHarness = (disabled: boolean, src: string | null, canExport = true, initialLoop = false,
+    platform?: "android" | "harmony" | "legacy") => {
     const exports: string[] = [];
+    const shares: string[] = [];
+    const saves: string[] = [];
     const mutations: string[] = [];
     const transactions: Array<{oldHTML: string; newHTML: string}> = [];
     const protyle = {disabled, app: {}};
@@ -45,9 +56,22 @@ const createHarness = (disabled: boolean, src: string | null, canExport = true, 
         get outerHTML() { return `<div><video src="${src}"${loop ? " loop" : ""}></video></div>`; },
         querySelector: () => media,
     };
+    const shareBridge = {shareAsset: (path: string) => { shares.push(path); }};
+    const window = {
+        siyuan: {languages: {link: "Link", rename: "Rename", openBy: "Open", assets: "Assets", shareAsset: "Share",
+            saveToGallery: "Save to Gallery"}},
+        JSAndroid: platform === "android" ? {...shareBridge, saveAssetToGallery: (path: string) => { saves.push(path); }} :
+            platform === "legacy" ? {} : undefined,
+        JSHarmony: platform === "harmony" ? shareBridge : undefined,
+    };
+    const exportAsset = (path: string) => canExport ? {id: "export", click: () => exports.push(path)} : {ignore: true};
+    const assetMenus = runInNewContext(assetMenuCode, {
+        window, exportAsset, getHostCapabilities: () => ({importExport: canExport}),
+        isInAndroid: () => platform === "android" || platform === "legacy", isInHarmony: () => platform === "harmony",
+    }) as Pick<typeof import("./util"), typeof assetFunctions[number]>;
     const context = {
-        window: {siyuan: {languages: {link: "Link", rename: "Rename", openBy: "Open", assets: "Assets"}}},
-        exportAsset: (path: string) => canExport ? {id: "export", click: () => exports.push(path)} : {ignore: true},
+        window,
+        ...assetMenus,
         writeAssetToClipboard: () => ({id: "copyFile"}),
         renameAsset: () => mutations.push("rename"),
         openMenu: () => [{id: "open"}],
@@ -58,7 +82,7 @@ const createHarness = (disabled: boolean, src: string | null, canExport = true, 
     };
     const videoMenu = runInNewContext(menuCode, context) as (editor: typeof protyle, block: typeof nodeElement,
                                                           type: string) => IMenu[];
-    return {context, protyle, nodeElement, videoMenu, exports, mutations, transactions, media};
+    return {context, protyle, nodeElement, videoMenu, exports, shares, saves, mutations, transactions, media};
 };
 
 test("video loop toggles the saved attribute and records independent undo snapshots", () => {
@@ -95,13 +119,71 @@ test("readonly media exports preserve asset context without exposing mutations",
 
 test("editable media retain their configured menu paths and order", () => {
     for (const type of ["NodeVideo", "NodeAudio"]) {
-        const harness = createHarness(false, "assets/movie.mp4");
+        const harness = createHarness(false, "assets/movie.mp4", true, false, "android");
         const menu = harness.videoMenu(harness.protyle, harness.nodeElement, type);
         const key = type === "NodeVideo" ? "assetVideo" : "assetAudio";
         assert.deepEqual(Array.from(menu, item => item.id),
             getEntryCatalogChildren(`gutter.single.${key}`).map(item => item.key));
         menu.find(item => item.id === "rename").click(null, null);
         assert.deepEqual(harness.mutations, ["rename"]);
+    }
+});
+
+test("mobile media shares the original local asset reference from readonly and editable menus", () => {
+    const src = "assets/影片%23test.mp4?box=20261006000000-box0001#t=10";
+    for (const platform of ["android", "harmony", "legacy", undefined] as const) {
+        for (const disabled of [true, false]) {
+            const harness = createHarness(disabled, src, true, false, platform);
+            for (const type of ["NodeVideo", "NodeAudio"]) {
+                const item = harness.videoMenu(harness.protyle, harness.nodeElement, type).find(item => item.id === "shareAsset");
+                if (platform === "android" || platform === "harmony") {
+                    assert.equal(item.label, "Share");
+                    item.click(null, null);
+                    assert.equal(harness.shares.at(-1), src);
+                } else {
+                    assert.equal(item, undefined);
+                }
+            }
+            assert.equal(harness.context.getAssetShareItem("https://example.com/movie.mp4"), undefined);
+        }
+    }
+    assert.equal(createHarness(true, src, false, false, "android").context.getAssetShareItem(src), undefined);
+});
+
+test("Android local images and videos can save the original asset to the gallery alongside export", () => {
+    const video = "assets/影片%23test.mp4?box=20261006000000-box0001#t=10";
+    const image = "assets/picture%25.png?box=20261006000000-box0001";
+    for (const disabled of [true, false]) {
+        const harness = createHarness(disabled, video, true, false, "android");
+        const menu = harness.videoMenu(harness.protyle, harness.nodeElement, "NodeVideo");
+        menu.find(item => item.id === "export").click(null, null);
+        menu.find(item => item.id === "saveToGallery").click(null, null);
+        const imageMenu = harness.context.getMediaAssetExportItems(image);
+        assert.deepEqual(Array.from(imageMenu, item => item.id), ["export", "shareAsset", "saveToGallery"]);
+        imageMenu.find(item => item.id === "saveToGallery").click(null, null);
+        assert.deepEqual(harness.saves, [video, image]);
+        assert.deepEqual(harness.exports, [video]);
+        assert.equal(harness.videoMenu(harness.protyle, harness.nodeElement, "NodeAudio").some(item =>
+            item.id === "saveToGallery"), false);
+    }
+    for (const [platform, src, canExport] of [["harmony", image, true], ["legacy", image, true], [undefined, image, true],
+        ["android", image, false], ["android", "https://example.com/photo.png", true]] as const) {
+        const harness = createHarness(false, src, canExport, false, platform);
+        assert.equal(harness.context.getMediaAssetExportItems(src).some(item => item.id === "saveToGallery"), false);
+    }
+});
+
+test("asset file menus share arbitrary file extensions with their original encoded paths", () => {
+    const harness = createHarness(false, "", true, false, "android");
+    for (const extension of ["pdf", "zip", "docx", "bin"]) {
+        const asset = "assets/report%20100%25." + extension;
+        const decoded = decodeURI(asset);
+        const items = harness.context.getAssetExportItems(asset, decoded);
+        assert.deepEqual(Array.from(items, item => item.id), ["export", "shareAsset"]);
+        items[0].click(null, null);
+        items[1].click(null, null);
+        assert.equal(harness.exports.at(-1), decoded);
+        assert.equal(harness.shares.at(-1), asset);
     }
 });
 
@@ -143,10 +225,10 @@ const browserCases = (source: string, lutePath: string) => {
     const block = holder.querySelector('[data-type="NodeVideo"]');
     check.ok(block, "standard video HTML must remain a video block");
     const snapshots: Array<{oldHTML: string; newHTML: string}> = [];
-    const videoMenu = new Function("window", "updateTransaction", "openMenu", "exportAsset", "writeAssetToClipboard",
-        source + "\nreturn videoMenu;")({siyuan: {languages: {videoLoop: "Loop"}}},
+    const videoMenu = new Function("window", "updateTransaction", "openMenu", "getAssetExportItems", "writeAssetToClipboard",
+        "const getMediaAssetExportItems = getAssetExportItems;\n" + source + "\nreturn videoMenu;")({siyuan: {languages: {videoLoop: "Loop"}}},
         (_editor: unknown, element: Element, oldHTML: string) => snapshots.push({oldHTML, newHTML: element.outerHTML}),
-        (): IMenu[] => [], () => ({id: "export"}), () => ({id: "copyFile"})) as typeof import("./protyle").videoMenu;
+        (): IMenu[] => [], (): IMenu[] => [{id: "export"}], () => ({id: "copyFile"})) as typeof import("./protyle").videoMenu;
     const editor = {disabled: false, app: {}} as IProtyle;
     const menu = videoMenu(editor, block, "NodeVideo");
     menu.find(item => item.id === "loop").click(null, null);

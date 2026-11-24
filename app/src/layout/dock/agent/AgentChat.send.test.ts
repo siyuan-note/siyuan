@@ -10,7 +10,7 @@ const source = createSourceFile("AgentChat.ts", readFileSync("src/layout/dock/ag
     ScriptTarget.Latest, true);
 const declaration = source.statements.find(item => isClassDeclaration(item) && item.name?.text === "AgentChat");
 assert.ok(declaration && isClassDeclaration(declaration));
-const methods = ["sendMessage", "sendQueuedMessage"].map(name => {
+const methods = ["sendMessage", "sendQueuedMessage", "continueEditorTask"].map(name => {
     const method = declaration.members.find(item => item.name?.getText(source) === name);
     assert.ok(method);
     return method.getText(source);
@@ -19,13 +19,17 @@ const compiled = transpileModule(`class Chat { ${methods.join("\n")} } globalThi
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText;
 
+class SessionRevisionConflict extends Error {}
+
 const createChat = () => {
     const events: string[] = [];
     const sent: string[] = [];
     const context: any = {
-        window: {siyuan: {config: {appearance: {lang: "en_US"}}}},
+        window: {siyuan: {languages: {aiEdit: "AI Edit"}, config: {appearance: {lang: "en_US"}}}},
         listCapabilityManifests: (): [] => [],
+        quotePreview: (text: string) => text,
         SessionStore: {newSessionId: () => "entry", getRevision: () => 1},
+        SessionRevisionConflict,
         fetchAgentSSE: async (text: string) => { events.push("send"); sent.push(text); },
     };
     runInNewContext(compiled, context);
@@ -59,8 +63,27 @@ const createChat = () => {
             finish: async () => events.push("finish"),
         },
     });
-    return {chat, events, sent};
+    return {chat, events, sent, context};
 };
+
+test("explicit editor handoff seeds a new session once and allows insertion without sending another request", async () => {
+    const {chat, context, sent} = createChat();
+    const saved: import("./SessionStore").AgentSession[] = [];
+    context.SessionStore.save = async (session: import("./SessionStore").AgentSession) => { saved.push(session); };
+    chat.editorInsertions = new Map();
+    chat.composer.focus = () => {};
+    chat.switchSession = async () => {};
+    const insert = (content: string) => content === "revision";
+    assert.equal(await chat.continueEditorTask("new", "Polish: draft", "result", insert), false);
+    chat.switchSession = async (id: string) => { chat.sessionId = id; };
+    assert.equal(await chat.continueEditorTask("new", "Polish: draft", "result", insert), true);
+    assert.equal(saved.length, 1);
+    assert.equal(saved[0].entries[0].content, "Polish: draft");
+    assert.equal(saved[0].entries[1].type, "assistant");
+    assert.equal(saved[0].entries[1].content, "result");
+    assert.equal(chat.editorInsertions.get("new")("revision"), true);
+    assert.deepEqual(sent, []);
+});
 
 test("sending a new message resets composer height after clearing and before starting the response", async () => {
     const {chat, events, sent} = createChat();
@@ -85,6 +108,37 @@ test("rejected sends preserve the current draft and its manually selected height
         assert.deepEqual(events, []);
         assert.deepEqual(sent, []);
         assert.equal(chat.entries.length, 0);
+    }
+});
+
+test("a send rejected by a revision conflict preserves both the failed message and any newer draft", async () => {
+    for (const newerDraft of [false, true]) {
+        const {chat, sent} = createChat();
+        let draft = chat.composer.getSendData();
+        const original = draft;
+        const conflict = new SessionRevisionConflict("agent session revision conflict");
+        chat.composer.getSendData = () => draft;
+        chat.composer.clear = () => { draft = {text: "", blockHTML: "", references: []}; };
+        chat.composer.setData = (value: AgentComposerData) => { draft = value; };
+        chat.runController.discard = () => {};
+        chat.rollbackUserEntry = () => { chat.entries = []; };
+        chat.saveSession = async () => {
+            if (newerDraft) draft = {text: "Newer draft", blockHTML: "", references: []};
+            throw conflict;
+        };
+        let recovered: unknown;
+        chat.reloadFromDisk = async (_force: boolean, error: unknown) => { recovered = error; };
+        await chat.sendMessage();
+        assert.equal(recovered, conflict);
+        assert.deepEqual(sent, []);
+        assert.equal(chat.entries.length, 0);
+        if (newerDraft) {
+            assert.equal(draft.text, "Newer draft");
+            assert.equal(chat.queuedMessages.get("session")[0].data, original);
+            assert.equal(chat.queuedMessages.isPaused("session"), true);
+        } else {
+            assert.equal(draft, original);
+        }
     }
 });
 

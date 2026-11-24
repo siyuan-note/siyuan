@@ -115,6 +115,42 @@ func TestLoadTreePreservesInvalidParent(t *testing.T) {
 	}
 }
 
+func TestLoadTreeWithSourceVersionChecksParentAndNotebookAccess(t *testing.T) {
+	box, parent, p, data := setupStalePathTest(t)
+	writeStalePathFixture(t, box, p, data)
+	engine := util.NewLute()
+	parentTree := treenode.NewTree(box, "/"+parent+".sy", "/Parent", "Parent")
+	parentPath := writeStalePathFixture(t, box, parentTree.Path,
+		render.NewJSONRenderer(parentTree, engine.RenderOptions, engine.ParseOptions).Render())
+	id := util.GetTreeID(p)
+	cache.SetTreeDataInBox(id, box, data)
+	var version uint64
+	for deadline := time.Now().Add(time.Second); ; time.Sleep(time.Millisecond) {
+		if version = cache.TreeDataVersionInBox(id, box); version != 0 {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("source cache did not publish a version")
+		}
+	}
+	if tree, _, got, err := LoadTreeWithSourceVersion(box, p, engine, version); err != nil || tree != nil || got != version {
+		t.Fatalf("valid source version was not reused: %d, %v", got, err)
+	}
+	if err := os.WriteFile(parentPath, []byte("{"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, got, err := LoadTreeWithSourceVersion(box, p, engine, version); err == nil || got != 0 {
+		t.Fatal("cached source accepted an invalid parent")
+	}
+	provider := DEKProvider
+	t.Cleanup(func() { DEKProvider = provider })
+	locked := errors.New("notebook is locked")
+	DEKProvider = func(string) ([]byte, error) { return nil, locked }
+	if _, _, got, err := LoadTreeWithSourceVersion(box, p, engine, version); !errors.Is(err, locked) || got != 0 {
+		t.Fatal("cached source bypassed notebook access")
+	}
+}
+
 func TestLoadTreePreservesUnsupportedParent(t *testing.T) {
 	for _, cached := range []bool{false, true} {
 		t.Run(map[bool]string{false: "disk", true: "cache"}[cached], func(t *testing.T) {

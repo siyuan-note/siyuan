@@ -860,7 +860,7 @@ const getTablePasteTarget = (range: Range): ITablePasteTarget | undefined => {
 };
 
 const processTable = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement,
-                       pasteTarget?: ITablePasteTarget) => {
+                       pasteTarget?: ITablePasteTarget, aiSource?: "agent" | "editor") => {
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
     const pasteNodes = Array.from(tempElement.content.childNodes).filter(item =>
@@ -920,6 +920,9 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
     }
     tableSelectElement.removeAttribute("style");
     const oldHTML = blockElement.outerHTML;
+    if (aiSource) {
+        blockElement.setAttribute(Constants.CUSTOM_SY_AI_SOURCE, aiSource);
+    }
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     matchedCells.forEach((item, index) => {
         copyTableCellContent(item.target, item.source);
@@ -960,7 +963,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 根据块级拖拽指示线强制插入方向
                            insertPosition?: "before" | "after",
                            undoContext?: Record<string, string>,
-                           templateDocTreePlanID?: string) => {
+                           templateDocTreePlanID?: string,
+                           aiSource?: "agent" | "editor") => {
     if (html === "") {
         return;
     }
@@ -1032,7 +1036,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         }
     }
     if (blockElement.classList.contains("table") &&
-        processTable(range, html, protyle, blockElement, tablePasteTarget)) {
+        processTable(range, html, protyle, blockElement, tablePasteTarget, aiSource)) {
         return;
     }
 
@@ -1248,6 +1252,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         } else {
             focusByWbr(blockElement, range);
         }
+        if (aiSource) {
+            blockElement.setAttribute(Constants.CUSTOM_SY_AI_SOURCE, aiSource);
+        }
         blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         if (isCrossBlockRange) {
             processCrossBlockData();
@@ -1413,6 +1420,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             });
             // 相邻标签之间插入空格区隔，避免后续 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
             fixAdjacentTags(getContenteditableElement(blockElement, range.startContainer));
+            if (aiSource) {
+                blockElement.setAttribute(Constants.CUSTOM_SY_AI_SOURCE, aiSource);
+            }
             protyle.wysiwyg.lastHTMLs[id] = oldHTML;
             input(protyle, blockElement as HTMLElement, range, true, undefined, isCrossBlockRange || undoContext ? {
                 doOperations: crossBlockDoOperations,

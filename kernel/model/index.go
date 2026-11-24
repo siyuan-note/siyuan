@@ -173,7 +173,7 @@ func indexBox(boxID string) {
 	sql.DeleteBoxQueue(boxID)
 	recoveringSources := hasDocumentSourceRecovery(boxID)
 
-	util.SetBootDetails(Conf.Language(303))
+	util.SetBootStage(util.BootStageListingFiles)
 	files, scanErr := box.listFilesForIndex("/")
 	if scanErr != nil {
 		logging.LogErrorf("enumerate notebook [%s] failed: %s", boxID, scanErr)
@@ -256,7 +256,7 @@ func indexBox(boxID string) {
 			treenode.IndexBlockTree(tree)
 		}
 		sql.IndexTreeQueue(tree)
-		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
+		util.UpdateBootProgress(bootProgressPart, util.BootStageIndexingDocuments, int64(i), int64(len(files)))
 		if 1 < i && 0 == i%64 {
 			util.PushStatusBar(fmt.Sprintf(Conf.Language(88), i, (len(files))-i))
 		}
@@ -355,9 +355,9 @@ func IndexRefs() {
 	defer databaseIndexDataLock.Unlock()
 
 	start := time.Now()
-	util.SetBootDetails(Conf.Language(304))
+	util.SetBootStage(util.BootStageResolvingRefs)
 	util.PushStatusBar(Conf.Language(54))
-	util.SetBootDetails(Conf.Language(305))
+	util.SetBootStage(util.BootStageIndexingRefs)
 
 	var defBlockIDs []string
 	defBlockBoxes := map[string]string{} // defBlockID -> boxID，加密笔记本下需按 box 路由后续加载
@@ -421,7 +421,7 @@ func IndexRefs() {
 				continue
 			}
 
-			util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(306), defTree.ID))
+			util.UpdateBootProgress(bootProgressPart, util.BootStageIndexingRefs, int64(i+1), int64(size))
 			sql.UpdateRefsTreeQueue(defTree)
 			if 1 < i && 0 == i%64 {
 				util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
@@ -500,7 +500,7 @@ func subscribeSQLEvents() {
 	//eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]any, current, total, blockCount int, hash string) {
 	//
 	//	msg := fmt.Sprintf(Conf.Language(89), current, total, blockCount, hash)
-	//	util.SetBootDetails(msg)
+
 	//	util.ContextPushMsg(context, msg)
 	//})
 	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]any, blockCount int, hash string) {
@@ -515,7 +515,7 @@ func subscribeSQLEvents() {
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(current), 0)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtSQLDeleteBlocks, func(context map[string]any, rootID string) {
@@ -530,7 +530,7 @@ func subscribeSQLEvents() {
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(93), current, total, rootID)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(current), 0)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtSQLUpdateBlocksHPaths, func(context map[string]any, blockCount int, hash string) {
@@ -545,7 +545,7 @@ func subscribeSQLEvents() {
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(234), current, total, blockCount, hash)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(current), 0)
 		util.ContextPushMsg(context, msg)
 	})
 
@@ -561,7 +561,7 @@ func subscribeSQLEvents() {
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(191), current, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(current), 0)
 		util.ContextPushMsg(context, msg)
 	})
 
@@ -577,7 +577,7 @@ func subscribeSQLEvents() {
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(217), current, total)
-		util.SetBootDetails(msg)
+		util.UpdateBootProgress(0, util.BootStageIndexingDocuments, int64(current), 0)
 		util.ContextPushMsg(context, msg)
 	})
 

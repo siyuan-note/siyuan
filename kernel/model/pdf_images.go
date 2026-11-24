@@ -22,6 +22,7 @@ import (
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 	pdfmodel "github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -140,18 +141,88 @@ func openPDFImages(ctx context.Context, source PDFImageSource, revision string) 
 	}
 	config := pdfmodel.NewDefaultConfiguration()
 	config.Cmd = pdfmodel.EXTRACTIMAGES
-	pdf, err := api.ReadValidateAndOptimize(bytes.NewReader(data), config)
+	pdf, err := pdfcpu.ReadWithContext(ctx, bytes.NewReader(data), config)
+	if err == nil {
+		err = checkPDFImagePageTree(pdf.XRefTable)
+	}
+	if err == nil {
+		err = api.ValidateContext(pdf)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("read PDF failed (damaged, unsupported or password-protected PDF): %w", err)
 	}
 	if pdf.PageCount > pdfImageMaxEntries {
 		return nil, errors.New("PDF has too many pages for image extraction")
 	}
+	if err = api.OptimizeContext(pdf); err != nil {
+		return nil, fmt.Errorf("optimize PDF: %w", err)
+	}
+	if err = pdfcpu.CacheFormFonts(pdf); err != nil {
+		return nil, fmt.Errorf("read PDF form fonts: %w", err)
+	}
 	if err = ctx.Err(); err != nil {
 		return nil, err
 	}
 	ok = true
 	return &pdfImageDocument{ctx: pdf, data: data, revision: actualRevision, boxID: bt.BoxID}, nil
+}
+
+func checkPDFImagePageTree(xref *pdfmodel.XRefTable) error {
+	catalog, err := xref.Catalog()
+	if err != nil {
+		return err
+	}
+	visited := map[int]struct{}{}
+	pages := 0
+	return checkPDFImagePageNode(xref, catalog["Pages"], 0, visited, &pages)
+}
+
+func checkPDFImagePageNode(xref *pdfmodel.XRefTable, object types.Object, depth int, visited map[int]struct{}, pages *int) error {
+	const maxDepth = 128
+	if depth > maxDepth {
+		return errors.New("PDF page tree is too deep")
+	}
+	if ref, ok := object.(types.IndirectRef); ok {
+		id := ref.ObjectNumber.Value()
+		if _, exists := visited[id]; exists {
+			return errors.New("PDF page tree contains a repeated node")
+		}
+		visited[id] = struct{}{}
+	}
+	node, err := xref.DereferenceDict(object)
+	if err != nil {
+		return err
+	}
+	if node == nil {
+		return errors.New("PDF page tree contains a missing node")
+	}
+	if typ := node.Type(); depth != 0 && typ != nil && *typ == "Page" {
+		*pages++
+		if *pages > pdfImageMaxEntries {
+			return errors.New("PDF has too many pages for image extraction")
+		}
+		return nil
+	}
+	kids, err := xref.DereferenceArray(node["Kids"])
+	if err != nil {
+		return err
+	}
+	if kids == nil {
+		return errors.New("PDF page tree contains invalid children")
+	}
+	for _, child := range kids {
+		ref, ok := child.(types.IndirectRef)
+		if child == nil || ok && ref.ObjectNumber.Value() == 0 {
+			continue
+		}
+		if !ok {
+			return errors.New("PDF page tree child is not an indirect reference")
+		}
+		if err = checkPDFImagePageNode(xref, ref, depth+1, visited, pages); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func ListPDFImages(ctx context.Context, source PDFImageSource, pages []int, offset, limit int, revision string) (ret PDFImageList, err error) {

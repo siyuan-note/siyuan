@@ -19,7 +19,7 @@ const setup = () => {
         classList: {add() {}, contains: () => open},
         querySelector: (selector: string) => selector === ".b3-dialog__container" ? sheet : {},
     };
-    const layout = {resize() {}, setMode() {}, getBounds() {}, setPreferredHeight() {},
+    const layout = {resize() {}, setMode() {},
         freeze() { freezes++; }, dispose() {}};
     const api: any = {};
     runInNewContext(source, {exports: api,

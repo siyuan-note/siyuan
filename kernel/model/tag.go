@@ -13,6 +13,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -122,6 +123,9 @@ func removeTag(label string, beforeCommit func()) (err error) {
 	updateAttributeViewBlockText(updateNodes)
 
 	sql.FlushQueue()
+	if sortErr := removeTagSort([]string{label}); sortErr != nil {
+		logging.LogErrorf("remove tag order failed: %s", sortErr)
+	}
 	util.PushClearProgress()
 	return
 }
@@ -135,47 +139,61 @@ type Tag struct {
 	Type     string `json:"type"` // "tag"
 	Depth    int    `json:"depth"`
 	Count    int    `json:"count"`
-
-	tags Tags
+	created  int64
 }
 
 type Tags []*Tag
 
-func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int) (ret *Tags) {
-	confFileTreeSnapshot := Conf.LoadFileTree()
-
+func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int, visible func(string, string) bool) *Tags {
 	FlushTxQueue()
 	sql.FlushQueue()
 
-	ret = &Tags{}
-	labels := labelTags()
-	tags := Tags{}
-	for label := range labels {
-		tags = buildTags(tags, strings.Split(label, "/"), 0)
+	withDates := sortVal == util.SortModeTagCreatedDESC
+	var labels map[string]int
+	var created tagDates
+	var err error
+	if visible != nil || withDates {
+		labels, created, err = labelTagAssociations(visible, withDates)
+	} else {
+		labels, err = labelTagCounts()
 	}
-	appendTagChildren(&tags, labels, sortVal)
-	sortTags(tags, sortVal)
-
-	var total int
-	tmp := &Tags{}
-	for _, tag := range tags {
-		*tmp = append(*tmp, tag)
-		countTag(tag, &total)
-		if confFileTreeSnapshot.MaxListCount < total && !ignoreMaxListHintArg {
-			if nil == util.NotificationsCfg.Load() || util.NotificationsCfg.Load().TagMaxList {
-				util.PushMsgWithApp(appID, fmt.Sprintf(Conf.Language(243), confFileTreeSnapshot.MaxListCount), 7000)
-			}
-			break
+	if err != nil {
+		logging.LogErrorf("query tags failed: %s", err)
+		return &Tags{}
+	}
+	var order tagSortGroups
+	if sortVal == util.SortModeCustom {
+		if order, err = readTagSort(); err != nil {
+			logging.LogErrorf("read tag order failed: %s", err)
 		}
 	}
+	tags := buildTagTree(labels, sortVal, order, created)
+	return limitTagTree(tags, ignoreMaxListHintArg, appID)
+}
 
-	ret = tmp
-	return
+func limitTagTree(tags Tags, ignoreLimit bool, appID string) *Tags {
+	if ignoreLimit {
+		return &tags
+	}
+
+	limit := Conf.LoadFileTree().MaxListCount
+	var total int
+	for i, tag := range tags {
+		countTag(tag, &total)
+		if limit < total {
+			if nil == util.NotificationsCfg.Load() || util.NotificationsCfg.Load().TagMaxList {
+				util.PushMsgWithApp(appID, fmt.Sprintf(Conf.Language(243), limit), 7000)
+			}
+			tags = tags[:i+1]
+			return &tags
+		}
+	}
+	return &tags
 }
 
 func countTag(tag *Tag, total *int) {
 	*total += 1
-	for _, child := range tag.tags {
+	for _, child := range tag.Children {
 		countTag(child, total)
 	}
 }
@@ -202,11 +220,23 @@ func sortTags(tags Tags, sortVal int) {
 		sort.Slice(tags, func(i, j int) bool { return (tags)[i].Count < (tags)[j].Count })
 	case util.SortModeRefCountDESC:
 		sort.Slice(tags, func(i, j int) bool { return (tags)[i].Count > (tags)[j].Count })
-	default:
+	case util.SortModeTagCreatedDESC:
 		sort.Slice(tags, func(i, j int) bool {
-			return util.NaturalCompare((tags)[i].Name, (tags)[j].Name)
+			if tags[i].created == tags[j].created {
+				return naturalTagLess(tags[i].Name, tags[j].Name)
+			}
+			return tags[i].created > tags[j].created
 		})
+	default:
+		sort.Slice(tags, func(i, j int) bool { return naturalTagLess(tags[i].Name, tags[j].Name) })
 	}
+}
+
+func naturalTagLess(left, right string) bool {
+	if util.NaturalCompare(left, right) {
+		return true
+	}
+	return !util.NaturalCompare(right, left) && left < right
 }
 
 func SearchTags(keyword string) (ret []string) {
@@ -270,63 +300,83 @@ func labelBlocksByKeyword(keyword string) (ret map[string]TagBlocks) {
 	return
 }
 
-func labelTags() (ret map[string]Tags) {
-	ret = map[string]Tags{}
-
-	tagSpans := sql.QueryTagSpans("")
-	for _, tagSpan := range tagSpans {
-		label := util.UnescapeHTML(tagSpan.Content)
-		if _, ok := ret[label]; ok {
-			ret[label] = append(ret[label], &Tag{})
-		} else {
-			ret[label] = Tags{}
-		}
+func labelTagCounts() (map[string]int, error) {
+	indexed, err := sql.QueryTagCounts()
+	if err != nil {
+		return nil, err
 	}
-	return
+	counts := make(map[string]int, len(indexed))
+	for label, count := range indexed {
+		counts[util.UnescapeHTML(label)] += count
+	}
+	return counts, nil
 }
 
-func appendTagChildren(tags *Tags, labels map[string]Tags, sortVal int) {
-	for _, tag := range *tags {
-		tag.Label = tag.Name
-		unescapedLabel := util.UnescapeHTML(tag.Label)
-		if _, ok := labels[unescapedLabel]; ok {
-			tag.Count = len(labels[unescapedLabel]) + 1
+func labelTagAssociations(visible func(string, string) bool, withDates bool) (map[string]int, tagDates, error) {
+	counts := map[string]int{}
+	created := tagDates{}
+	var previousAttrs string
+	var dates tagDates
+	err := sql.ReadTagAssociations(withDates, func(label, attrs, box, path string, count int) {
+		if visible != nil && !visible(box, path) {
+			return
 		}
-		appendChildren0(tag, labels, sortVal)
-		sortTags(tag.Children, sortVal)
-	}
+		label = util.UnescapeHTML(label)
+		counts[label] += count
+		if withDates {
+			if attrs != previousAttrs {
+				dates = readTagDates(attrs)
+				previousAttrs = attrs
+			}
+			created[label] = max(created[label], dates[label])
+		}
+	})
+	return counts, created, err
 }
 
-func appendChildren0(tag *Tag, labels map[string]Tags, sortVal int) {
-	sortTags(tag.tags, sortVal)
-	for _, t := range tag.tags {
-		t.Label = tag.Label + "/" + t.Name
-		unescapedLabel := util.UnescapeHTML(t.Label)
-		if _, ok := labels[unescapedLabel]; ok {
-			t.Count = len(labels[unescapedLabel]) + 1
+func buildTagTree(labels map[string]int, sortVal int, order tagSortGroups, created tagDates) Tags {
+	tags := Tags{}
+	nodes := make(map[string]*Tag, len(labels))
+	for label, count := range labels {
+		path := ""
+		children := &tags
+		for depth, name := range strings.Split(label, "/") {
+			path += name
+			node := nodes[path]
+			if node == nil {
+				node = &Tag{Name: util.EscapeHTML(name), Label: util.EscapeHTML(path), Type: "tag", Depth: depth}
+				nodes[path] = node
+				*children = append(*children, node)
+			}
+			node.created = max(node.created, created[label])
+			children = &node.Children
+			path += "/"
 		}
-		tag.Children = append(tag.Children, t)
+		nodes[label].Count = count
 	}
-	for _, child := range tag.tags {
-		appendChildren0(child, labels, sortVal)
-	}
+	sortTagGroups(tags, "", sortVal, order)
+	return tags
 }
 
-func buildTags(root Tags, labels []string, depth int) Tags {
-	if 1 > len(labels) {
-		return root
+func sortTagGroups(tags Tags, group string, sortVal int, order tagSortGroups) {
+	if sortVal == util.SortModeCustom && len(order[group]) > 0 {
+		ranks := make(map[string]int, len(order[group]))
+		for i, label := range order[group] {
+			ranks[util.EscapeHTML(label)] = i + 1
+		}
+		sort.Slice(tags, func(i, j int) bool {
+			left, right := ranks[tags[i].Label], ranks[tags[j].Label]
+			if left == right {
+				return naturalTagLess(tags[i].Name, tags[j].Name)
+			}
+			return left > 0 && (right == 0 || left < right)
+		})
+	} else {
+		sortTags(tags, sortVal)
 	}
-
-	i := 0
-	for ; i < len(root); i++ {
-		if (root)[i].Name == util.EscapeHTML(labels[0]) {
-			break
+	for _, tag := range tags {
+		if len(tag.Children) > 0 {
+			sortTagGroups(tag.Children, util.UnescapeHTML(tag.Label)+"/", sortVal, order)
 		}
 	}
-	if i == len(root) {
-		root = append(root, &Tag{Name: util.EscapeHTML(labels[0]), Type: "tag", Depth: depth})
-	}
-	depth++
-	root[i].tags = buildTags(root[i].tags, labels[1:], depth)
-	return root
 }

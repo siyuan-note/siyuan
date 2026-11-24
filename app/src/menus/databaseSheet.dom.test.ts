@@ -12,6 +12,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     const check: typeof assert = require("node:assert/strict");
     let saves = 0;
     let backs = 0;
+    let showGroupFields = false;
     const modules: Record<string, {exports: any}> = {};
     const content = () => '<div class="b3-menu__items"><input class="b3-text-field" value="Draft">' +
         '<div style="height:1600px">Database settings</div></div>';
@@ -29,6 +30,12 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         "protyle/render/av/panels/registry": {
             getAVPanelDescriptor: () => ({
                 render: (context: {html: string}) => {
+                    if (showGroupFields) {
+                        const {getGroupsMethodHTML}: typeof import("../protyle/render/av/groups") = load("protyle/render/av/groups");
+                        context.html = getGroupsMethodHTML([{id: "primary", type: "block", name: "Primary key"},
+                            {id: "status", type: "select", name: "Status"}] as IAVColumn[], null, "table");
+                        return true;
+                    }
                     context.html = '<div class="b3-menu__items"><button class="b3-menu__item" data-type="nobg">' +
                         '<span class="block__icon block__icon--menu-back" data-type="go-config"><svg><use xlink:href="#iconLeft"></use></svg></span>' +
                         '<span class="b3-menu__label ft__center">Fields</span></button>' +
@@ -51,7 +58,9 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
         "protyle/render/av/cell": {},
         "protyle/ui/hideElements": {}, "protyle/render/av/view": {getFieldsByData: (): IAVColumn[] => []},
         "protyle/util/selection": {focusBlock() {}}, "protyle/render/av/row": {},
-        "protyle/render/av/groups": {getPageSize: () => ({})},
+        "protyle/render/av/capabilities": {hasAVCapability: () => true},
+        "protyle/render/av/col": {getColIconByType: () => "iconKey"},
+        "protyle/render/av/groupResponse": {}, "emoji": {}, "plugin/Menu": {},
         "protyle/render/av/color": {applyAVColorPalette() {}, getAVCustomColors: (): string[] => []},
         "protyle/render/av/panelTarget": {}, "protyle/render/av/selectPosition": {},
         "dialog/message": {showMessage() {}},
@@ -96,14 +105,13 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     common.className = "b3-menu fn__none";
     common.innerHTML = '<div class="b3-menu__title"><span class="b3-menu__label"></span></div>' +
         '<div class="b3-menu__items"><button class="b3-menu__item">Database</button></div>';
-    common.dataset.sheetExpandable = "true";
     document.body.append(common);
     const parent = new Menu(common);
     parent.addItem({label: "A long database property label that needs more than one line", submenu: [{label: "Option"}]});
     window.siyuan.menus.menu = parent;
     parent.fullscreen();
     await settle();
-    check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight * .56) < 1);
+    check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight / 2) < 1);
     (common.lastElementChild.lastElementChild as HTMLElement).click();
     await settle();
     const title = common.firstElementChild;
@@ -113,7 +121,7 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     check.equal(common.querySelector('[data-type="sheet-expand"]'), null);
     common.dispatchEvent(new CustomEvent("click", {detail: "back"}));
     await settle();
-    check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight * .56) < 1);
+    check.ok(Math.abs(common.getBoundingClientRect().height - innerHeight / 2) < 1);
 
     const block = document.createElement("div");
     block.className = "av";
@@ -131,11 +139,11 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     const menu = panel.lastElementChild as HTMLElement;
     const back = menu.querySelector<HTMLButtonElement>('[data-type="sheet-back"]');
     check.equal(back.classList.contains("fn__none"), false);
-    check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight * .56) < 1);
+    check.ok(Math.abs(menu.getBoundingClientRect().height - innerHeight / 2) < 1);
     check.equal(menu.querySelector('[data-type="sheet-expand"]'), null);
     const touch = (type: string, y: number, target: Element = menu.firstElementChild) => {
         const event = new Event(type, {bubbles: true, cancelable: true});
-        Object.assign(event, {touches: [{clientX: 80, clientY: y}], changedTouches: [{clientX: 80, clientY: y}]});
+        Object.assign(event, {touches: [{identifier: 1, clientX: 80, clientY: y}], changedTouches: [{identifier: 1, clientX: 80, clientY: y}]});
         target.dispatchEvent(event);
     };
     touch("touchstart", menu.getBoundingClientRect().top + 8);
@@ -183,30 +191,6 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     touch("touchmove", 280);
     touch("touchend", 280);
     await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 180)) < 1,
-        `drag height ${menu.getBoundingClientRect().height}, expected ${innerHeight - 180}`);
-    touch("touchstart", 200);
-    touch("touchmove", 60);
-    touch("touchend", 60);
-    await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 40)) < 1,
-        `resized height ${menu.getBoundingClientRect().height}, expected ${innerHeight - 40}`);
-    Object.assign(viewport, {height: innerHeight - 300});
-    viewport.dispatchEvent(new Event("resize"));
-    await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 300)) < 1);
-    Object.assign(viewport, {height: innerHeight});
-    viewport.dispatchEvent(new Event("resize"));
-    await settle();
-    check.ok(Math.abs(menu.getBoundingClientRect().height - (innerHeight - 40)) < 1,
-        "keyboard dismissal restores the manually selected height");
-    await new Promise(resolve => setTimeout(resolve, 310));
-    check.equal(menu.querySelector('[data-type="sheet-close"]'), null);
-    menu.classList.remove("b3-menu--expanded");
-    touch("touchstart", 100);
-    touch("touchmove", innerHeight + 300);
-    touch("touchend", innerHeight + 300);
-    await settle();
     check.equal(saves, 1);
     check.equal(panel.isConnected, false);
     check.equal(common.classList.contains("fn__none"), false);
@@ -214,23 +198,35 @@ const browserCases = async (sources: Record<string, string>, languages: Record<s
     common.dispatchEvent(new CustomEvent("click", {detail: "back"}));
     await settle();
     check.equal(common.classList.contains("fn__none"), true);
-    check.equal(common.hasAttribute("data-sheet-expandable"), false);
     check.equal(common.querySelector(".b3-menu__actions"), null);
     parent.append(document.createElement("button"));
     parent.fullscreen();
     await settle();
     check.equal(common.querySelector(".b3-menu__actions"), null);
     parent.remove();
+
+    showGroupFields = true;
+    openMenuPanel({type: "config", data: {} as IAV, blockElement: block, protyle});
+    await settle();
+    const groupChoices = Array.from(document.querySelectorAll('[data-type="setGroupMethod"]'));
+    check.equal(groupChoices.length, 3);
+    const rowHeight = groupChoices[0].getBoundingClientRect().height;
+    for (const choice of groupChoices.slice(1)) {
+        const icon = choice.querySelector(".b3-menu__icon").getBoundingClientRect();
+        check.ok(icon.width > 0 && icon.width <= 20);
+        check.ok(Math.abs(choice.getBoundingClientRect().height - rowHeight) < 1,
+            "Group field icons must fit the same row height as the clear option");
+    }
     return "Database sheets passed";
 };
 
-test("mobile database sheets expand, preserve navigation and edits, and fit the keyboard viewport", {
+test("mobile database sheets fit group field rows, preserve navigation and edits, and fit the keyboard viewport", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuGroup", "menus/menuPosition", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
-        "util/escape", "util/setPosition", "protyle/util/hasClosest", "protyle/render/av/openMenuPanel",
-        "protyle/render/av/mobilePanel", "protyle/render/av/host", "protyle/render/av/renderData"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
+        "util/escape", "util/setPosition", "protyle/util/hasClosest", "protyle/render/av/openMenuPanel", "protyle/render/av/cellPanelPosition",
+        "protyle/render/av/mobilePanel", "protyle/render/av/host", "protyle/render/av/renderData", "protyle/render/av/viewVisibility", "protyle/render/av/groups"].map(name => [name, transpileModule(readFileSync(path.join(__dirname, "..", name + ".ts"), "utf8"), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText]));
     const css = compile(path.join(__dirname, "../assets/scss/mobile.scss"), {logger: Logger.silent}).css;

@@ -601,6 +601,8 @@ export const disabledProtyle = (protyle: IProtyle) => {
         protyle.background.element.classList.remove("protyle-background--enable");
     }
     disabledWYSIWYG(protyle.wysiwyg.element);
+    // 点击只读正文时让滚动容器获得焦点，以便使用浏览器的键盘滚动。
+    protyle.contentElement.tabIndex = -1;
     // 搜索预览的只读正文无法持有焦点，交由可聚焦容器维持快捷键上下文。
     if (hadFocus && protyle.element.hasAttribute("tabindex") &&
         !protyle.element.contains(document.activeElement)) {
@@ -638,6 +640,7 @@ export const enableProtyle = (protyle: IProtyle) => {
     }
     /// #endif
     protyle.disabled = false;
+    protyle.contentElement.removeAttribute("tabindex");
     if (wasDisabled) {
         protyle.wysiwyg.tableControl?.clear();
         protyle.wysiwyg.element.querySelectorAll(".table__select").forEach(item => item.removeAttribute("style"));

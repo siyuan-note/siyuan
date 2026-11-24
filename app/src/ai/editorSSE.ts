@@ -1,20 +1,20 @@
 import {fetchWithAppId} from "../util/fetchWithAppId";
+import type {AIEditorChatRequestInput} from "../types/api";
+
 export interface IAIEditorMessage {
     role: "user" | "assistant";
     content: string;
 }
 
-export interface IAIEditorChatRequest {
+interface IAIEditorChatRequest extends AIEditorChatRequestInput {
     taskID: string;
-    ids?: string[];
-    input?: string;
-    action?: string;
     history?: IAIEditorMessage[];
 }
 
 export type TAIEditorSSEEvent = {
     type: "start";
     taskID: string;
+    prompt?: string;
 } | {
     type: "reasoning";
     token: string;
@@ -42,7 +42,8 @@ export const createAIEditorSSEParserState = (): IAIEditorSSEParserState => ({buf
 const buildEvent = (event: string, data: Record<string, unknown>): TAIEditorSSEEvent | undefined => {
     switch (event) {
         case "start":
-            return {type: "start", taskID: String(data.taskID || "")};
+            return {type: "start", taskID: String(data.taskID || ""),
+                ...(typeof data.prompt === "string" ? {prompt: data.prompt} : {})};
         case "content":
             return {type: "content", token: String(data.token || "")};
         case "reasoning":

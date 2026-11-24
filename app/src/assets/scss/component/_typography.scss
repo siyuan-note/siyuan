@@ -968,7 +968,8 @@
     word-break: break-word;
     position: relative;
 
-    &--done:not([data-task="/"]) > div[data-node-id].p {
+    &--done:not([data-task="/"]) > div[data-node-id].p,
+    &--done:not([data-task="/"]) > div[data-table-cell-node].p {
       @include task.completed-text;
     }
 

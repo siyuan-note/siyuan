@@ -48,6 +48,8 @@ func TestAttributeViewListCreateAndDuplicate(t *testing.T) {
 		t.Fatal("missing source group")
 	}
 	folded.GroupFolded = true
+	expanded := list.GetGroupByGroupValue("expanded")
+	folded.GroupSort, expanded.GroupSort = expanded.GroupSort, folded.GroupSort
 	if err = av.SaveAttributeView(attrView); nil != err {
 		t.Fatal(err)
 	}
@@ -72,5 +74,8 @@ func TestAttributeViewListCreateAndDuplicate(t *testing.T) {
 	expandedCopy := duplicate.GetGroupByGroupValue("expanded")
 	if foldedCopy == nil || !foldedCopy.GroupFolded || foldedCopy.ID == folded.ID || expandedCopy == nil || expandedCopy.GroupFolded {
 		t.Fatal("duplicate must retain each group's fold state with independent group IDs")
+	}
+	if duplicate.Group.Order != av.GroupOrderMan || foldedCopy.GroupSort != folded.GroupSort || expandedCopy.GroupSort != expanded.GroupSort {
+		t.Fatal("duplicate must retain the source's manual group order")
 	}
 }

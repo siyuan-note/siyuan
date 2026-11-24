@@ -209,6 +209,7 @@ interface Window {
         exportByDefault(url: string): void
         saveExportFile(url: string): void
         saveExportFileV2?(url: string, requestID: string): void
+        saveAssetToGallery?(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
@@ -412,7 +413,7 @@ interface IPosition {
 
 interface ISaveLayout {
     name: string,
-    layout: IObject
+    layout: Config.IUiLayout & import("./api").APIPOSTRoutes["/api/system/setUILayout"]["request"]["layout"]
     time: number
     filesPaths: IFilesPath[]
 }

@@ -444,7 +444,7 @@ export class ListMindmapView {
                 this.cancelPointer();
             }
             this.printTransform ||= {scale: this.scale, offsetX: this.offsetX, offsetY: this.offsetY};
-            this.fitPrint();
+            this.refreshLayout(true);
         });
         this.listen(window, "afterprint", () => {
             if (this.printTransform) {
@@ -1384,11 +1384,11 @@ export class ListMindmapView {
         });
     }
 
-    public refreshLayout() {
-        if (this.destroyed || this.frame || this.pointer?.relation) {
+    public refreshLayout(immediate = false) {
+        if (this.destroyed || (!immediate && this.frame) || this.pointer?.relation) {
             return;
         }
-        this.frame = requestAnimationFrame(() => {
+        const layout = () => {
             this.frame = 0;
             this.stopFoldAnimation?.();
             if (this.pointer?.relation) {
@@ -1588,7 +1588,16 @@ export class ListMindmapView {
                 [...previousPositions.keys()].some(id => !this.positions.has(id)))) {
                 this.animateFold(previousPositions, previousEdges, previousOffset, summarySizes);
             }
-        });
+        };
+        if (immediate) {
+            cancelAnimationFrame(this.frame);
+            if (this.options.printLayout) {
+                this.nestedViews.forEach(views => views.forEach(view => view.refreshLayout(true)));
+            }
+            layout();
+        } else {
+            this.frame = requestAnimationFrame(layout);
+        }
     }
 
     private positionNodes() {
@@ -3529,6 +3538,19 @@ export class ListMindmapView {
         input.addEventListener("blur", () => finish(true));
         input.addEventListener("keydown", event => {
             event.stopPropagation();
+            if (event.key === "Tab" && !event.isComposing && event.keyCode !== 229 &&
+                !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey &&
+                !this.readOnly && !this.locked && this.options.onAdd) {
+                event.preventDefault();
+                if (!event.repeat) {
+                    finish(true);
+                    this.focusNode(id, false);
+                    if (!this.destroyed && !this.readOnly && !this.locked && this.getSelectedId() === id) {
+                        this.options.onAdd?.(id, "child");
+                    }
+                }
+                return;
+            }
             if (!event.isComposing && (event.key === "Enter" || event.key === "Escape")) {
                 event.preventDefault();
                 finish(event.key === "Enter");

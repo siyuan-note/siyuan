@@ -11,6 +11,30 @@ import (
 	"testing"
 )
 
+func TestInlineMessageQuotesUseAvailableHistory(t *testing.T) {
+	snapshot := strings.Repeat("長文", 80)
+	refs := []Reference{{ID: "first", MessageID: "assistant", Title: snapshot}, {ID: "second", MessageID: "user", Title: "draft"}}
+	input := "Review ⟦second⟧ then ⟦first⟧"
+	restored := buildUserMessageContent(input, refs, nil, nil)
+	if restored != "Review \"draft\" then \""+snapshot+"\"" {
+		t.Fatalf("missing or compacted history: %q", restored)
+	}
+	history := []AgentMessage{{Role: "assistant", EntryID: "assistant", Content: snapshot}}
+	linked := buildUserMessageContent(input, refs, nil, nil, history...)
+	if !strings.HasPrefix(linked, "Review \"draft\" then ") || !strings.Contains(linked, "earlier assistant message") ||
+		strings.Contains(linked, snapshot) || strings.Contains(linked, "⟦") {
+		t.Fatalf("available history: %q", linked)
+	}
+	short := buildUserMessageContent(input, refs, nil, nil, AgentMessage{EntryID: "user", Role: "user", Content: "draft"})
+	if strings.Contains(short, "draft") || !strings.Contains(short, "the earlier user message") {
+		t.Fatalf("short historical message was duplicated: %q", short)
+	}
+	history[0].Content = "edited"
+	if actual := buildUserMessageContent(input, refs, nil, nil, history...); actual != restored {
+		t.Fatalf("edited message discarded its snapshot: %q", actual)
+	}
+}
+
 func TestSystemPromptRequiresSourceContentReads(t *testing.T) {
 	for _, instruction := range []string{
 		"including a bare block ID",
@@ -59,6 +83,26 @@ func TestSourceContentPromptRespectsAvailableCapabilities(t *testing.T) {
 				t.Fatal("content-unavailable fallback and known-ID links must survive capability filtering")
 			}
 		})
+	}
+}
+
+func TestUserGuidePromptOpensAnUnlistedGuide(t *testing.T) {
+	for _, instruction := range []string{
+		"If the guide is absent from the list or closed, call notebook.open with its built-in ID",
+		"Once open, use search.fulltext with the guide ID in the notebook argument",
+	} {
+		if !strings.Contains(systemPrompt, instruction) {
+			t.Errorf("missing guide instruction %q", instruction)
+		}
+	}
+	for _, name := range []string{"notebook", "search"} {
+		set := &capabilitySet{registrations: map[string]*capabilityRegistration{
+			name: {ModelName: name},
+		}}
+		prompt := filterSystemPromptByCapabilities(systemPrompt, set)
+		if strings.Contains(prompt, "If the guide is absent from the list") {
+			t.Errorf("guide workflow exposed with only the %s capability", name)
+		}
 	}
 }
 

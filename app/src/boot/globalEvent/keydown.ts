@@ -61,7 +61,7 @@ import {openRecentDocs} from "../../business/openRecentDocs";
 import type {App} from "../../index";
 import {toggleDockPanel} from "../../layout/dock/panel";
 import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/dock/util";
-import {workspaceMenu} from "../../menus/workspace";
+import {mainMenu} from "../../menus/mainMenu";
 import {Search} from "../../search";
 import {Custom} from "../../layout/dock/Custom";
 import {transaction} from "../../protyle/wysiwyg/transaction";
@@ -1598,8 +1598,8 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.mainMenu, event)) {
-        const target = document.querySelector("#barWorkspace");
-        workspaceMenu(app, target.getBoundingClientRect(), true, target);
+        const target = document.getElementById(Constants.MENU_BAR_MAIN_MENU);
+        mainMenu(app, target.getBoundingClientRect(), true, target);
         event.preventDefault();
         return;
     }

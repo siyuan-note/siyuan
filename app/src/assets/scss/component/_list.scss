@@ -1,6 +1,24 @@
 @use "../util/mixin";
 @use "../util/function";
 
+.tag-tree {
+  min-height: 0;
+  overflow: auto;
+  overflow-anchor: none;
+}
+
+.tag-tree__list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tag-tree__drag-source {
+  position: absolute;
+  inset-block-start: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .file-tree__row {
   --file-tree-indent: 16px;
   --file-tree-toggle-size: 22px;

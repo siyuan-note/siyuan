@@ -14,8 +14,10 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -34,6 +36,7 @@ const (
 
 	oidcMobileRedirectURL  = "siyuan:/oidc-callback"
 	oidcTransactionMax     = 512
+	oidcCompletedMax       = 4096
 	oidcTransactionPerIP   = 32
 	oidcTransactionPerBind = 8
 	oidcTransactionTimeout = 10 * time.Minute
@@ -57,6 +60,7 @@ type oidcTransaction struct {
 	RememberMe       bool
 	Claimed          bool
 	Completed        bool
+	CompletedSeq     uint64
 	Success          bool
 	Message          string
 	ExpiresAt        time.Time
@@ -72,6 +76,9 @@ var oidcTransactions = struct {
 	byState map[string]*oidcTransaction
 	byPoll  map[string]string
 }{byState: map[string]*oidcTransaction{}, byPoll: map[string]string{}}
+
+// oidcCompletedSeq 标记完成顺序，用于按先后淘汰完成记录
+var oidcCompletedSeq atomic.Uint64
 
 var oidcProviders = struct {
 	sync.Mutex
@@ -635,20 +642,21 @@ func storeOIDCTransaction(transaction *oidcTransaction) error {
 	if transaction.Done == nil {
 		transaction.Done = make(chan struct{})
 	}
-	if len(oidcTransactions.byState) >= oidcTransactionMax {
-		return errors.New("OIDC login transaction capacity reached")
-	}
-	perIP, perBinding := 0, 0
+	pending, perIP, perBinding := 0, 0, 0
 	for _, candidate := range oidcTransactions.byState {
 		if candidate.Completed {
 			continue
 		}
+		pending++
 		if transaction.ClientIP != "" && candidate.ClientIP == transaction.ClientIP {
 			perIP++
 		}
 		if transaction.Binding != "" && candidate.Binding == transaction.Binding {
 			perBinding++
 		}
+	}
+	if pending >= oidcTransactionMax {
+		return errors.New("OIDC login transaction capacity reached")
 	}
 	if perIP >= oidcTransactionPerIP || perBinding >= oidcTransactionPerBind {
 		return errors.New("too many pending OIDC login transactions")
@@ -718,6 +726,7 @@ func completeOIDCTransaction(state string, success bool, message string) {
 		return
 	}
 	transaction.Completed = true
+	transaction.CompletedSeq = oidcCompletedSeq.Add(1)
 	transaction.Success = success
 	transaction.Message = message
 	transaction.ExpiresAt = time.Now().Add(oidcCompletedTimeout)
@@ -731,6 +740,27 @@ func completeOIDCTransaction(state string, success bool, message string) {
 		transaction.Done = make(chan struct{})
 	}
 	close(transaction.Done)
+	trimCompletedOIDCTransactionsLocked()
+}
+
+// trimCompletedOIDCTransactionsLocked 淘汰最早完成的登录事务，避免完成记录占满待完成容量。
+// 完成记录只用于重放回调，洪泛时保留时间可能短于 oidcCompletedTimeout。
+func trimCompletedOIDCTransactionsLocked() {
+	completed := make([]*oidcTransaction, 0, len(oidcTransactions.byState))
+	for _, transaction := range oidcTransactions.byState {
+		if transaction.Completed {
+			completed = append(completed, transaction)
+		}
+	}
+	if len(completed) <= oidcCompletedMax {
+		return
+	}
+	sort.Slice(completed, func(i, j int) bool {
+		return completed[i].CompletedSeq < completed[j].CompletedSeq
+	})
+	for _, transaction := range completed[:len(completed)-oidcCompletedMax] {
+		deleteOIDCTransactionLocked(transaction.State)
+	}
 }
 
 func pollOIDCTransaction(pollToken, binding string) (*oidcTransaction, bool) {

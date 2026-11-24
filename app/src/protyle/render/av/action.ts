@@ -341,7 +341,6 @@ const openAVEditFieldMenu = (protyle: IProtyle, blockElement: HTMLElement, ancho
     const menu = new Menu();
     getAVEditFieldMenuItems(protyle, blockElement).forEach(item => menu.addItem(item));
     if (isMobile()) {
-        menu.element.setAttribute("data-sheet-expandable", "true");
         menu.fullscreen();
     } else {
         const rect = anchorElement.getBoundingClientRect();
@@ -349,7 +348,6 @@ const openAVEditFieldMenu = (protyle: IProtyle, blockElement: HTMLElement, ancho
     }
 };
 
-let foldTimeout: number;
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     const templateInteractiveElement = getAVTemplateInteractiveElement(event.target);
     if (templateInteractiveElement) {
@@ -491,8 +489,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-switcher" && !protyle.disabled) {
-            openMenuPanel({protyle, blockElement, type: "switcher"});
+        } else if (type === "av-switcher" && (!protyle.disabled || target.classList.contains("av__mobile-view"))) {
+            const data = protyle.disabled ? getAVData(blockElement) : undefined;
+            if (!protyle.disabled || data) {
+                openMenuPanel({protyle, blockElement, type: "switcher", data});
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -712,7 +713,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 });
                 initUnfoldedGroupTables(blockElement, protyle);
                 updateGroupFoldedStates(blockElement, doData);
-                clearTimeout(foldTimeout);
                 if (window.siyuan.isPublish || protyle.disabled) {
                     if (window.siyuan.isPublish) {
                         setPublishAVFolds(blockElement, viewID, doData);
@@ -741,7 +741,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 setGroupFolded(target, isOpen);
                 initUnfoldedGroupTables(blockElement, protyle);
                 updateGroupFoldedStates(blockElement, {[target.dataset.id]: isOpen});
-                clearTimeout(foldTimeout);
                 if (window.siyuan.isPublish || protyle.disabled) {
                     if (window.siyuan.isPublish) {
                         setPublishAVFolds(blockElement, viewID, {[target.dataset.id]: isOpen});
@@ -752,26 +751,21 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     event.stopPropagation();
                     return true;
                 }
-                foldTimeout = window.setTimeout(() => {
-                    if (protyle.disabled) {
-                        return;
-                    }
-                    transaction(protyle, [{
-                        action: "foldAttrViewGroup",
-                        avID: blockElement.dataset.avId,
-                        blockID: blockElement.dataset.nodeId,
-                        viewID,
-                        id: target.dataset.id,
-                        data: isOpen
-                    }], [{
-                        action: "foldAttrViewGroup",
-                        avID: blockElement.dataset.avId,
-                        blockID: blockElement.dataset.nodeId,
-                        viewID,
-                        id: target.dataset.id,
-                        data: !isOpen
-                    }]);
-                }, Constants.TIMEOUT_COUNT);
+                transaction(protyle, [{
+                    action: "foldAttrViewGroup",
+                    avID: blockElement.dataset.avId,
+                    blockID: blockElement.dataset.nodeId,
+                    viewID,
+                    id: target.dataset.id,
+                    data: isOpen,
+                }], [{
+                    action: "foldAttrViewGroup",
+                    avID: blockElement.dataset.avId,
+                    blockID: blockElement.dataset.nodeId,
+                    viewID,
+                    id: target.dataset.id,
+                    data: !isOpen,
+                }]);
             }
             event.preventDefault();
             event.stopPropagation();
@@ -965,7 +959,6 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
     }
     const menu = new Menu();
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
-    menu.element.setAttribute("data-sheet-expandable", "true");
     const selectedItemInfos = getAVSelectedItemInfos(blockElement);
     const selectedItems = getAVSelectedItems(blockElement);
     const primaryRows = selectedItemInfos

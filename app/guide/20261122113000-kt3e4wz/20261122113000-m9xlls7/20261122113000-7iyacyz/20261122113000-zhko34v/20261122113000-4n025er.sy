@@ -1,0 +1,385 @@
+{
+	"ID": "20261122113000-4n025er",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-4n025er",
+		"title": "Хранилище",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-sxwi8aa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-sxwi8aa",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-al5r9n7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-al5r9n7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Объём облачного хранилища составляет "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "8G"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и включает следующие разделы:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-78uppeu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-78uppeu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-v74z9bp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-v74z9bp",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-kdadxc9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-kdadxc9",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Данные синхронизации: используются функцией синхронизации, данные зашифрованы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-g8puliv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-g8puliv",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-k78f9d8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-k78f9d8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Данные резервных копий: используются функцией резервного копирования, данные зашифрованы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-t2mlh29",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-t2mlh29",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-16ln33f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-16ln33f",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Файлы ресурсов: используются при копировании в WeChat Official Accounts, Zhihu, Yuque и др. (HTTPS CDN)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ss6iyzp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ss6iyzp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Объём использованного пространства можно посмотреть в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Аккаунт и синхронизация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-nyyg5ku",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-nyyg5ku",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "сквозное шифрование"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ds4m4v1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ds4m4v1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Данные синхронизации и резервных копий передаются со сквозным шифрованием, в облаке не хранятся никакие незашифрованные данные."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-twmook0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-twmook0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-qlmti9n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-qlmti9n",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ipx0gca",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ipx0gca",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ключ хранится только локально и никогда не загружается в облако"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-v6wpekt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-v6wpekt",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-mgpooq8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-mgpooq8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Шифрование и расшифровка выполняются исключительно на локальном устройстве"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-hgcebxm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hgcebxm",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-63nt1uy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-63nt1uy",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Используется общепризнанный надёжный алгоритм шифрования AES-GCM"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-g0320te",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-g0320te",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Частые вопросы"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-l2yn0m5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-l2yn0m5",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Могут ли разработчики расшифровать мои облачные данные?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-juvmlzc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-juvmlzc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Нет, это невозможно. При утере ключа никто (включая разработчиков) не сможет восстановить ваши данные из облака."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-n2y4uug",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-n2y4uug",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Можно ли за дополнительную плату увеличить объём облачного хранилища?"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-e48ywg3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-e48ywg3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Объём можно увеличить, обменяв баллы сообщества Liandi; подробные правила см. в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/article/1673936193811",
+					"TextMarkTextContent": "здесь"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

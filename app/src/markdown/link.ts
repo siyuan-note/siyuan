@@ -8,9 +8,13 @@ export const markdownLinkDestination = (element: Element,
     const destination = element.matches("span.vditor-ir__marker--link") &&
         element.parentElement?.getAttribute("data-type") === "a" ? element.textContent :
         element.tagName === "A" ? originalAttribute(element, "href") : undefined;
-    if (!destination || !isExternalMarkdownLink(destination) || destination.length > 8192) return;
+    if (destination) return destination;
+};
+
+export const externalMarkdownLink = (destination: string): boolean => {
+    if (!isExternalMarkdownLink(destination) || destination.length > 8192) return false;
     try {
         const url = new URL(destination);
-        if (["http:", "https:", "mailto:"].includes(url.protocol) && !url.username && !url.password) return destination;
-    } catch { return; }
+        return ["http:", "https:", "mailto:"].includes(url.protocol) && !url.username && !url.password;
+    } catch { return false; }
 };

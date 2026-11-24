@@ -87,10 +87,8 @@ export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup, viewT
             return;
         }
         html += `<button class="b3-menu__item" data-id="${item.id}" data-type="setGroupMethod">
-    <div class="b3-menu__label fn__flex">
-        ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
-        ${escapeHtml(item.name) || "&nbsp;"}
-    </div>
+    ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
+    <div class="b3-menu__label">${escapeHtml(item.name) || "&nbsp;"}</div>
     ${group?.field === item.id ? selectHTML : ""}
 </button>`;
     });

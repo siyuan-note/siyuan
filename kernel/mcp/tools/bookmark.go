@@ -57,7 +57,7 @@ func bookmarkHandler(args map[string]any) (CallToolResult, error) {
 }
 
 func bookmarkList(_ map[string]any) (CallToolResult, error) {
-	bookmarks := model.BuildBookmark()
+	bookmarks := model.BuildBookmark(false)
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "Bookmarks (%d):\n\n", len(*bookmarks))
 	for _, b := range *bookmarks {

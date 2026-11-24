@@ -11,7 +11,7 @@ import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
 import {clearSelect} from "../../util/clear";
-import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "./viewVisibility";
+import {getAVVisibleViewIDs, setAVVisibleViewIDs, updateAVVisibleViews} from "./viewVisibility";
 import {isNotEditBlock} from "../../wysiwyg/getBlock";
 import {countFilterLeaves} from "./filterTree";
 import {isMobile} from "../../../util/functions";
@@ -31,18 +31,8 @@ export const setAVBlockVisibleViewIDs = (
         return false;
     }
 
-    setAVVisibleViewIDs(blockElement, viewIDs);
-    transaction(protyle, [{
-        action: "setAttrViewBlockVisibleViews",
-        avID: blockElement.getAttribute("data-av-id"),
-        blockID: blockElement.getAttribute("data-node-id"),
-        viewIDs,
-    }], [{
-        action: "setAttrViewBlockVisibleViews",
-        avID: blockElement.getAttribute("data-av-id"),
-        blockID: blockElement.getAttribute("data-node-id"),
-        viewIDs: oldViewIDs,
-    }]);
+    const {operations, undoOperations} = updateAVVisibleViews(blockElement, allViewIDs, oldViewIDs, viewIDs);
+    transaction(protyle, operations, undoOperations);
     return true;
 };
 
@@ -352,6 +342,7 @@ export const getViewHTML = (data: IAV) => {
 
 export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Element, blockElement: Element }) => {
     const inputElement = options.menuElement.querySelector(".b3-text-field") as HTMLInputElement;
+    const readonly = options.protyle.disabled;
     if (!isMobile()) {
         inputElement.focus();
     }
@@ -363,6 +354,11 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
         upDownHint(options.menuElement.querySelector(".fn__flex-1"), event, "b3-menu__item--current");
         if (event.key === "Enter") {
             const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
+            if (readonly || options.protyle.disabled) {
+                event.preventDefault();
+                currentElement?.querySelector<HTMLElement>('[data-type="av-view-switch"]')?.click();
+                return;
+            }
             if (currentElement) {
                 locateRequests.delete(options.blockElement as HTMLElement);
                 const currentViewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) ||
@@ -385,6 +381,10 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
                 focusBlock(options.blockElement);
             }
         } else if (event.key === "Escape") {
+            if (readonly || options.protyle.disabled) {
+                options.menuElement.closest(".av__panel")?.remove();
+                return;
+            }
             options.menuElement.remove();
             focusBlock(options.blockElement);
         }
@@ -403,7 +403,7 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
 const filterSwitcher = (menuElement: Element) => {
     const inputElement = menuElement.querySelector(".b3-text-field") as HTMLInputElement;
     const key = inputElement.value;
-    menuElement.querySelectorAll('.b3-menu__item[draggable="true"]').forEach(item => {
+    menuElement.querySelectorAll(".b3-menu__item[data-av-view-visibility]").forEach(item => {
         if (!key ||
             (key.toLowerCase().indexOf(item.textContent.trim().toLowerCase()) > -1 ||
                 item.textContent.trim().toLowerCase().indexOf(key.toLowerCase()) > -1)) {
@@ -419,24 +419,24 @@ const filterSwitcher = (menuElement: Element) => {
         sectionElement.classList.toggle("fn__none", !!key && !hasMatchedView);
     });
     if (!menuElement.querySelector(".b3-menu__item--current")) {
-        menuElement.querySelector('.fn__flex-1 .b3-menu__item[draggable="true"]:not(.fn__none)')?.classList.add("b3-menu__item--current");
+        menuElement.querySelector(".fn__flex-1 .b3-menu__item[data-av-view-visibility]:not(.fn__none)")?.classList.add("b3-menu__item--current");
     }
 };
 
-export const getSwitcherHTML = (views: IAVView[], viewId: string, blockElement: Element) => {
+export const getSwitcherHTML = (views: IAVView[], viewId: string, blockElement: Element, readonly = false) => {
     const visibleViewIDs = getAVVisibleViewIDs(blockElement, views);
     let visibleHTML = "";
     let hiddenHTML = "";
     views.forEach((item) => {
         const visible = visibleViewIDs.includes(item.id);
-        const html = `<button draggable="true" class="b3-menu__item${item.id === viewId ? " b3-menu__item--current" : ""}" data-id="${item.id}" data-av-view-visibility="${visible ? "visible" : "hidden"}">
-    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
+        const html = `<button ${readonly ? 'data-type="av-view-switch"' : 'draggable="true"'} class="b3-menu__item${item.id === viewId ? " b3-menu__item--current" : ""}" data-id="${item.id}" data-page="${item.pageSize}" data-av-view-visibility="${visible ? "visible" : "hidden"}">
+    ${readonly ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
     <div class="b3-menu__label fn__flex" data-type="av-view-switch" data-av-type="${item.type}">
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getViewIcon(item.type)}"></use></svg>`}
         <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
     </div>
-    <svg class="b3-menu__action ariaLabel${visibleViewIDs.length === 1 && visible ? " fn__none" : ""}" data-type="av-view-visibility" data-position="4west" aria-label="${visible ? window.siyuan.languages.hideViewTab : window.siyuan.languages.showViewTab}"><use xlink:href="#${visible ? "iconEyeoff" : "iconEye"}"></use></svg>
-    <svg class="b3-menu__action" data-type="av-view-edit"><use xlink:href="#iconEdit"></use></svg>
+    ${readonly ? "" : `<svg class="b3-menu__action ariaLabel${visibleViewIDs.length === 1 && visible ? " fn__none" : ""}" data-type="av-view-visibility" data-position="4west" aria-label="${visible ? window.siyuan.languages.hideViewTab : window.siyuan.languages.showViewTab}"><use xlink:href="#${visible ? "iconEyeoff" : "iconEye"}"></use></svg>
+    <svg class="b3-menu__action" data-type="av-view-edit"><use xlink:href="#iconEdit"></use></svg>`}
 </button>`;
         if (visible) {
             visibleHTML += html;
@@ -448,22 +448,22 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string, blockElement: 
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label">${window.siyuan.languages.visibleViews}</span>
-    <span class="block__icon" data-type="av-view-hide-all">
+    ${readonly ? "" : `<span class="block__icon" data-type="av-view-hide-all">
         ${window.siyuan.languages.hideAll}
         <span class="fn__space"></span>
         <svg><use xlink:href="#iconEyeoff"></use></svg>
-    </span>
+    </span>`}
 </button>
 </div>${visibleHTML}`;
     const hiddenSectionHTML = hiddenHTML ? `<div data-av-view-section="hidden">
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label">${window.siyuan.languages.hiddenViews}</span>
-    <span class="block__icon" data-type="av-view-show-all">
+    ${readonly ? "" : `<span class="block__icon" data-type="av-view-show-all">
         ${window.siyuan.languages.showAll}
         <span class="fn__space"></span>
         <svg><use xlink:href="#iconEye"></use></svg>
-    </span>
+    </span>`}
 </button>
 </div>${hiddenHTML}` : "";
     return `<div class="b3-menu__items fn__flex-column">
@@ -474,11 +474,11 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string, blockElement: 
     ${visibleSectionHTML}
     ${hiddenSectionHTML}
 </div>
-<button class="b3-menu__separator fn__flex-shrink"></button>
+${readonly ? "" : `<button class="b3-menu__separator fn__flex-shrink"></button>
 <button class="b3-menu__item fn__flex-shrink" data-type="av-add">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.newView}</span>
-</button>
+</button>`}
 </div>`;
 };
 

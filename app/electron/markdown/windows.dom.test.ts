@@ -202,6 +202,35 @@ const runElectron = async options => {
         assert.equal(createdWindows, 1);
         assert.equal(window.isDestroyed(), false);
         assert.equal(await fs.readFile(options.secondDocument, "utf8"), "# B pending before switching\n");
+        const linkedContent = "# A with links\n\n[Missing](missing.md)\n\n[Next](B.md)\n";
+        const linked = await window.webContents.executeJavaScript(`(async () => {
+            const input = document.querySelector('textarea.vditor-sv');
+            input.value = ${JSON.stringify(linkedContent)};
+            input.dispatchEvent(new InputEvent('input', {bubbles: true, inputType: 'insertText'}));
+            const waitFor = async (condition, message) => {
+                const deadline = Date.now() + 10000;
+                while (!condition()) {
+                    if (Date.now() > deadline) throw new Error(message + ': ' + document.body.innerText);
+                    await new Promise(resolve => setTimeout(resolve, 25));
+                }
+            };
+            const links = () => document.querySelectorAll('.vditor-preview a');
+            await waitFor(() => links().length === 2, 'File links did not render');
+            links()[0].click();
+            const {languages, sessionId} = await window.siyuanMarkdown.bootstrap();
+            await waitFor(() => document.querySelector('#markdownStatus').textContent === languages.markdownLinkUnavailable,
+                'Missing link did not show its status');
+            if ((await window.siyuanMarkdown.bootstrap()).sessionId !== sessionId) throw new Error('Missing link changed the document');
+            links()[1].click();
+            await waitFor(() => document.querySelector('#markdownName').textContent === 'B.md' &&
+                document.querySelector('textarea.vditor-sv')?.value === '# B pending before switching\\n' &&
+                document.getElementById('markdownApp').getAttribute('aria-busy') !== 'true', 'Clicking B.md did not switch documents');
+            return {sessionId: (await window.siyuanMarkdown.bootstrap()).sessionId, origin: location.href};
+        })()`);
+        assert.notEqual(linked.sessionId, returned.sessionId);
+        assert.equal(linked.origin, security.origin);
+        assert.equal(createdWindows, 1);
+        assert.equal(await fs.readFile(options.document, "utf8"), linkedContent);
         const imageRequests = [];
         imageServer = require("node:http").createServer((request, response) => {
             imageRequests.push({path: request.url, referrer: request.headers.referer});

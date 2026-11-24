@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -78,8 +79,9 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - If source content cannot be read with the available capabilities, explain the limitation and request the needed content; do not infer it from titles or previews.
 
 ## SiYuan User Guide
-SiYuan has a built-in user guide notebook documenting all features. IDs by language: 简体中文 "20210808180117-czj9bvb", 繁體中文 "20211226090932-5lcq56f", 日本語 "20240530133126-axarxgx", others "20210808180117-6v0mkxr".
-When asked whether/how SiYuan supports a feature: notebook.list to check it's open (notebook.open to open it if not), then search.fulltext the guide for docs and cite if found. Missing guide search results alone do not prove a feature is unsupported; also check the native tool descriptions and supported block types above. Do NOT invent features or UI workflows.
+SiYuan has a built-in user guide notebook documenting all features. IDs by language: 简体中文 "20210808180117-czj9bvb", 繁體中文 "20211226090932-5lcq56f", 日本語 "20240530133126-axarxgx", Русский "20261122113000-kt3e4wz", others "20210808180117-6v0mkxr".
+For questions about SiYuan features or shortcuts, consult the built-in guide before answering. Use notebook.list to check its status. If the guide is absent from the list or closed, call notebook.open with its built-in ID above, then wait for the result. The bundled guide can be opened even if it has never appeared in the notebook list. Once open, use search.fulltext with the guide ID in the notebook argument and cite the relevant docs.
+Missing guide search results alone do not prove a feature is unsupported; also check the native tool descriptions and supported block types above. Do NOT invent features or UI workflows.
 
 ## Todo Tracking
 For multi-step tasks (3+ distinct steps), use todo_write to track progress. Each call replaces the whole list; statuses are pending / in_progress / completed / cancelled. Set in_progress before starting a step, completed when done, and update on every status change. Skip todo_write for single-step requests.
@@ -214,6 +216,7 @@ type AgentEvent struct {
 	QuestionID       string
 	CallID           string
 	Error            string
+	SnapshotFailed   bool
 	PromptTokens     int
 	CompletionTokens int
 	LastPromptTokens int
@@ -277,8 +280,9 @@ type AgentAttachment struct {
 }
 
 type Reference struct {
-	ID    string `json:"id"`
-	Title string `json:"title"` // 引用锚文本，仅作预览，不代表目标块正文。
+	ID        string `json:"id"`
+	Title     string `json:"title"`               // 块引用的锚文本或来源消息的完整快照。
+	MessageID string `json:"messageID,omitempty"` // 整条消息引用携带原始消息快照，供上下文压缩后使用。
 }
 
 // EditorContext 是发送消息时前端编辑器的只读状态快照。
@@ -423,7 +427,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 		}
 
 		for _, reference := range references {
-			memoryIDs = append(memoryIDs, reference.ID)
+			if reference.MessageID == "" {
+				memoryIDs = append(memoryIDs, reference.ID)
+			}
 		}
 		ctx = kernelModel.ContextWithAIMemoryScope(ctx, memoryIDs)
 		if confAIReadSnapshot.MCP != nil {
@@ -1437,8 +1443,9 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 								})
 							}
 							sendEvent(ctx, ch, AgentEvent{
-								Type:  "error",
-								Error: "auto snapshot failed, operation aborted: " + err.Error(),
+								Type:           "error",
+								Error:          "auto snapshot failed, operation aborted: " + err.Error(),
+								SnapshotFailed: true,
 							})
 							return
 						}
@@ -2198,7 +2205,38 @@ func buildSystemPrompt(language string, capabilities *capabilitySet, instruction
 }
 
 func buildUserMessageContent(userMessage string, references []Reference, editorCtx *EditorContext,
-	capabilities *capabilitySet) string {
+	capabilities *capabilitySet, history ...AgentMessage) string {
+	var blocks []Reference
+	var replacements []string
+	for _, ref := range references {
+		if ref.MessageID == "" {
+			blocks = append(blocks, ref)
+			continue
+		}
+		snapshot := ref.Title
+		for i := len(history) - 1; i >= 0; i-- {
+			message := &history[i]
+			if message.EntryID == ref.MessageID && message.Content == snapshot {
+				distance := 0
+				for _, later := range history[i:] {
+					if later.Role == message.Role {
+						distance++
+					}
+				}
+				preview := []rune(snapshot)
+				snapshot = fmt.Sprintf("the earlier %s message (%d back among %s messages)", message.Role, distance, message.Role)
+				if len(preview) > 60 {
+					snapshot += fmt.Sprintf(" beginning %q", string(preview[:60]))
+				}
+				break
+			}
+		}
+		replacements = append(replacements, "⟦"+ref.ID+"⟧", strconv.Quote(snapshot))
+	}
+	if len(replacements) > 0 {
+		userMessage = strings.NewReplacer(replacements...).Replace(userMessage)
+	}
+	references = blocks
 	if len(references) == 0 && editorCtx == nil {
 		return userMessage
 	}
@@ -2424,7 +2462,7 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 				Role: openai.ChatMessageRoleSystem, Content: cm.Content,
 			})
 		case "user":
-			content := buildUserMessageContent(cm.Content, cm.References, cm.EditorContext, capabilities)
+			content := buildUserMessageContent(cm.Content, cm.References, cm.EditorContext, capabilities, checkpointMsgs[:cmi]...)
 			if content == "" {
 				content = " "
 			}
@@ -2528,7 +2566,7 @@ func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, _ st
 				Type: "message", Role: openai.ChatMessageRoleSystem, Content: message.Content,
 			})
 		case "user":
-			content := buildUserMessageContent(message.Content, message.References, message.EditorContext, capabilities)
+			content := buildUserMessageContent(message.Content, message.References, message.EditorContext, capabilities, checkpointMsgs[:messageIndex]...)
 			if content == "" {
 				content = " "
 			}

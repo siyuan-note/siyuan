@@ -105,3 +105,9 @@ type TagData struct {
 	Depth    int        `json:"depth"`
 	Count    int        `json:"count"`
 }
+
+type ReorderTagRequest struct {
+	Label    string `json:"label"`
+	Target   string `json:"target"`
+	Position string `json:"position" api:"enum=before|after"`
+}

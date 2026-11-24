@@ -61,15 +61,6 @@ func GetTreeID(treePath string) string {
 	return strings.TrimSuffix(base, ".sy")
 }
 
-func ShortPathForBootingDisplay(p string) string {
-	if 25 > len(p) {
-		return p
-	}
-	p = strings.TrimSuffix(p, ".sy")
-	p = path.Base(p)
-	return p
-}
-
 var (
 	localIPsMu sync.RWMutex
 	localIPs   []string

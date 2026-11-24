@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20261116005812"
+		"updated": "20261120112341"
 	},
 	"Children": [
 		{
@@ -1962,6 +1962,65 @@
 				{
 					"Type": "NodeText",
 					"Data": "表格包含合併儲存格或多列表頭時，複製和匯出的 Markdown 會使用 HTML 表格保留結構。"
+				}
+			]
+		},
+		{
+			"ID": "20261120112341-he6kw3p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261120112341-he6kw3p",
+				"updated": "20261120112341"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟區塊選單，選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "表格區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "固定標題欄"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，橫向捲動時第一欄會保持可見。可同時啟用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "固定標題列"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，縱向捲動時也能看到表頭。橫跨第一欄和後續欄的合併儲存格隨表格整體捲動。可視區域過窄時，第一欄會暫時隨表格捲動。使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "標題列背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "標題欄背景"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可切換對應的背景和粗體。"
 				}
 			]
 		},

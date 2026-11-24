@@ -126,11 +126,12 @@ func getReleaseInstallPackage(release *updateRelease) (ret *installPackageDownlo
 	}
 	ret = &installPackageDownload{
 		Metadata: installPackageMetadata{
-			FormatVersion: installPackageMetadataVersion,
-			Version:       release.Version,
-			Channel:       release.Channel,
-			FileName:      pkgName,
-			Checksum:      pkg.Checksum,
+			FormatVersion:      installPackageMetadataVersion,
+			Version:            release.Version,
+			Channel:            release.Channel,
+			FileName:           pkgName,
+			Checksum:           pkg.Checksum,
+			MainlandReleaseURL: release.MainlandReleaseURL,
 		},
 		URLs: append([]string(nil), pkg.URLs...),
 	}
@@ -349,7 +350,7 @@ func CheckUpdate(showMsg bool) {
 func pushNewVersionNotification(release *updateRelease) {
 	releaseLink := "<a href=\"" + release.ReleaseURL + "\">" + release.ReleaseURL + "</a>"
 	message := fmt.Sprintf(Conf.Language(9), releaseLink)
-	if !skipNewVerInstallPkg() {
+	if !skipNewVerInstallPkg() && !Conf.LoadSystem().DownloadInstallPkg {
 		if _, err := getReleaseInstallPackage(release); err == nil {
 			message = fmt.Sprintf(`<div class="b3-snackbar__actions"><div class="b3-snackbar__body">%s</div><button type="button" class="b3-button b3-button--white b3-button--wrap b3-snackbar__action" data-type="download-update" data-version="%s">%s</button></div>`,
 				message, html.EscapeString(release.Version), html.EscapeString(Conf.Language(437)))

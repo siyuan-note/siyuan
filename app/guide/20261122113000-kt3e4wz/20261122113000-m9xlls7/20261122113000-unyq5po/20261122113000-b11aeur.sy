@@ -1,0 +1,357 @@
+{
+	"ID": "20261122113000-b11aeur",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-b11aeur",
+		"title": "Веб-клиппинг",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-vhzebih",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-vhzebih",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vzjq47x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-vzjq47x",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "«Веб-клиппинг» означает копирование содержимого веб-страниц в SiYuan с максимальным сохранением исходного форматирования."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-l0i74c7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-l0i74c7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-k5hz6yr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-k5hz6yr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-340gjnb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-340gjnb",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-n85s5e3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-n85s5e3",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если не нужно загружать изображения из вырезаемого содержимого локально, просто скопируйте нужное в браузере и вставьте в SiYuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-12xcckb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-12xcckb",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-r651jb2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-r651jb2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если нужно загрузить изображения из вырезаемого содержимого локально, используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1629423901669",
+									"TextMarkTextContent": "расширение SiYuan для Chrome"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-auhml9m",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-auhml9m",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "расширение SiYuan для Chrome"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-l20ees1",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20261122113000-l20ees1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-zp6ku9e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261122113000-zp6ku9e",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-8ir98ak",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-8ir98ak",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Установите расширение и укажите API token в его настройках. Его можно посмотреть в SiYuan в разделе "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Аутентификация"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Вход и токены"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "API токен"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-85cmz2v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261122113000-85cmz2v",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-70mau42",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-70mau42",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Выделите нужное содержимое на веб-странице и выберите «Копировать в SiYuan» в контекстном меню"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-adry9b7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261122113000-adry9b7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-x29g1nv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-x29g1nv",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Вставьте в SiYuan"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ln5p4b8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ln5p4b8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если нужно сохранить всю статью целиком, нажмите «Отправить в SiYuan» прямо в расширении."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-azoxc3g",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-azoxc3g",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Веб-клиппинг на мобильных устройствах"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-d1bryfi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-d1bryfi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для записи текста или ссылок на телефоне можно использовать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-r4qe8qg",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Быстрые заметки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " через системное меню «Поделиться» — содержимое сначала сохраняется локально, а затем переносится в документ. Если нужно временно сохранить через облако и разобрать на другом устройстве, используйте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-ecybscs",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Входящие"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

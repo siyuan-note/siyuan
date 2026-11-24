@@ -28,6 +28,7 @@ for (const enable of [false, true]) {
                 id: "readonly-editor",
                 disabled: enable,
                 element: {getAttribute: (): null => null, contains: () => false},
+                contentElement: {removeAttribute() {}},
                 databaseAttributePanel: {updateReadonly: changeLayout},
                 wysiwyg: {
                     tableControl: {clear: () => tableClears++},

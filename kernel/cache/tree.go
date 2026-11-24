@@ -41,25 +41,43 @@ func treeCacheKey(rootID, boxID string) string {
 }
 
 func GetTreeDataInBox(rootID, boxID string) (raw []byte, ok bool) {
+	raw, _, ok = GetTreeDataWithVersionInBox(rootID, boxID)
+	return
+}
+
+func TreeDataVersionInBox(rootID, boxID string) uint64 {
+	if entry := getCurrentTreeCacheEntry(rootID, boxID); entry != nil {
+		return entry.generation
+	}
+	return 0
+}
+
+func getCurrentTreeCacheEntry(rootID, boxID string) *treeCacheEntry {
 	treeCacheKeysMu.Lock()
+	defer treeCacheKeysMu.Unlock()
 	key := treeCacheKey(rootID, boxID)
 	v, _ := treeCache.Get(key)
 	if nil == v {
-		treeCacheKeysMu.Unlock()
-		return nil, false
+		return nil
 	}
 	e := v.(*treeCacheEntry)
 	// 异步准入可能保留较早的写入，只接受当前版本，否则交由调用方读取源文件。
 	if e.generation != treeCacheKeys[rootID][key] {
-		treeCacheKeysMu.Unlock()
-		return nil, false
+		return nil
 	}
-	treeCacheKeysMu.Unlock()
+	return e
+}
+
+func GetTreeDataWithVersionInBox(rootID, boxID string) (raw []byte, version uint64, ok bool) {
+	e := getCurrentTreeCacheEntry(rootID, boxID)
+	if e == nil {
+		return nil, 0, false
+	}
 	if e.compressed {
 		var err error
 		raw, err = treeCacheDecoder.DecodeAll(e.raw, make([]byte, 0, e.rawSize))
 		if err != nil || len(raw) != e.rawSize {
-			return nil, false
+			return nil, 0, false
 		}
 	} else {
 		raw = bytes.Clone(e.raw)
@@ -67,10 +85,10 @@ func GetTreeDataInBox(rootID, boxID string) (raw []byte, ok bool) {
 	// 解码期间可能发生写入或笔记本锁定，返回前再次检查当前版本。
 	treeCacheKeysMu.Lock()
 	defer treeCacheKeysMu.Unlock()
-	if e.generation != treeCacheKeys[rootID][key] {
-		return nil, false
+	if e.generation != treeCacheKeys[rootID][treeCacheKey(rootID, boxID)] {
+		return nil, 0, false
 	}
-	return raw, true
+	return raw, e.generation, true
 }
 
 func SetTreeDataInBox(rootID, boxID string, raw []byte) {

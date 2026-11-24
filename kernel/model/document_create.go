@@ -29,6 +29,7 @@ type DocumentCreateRequest struct {
 	TitleFormat            string
 	Title                  string
 	Markdown               string
+	AgentGenerated         bool
 	ExpectedParentRevision *string
 	ExpectedTarget         *DocumentTargetRevision
 	NameConditions         []treenode.DocumentNameCondition
@@ -246,6 +247,9 @@ func createDocByParent(request DocumentCreateRequest, creationLocked bool) (docu
 		tree, err = buildCreateDocTree(request.Notebook, validation, dom, attrs)
 		if err != nil {
 			return err
+		}
+		if request.AgentGenerated && strings.TrimSpace(request.Markdown) != "" {
+			markAgentBlocks(tree.Root, nil, luteEngine)
 		}
 		var writeErr error
 		tx := &Transaction{DoOperations: []*Operation{{Action: "create", Tree: tree}}, fromAPI: true}

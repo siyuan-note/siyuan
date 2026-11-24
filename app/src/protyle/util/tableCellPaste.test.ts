@@ -13,7 +13,7 @@ const browserCases = async (source: string, pasteSource: string) => {
     const noop = () => {};
     const transactions: {before: string, after: string}[] = [];
     const dependencies = {
-        Constants: {ZWSP: "\u200b"}, dayjs: () => ({format: () => "20261020000000"}),
+        Constants: {ZWSP: "\u200b", CUSTOM_SY_AI_SOURCE: "custom-sy-ai-source"}, dayjs: () => ({format: () => "20261020000000"}),
         getTextWithoutSemanticMarkers: (node: Node) => node.textContent,
         updateTransaction: (_owner: IProtyle, block: HTMLElement, before: string) => {
             transactions.push({before, after: block.outerHTML});
@@ -27,7 +27,8 @@ const browserCases = async (source: string, pasteSource: string) => {
         typeof import("../render/setLute") & typeof import("../render/av/richText") & typeof import("./table") &
         typeof import("./hasClosest") & typeof import("./tableCellRichContext") & typeof import("./tableCellRich") &
         typeof import("./tableVirtualizationDOM") & typeof import("./mathPaste") & {
-            processTable: (range: Range, html: string, protyle: IProtyle, block: HTMLElement, target: unknown) => boolean,
+            processTable: (range: Range, html: string, protyle: IProtyle, block: HTMLElement, target: unknown,
+                           aiSource?: "agent" | "editor") => boolean,
             getTablePasteTarget: (range: Range) => unknown,
         };
     Object.assign(window, {siyuan: {languages: {table: "Table", cellPasteUnsupported: "Unsupported: ${x}"},
@@ -197,6 +198,20 @@ const browserCases = async (source: string, pasteSource: string) => {
         }
         ownerElement.remove();
     }
+    const table = document.createElement("div");
+    table.innerHTML = lute.Md2BlockDOM("| H |\n| --- |\n| original |");
+    const block = table.firstElementChild as HTMLElement;
+    const range = document.createRange();
+    range.selectNodeContents(block.querySelector("td"));
+    range.collapse(false);
+    transactions.length = 0;
+    const original = block.outerHTML;
+    check.equal(api.processTable(range, lute.Md2BlockDOM("| generated |\n| --- |\n| additional |"),
+        {lute} as IProtyle, block, api.getTablePasteTarget(range), "editor"), true);
+    check.equal(transactions.length, 1);
+    check.equal(transactions[0].before, original);
+    check.match(transactions[0].after, /custom-sy-ai-source="editor"/);
+    check.match(transactions[0].after, /generated/);
     return "table-cell-paste-ok";
 };
 

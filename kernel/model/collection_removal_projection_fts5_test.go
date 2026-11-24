@@ -307,6 +307,14 @@ func TestCollectionRemovalProjectionMatchesTransactions(t *testing.T) {
 				if readErr != nil {
 					t.Fatal(readErr)
 				}
+				if test.name == "attribute normalization affects rule conditions" && expected.ID == source.ID {
+					// 预览完成后，提交阶段为最终标签集合记录关联时间。
+					dates := readTagDates(actual.Root.IALAttr(treenode.TagCreatedAttr))
+					if len(dates) != 1 || dates["other"] <= 0 || expected.Root.IALAttr(treenode.TagCreatedAttr) != "" {
+						t.Fatalf("unexpected final tag addition times: %v", dates)
+					}
+					actual.Root.RemoveIALAttr(treenode.TagCreatedAttr)
+				}
 				if got, want := blockSwapFingerprint(actual.Root), blockSwapFingerprint(expected.Root); got != want {
 					t.Fatalf("projection disagreed with committed tree\nactual: %s\nprojected: %s", got, want)
 				}

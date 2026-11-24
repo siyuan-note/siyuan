@@ -259,10 +259,6 @@ export const openSearchAV = (options: IOpenSearchAVOptions) => {
             });
         }
     });
-    if (isMobile()) {
-        // 移动端底部面板按内容收缩，避免列表下方留白
-        menu.element.classList.add("b3-menu--fit");
-    }
     const popoverElement = hasTopClosestByClassName(options.target, "block__popover", true);
     menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
 };

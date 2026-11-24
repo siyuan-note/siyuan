@@ -1010,6 +1010,26 @@
             }
           ]
         },
+        "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasoningEffort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "taskID": {
           "anyOf": [
             {
@@ -2242,6 +2262,9 @@
         "id": {
           "type": "string"
         },
+        "messageID": {
+          "type": "string"
+        },
         "title": {
           "type": "string"
         }
@@ -2256,6 +2279,16 @@
       "type": "object",
       "properties": {
         "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "messageID": {
           "anyOf": [
             {
               "type": "string"
@@ -2290,6 +2323,21 @@
       },
       "required": [
         "matched"
+      ],
+      "additionalProperties": false
+    },
+    "AISSEAgentError": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "snapshotFailed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "message"
       ],
       "additionalProperties": false
     },
@@ -2458,6 +2506,9 @@
     "AISSEStart": {
       "type": "object",
       "properties": {
+        "prompt": {
+          "type": "string"
+        },
         "taskID": {
           "type": "string"
         }
@@ -4123,6 +4174,16 @@
             }
           ]
         },
+        "messageID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "title": {
           "anyOf": [
             {
@@ -4142,6 +4203,16 @@
       "type": "object",
       "properties": {
         "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "messageID": {
           "anyOf": [
             {
               "type": "string"
@@ -41087,6 +41158,30 @@
       },
       "additionalProperties": false
     },
+    "ReorderTagRequestInput": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string",
+          "enum": [
+            "before",
+            "after"
+          ]
+        },
+        "target": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "position",
+        "target"
+      ],
+      "additionalProperties": false
+    },
     "RepoCloudSnapshotsData": {
       "type": "object",
       "properties": {
@@ -49602,6 +49697,9 @@
         "modelId": {
           "type": "string"
         },
+        "reasoningEffort": {
+          "type": "string"
+        },
         "temperature": {
           "type": "number"
         }
@@ -49610,6 +49708,7 @@
         "maxCompletionTokens",
         "maxHistoryMessages",
         "modelId",
+        "reasoningEffort",
         "temperature"
       ],
       "additionalProperties": false
@@ -49638,6 +49737,16 @@
           ]
         },
         "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasoningEffort": {
           "anyOf": [
             {
               "type": "string"
@@ -58478,6 +58587,9 @@
         "cloudName": {
           "type": "string"
         },
+        "configured": {
+          "type": "boolean"
+        },
         "enabled": {
           "type": "boolean"
         },
@@ -58549,6 +58661,7 @@
       "required": [
         "assetDownloadMode",
         "cloudName",
+        "configured",
         "enabled",
         "generateConflictDoc",
         "interval",
@@ -133776,7 +133889,7 @@
             "$ref": "#/$defs/AISSETurn"
           },
           "error": {
-            "$ref": "#/$defs/AISSEMessage"
+            "$ref": "#/$defs/AISSEAgentError"
           },
           "interrupted": {
             "$ref": "#/$defs/AISSEMessage"
@@ -190602,6 +190715,86 @@
       "body": "json",
       "request": {
         "$ref": "#/$defs/RenameTagRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/tag/reorderTag",
+      "handler": "reorderTag",
+      "authorization": [
+        "authenticated",
+        "admin",
+        "writable"
+      ],
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/ReorderTagRequestInput"
       },
       "response": {
         "anyOf": [

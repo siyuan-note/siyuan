@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20261112034624"
+		"updated": "20261122235513"
 	},
 	"Children": [
 		{
@@ -497,6 +497,20 @@
 			]
 		},
 		{
+			"ID": "20261120223328-87b0828",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261120223328-87b0828",
+				"updated": "20261120223328"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, pinch with two fingers to zoom. Double-tap the image to zoom to twice its initial size. Double-tap again to restore the initial view. Use the bottom toolbar to rotate the image or reset the view. When there are multiple images, use the previous and next buttons in the toolbar to switch between them."
+				}
+			]
+		},
+		{
 			"ID": "20261105133656-ez7ztx2",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -704,6 +718,112 @@
 				{
 					"Type": "NodeText",
 					"Data": " to cancel. Clicking outside the input or leaving the field also saves. On mobile, Back saves and closes the input first. The change applies to this image reference and does not rename the asset file. Read-only documents do not allow title editing."
+				}
+			]
+		},
+		{
+			"ID": "20261122120803-rd8uzwh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122120803-rd8uzwh",
+				"updated": "20261122235513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Share and save assets on mobile"
+				}
+			]
+		},
+		{
+			"ID": "20261122120803-0enm0xf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122120803-0enm0xf",
+				"updated": "20261122120803"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On Android and HarmonyOS, open an image, attachment link, or database attachment menu and choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Share"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". For audio, video, or an embedded local HTML file, open the block menu and choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Share"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". The system share sheet sends the attachment in its original format. On iOS, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Export"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the resource menu where available to open the system share sheet."
+				}
+			]
+		},
+		{
+			"ID": "20261122235513-23af5ee",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122235513-23af5ee",
+				"updated": "20261122235513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On Android, touch and hold a local image and choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Save to Gallery"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". For a local video, open the block menu and choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Save to Gallery"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". SiYuan saves the original file to the system gallery."
 				}
 			]
 		},

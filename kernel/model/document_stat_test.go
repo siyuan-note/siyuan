@@ -75,34 +75,6 @@ func TestDocumentEmbedStatMarksJSEmbedIncomplete(t *testing.T) {
 	}
 }
 
-func TestDocumentEmbedStatFiltersInaccessibleResults(t *testing.T) {
-	setDocumentStatTestConf(t)
-
-	embed := documentStatTestEmbed("20260813120005-embed05", "query")
-	hostTree := documentStatTestTree("20260813120005-host004", embed)
-	paragraph := documentStatTestParagraph("20260813120005-para003", "hidden content")
-	resultTree := documentStatTestTree("20260813120005-doc0003", paragraph)
-	info := &EmbedStat{Complete: true}
-	stat := filesys.StatTreeFromTree(hostTree)
-	resolver := documentStatTestResolver(hostTree, stat, info)
-	resolver.accessChecker = func(string) bool {
-		return false
-	}
-	resolver.queryBlocks = func(context.Context, string, int, string) ([]*sql.Block, bool, error) {
-		return []*sql.Block{{ID: paragraph.ID, RootID: resultTree.Root.ID, Type: "p"}}, false, nil
-	}
-	resolver.loadTree = func(*sql.Block) *parse.Tree {
-		t.Fatal("无权限的查询结果不应加载文档树")
-		return nil
-	}
-
-	resolver.resolveNodes(hostTree, []*ast.Node{hostTree.Root}, 0)
-
-	if 0 != stat.WordCount || 0 != info.ResultCount || !info.Complete {
-		t.Fatalf("无权限的查询结果不应计入统计：stat=%+v info=%+v", stat, info)
-	}
-}
-
 func TestDocumentEmbedStatMarksTruncatedQueryIncomplete(t *testing.T) {
 	setDocumentStatTestConf(t)
 

@@ -5,14 +5,19 @@
 package model
 
 import (
+	"bytes"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestInstallPackageReleaseURL(t *testing.T) {
+	prepareInstallPackageTest(t)
+	Conf.Lang = "zh-CN"
 	for _, version := range []string{"99.3.0", "99.3.1-beta.3", "99.3.1-rc.1", "99.3.1-alpha.2"} {
 		t.Run(version, func(t *testing.T) {
 			key := "v" + version
@@ -25,7 +30,11 @@ func TestInstallPackageReleaseURL(t *testing.T) {
 			}
 			announcement := "https://ld246.com/article/123?version=" + version
 			rememberUpdateReleaseURL(&updateRelease{Version: version, ReleaseURL: announcement})
-			if got := GetInstallPackageReleaseURL("siyuan-" + version + "-win.exe"); got != announcement {
+			want := githubReleaseURLPrefix + version
+			if version == "99.3.0" {
+				want = announcement
+			}
+			if got := GetInstallPackageReleaseURL("siyuan-" + version + "-win.exe"); got != want {
 				t.Fatalf("cached announcement: %q", got)
 			}
 			if got := GetInstallPackageReleaseURL("siyuan-99.4.0-win.exe"); got != githubReleaseURLPrefix+"99.4.0" {
@@ -43,6 +52,53 @@ func TestInstallPackageReleaseURL(t *testing.T) {
 		if got := GetInstallPackageReleaseURL("siyuan-99.5.0-win.exe"); got != githubReleaseURLPrefix+"99.5.0" {
 			t.Fatalf("unsafe announcement: %q", got)
 		}
+	}
+}
+
+func TestInstallPackageMainlandAnnouncementSurvivesRestart(t *testing.T) {
+	dir := prepareInstallPackageTest(t)
+	oldRegion := util.CurrentCloudRegion
+	t.Cleanup(func() { util.CurrentCloudRegion = oldRegion })
+	const version = "99.8.0"
+	const announcement = "https://ld246.com/article/123"
+	metadata := installPackageFixture(t, dir, version, conf.UpdateChannelStable, "win.exe")
+	result := map[string]any{"ver": version, "release_zh_CN": announcement}
+	if got := getMainlandReleaseURL(result, "99.8.1"); got != "" {
+		t.Fatalf("mismatched version reused an announcement: %q", got)
+	}
+	metadata.MainlandReleaseURL = getMainlandReleaseURL(result, version)
+	installer, err := reuseInstallPackage(dir, metadata, Conf.CookieKey)
+	if err != nil || installer == "" {
+		t.Fatalf("reuse existing installer: %q, %v", installer, err)
+	}
+	for _, test := range []struct {
+		lang   string
+		region int
+		want   string
+	}{
+		{"zh-CN", 0, announcement},
+		{"zh-CN", 1, githubReleaseURLPrefix + version},
+		{"en", 0, githubReleaseURLPrefix + version},
+	} {
+		Conf.Lang, util.CurrentCloudRegion = test.lang, test.region
+		if got := GetInstallPackageReleaseURL(installer); got != test.want {
+			t.Fatalf("locale %s, region %d: got %q, want %q", test.lang, test.region, got, test.want)
+		}
+	}
+	record := installer + ".json"
+	data, err := os.ReadFile(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(record, bytes.Replace(data, []byte(announcement), []byte("https://ld246.com/article/456"), 1), 0600); err != nil {
+		t.Fatal(err)
+	}
+	Conf.Lang, util.CurrentCloudRegion = "zh-CN", 0
+	if got := GetInstallPackageReleaseURL(installer); got != githubReleaseURLPrefix+version {
+		t.Fatalf("tampered announcement was used: %q", got)
+	}
+	if _, err = readInstallPackageMetadata(record, Conf.CookieKey); err != nil {
+		t.Fatalf("tampered announcement invalidated the installer record: %v", err)
 	}
 }
 
@@ -73,7 +129,7 @@ func TestInstallPackageUsesLocalizedReleaseAnnouncement(t *testing.T) {
 	}
 }
 
-func TestUpdateCheckRemembersPackageAnnouncement(t *testing.T) {
+func TestPrereleaseInstallerUsesGitHubAnnouncement(t *testing.T) {
 	previousConf := Conf
 	Conf = NewAppConf()
 	t.Cleanup(func() { Conf = previousConf })
@@ -94,7 +150,7 @@ func TestUpdateCheckRemembersPackageAnnouncement(t *testing.T) {
 	if _, err := getUpdateRelease(false); err != nil {
 		t.Fatal(err)
 	}
-	if got := GetInstallPackageReleaseURL("siyuan-99.6.0-beta.3-win.exe"); got != "https://example.invalid/announcement" {
-		t.Fatalf("check result was not retained: %q", got)
+	if got := GetInstallPackageReleaseURL("siyuan-99.6.0-beta.3-win.exe"); got != githubReleaseURLPrefix+"99.6.0-beta.3" {
+		t.Fatalf("unexpected prerelease announcement: %q", got)
 	}
 }

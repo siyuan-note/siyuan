@@ -12,15 +12,23 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-// CalculateEmbedBlockContent 计算只读 SQL 嵌入的搜索内容；空脚本和 JavaScript 嵌入由前端更新。
-func CalculateEmbedBlockContent(block *Block) (content string, supported bool) {
+func embedBlockQueryStatement(block *Block) string {
 	stmt := strings.TrimSpace(block.Markdown)
 	stmt = strings.TrimPrefix(stmt, "{{")
 	stmt = strings.TrimSuffix(stmt, "}}")
 	stmt = html.UnescapeString(stmt)
 	stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-	stmt = strings.TrimSpace(stmt)
-	if stmt == "" || strings.HasPrefix(stmt, "//!js") {
+	return strings.TrimSpace(stmt)
+}
+
+func isServerEmbedQuery(stmt string) bool {
+	return stmt != "" && !strings.HasPrefix(stmt, "//!js")
+}
+
+// CalculateEmbedBlockContent 计算只读 SQL 嵌入的搜索内容；空脚本和 JavaScript 嵌入由前端更新。
+func CalculateEmbedBlockContent(block *Block) (content string, supported bool) {
+	stmt := embedBlockQueryStatement(block)
+	if !isServerEmbedQuery(stmt) {
 		return "", false
 	}
 	if err := CheckReadonlyBlockQueryStatement(stmt, block.Box); err != nil {

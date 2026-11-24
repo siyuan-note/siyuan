@@ -5,7 +5,7 @@ import {test} from "node:test";
 
 test("template management uses the grid icon on desktop and mobile", () => {
     for (const [file, templateId] of [
-        ["workspace.ts", "templateManager"],
+        ["mainMenu.ts", "templateManager"],
         ["../mobile/menu/mainMenu.ts", "menuTemplateManager"],
     ]) {
         const source = readFileSync(path.resolve(__dirname, file), "utf8");

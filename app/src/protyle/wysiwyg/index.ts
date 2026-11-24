@@ -7,6 +7,7 @@ import {bindEmbedToolbarVisibility} from "./embedToolbarVisibility";
 import {openEmbedBlock} from "../gutter/embedOpenMenu";
 import {bindSpellcheckFocus} from "../util/spellcheckFocus";
 import {isTableLikeView} from "../render/av/viewType";
+import {bindAVCellTyping} from "../render/av/cellTyping";
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
 import {normalizeInlineElementBoundaries, prepareInlineElementBoundaryMutation} from "../util/inlineElementBoundary";
 import {renderLongTextRuns} from "../util/longTextWrap";
@@ -27,6 +28,7 @@ import {
     getTextStar,
     normalizeVirtualBlockRef,
     paste,
+    pasteFromMenu,
     restoreLuteMarkdownSyntax
 } from "../util/paste";
 import {
@@ -128,7 +130,6 @@ import {
     isMac,
     isOnlyMeta,
     isPhablet,
-    readClipboard,
     writeClipboardData
 } from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
@@ -252,7 +253,7 @@ import {syncRootAttributes} from "../util/syncRootAttributes";
 import {isHandlerIALAttribute} from "../util/ialAttributes";
 import {bindImageTitleEditor} from "../render/imageTitleEditor";
 import {bindImageResize, getImageResizeWidth} from "../render/imageResize";
-import {isDirectCalloutStructureClick} from "./calloutClick";
+import {isBelowCalloutContent, isDirectCalloutStructureClick} from "./calloutClick";
 import {
     BLOCK_SELECTION_CLASS,
     clearBlockSelectionMode,
@@ -578,6 +579,7 @@ export class WYSIWYG {
         }
         /// #endif
         if (!isMobile()) {
+            bindAVCellTyping(protyle, this.element);
             this.disposeTouchBlockDragSelect = bindTouchBlockDragSelect(this.element,
                 () => !protyle.disabled && !window.siyuan.touchDragActive &&
                     !protyle.toolbar.isMultiSelectMode(), protyle.element);
@@ -1310,7 +1312,9 @@ export class WYSIWYG {
             const documentSelf = document;
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
-            if (shouldFoldEmbeddedListByAlt(event, protyle.disabled, hasClosestByClassName(target, "protyle-action"))) {
+            const action = hasClosestByClassName(target, "protyle-action");
+            const actionElement = action && !action.closest(".table__cell-rich") && action;
+            if (shouldFoldEmbeddedListByAlt(event, protyle.disabled, actionElement)) {
                 // 折叠控件不改变选区，避免浏览器把光标放到嵌入块前方。
                 event.preventDefault();
                 return;
@@ -1388,8 +1392,7 @@ export class WYSIWYG {
                 Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")) : []);
             const rangeBeforePaddingMouseDown = startsFromPadding && getSelection().rangeCount > 0 ?
                 getSelection().getRangeAt(0).cloneRange() : undefined;
-            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
-                hasClosestByClassName(target, "protyle-action"));
+            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled, actionElement);
             if (event.shiftKey && !openListItemAttrByShift) {
                 if (!isMobile() && !protyle.disabled && isTableLikeView(avElement?.dataset.avType) &&
                     avCellElement && avCellElement.dataset.id &&
@@ -1487,7 +1490,7 @@ export class WYSIWYG {
                 }
             }
 
-            if ((hasClosestByClassName(target, "protyle-action") && !hasClosestByClassName(target, "code-block")) ||
+            if ((actionElement && !hasClosestByClassName(target, "code-block")) ||
                 (hasClosestByClassName(target, "av__cell--header") && !hasClosestByClassName(target, "av__widthdrag"))) {
                 return;
             }
@@ -1726,6 +1729,7 @@ export class WYSIWYG {
                 const blockID = nodeElement.dataset.nodeId;
                 const dragElement = target.parentElement as HTMLElement;
                 const dragRect = dragElement.getBoundingClientRect();
+                const originalWidth = dragElement.style.width;
                 const oldWidth = Math.round(parseFloat(dragElement.style.width) || dragRect.width);
                 const dragColId = dragElement.getAttribute("data-col-id");
                 const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
@@ -1853,7 +1857,7 @@ export class WYSIWYG {
                         action: "setAttrViewColWidth",
                         id: dragColId,
                         avID: avId,
-                        data: oldWidth + "px",
+                        data: originalWidth || oldWidth + "px",
                         blockID,
                         viewID
                     }]);
@@ -3055,20 +3059,15 @@ export class WYSIWYG {
                                 label: window.siyuan.languages.paste,
                                 icon: "iconPaste",
                                 accelerator: "⌘V",
-                                async click() {
+                                async click(_element, event) {
                                     if (!tableBlockElement) {
                                         return;
                                     }
                                     focusByRange(getEditorRange(tableBlockElement));
-                                    if (document.queryCommandSupported("paste")) {
-                                        document.execCommand("paste");
-                                    } else {
-                                        try {
-                                            const text = await readClipboard();
-                                            paste(protyle, Object.assign(text, {target: tableBlockElement as HTMLElement}));
-                                        } catch (e) {
-                                            console.log(e);
-                                        }
+                                    try {
+                                        await pasteFromMenu(protyle, tableBlockElement as HTMLElement, event?.isTrusted === true);
+                                    } catch (error) {
+                                        console.log(error);
                                     }
                                 }
                             }).element);
@@ -4909,8 +4908,9 @@ export class WYSIWYG {
                 return;
             }
             /// #endif
-            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
-                hasClosestByClassName(event.target, "protyle-action"));
+            const action = hasClosestByClassName(event.target, "protyle-action");
+            const actionElement = action && !action.closest(".table__cell-rich") && action;
+            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled, actionElement);
             const shiftAssetElement = hasClosestByAttribute(event.target, "data-type", "file-annotation-ref") ||
                 hasClosestByAttribute(event.target, "data-type", "a") ||
                 hasClosestByClassName(event.target, "av__celltext--url");
@@ -5019,7 +5019,6 @@ export class WYSIWYG {
             if (hasClosestByClassName(event.target, "av__views") && avClick(protyle, event)) {
                 return;
             }
-            const actionElement = hasClosestByClassName(event.target, "protyle-action");
             if (actionElement && shouldFoldEmbeddedListByAlt(event, protyle.disabled, actionElement)) {
                 // 在读取编辑器选区前处理折叠，避免无选区时兜底聚焦文档顶部。
                 toggleListFold(protyle, actionElement.parentElement.parentElement);
@@ -5159,10 +5158,14 @@ export class WYSIWYG {
                     virtualRefParam.notebook = protyle.notebookId;
                 }
                 fetchPost("/api/block/getBlockDefIDsByRefText", virtualRefParam, (response) => {
-                    checkReferenceFold(response.data.refDefs[0].refID, (zoomIn) => {
+                    const targetID = response.data?.refDefs?.[0]?.refID;
+                    if (response.code !== 0 || !targetID) {
+                        return;
+                    }
+                    checkReferenceFold(targetID, (zoomIn) => {
                         mobileBlur = true;
                         activeBlur();
-                        openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
+                        openMobileFileById(protyle.app, targetID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
                     });
                 });
                 return;
@@ -5591,9 +5594,8 @@ export class WYSIWYG {
                     }
                 } else if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutElement &&
                     isDirectCalloutClick) {
-                    // 提示块结构区域不可编辑，点击后将光标定位到首个可编辑子块
-                    // https://github.com/siyuan-note/siyuan/issues/16310
-                    newRange = focusBlock(calloutElement) || newRange;
+                    const toStart = !isBelowCalloutContent(calloutElement, event.clientY);
+                    newRange = focusBlock(calloutElement, undefined, toStart) || newRange;
                 }
                 // 表格中点击两侧或间隙导致光标跳转到开头 https://github.com/siyuan-note/siyuan/issues/16179
                 if (event.target.classList.contains("protyle-wysiwyg") || event.target.parentElement?.classList.contains("table")) {

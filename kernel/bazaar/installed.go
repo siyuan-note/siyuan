@@ -5,6 +5,7 @@
 package bazaar
 
 import (
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -76,6 +77,82 @@ func PackageDirContainsFile(dirPath string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+// installedManifestStamp 用清单文件的大小与修改时间判断解析结果是否仍然有效。
+type installedManifestStamp struct {
+	size    int64
+	modTime int64
+}
+
+// installedManifestCacheEntry 保存已安装包清单的解析结果及其校验信息。
+type installedManifestCacheEntry struct {
+	stamp installedManifestStamp
+	pkg   *Package
+}
+
+var (
+	installedManifestCacheMu sync.RWMutex
+	installedManifestCache   = map[string]map[string]installedManifestCacheEntry{} // 包类型 -> 安装目录 -> 清单解析结果
+	installedManifestReader  = readInstalledPackageManifest                        // 读取入口，便于测试替换
+)
+
+// readInstalledPackageManifest 打开一次清单文件，同时取得修改时间、大小并解析内容，
+// 避免先 stat 再读取时的第二次打开。
+func readInstalledPackageManifest(manifestPath string) (stamp installedManifestStamp, pkg *Package, err error) {
+	file, err := filelock.OpenFile(manifestPath, os.O_RDONLY, 0)
+	if err != nil {
+		return
+	}
+	defer filelock.CloseFile(file)
+
+	info, err := file.Stat()
+	if err != nil {
+		return
+	}
+	data, err := io.ReadAll(file)
+	if err != nil {
+		logging.LogErrorf("read [%s] failed: %s", manifestPath, err)
+		return
+	}
+	if pkg, err = parsePackageJSONData(manifestPath, data); err != nil {
+		return
+	}
+	stamp = installedManifestStamp{size: info.Size(), modTime: info.ModTime().UnixNano()}
+	return
+}
+
+// manifestStampMatches 校验清单是否仍是缓存时的版本，命中路径只打开一次文件取属性。
+func manifestStampMatches(manifestPath string, stamp installedManifestStamp) bool {
+	info, err := os.Stat(manifestPath)
+	if err != nil {
+		return false
+	}
+	return info.Size() == stamp.size && info.ModTime().UnixNano() == stamp.modTime
+}
+
+// LoadInstalledPackageManifest 解析已安装包的清单文件，清单的修改时间与大小未变化时复用上次解析结果。
+// 返回的包是缓存原型的独立副本，调用方可以就地写入展示字段。
+func LoadInstalledPackageManifest(pkgType, installPath, manifestPath string) (pkg *Package, err error) {
+	installedManifestCacheMu.RLock()
+	cached, ok := installedManifestCache[pkgType][installPath]
+	installedManifestCacheMu.RUnlock()
+	if ok && manifestStampMatches(manifestPath, cached.stamp) {
+		return ClonePackage(cached.pkg), nil
+	}
+
+	stamp, parsed, err := installedManifestReader(manifestPath)
+	if nil != err {
+		// 清单缺失或不可读时沿用既有错误，这类情况不写入缓存
+		return nil, err
+	}
+	installedManifestCacheMu.Lock()
+	if nil == installedManifestCache[pkgType] {
+		installedManifestCache[pkgType] = map[string]installedManifestCacheEntry{}
+	}
+	installedManifestCache[pkgType][installPath] = installedManifestCacheEntry{stamp: stamp, pkg: parsed}
+	installedManifestCacheMu.Unlock()
+	return ClonePackage(parsed), nil
 }
 
 // SetInstalledPackageMetadata 设置本地集市包的通用元数据
@@ -187,14 +264,55 @@ func GetInstalledPackageSize(pkgType, packageName, installPath string) (size int
 	return
 }
 
-// RemoveInstalledPackageSizeCache 删除本地集市包的安装大小缓存
-func RemoveInstalledPackageSizeCache(pkgType, packageName string) {
+// InvalidateInstalledPackageSizeCache 删除本地集市包的安装大小缓存
+func InvalidateInstalledPackageSizeCache(pkgType, packageName string) {
 	cacheKey := pkgType + ":" + packageName
 	installSizeCacheMu.Lock()
 	delete(installSizeCache, cacheKey)
 	installSizeVersion[cacheKey]++
 	installSizeCacheMu.Unlock()
 	installSizeFlight.Forget(cacheKey)
+}
+
+// InvalidateInstalledPackageManifestCache 丢弃指定包的清单缓存，供安装或卸载后立即生效。
+func InvalidateInstalledPackageManifestCache(pkgType, packageName string) {
+	layout, ok := GetPackageLayout(pkgType)
+	if !ok {
+		return
+	}
+	installedManifestCacheMu.Lock()
+	defer installedManifestCacheMu.Unlock()
+	delete(installedManifestCache[pkgType], filepath.Join(layout.BasePath, packageName))
+}
+
+// RetainInstalledPackageCaches 只保留本次扫描到的安装目录，卸载后的派生缓存不再驻留。
+func RetainInstalledPackageCaches(pkgType string, installPaths []string) {
+	installedManifestCacheMu.Lock()
+	cached := installedManifestCache[pkgType]
+	if nil != cached {
+		keep := make(map[string]struct{}, len(installPaths))
+		for _, installPath := range installPaths {
+			keep[installPath] = struct{}{}
+		}
+		for installPath := range cached {
+			if _, ok := keep[installPath]; !ok {
+				delete(cached, installPath)
+			}
+		}
+	}
+	installedManifestCacheMu.Unlock()
+	if layout, ok := GetPackageLayout(pkgType); ok {
+		retainInstalledPackageReadmeCache(filepath.Clean(layout.BasePath), installPaths)
+	}
+}
+
+// InvalidateInstalledPackageCaches 在安装、卸载或外观同步后丢弃该包的全部派生缓存。
+func InvalidateInstalledPackageCaches(pkgType, packageName string) {
+	InvalidateInstalledPackageSizeCache(pkgType, packageName)
+	InvalidateInstalledPackageManifestCache(pkgType, packageName)
+	if layout, ok := GetPackageLayout(pkgType); ok {
+		InvalidateInstalledPackageReadmeCache(filepath.Join(layout.BasePath, packageName))
+	}
 }
 
 // Add marketplace package config item `minAppVersion` https://github.com/siyuan-note/siyuan/issues/8330

@@ -54,6 +54,8 @@ func TestAPIContractAgentSSEDelivery(t *testing.T) {
 	for _, event := range []agent.AgentEvent{
 		{Type: "thinking", Reasoning: "compacting context", RoundID: "same-round"},
 		{Type: "interrupted", Error: "consumer stalled"},
+		{Type: "error", Error: "snapshot failure", SnapshotFailed: true},
+		{Type: "error", Error: "other failure"},
 		{Type: "usage", PromptTokens: 10, CompletionTokens: 3},
 	} {
 		writer := &agentDeadlineWriter{ResponseRecorder: httptest.NewRecorder()}
@@ -75,6 +77,9 @@ func TestAPIContractAgentSSEDelivery(t *testing.T) {
 		}
 		if event.Type == "thinking" && !strings.Contains(writer.Body.String(), `"roundID":"same-round"`) {
 			t.Fatal("compaction lost its round identity")
+		}
+		if event.Type == "error" && strings.Contains(writer.Body.String(), `"snapshotFailed":true`) != event.SnapshotFailed {
+			t.Fatal("incorrect snapshot failure marker in error event")
 		}
 	}
 }

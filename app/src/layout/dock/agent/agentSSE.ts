@@ -1,3 +1,4 @@
+import type {AIReference} from "../../../types/api";
 import {fetchWithAppId} from "../../../util/fetchWithAppId";
 import {buildAgentConfirmEvent, IToolEffects} from "./agentConfirmEvent";
 
@@ -35,6 +36,7 @@ export type ISSEResult = {
 } | {
     type: "error";
     message: string;
+    snapshotFailed?: boolean;
 } | {
     type: "interrupted";
     message: string;
@@ -101,7 +103,7 @@ export class AgentHttpError extends Error {
 export async function fetchAgentSSE(
     message: string,
     language: string,
-    references: Array<{id: string; title: string}>,
+    references: AIReference[],
     onEvent: (event: ISSEResult) => void | Promise<void>,
     onError: (err: Error) => void | Promise<void>,
     signal?: AbortSignal,
@@ -310,7 +312,7 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
                 result: data.result as string,
             };
         case "error":
-            return {type: "error", message: data.message as string};
+            return {type: "error", message: data.message as string, snapshotFailed: data.snapshotFailed === true};
         case "interrupted":
             return {type: "interrupted", message: data.message as string};
         case "done":

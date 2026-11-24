@@ -145,13 +145,15 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
         {type: "color", label: window.siyuan.languages.colorFont},
         {type: "backgroundColor", label: window.siyuan.languages.colorPrimary},
     ];
+    const colorTitle = window.siyuan.languages.manageColors;
+    const colorDescription = window.siyuan.languages.manageColorsDesc;
     group.slot({
         key: "manageColors",
-        keywords: [window.siyuan.languages.manageColors, ...colorOptions.map(option => option.label)],
+        keywords: [colorTitle, colorDescription, ...colorOptions.map(option => option.label)],
         html: () => genStackHtml(colorOptions.map((option, index) => ({
             left: {
                 kind: index === 0 ? "title" : "desc",
-                text: index === 0 ? window.siyuan.languages.manageColors : "",
+                text: [colorTitle, colorDescription, ""][index],
             },
             right: {kind: "button", id: `manageColors-${option.type}`, label: option.label, icon: "iconSettings"},
         }))),

@@ -114,7 +114,7 @@ func InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, systemID
 	if err != nil {
 		return nil, err
 	}
-	RemoveInstalledPackageSizeCache(pkgType, packageName)
+	InvalidateInstalledPackageCaches(pkgType, packageName)
 
 	// 记录首次安装时间或最近更新时间
 	now := time.Now()
@@ -362,7 +362,7 @@ func InstallLocalPackageWithOptions(sourcePath, installPath, pkgType, packageNam
 		return
 	}
 
-	RemoveInstalledPackageSizeCache(pkgType, packageName)
+	InvalidateInstalledPackageCaches(pkgType, packageName)
 	now := time.Now()
 	recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update, "", "")
 	if chtimesErr := os.Chtimes(installPath, now, now); chtimesErr != nil {

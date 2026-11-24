@@ -12,7 +12,7 @@ const inside = (directory: string, candidate: string): boolean => {
     return relative !== ".." && !relative.startsWith(".." + path.sep) && !path.isAbsolute(relative);
 };
 const identity = (stat: BigIntStats): string => `${stat.dev}:${stat.ino}`;
-const relativeReference = (value: string): boolean => Boolean(value) &&
+const isRelativeMarkdownReference = (value: string): boolean => Boolean(value) &&
     !/^[\/\\#]|^[a-z][\w+.-]*:/i.test(value) &&
     !Array.from(value).some(character => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127);
 
@@ -100,11 +100,11 @@ class MarkdownResources {
     }
 
     private async inspect(reference: unknown, targetPath?: string) {
-        if (typeof reference !== "string" || reference.length > 8192 || !targetPath || !relativeReference(reference)) return;
+        if (typeof reference !== "string" || reference.length > 8192 || !targetPath || !isRelativeMarkdownReference(reference)) return;
         try {
             const withoutFragment = reference.split("#", 1)[0].split("?", 1)[0];
             const relative = decodeURIComponent(withoutFragment);
-            if (path.isAbsolute(relative) || !relativeReference(relative)) return;
+            if (path.isAbsolute(relative) || !isRelativeMarkdownReference(relative)) return;
             const selection = path.resolve(path.dirname(targetPath), relative);
             const canonical = await fs.realpath(selection);
             const type = imageTypes[path.extname(canonical).toLowerCase()];
@@ -161,4 +161,4 @@ class MarkdownResources {
     }
 }
 
-export {MarkdownResources, inside};
+export {MarkdownResources, inside, isRelativeMarkdownReference};

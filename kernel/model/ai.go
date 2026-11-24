@@ -131,6 +131,7 @@ func buildAIEditorMessages(prompt string, history []AIEditorMessage, maxHistoryM
 }
 
 type AIEditorChatStream struct {
+	Prompt      string
 	stream      *util.OpenAICompletionStream
 	cancel      context.CancelFunc
 	idleTimeout time.Duration
@@ -150,8 +151,13 @@ func (stream *AIEditorChatStream) Close() {
 	stream.stream.Close()
 }
 
+type AIEditorChatOptions struct {
+	ModelID         string
+	ReasoningEffort *string
+}
+
 // NewAIEditorChatStream 创建绑定到编辑器请求生命周期的模型流。
-func NewAIEditorChatStream(ctx context.Context, ids []string, input, action string, history []AIEditorMessage) (*AIEditorChatStream, error) {
+func NewAIEditorChatStream(ctx context.Context, ids []string, input, action string, history []AIEditorMessage, options AIEditorChatOptions) (*AIEditorChatStream, error) {
 	confAISnapshot := Conf.LoadAI()
 
 	if !confAISnapshot.HasAnyProvider() {
@@ -159,12 +165,25 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 	}
 
 	prov, m := confAISnapshot.GetEditingModel()
+	if options.ModelID != "" {
+		prov, m = confAISnapshot.GetModel(options.ModelID)
+		if m == nil || m.ID != options.ModelID {
+			return nil, errors.New("AI editing model unavailable")
+		}
+	}
 	if nil == prov || nil == m {
 		return nil, errors.New("no AI editing model configured")
 	}
 	editing := confAISnapshot.Editing
 	if nil == editing {
 		return nil, errors.New("no AI editing config")
+	}
+	effort := editing.ReasoningEffort
+	if options.ReasoningEffort != nil {
+		effort = *options.ReasoningEffort
+	}
+	if !conf.IsAIReasoningEffort(effort) {
+		return nil, errors.New("invalid AI editing reasoning effort")
 	}
 
 	if "" == input && 0 < len(ids) {
@@ -185,6 +204,7 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 		Model:               m.Name,
 		MaxCompletionTokens: editing.MaxCompletionTokens,
 		Temperature:         float32(editing.Temperature),
+		ReasoningEffort:     effort,
 		Messages:            messages,
 		Stream:              true,
 	}
@@ -208,6 +228,7 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 		return nil, errors.New("AI editor model returned nil stream")
 	}
 	return &AIEditorChatStream{
+		Prompt:      prompt,
 		stream:      completionStream,
 		cancel:      cancel,
 		idleTimeout: 120 * time.Second,

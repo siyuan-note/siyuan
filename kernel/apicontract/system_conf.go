@@ -149,6 +149,8 @@ type SystemNetworkProxy struct {
 }
 
 type SystemSync struct {
+	// Configured is a read-only record of a current or prior workspace sync association.
+	Configured bool   `json:"configured" api:"optional,nullable"`
 	CloudName  string `json:"cloudName" api:"optional,nullable"`
 	Enabled    bool   `json:"enabled" api:"optional,nullable"`
 	Perception bool   `json:"perception" api:"optional,nullable"`

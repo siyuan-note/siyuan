@@ -128,24 +128,24 @@ test("standalone tab rows reserve the actual toolbar overlap across fractional s
 });
 
 for (const platform of ["windows", "mac", "linux"]) {
-    test(`Fused tabs on ${platform} keep an icon-width drag area beside the right toolbar buttons`, () => {
+    test(`Fused tabs on ${platform} reserve only the overlap with the right toolbar`, () => {
         const f = loadTabUtil(0, "desktop", platform);
         try {
             const header = f.headerElement;
             f.setTabPosition(true);
             assert.equal(f.toolbarDragStyle.get("--b3-toolbar-drag-left"), "8px");
-            assert.equal(f.toolbarDragStyle.get("--b3-toolbar-drag-right"), "24px");
-            assert.equal(header.lastElementChild.style.marginRight, "74px");
+            assert.equal(f.toolbarDragStyle.get("--b3-toolbar-drag-right"), "8px");
+            assert.equal(header.lastElementChild.style.marginRight, "50px");
 
-            for (const [paneRight, expectedWidth, expectedMargin] of [[830, "24px", "4px"], [810, "40px", ""]] as const) {
+            for (const [paneRight, expectedWidth] of [[830, "20px"], [810, "40px"]] as const) {
                 f.center.element.getBoundingClientRect = () => ({left: 0, right: paneRight});
                 header.getBoundingClientRect = () => ({top: 0, left: 0, right: paneRight, width: paneRight}) as DOMRect;
                 f.setTabPosition(true);
                 assert.equal(f.toolbarDragStyle.get("--b3-toolbar-drag-right"), expectedWidth);
-                assert.equal(header.lastElementChild.style.marginRight, expectedMargin);
+                assert.equal(header.lastElementChild.style.marginRight, "");
             }
 
-            header.getBoundingClientRect = () => ({top: 0, left: 765, right: 850, width: 85}) as DOMRect;
+            header.getBoundingClientRect = () => ({top: 0, left: 810, right: 900, width: 90}) as DOMRect;
             f.setTabPosition(true);
             assert.equal(header.style.visibility, "hidden");
             header.getBoundingClientRect = () => ({top: 42, left: 0, right: 900, width: 900}) as DOMRect;

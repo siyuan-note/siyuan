@@ -13,6 +13,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -225,7 +226,8 @@ func previewTagRemovalTrees(before, after map[string]*parse.Tree, changes []*api
 
 // 全局标签删除使用普通编辑事务，源标签和用户选择移出的字段共用撤销记录。
 func RemoveTagWithCollections(request apicontract.RemoveTagWithCollectionsRequest) (*Transaction, error) {
-	if _, err := tagRemovalLabels(request.Label, request.Labels); err != nil {
+	labels, err := tagRemovalLabels(request.Label, request.Labels)
+	if err != nil {
 		return nil, err
 	}
 	type result struct {
@@ -290,6 +292,9 @@ func RemoveTagWithCollections(request apicontract.RemoveTagWithCollectionsReques
 		}
 		if err = execute(tx); err != nil {
 			return result{err: err}
+		}
+		if err = removeTagSort(labels); err != nil {
+			logging.LogErrorf("remove tag order failed: %s", err)
 		}
 		return result{tx: tx}
 	})

@@ -12,8 +12,9 @@ import (
 
 var getBookmark = contractHandler(apicontract.GetBookmark, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.Bookmark] {
 
-	bookmarks := model.BuildBookmark()
-	if model.IsReadOnlyRoleContext(c) {
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	bookmarks := model.BuildBookmark(isReadOnlyRole)
+	if isReadOnlyRole {
 		publishAccess := model.GetPublishAccess()
 		tempBookmarks := &model.Bookmarks{}
 		for _, bookmark := range *bookmarks {
@@ -25,7 +26,7 @@ var getBookmark = contractHandler(apicontract.GetBookmark, func(c *gin.Context, 
 		}
 		bookmarks = tempBookmarks
 	}
-	return apicontract.Success(bookmarkContracts(bookmarks))
+	return apicontract.Success(bookmarkContracts(bookmarks, isReadOnlyRole))
 })
 
 var removeBookmark = contractHandler(apicontract.RemoveBookmark, func(c *gin.Context, request apicontract.RemoveBookmarkRequest) apicontract.Response[apicontract.Null] {

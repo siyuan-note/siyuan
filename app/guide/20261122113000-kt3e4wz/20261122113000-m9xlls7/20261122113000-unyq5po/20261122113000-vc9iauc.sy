@@ -1,0 +1,888 @@
+{
+	"ID": "20261122113000-vc9iauc",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-vc9iauc",
+		"title": "Рабочее пространство",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-qejsyrk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-qejsyrk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5rj6956",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-5rj6956",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Рабочее пространство используется для хранения данных, истории, конфигурации и файлов, необходимых во время работы."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lujtgk0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-lujtgk0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На настольной версии, если запрос на закрытие окна или выход из приложения не завершается в течение 15 секунд и окно не отвечает в течение следующей 1 секунды, появляется системный диалог, позволяющий продолжить ожидание или подтвердить выход. Выход может привести к потере правок в интерфейсе, ещё не отправленных в ядро. Окно закрывается только после успешного штатного завершения локального ядра; при сбое окно остаётся открытым для повторной попытки. Закрытие удалённого подключения не останавливает удалённое ядро. Точки выхода из трея и приложения также поддерживают этот механизм восстановления; отзывчивые окна продолжают сохранение, подтверждение и синхронизацию в обычном режиме."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-g5ipqgc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-g5ipqgc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-e7pyb7i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-e7pyb7i",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-h7amcos",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-h7amcos",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Разные рабочие пространства изолированы друг от друга папками файловой системы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-r11qqs5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-r11qqs5",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5a81j5u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5a81j5u",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Одно рабочее пространство может обслуживаться только одним процессом ядра"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fg5pmzm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-fg5pmzm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Переключение рабочего пространства"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-v0tw6xi",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-v0tw6xi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-tdx4owp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-tdx4owp",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-znai1t6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-znai1t6",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "На настольной версии можно открыть несколько рабочих пространств через выпадающее меню в левой части верхней панели"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-7pr0ali",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7pr0ali",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Если вам нужно часто запускать несколько рабочих пространств, можно создать отдельный ярлык запуска для каждого из них и указать параметр запуска "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace=&quot;абсолютный_путь_к_рабочему_пространству&quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " или "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace &quot;абсолютный_путь_к_рабочему_пространству&quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (пожалуйста, используйте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "&quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, чтобы заключить путь в кавычки). Например, в Windows можно скопировать несколько ярлыков и в каждом в поле «Свойства» -> «Объект» добавить параметр пути к рабочему пространству, например "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace=&quot;F:\\SiYuan&quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​. Кроме того, можно указать порт, который прослушивает ядро, с помощью "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--port=12345"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-h7wqjmu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-h7wqjmu",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ajbrtq6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ajbrtq6",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "На мобильных устройствах переключаться между рабочими пространствами можно в разделе "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Больше"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Приложение"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Рабочее пространство"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ""
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-hisfnh7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-hisfnh7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Переименование рабочего пространства"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-oekhnc0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-oekhnc0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На настольной версии имя рабочего пространства совпадает с именем папки, поэтому для изменения нужно выйти из SiYuan и переименовать её в файловом менеджере. Достаточно переименовать всю папку рабочего пространства, не очищая её содержимое и не перенося данные."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-40io7ea",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46
+			},
+			"Properties": {
+				"id": "20261122113000-40io7ea",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-9amfb61",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20261122113000-9amfb61",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-poydc2j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-poydc2j",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Найдите целевое рабочее пространство в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Рабочее пространство"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " в левом меню верхней панели и выберите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Показать в папке"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", чтобы найти папку"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-iya7i2i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20261122113000-iya7i2i",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2vt2cgw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2vt2cgw",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Безопасно выйдите из SiYuan через "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Выйти из приложения"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " в левом меню верхней панели и дождитесь завершения соответствующего процесса ядра"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-3env8yw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20261122113000-3env8yw",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-63b6yte",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-63b6yte",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Измените имя папки рабочего пространства в файловом менеджере, сохранив все файлы и подпапки внутри"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ovrgj4r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20261122113000-ovrgj4r",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-x7l4pi8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-x7l4pi8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Перезапустите SiYuan и выберите переименованную папку в окне выбора рабочего пространства; если вы уже вошли в другое рабочее пространство, выберите эту папку через "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Рабочее пространство"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Создать / Открыть"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " в левом меню верхней панели"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lzle6mn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-lzle6mn",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Простое закрытие окна или открытие другого рабочего пространства не обязательно завершает исходное рабочее пространство. Если вы использовали параметр "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", перед перезапуском обновите путь в команде запуска или ярлыке на новое имя."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-72n8moh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-72n8moh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Структура файловой системы"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-hxe3zsj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-hxe3zsj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Структура рабочего пространства в файловой системе:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-i4ug6bg",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-i4ug6bg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-9ik68tr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9ik68tr",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-vjxhig4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-vjxhig4",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "conf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ используется для хранения конфигурации рабочего пространства"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-2j4pacz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-2j4pacz",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-qb1128v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-qb1128v",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "corrupted"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ используется для хранения повреждённых файлов данных"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-pet7tjh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-pet7tjh",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-c4okzb4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-c4okzb4",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ используется для хранения данных, подробную структуру см. "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-6cd0d4h",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "здесь"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-qf5sl95",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-qf5sl95",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-z9s5tyt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-z9s5tyt",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "history"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ используется для хранения истории файлов"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-jpllq5t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-jpllq5t",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-h69fiz1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-h69fiz1",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "repo"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ используется для хранения данных репозитория данных"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-hg39q1k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hg39q1k",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-op20j5s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-op20j5s",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "temp"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ используется для хранения временных файлов, необходимых во время работы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-v7he7uv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-v7he7uv",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-22x58mn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-22x58mn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".lock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ создаётся после запуска процесса ядра для блокировки рабочего пространства"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3fnl7ay",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-3fnl7ay",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Сторонние темы сохраняются в data/themes/, а наборы значков — в data/icons/, и они участвуют в синхронизации данных и снимках. Выбор внешнего вида на каждом устройстве по-прежнему хранится локально в conf/conf.json; встроенные ресурсы внешнего вида в синхронизации не участвуют. При миграции во время обновления исходный каталог переносится в каталог данных, после чего исходная копия удаляется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8svocar",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-8svocar",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если запись восстановления незавершённой транзакции конфликтует с файлом, который позже был изменён, перемещён или удалён, при запуске автоматически сохраняется текущий файл и перестраиваются связанные индексы без повторного создания удалённых документов. Исходная запись восстановления сохраняется в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "conf/document-source-recovery/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для диагностики, без необходимости ручной очистки или подтверждения. Ошибки доступа к файлам, неподдерживаемые форматы и сбои аутентификации по-прежнему выдают ошибку и сохраняют исходные данные."
+				}
+			]
+		}
+	]
+}

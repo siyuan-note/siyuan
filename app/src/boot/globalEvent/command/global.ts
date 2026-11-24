@@ -10,7 +10,7 @@ import {getRecentDocs} from "../../../mobile/menu/getRecentDocs";
 import {openNewWindow} from "../../../window/openNewWindow";
 import {openBacklink, openGraph, openOutline, selectOpenTab, toggleDockBar} from "../../../layout/dock/util";
 import {openGlobalSearch} from "../../../search/util";
-import {workspaceMenu} from "../../../menus/workspace";
+import {mainMenu} from "../../../menus/mainMenu";
 import {isWindow} from "../../../util/functions";
 import {openRecentDocs} from "../../../business/openRecentDocs";
 import {openSearch} from "../../../search/spread";
@@ -161,8 +161,8 @@ export const globalCommand = (command: string, app: App, range?: Range, openOnly
             return true;
         case "mainMenu":
             if (!isWindow()) {
-                const target = document.querySelector("#barWorkspace");
-                workspaceMenu(app, target.getBoundingClientRect(), openOnly, target);
+                const target = document.getElementById(Constants.MENU_BAR_MAIN_MENU);
+                mainMenu(app, target.getBoundingClientRect(), openOnly, target);
             }
             return true;
         case "recentDocs":

@@ -17,6 +17,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -42,48 +43,48 @@ func documentCheckoutPreflight(repo *dejavu.Repo, checkSources bool) func(*dejav
 		if err := checkPasswordMigrationCheckout(plan); err != nil {
 			return err
 		}
-		upserts := make([]string, 0, len(plan.Upserts))
-		removes := make([]string, 0, len(plan.Removes))
 		upsertBoxes, removedPaths := map[string]bool{}, map[string]bool{}
 		seen := map[string]bool{}
+		rejectPath := func(operation, name, reason string) error {
+			logging.LogErrorf("checkout path rejected [operation=%s, path=%q, reason=%s]", operation, name, reason)
+			return documentaddressing.ErrInvalid
+		}
 		// 仓库索引统一使用前导斜杠和正斜杠；拒绝别名及重复目标，避免覆盖计划遮盖来源。
-		checkPath := func(name string) error {
-			if !strings.HasPrefix(name, "/") || strings.Contains(name, "\\") {
-				return documentaddressing.ErrInvalid
+		checkPath := func(operation, name string) error {
+			if !strings.HasPrefix(name, "/") {
+				return rejectPath(operation, name, "missing leading slash")
+			}
+			if reason := documentaddressing.PathRejectionReason(name); reason != "" {
+				return rejectPath(operation, name, reason)
 			}
 			key := name
 			if runtime.GOOS == "windows" {
 				for _, part := range strings.Split(name[1:], "/") {
 					if strings.TrimRight(part, ". ") != part || strings.Contains(part, ":") {
-						return documentaddressing.ErrInvalid
+						return rejectPath(operation, name, "Windows path alias")
 					}
 				}
 				key = strings.ToLower(key)
 			}
 			if seen[key] {
-				return documentaddressing.ErrInvalid
+				return rejectPath(operation, name, "duplicate target")
 			}
 			seen[key] = true
 			return nil
 		}
 		for _, file := range plan.Upserts {
-			if err := checkPath(file.Path); err != nil {
+			if err := checkPath("upsert", file.Path); err != nil {
 				return err
 			}
-			upserts = append(upserts, file.Path)
 			name := strings.TrimPrefix(file.Path, "/")
 			boxID, _, _ := strings.Cut(name, "/")
 			upsertBoxes[boxID] = true
 		}
 		for _, file := range plan.Removes {
-			if err := checkPath(file.Path); err != nil {
+			if err := checkPath("remove", file.Path); err != nil {
 				return err
 			}
-			removes = append(removes, file.Path)
 			removedPaths[strings.TrimPrefix(file.Path, "/")] = true
-		}
-		if err := documentaddressing.CheckPaths(upserts, removes); err != nil {
-			return err
 		}
 		if checkSources {
 			for _, file := range plan.Upserts {

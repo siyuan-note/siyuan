@@ -42,26 +42,45 @@ func CheckBox(boxID string) error {
 func CheckPaths(upserts, removes []string) error {
 	for _, group := range [][]string{upserts, removes} {
 		for _, name := range group {
-			if strings.Contains(name, "\\") {
+			if PathRejectionReason(name) != "" {
 				return ErrInvalid
-			}
-			name = strings.TrimPrefix(filepath.ToSlash(name), "/")
-			if name == "" || name == "." || name == ".." || strings.HasPrefix(name, "../") ||
-				filepath.IsAbs(name) || filepath.VolumeName(name) != "" ||
-				filepath.ToSlash(filepath.Clean(name)) != name || strings.Contains(name, "\\") {
-				return ErrInvalid
-			}
-			boxID, relative, found := strings.Cut(name, "/")
-			if found && ast.IsNodeIDPattern(strings.ToLower(boxID)) {
-				metadata := strings.ToLower(relative)
-				if boxID != strings.ToLower(boxID) ||
-					((metadata == ConfigPath || metadata == FloorPath) && relative != metadata) {
-					return ErrInvalid
-				}
 			}
 		}
 	}
 	return nil
+}
+
+func PathRejectionReason(name string) string {
+	if strings.Contains(name, "\\") {
+		return "backslash in path"
+	}
+	name = strings.TrimPrefix(filepath.ToSlash(name), "/")
+	if name == "" || name == "." {
+		return "empty file path"
+	}
+	if name == ".." || strings.HasPrefix(name, "../") {
+		return "parent directory path"
+	}
+	if filepath.IsAbs(name) || filepath.VolumeName(name) != "" {
+		return "absolute path or volume name"
+	}
+	if filepath.ToSlash(filepath.Clean(name)) != name {
+		return "noncanonical path"
+	}
+	boxID, relative, found := strings.Cut(name, "/")
+	if found {
+		lowerBoxID := strings.ToLower(boxID)
+		if ast.IsNodeIDPattern(lowerBoxID) {
+			if boxID != lowerBoxID {
+				return "notebook ID casing"
+			}
+			metadata := strings.ToLower(relative)
+			if (metadata == ConfigPath || metadata == FloorPath) && relative != metadata {
+				return "notebook metadata path casing"
+			}
+		}
+	}
+	return ""
 }
 
 // DefaultMode is the fixed diagnostic addressing version, not a notebook setting.

@@ -45,6 +45,7 @@ test("manual route save and reset use one transaction and reject stale relation 
             nodes: new Map(["a", "b", "c"].map(id => [id, {}]))}),
         writeListMindmapMetadata: (_list: unknown, next: typeof data) => data = next,
         cleanListMindmapHTML: (html: string) => html,
+        dayjs: () => ({format: () => "20261125120000"}), updateListMindmapTimestamps: () => {},
         updateTransaction: (_owner: unknown, _list: unknown, before: string, undoContext: Record<string, string>,
                             additional: {context: Record<string, string>}) => {
             assert.equal(undoContext.mindmapSnapshotId, list.dataset.nodeId);

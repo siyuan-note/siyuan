@@ -25,6 +25,7 @@ const browserCases = async (source: string) => {
         return element;
     };
     const dependencies = {Constants: constants, canEdit: () => editable, showMessage: (message: string) => check.fail(message),
+        dayjs: () => ({format: () => "20261125120000"}),
         disposeCustomBlocksInElement: noop, processRender: noop, highlightRender: noop, avRender: noop, blockRender: noop,
         genListItemElement: () => blockDOM("- New\n").firstElementChild.firstElementChild,
         updateTransaction: (_owner: unknown, list: HTMLElement, before: string, undo: Record<string, string>,

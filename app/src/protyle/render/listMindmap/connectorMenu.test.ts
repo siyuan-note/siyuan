@@ -76,6 +76,7 @@ test("desktop and mobile settings cancel theme previews and persist one undoable
                 nodes: new Map([["root", {children: []}], ["child", {parentId: "root", children: []}]])}),
             writeListMindmapMetadata: (_list: unknown, value: typeof data) => data = value,
             cleanListMindmapHTML: (html: string) => html,
+            dayjs: () => ({format: () => "20261125120000"}), updateListMindmapTimestamps: () => {},
             updateTransaction: (_owner: unknown, _list: unknown, before: string) =>
                 transactions.push({before, after: list.outerHTML}),
             showMessage: () => assert.fail("valid connector changes must not report an error"),

@@ -337,7 +337,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                             inputSource: string, controllerSource: string) => {
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
-        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
+        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, updateListMindmapTimestamps, " +
+        "convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
         "getListMindmapSiblingIDs, normalizeListMindmapSummaryMetadata, getListMindmapSummaryRange, getListMindmapSiblingFoldStates, " +
         "addListMindmapSummaryRanges, getListMindmapSummarySnapshot, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
@@ -385,6 +386,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const controllers: any[] = [];
         const historyRoots: string[] = [];
         const dependencies = {...api,
+            dayjs: () => ({format: () => "20261125120000"}),
             Constants: {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing",
                 CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
             isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
@@ -445,6 +447,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(operations[0].undoOperations[0].context.undoFocusEmbedId, "first");
         check.equal(operations[0].undoOperations[0].context.undoFocusIndex, "1");
         check.match(operations[0].doOperations[0].data as string, /Folded child/);
+        check.equal(copies[0].getAttribute("updated"), "20261125120000");
+        check.equal(copies[1].getAttribute("updated"), "20261125120000");
         await target.view.options.onAdd(itemID, "child");
         const addedID = target.view.getSelectedId();
         check.notEqual(addedID, itemID);
@@ -845,6 +849,31 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(typedRootItem.querySelector(':scope > [data-type="NodeList"]'), null);
     check.ok(typedRootItem.querySelector(':scope > [data-type="NodeMindmap"] > [data-type="NodeMindmapItem"]'));
     check.equal(api.readListMindmap(typedMindmap).root.children.length, 1);
+    for (const legacy of [false, true]) {
+        const timestampList = reset("* Root\n  * Edited\n  * Unchanged\n");
+        if (legacy) {
+            timestampList.setAttribute("custom-sy-list-mindmap", "1");
+        } else {
+            api.retagMindmapBranch(timestampList, true);
+        }
+        const timestampModel = api.readListMindmap(timestampList);
+        const [editedNode, siblingNode] = timestampModel.root.children;
+        const previousTimestamp = "20260101000000";
+        const updatedTimestamp = "20261125120000";
+        [timestampList, ...timestampList.querySelectorAll("[data-node-id]")].forEach(block =>
+            block.setAttribute("updated", previousTimestamp));
+        const beforeUpdate = api.cleanListMindmapHTML(timestampList.outerHTML);
+        const editedBlock = editedNode.contentBlocks[0];
+        editedBlock.querySelector('[contenteditable="true"]').textContent = "Edited text";
+        const afterUpdate = api.cleanListMindmapHTML(timestampList.outerHTML);
+        api.updateListMindmapTimestamps(timestampList, beforeUpdate, afterUpdate, updatedTimestamp);
+        for (let block = editedBlock; block !== timestampList.parentElement; block = block.parentElement) {
+            check.equal(block.getAttribute("updated"), updatedTimestamp);
+        }
+        check.equal(timestampModel.root.contentBlocks[0].getAttribute("updated"), previousTimestamp);
+        check.equal(siblingNode.element.getAttribute("updated"), previousTimestamp);
+        check.equal(siblingNode.contentBlocks[0].getAttribute("updated"), previousTimestamp);
+    }
     const layered = document.createElement("div");
     layered.innerHTML = '<div data-type="NodeList" class="list"><div data-type="NodeListItem" class="li">' +
         '<div data-type="NodeSuperBlock"><div data-type="NodeList" class="list"></div></div>' +
@@ -4955,6 +4984,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const operations: {id: string, before: string, after: string}[] = [];
     const taskAPI = new Function("readListMindmap", "canEdit", "Constants", "dayjs", "updateTransaction", "showMessage",
         "getListMindmapTabItem", "getTabTask", "cleanListMindmapHTML", "getListMindmapSiblingIDs", "normalizeListMindmapSummaryMetadata",
+        "updateListMindmapTimestamps",
         taskSource + "; return {setTaskListItemMarker, nextTaskListMarker, nextTaskListStatus, TaskController};")(
         api.readListMindmap, (owner: any) => !owner.disabled && !owner.history && !owner.embedded,
         {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing"},
@@ -4962,7 +4992,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         (_owner: unknown, element: HTMLElement, before: string) => operations.push({id: element.dataset.nodeId,
             before, after: api.cleanListMindmapHTML(element.outerHTML)}), () => check.fail("Task update failed"),
         api.getListMindmapTabItem, api.getTabTask, api.cleanListMindmapHTML,
-        api.getListMindmapSiblingIDs, api.normalizeListMindmapSummaryMetadata);
+        api.getListMindmapSiblingIDs, api.normalizeListMindmapSummaryMetadata, api.updateListMindmapTimestamps);
     const owner = {disabled: false, history: false, embedded: false, options: {action: [] as string[]}};
     let finishTask: boolean | Promise<boolean> = true;
     let menus = 0;

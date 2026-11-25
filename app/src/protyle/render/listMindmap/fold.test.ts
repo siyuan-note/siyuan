@@ -155,6 +155,7 @@ test("batch folding saves a single undo snapshot and reads the source after fini
         getListMindmapFoldStates,
         getListMindmapSiblingFoldStates,
         cleanListMindmapHTML: (html: string) => html,
+        dayjs: () => ({format: () => "20261125120000"}), updateListMindmapTimestamps: () => {},
         updateTransaction: (_owner: unknown, _list: unknown, before: string, undoContext: Record<string, string>,
                             additional: {context: Record<string, string>}) => {
             assert.equal(undoContext.mindmapSnapshotId, list.dataset.nodeId);

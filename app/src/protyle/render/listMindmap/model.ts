@@ -429,6 +429,27 @@ export const cleanListMindmapHTML = (html: string): string => {
     return template.innerHTML;
 };
 
+export const updateListMindmapTimestamps = (list: HTMLElement, before: string, after: string, updated: string) => {
+    const snapshot = (html: string) => {
+        const template = list.ownerDocument.createElement("template");
+        template.innerHTML = html;
+        return template.content.firstElementChild as HTMLElement;
+    };
+    const previous = snapshot(before);
+    const current = snapshot(after);
+    const previousBlocks = new Map(sourceBlocks(previous).map(block => [block.dataset.nodeId, block]));
+    const liveBlocks = new Map(sourceBlocks(list).map(block => [block.dataset.nodeId, block]));
+    const changed = new Set<Element>();
+    for (const block of sourceBlocks(current).reverse()) {
+        if (!changed.has(block) && block.isEqualNode(previousBlocks.get(block.dataset.nodeId) ?? null)) {
+            continue;
+        }
+        liveBlocks.get(block.dataset.nodeId)?.setAttribute("updated", updated);
+        changed.add(block.parentElement.closest("[data-node-id]"));
+    }
+    list.setAttribute("updated", updated);
+};
+
 // 转换前将思维导图块还原为列表结构，并移除视图节点。
 export const listMindmapConversionSource = (element: Element): Element => {
     const template = document.createElement("template");

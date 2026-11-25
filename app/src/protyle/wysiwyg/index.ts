@@ -796,7 +796,7 @@ export class WYSIWYG {
         return getTextWithoutSemanticMarkers(element);
     }
 
-    private normalizeCrossBlockCopy(element: HTMLElement, range: Range) {
+    private normalizeCrossBlockCopy(element: HTMLElement, range: Range, sourceBlocks?: Map<string, HTMLElement>) {
         normalizeVirtualBlockRef(element);
         let firstElement = element.firstElementChild as HTMLElement;
         while (firstElement?.getAttribute("data-type") === "NodeListItem") {
@@ -814,10 +814,9 @@ export class WYSIWYG {
             firstElement = element.firstElementChild as HTMLElement;
         }
         element.querySelectorAll<HTMLElement>("[data-node-id]").forEach(item => {
-            const sourceElements = this.element.querySelectorAll<HTMLElement>(
-                `[data-node-id="${item.getAttribute("data-node-id")}"]`,
-            );
-            const sourceElement = Array.from(sourceElements).find(source => range.intersectsNode(source)) ||
+            const id = item.dataset.nodeId;
+            const sourceElements = sourceBlocks ? [] : Array.from(this.element.querySelectorAll<HTMLElement>(`[data-node-id="${id}"]`));
+            const sourceElement = sourceBlocks?.get(id) || sourceElements.find(source => range.intersectsNode(source)) ||
                 sourceElements[0];
             if (!sourceElement) {
                 return;
@@ -842,6 +841,42 @@ export class WYSIWYG {
                 }
             });
         }
+    }
+
+    private normalizeTableCellClipboardSelection(element: HTMLElement, range: Range) {
+        const preview = hasClosestByClassName(range.startContainer, "table__cell-rich");
+        if (!preview || !preview.contains(range.endContainer)) {
+            return false;
+        }
+        const copiedBlocks = element.querySelectorAll<HTMLElement>("[data-table-cell-node]");
+        if (!copiedBlocks.length) {
+            return false;
+        }
+        // 选区克隆保留相交的后代节点。根据原节点补齐边界块的操作区和属性栏。
+        const ancestor = range.commonAncestorContainer;
+        const selectedBlocks = Array.from(preview.querySelectorAll<HTMLElement>("[data-table-cell-node]")).filter(block =>
+            block !== ancestor && ancestor.contains(block) && range.intersectsNode(block));
+        const sourceBlocks = new Map<string, HTMLElement>();
+        copiedBlocks.forEach((block, index) => {
+            const id = Lute.NewNodeID();
+            block.dataset.nodeId = id;
+            block.removeAttribute("data-table-cell-node");
+            if (selectedBlocks.length === copiedBlocks.length) {
+                sourceBlocks.set(id, selectedBlocks[index]);
+            }
+        });
+        element.querySelectorAll<HTMLElement>("[data-table-cell-content]").forEach(content => {
+            content.contentEditable = "true";
+            content.setAttribute("spellcheck", "false");
+            content.removeAttribute("data-table-cell-content");
+        });
+        this.normalizeCrossBlockCopy(element, range, sourceBlocks);
+        return true;
+    }
+
+    private getTableCellClipboardText(element: HTMLElement) {
+        element.querySelectorAll("br").forEach(br => br.replaceWith("\n"));
+        return Array.from(element.children, block => getPlainText(block as HTMLElement).trimEnd()).join("\n");
     }
 
     private async writeSelectionClipboardForCut() {
@@ -1097,6 +1132,7 @@ export class WYSIWYG {
                     if (matchHeading) {
                         // 复制标题 https://github.com/siyuan-note/insider/issues/297
                         tempElement.append(headingElement.cloneNode(true));
+                        this.normalizeTableCellClipboardSelection(tempElement, range);
                         const textWithoutAttr = this.clearAttrContent(tempElement);
                         if (textWithoutAttr !== undefined) {
                             textPlain = textWithoutAttr;
@@ -1143,6 +1179,7 @@ export class WYSIWYG {
                     textPlain = semanticRangeText;
                 } else {
                     tempElement.append(range.cloneContents());
+                    const copiedTableCellPreview = this.normalizeTableCellClipboardSelection(tempElement, range);
                     const isCrossBlock = nodeElement !== hasClosestBlock(range.endContainer);
                     if (isCrossBlock) {
                         nestedListPaste = isNestedListCrossBlockSelection(
@@ -1166,7 +1203,9 @@ export class WYSIWYG {
                     this.emojiToMd(tempElement);
                     // 不能使用 commonAncestorContainer https://ld246.com/article/1643282894693
                     textPlain = crossBlockTextPlain ?? getTextWithoutSemanticMarkers(tempElement);
-                    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
+                    if (copiedTableCellPreview) {
+                        textPlain = this.getTableCellClipboardText(tempElement);
+                    } else if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
                         }
@@ -3541,6 +3580,7 @@ export class WYSIWYG {
                 setInsertWbrHTML(nodeElement, range, protyle);
                 const oldHTML = protyle.wysiwyg.lastHTMLs[id] || nodeElement.outerHTML;
                 const tempElement = document.createElement("div");
+                let copiedTableCellPreview = false;
                 // 首次选中标题时，range.startContainer 会为空
                 let startContainer = range.startContainer;
                 if (startContainer.nodeType === 3 && startContainer.textContent === "") {
@@ -3632,6 +3672,7 @@ export class WYSIWYG {
                             tempElement.append(inlineMathElement);
                         } else {
                             tempElement.append(range.cloneContents());
+                            copiedTableCellPreview = this.normalizeTableCellClipboardSelection(tempElement, range);
                             let parentElement: false | Element = getContenteditableElement(nodeElement);
                             // https://ld246.com/article/1647689760545
                             if (nodeElement.classList.contains("av")) {
@@ -3670,9 +3711,11 @@ export class WYSIWYG {
                 }
                 this.emojiToMd(tempElement);
                 html = tempElement.innerHTML;
-                // https://github.com/siyuan-note/siyuan/issues/10722
-                if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
+                if (copiedTableCellPreview) {
+                    textPlain = this.getTableCellClipboardText(tempElement);
+                } else if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
                     hasClosestByTag(range.startContainer, "CODE")) {
+                    // https://github.com/siyuan-note/siyuan/issues/10722
                     textPlain = getTextWithoutSemanticMarkers(tempElement).replace(Constants.ZWSP, "");
                     isInCodeBlock = true;
                 }

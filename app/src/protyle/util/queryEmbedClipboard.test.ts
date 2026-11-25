@@ -172,8 +172,9 @@ test("query embed copy exports selected results while preserving internal embeds
 }, async () => {
     const sourceFile = createSourceFile("index.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);
     const editor = sourceFile.statements.find(isClassDeclaration);
-    const methods = editor.members.filter(member => isMethodDeclaration(member) &&
-        ["emojiToMd", "clearAttrContent", "normalizeCrossBlockCopy"].includes(member.name.getText(sourceFile)));
+    const methods = editor.members.filter(member => isMethodDeclaration(member) && ["emojiToMd", "clearAttrContent",
+        "normalizeCrossBlockCopy", "normalizeTableCellClipboardSelection", "getTableCellClipboardText"
+    ].includes(member.name.getText(sourceFile)));
     const bind = editor.members.find(member => isMethodDeclaration(member) &&
         member.name.getText(sourceFile) === "bindCommonEvent");
     assert.ok(bind && isMethodDeclaration(bind));

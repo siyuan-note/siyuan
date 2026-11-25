@@ -22,8 +22,21 @@ const loadTabUtil = (headerTop: number, frontend = "desktop-window", platform = 
     };
     const spacer = {style: spacerStyle, parentElement: {parentElement: {style: {}}} as unknown as HTMLElement};
     (spacer as unknown as {parentElement: {clientHeight: number}}).parentElement.clientHeight = 29;
+    const headerClasses = new Set<string>();
+    let harmonyControls = false;
     const headerElement = {
-        classList: {contains: (): boolean => false, remove: (): void => undefined},
+        classList: {
+            contains: (name: string) => headerClasses.has(name),
+            remove: (name: string) => headerClasses.delete(name),
+            toggle: (name: string, enabled: boolean) => {
+                if (enabled) {
+                    headerClasses.add(name);
+                } else {
+                    headerClasses.delete(name);
+                }
+                return enabled;
+            },
+        },
         getBoundingClientRect: (): DOMRect => ({top: headerTop, left: 0, right: 900, width: 900}) as DOMRect,
         style: {paddingLeft: "", paddingRight: "", visibility: ""},
         lastElementChild: {style: {marginRight: ""},
@@ -49,7 +62,7 @@ const loadTabUtil = (headerTop: number, frontend = "desktop-window", platform = 
         document: {
             getElementById: () => frontend === "desktop-window" ? null : toolbarDrag,
             querySelector: () => ({getBoundingClientRect: () => ({left: 780, right: 900, width: 120})}),
-            documentElement: {dataset: {frontend}},
+            documentElement: {dataset: {frontend}, hasAttribute: (name: string) => name === "data-harmony-window-controls" && harmonyControls},
             body: {matches: (selector: string) => selector.split(", ").includes(`.body--${platform}`)},
         },
         getComputedStyle: (): {getPropertyValue: () => string} => ({getPropertyValue: (): string => "8px"}),
@@ -62,7 +75,8 @@ const loadTabUtil = (headerTop: number, frontend = "desktop-window", platform = 
     new Function("exports", "require", code)(exports, (name: string) => modules[name] || {});
     const restore = () => saved.forEach((descriptor, key) => descriptor ?
         Object.defineProperty(globalThis, key, descriptor) : Reflect.deleteProperty(globalThis, key));
-    return {setTabPosition: exports.setTabPosition, spacerStyle, headerElement, spacer, created, restore, center, toolbarDragStyle};
+    return {setTabPosition: exports.setTabPosition, spacerStyle, headerElement, spacer, created, restore, center,
+        toolbarDragStyle, setHarmonyControls: (enabled: boolean) => { harmonyControls = enabled; }};
 };
 
 test("tab drag spacer stretches with the row instead of pinning a pixel height", () => {
@@ -170,6 +184,28 @@ for (const [frontend, platform] of [["browser-desktop", "windows"], ["browser-de
         }
     });
 }
+
+test("only fused tab headers in the Harmony native button row follow its height", () => {
+    const f = loadTabUtil(0, "desktop", "harmony");
+    const header = f.headerElement;
+    try {
+        f.setHarmonyControls(true);
+        f.setTabPosition(true);
+        assert.ok(header.classList.contains("layout-tab-row--harmony-controls"));
+        assert.equal(header.lastElementChild.style.marginRight, "50px");
+
+        header.getBoundingClientRect = () => ({top: 50, left: 0, right: 900, width: 900}) as DOMRect;
+        f.setTabPosition(true);
+        assert.equal(header.classList.contains("layout-tab-row--harmony-controls"), false);
+
+        header.getBoundingClientRect = () => ({top: 0, left: 0, right: 900, width: 900}) as DOMRect;
+        f.setHarmonyControls(false);
+        f.setTabPosition(true);
+        assert.equal(header.classList.contains("layout-tab-row--harmony-controls"), false);
+    } finally {
+        f.restore();
+    }
+});
 
 for (const type of ["closeOthers", "closeAll"] as const) {
     for (const outcome of ["immediate", "pending", "blocked", "failed", "mixed"] as const) {

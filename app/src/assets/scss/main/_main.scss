@@ -113,6 +113,58 @@ body.body--harmony {
   padding-top: 0;
 }
 
+:root[data-harmony-window-controls] .body--harmony {
+  --b3-window-controls-height: var(--harmony-window-controls-bottom);
+
+  #toolbar {
+    height: max(var(--b3-ui-toolbar-height, 32px), var(--harmony-window-controls-bottom));
+    padding-right: calc(var(--harmony-window-controls-inset) + 5px);
+    align-items: center;
+  }
+
+  #toolbar #drag {
+    min-width: 32px;
+  }
+
+  .fullscreen > .protyle-breadcrumb,
+  .fullscreen > .block__icons {
+    padding-right: calc(var(--harmony-window-controls-inset) + 8px);
+    min-height: var(--harmony-window-controls-bottom);
+  }
+
+  &.body--toolbar-hide {
+    --harmony-window-top-row-height: max(var(--b3-ui-panel-height, 42px), var(--harmony-window-controls-bottom));
+
+    #toolbar,
+    #toolbar #drag {
+      height: var(--harmony-window-top-row-height);
+    }
+
+    .layout-tab-row--harmony-controls {
+      min-height: var(--harmony-window-top-row-height);
+    }
+
+    #dockLeft,
+    #dockRight,
+    .layout__dockl:not(.layout--float),
+    .layout__dockr:not(.layout--float) {
+      margin-top: var(--harmony-window-top-row-height);
+    }
+
+    #dockLeft:not(.dock--float),
+    #dockRight:not(.dock--float) {
+      height: calc(100% - var(--harmony-window-top-row-height));
+    }
+  }
+}
+
+:root[data-harmony-window-controls="movable"] .body--harmony #toolbar >
+#drag:not(.fn__hidden):not([data-topbar-reordering="true"]) ~ .toolbar__window-gap {
+  display: block;
+  flex: 0 0 24px;
+  align-self: stretch;
+}
+
 .toolbar {
   box-sizing: border-box;
   height: var(--b3-ui-toolbar-height, 32px);

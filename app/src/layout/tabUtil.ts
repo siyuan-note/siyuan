@@ -51,6 +51,7 @@ export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
         toolbarDragElement.style.setProperty("--b3-toolbar-drag-left", "8px");
         toolbarDragElement.style.setProperty("--b3-toolbar-drag-right", "8px");
     }
+    const harmonyWindowControls = !isWindowMode && document.documentElement.hasAttribute("data-harmony-window-controls");
     wndsTemp.forEach(item => {
         const headerElement = item.headersElement.parentElement;
         // empty
@@ -58,6 +59,7 @@ export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
             headerElement.classList.remove("fn__none");
         }
         const headerRect = headerElement.getBoundingClientRect();
+        headerElement.classList.toggle("layout-tab-row--harmony-controls", harmonyWindowControls && headerRect.top <= 0);
         headerElement.style.paddingLeft = "";
         headerElement.style.paddingRight = "";
         (headerElement.lastElementChild as HTMLElement).style.marginRight = "";

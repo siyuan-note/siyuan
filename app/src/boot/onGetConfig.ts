@@ -1,5 +1,8 @@
 import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs, setTabPosition} from "../layout/tabUtil";
+/// #if BROWSER
+import {initHarmonyWindowControls} from "./harmonyWindowControls";
+/// #endif
 import {applyPlatformClasses, initWindowOpenOverride, isMac, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {initNativeDialogOverride} from "../protyle/util/compatibility";
@@ -152,6 +155,9 @@ export const onGetConfig = async (isStart: boolean, app: App) => {
             });
         }, Constants.TIMEOUT_RESIZE);
     });
+    /// #if BROWSER
+    initHarmonyWindowControls();
+    /// #endif
     await Promise.all([layoutReady, windowReady, inlineStyleReady]);
     adjustLayout();
 };

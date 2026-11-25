@@ -257,6 +257,10 @@ interface Window {
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
         cancelNotification(id: number): void
     };
+    SiYuanHarmonyWindowControls?: {
+        connect(): string
+        setDragArea(left: number, top: number, right: number, bottom: number): void
+    };
     handleSaveExportFileResult(requestID: string, resultJSON: string): void
 
     Protyle: import("../protyle/method").default;

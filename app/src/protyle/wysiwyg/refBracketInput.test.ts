@@ -28,7 +28,7 @@ test("reference bracket input waits for IME commit and avoids saving duplicate c
             const context: Record<string, unknown> = {
                 lineBreakUndoContext: undefined, forwardDeleteUndoContext: undefined,
                 isComposition: type === "compositionend", recoveredComposition: false,
-                crossBlockComposition: undefined, beforeInputCompositionHandled: false,
+                crossBlockComposition: undefined, inlineMathComposition: undefined, beforeInputCompositionHandled: false,
                 compositionSnapshot: undefined, compositionRange: undefined,
                 compositionInputText: "",
                 getAVTemplateInteractiveElement: (): undefined => undefined,

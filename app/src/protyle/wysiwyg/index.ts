@@ -14,7 +14,7 @@ import {renderLongTextRuns} from "../util/longTextWrap";
 import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {captureCompositionText} from "./compositionCaret";
-import {isCommittedTextInput} from "./compositionInput";
+import {isCommittedTextInput, prepareInlineMathComposition} from "./compositionInput";
 import {bindIOSTouchCaret} from "./touchCaret";
 import {usesNativeTextMenu} from "./nativeTextMenu";
 import {bindListMarkerCaret} from "./listMarkerCaret";
@@ -4276,8 +4276,9 @@ export class WYSIWYG {
         };
         let compositionInputText = "";
         let crossBlockComposition: ICrossBlockComposition;
+        let inlineMathComposition: ReturnType<typeof prepareInlineMathComposition>;
         this.persistComposition = () => {
-            if (!isComposition || crossBlockComposition || !compositionSnapshot?.html ||
+            if (!isComposition || crossBlockComposition || inlineMathComposition || !compositionSnapshot?.html ||
                 !this.element.contains(compositionSnapshot.element)) {
                 return;
             }
@@ -4321,6 +4322,8 @@ export class WYSIWYG {
             recoveredComposition = false;
             compositionSnapshot = undefined;
             crossBlockComposition = undefined;
+            inlineMathComposition?.(false);
+            inlineMathComposition = undefined;
             // 微软双拼由于 focusByRange 导致无法输入文字，因此不再 keydown 中记录了，但 keyup 会记录拼音字符，因此使用 isComposition 阻止 keyup 记录。
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
             const range = getEditorRange(protyle.wysiwyg.element);
@@ -4374,6 +4377,9 @@ export class WYSIWYG {
                     element: nodeElement,
                     html,
                 };
+                if (!isIOSDevice()) {
+                    inlineMathComposition = prepareInlineMathComposition(range);
+                }
             }
             event.stopPropagation();
         });
@@ -4392,6 +4398,13 @@ export class WYSIWYG {
                 return;
             }
             compositionSnapshot = undefined;
+            const restoredInlineMath = inlineMathComposition?.(!!event.data, true);
+            inlineMathComposition = undefined;
+            if (restoredInlineMath) {
+                isComposition = false;
+                compositionRange = undefined;
+                return;
+            }
             if (crossBlockComposition) {
                 const currentComposition = crossBlockComposition;
                 beforeInputCompositionHandled = false;
@@ -4649,6 +4662,8 @@ export class WYSIWYG {
             // 外接键盘的结束事件可能缺失，收到明确提交的文本后恢复输入处理。
             // 跨块组合由其独立事务完成，不能在这里拆开提交。
             if (isComposition && !crossBlockComposition && isCommittedTextInput(event)) {
+                inlineMathComposition?.(true);
+                inlineMathComposition = undefined;
                 isComposition = false;
                 recoveredComposition = true;
                 beforeInputCompositionHandled = false;

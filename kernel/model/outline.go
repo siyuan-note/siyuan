@@ -316,10 +316,6 @@ func walkChildren(b *Block, expandIDs []string) {
 	}
 }
 
-func outline(tree *parse.Tree) (ret []*Path) {
-	return outlineWithReader(tree, false)
-}
-
 func outlineWithReader(tree *parse.Tree, forReader bool) (ret []*Path) {
 	luteEngine := NewLute()
 	var headings []*Block

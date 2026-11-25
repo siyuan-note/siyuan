@@ -1590,18 +1590,6 @@ func newHistoryAttributeViewCustomColorRenderContext(historyDir string) *av.Cust
 	return newAttributeViewCustomColorRenderContext(colors, order, found)
 }
 
-func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string, calendarRanges ...*av.CalendarRange) (viewable av.Viewable, attrView *av.AttributeView, err error) {
-	options := AttributeViewRenderOptions{}
-	if len(calendarRanges) > 0 {
-		options.CalendarRange = calendarRanges[0]
-	}
-	return RenderRepoSnapshotAttributeViewWithOptions(indexID, avID, viewID, carrierViewID, options)
-}
-
-func RenderRepoSnapshotAttributeViewWithOptions(indexID, avID, viewID, carrierViewID string, options AttributeViewRenderOptions) (viewable av.Viewable, attrView *av.AttributeView, err error) {
-	return RenderRepoSnapshotAttributeViewWithPagingOptions(indexID, avID, viewID, carrierViewID, "", 1, -1, nil, options)
-}
-
 func RenderRepoSnapshotAttributeViewWithPagingOptions(indexID, avID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, options AttributeViewRenderOptions) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID

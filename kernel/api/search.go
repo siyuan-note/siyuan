@@ -356,9 +356,6 @@ var fullTextSearchBlock = contractHandler(apicontract.FullTextSearchBlock, func(
 		return apicontract.Success(&apicontract.FullTextSearchBlockData{SearchBlocksData: apicontract.SearchBlocksData{Blocks: []*apicontract.SearchBlock{}}})
 	}
 
-	var blocks []*model.Block
-	var matchedBlockCount, matchedRootCount, pageCount int
-	var docMode bool
 	searchHPath := true
 	if request.SearchHPath != nil {
 		searchHPath = *request.SearchHPath
@@ -373,46 +370,30 @@ var fullTextSearchBlock = contractHandler(apicontract.FullTextSearchBlock, func(
 		}
 		excludeBoxIDs, excludeDocIDs = deniedBoxIDs, deniedDocIDs
 	}
+	options := model.BlockSearchOptions{
+		Context:          c.Request.Context(),
+		Query:            query,
+		Boxes:            boxes,
+		Paths:            paths,
+		Types:            types,
+		SubTypes:         subTypes,
+		Method:           method,
+		OrderBy:          orderBy,
+		GroupBy:          groupBy,
+		Page:             page,
+		PageSize:         pageSize,
+		SearchHPath:      new(searchHPath),
+		ExcludeBoxIDs:    excludeBoxIDs,
+		ExcludeDocIDs:    excludeDocIDs,
+		PublicFieldsOnly: isReadOnlyRole,
+	}
 	if notebook != "" && model.IsEncryptedBox(notebook) {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 			return apicontract.Failure[*apicontract.FullTextSearchBlockData](-1, err.Error())
 		}
-		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(model.BlockSearchOptions{
-			Context:       c.Request.Context(),
-			Query:         query,
-			Boxes:         boxes,
-			Paths:         paths,
-			Types:         types,
-			SubTypes:      subTypes,
-			Method:        method,
-			OrderBy:       orderBy,
-			GroupBy:       groupBy,
-			Page:          page,
-			PageSize:      pageSize,
-			BoxID:         notebook,
-			SearchHPath:   new(searchHPath),
-			ExcludeBoxIDs: excludeBoxIDs,
-			ExcludeDocIDs: excludeDocIDs,
-		})
-	} else {
-		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(model.BlockSearchOptions{
-			Context:       c.Request.Context(),
-			Query:         query,
-			Boxes:         boxes,
-			Paths:         paths,
-			Types:         types,
-			SubTypes:      subTypes,
-			Method:        method,
-			OrderBy:       orderBy,
-			GroupBy:       groupBy,
-			Page:          page,
-			PageSize:      pageSize,
-			BoxID:         "",
-			SearchHPath:   new(searchHPath),
-			ExcludeBoxIDs: excludeBoxIDs,
-			ExcludeDocIDs: excludeDocIDs,
-		})
+		options.BoxID = notebook
 	}
+	blocks, matchedBlockCount, matchedRootCount, pageCount, docMode := model.FullTextSearchBlock(options)
 	if c.Request.Context().Err() != nil {
 		return apicontract.Success[*apicontract.FullTextSearchBlockData](nil)
 	}

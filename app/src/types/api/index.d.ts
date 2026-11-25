@@ -6163,6 +6163,7 @@ export interface APIPOSTRoutes {
     /**
      * 按可见直接子文档的当前排序读取范围；parentID 为空表示笔记本根级，其他值必须属于指定笔记本。
      * offset 为非负整数，limit 为 1..10240 的整数，省略时采用 docTreeBatchSize。返回 offset 不超过 total。
+     * 发布读者的 revision 只反映所请求目录的可见顺序。
      * revision 是不透明的目录顺序版本。传入旧版本时返回 stale=true 和空 files，客户端须替换该目录状态后重试。
      * 隐藏、发布不可见及笔记本文档不计入 total；响应保留加密笔记本租约。旧 listDocsByPath 的上限语义不变。
      * files 可附带标题格式 titleFormat 和语义源版本 titleRevision；索引未就绪时省略，name 始终为纯文本摘要。
@@ -6187,6 +6188,7 @@ export interface APIPOSTRoutes {
     /**
      * 返回目标在各级可见兄弟列表中的位置和版本，steps 按根级到目标排列，无需先读取所有前置范围。
      * 任一祖先隐藏、发布不可见或目标不属于指定笔记本时返回错误，不泄露不可访问的数量和位置。
+     * 发布读者的各级版本使用与 listDocTreeRange 相同的可见顺序。
      */
     "/api/filetree/locateDocTreeItem": {
         request: FileTreeLocateRequestInput;
@@ -7235,6 +7237,7 @@ export interface APIPOSTRoutes {
     /**
      * 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
      * 可选 sourceFilter.database 按单个数据库的字段筛选反链及数量，不影响提及或数据库原视图。
+     * 发布读者无法访问目标块时返回空列表、空笔记本 ID 和零计数。
      */
     "/api/ref/getBacklink2": {
         request: BacklinkListRequestInput;
@@ -7720,6 +7723,7 @@ export interface APIPOSTRoutes {
      * SQL 模式保留换行、注释与字面量大小写，支持带别名的完整块投影。
      * 关键字和查询语法模式下，精确块 ID 仍遵循笔记本、文档路径、类型、子类型和忽略条件。
      * 关键字模式的多词文档搜索按字面量匹配 %、_ 和反斜杠；按文档分组只整理当前页，不改变分页单位。
+     * 发布读者的结果、匹配数和分页均排除块备注及原始块属性列。
      */
     "/api/search/fullTextSearchBlock": {
         request: FullTextSearchBlockRequestInput;
@@ -8857,6 +8861,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 发布读者的文档树设置清空新建文档、块引新建文档和闪念速记的保存目标及模板路径。
+     */
     "/api/system/getConf": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

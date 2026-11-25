@@ -11,12 +11,12 @@ const browserCases = (source: string) => {
     const check: typeof assert = require("node:assert/strict");
     const operations: IOperation[][][] = [];
     Object.assign(window, {siyuan: {config: {readonly: false}, languages: new Proxy({}, {get: () => "label"})}});
-    const api = new Function("Constants", "transaction", "hasClosestByAttribute", "escapeHtml", "isMobile", source +
+    const api = new Function("Constants", "transaction", "hasClosestByAttribute", "isMobile", source +
         "\nreturn {bindAVPanelDrag, bindSwitcherEvent, getSwitcherHTML, getAVVisibleViewIDs};")(
         {CUSTOM_SY_AV_VISIBLE_VIEWS: "custom-sy-av-visible-views", CUSTOM_SY_AV_VIEW: "custom-sy-av-view"},
         (_protyle: IProtyle, forward: IOperation[], undo: IOperation[]) => operations.push([forward, undo]),
         (element: Element, name: string, value: string) => element?.closest(`[${name}="${value}"]`),
-        (value: string) => value, () => true) as typeof import("./drag") & typeof import("../view") & typeof import("../viewVisibility");
+        () => true) as typeof import("./drag") & typeof import("../view") & typeof import("../viewVisibility");
     const fixture = (visible = ["A", "B"], order = ["A", "B", "C", "D"]) => {
         document.body.innerHTML = "";
         operations.length = 0;
@@ -181,6 +181,12 @@ const browserCases = (source: string) => {
         check.equal(selected, "C");
         check.equal(operations.length, 0);
     }
+    {
+        const f = fixture();
+        const viewID = 'view &quot; "main" <1>';
+        f.menu.innerHTML = api.getSwitcherHTML([{...f.data.views[0], id: viewID}], viewID, f.block, true);
+        check.equal(f.menu.querySelector(".b3-menu__item--current").getAttribute("data-id"), viewID);
+    }
     return "View drag cases passed";
 };
 
@@ -188,7 +194,7 @@ test("the view switcher supports drag editing and search with readonly selection
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const files = ["drag.ts", "../viewVisibility.ts", "../view.ts", "../../../../util/upDownHint.ts"];
+    const files = ["../../../../util/escape.ts", "drag.ts", "../viewVisibility.ts", "../view.ts", "../../../../util/upDownHint.ts"];
     const source = files.map(file => transpileModule(readFileSync(path.join(__dirname, file), "utf8")
         .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, ""),
     {compilerOptions: {target: ScriptTarget.ES2022}}).outputText).join("\n");

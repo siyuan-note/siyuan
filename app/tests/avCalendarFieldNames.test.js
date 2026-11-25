@@ -6,6 +6,11 @@ const {runInNewContext} = require("node:vm");
 const {transpileModule, ModuleKind, ScriptTarget} = require("typescript");
 const sass = require("sass");
 
+const escapes = {};
+runInNewContext(transpileModule(readFileSync(path.join(__dirname, "../src/util/escape.ts"), "utf8"), {
+    compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
+}).outputText, {exports: escapes});
+
 const calendarItem = mobile => {
     const api = {};
     const source = readFileSync(path.join(__dirname, "../src/protyle/render/av/calendar/render.ts"), "utf8");
@@ -13,15 +18,14 @@ const calendarItem = mobile => {
     runInNewContext(transpileModule(readFileSync(path.join(__dirname, "../src/protyle/render/av/entryIcon.ts"), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},
     }).outputText, {exports: entryIcon});
-    const escape = value => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
     const modules = {
         "../entryIcon": entryIcon,
-        "../../../../util/escape": {escapeAttr: escape, escapeHtml: escape},
+        "../../../../util/escape": escapes,
         "../../../../util/functions": {isMobile: () => mobile},
         "./date": {getCalendarDate: value => value.date, isCalendarDateEditable: () => true},
         "../conditionalColor": {getConditionalBackground: () => ""},
         "../cellValue": {cellValueIsEmpty: () => false},
-        "../cell": {renderCell: value => `<span class="av__celltext">${escape(value.text?.content ?? value.number?.content ?? "[ ]")}</span>`},
+        "../cell": {renderCell: value => `<span class="av__celltext">${escapes.escapeHtml(String(value.text?.content ?? value.number?.content ?? "[ ]"))}</span>`},
     };
     runInNewContext(transpileModule(source, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2022},

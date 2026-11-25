@@ -469,6 +469,46 @@ func TestDocTreeRangeSortModesAndDeletion(t *testing.T) {
 	}
 }
 
+func TestDocTreeRangeRevisionTracksPublishVisibleOrder(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	ctx := context.Background()
+	Conf.FileTree.Load().Sort = util.SortModeUpdatedDESC
+	access := DocTreeAccess{Published: true, Policy: PublishAccess{{ID: fixture.sourceID, Disable: true}}}
+	before, err := ListDocTreeRange(ctx, fixture.box.ID, "", 0, 10, "", access)
+	if err != nil || before.Total != 1 {
+		t.Fatalf("initial reader range: %+v, %v", before, err)
+	}
+	adminBefore, err := ListDocTreeRange(ctx, fixture.box.ID, "", 0, 10, "", DocTreeAccess{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree.Root.SetIALAttr("updated", "20261125100000")
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	after, err := ListDocTreeRange(ctx, fixture.box.ID, "", 0, 10, before.Revision, access)
+	if err != nil || after.Stale || after.Revision != before.Revision || after.Total != before.Total {
+		t.Fatalf("disabled document changed the reader range: %+v, %v", after, err)
+	}
+	steps, err := LocateDocTreeItem(ctx, fixture.box.ID, fixture.targetID, access)
+	if err != nil || len(steps) != 1 || steps[0].Revision != before.Revision {
+		t.Fatalf("disabled document changed the reader location: %+v, %v", steps, err)
+	}
+	adminAfter, err := ListDocTreeRange(ctx, fixture.box.ID, "", 0, 10, adminBefore.Revision, DocTreeAccess{})
+	if err != nil || !adminAfter.Stale {
+		t.Fatalf("administrator range did not invalidate: %+v, %v", adminAfter, err)
+	}
+	addFileOperationTestDoc(t, fixture, "20261125100001-visible", "Published document", false)
+	next, err := ListDocTreeRange(ctx, fixture.box.ID, "", 0, 10, before.Revision, access)
+	if err != nil || !next.Stale || next.Total != 2 {
+		t.Fatalf("published document did not change the reader range: %+v, %v", next, err)
+	}
+}
+
 func TestDocTreeRangeRejectsRevokedPublishContext(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	previous := GetPublishAccess()

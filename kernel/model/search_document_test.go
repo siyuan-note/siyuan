@@ -86,7 +86,7 @@ func TestDocumentSearchLiteralSpecialCharacters(t *testing.T) {
 						insertSearchHPathTestBlock(t, database, doc.id, doc.id, hpath, content, "d")
 					}
 					keywords := strings.Split(strings.ReplaceAll(tc.query, "'", "''"), " ")
-					statement := buildDocumentSearchStatement(tc.query, keywords, "type = 'd'", "", "", "", 0, 1, 32, pathOnly)
+					statement := buildDocumentSearchStatement(Conf.LoadSearch(), tc.query, keywords, "type = 'd'", "", "", "", 0, 1, 32, pathOnly)
 					rows := documentSearchRows(t, database, statement, nil)
 					if len(rows) != 1 || rows[0][0] != "literal" {
 						t.Fatalf("expected only literal match, got %v", rows)
@@ -177,7 +177,7 @@ func BenchmarkDocumentSearch(b *testing.B) {
 			if err = tx.Commit(); err != nil {
 				b.Fatal(err)
 			}
-			statement := buildDocumentSearchStatement("alpha beta", []string{"alpha", "beta"}, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
+			statement := buildDocumentSearchStatement(Conf.LoadSearch(), "alpha beta", []string{"alpha", "beta"}, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
 			baseline := withoutDocumentSearchCandidates(statement, []string{"alpha", "beta"}, "(type IN ('d','p'))", false)
 			for _, entry := range []struct{ name, statement string }{{"baseline", baseline}, {"indexed", statement}} {
 				b.Run(entry.name, func(b *testing.B) {
@@ -254,8 +254,8 @@ func TestDocumentSearchPartialIndexResults(t *testing.T) {
 								{ignore: " AND id != 'release'"},
 							} {
 								args := append(append([]any{}, scope.args...), scope.args...)
-								oldStatement := buildDocumentSearchStatement(query, keywords, "(type IN ('d'))", scope.box, scope.path, scope.ignore, order, page, 2, hpath)
-								newStatement := buildDocumentSearchStatement(query, keywords, buildTypeFilter(map[string]bool{"document": true}, nil), scope.box, scope.path, scope.ignore, order, page, 2, hpath)
+								oldStatement := buildDocumentSearchStatement(Conf.LoadSearch(), query, keywords, "(type IN ('d'))", scope.box, scope.path, scope.ignore, order, page, 2, hpath)
+								newStatement := buildDocumentSearchStatement(Conf.LoadSearch(), query, keywords, buildTypeFilter(map[string]bool{"document": true}, nil), scope.box, scope.path, scope.ignore, order, page, 2, hpath)
 								want := documentSearchRows(t, database, oldStatement, args)
 								if query == "release notes" && page == 1 && scope.box == "" && scope.ignore == "" && len(want) == 0 {
 									t.Fatal("matching document missing from baseline")
@@ -275,7 +275,7 @@ func TestDocumentSearchPartialIndexResults(t *testing.T) {
 				}
 			}
 			for _, hpath := range []bool{false, true} {
-				statement := buildDocumentSearchStatement("release notes", []string{"release", "notes"}, buildTypeFilter(map[string]bool{"document": true}, nil), "", "", "", 0, 1, 32, hpath)
+				statement := buildDocumentSearchStatement(Conf.LoadSearch(), "release notes", []string{"release", "notes"}, buildTypeFilter(map[string]bool{"document": true}, nil), "", "", "", 0, 1, 32, hpath)
 				plan := documentSearchRows(t, database, "EXPLAIN QUERY PLAN "+statement, nil)
 				indexed := 0
 				for _, row := range plan {
@@ -342,7 +342,7 @@ func TestDocumentSearchFTSCandidatesPreserveResults(t *testing.T) {
 					for _, filter := range []string{"(type IN ('d','p'))", "type = 'd'"} {
 						for order := 0; order <= 7; order++ {
 							for page := 1; page <= 3; page++ {
-								statement := buildDocumentSearchStatement(query, keywords, filter, " AND box = ?", " AND path LIKE ?", " AND id != 'ignored'", order, page, 2, hpath)
+								statement := buildDocumentSearchStatement(Conf.LoadSearch(), query, keywords, filter, " AND box = ?", " AND path LIKE ?", " AND id != 'ignored'", order, page, 2, hpath)
 								baseline := withoutDocumentSearchCandidates(statement, keywords, filter, hpath)
 								args := []any{"20260729120000-box000", "%", "20260729120000-box000", "%"}
 								want := documentSearchRows(t, database, baseline, args)
@@ -356,7 +356,7 @@ func TestDocumentSearchFTSCandidatesPreserveResults(t *testing.T) {
 				}
 			}
 			Conf.LoadSearch().IAL = false
-			statement := buildDocumentSearchStatement("meet rec", []string{"meet", "rec"}, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
+			statement := buildDocumentSearchStatement(Conf.LoadSearch(), "meet rec", []string{"meet", "rec"}, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
 			rows := documentSearchRows(t, database, statement, nil)
 			foundCrossBlock := false
 			for _, row := range rows {
@@ -376,7 +376,7 @@ func TestDocumentSearchFTSCandidatesPreserveResults(t *testing.T) {
 }
 
 func withoutDocumentSearchCandidates(statement string, keywords []string, typeFilter string, hpath bool) string {
-	if candidates := buildDocumentSearchCandidates(keywords, typeFilter, hpath); candidates != "" {
+	if candidates := buildDocumentSearchCandidates(Conf.LoadSearch(), keywords, typeFilter, hpath); candidates != "" {
 		return strings.Replace(statement, " AND root_id IN ("+candidates+")", "", 1)
 	}
 	return statement
@@ -421,7 +421,7 @@ func BenchmarkDocumentSearchSparseCandidates(b *testing.B) {
 				b.Fatal(err)
 			}
 			keywords := []string{"会议", "记录"}
-			optimized := buildDocumentSearchStatement("会议 记录", keywords, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
+			optimized := buildDocumentSearchStatement(Conf.LoadSearch(), "会议 记录", keywords, "(type IN ('d','p'))", "", "", "", 0, 1, 50, false)
 			baseline := withoutDocumentSearchCandidates(optimized, keywords, "(type IN ('d','p'))", false)
 			for _, entry := range []struct{ name, statement string }{{"baseline", baseline}, {"indexed", optimized}} {
 				b.Run(entry.name, func(b *testing.B) {

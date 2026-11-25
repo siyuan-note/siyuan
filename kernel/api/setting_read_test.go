@@ -107,6 +107,54 @@ func TestAPIContractSettingSectionVisibility(t *testing.T) {
 	}
 }
 
+func TestAPIContractPublishFileTreeDestinations(t *testing.T) {
+	previousConf := model.Conf
+	t.Cleanup(func() { model.Conf = previousConf })
+	model.Conf = model.NewAppConf()
+	model.NormalizeAppConf(model.Conf)
+	fileTree := model.Conf.FileTree.Load()
+	fileTree.RefCreateSaveBox, fileTree.RefCreateSavePath = "reference-notebook", "/References"
+	fileTree.DocCreateSaveBox, fileTree.DocCreateSavePath, fileTree.DocCreateTemplatePath = "document-notebook", "/Documents", "/Templates/New"
+	fileTree.ShorthandSaveBox, fileTree.ShorthandSavePath = "shorthand-notebook", "/Shorthand"
+	fileTree.AlwaysSelectOpenedFile = true
+
+	gin.SetMode(gin.TestMode)
+	const path = "/api/system/getConf"
+	destinations := func(got *apicontract.SettingFileTree) [7]string {
+		return [7]string{got.RefCreateSaveBox, got.RefCreateSavePath, got.DocCreateSaveBox, got.DocCreateSavePath,
+			got.DocCreateTemplatePath, got.ShorthandSaveBox, got.ShorthandSavePath}
+	}
+	private := destinations(settingFileTreePayload(fileTree))
+	for _, role := range []model.Role{model.RoleReader, model.RoleVisitor, model.RoleEditor, model.RoleAdministrator} {
+		engine := gin.New()
+		engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, role) })
+		engine.POST(path, getConf)
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, path, nil))
+		requireAPIContract(t, http.MethodPost, path, recorder)
+		var response struct {
+			Code int                        `json:"code"`
+			Data apicontract.SystemConfData `json:"data"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != 0 || response.Data.Conf == nil {
+			t.Fatalf("getConf failed for role %d: %v", role, err)
+		}
+		section := requestSettingSection(t, role, `{"namespace":"fileTree"}`)
+		for _, got := range []*apicontract.SettingFileTree{response.Data.Conf.FileTree, section.Conf.FileTree} {
+			if got == nil || !got.AlwaysSelectOpenedFile {
+				t.Fatalf("role %d lost public file-tree preferences: %+v", role, got)
+			}
+			want := private
+			if model.IsReadOnlyRole(role) {
+				want = [7]string{}
+			}
+			if targets := destinations(got); targets != want {
+				t.Fatalf("role %d: got file-tree destinations %v, want %v", role, targets, want)
+			}
+		}
+	}
+}
+
 func TestAPIContractSettingSectionRejectsUnknownNamespace(t *testing.T) {
 	previousConf, previousReadOnly := model.Conf, util.ReadOnly
 	util.ReadOnly = true

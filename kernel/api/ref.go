@@ -256,6 +256,11 @@ var getBacklink2 = contractHandler(apicontract.GetBacklink2, func(c *gin.Context
 	var linkRefsCount, mentionsCount int
 	// 加密笔记本的反链面板走 InBox 版（查加密 content db）
 	notebook := request.Notebook
+	isReader := model.IsReadOnlyRoleContext(c)
+	var publishAccess model.PublishAccess
+	if isReader {
+		publishAccess = model.GetPublishAccess()
+	}
 	if !isEncryptedNotebookDeniedForPublish(c, notebook) {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 			return apicontract.Failure[apicontract.BacklinkListData](1, err.Error())
@@ -269,11 +274,12 @@ var getBacklink2 = contractHandler(apicontract.GetBacklink2, func(c *gin.Context
 			if err := validateBacklinkDatabaseRequest(c, sourceFilter, ""); err != nil {
 				return apicontract.Failure[apicontract.BacklinkListData](1, err.Error())
 			}
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, "", sourceFilter, includeMentions, includeBacklinks, notify)
+			if !isReader || model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id) {
+				boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, "", sourceFilter, includeMentions, includeBacklinks, notify)
+			}
 		}
 	}
-	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
+	if isReader {
 		backlinks = model.FilterPathsByPublishAccess(c, publishAccess, backlinks)
 		backmentions = model.FilterPathsByPublishAccess(c, publishAccess, backmentions)
 		linkRefsCount = countBacklinkPaths(backlinks)

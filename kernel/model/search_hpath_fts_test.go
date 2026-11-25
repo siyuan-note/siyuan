@@ -36,7 +36,7 @@ func TestFTSAndHPathMatchesIntegration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cte, args := buildFTSAndHPathMatchesCTE("Parent", "\"Parent\"", "", "", nil, nil, "(type IN ('d', 'p'))", "")
+	cte, args := buildFTSAndHPathMatchesCTE("Parent", columnFilter()+`:("Parent")`, "", "", nil, nil, "(type IN ('d', 'p'))", "")
 	stmt := cte + " SELECT b.id, matches.match_source FROM matches JOIN blocks b ON b.rowid = matches.block_rowid " +
 		buildHPathSearchOrderBy("Parent", 0)
 	rows, err := testDB.Query(stmt, args...)
@@ -79,7 +79,7 @@ func TestFTSAndHPathMatchesIntegration(t *testing.T) {
 		t.Fatalf("FTS 与路径联合搜索统计错误：matches=%d, docs=%d", matched, docs)
 	}
 
-	snippetStmt, snippetArgs := buildFTSSnippetBlocksByRowIDQuery("\"Parent\"", []int64{1, 3})
+	snippetStmt, snippetArgs := buildFTSSnippetBlocksByRowIDQuery(columnFilter()+`:("Parent")`, []int64{1, 3})
 	if !strings.Contains(snippetStmt, "snippet(blocks_fts") || strings.Contains(snippetStmt, "SELECT *") {
 		t.Fatalf("FTS 结果应使用摘要投影：%s", snippetStmt)
 	}

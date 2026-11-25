@@ -360,7 +360,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The publish service applies access rules to backlinks and database names. The custom emoji catalog lists only emoji referenced by documents the reader can access."
+					"Data": "The publish service applies access rules to backlinks and database names. The custom emoji catalog lists only emoji referenced by documents the reader can access. Full-text search excludes block memos and raw block attributes."
 				}
 			]
 		},

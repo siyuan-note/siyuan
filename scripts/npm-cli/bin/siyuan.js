@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-// SiYuan - https://github.com/siyuan-note/siyuan
-// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Thin wrapper that locates the SiYuan kernel CLI bundled with the desktop
  * client and forwards all arguments to it.

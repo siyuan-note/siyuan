@@ -143,7 +143,6 @@ module.exports = (env, argv) => {
         },
         plugins: [
             new PreserveWatchAssetsPlugin(),
-            // 分块自身包一层函数作用域，压缩器提升到顶层的辅助名不会成为全局变量。
             new ChunkScopePlugin(),
             new webpack.DefinePlugin({
                 SIYUAN_VERSION: JSON.stringify(pkg.version),

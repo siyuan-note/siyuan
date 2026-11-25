@@ -8,8 +8,9 @@ const webpack = require("webpack");
 const {EsbuildPlugin} = require("esbuild-loader");
 const ChunkScopePlugin = require("./chunk-scope");
 
-const createFixture = () => {
+const createFixture = t => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-chunk-scope-"));
+    t.after(() => fs.rmSync(directory, {recursive: true}));
     const write = (name, source) => {
         const absolute = path.join(directory, name);
         fs.mkdirSync(path.dirname(absolute), {recursive: true});
@@ -25,7 +26,7 @@ const createFixture = () => {
     return directory;
 };
 
-const build = (directory, {scope, minimize = true, devtool = false}) => new Promise((resolve, reject) => {
+const build = (directory, {scope, minimize = true, devtool = false, filename = "[name].js"}) => new Promise((resolve, reject) => {
     webpack({
         mode: "production",
         context: directory,
@@ -34,7 +35,7 @@ const build = (directory, {scope, minimize = true, devtool = false}) => new Prom
         devtool,
         output: {
             path: path.join(directory, "output"),
-            filename: "[name].js",
+            filename,
             chunkFilename: "[name].js",
             globalObject: "globalThis",
             publicPath: "",
@@ -80,8 +81,8 @@ const PAGED = ["runtime.js", "common.js", "main.js"];
 const leakedGlobals = (context) => Object.keys(context)
     .filter(name => name !== "__result" && !name.startsWith("webpackChunk"));
 
-test("compressed chunks leak top-level helper names without the scope plugin", async () => {
-    const directory = createFixture();
+test("compressed chunks leak top-level helper names without the scope plugin", async t => {
+    const directory = createFixture(t);
     const output = await build(directory, {scope: false});
     const source = fs.readFileSync(path.join(output, "common.js"), "utf8");
     const head = source.slice(0, source.indexOf(".push([["));
@@ -92,8 +93,8 @@ test("compressed chunks leak top-level helper names without the scope plugin", a
     assert.ok(leakedGlobals(context).length > 0, "未包裹的注册型分块应把顶层声明泄漏为全局");
 });
 
-test("the scope plugin keeps helper names out of the global scope", async () => {
-    const directory = createFixture();
+test("the scope plugin keeps helper names out of the global scope", async t => {
+    const directory = createFixture(t);
     const output = await build(directory, {scope: true});
     for (const name of ["common.js", "main.js"]) {
         const source = fs.readFileSync(path.join(output, name), "utf8");
@@ -105,25 +106,41 @@ test("the scope plugin keeps helper names out of the global scope", async () => 
     const context = runAssets(output, PAGED);
     assert.equal(context.__result, 12);
     assert.deepEqual(leakedGlobals(context), [], "包裹后不应再有分块顶层声明成为全局");
-    // 真实缺陷里被覆盖的全局名，确保包裹对具体名字同样成立。
-    for (const name of ["fs", "Ch", "eg", "Sh"]) {
-        assert.equal(context[name], undefined, name + " 不应成为全局变量");
-    }
 });
 
-test("the scope plugin leaves development builds and their readable output alone", async () => {
-    const directory = createFixture();
+test("the scope plugin leaves development builds and their readable output alone", async t => {
+    const directory = createFixture(t);
     const output = await build(directory, {scope: true, minimize: false});
     assert.ok(!fs.readFileSync(path.join(output, "common.js"), "utf8").startsWith("(()=>{\n"));
     assert.equal(runAssets(output, PAGED).__result, 12);
 });
 
-test("the scope plugin shifts asset source maps by the prepended line", async () => {
-    const directory = createFixture();
-    const output = await build(directory, {scope: true, devtool: "source-map"});
-    const map = JSON.parse(fs.readFileSync(path.join(output, "common.js.map"), "utf8"));
-    // 包裹前的映射整体下移一行，包裹后的首行没有映射。
-    assert.ok(map.mappings.startsWith(";"), "映射应以下移一行的空段开始");
-    const source = fs.readFileSync(path.join(output, "common.js"), "utf8");
-    assert.ok(source.split("\n").length >= map.mappings.split(";").length);
+test("wrapping a chunk changes its cache key", async t => {
+    const directory = createFixture(t);
+    const filename = "[name].[chunkhash].js";
+    const commonName = output => {
+        const name = fs.readdirSync(output).find(file => /^common\.[a-f0-9]+\.js$/.test(file));
+        assert.ok(name);
+        return name;
+    };
+    const original = commonName(await build(directory, {scope: false, filename}));
+    const wrapped = commonName(await build(directory, {scope: true, filename}));
+    assert.notEqual(wrapped, original);
 });
+
+for (const devtool of ["source-map", "inline-source-map"]) {
+    test(`the scope plugin preserves ${devtool} after inserting the wrapper`, async t => {
+        const directory = createFixture(t);
+        const readMap = output => {
+            if (devtool === "source-map") {
+                return JSON.parse(fs.readFileSync(path.join(output, "common.js.map"), "utf8"));
+            }
+            const script = fs.readFileSync(path.join(output, "common.js"), "utf8");
+            const [, encoded] = script.match(/sourceMappingURL=data:application\/json[^,]*,([\w+/=]+)/);
+            return JSON.parse(Buffer.from(encoded, "base64").toString("utf8"));
+        };
+        const original = readMap(await build(directory, {scope: false, devtool}));
+        const wrapped = readMap(await build(directory, {scope: true, devtool}));
+        assert.deepEqual(wrapped, {...original, mappings: ";" + original.mappings});
+    });
+}

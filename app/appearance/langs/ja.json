@@ -1,4 +1,5 @@
 {
+	"agentQuickPhraseSendTip": "${key} を押しながらクリックして送信",
 	"mobileWorkspaceSwitch": "切り替える",
 	"mobileWorkspaceSwitchTitle": "「${x}」に切り替えますか？",
 	"mobileWorkspaceSwitchTip": "アプリが終了します。手動で開き直してください",

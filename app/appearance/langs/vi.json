@@ -1,4 +1,5 @@
 {
+	"agentQuickPhraseSendTip": "Giữ ${key} và nhấp để gửi",
 	"mobileWorkspaceSwitch": "Chuyển",
 	"mobileWorkspaceSwitchTitle": "Chuyển sang “${x}”?",
 	"mobileWorkspaceSwitchTip": "Ứng dụng sẽ đóng. Hãy tự mở lại ứng dụng",

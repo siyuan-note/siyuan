@@ -1,4 +1,5 @@
 {
+	"agentQuickPhraseSendTip": "Zum Senden ${key} gedrückt halten und klicken",
 	"mobileWorkspaceSwitch": "Wechseln",
 	"mobileWorkspaceSwitchTitle": "Zu „${x}“ wechseln?",
 	"mobileWorkspaceSwitchTip": "Die App wird geschlossen. Bitte öffne sie erneut",

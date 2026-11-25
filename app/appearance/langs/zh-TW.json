@@ -1,4 +1,5 @@
 {
+	"agentQuickPhraseSendTip": "按住 ${key} 點選即可直接傳送",
 	"mobileWorkspaceSwitch": "切換",
 	"mobileWorkspaceSwitchTitle": "切換至「${x}」？",
 	"mobileWorkspaceSwitchTip": "應用程式將關閉，請手動重新開啟",

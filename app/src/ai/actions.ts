@@ -10,7 +10,7 @@ import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {upDownHint} from "../util/upDownHint";
 import {clearAIEditorHistory, startAIEditorAction} from "./editor";
-import {isDisabledFeature, isOnlyMeta} from "../protyle/util/compatibility";
+import {isDisabledFeature, isOnlyMeta, updateHotkeyTip} from "../protyle/util/compatibility";
 import {bindOneTimeAction} from "./oneTimeAction";
 
 interface IAIEditorAction {
@@ -307,11 +307,17 @@ export const openAgentPhrases = (target: HTMLElement, apply: (instruction: strin
             const builtins = [lang.aiContinueWrite, lang.aiTranslate, lang.aiExtractSummary, lang.aiPolish,
                 lang.aiBrainStorm, lang.aiFixGrammarSpell];
             const mobile = isMobile();
+            if (!mobile) {
+                menu.addItem({
+                    type: "readonly",
+                    iconHTML: "",
+                    label: escapeHtml(lang.agentQuickPhraseSendTip.replace("${key}", updateHotkeyTip("⌘"))),
+                });
+            }
             [...builtins.map(action => ({name: action, action})), ...saved].forEach(item => {
                 menu.addItem({
                     iconHTML: "",
                     label: escapeHtml(item.name || item.action),
-                    accelerator: mobile ? "" : "⌘" + lang.click,
                     click: (_element, event) => apply(item.action || item.name, !mobile && isOnlyMeta(event)),
                 });
             });

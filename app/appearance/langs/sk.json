@@ -1,4 +1,5 @@
 {
+	"agentQuickPhraseSendTip": "Podržte ${key} a kliknutím odošlite",
 	"mobileWorkspaceSwitch": "Prepnúť",
 	"mobileWorkspaceSwitchTitle": "Prepnúť na „${x}“?",
 	"mobileWorkspaceSwitchTip": "Aplikácia sa zatvorí. Otvorte ju znova ručne",

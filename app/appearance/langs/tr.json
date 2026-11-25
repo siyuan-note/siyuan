@@ -1,4 +1,5 @@
 {
+	"agentQuickPhraseSendTip": "Göndermek için ${key} tuşunu basılı tutup tıklayın",
 	"mobileWorkspaceSwitch": "Geç",
 	"mobileWorkspaceSwitchTitle": "“${x}” çalışma alanına geçilsin mi?",
 	"mobileWorkspaceSwitchTip": "Uygulama kapanacak. Lütfen uygulamayı kendiniz yeniden açın",

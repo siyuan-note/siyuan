@@ -1,4 +1,5 @@
 {
+	"agentQuickPhraseSendTip": "Houd ${key} ingedrukt en klik om te verzenden",
 	"mobileWorkspaceSwitch": "Wisselen",
 	"mobileWorkspaceSwitchTitle": "Wisselen naar ‘${x}’?",
 	"mobileWorkspaceSwitchTip": "De app wordt gesloten. Open de app daarna zelf opnieuw",

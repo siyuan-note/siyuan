@@ -46,4 +46,28 @@ for (const [filename, architecture] of manifests) {
         assert.match(source, /<rescap:Capability\s+Name="runFullTrust"\s*\/>/);
         assert.equal(attributes(source.match(/<TargetDeviceFamily\b([^>]*)\/>/)[1]).MinVersion, "10.0.14316.0");
     });
+
+    test(`${filename} registers Markdown files with the GUI without taking over defaults`, () => {
+        const packageAttributes = attributes(source.match(/<Package\b([^>]*)>/)[1]);
+        assert.equal(packageAttributes["xmlns:desktop2"], "http://schemas.microsoft.com/appx/manifest/desktop/windows10/2");
+        assert.ok(packageAttributes.IgnorableNamespaces.split(/\s+/).includes("desktop2"));
+
+        const [application] = Array.from(source.matchAll(/<Application\b([^>]*)>([\s\S]*?)<\/Application>/g));
+        assert.equal(attributes(application[1]).Executable, "app\\SiYuan.exe");
+        const associations = Array.from(application[2].matchAll(/<uap3:Extension\b([^>]*)>([\s\S]*?)<\/uap3:Extension>/g))
+            .filter(match => attributes(match[1]).Category === "windows.fileTypeAssociation");
+        assert.equal(associations.length, 1);
+        const [association] = associations;
+        assert.deepEqual(attributes(association[1]), {Category: "windows.fileTypeAssociation"});
+
+        const [, details, fileTypes] = association[2].match(/<uap3:FileTypeAssociation\b([^>]*)>([\s\S]*?)<\/uap3:FileTypeAssociation>/);
+        assert.deepEqual(attributes(details), {
+            Name: "markdown",
+            Parameters: "--markdown &quot;%1&quot;",
+            "desktop2:AllowSilentDefaultTakeOver": "true",
+        });
+        const supported = fileTypes.match(/<uap:SupportedFileTypes>([\s\S]*?)<\/uap:SupportedFileTypes>/)[1];
+        assert.deepEqual(Array.from(supported.matchAll(/<uap:FileType>([^<]+)<\/uap:FileType>/g), match => match[1]),
+            [".md", ".markdown"]);
+    });
 }

@@ -1,4 +1,5 @@
 const path = require("path");
+const ChunkScopePlugin = require("./scripts/chunk-scope");
 const PreserveWatchAssetsPlugin = require("./scripts/preserve-watch-assets");
 const webpack = require("webpack");
 const pkg = require("./package.json");
@@ -142,6 +143,8 @@ module.exports = (env, argv) => {
         },
         plugins: [
             new PreserveWatchAssetsPlugin(),
+            // 分块自身包一层函数作用域，压缩器提升到顶层的辅助名不会成为全局变量。
+            new ChunkScopePlugin(),
             new webpack.DefinePlugin({
                 SIYUAN_VERSION: JSON.stringify(pkg.version),
                 NODE_ENV: JSON.stringify(argv.mode),

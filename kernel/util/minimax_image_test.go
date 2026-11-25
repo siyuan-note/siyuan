@@ -92,6 +92,50 @@ func TestMiniMaxImageRequestAndResponse(t *testing.T) {
 	}
 }
 
+func TestMiniMaxImageH3RequestAndResponse(t *testing.T) {
+	for _, tc := range []struct {
+		model, size, format string
+	}{
+		{"MiniMax-H3-Image", "1024x1024", "png"},
+		{"MiniMax-H3-Image-Highspeed", "auto", "webp"},
+	} {
+		t.Run(tc.model, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path != "/v1/images/generations" || r.Method != http.MethodPost || r.Header.Get("Authorization") != "Bearer test" {
+					t.Errorf("unexpected request: %s %s", r.Method, r.URL.Path)
+				}
+				var body map[string]any
+				if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+					t.Error(err)
+				}
+				if body["model"] != tc.model || body["prompt"] != "Draw a cat" || body["n"] != float64(1) || body["response_format"] != "url" || body["size"] != tc.size || body["output_format"] != tc.format {
+					t.Errorf("unexpected payload: %#v", body)
+				}
+				for _, key := range []string{"width", "height", "aspect_ratio", "prompt_optimizer", "quality"} {
+					if _, present := body[key]; present {
+						t.Errorf("unsupported field %s was sent", key)
+					}
+				}
+				w.Header().Set("Content-Type", "application/json")
+				fmt.Fprint(w, `{"data":[{"url":"https://example.com/generated","revised_prompt":"Draw an orange cat"}],"usage":{"generated_images":1}}`)
+			}))
+			defer server.Close()
+			config := openai.DefaultConfig("test")
+			config.BaseURL = server.URL + "/v1/"
+			config.HTTPClient = &miniMaxImageTransport{base: server.Client()}
+			response, err := openai.NewClientWithConfig(config).CreateImage(context.Background(), openai.ImageRequest{
+				Model: tc.model, Prompt: "Draw a cat", N: 1, Size: tc.size, Quality: "auto", OutputFormat: tc.format,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(response.Data) != 1 || response.Data[0].URL != "https://example.com/generated" || response.Data[0].RevisedPrompt != "Draw an orange cat" {
+				t.Fatalf("unexpected image response: %#v", response)
+			}
+		})
+	}
+}
+
 func TestMiniMaxImageFailures(t *testing.T) {
 	for _, body := range []string{
 		`{"base_resp":{"status_code":1004},"data":{"image_urls":["https://example.com/image.png"]}}`,

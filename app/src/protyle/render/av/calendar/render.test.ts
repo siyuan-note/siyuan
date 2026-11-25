@@ -10,7 +10,7 @@ import * as dates from "./date";
 import {cellValueIsEmpty, createEmptyAVValue} from "../cellValue";
 import {getConditionalBackground} from "../conditionalColor";
 import {DOMFixture} from "../testDOM";
-import {escapeAttr, escapeHtml} from "../../../../util/escape";
+import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../../util/escape";
 
 const search = {bindAvSearch() {}, captureAvSearchSelection() {}, deferAvSearchRender: () => false};
 
@@ -42,7 +42,7 @@ test("calendar refreshes the current view after composition and captures the lat
                     view: {calendar: {}, columns: [], rows: [], calendarRange: range}} as unknown as IAV, callback);
             },
         },
-        "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
+        "../../../../util/escape": {escapeAttr, escapeHtml, escapeHtmlTextAndAttr},
         "../../../../constants": {Constants: {ZWSP: ""}},
         "../container": {replaceAVContainer() { assert.equal(captured, true); replaced = true; }},
         "../virtualScroll": {getAVSelectedItemIDs: (): string[] => [], setAVData() {}},
@@ -102,6 +102,8 @@ test("calendar field names preserve titles, empty fields, zero, unchecked boxes 
         createEmptyAVValue("primary", "block"),
         {...createEmptyAVValue("hidden", "text"), text: {content: "Hidden value"}},
     );
+    const fieldID = 'number &quot; "Q" <2>';
+    const rowID = 'row & "R"';
     let html = "";
     const complete = new Error("rendered");
     const api = {} as typeof import("./render");
@@ -116,7 +118,7 @@ test("calendar field names preserve titles, empty fields, zero, unchecked boxes 
         "../cell": {renderCell: () => "<span></span>"},
         "../render": {genTabHeaderHTML: () => ""},
         "../search": search,
-        "../../../../util/escape": {escapeAttr, escapeHtml},
+        "../../../../util/escape": {escapeAttr, escapeHtml, escapeHtmlTextAndAttr},
         "../../../../constants": {Constants: {}},
         "../virtualScroll": {getAVSelectedItemIDs: (): string[] => []},
         "../container": {replaceAVContainer: (_block: unknown, value: string) => { html = value; throw complete; }},
@@ -133,8 +135,8 @@ test("calendar field names preserve titles, empty fields, zero, unchecked boxes 
             await assert.rejects(api.renderCalendar({querySelector: (): null => null, removeAttribute() {}} as unknown as HTMLElement,
                 {disabled: true, options: {}} as IProtyle, {viewID: "calendar", view: {
                     calendar: {dateKeyID: "date", displayFieldName}, calendarRange: range,
-                    columns: values.map(value => ({id: value.keyID, type: value.type, name: `Name ${value.keyID} <&>`, hidden: value.keyID === "hidden"})),
-                    rows: [{id: "row", cells: values.map(value => ({value})), conditionalColors: {background: {content: "", color: "3"}}}],
+                    columns: values.map(value => ({id: value.keyID === "zero" ? fieldID : value.keyID, type: value.type, name: `Name ${value.keyID} <&>`, hidden: value.keyID === "hidden"})),
+                    rows: [{id: rowID, cells: values.map(value => ({value})), conditionalColors: {background: {content: "", color: "3"}}}],
                 }} as unknown as IAV), error => error === complete);
             for (const type of types) {
                 assert.doesNotMatch(html, new RegExp(`data-field-id="empty-${type}"`));
@@ -142,12 +144,16 @@ test("calendar field names preserve titles, empty fields, zero, unchecked boxes 
             assert.doesNotMatch(html, /data-field-id="blank-rendered"/);
             assert.doesNotMatch(html, /data-field-id="hidden"/);
             assert.match(html, /--b3-av-calendar-background:var\(--b3-font-background3\)/);
-            for (const key of ["primary", "date", "zero", "unchecked", "rendered"]) {
+            for (const key of ["primary", "date", "unchecked", "rendered"]) {
                 assert.match(html, new RegExp(`data-field-id="${key}"`));
             }
             const document = new DOMFixture();
             document.body.innerHTML = html;
             const labels = document.body.querySelectorAll(".av__calendar-field-name");
+            const numberField = document.body.querySelector('[data-dtype="number"]');
+            assert.equal(numberField.getAttribute("data-field-id"), fieldID);
+            assert.equal(numberField.getAttribute("data-col-id"), fieldID);
+            assert.equal(document.body.querySelector("[data-calendar-item]").getAttribute("data-calendar-item"), rowID);
             assert.equal(labels.length, displayFieldName ? 4 : 0);
             assert.equal(document.body.querySelector('[data-field-id="primary"]').parentElement.classList.contains("av__calendar-field-row"), false);
             if (displayFieldName) {
@@ -176,7 +182,7 @@ test("calendar without a date field renders its setup instead of reading an abse
         "../render": {genTabHeaderHTML: () => "view-switcher"},
         "../search": search,
         "../col": {getColNameByType: (type: string) => type},
-        "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
+        "../../../../util/escape": {escapeAttr, escapeHtml, escapeHtmlTextAndAttr},
         "../../../../constants": {Constants: {ZWSP: ""}},
         "../container": {replaceAVContainer: (_block: unknown, value: string) => {
             html = value;
@@ -229,7 +235,7 @@ test("calendar refresh keeps selected event segments and blank clicks dismiss th
         "./settings": {getCalendarSettingsHTML: () => "", bindCalendarSettings() {}},
         "../render": {genTabHeaderHTML: () => ""},
         "../col": {getColNameByType: (type: string) => type},
-        "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
+        "../../../../util/escape": {escapeAttr, escapeHtml, escapeHtmlTextAndAttr},
         "../../../../constants": {Constants: {ZWSP: ""}},
         "../container": {replaceAVContainer() {}},
         "../virtualScroll": {getAVSelectedItemIDs: () => ["selected", "deleted"], setAVData() {}},
@@ -306,7 +312,7 @@ test("calendar checkbox clicks and keyboard activation update only the chosen fi
                 options: {customize: (menu: unknown) => void}) => options.customize({
                 addSeparator() {}, addItem: (item: {icon: string}) => menuIcons.push(item.icon),
             })},
-            "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
+            "../../../../util/escape": {escapeAttr, escapeHtml, escapeHtmlTextAndAttr},
             "../../../../util/functions": {isMobile: () => mode.startsWith("mobile")},
             "../../../../constants": {Constants: {ZWSP: ""}},
             "../container": {replaceAVContainer: (_block: unknown, value: string) => { html = value; }},
@@ -412,6 +418,7 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
             columns: [{id: "date", type: "date"}], rows: [],
         }} as unknown as IAV;
         const protyle = {disabled: true, options: {}, element: {getAttribute: (): null => null, contains: () => false},
+            contentElement: {removeAttribute() {}},
             wysiwyg: {element: {style: {}, setAttribute() {},
                 querySelectorAll: (selector: string) => selector === '.av[data-av-type="calendar"]' ? [block] : []}},
         } as unknown as IProtyle;
@@ -424,7 +431,7 @@ test("calendar edit-mode changes refresh controls and stale actions cannot creat
             "./undated": {getCalendarUndatedHTML: () => "", bindCalendarUndated() {}},
             "../render": {genTabHeaderHTML: () => ""},
             "../newItemTemplate": {createAttributeViewItem: () => created++},
-            "../../../../util/escape": {escapeAttr: String, escapeHtml: String},
+            "../../../../util/escape": {escapeAttr, escapeHtml, escapeHtmlTextAndAttr},
             "../../../../constants": {Constants: {ZWSP: ""}},
             "../container": {replaceAVContainer: (_block: unknown, value: string) => { html = value; }},
             "../virtualScroll": {getAVData: () => data, getAVSelectedItemIDs: (): string[] => [], setAVData() {}},

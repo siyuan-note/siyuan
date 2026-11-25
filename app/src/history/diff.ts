@@ -440,7 +440,6 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
     };
 
     const dialog = new AdaptiveDialog({
-        mobileSheet: {mode: "expanded"},
         title: window.siyuan.languages.compare,
         content: "",
         width: isMobile() ? "100vw" : "90vw",

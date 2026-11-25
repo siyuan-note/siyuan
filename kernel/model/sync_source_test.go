@@ -25,12 +25,20 @@ func TestSyncSourcePreviewDoesNotPushNotifications(t *testing.T) {
 	connection := connectSyncCheckoutClient(t, "source-preview-notifications")
 	pushSyncSourceDecisionError("stale preview", dejavu.ErrSyncSourcePreviewChanged)
 	pushSyncSourceDecisionError("wrapped stale preview", fmt.Errorf("wrapped: %w", dejavu.ErrSyncSourcePreviewChanged))
-	pushSyncSourceDecisionError("cloud unavailable", errors.New("cloud unavailable"))
+	err := pushSyncSourceDecisionError("cloud unavailable", errors.New("cloud unavailable"))
+	notice, _ := SyncErrorNoticeFor(err)
 	util.BroadcastByType("main", "sourcePreviewBarrier", 0, "", nil)
 	_ = connection.SetReadDeadline(time.Now().Add(5 * time.Second))
 	notifications := 0
 	for {
-		var event struct{ Cmd, Msg string }
+		var event struct {
+			Cmd, Msg string
+			Code     int
+			Data     struct {
+				ID           string
+				CloseTimeout int
+			}
+		}
 		if err := connection.ReadJSON(&event); err != nil {
 			t.Fatal(err)
 		}
@@ -39,8 +47,9 @@ func TestSyncSourcePreviewDoesNotPushNotifications(t *testing.T) {
 		}
 		if event.Cmd == "msg" {
 			notifications++
-			if event.Msg != "cloud unavailable" {
-				t.Fatalf("preview failure emitted a notification: %+v", event)
+			if event.Msg != "cloud unavailable" || event.Msg != notice.Message || event.Code != notice.Code ||
+				event.Data.ID == "" || event.Data.ID != notice.ID || event.Data.CloseTimeout != notice.CloseTimeout {
+				t.Fatalf("unexpected sync notification: %+v", event)
 			}
 		}
 	}

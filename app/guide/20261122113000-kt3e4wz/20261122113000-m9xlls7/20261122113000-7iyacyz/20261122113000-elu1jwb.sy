@@ -1,0 +1,155 @@
+{
+	"ID": "20261122113000-elu1jwb",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f387",
+		"id": "20261122113000-elu1jwb",
+		"title": "Функциональные возможности",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-ddtjtem",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ddtjtem",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Возможности подписки включают:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-q6f9v7i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-q6f9v7i",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-phhpzd8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-phhpzd8",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-m79v034",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-m79v034",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-lef3tmo",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "подключение стороннего облачного хранилища"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bo1kmuk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-bo1kmuk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Дополнительные функции подписки доступны после оплаты:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ry3uq06",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-ry3uq06",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-lxujwoo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-lxujwoo",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-xe2rg77",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-xe2rg77",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/one-time-pay/siyuan",
+									"TextMarkTextContent": "Материковый Китай"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-sdoeovg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-sdoeovg",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-20xgzhp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-20xgzhp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/one-time-pay/siyuan",
+									"TextMarkTextContent": "За пределами материкового Китая"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

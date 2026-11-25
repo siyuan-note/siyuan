@@ -59,7 +59,7 @@ func TestDocumentReadBoundaryEncryptedSourceAuthenticationAndLock(t *testing.T) 
 	queued := []*Transaction{transaction}
 	PerformTransactions(&queued)
 	_, content, _, _, rootID, _, _, _, gotBox, _, _, _, _, _, err := GetDocInBox(
-		"", "", fixture.childID, 0, "", nil, nil, 0, 0, 102400, false, map[string]string{}, true, false, boxID, false)
+		"", "", fixture.childID, 0, "", nil, nil, 0, 0, 102400, false, map[string]string{}, true, false, boxID, nil, nil)
 	if err != nil || !strings.Contains(content, "authenticated source") || rootID != tree.ID || gotBox != boxID {
 		t.Fatalf("encrypted document did not capture its committed source: %v", err)
 	}

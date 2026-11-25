@@ -12,11 +12,13 @@ func RequiresAI(path string) bool {
 }
 
 type AIEditorChatRequest struct {
-	TaskID  string            `json:"taskID" api:"optional,nullable"`
-	IDs     []string          `json:"ids" api:"optional,nullable"`
-	Input   string            `json:"input" api:"optional,nullable"`
-	Action  string            `json:"action" api:"optional,nullable"`
-	History []AIEditorMessage `json:"history" api:"optional,nullable"`
+	ModelID         string            `json:"modelId" api:"optional,nullable"`
+	ReasoningEffort *string           `json:"reasoningEffort" api:"optional,nullable"`
+	TaskID          string            `json:"taskID" api:"optional,nullable"`
+	IDs             []string          `json:"ids" api:"optional,nullable"`
+	Input           string            `json:"input" api:"optional,nullable"`
+	Action          string            `json:"action" api:"optional,nullable"`
+	History         []AIEditorMessage `json:"history" api:"optional,nullable"`
 }
 
 type AIConfirmRequest struct {

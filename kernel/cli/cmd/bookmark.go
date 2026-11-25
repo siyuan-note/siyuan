@@ -24,7 +24,7 @@ var bookmarkListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List bookmarks",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		bookmarks := model.BuildBookmark()
+		bookmarks := model.BuildBookmark(false)
 		switch outputFormat {
 		case "json":
 			data, _ := json.MarshalIndent(bookmarks, "", "  ")

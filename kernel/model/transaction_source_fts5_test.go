@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -246,12 +247,31 @@ func TestTransactionSourceSingleDocumentCrashRecoversAtomicReplacement(t *testin
 		t.Fatal(txErr)
 	}
 	source := tx.trees[fixture.sourceID]
+	filename := tx.sourceJournal.filename()
+	marker := time.Unix(946684800, 0)
+	if err := os.Chtimes(filename, marker, marker); err != nil {
+		t.Fatal(err)
+	}
 	if err := tx.recordDocumentWrite(source, func() error { return writeTreeUpsertQueue(source) }); err != nil {
 		t.Fatal(err)
 	}
+	if len(tx.sourceJournal.Files[0].After) == 0 || bytes.Equal(tx.sourceJournal.Files[0].Before, tx.sourceJournal.Files[0].After) {
+		t.Fatal("single-source transaction lost its in-memory rollback images")
+	}
+	if err := tx.commitDocumentSources(); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !info.ModTime().Equal(marker) {
+		t.Fatal("single-source transaction rewrote the durable recovery record")
+	}
 	journals, err := readDocumentSourceJournals()
-	if err != nil || len(journals) != 1 || !journals[0].Forward || journals[0].Files[0].Before != nil || journals[0].Files[0].After != nil {
-		t.Fatalf("single atomic document save stored unnecessary source copies: %+v %v", journals, err)
+	if err != nil || len(journals) != 1 || !journals[0].Forward || journals[0].State != "pending" ||
+		journals[0].Files[0].Before != nil || journals[0].Files[0].After != nil {
+		t.Fatalf("expected the original identity-only recovery record: %+v %v", journals, err)
 	}
 	tx.releaseDocumentSources(false)
 	tx.state.Store(3)

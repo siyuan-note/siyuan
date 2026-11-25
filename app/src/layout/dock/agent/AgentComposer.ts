@@ -1,4 +1,6 @@
+import type {AIReference} from "../../../types/api";
 import {Constants} from "../../../constants";
+import {AGENT_QUOTE_SELECTOR, AgentQuote, createAgentQuote, projectAgentQuotes, quotePreview} from "./agentQuote";
 import {escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
 import {hintRef, hintSlash} from "../../../protyle/hint/extend";
@@ -10,7 +12,7 @@ import {uploadFiles} from "../../../protyle/upload";
 import {previewImages} from "../../../protyle/preview/image";
 import {removeCompressURL} from "../../../util/image";
 import {mountProtyleLiteFragment} from "../../../protyle/lite/fragmentEditor";
-import {AGENT_SKILL_SELECTOR, deleteAgentSkill, expandAgentSkillSelection, normalizeAgentSkills} from "./agentSkill";
+import {AGENT_SKILL_SELECTOR, deleteAgentToken, expandAgentTokenSelection, normalizeAgentTokens} from "./agentSkill";
 import {focusByRange} from "../../../protyle/util/selectionOffsets";
 import {getConfiguredEntryVisibility} from "../../../config/entryVisibility/runtime";
 import {SLASH_MENU_ROOT_PATH} from "../../../config/entryVisibility/catalog";
@@ -18,7 +20,7 @@ import {SLASH_MENU_ROOT_PATH} from "../../../config/entryVisibility/catalog";
 export interface AgentComposerData {
     text: string;
     blockHTML: string;
-    references: { id: string; title: string }[];
+    references: AIReference[];
 }
 
 interface ComposerHandle {
@@ -32,8 +34,10 @@ interface ComposerHandle {
     clearHistory: () => void;
     restoreHistory: (h: string[]) => void;
     insertMention: (id: string, label: string) => void;
+    insertQuote: (quote: AgentQuote, inBackground?: boolean) => number | undefined;
+    applyPhrase: (instruction: string) => void;
     insertMentions: (mentions: Array<{ id: string; label: string }>) => void;
-    uploadImages: (files: FileList, element: HTMLInputElement) => void;
+    uploadImages: (files: FileList | File[], element: HTMLInputElement) => void;
     isUploading: () => boolean;
     renderBlockHTML: (element: HTMLElement, onEmbedRender: () => void) => void;
 }
@@ -226,7 +230,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         emptyClass: "agent-composer--empty",
         hintOverlayClass: AGENT_HINT_OVERLAY_CLASS,
         onChange: () => {
-            normalizeAgentSkills(host);
+            normalizeAgentTokens(host);
             onChange?.();
         },
         protyleOptions: {
@@ -255,9 +259,10 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         },
         runtimeCapabilities: {
             websocket: false,
+            blockDropAsReference: true,
         },
         afterSetContent: (protyle, element) => {
-            normalizeAgentSkills(element);
+            normalizeAgentTokens(element);
             resetEmbedBlocks(element);
             blockRender(protyle, element);
         },
@@ -271,13 +276,13 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         if (selection.rangeCount > 0) {
             const range = selection.getRangeAt(0);
             if (wysiwyg.element.contains(range.commonAncestorContainer)) {
-                expandAgentSkillSelection(range);
+                expandAgentTokenSelection(range);
             }
         }
     };
     let skillDeletionRange: Range;
     const handleSkillDeletion = (event: InputEvent) => {
-        if (!deleteAgentSkill(p, event)) {
+        if (!deleteAgentToken(p, event)) {
             return false;
         }
         skillDeletionRange = getSelection().getRangeAt(0).cloneRange();
@@ -389,8 +394,9 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         }
     }, true);
 
-    const getMarkdown = (): string => {
+    const getMarkdown = (references: AIReference[]): string => {
         return fragment.getMarkdown((element) => {
+            projectAgentQuotes(element, references);
             element.querySelectorAll(AGENT_SKILL_SELECTOR).forEach((skillElement) => {
                 skillElement.replaceWith(document.createTextNode(skillElement.textContent || ""));
             });
@@ -411,6 +417,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                     if (!(node instanceof HTMLElement)) {
                         return false;
                     }
+                    if (node.hasAttribute("custom-agent-quote")) return false;
                     if (node.tagName === "BR") {
                         node.remove();
                         return true;
@@ -450,14 +457,14 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         },
         destroy: fragment.destroy,
         getSendData: () => {
-            const references: { id: string; title: string }[] = [];
+            const references: AIReference[] = [];
             wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach((ref) => {
                 references.push({
                     id: ref.getAttribute("data-id") || "",
                     title: ref.textContent || "",
                 });
             });
-            return {text: getMarkdown(), blockHTML: getBlockHTML(), references};
+            return {text: getMarkdown(references), blockHTML: getBlockHTML(), references};
         },
         clear: () => {
             fragment.clear();
@@ -467,7 +474,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             if (data.blockHTML) {
                 fragment.setBlockHTML(data.blockHTML);
             } else {
-                fragment.setMarkdown(data.text);
+                fragment.setMarkdown(quotePreview(data.text, data.references));
             }
             history.resetCursor();
         },
@@ -475,6 +482,61 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         getHistory: () => history.get(),
         clearHistory: () => history.clear(),
         restoreHistory: (h: string[]) => history.restore(h),
+        applyPhrase: instruction => {
+            // 保留草稿中的行内引用、附件及格式，模板可以在任意位置引用草稿。
+            const draft = getBlockHTML();
+            const parts = instruction.includes("{{input}}") ? instruction.split("{{input}}") : [instruction, ""];
+            const output = document.createElement("div");
+            parts.forEach((part, index) => {
+                if (index && draft) {
+                    const copy = document.createElement("template");
+                    copy.innerHTML = draft;
+                    if (index > 1) {
+                        copy.content.querySelectorAll<HTMLElement>("[data-node-id]").forEach(block => block.dataset.nodeId = Lute.NewNodeID());
+                    }
+                    output.append(copy.content);
+                }
+                if (part.trim()) output.insertAdjacentHTML("beforeend", p.lute.Md2BlockDOM(part));
+            });
+            fragment.setBlockHTML(output.innerHTML);
+        },
+        insertQuote: (quote, inBackground) => {
+            const selection = getSelection();
+            const original = inBackground && selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : undefined;
+            const previousCount = inBackground ? wysiwyg.element.querySelectorAll(AGENT_QUOTE_SELECTOR).length : 0;
+            const saved = p.toolbar.range;
+            if (!saved || !wysiwyg.element.contains(saved.commonAncestorContainer)) {
+                if (!inBackground) fragment.focus(true);
+                const active = !inBackground && selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+                if (active && wysiwyg.element.contains(active.commonAncestorContainer)) {
+                    p.toolbar.range = active.cloneRange();
+                } else {
+                    const editables = wysiwyg.element.querySelectorAll('[contenteditable="true"]');
+                    const last = editables[editables.length - 1];
+                    if (!last) return;
+                    const end = document.createRange();
+                    end.selectNodeContents(last);
+                    end.collapse(false);
+                    p.toolbar.range = end;
+                }
+            }
+            if (inBackground) {
+                p.toolbar.range = p.toolbar.range.cloneRange();
+                p.toolbar.range.collapse(false);
+            }
+            expandAgentTokenSelection(p.toolbar.range);
+            if (!inBackground) focusByRange(p.toolbar.range);
+            protyle.insert(createAgentQuote(quote), false, true);
+            if (inBackground && selection && (!selection.anchorNode || wysiwyg.element.contains(selection.anchorNode))) {
+                if (original?.commonAncestorContainer.isConnected) {
+                    focusByRange(original);
+                } else {
+                    selection.removeAllRanges();
+                }
+            }
+            const count = wysiwyg.element.querySelectorAll(AGENT_QUOTE_SELECTOR).length;
+            if (count > previousCount) return count;
+        },
         insertMention: (id: string, label: string) => {
             protyle.insert('<span data-type="block-ref" data-id="' + id + '" data-subtype="d">' +
                 escapeHtml(label) + "</span>" + Constants.ZWSP);

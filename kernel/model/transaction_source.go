@@ -257,22 +257,30 @@ func (tx *Transaction) recordDocumentWrite(tree *parse.Tree, write func() error)
 	if file == nil {
 		return write()
 	}
+	journal := tx.sourceJournal
 	return filesys.RecordTreeWrites(tree, file.Before, func(data []byte) error {
 		file.After = data
-		if len(tx.sourceJournal.Files) > 1 {
-			tx.sourceJournal.Forward = false
+		// 单文档恢复记录已持久化文档身份，写入结果仅供进程内回滚。
+		if journal.Forward && len(journal.Files) == 1 {
+			return nil
 		}
-		return tx.sourceJournal.save()
+		journal.Forward = false
+		return journal.save()
 	}, write)
 }
 
 func (tx *Transaction) commitDocumentSources() error {
-	if tx.sourceJournal == nil {
+	journal := tx.sourceJournal
+	if journal == nil {
 		return nil
 	}
-	tx.sourceJournal.State = "committed"
-	if err := tx.sourceJournal.save(); err != nil {
-		tx.sourceJournal.State = "pending"
+	journal.State = "committed"
+	// 单文档恢复直接读取已原子替换的源文件，待提交状态足以触发索引恢复。
+	if journal.Forward && len(journal.Files) == 1 {
+		return nil
+	}
+	if err := journal.save(); err != nil {
+		journal.State = "pending"
 		return err
 	}
 	return nil

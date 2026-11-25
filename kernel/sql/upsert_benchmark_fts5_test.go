@@ -18,7 +18,10 @@ import (
 
 // upsertTreeWithFullAuxiliaryReplacement 以完整替换附属记录作为增量路径的基准对照。
 func upsertTreeWithFullAuxiliaryReplacement(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error) {
-	oldBlockHashes := queryBlockHashes(tx, tree.ID)
+	oldBlockHashes, err := queryBlockHashes(tx, tree.ID)
+	if err != nil {
+		return
+	}
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
 	newBlockHashes := map[string]string{}
 	for _, block := range blocks {
@@ -94,8 +97,8 @@ func BenchmarkUpsertTreeAuxiliaryIndexes(b *testing.B) {
 					if err != nil {
 						b.Fatal(err)
 					}
-					if hashes := queryBlockHashes(tx, tree.ID); len(hashes) != size+1 {
-						b.Fatalf("baseline must contain all existing block hashes: got %d", len(hashes))
+					if hashes, queryErr := queryBlockHashes(tx, tree.ID); queryErr != nil || len(hashes) != size+1 {
+						b.Fatalf("baseline must contain all existing block hashes: got %d, %v", len(hashes), queryErr)
 					}
 					tx.Rollback()
 					var before, after int64

@@ -35,7 +35,7 @@ func TestManualTagOrderBuildsAndMovesOnlySiblings(t *testing.T) {
 	}
 	groups := tagSortGroups{"": {"project", "archive"}, "project/": moved}
 	labels["project/0"] = 1
-	tags := buildTagTree(labels, util.SortModeCustom, groups)
+	tags := buildTagTree(labels, util.SortModeCustom, groups, nil)
 	if tags[0].Name != "project" || tags[0].Count != 0 || tags[1].Name != "archive" {
 		t.Fatal("manual root order or derived parent count changed")
 	}
@@ -45,12 +45,12 @@ func TestManualTagOrderBuildsAndMovesOnlySiblings(t *testing.T) {
 			t.Fatalf("child %d = %s, want %s", i, child.Name, want[i])
 		}
 	}
-	automatic := buildTagTree(labels, util.SortModeAlphanumASC, groups)
+	automatic := buildTagTree(labels, util.SortModeAlphanumASC, groups, nil)
 	if automatic[0].Name != "archive" || automatic[1].Children[0].Name != "0" {
 		t.Fatal("manual positions were applied to automatic sorting")
 	}
 	labels["project/1/heavy"] = 4
-	counts := buildTagTree(labels, util.SortModeRefCountDESC, nil)
+	counts := buildTagTree(labels, util.SortModeRefCountDESC, nil, nil)
 	if counts[1].Children[3].Children[0].Name != "heavy" {
 		t.Fatal("grandchildren were sorted before their counts were available")
 	}

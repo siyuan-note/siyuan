@@ -243,6 +243,16 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
             }
         },
     }, {
+        name: "agentQuote",
+        lang: "agentQuote",
+        icon: "iconQuote",
+        tipPosition: "n",
+        click(editor) {
+            const protyle = editor.protyle;
+            const range = protyle.toolbar.range?.cloneRange();
+            void import("../../ai/editorAgent").then(({quoteEditorSelection}) => quoteEditorSelection(protyle, range));
+        },
+    }, {
         name: "strong",
         lang: "bold",
         hotkey: window.siyuan.config.keymap.editor.insert.bold.custom,
@@ -359,7 +369,7 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
                 return true;
             }
         });
-        if (isDisabledFeature("ai") && currentMenuItem.name === "ai") {
+        if (isDisabledFeature("ai") && ["ai", "agentQuote"].includes(currentMenuItem.name)) {
             return;
         }
         toolbarResult.push(currentMenuItem);

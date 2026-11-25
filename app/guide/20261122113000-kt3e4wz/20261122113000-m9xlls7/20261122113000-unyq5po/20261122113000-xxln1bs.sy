@@ -1,0 +1,519 @@
+{
+	"ID": "20261122113000-xxln1bs",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-xxln1bs",
+		"title": "Использование в браузере",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-mzo8ork",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-mzo8ork",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Использование в браузере"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-um035i4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-um035i4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В запущенном приложении откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Аутентификация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сервер"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Используйте в обозревателе"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Открыть обозреватель"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", чтобы работать с приложением в локальном браузере. Не останавливайте ядро и используйте открытый адрес с его портом."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gof2ep9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-gof2ep9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Перед доступом с других устройств в той же локальной сети сначала задайте пароль блокировки экрана или корректную конфигурацию "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-8q8xgxj",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Вход через OIDC"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", включите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Аутентификация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сервер"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Сетевое обслуживание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и перезапустите SiYuan после полного выхода. Затем замените в адресе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "127.0.0.1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " на IP-адрес компьютера с ядром в локальной сети, сохранив указанный порт, и разрешите этот порт в брандмауэре. Для доступа из внешней сети можно использовать следующие способы развёртывания:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xf43d62",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20261122113000-xf43d62",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-3c2c6oy",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-3c2c6oy",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-wzppw42",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-wzppw42",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Публикация локального сервиса ядра в публичной сети с помощью «проброса портов / NAT traversal» (сложно и нестабильно, не рекомендуется)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-a5nykvr",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-a5nykvr",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-n7oxbyb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-n7oxbyb",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Самостоятельное развёртывание серверной версии SiYuan (рекомендуется)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gk9g4t1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-gk9g4t1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Перед началом работы ознакомьтесь с "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/article/1619868273581#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84",
+					"TextMarkTextContent": "технической архитектурой SiYuan Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-42lwj1o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-42lwj1o",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Чтобы подключить настольный клиент к удалённому ядру, см. раздел "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-uoyl377",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Подключение к удалённому ядру"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-a1ucghv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-a1ucghv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "пароля блокировки экрана"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-uysh8gv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-uysh8gv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Аутентификация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Вход и токены"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Пароль блокировки экрана"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " задайте пароль блокировки экрана. Если оставить поле пустым, вход по паролю будет отключён; однако для обычного нелокального доступа всё равно требуется пароль или корректная настройка OIDC. Сначала настройте аутентификацию и только затем открывайте доступ к ядру для других устройств."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-i5p2y0m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-i5p2y0m",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Параметр "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Блокировать вместе с системой"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для настольного клиента поддерживается только в Windows и macOS. В Linux перед блокировкой системы заблокируйте SiYuan вручную через пункт "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Заблокировать экран"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " в меню рабочего пространства."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rm6dybk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rm6dybk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Аутентификация"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Вход и токены"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Обои экрана блокировки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " загрузите изображение JPEG, PNG или WebP (до 10 MiB и 16 мегапикселей), чтобы настроить фон страницы аутентификации при запуске и после блокировки экрана. Также можно нажать «Встроенные» и выбрать изображение из галереи по категориям. Встроенные картинки широкоформатные: при заполнении экрана они обрезаются по центру, особенно заметно в портретной ориентации. Выбор или загрузка нового изображения заменяет прежнее, а кнопка «Сбросить» возвращает фон по умолчанию."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vr1f2od",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-vr1f2od",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка обоев появляется после установки пароля или включения входа через OIDC. При использовании пользовательских обоев страница аутентификации сначала показывает фон и местное время; панель входа появляется после клика, касания экрана или нажатия клавиши. Если сразу начать вводить пароль, первый символ тоже попадёт в поле пароля. Если обои не заданы или изображение не удалось загрузить, сразу отображается стандартный экран входа."
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Когда панель входа открыта, нажмите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для возврата к обоям и часам; введённый пароль и код проверки сохраняются. При переходе вперёд и назад проигрывается короткая анимация (при включённом в системе уменьшении движения переключение происходит мгновенно)."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gmqwsbu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-gmqwsbu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обои хранятся в текущем рабочем пространстве, не участвуют в синхронизации заметок и не включаются в экспорт настроек. До входа в систему это изображение видит любой, у кого есть доступ к странице аутентификации, поэтому не выбирайте картинки с конфиденциальной информацией."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-nyn16vl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-nyn16vl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вход через OIDC"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-op2r18r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-op2r18r",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Подробное описание провайдеров, URL обратного вызова, правил доступа, входа с нескольких устройств, настройки Docker и устранения неполадок см. в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-8q8xgxj",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Вход через OIDC"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

@@ -58,15 +58,16 @@ type DocTreeLocation struct {
 }
 
 type docTreeQuery struct {
-	box        *Box
-	parentID   string
-	listPath   string
-	directory  string
-	sortMode   int
-	access     DocTreeAccess
-	visibility func(string, string) bool
-	key        string
-	refSort    bool
+	box               *Box
+	parentID          string
+	listPath          string
+	directory         string
+	sortMode          int
+	access            DocTreeAccess
+	visibility        func(string, string) bool
+	key               string
+	publicRevisionKey string
+	refSort           bool
 }
 
 type docTreeBuild struct {
@@ -233,6 +234,11 @@ func newDocTreeQuery(ctx context.Context, notebook, parentID string, access DocT
 	}
 	digest := sha256.Sum256(key)
 	query.key = hex.EncodeToString(digest[:])
+	if access.Published {
+		// 发布读者共用目录的可见顺序摘要，内部缓存仍按访问策略和源版本校验。
+		visibleScope, _ := json.Marshal([]any{notebook, parentID, query.listPath, mode})
+		query.publicRevisionKey = "publish:" + string(visibleScope)
+	}
 	return query, nil
 }
 
@@ -404,7 +410,8 @@ func (query *docTreeQuery) collect(ctx context.Context) (*cache.DocTreeOrder, er
 			childCounts = append(childCounts, file.SubFileCount)
 		}
 	}
-	scope := cache.DocTreeOrderScope{Directory: query.directory, Sorts: positions, ChildCounts: childCounts,
+	scope := cache.DocTreeOrderScope{Directory: query.directory, PublicRevisionKey: query.publicRevisionKey,
+		Sorts: positions, ChildCounts: childCounts,
 		Title: query.sortMode == util.SortModeNameASC || query.sortMode == util.SortModeNameDESC ||
 			query.sortMode == util.SortModeAlphanumASC || query.sortMode == util.SortModeAlphanumDESC,
 		Updated: query.sortMode == util.SortModeUpdatedASC || query.sortMode == util.SortModeUpdatedDESC,

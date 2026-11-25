@@ -57,12 +57,17 @@ func TestAPIContractSyncSourcePreviewFailure(t *testing.T) {
 	} {
 		engine := gin.New()
 		engine.POST("/api/sync/performSync", contractHandler(apicontract.PerformSync,
-			func(_ *gin.Context, _ apicontract.PerformSyncRequest) apicontract.Response[apicontract.Null] {
-				return syncSourceDecisionFailure(fixture.err)
+			func(c *gin.Context, _ apicontract.PerformSyncRequest) apicontract.Response[apicontract.Null] {
+				return syncSourceDecisionFailure(c, fixture.err)
 			}))
 		recorder := httptest.NewRecorder()
-		engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(`{}`)))
+		request := httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(`{}`))
+		request.Header.Set(syncNoticeHeader, "2")
+		engine.ServeHTTP(recorder, request)
 		requireAPIContract(t, "POST", "/api/sync/performSync", recorder)
+		if notice := recorder.Header().Get(syncNoticeHeader); notice != "" {
+			t.Fatalf("unexpected sync notice for %v: %q", fixture.err, notice)
+		}
 		var response struct {
 			Code int
 			Msg  string

@@ -4,13 +4,28 @@
 
 package sql
 
-import "strings"
+import (
+	"encoding/json"
+	"strings"
+)
 
-// QueryOCRAssetDocuments 返回普通笔记本中引用资源的文档，用于刷新包含 OCR 文本的块索引。
-func QueryOCRAssetDocuments(path string) ([]Asset, error) {
-	// 资源索引不保存查询参数，由调用方继续按完整 OCR 资源身份筛选文档中的图片。
-	path = strings.SplitN(path, "?", 2)[0]
-	rows, err := query("SELECT DISTINCT root_id, box FROM assets WHERE path = ? OR instr(path, ?) = 1 OR instr(path, ?) = 1", path, path+"?", path+"#")
+func QueryOCRAssetDocuments(paths map[string]bool, refreshAll bool) ([]Asset, error) {
+	stmt := "SELECT DISTINCT root_id, box FROM assets"
+	var args []any
+	if !refreshAll {
+		basePaths := make([]string, 0, len(paths))
+		for path := range paths {
+			basePaths = append(basePaths, strings.SplitN(path, "?", 2)[0])
+		}
+		encoded, err := json.Marshal(basePaths)
+		if err != nil {
+			return nil, err
+		}
+		// 资源索引不保存图片链接的查询参数，文档扫描按完整的 OCR 资源身份匹配。
+		stmt += " WHERE substr(path, 1, min(instr(path || '?', '?'), instr(path || '#', '#')) - 1) IN (SELECT value FROM json_each(?))"
+		args = append(args, string(encoded))
+	}
+	rows, err := query(stmt, args...)
 	if err != nil {
 		return nil, err
 	}

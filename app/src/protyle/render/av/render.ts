@@ -24,6 +24,9 @@ import {renderAVAttribute} from "./blockAttr";
 import {escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {isInMobileApp} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
+/// #if !MOBILE
+import {registerAVHorizontalScrollbar} from "./horizontalScrollbar";
+/// #endif
 import {selectNewAVPrimary} from "./cellTyping";
 import {renderGallery} from "./gallery/render";
 import {getFieldsByData, getViewIcon} from "./view";
@@ -142,7 +145,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             }
             return;
         }
-        tabHTML += `<div draggable="true" data-position="north" data-av-type="${item.type}" data-id="${item.id}" data-page="${item.pageSize}" data-desc="${escapeAriaLabel(item.desc || "")}" class="ariaLabel item${item.id === data.viewID ? " item--focus" : ""}">
+        tabHTML += `<div draggable="true" data-position="north" data-av-type="${escapeHtmlTextAndAttr(item.type)}" data-id="${escapeHtmlTextAndAttr(item.id)}" data-page="${item.pageSize}" data-desc="${escapeAriaLabel(item.desc || "")}" class="ariaLabel item${item.id === data.viewID ? " item--focus" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "item__graphic", true) : `<svg class="item__graphic"><use xlink:href="#${getViewIcon(item.type)}"></use></svg>`}
     <span class="item__text">${escapeHtml(item.name)}</span>
 </div>`;
@@ -155,7 +158,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
         defaultTemplate.icon || defaultTemplate.primaryKeyTemplate ||
         Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
     const editingState = getAVHeaderEditingState(editable, includeEditingControls);
-    return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-current-view-id="${escapeAttr(data.viewID)}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}" data-view-pages="${escapeAttr(serializeAVViewPageSizes(data.views))}">
+    return `<div class="av__header" data-default-template-id="${escapeHtmlTextAndAttr(defaultTemplateID)}" data-current-view-id="${escapeHtmlTextAndAttr(data.viewID)}" data-view-count="${data.views.length}" data-view-ids="${escapeHtmlTextAndAttr(data.views.map((view) => view.id).join(","))}" data-view-pages="${escapeAttr(serializeAVViewPageSizes(data.views))}">
         <div class="fn__flex av__views${isMobile() ? " av__views--mobile" : ""}${showSearch ? " av__views--show av__views--search" : ""}">
             ${isMobile() ? `<button data-type="av-switcher" class="block__icon block__icon--show av__mobile-view" aria-label="${escapeAriaLabel(window.siyuan.languages.allViews)}">
                 <span class="fn__ellipsis">${escapeHtml(viewData?.name || data.name || "")}</span>
@@ -477,6 +480,11 @@ const afterRenderTable = (options: ITableOptions) => {
     options.blockElement.setAttribute("data-render", "true");
     options.blockElement.querySelector(".av__scroll").scrollLeft = options.resetData.left;
     options.blockElement.style.alignSelf = options.resetData.alignSelf;
+    /// #if !MOBILE
+    if (options.protyle.model) {
+        registerAVHorizontalScrollbar(options.protyle, options.blockElement);
+    }
+    /// #endif
     const editRect = options.protyle.contentElement.getBoundingClientRect();
     if (options.resetData.headerTransform) {
         const headerTransformElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.resetData.headerTransform.groupId}"] .av__row--header`) as HTMLElement;

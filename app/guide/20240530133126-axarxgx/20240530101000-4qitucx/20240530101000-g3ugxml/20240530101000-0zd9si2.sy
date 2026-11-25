@@ -182,6 +182,20 @@
 			]
 		},
 		{
+			"ID": "20261122110827-um20a1x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122110827-um20a1x",
+				"updated": "20261122110827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "公開ページの仮想参照は、閲覧できるブロックのみを参照先とします。アンカーテキストで一致した場合は、参照元のドキュメントも閲覧できる必要があります。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-4czwauu",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

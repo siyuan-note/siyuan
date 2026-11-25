@@ -1,0 +1,457 @@
+{
+	"ID": "20261122113000-vrxoxii",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-vrxoxii",
+		"title": "Оптимизация форматирования",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-vg9t36w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-vg9t36w",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Обзор",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-o7hv9ic",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-o7hv9ic",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Оптимизация форматирования добавляет пробелы вокруг строчных элементов и между китайскими и латинскими символами для единообразия отступов в документе. Она также обрабатывает текст в ячейках таблицы с расширенным форматированием."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-e3hvepk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-e3hvepk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Эта операция изменяет содержимое документа. Используйте её по необходимости; область обработки описана ниже."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ik24itl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ik24itl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lfgr0sm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-lfgr0sm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В правом верхнем углу редактора в меню "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ в правом верхнем углу вкладки редактора выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Оптимизировать типографику"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​; после обработки пробел будет автоматически вставлен до и после следующих элементов:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jm9xdun",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-jm9xdun",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-qx33d0v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-qx33d0v",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-r6wauos",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-r6wauos",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Строчный код: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Code"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-y8rd1qx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-y8rd1qx",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-pr6net3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-pr6net3",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Строчная формула: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "inline-math",
+									"TextMarkInlineMathContent": "a^2 + b^2 = \\color{red}c^2"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-z1kvp5l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-z1kvp5l",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Кроме того, пробел будет автоматически добавлен между китайскими и латинскими символами в следующих элементах:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9utnl3z",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-9utnl3z",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-5zy34zp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-5zy34zp",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-7yvonmv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7yvonmv",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "выделение"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ycasrx5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ycasrx5",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ko56k64",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ko56k64",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "s",
+									"TextMarkTextContent": "Зачёркнутый"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-0oyqf0u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-0oyqf0u",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-7v9mrws",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7v9mrws",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com",
+									"TextMarkTextContent": "Текст якоря гиперссылки"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-nzjbu1b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-nzjbu1b",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-rdsxpui",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-rdsxpui",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Обычный текст"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-9ldsp6d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9ldsp6d",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-hr5pr9b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-hr5pr9b",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "em",
+									"TextMarkTextContent": "Курсив"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-thml1f2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-thml1f2",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-pn814wn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-pn814wn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Жирный"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-w7ceh2u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-w7ceh2u",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Оптимизация форматирования обрабатывает только текущий открытый документ."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-eya9lyi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-eya9lyi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Автоматическое резервное копирование"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zn8jtga",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zn8jtga",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Перед выполнением оптимизации SiYuan автоматически создаёт резервную копию исходного документа, чтобы при необходимости можно было откатить изменения через"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-36a05no",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "История данных"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		}
+	]
+}

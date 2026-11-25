@@ -92,7 +92,7 @@ ${mobile ? "" : `<div class="skill-manager__actions">${button("save", lang.save)
         window.removeEventListener("beforeunload", beforeUnload);
     };
     const dialog = mobile ? undefined : new Dialog({
-        title: lang.agentSkillManager,
+        title: escapeHtml(lang.agentWorkspaceSkills),
         width: "min(1100px, 96vw)",
         height: "min(800px, 90vh)",
         containerClassName: "skill-manager-dialog",

@@ -93,6 +93,8 @@ func TestTreeIndexChangesMatchCompleteUpdates(t *testing.T) {
 			}
 			compare(changes)
 			removed := tree.Root.FirstChild
+			// 旧记录的哈希为空也不能漏删。
+			execDeletePathTestSQL(t, database, "UPDATE blocks SET hash = NULL WHERE id = ?", removed.ID)
 			removed.Unlink()
 			added := treenode.NewParagraph("20261019110000-added01")
 			added.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("new child")})

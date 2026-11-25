@@ -60,6 +60,7 @@ export abstract class Constants {
     public static readonly SIYUAN_HOTKEY: string = "siyuan-hotkey";
     public static readonly SIYUAN_SYNC_APP_MENU: string = "siyuan-sync-app-menu";
     public static readonly SIYUAN_SYNC_MARKDOWN_KEYMAP: string = "siyuan-sync-markdown-keymap";
+    public static readonly SIYUAN_SYNC_NOTICE_HEADER: string = "X-Siyuan-Sync-Notice";
     public static readonly SIYUAN_INIT: string = "siyuan-init";
     public static readonly SIYUAN_READY_TO_SHOW: string = "siyuan-ready-to-show";
     public static readonly SIYUAN_SEND_WINDOWS: string = "siyuan-send-windows"; // 主窗口和各新窗口之间的通信
@@ -93,6 +94,7 @@ export abstract class Constants {
     public static readonly CUSTOM_REMINDER_WECHAT: string = "custom-reminder-wechat";
     public static readonly CUSTOM_RIFF_DECKS: string = "custom-riff-decks";
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
+    public static readonly CUSTOM_SY_AI_SOURCE: string = "custom-sy-ai-source";
     public static readonly CUSTOM_SY_EMBED_BREADCRUMB_PARENT_PATH: string = "custom-sy-embed-breadcrumb-parent-path";
     public static readonly CUSTOM_SY_SUBDOC_SORT_MODE: string = "custom-sy-subdoc-sort-mode";
     public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";
@@ -387,6 +389,7 @@ export abstract class Constants {
     public static readonly TIMEOUT_TAB_SWITCH = 500;
     public static readonly TIMEOUT_SNIPPET_LOAD = 5000;
     public static readonly TIMEOUT_LONGPRESS = 460;
+    public static readonly TIMEOUT_TOUCH_DRAG_STILLNESS = 120;
     public static readonly TIMEOUT_VIBRATION_DURATION = 20;
     // 鼠标拖拽启动的短暂时间下限：平板鼠标合成 touch 拖拽文件树/画廊/列表操作等元素时，按下后需经过该时间才进拖拽，避免点击 + 号/箭头时抖动误触发 dragstart
     public static readonly TIMEOUT_MOUSE_DRAG_DELAY = 150;
@@ -409,7 +412,7 @@ export abstract class Constants {
         ko: "20210808180117-6v0mkxr",
         pl: "20210808180117-6v0mkxr",
         "pt-BR": "20210808180117-6v0mkxr",
-        ru: "20210808180117-6v0mkxr",
+        ru: "20261122113000-kt3e4wz",
         th: "20210808180117-6v0mkxr",
         nl: "20210808180117-6v0mkxr",
         sk: "20210808180117-6v0mkxr",
@@ -925,6 +928,7 @@ export abstract class Constants {
 
     // assets
     public static readonly SIYUAN_ASSETS_IMAGE: string[] = [".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif", ".tiff", ".tif", ".heic", ".heif"];
+    public static readonly AGENT_IMAGE_MIME_TYPES: readonly string[] = ["image/png", "image/jpeg", "image/gif", "image/webp"];
     public static readonly SIYUAN_ASSETS_AUDIO: string[] = [".mp3", ".wav", ".ogg", ".m4a", ".aac", ".flac"];
     public static readonly SIYUAN_ASSETS_VIDEO: string[] = [".mov", ".weba", ".mkv", ".mp4", ".webm"];
     public static readonly SIYUAN_ASSETS_EXTS: string[] = [".pdf"].concat(Constants.SIYUAN_ASSETS_IMAGE, Constants.SIYUAN_ASSETS_AUDIO, Constants.SIYUAN_ASSETS_VIDEO);

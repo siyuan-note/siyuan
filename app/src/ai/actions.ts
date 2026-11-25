@@ -10,7 +10,7 @@ import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {upDownHint} from "../util/upDownHint";
 import {clearAIEditorHistory, startAIEditorAction} from "./editor";
-import {isDisabledFeature} from "../protyle/util/compatibility";
+import {isDisabledFeature, isOnlyMeta, updateHotkeyTip} from "../protyle/util/compatibility";
 import {bindOneTimeAction} from "./oneTimeAction";
 
 interface IAIEditorAction {
@@ -21,7 +21,7 @@ interface IAIEditorAction {
 
 const editDialog = (item: IAIEditorAction) => {
     const dialog = new AdaptiveDialog({
-        title: window.siyuan.languages.update,
+        title: item.id ? window.siyuan.languages.update : window.siyuan.languages.aiCustomAction,
         content: `<div class="b3-dialog__content">
     <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.memo}">
     <div class="fn__hr"></div>
@@ -43,6 +43,7 @@ const editDialog = (item: IAIEditorAction) => {
         (btnsElement[2] as HTMLButtonElement).click();
     });
     customElement.value = item.action;
+    if (!item.id) btnsElement[0].classList.add("fn__none");
     btnsElement[1].addEventListener("click", () => {
         dialog.destroy();
     });
@@ -294,6 +295,41 @@ const openAIActions = (actions: IAIEditorAction[], elements: HTMLElement[], prot
     });
     menu.element.querySelector("textarea").focus();
     /// #endif
+};
+
+export const openAgentPhrases = (target: HTMLElement, apply: (instruction: string, send: boolean) => void) => {
+    const lang = window.siyuan.languages;
+    void toggleMenu({target, build: (_menu, session) => {
+        fetchPost("/api/ai/editor/lsActions", {}, response => {
+            if (!session.isCurrent() || !target.isConnected) return;
+            const menu = new Menu("agent-phrases");
+            const saved: IAIEditorAction[] = response.data || [];
+            const builtins = [lang.aiContinueWrite, lang.aiTranslate, lang.aiExtractSummary, lang.aiPolish,
+                lang.aiBrainStorm, lang.aiFixGrammarSpell];
+            const mobile = isMobile();
+            if (!mobile) {
+                menu.addItem({
+                    type: "readonly",
+                    iconHTML: "",
+                    label: escapeHtml(lang.agentQuickPhraseSendTip.replace("${key}", updateHotkeyTip("⌘"))),
+                });
+            }
+            [...builtins.map(action => ({name: action, action})), ...saved].forEach(item => {
+                menu.addItem({
+                    iconHTML: "",
+                    label: escapeHtml(item.name || item.action),
+                    click: (_element, event) => apply(item.action || item.name, !mobile && isOnlyMeta(event)),
+                });
+            });
+            menu.addSeparator();
+            menu.addItem({iconHTML: "", label: lang.manage, submenu: [
+                {label: lang.new, icon: "iconAdd", click: () => editDialog({id: "", name: "", action: ""})},
+                ...saved.map(item => ({label: escapeHtml(item.name || item.action), click: () => editDialog(item)})),
+            ]});
+            const rect = target.getBoundingClientRect();
+            session.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height, target}));
+        });
+    }});
 };
 
 let aiActionsRequestID = 0;

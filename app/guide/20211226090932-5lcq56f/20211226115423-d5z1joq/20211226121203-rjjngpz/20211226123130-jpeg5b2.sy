@@ -177,7 +177,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "所有打過標簽的內容區塊會在標簽分頁（"
+					"Data": "開啟標籤面板（"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -213,7 +213,39 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​）中列出。如果需要取消標簽，在內容區塊中刪掉該標簽即可。"
+					"Data": "​）。在桌面端點選標籤，會在全域搜尋中顯示相符的內容區塊。若要移除內容區塊上的標籤，直接在區塊中刪除該標籤即可。"
+				}
+			]
+		},
+		{
+			"ID": "20261124191611-q7b8e3p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261124191611-q7b8e3p",
+				"updated": "20261124191611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在行動裝置上，點選文件頁首的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新增標籤"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開啟標籤選擇面板。候選清單中的勾選標記表示該標籤已新增到文件。新增完畢後，點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "關閉"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

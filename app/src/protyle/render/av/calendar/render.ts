@@ -3,7 +3,7 @@ import {AV_DATE_TYPES} from "../capabilities";
 import {Constants} from "../../../../constants";
 import {setStorageVal} from "../../../util/compatibility";
 import dayjs from "dayjs";
-import {escapeAttr, escapeHtml} from "../../../../util/escape";
+import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../../util/escape";
 import {isMobile} from "../../../../util/functions";
 import {transaction} from "../../../wysiwyg/transaction";
 import {renderCell, updateCellsValue} from "../cell";
@@ -99,11 +99,13 @@ const getEventHTML = (segment: ICalendarSegment, view: IAVTable, editable: boole
         const checkClass = field.type === "checkbox" ? (cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck") : "";
         const checkbox = field.type === "checkbox" && !field.renderTemplate?.trim() ?
             ` role="checkbox" tabindex="${editable ? "0" : "-1"}" aria-checked="${!!cell.value.checkbox?.checked}" aria-disabled="${!editable}" aria-label="${escapeAttr(field.name)}"` : "";
-        const value = `<div class="av__calendar-field${checkClass}"${checkbox} data-field-id="${field.id}" data-col-id="${field.id}" data-dtype="${field.type}" data-align="${field.align || ""}" data-wrap="${field.wrap}"${field.renderTemplate?.trim() ? ' data-render-template="true"' : ""} title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, getAVCellShowIcon(view, cell.value.type), "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
+        const fieldID = escapeHtmlTextAndAttr(field.id);
+        const value = `<div class="av__calendar-field${checkClass}"${checkbox} data-field-id="${fieldID}" data-col-id="${fieldID}" data-dtype="${escapeHtmlTextAndAttr(field.type)}" data-align="${escapeHtmlTextAndAttr(field.align || "")}" data-wrap="${field.wrap}"${field.renderTemplate?.trim() ? ' data-render-template="true"' : ""} title="${escapeAttr(field.name)}">${renderCell(cell.value, event.rowIndex || 0, getAVCellShowIcon(view, cell.value.type), "calendar", field.options, field.dateFormat, field.renderTemplate, false)}</div>`;
         return view.calendar.displayFieldName && field.type !== "block" ?
             `<div class="av__calendar-field-row"><span class="av__calendar-field-name fn__ellipsis" title="${escapeAttr(field.name)}">${escapeHtml(field.name)}</span>${value}</div>` : value;
     }).join("");
-    return `<div class="av__calendar-item${starts ? " av__calendar-item--start" : ""}${ends ? " av__calendar-item--end" : ""}" role="button" tabindex="0" data-calendar-item="${event.row.id}" data-id="${event.row.id}" title="${escapeAttr(title)}" style="grid-column:${segment.column + 1}/span ${segment.span};grid-row:${segment.lane + 1};${background ? `--b3-av-calendar-background:${background}` : ""}">
+    const itemID = escapeHtmlTextAndAttr(event.row.id);
+    return `<div class="av__calendar-item${starts ? " av__calendar-item--start" : ""}${ends ? " av__calendar-item--end" : ""}" role="button" tabindex="0" data-calendar-item="${itemID}" data-id="${itemID}" title="${escapeAttr(title)}" style="grid-column:${segment.column + 1}/span ${segment.span};grid-row:${segment.lane + 1};${background ? `--b3-av-calendar-background:${background}` : ""}">
         ${drag && starts ? `<span class="av__calendar-resize av__calendar-resize--start" data-calendar-resize="start" title="${window.siyuan.languages.calendarResizeStart}"></span>` : ""}
         ${drag && !isMobile() ? `<span class="av__calendar-move" data-calendar-move title="${window.siyuan.languages.move}"><svg><use xlink:href="#iconDrag"></use></svg></span>` : ""}
         <div class="av__calendar-item-content">${time ? `<span class="av__calendar-time">${time}</span>` : ""}${event.invalid ? '<svg class="av__calendar-warning"><use xlink:href="#iconInfo"></use></svg>' : ""}${fields || escapeHtml(primary?.value?.block?.content || window.siyuan.languages.untitled)}</div>

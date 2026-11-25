@@ -1,0 +1,123 @@
+{
+	"ID": "20261122113000-7iyacyz",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f451",
+		"id": "20261122113000-7iyacyz",
+		"title": "Привилегии подписки",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-7oeveyu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7oeveyu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Привилегии подписки делятся на две части:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-uguzhmq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-uguzhmq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-tdrsiiz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-tdrsiiz",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-777wjd8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-777wjd8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Годовая подписка"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-zhko34v",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Облачные сервисы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-0m9ehzh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-0m9ehzh",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-olt92bx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-olt92bx",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Разовая покупка"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-elu1jwb",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Функциональные возможности"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ycqr6sw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ycqr6sw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вы можете выбрать нужный вариант. Годовая подписка на облачные сервисы включает платные функции на время действия подписки; разовая покупка платных функций не включает облачные сервисы."
+				}
+			]
+		}
+	]
+}

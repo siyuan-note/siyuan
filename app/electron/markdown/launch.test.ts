@@ -18,6 +18,15 @@ test("explicit Markdown flags support a new document and file arguments", () => 
         {requested: true, files: ["/home/user/a.md"], newDocument: false});
 });
 
+test("Windows Markdown association arguments open the quoted file path", () => {
+    for (const file of ["C:\\My Notes\\note.md", "D:\\笔记\\会议 纪要.markdown"]) {
+        assert.deepEqual(parseMarkdownLaunch(["SiYuan.exe", "--markdown", file],
+            "C:\\Windows", {startIndex: 1, platform: "win32"}), {
+            requested: true, files: [file], newDocument: false,
+        });
+    }
+});
+
 test("reordered and repeated entry flags never add a blank window to a file request", () => {
     for (const argv of [["siyuan.exe", "C:\\docs\\a.md", "--markdown"],
         ["siyuan.exe", "--markdown", "--", "C:\\docs\\a.md"],

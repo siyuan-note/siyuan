@@ -138,10 +138,17 @@
     line-height: 16px;
 
     &--tap:active:not([disabled]),
-    &:hover:not([disabled]):not(.block__icon--text):not(.block__icon--warning):not(.block__icon--subtle),
+    &:hover:not([disabled]):not(.block__icon--text):not(.block__icon--warning):not(.block__icon--subtle):not(.block__icon--tap),
     &--active {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-list-icon-hover);
+    }
+
+    @media (hover: hover) {
+      &--tap:hover:not([disabled]):not(.block__icon--text):not(.block__icon--warning):not(.block__icon--subtle) {
+        color: var(--b3-theme-on-background);
+        background-color: var(--b3-list-icon-hover);
+      }
     }
 
     &--show {

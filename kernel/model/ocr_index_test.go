@@ -21,6 +21,8 @@ import (
 	"time"
 
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/dejavu"
+	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -66,6 +68,7 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 		Conf.Editor.Store(confSectionValue1)
 		Conf.Export.Store(confSectionValue2)
 	}
+	Conf.System.Store(conf.NewSystem())
 	Conf.OCR.Store(&conf.OCR{Provider: "paddleocr", Model: "tiny", Auto: true})
 	util.WorkspaceDir = filepath.Dir(util.DataDir)
 	util.TempDir, util.HistoryDir = t.TempDir(), t.TempDir()
@@ -99,6 +102,9 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 	treenode.UpsertBlockTree(tree)
 	sql.IndexTreeQueue(tree)
 	sql.FlushQueue()
+	t.Run("sync OCR cache without changing documents", func(t *testing.T) {
+		testSyncedOCRAssetIndex(t, path, paragraph.ID)
+	})
 	provider := &ocrFixtureProvider{rows: []map[string]string{{"text": "nativeocrkeyword", "conf": "99"}}}
 	ocrRegistry = ocr.NewRegistry()
 	if err := ocrRegistry.Register(ocr.PaddleOCR, provider); err != nil {
@@ -263,6 +269,54 @@ func TestOCRResultReindexesWithoutTesseract(t *testing.T) {
 		t.Fatal("encrypted OCR changed source ciphertext")
 	}
 	testOCRNotebookIsolation(t, provider, fixture.box.ID)
+}
+
+func testSyncedOCRAssetIndex(t *testing.T, assetPath, blockID string) {
+	t.Helper()
+	const repoPath = "/assets/ocr-texts.json"
+	filename := filepath.Join(util.DataDir, repoPath)
+	file := &entity.File{Path: repoPath}
+	syncAndCheck := func(changes *dejavu.MergeResult, present, absent string, immediateIndex bool) {
+		t.Helper()
+		processSyncMergeResult(false, true, changes, &dejavu.TrafficStat{}, "c", 0, immediateIndex, nil)
+		sql.FlushQueue()
+		for _, query := range []string{
+			"SELECT id FROM blocks WHERE id = ? AND content LIKE '%' || ? || '%'",
+			"SELECT id FROM blocks_fts WHERE id = ? AND blocks_fts MATCH ?",
+		} {
+			if present != "" {
+				rows, err := sql.QueryNoLimitArgs(query, blockID, present)
+				if err != nil || len(rows) != 1 {
+					t.Fatalf("synced OCR text %q is missing: %v, %v", present, rows, err)
+				}
+			}
+			if absent != "" {
+				rows, err := sql.QueryNoLimitArgs(query, blockID, absent)
+				if err != nil || len(rows) != 0 {
+					t.Fatalf("obsolete OCR text %q remains: %v, %v", absent, rows, err)
+				}
+			}
+		}
+	}
+	writeText := func(value string) {
+		t.Helper()
+		data, err := json.Marshal(map[string]string{assetPath: value})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filename, data, 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	upserts := &dejavu.MergeResult{Upserts: []*entity.File{file}}
+	writeText("initialsyncocr")
+	syncAndCheck(upserts, "initialsyncocr", "", true)
+	writeText("updatedsyncocr")
+	syncAndCheck(upserts, "updatedsyncocr", "initialsyncocr", false)
+	if err := os.Remove(filename); err != nil {
+		t.Fatal(err)
+	}
+	syncAndCheck(&dejavu.MergeResult{Removes: []*entity.File{file}}, "", "updatedsyncocr", false)
 }
 
 func testOCRClearResults(t *testing.T, path string, provider *ocrFixtureProvider) {

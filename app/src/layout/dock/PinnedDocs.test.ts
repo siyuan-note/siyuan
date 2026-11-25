@@ -226,47 +226,205 @@ test("pinned long press drags consume moves and releases without closing the sid
     }
 });
 
-test("mobile source tree skips bubbled pinned touches and still starts ordinary document drags", () => {
+function loadMobileTreeGestures(pinned = false) {
     const source = ts.createSourceFile("MobileFiles.ts", readFileSync(join(__dirname, "../../mobile/dock/MobileFiles.ts"), "utf8"),
         ts.ScriptTarget.Latest, true);
-    let handler: ts.ArrowFunction;
+    const bodies: Record<string, string> = {};
     const visit = (node: ts.Node) => {
-        if (ts.isCallExpression(node) && node.expression.getText(source) === "filesElement.addEventListener" &&
-            node.arguments[0].getText(source) === '"touchstart"' && ts.isArrowFunction(node.arguments[1]) &&
-            node.arguments[1].getText(source).includes("this.touchDragState =")) {
-            handler = node.arguments[1];
+        if (ts.isCallExpression(node) && node.arguments.length >= 2 &&
+            ts.isStringLiteral(node.arguments[0]) && ts.isArrowFunction(node.arguments[1])) {
+            const call = node.expression.getText(source);
+            const name = node.arguments[0].text;
+            const body = node.arguments[1].body.getText(source);
+            if (body.includes("this.touchDragState") && (
+                call === "filesElement.addEventListener" && ["touchstart", "touchmove", "touchend"].includes(name) ||
+                call === "this.element.addEventListener" && name === "scroll")) {
+                bodies[name] = body;
+            }
+        }
+        if (ts.isVariableDeclaration(node) && node.name.getText(source) === "cancelTouchDrag" &&
+            node.initializer && ts.isArrowFunction(node.initializer)) {
+            bodies.cancel = node.initializer.body.getText(source);
         }
         ts.forEachChild(node, visit);
     };
     visit(source);
-    assert.ok(handler);
+    const events = ["touchstart", "touchmove", "touchend", "scroll", "cancel"];
+    assert.ok(events.every(name => bodies[name]));
+    let now = 0;
     const timers: (() => void)[] = [];
-    const callback = runInNewContext(ts.transpileModule(`const callback = function(event) ${handler.body.getText(source)}; callback;`, {
-        compilerOptions: {target: ts.ScriptTarget.ES2020},
-    }).outputText, {
+    const callbacks = runInNewContext(ts.transpileModule(
+        `({${events.map(name => `${name}: ${name === "touchend" ? "async " : ""}function(event) ${bodies[name]}`).join(",")}});`,
+        {compilerOptions: {target: ts.ScriptTarget.ES2020}},
+    ).outputText, {
         window: {siyuan: {config: {readonly: false}}, setTimeout: (callback: () => void) => timers.push(callback)},
-        Constants: {TIMEOUT_LONGPRESS: 500}, isMousePointerTouchEvent: () => false,
-    }) as (event: unknown) => void;
-    for (const pinned of [true, false]) {
-        const starts: unknown[][] = [];
-        const panel = {
-            pinnedDocs: {element: {contains: () => pinned}},
-            touchDragState: undefined as {selectedElement: unknown},
-            startTouchDrag: (...args: unknown[]) => starts.push(args),
+        Constants: {TIMEOUT_LONGPRESS: 460, SIZE_DRAG_THRESHOLD: 5, TIMEOUT_TOUCH_DRAG_STILLNESS: 120},
+        performance: {now: () => now},
+        isMousePointerTouchEvent: (event: {mouse: boolean}) => event.mouse,
+        dragOverScroll: () => {},
+        stopScrollAnimation: () => {},
+    }) as Record<string, (event?: unknown) => unknown>;
+    const row = {getAttribute: () => "navigation-file", style: {opacity: ""}};
+    const starts: unknown[][] = [];
+    const holds: number[] = [];
+    const updates: unknown[][] = [];
+    const ghost = {style: {left: "", top: ""}, remove: () => { ghostRemoved += 1; }};
+    let ghostRemoved = 0;
+    const panel = {
+        element: {scrollTop: 0, getBoundingClientRect: () => ({}), querySelector: (): null => null},
+        pinnedDocs: {element: {contains: () => pinned}},
+        docTree: {release: () => {}, getItemFromElement: (element: unknown) => element},
+        touchDragState: undefined as {selectedElement: unknown, isDragging: boolean, ghostElement: typeof ghost},
+        getTouchDragSource: (): undefined => undefined,
+        clearDragIndicators: () => {},
+        updateTouchDrop: (...args: unknown[]) => updates.push(args),
+        startTouchDrag: (state: {isDragging: boolean, ghostElement: typeof ghost}, ...args: unknown[]) => {
+            starts.push(args);
+            state.isDragging = true;
+            state.ghostElement = ghost;
+        },
+        cancelTouchDrag: () => callbacks.cancel.call(panel),
+        signalTouchDragHold: () => holds.push(now),
+    };
+    const dispatch = (name: string, time: number, x = 10, y = 20, options: {mouse?: boolean, cancelable?: boolean, count?: number} = {}) => {
+        now = time;
+        const touch = {target: {closest: () => row}, clientX: x, clientY: y};
+        const event = {
+            touches: Array.from({length: options.count ?? 1}, () => touch),
+            changedTouches: [touch],
+            mouse: options.mouse ?? false,
+            cancelable: options.cancelable ?? true,
+            stopped: false,
+            prevented: false,
+            stopPropagation() { this.stopped = true; },
+            preventDefault() { this.prevented = true; },
         };
-        const row = {getAttribute: () => "navigation-file"};
-        callback.call(panel, {touches: [{target: {closest: () => row}, clientX: 10, clientY: 20}]});
-        if (pinned) {
-            assert.equal(panel.touchDragState, undefined);
-            assert.equal(timers.length, 0);
-        } else {
-            assert.equal(panel.touchDragState.selectedElement, row);
-            assert.equal(timers.length, 1);
-            timers[0]();
-            assert.equal(starts.length, 1);
-            assert.deepEqual(starts[0].slice(1), [10, 20, true]);
-        }
+        callbacks[name].call(panel, event);
+        return event;
+    };
+    return {panel, row, dispatch, timers, starts, holds, updates, ghost, ghostRemoved: () => ghostRemoved,
+        fireTimer(time = 460, index = 0) {
+            now = time;
+            timers[index]();
+        }};
+}
+
+test("mobile source tree skips bubbled pinned touches and still starts ordinary document drags", () => {
+    const pinned = loadMobileTreeGestures(true);
+    pinned.dispatch("touchstart", 0);
+    assert.equal(pinned.panel.touchDragState, undefined);
+    assert.equal(pinned.timers.length, 0);
+
+    const tree = loadMobileTreeGestures();
+    tree.dispatch("touchstart", 0);
+    assert.equal(tree.panel.touchDragState.selectedElement, tree.row);
+    assert.equal(tree.timers.length, 1);
+    tree.fireTimer();
+    assert.deepEqual(tree.holds, [460]);
+    assert.deepEqual(tree.starts, []);
+    const firstMove = tree.dispatch("touchmove", 470, 10, 24);
+    assert.equal(firstMove.prevented, true);
+    assert.equal(firstMove.stopped, false);
+    assert.deepEqual(tree.starts, []);
+    assert.deepEqual(tree.updates, []);
+    const move = tree.dispatch("touchmove", 480, 10, 25);
+    assert.deepEqual(tree.starts, [[10, 25]]);
+    assert.equal(move.prevented, true);
+    assert.equal(move.stopped, true);
+    assert.equal(tree.ghost.style.top, "25px");
+    assert.equal(tree.updates.length, 1);
+});
+
+test("mobile tree real touch cancels at the exact slop boundary and on moves before a late timer", () => {
+    for (const [x, y, time] of [[15, 20, 60], [10, 15, 60], [10, 25, 500]]) {
+        const tree = loadMobileTreeGestures();
+        tree.dispatch("touchstart", 0);
+        const move = tree.dispatch("touchmove", time, x, y);
+        assert.equal(move.prevented, false);
+        assert.equal(move.stopped, false);
+        assert.equal(tree.panel.touchDragState, null);
+        tree.fireTimer(Math.max(time, 460));
+        assert.deepEqual(tree.starts, []);
     }
+});
+
+test("mobile tree recent under-threshold drift cancels the hold but early settling does not", () => {
+    const drifting = loadMobileTreeGestures();
+    drifting.dispatch("touchstart", 0);
+    drifting.dispatch("touchmove", 100, 10, 21);
+    drifting.dispatch("touchmove", 240, 10, 22);
+    drifting.dispatch("touchmove", 415, 10, 23);
+    drifting.fireTimer();
+    assert.equal(drifting.panel.touchDragState, null);
+    assert.equal(drifting.dispatch("touchmove", 480, 10, 30).prevented, false);
+    assert.deepEqual(drifting.holds, []);
+    assert.deepEqual(drifting.starts, []);
+
+    const settled = loadMobileTreeGestures();
+    settled.dispatch("touchstart", 0);
+    settled.dispatch("touchmove", 90, 10, 22);
+    settled.fireTimer();
+    assert.deepEqual(settled.holds, [460]);
+    assert.equal(settled.dispatch("touchmove", 470, 10, 26).prevented, true);
+    assert.equal(settled.dispatch("touchmove", 480, 10, 27).prevented, true);
+    assert.deepEqual(settled.starts, [[10, 27]]);
+});
+
+test("mobile tree scroll, touchend, cancellations and extra contacts invalidate a pending drag", () => {
+    for (const [event, options] of [
+        ["scroll", undefined], ["touchend", undefined], ["cancel", undefined], ["touchstart", {count: 2}],
+        ["touchmove", {count: 2}], ["touchmove", {cancelable: false}],
+    ] as const) {
+        const tree = loadMobileTreeGestures();
+        tree.dispatch("touchstart", 0);
+        tree.dispatch(event, 50, 10, 20, options);
+        tree.fireTimer();
+        assert.deepEqual(tree.starts, [], event);
+    }
+
+    const tree = loadMobileTreeGestures();
+    tree.dispatch("touchstart", 0);
+    tree.panel.element.scrollTop = 20;
+    tree.fireTimer();
+    assert.deepEqual(tree.starts, []);
+});
+
+test("mobile tree hold and release do not show a ghost or drop, including with a small post-hold move", () => {
+    for (const withMotion of [false, true]) {
+        const tree = loadMobileTreeGestures();
+        tree.dispatch("touchstart", 0);
+        tree.fireTimer();
+        if (withMotion) {
+            assert.equal(tree.dispatch("touchmove", 500, 10, 23).prevented, true);
+        }
+        tree.dispatch("touchend", 550);
+        assert.deepEqual(tree.holds, [460]);
+        assert.deepEqual(tree.starts, []);
+        assert.deepEqual(tree.updates, []);
+        assert.equal(tree.panel.touchDragState, null);
+    }
+});
+
+test("mobile tree yields to browser-owned scroll even if already armed or dragging", () => {
+    for (const active of [false, true]) {
+        const touch = loadMobileTreeGestures();
+        touch.dispatch("touchstart", 0);
+        touch.fireTimer();
+        if (active) touch.dispatch("touchmove", 470, 10, 25);
+        assert.equal(touch.dispatch("touchmove", 490, 10, 31, {cancelable: false}).prevented, false);
+        assert.equal(touch.panel.touchDragState, null);
+        assert.equal(touch.ghostRemoved(), Number(active));
+    }
+});
+
+test("mobile tree allows immediate bridged mouse drag", () => {
+
+    const mouse = loadMobileTreeGestures();
+    mouse.dispatch("touchstart", 0, 10, 20, {mouse: true});
+    assert.equal(mouse.timers.length, 0);
+    assert.equal(mouse.dispatch("touchmove", 25, 10, 24, {mouse: true}).prevented, false);
+    assert.equal(mouse.dispatch("touchmove", 45, 10, 25, {mouse: true}).prevented, true);
+    assert.deepEqual(mouse.starts, [[10, 25]]);
 });
 
 test("collapse clears controller expansion and persists the closed section", () => {

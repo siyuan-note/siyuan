@@ -443,6 +443,11 @@ button:focus-visible,
   margin-top: 24px;
 }
 
+.markdown-editor .vditor-reset table :is(th, td) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .markdown-app[data-tooltips] .vditor-tooltipped::before,
 .markdown-app[data-tooltips] .vditor-tooltipped::after {
   content: none;

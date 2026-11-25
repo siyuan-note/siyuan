@@ -151,6 +151,7 @@ func LoginAuth(c *gin.Context, request apicontract.SystemLoginAuthRequest) (ret 
 }
 
 func GetCaptcha(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.BinaryContent] {
+	c.Header("Cache-Control", "private, no-store")
 	img, err := captcha.New(100, 26, func(options *captcha.Options) {
 		options.CharPreset = "ABCDEFGHKLMNPQRSTUVWXYZ23456789"
 		options.Noise = 0.5
@@ -164,20 +165,20 @@ func GetCaptcha(c *gin.Context, request apicontract.EmptyRequest) apicontract.Re
 
 	session := util.GetSession(c)
 	workspaceSession := util.GetWorkspaceSession(session)
-	captchaID := util.NewCaptchaChallenge(img.Text)
+	captchaID := util.NewCaptchaChallenge(img.Text, c.ClientIP(), workspaceSession.CaptchaID)
 	if "" == captchaID {
-		logging.LogError("generates captcha challenge failed")
+		return apicontract.EmptyHTTPResponse[apicontract.BinaryContent](http.StatusInternalServerError)
+	}
+	var data bytes.Buffer
+	if err = img.WriteImage(&data); err != nil {
+		util.DiscardCaptchaChallenge(captchaID)
+		logging.LogErrorf("writes captcha image failed: %v", err)
 		return apicontract.EmptyHTTPResponse[apicontract.BinaryContent](http.StatusInternalServerError)
 	}
 	workspaceSession.CaptchaID = captchaID
 	if err = session.Save(c); err != nil {
+		util.DiscardCaptchaChallenge(captchaID)
 		logging.LogError("save session failed: " + err.Error())
-		return apicontract.EmptyHTTPResponse[apicontract.BinaryContent](http.StatusInternalServerError)
-	}
-
-	var data bytes.Buffer
-	if err = img.WriteImage(&data); err != nil {
-		logging.LogError("writes captcha image failed: " + err.Error())
 		return apicontract.EmptyHTTPResponse[apicontract.BinaryContent](http.StatusInternalServerError)
 	}
 	return apicontract.SuccessHTTPContent(http.StatusOK, "image/png", data.Bytes())

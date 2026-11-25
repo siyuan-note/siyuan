@@ -8,13 +8,16 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/documentaddressing"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -35,6 +38,49 @@ func TestSyncDocumentExitPreflight(t *testing.T) {
 	plan.Removes[0].Path += "/../alias.sy"
 	if err := hooks.Preflight(plan); !errors.Is(err, documentaddressing.ErrInvalid) {
 		t.Fatal("exit sync accepted a noncanonical document path", err)
+	}
+}
+
+func TestSyncDocumentPreflightLogsRejectedPath(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		upsert string
+		remove string
+		reason string
+	}{
+		{name: "missing slash", upsert: "assets/file.txt", reason: "missing leading slash"},
+		{name: "escaped path", upsert: "/assets/line\nbreak\\file.txt", reason: "backslash in path"},
+		{name: "metadata casing", remove: "/" + checkoutSourceBox + "/.siyuan/CONF.json", reason: "notebook metadata path casing"},
+		{name: "duplicate target", upsert: "/assets/file.txt", remove: "/assets/file.txt", reason: "duplicate target"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			repo := newCheckoutSourceTestRepo(t)
+			logPath := filepath.Join(t.TempDir(), "kernel.log")
+			previousLogPath := logging.LogPath
+			logging.SetLogPath(logPath)
+			t.Cleanup(func() { logging.SetLogPath(previousLogPath) })
+
+			plan := &dejavu.CheckoutPlan{}
+			operation, path := "upsert", test.upsert
+			if test.upsert != "" {
+				plan.Upserts = []*entity.File{{Path: test.upsert}}
+			}
+			if test.remove != "" {
+				plan.Removes = []*entity.File{{Path: test.remove}}
+				operation, path = "remove", test.remove
+			}
+			if err := syncDocumentPreflight(repo)(plan); err != documentaddressing.ErrInvalid {
+				t.Fatalf("unexpected preflight error: %v", err)
+			}
+			data, err := os.ReadFile(logPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			want := fmt.Sprintf("checkout path rejected [operation=%s, path=%q, reason=%s]", operation, path, test.reason)
+			if !strings.Contains(string(data), want) {
+				t.Fatalf("missing diagnostic %q in %s", want, data)
+			}
+		})
 	}
 }
 

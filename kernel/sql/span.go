@@ -182,12 +182,19 @@ func QueryTagCounts() (map[string]int, error) {
 	return counts, rows.Err()
 }
 
-func ReadTagAssociations(consume func(label, attrs, box, path string, count int)) error {
-	rows, err := query("SELECT s.content, COALESCE((SELECT a.value FROM attributes a "+
-		"WHERE a.block_id = s.block_id AND a.root_id = s.root_id AND a.box = s.box AND a.path = s.path "+
-		"AND a.name = ? AND a.type = 'b' LIMIT 1), ''), "+
-		"s.box, s.path, COUNT(*) FROM spans s WHERE "+tagSpanPredicate+
-		" GROUP BY s.block_id, s.content, s.box, s.path", treenode.TagCreatedAttr)
+func ReadTagAssociations(withDates bool, consume func(label, attrs, box, path string, count int)) error {
+	var rows *sql.Rows
+	var err error
+	if withDates {
+		rows, err = query("SELECT s.content, COALESCE((SELECT a.value FROM attributes a "+
+			"WHERE a.block_id = s.block_id AND a.root_id = s.root_id AND a.box = s.box AND a.path = s.path "+
+			"AND a.name = ? AND a.type = 'b' LIMIT 1), ''), "+
+			"s.box, s.path, COUNT(*) FROM spans s WHERE "+tagSpanPredicate+
+			" GROUP BY s.block_id, s.content, s.box, s.path", treenode.TagCreatedAttr)
+	} else {
+		rows, err = query("SELECT content, '', box, path, COUNT(*) FROM spans WHERE " + tagSpanPredicate +
+			" GROUP BY content, box, path")
+	}
 	if err != nil {
 		return err
 	}

@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"context"
 	stdsql "database/sql"
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -17,20 +18,22 @@ import (
 	"testing"
 	"time"
 
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestIndexRecoveryLifecycle(t *testing.T) {
 	if os.Getenv("SIYUAN_TEST_INDEX_RECOVERY") != "1" {
-		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 150*time.Second)
 		defer cancel()
-		cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestIndexRecoveryLifecycle$", "-test.timeout=60s", "-test.v")
+		cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestIndexRecoveryLifecycle$", "-test.timeout=120s", "-test.v")
 		cmd.Env = append(os.Environ(), "SIYUAN_TEST_INDEX_RECOVERY=1")
 		if output, err := cmd.CombinedOutput(); err != nil {
 			t.Fatalf("index recovery subprocess: %v\n%s", err, output)
@@ -86,6 +89,63 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 		}
 	}
 
+	t.Run("large recovery resumes after committing a prefix", func(t *testing.T) {
+		const total, interruptAfter, documentUpdates = 35000, 600, 1200
+		ClearQueue()
+		first, last := newTree(), newTree()
+		record := func(id, path string) []byte {
+			data, err := json.Marshal(indexEntry{Action: "upsert", Box: box, ID: id, Path: path})
+			if err != nil {
+				t.Fatal(err)
+			}
+			return append(data, '\n')
+		}
+		journal := bytes.Repeat(record(first.ID, first.Path), documentUpdates)
+		const assetRecord = "{\"action\":\"delete_assets\",\"hashes\":[\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"]}\n"
+		journal = append(journal, bytes.Repeat([]byte(assetRecord), total-documentUpdates-1)...)
+		journal = append(journal, record(last.ID, last.Path)...)
+		if err := os.WriteFile(filepath.Join(util.QueueDir, "index.queue"), journal, 0644); err != nil {
+			t.Fatal(err)
+		}
+		restartQueue()
+		committed := 0
+		handler := func(id string) {
+			if id == first.ID {
+				committed++
+				if committed == interruptAfter {
+					util.IsExiting.Store(true)
+				}
+			}
+		}
+		eventbus.Subscribe(eventbus.EvtEmbeddingDirty, handler)
+		defer util.IsExiting.Store(false)
+		if !flushQueueBatch() || committed != indexRecoveryBatchSize || len(loadIndexQueue()) != total-indexRecoveryBatchSize {
+			t.Fatalf("first recovery batch did not checkpoint %d entries: committed %d", indexRecoveryBatchSize, committed)
+		}
+		if !initDatabaseLock.TryLock() {
+			t.Fatal("completed recovery batch retained the index execution lock")
+		}
+		initDatabaseLock.Unlock()
+		FlushQueue()
+		util.IsExiting.Store(false)
+		assertRows(first)
+		if pending := len(loadIndexQueue()); committed != interruptAfter || pending != total-interruptAfter {
+			t.Fatalf("committed %d of %d entries, journal still has %d entries, want %d", committed, total, pending, total-interruptAfter)
+		}
+		t.Logf("checkpointed %d of %d records before reopening", committed, total)
+		operationQueue = nil
+		InitDatabase(false)
+		if len(operationQueue) != total-interruptAfter || !IndexRecoveryPending() {
+			t.Fatalf("reopened database queued %d entries, want %d", len(operationQueue), total-interruptAfter)
+		}
+		FlushQueue()
+		if committed != documentUpdates || len(loadIndexQueue()) != 0 || IndexRecoveryPending() {
+			t.Fatalf("recovery repeated committed work or left pending entries: %d document updates", committed)
+		}
+		assertRows(last)
+		t.Logf("replayed %d pending records after reopening", total-interruptAfter)
+	})
+
 	t.Run("interrupted replay and live append", func(t *testing.T) {
 		ClearQueue()
 		first, second, live := newTree(), newTree(), newTree()
@@ -112,8 +172,8 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 			t.Fatal("interruption did not retain pending operations before live appends")
 		}
 		assertRows(first)
-		if len(loadIndexQueue()) != 3 {
-			t.Fatal("interruption lost persistent recovery records")
+		if entries := loadIndexQueue(); len(entries) != 2 || entries[0].ID != second.ID || entries[1].ID != live.ID {
+			t.Fatal("interruption did not checkpoint the committed prefix and retain pending work in order")
 		}
 		restartQueue()
 		FlushQueue()
@@ -225,8 +285,8 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 			t.Fatal(err)
 		}
 		FlushQueue()
-		if len(operationQueue) != 1 || len(loadIndexQueue()) != 3 {
-			t.Fatal("failed reference repair lost its recovery record")
+		if entries := loadIndexQueue(); len(operationQueue) != 1 || len(entries) != 1 || entries[0].Action != "refresh_def_refs" {
+			t.Fatal("failed reference repair did not retain its recovery record after checkpointing prior commits")
 		}
 		if _, err := db.Exec("DROP TRIGGER reject_ref_location"); err != nil {
 			t.Fatal(err)
@@ -387,6 +447,215 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 		})
 	}
 
+	for _, replay := range []bool{false, true} {
+		name := "live"
+		if replay {
+			name = "replay"
+		}
+		t.Run(name+" rename repairs a missing root before later documents", func(t *testing.T) {
+			ClearQueue()
+			tree, later := newTree(), newTree()
+			IndexTreeQueue(tree)
+			FlushQueue()
+			assertRows(tree)
+			if _, err := db.Exec("DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE id = ?)", tree.ID); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := db.Exec("DELETE FROM blocks WHERE id = ?", tree.ID); err != nil {
+				t.Fatal(err)
+			}
+			queued, _, err := filesys.LoadTreeSnapshot(box, tree.Path, lute.New())
+			if err != nil {
+				t.Fatal(err)
+			}
+			RenameDocQueue(queued)
+			tree.HPath = "/repairtitle"
+			tree.Root.SetIALAttr("title", "repairtitle")
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.IndexBlockTree(tree)
+			IndexTreeQueue(later)
+			if replay {
+				restartQueue()
+			}
+			FlushQueue()
+			assertRows(tree)
+			assertRows(later)
+			var content, path, hpath string
+			if err := db.QueryRow("SELECT content, path, hpath FROM blocks WHERE id = ?", tree.ID).Scan(&content, &path, &hpath); err != nil ||
+				content != "repairtitle" || path != tree.Path || hpath != tree.HPath {
+				t.Fatalf("repaired root differs from current disk source: %q %q %q, %v", content, path, hpath, err)
+			}
+			var matches int
+			if err := db.QueryRow("SELECT COUNT(*) FROM blocks_fts WHERE blocks_fts MATCH 'repairtitle' AND id = ?", tree.ID).Scan(&matches); err != nil || matches != 1 {
+				t.Fatalf("repaired root must have one searchable FTS row: %d, %v", matches, err)
+			}
+			if !IndexQueueIdle() || len(loadIndexQueue()) != 0 {
+				t.Fatal("successful repair did not checkpoint queue")
+			}
+		})
+
+		t.Run(name+" embed repair recalculates after rebuilding its source", func(t *testing.T) {
+			ClearQueue()
+			tree, later := newTree(), newTree()
+			source := tree.Root.LastChild
+			embed := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeBlockQueryEmbed}
+			embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + source.ID + "'")})
+			tree.Root.AppendChild(embed)
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.IndexBlockTree(tree)
+			block, _ := buildBlockFromNode(embed, tree)
+			block.Content = "stale queued result"
+			UpdateBlockContentQueue(block)
+			IndexTreeQueue(later)
+			if replay {
+				restartQueue()
+			} else {
+				if _, err := db.Exec("CREATE TEMP TRIGGER reject_repaired_embed BEFORE UPDATE OF content ON blocks WHEN old.id = '" + embed.ID + "' BEGIN SELECT RAISE(ABORT, 'reject repaired embed'); END"); err != nil {
+					t.Fatal(err)
+				}
+				t.Cleanup(func() { _, _ = db.Exec("DROP TRIGGER IF EXISTS reject_repaired_embed") })
+				FlushQueue()
+				if len(operationQueue) != 2 || operationQueue[0].recoveryEntry == nil || len(loadIndexQueue()) != 2 {
+					t.Fatal("failed recomputation discarded or reordered queued work")
+				}
+				var count int
+				if err := db.QueryRow("SELECT COUNT(*) FROM blocks WHERE root_id = ?", later.ID).Scan(&count); err != nil || count != 0 {
+					t.Fatalf("later document escaped FIFO during recomputation failure: %d, %v", count, err)
+				}
+				if _, err := db.Exec("DROP TRIGGER reject_repaired_embed"); err != nil {
+					t.Fatal(err)
+				}
+			}
+			FlushQueue()
+			assertRows(later)
+			var content string
+			if err := db.QueryRow("SELECT content FROM blocks WHERE id = ?", embed.ID).Scan(&content); err != nil || content != "recovery content" {
+				t.Fatalf("repaired embed must query committed source, not stale queued content: %q, %v", content, err)
+			}
+			var matches int
+			if err := db.QueryRow("SELECT COUNT(*) FROM blocks_fts WHERE blocks_fts MATCH 'recovery' AND id = ?", embed.ID).Scan(&matches); err != nil || matches != 1 {
+				t.Fatalf("repaired embed must have one searchable FTS row: %d, %v", matches, err)
+			}
+			if !IndexQueueIdle() || len(loadIndexQueue()) != 0 {
+				t.Fatal("successful embed recompute did not checkpoint queue")
+			}
+		})
+
+		t.Run(name+" missing or ignored rename sources are not restored", func(t *testing.T) {
+			ClearQueue()
+			removed, ignored, later := newTree(), newTree(), newTree()
+			RenameDocQueue(removed)
+			RenameDocQueue(ignored)
+			IndexTreeQueue(later)
+			if err := os.Remove(filepath.Join(util.DataDir, box, removed.Path)); err != nil {
+				t.Fatal(err)
+			}
+			cache.RemoveTreeDataInBox(removed.ID, box)
+			previous := indexIgnore
+			indexIgnore = []string{"/" + box + ignored.Path}
+			defer func() { indexIgnore = previous }()
+			if replay {
+				restartQueue()
+			}
+			FlushQueue()
+			assertRows(later)
+			var count int
+			if err := db.QueryRow("SELECT COUNT(*) FROM blocks WHERE root_id IN (?, ?)", removed.ID, ignored.ID).Scan(&count); err != nil || count != 0 ||
+				!IndexQueueIdle() || len(loadIndexQueue()) != 0 {
+				t.Fatalf("missing or ignored document was restored or kept queued: %d, %v", count, err)
+			}
+		})
+	}
+
+	t.Run("pending SQL embed repair cannot clear a replacement JavaScript result", func(t *testing.T) {
+		ClearQueue()
+		tree, later := newTree(), newTree()
+		script := &ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where type = 'p'")}
+		embed := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeBlockQueryEmbed}
+		embed.AppendChild(script)
+		tree.Root.AppendChild(embed)
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.IndexBlockTree(tree)
+		block, _ := buildBlockFromNode(embed, tree)
+		UpdateBlockContentQueue(block)
+		IndexTreeQueue(later)
+		if _, err := db.Exec("CREATE TEMP TRIGGER reject_repaired_embed BEFORE UPDATE OF content ON blocks WHEN old.id = '" + embed.ID + "' BEGIN SELECT RAISE(ABORT, 'reject repaired embed'); END"); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { _, _ = db.Exec("DROP TRIGGER IF EXISTS reject_repaired_embed") })
+		FlushQueue()
+		if len(operationQueue) != 2 || operationQueue[0].repairedEmbed == nil {
+			t.Fatal("test requires a pending SQL repair continuation")
+		}
+		if _, err := db.Exec("DROP TRIGGER reject_repaired_embed"); err != nil {
+			t.Fatal(err)
+		}
+		script.Tokens = []byte("//!js return [];")
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		current, _ := buildBlockFromNode(embed, tree)
+		current.Content = "javascriptrendererresult"
+		tx, err := beginTxForBox(box)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tx.Rollback()
+		if err = updateBlockContent(tx, current); err != nil {
+			t.Fatal(err)
+		}
+		if err = commitTx(tx); err != nil {
+			t.Fatal(err)
+		}
+		FlushQueue()
+		var content string
+		if err = db.QueryRow("SELECT content FROM blocks WHERE id = ?", embed.ID).Scan(&content); err != nil || content != current.Content {
+			t.Fatalf("SQL continuation overwrote current renderer result: %q, %v", content, err)
+		}
+		var matches int
+		if err = db.QueryRow("SELECT COUNT(*) FROM blocks_fts WHERE blocks_fts MATCH 'javascriptrendererresult' AND id = ?", embed.ID).Scan(&matches); err != nil || matches != 1 {
+			t.Fatalf("renderer result is not searchable: %d, %v", matches, err)
+		}
+		assertRows(later)
+		if !IndexQueueIdle() || len(loadIndexQueue()) != 0 {
+			t.Fatal("obsolete SQL repair should not delay unrelated indexing")
+		}
+	})
+
+	t.Run("live JavaScript embed repair retains only a current renderer result", func(t *testing.T) {
+		for _, changed := range []bool{false, true} {
+			ClearQueue()
+			tree := newTree()
+			script := &ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("//!js return [];")}
+			embed := &ast.Node{ID: ast.NewNodeID(), Type: ast.NodeBlockQueryEmbed}
+			embed.AppendChild(script)
+			tree.Root.AppendChild(embed)
+			block, _ := buildBlockFromNode(embed, tree)
+			block.Content = "renderer result"
+			want := block.Content
+			if changed {
+				script.Tokens = []byte("//!js return null;")
+				want = ""
+			}
+			if _, err := filesys.WriteTree(tree); err != nil {
+				t.Fatal(err)
+			}
+			treenode.IndexBlockTree(tree)
+			UpdateBlockContentQueue(block)
+			FlushQueue()
+			var content string
+			if err := db.QueryRow("SELECT content FROM blocks WHERE id = ?", embed.ID).Scan(&content); err != nil || content != want {
+				t.Fatalf("changed=%v: repair took stale or missing renderer output: %q, %v", changed, content, err)
+			}
+		}
+	})
+
 	t.Run("embed content is recalculated and searchable after restart", func(t *testing.T) {
 		ClearQueue()
 		tree := newTree()
@@ -471,4 +740,50 @@ func TestIndexRecoveryLifecycle(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("scheduled recovery leaves the rebuild worker available", func(t *testing.T) {
+		ClearQueue()
+		tree := newTree()
+		IndexTreeQueue(tree)
+		restartQueue()
+		FlushTxJob()
+		waiting, drained := make(chan struct{}), make(chan struct{})
+		go func() {
+			dbQueueLock.Lock()
+			defer dbQueueLock.Unlock()
+			close(waiting)
+			for len(operationQueue) > 0 {
+				dbQueueCond.Wait()
+			}
+			close(drained)
+		}()
+		<-waiting
+		rebuildCompleted, recoveryPending := false, false
+		task.AppendTask(task.DatabaseIndexFull, func() {
+			recoveryPending = IndexRecoveryPending()
+			InitDatabase(true)
+			rebuildCompleted = true
+		})
+		deadline := time.Now().Add(2 * time.Second)
+		for !rebuildCompleted && time.Now().Before(deadline) {
+			task.ExecTaskJob()
+			if !rebuildCompleted {
+				time.Sleep(time.Millisecond)
+			}
+		}
+		if !rebuildCompleted {
+			t.Fatal("serial worker did not run the requested rebuild")
+		}
+		if !recoveryPending {
+			t.Fatal("scheduled recovery took the serial worker ahead of the requested rebuild")
+		}
+		if IndexRecoveryPending() || len(loadIndexQueue()) != 0 {
+			t.Fatal("full rebuild retained superseded recovery entries")
+		}
+		select {
+		case <-drained:
+		case <-time.After(2 * time.Second):
+			t.Fatal("rebuild did not notify the waiter after clearing recovery entries")
+		}
+	})
 }

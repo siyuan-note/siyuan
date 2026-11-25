@@ -18,10 +18,10 @@ const extract = (file, names) => {
     return statements.map(statement => statement.getText(source).replace(/^export /, "")).join("\n");
 };
 const functions = [
-    extract("cell.ts", ["getStoredCellValueByElement", "genCellValueByElement", "genCellValue",
+    extract("cell.ts", ["genCellValueByElement", "genCellValue",
         "createCellInputTarget", "captureAVCellInput", "updateCellsValue"]),
     extract("openMenuPanel.ts", ["openMenuPanel"]),
-    extract("date.ts", ["bindDateEvent", "getFullYearTime"]),
+    extract("date.ts", ["normalizeDateDraft", "bindDateEvent", "getFullYearTime"]),
     extract("lunarDate.ts", ["bindLunarDateEvent"]),
     extract("panels/date.ts", ["datePanel"]),
     extract("select.ts", ["bindSelectEvent", "removeCellOption", "addColOptionOrCell", "setColOption"]),
@@ -62,6 +62,22 @@ const element = (dataset = {}, classes = []) => {
 const option = content => ({content, color: "1"});
 const asset = name => ({type: "file", name, content: `assets/${name}.txt`});
 const relation = id => ({blockIDs: [id], contents: [{type: "block", block: {content: id}, isDetached: true}]});
+
+test("panel targets read the stored cell value from the cell or its nested markup", () => {
+    const {getStoredCellValueByElement} = load("cellValue");
+    const value = {type: "text", text: {content: "A value with % and &"}};
+    const stored = element({cellValue: encodeURIComponent(JSON.stringify(value))});
+    assert.deepEqual(plain(getStoredCellValueByElement(stored)), value);
+
+    const wrapper = element();
+    wrapper.querySelector = selector => selector === "[data-cell-value]" ? stored : null;
+    assert.deepEqual(plain(getStoredCellValueByElement(wrapper)), value);
+    assert.equal(getStoredCellValueByElement(element()), undefined);
+    for (const malformed of ["%", encodeURIComponent("{")]) {
+        stored.dataset.cellValue = malformed;
+        assert.equal(getStoredCellValueByElement(wrapper), undefined);
+    }
+});
 
 const fixture = (type, {count = 1, batch = "", groups = false, cached = true, related = false} = {}) => {
     const transactions = [];

@@ -818,9 +818,9 @@ test("increasing startup progress allows boot to finish after five minutes", asy
     assert.equal(exits(fixture).length, 0);
 });
 
-test("indexing new documents allows boot to finish when the percentage stays the same", async (t) => {
+test("an advancing document count allows boot to finish when the percentage stays the same", async (t) => {
     const fixture = setup(t, request => request === 4 ? 100 : {
-        progress: 20, details: "Indexing document " + request,
+        progress: 20, details: "Indexing documents [" + request + "/500]",
     }, {
         onSleep: (_ms, state) => state.advance(BOOT_PROGRESS_TIMEOUT_MS / 2),
     });
@@ -831,7 +831,7 @@ test("indexing new documents allows boot to finish when the percentage stays the
 
 test("boot times out after progress stops even when the kernel keeps responding", async (t) => {
     const fixture = setup(t, request => request === 5 ? 100 : {
-        progress: 20, details: request === 1 ? "Preparing indexes" : "Indexing document",
+        progress: 20, details: request === 1 ? "Preparing indexes" : "Indexing documents [1/500]",
     }, {
         onSleep: (_ms, state) => state.advance(BOOT_PROGRESS_TIMEOUT_MS / 3),
     });

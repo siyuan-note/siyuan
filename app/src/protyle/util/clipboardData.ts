@@ -16,6 +16,14 @@ export const encodeBase64 = (text: string): string => {
     }
 };
 
+export const decodeBase64 = (base64: string): string => {
+    if (typeof Buffer !== "undefined") {
+        return Buffer.from(base64, "base64").toString("utf8");
+    }
+    const bytes = Uint8Array.from(atob(base64), char => char.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+};
+
 export const buildWebClipboardHTML = (textHTML: string, textSiyuan: string) => {
     if (!textSiyuan) {
         return textHTML;
@@ -44,14 +52,7 @@ export const getTextSiyuanFromTextHTML = (html: string, legacyHarmony = false) =
     }
     if (siyuanMatch) {
         try {
-            if (typeof Buffer !== "undefined") {
-                const decodedBytes = Buffer.from(siyuanMatch[1], "base64");
-                textSiyuan = decodedBytes.toString("utf8");
-            } else {
-                const decoder = new TextDecoder();
-                const bytes = Uint8Array.from(atob(siyuanMatch[1]), char => char.charCodeAt(0));
-                textSiyuan = decoder.decode(bytes);
-            }
+            textSiyuan = decodeBase64(siyuanMatch[1]);
             // 移除注释节点，保持原有的 text/html 内容
             textHtml = html.replace(/<!--data-siyuan='[^']+'-->/g, "");
         } catch (e) {

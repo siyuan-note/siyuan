@@ -1,0 +1,762 @@
+{
+	"ID": "20261122113000-ml05o5k",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f680",
+		"id": "20261122113000-ml05o5k",
+		"title": "Оптимизация производительности",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-vb7sqy0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-vb7sqy0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xmd6npg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xmd6npg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Производительность зависит от оборудования, нагрузки на систему, объёма данных и структуры содержимого. При тормозах сначала определите, что именно работает медленно — запуск, поиск, редактирование или сеть, а затем настройте соответствующие параметры ниже."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ngjajfo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ngjajfo",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Общая производительность"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-3e99bic",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-3e99bic",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-dviutdj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-dviutdj",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-mjl9z55",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-mjl9z55",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Количество и размер блоков содержимого: влияют на раскрытие документов, поиск и запись данных; фактическое влияние зависит также от оборудования и структуры содержимого, поэтому нельзя судить только по числу блоков"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-rkpf2sg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-rkpf2sg",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-tg29xfv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-tg29xfv",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Системная среда: текущая нагрузка на операционную систему влияет на общую производительность"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ywd6noy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ywd6noy",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-edlttaw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-edlttaw",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Сетевая среда: при использовании через "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Сетевое обслуживание"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ качество сети влияет на время отклика запросов"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-anrkmfc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-anrkmfc",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Рекомендации по оптимизации:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-t67z9yp",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-t67z9yp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-ixf21me",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ixf21me",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-8ahqhrm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-8ahqhrm",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Переместите редко используемые или сохранённые веб-клиппингом документы в отдельный "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "архивный блокнот"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ или "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "блокнот для клиппинга"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — его закрытие уменьшит количество индексов в базе данных и повысит производительность"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ozzvewz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-ozzvewz",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-32jnv0q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-32jnv0q",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Уменьшите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Количество отображаемых результатов поиска"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ — мы отслеживаем время отклика поисковых запросов; если оно превышает порог, появится предложение уменьшить этот параметр"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-mnfh27s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-mnfh27s",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Порог мониторинга производительности можно задать через переменную окружения "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PERFORMANCE_TIMING"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ в миллисекундах (по умолчанию 15000, то есть 15 секунд)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-naplejr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-naplejr",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2944qdz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2944qdz",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Поддерживайте достаточный запас системных ресурсов"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-0nn7e80",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-0nn7e80",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-26m3adk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-26m3adk",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Используйте SSD: размещение рабочего пространства на твердотельном накопителе заметно повышает общую производительность"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-9aln124",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9aln124",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-bl4dbsp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-bl4dbsp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При нехватке аппаратных ресурсов рассмотрите обновление ОЗУ, процессора или накопителя в зависимости от узкого места"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-kgw7nkt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-kgw7nkt",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Производительность редактора"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-kvlqsnu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-kvlqsnu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-tp19clo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-tp19clo",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-kmxftop",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-kmxftop",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Размер листового блока: размер отдельного листового блока влияет на производительность редактора; если в одном листовом блоке слишком много символов, редактор может тормозить"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-d9lmlo7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-d9lmlo7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-atnjnl3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-atnjnl3",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Количество динамически загружаемых блоков: влияет на производительность редактора, особенно при большом числе блоков формул, кода и диаграмм"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-x6ifj3f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-x6ifj3f",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-7lpp4le",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-7lpp4le",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Номера строк в блоках кода: при большом объёме кода включённая нумерация строк может замедлять редактор"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-hw22kym",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hw22kym",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-kx1qcwi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-kx1qcwi",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Формулы, изображения и диаграммы: большое их количество в документе может вызывать замедление редактора"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-shtepb8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-shtepb8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Рекомендации по оптимизации:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-awumoza",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-awumoza",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-vtbq36v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-vtbq36v",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-lkp5hyn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-lkp5hyn",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Избегайте чрезмерного использования мягких переносов строк: хотя без них увеличивается число блоков, это уменьшает размер каждого блока абзаца и предотвращает тормоза редактора"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-7bcmthd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-7bcmthd",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-cryvpje",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-cryvpje",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Уменьшите "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Количество динамически загружаемых блоков"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, особенно при большом количестве блоков формул, кода или диаграмм. Для этого параметра нет точного оптимального значения — ориентируйтесь на собственные ощущения после настройки"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-psan4id",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-psan4id",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-wh12hbx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-wh12hbx",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Используйте фокусировку на блоке содержимого, чтобы уменьшить объём одновременно отображаемого в редакторе материала"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-b3ovqbn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-b3ovqbn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-giznu19",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-giznu19",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "В настольной версии поддержка специальных возможностей по умолчанию отключена, чтобы уменьшить тормоза при редактировании или вставке длинных текстов в некоторых средах; если вам нужны программы чтения с экрана и другие вспомогательные инструменты, включите её в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Приложение"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Общие"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Поддержка специальных возможностей"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Эта настройка применяется ко всем рабочим пространствам на устройстве; после изменения необходимо полностью закрыть и перезапустить SiYuan. Если после включения появятся тормоза, попробуйте отключить её и перезапустить для сравнения"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0s4iga6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-0s4iga6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Оптимизация индекса"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-npr6z8z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-npr6z8z",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Рекомендуется регулярно выполнять оптимизацию индекса: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Приложение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Обслуживание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Оптимизация индекса"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

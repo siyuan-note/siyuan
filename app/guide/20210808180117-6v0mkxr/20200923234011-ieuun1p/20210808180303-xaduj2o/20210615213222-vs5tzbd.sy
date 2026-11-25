@@ -2391,7 +2391,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If you need to ignore some files during synchronization, please create or edit the text file "
+					"Data": "Local snapshots skip directory links inside the data folder, including Windows junctions. Sync leaves the linked folder alone and keeps files already synced at that path available to other devices. If you need to ignore some files during synchronization, please create or edit the text file "
 				},
 				{
 					"Type": "NodeTextMark",

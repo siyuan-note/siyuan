@@ -18,6 +18,7 @@ import {isDisabledFeature, isInMobileApp} from "../../protyle/util/compatibility
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {escapeAttr} from "../../util/escape";
 import {getSettingTabDefs, settingTabToMenuId, type ISettingTabShell, type TSettingTab} from "../../config/setting/tabs";
+import {canManageMobileWorkspaces} from "./workspaceManager";
 
 /** 主菜单条目：标记结构、可见条件与点击行为集中声明，供 HTML 生成与事件分发共用同一份标识符 */
 export interface IMobileMainMenuItem {
@@ -44,6 +45,7 @@ export interface IMobileMainMenuGroup {
     id: string;
     title: () => string;
     hidden?: () => boolean;
+    headerAction?: {id: string; label: () => string};
     entries: TMobileMainMenuEntry[];
 }
 
@@ -64,6 +66,12 @@ const dockItem = (id: string, dockType: string, icon: string, label: () => strin
 });
 
 export const MOBILE_MAIN_MENU_GROUPS: IMobileMainMenuGroup[] = [{
+    id: "workspaces",
+    title: lang("workspaceList"),
+    hidden: () => !canManageMobileWorkspaces(),
+    headerAction: {id: "menuManageWorkspaces", label: lang("manage")},
+    entries: [],
+}, {
     id: "navigation",
     title: lang("mobileMenuNavigation"),
     entries: [
@@ -310,6 +318,7 @@ const renderMobileMainMenuEntryHTML = (entry: TMobileMainMenuEntry) => {
 const renderMobileMainMenuGroupHTML = (group: IMobileMainMenuGroup) =>
     `<div class="b3-menu__group${group.hidden?.() ? " fn__none" : ""}" data-menu-group="${group.id}">
         <div class="b3-menu__group-title fn__flex"><span class="fn__flex-1 fn__flex-center">${group.title()}</span>
+            ${group.headerAction ? `<button type="button" id="${group.headerAction.id}" class="b3-button b3-button--text">${group.headerAction.label()}</button>` : ""}
             <button type="button" class="block__icon block__icon--show block__icon--tap mobile-main-menu__collapse" data-type="toggle-menu-group" aria-expanded="true" aria-controls="mobile-menu-group-${group.id}" aria-label="${escapeAttr(window.siyuan.languages.collapse + " - " + group.title())}"><svg><use xlink:href="#iconDown"></use></svg></button>
         </div>
         <div id="mobile-menu-group-${group.id}" class="b3-menu__group-items">${group.entries.map(renderMobileMainMenuEntryHTML).join("")}</div>

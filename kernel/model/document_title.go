@@ -27,6 +27,14 @@ type DocumentTitleData struct {
 }
 
 func GetDocTitle(id, boxID string) (*DocumentTitleData, error) {
+	return getDocTitle(id, boxID, false)
+}
+
+func GetDocTitleForReader(id, boxID string) (*DocumentTitleData, error) {
+	return getDocTitle(id, boxID, true)
+}
+
+func getDocTitle(id, boxID string, forReader bool) (*DocumentTitleData, error) {
 	FlushTxQueue()
 	tree, err := loadTreeByBlockIDInBox(id, boxID)
 	if err != nil {
@@ -40,6 +48,9 @@ func GetDocTitle(id, boxID string) (*DocumentTitleData, error) {
 		return nil, err
 	}
 	paragraph.Parent = nil
+	if forReader {
+		paragraph = stripInlineMemoContent(paragraph)
+	}
 	paragraph.ID = id
 	paragraph.SetIALAttr("id", id)
 	luteEngine := util.NewLute()
@@ -48,9 +59,13 @@ func GetDocTitle(id, boxID string) (*DocumentTitleData, error) {
 	dom := luteEngine.Tree2BlockDOM(fragment, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	dom = strings.Replace(dom, "<div ", "<div data-document-title=\"true\" ", 1)
 	summary := treenode.ReadDocumentTitle(tree.Root)
-	return &DocumentTitleData{ID: id, Notebook: tree.Box, Format: summary.Format, Text: summary.Text,
-		Empty: summary.Empty, BlockDOM: dom, Source: tree.Root.DocumentTitle,
-		Revision: treenode.DocumentTitleRevision(tree.Root)}, nil
+	ret := &DocumentTitleData{ID: id, Notebook: tree.Box, Format: summary.Format, Text: summary.Text,
+		Empty: summary.Empty, BlockDOM: dom}
+	if !forReader {
+		ret.Source = tree.Root.DocumentTitle
+		ret.Revision = treenode.DocumentTitleRevision(tree.Root)
+	}
+	return ret, nil
 }
 
 type documentTitleSnapshot struct {

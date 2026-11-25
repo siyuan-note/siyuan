@@ -10,7 +10,7 @@ import * as nativeTextMenu from "../../protyle/wysiwyg/nativeTextMenu";
 const source = transpileModule(readFileSync("src/mobile/util/bindBottomSheetDrag.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
-const setup = (initialHeight = 700) => {
+const setup = (initialHeight = 400) => {
     let time = 0;
     let height = initialHeight;
     let closeCount = 0;
@@ -34,7 +34,7 @@ const setup = (initialHeight = 700) => {
     runInNewContext(source, {exports: api, require: (id: keyof typeof modules) => modules[id], window,
         navigator: {userAgent: "Android"}, performance: {now: () => time}, console, getComputedStyle: () => ({overflowY: "auto"})});
     const dispose = api.bindBottomSheetDrag(element, scrim, () => { closeCount++; return close(); }, {
-        grip, getBounds: () => ({min: 180, max: 800}), resize: (value: number) => { height = value; },
+        grip, expand: () => { height = 800; },
         canStart: () => permitted, isClosing: () => exiting,
     });
     const touch = (y: number, id = 7, x = 100) => ({clientX: x, clientY: y, identifier: id});
@@ -59,31 +59,30 @@ const setup = (initialHeight = 700) => {
 };
 const settle = async () => { await Promise.resolve(); await Promise.resolve(); await Promise.resolve(); };
 
-test("grip continuously resizes an expanded sheet and large shrink alone never closes", async () => {
-    const s = setup(800);
-    s.send("touchstart", 0);
-    assert.equal(s.send("touchmove", 500), true);
-    assert.equal(s.height(), 300);
-    assert.equal(s.element.style.transform, "translateY(0px)");
-    s.send("touchend", 500);
-    await settle();
-    assert.equal(s.closes(), 0);
-    assert.equal(s.height(), 300);
+test("the grip expands to full height only on release", () => {
+    const s = setup();
+    s.send("touchstart", 100);
+    assert.equal(s.send("touchmove", 40), true);
+    assert.equal(s.height(), 400);
+    s.send("touchend", 40);
+    assert.equal(s.height(), 800);
     assert.equal(s.click(), true);
 });
 
-test("same gesture beyond minimum requests guarded close and refusal rebounds at minimum", async () => {
-    const s = setup();
-    s.send("touchstart", 0);
-    s.send("touchmove", 580);
-    assert.equal(s.height(), 180);
-    assert.equal(s.element.style.transform, "translateY(60px)");
-    s.send("touchend", 580);
-    await settle();
-    assert.equal(s.closes(), 1);
-    assert.equal(s.element.style.transform, "");
-    assert.equal(s.height(), 180);
-});
+for (const height of [400, 800]) {
+    test(`a downward grip gesture from ${height}px requests close and a refusal restores the original height`, async () => {
+        const s = setup(height);
+        s.send("touchstart", 0);
+        s.send("touchmove", 60);
+        assert.equal(s.height(), height);
+        assert.equal(s.element.style.transform, "translateY(60px)");
+        s.send("touchend", 60);
+        await settle();
+        assert.equal(s.closes(), 1);
+        assert.equal(s.element.style.transform, "");
+        assert.equal(s.height(), height);
+    });
+}
 
 test("accepted void close retains host exit animation and disposal blocks late cleanup", async () => {
     const s = setup();
@@ -112,14 +111,14 @@ test("body keeps downward dismissal without resizing and editable actions stay n
     const s = setup();
     s.send("touchstart", 0, {target: s.body});
     s.send("touchmove", 140, {target: s.body});
-    assert.equal(s.height(), 700);
+    assert.equal(s.height(), 400);
     s.send("touchend", 140);
     await settle();
     assert.equal(s.closes(), 1);
     const action = {closest: () => true};
     s.send("touchstart", 0, {target: action});
     assert.equal(s.send("touchmove", 100), false);
-    assert.equal(s.height(), 700);
+    assert.equal(s.height(), 400);
 });
 
 test("multitouch, wrong identifier and viewport changes cancel active gestures", () => {
@@ -134,7 +133,7 @@ test("multitouch, wrong identifier and viewport changes cancel active gestures",
         if (cancel === "touchcancel") s.send("touchcancel", 100);
         s.send("touchend", 900);
         assert.equal(s.closes(), 0, cancel);
-        assert.equal(s.height(), 600, cancel);
+        assert.equal(s.height(), 400, cancel);
         assert.equal(s.element.style.transform, "", cancel);
     }
 });
@@ -148,12 +147,12 @@ test("unrecognized taps preserve clicks and pending or non-topmost hosts can blo
     s.allow(false);
     s.send("touchstart", 0);
     s.send("touchmove", 700);
-    assert.equal(s.height(), 700);
+    assert.equal(s.height(), 400);
     assert.equal(s.click(), false);
 });
 
 
-test("an initially clipped short sheet has no phantom excess before reaching its actual starting height", async () => {
+test("a short movement does not dismiss a keyboard-clipped sheet", async () => {
     const s = setup(150);
     s.send("touchstart", 0);
     s.send("touchmove", 5, {elapsed: 1000});
@@ -164,7 +163,7 @@ test("an initially clipped short sheet has no phantom excess before reaching its
 });
 
 
-test("pending or covered state starting during a drag cancels further resizing and closing", async () => {
+test("pending or covered state starting during a drag cancels dismissal", async () => {
     const s = setup();
     s.send("touchstart", 0);
     s.send("touchmove", 100);
@@ -172,7 +171,7 @@ test("pending or covered state starting during a drag cancels further resizing a
     s.send("touchmove", 600);
     s.send("touchend", 600);
     await settle();
-    assert.equal(s.height(), 600);
+    assert.equal(s.height(), 400);
     assert.equal(s.closes(), 0);
 });
 
@@ -184,7 +183,7 @@ test("pending or child dialog appearing before touchend cancels without another 
     s.allow(false);
     s.send("touchend", 600);
     await settle();
-    assert.equal(s.height(), 600);
+    assert.equal(s.height(), 400);
     assert.equal(s.closes(), 0);
     assert.equal(s.element.style.transform, "");
 });
@@ -201,7 +200,7 @@ for (const event of ["touchmove", "touchend", "touchcancel"]) {
         s.send(event, 150);
         s.send("touchend", 900);
         await settle();
-        assert.equal(s.height(), 600);
+        assert.equal(s.height(), 400);
         assert.equal(s.element.style.transform, "translateY(100%)");
         assert.equal(s.element.style.transition, "exit transition");
         assert.equal(s.scrim.style.opacity, "0");
@@ -214,9 +213,9 @@ test("grip tolerates initial jitter and locks a recognized vertical drag", () =>
     s.send("touchstart", 100);
     s.send("touchmove", 101, {x: 102});
     assert.equal(s.send("touchmove", 180, {x: 102}), true);
-    assert.equal(s.height(), 620);
+    assert.equal(s.height(), 400);
     assert.equal(s.send("touchmove", 110, {x: 150}), true);
-    assert.equal(s.height(), 690);
+    assert.equal(s.height(), 400);
 });
 
 test("horizontal initiation still cancels before vertical recognition", () => {
@@ -224,5 +223,5 @@ test("horizontal initiation still cancels before vertical recognition", () => {
     s.send("touchstart", 100);
     s.send("touchmove", 101, {x: 110});
     assert.equal(s.send("touchmove", 180), false);
-    assert.equal(s.height(), 700);
+    assert.equal(s.height(), 400);
 });

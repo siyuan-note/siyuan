@@ -1,0 +1,719 @@
+{
+	"ID": "20261122113000-3om2jpu",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-3om2jpu",
+		"title": "Семантический поиск",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-nkyy4g0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-nkyy4g0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mcnn0a6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mcnn0a6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Семантический поиск находит близкое по смыслу содержимое путём сравнения текстовых векторов. Обычный полнотекстовый поиск зависит от наличия ключевых слов, а семантический поиск позволяет находить заметки с разными формулировками, но близкой тематикой."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-98nhtrf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-98nhtrf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5ao36dp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-5ao36dp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Модель эмбеддингов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2rlwebx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-2rlwebx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Искусственный интеллект"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Модель встраивания"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " включите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Семантический поиск"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и настройте базовый адрес API, API-ключ, модель, размерность вектора и тайм-аут. После настройки можно использовать тест подключения, чтобы убедиться в доступности модели."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5jqcv4f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-5jqcv4f",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При значении размерности вектора 0 используется значение модели по умолчанию. Указывайте другое значение только если целевая модель поддерживает пользовательскую размерность вектора. Семантический поиск использует только векторы, совпадающие по адресу службы, модели, настроенной размерности и фактической размерности. Несовместимые старые векторы или векторы с неподтверждённым источником сохраняются, но не участвуют в поиске; изменение настроек или обновление не запускает перестройку автоматически. При необходимости используйте действие перестройки индекса эмбеддингов ниже для пересчёта — это отправляет запросы к службе модели и может повлечь расходы."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9dctm0l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-9dctm0l",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Модель переранжирования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7uf0pzp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7uf0pzp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Модель переранжирования необязательна. При включении система повторно оценивает кандидатов, найденных по векторам, для повышения точности сортировки результатов. Чем больше кандидатов, тем выше точность, но увеличиваются задержка и расходы."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-v49fihx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-v49fihx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-87on4dy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-87on4dy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Откройте полнотекстовый поиск, в меню поиска в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Метод поиска"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Семантический поиск"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и опишите искомое содержимое на естественном языке. Фильтры по блокноту, пути и типу блока содержимого по-прежнему действуют."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6nk4a5d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-6nk4a5d",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Индекс эмбеддингов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-n80rwj5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-n80rwj5",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После включения модели эмбеддингов SiYuan в фоновом режиме генерирует векторы для подходящих блоков содержимого. При добавлении или изменении содержимого соответствующие векторы обновляются автоматически."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-uekd88a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-uekd88a",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Просмотр прогресса индексации"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1kzwuxt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-1kzwuxt",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Искусственный интеллект"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Модель встраивания"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " можно просмотреть количество проиндексированных, ожидающих, завершившихся с ошибкой, пропущенных по длине и пропущенных по конфигурации блоков. Первичное построение индекса может занять длительное время."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-15gpi74",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-15gpi74",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Повторить для блоков с ошибкой"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1x2lvlf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-1x2lvlf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если в прогрессе индексации появились блоки с ошибкой, сначала проверьте настройки модели эмбеддингов и сетевое подключение, затем нажмите «Повторить для блоков с ошибкой». Эта операция не переобрабатывает блоки, для которых векторы уже успешно созданы."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pyn75y9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-pyn75y9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Перестроить индекс эмбеддингов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-25cq77x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-25cq77x",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После смены модели эмбеддингов, изменения размерности вектора или корректировки правил игнорирования следует нажать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Перестроить индекс вложений"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Перестройка очищает существующие векторы и пересчитывает их в фоне; в это время результаты семантического поиска могут быть неполными."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-artt630",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-artt630",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Игнорирование содержимого"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ena1v2a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ena1v2a",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Чтобы исключить часть документов, создайте или отредактируйте в файловой системе текстовый файл "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Рабочее_пространство/data/.siyuan/embeddingignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". В каждой строке укажите путь для игнорирования с поддержкой синтаксиса gitignore. Например:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8mio0ps",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20261122113000-8mio0ps",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20261122113000-tymtpbe/20261122113000-u3pmciy.sy\n20210808180117-6v0mkxr/**/*"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7r0aas5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-7r0aas5",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-a1yvmcg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-a1yvmcg",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-rmckiff",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-rmckiff",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20261122113000-tymtpbe/20261122113000-u3pmciy.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": игнорировать указанный документ в указанном блокноте"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ef0n4zl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-ef0n4zl",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-liaj39x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-liaj39x",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20261122113000-tymtpbe/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": игнорировать все документы в указанном блокноте"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xw5skvm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xw5skvm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После сохранения файла конфигурации необходимо перестроить индекс эмбеддингов. Этот файл влияет только на векторы эмбеддингов — содержимое по-прежнему индексируется обычным полнотекстовым поиском; чтобы полностью исключить из обычного полнотекстового индекса, см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Игнорирование индексации",
+					"TextMarkBlockRefID": "20261122113000-grd1b2k",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lq5zwnk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-lq5zwnk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Примечание"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-b3qzt4i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-b3qzt4i",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-ybwc8rn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-ybwc8rn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-eygx21z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-eygx21z",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При построении индекса текст документов отправляется поставщику модели эмбеддингов, а при выполнении запроса отправляется также текст запроса"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ozaay6d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-ozaay6d",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-92zd0v6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-92zd0v6",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Вызов моделей эмбеддингов и переранжирования может повлечь расходы, а построение индекса для большого рабочего пространства может занять много времени"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-you7a1y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-you7a1y",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-12b9bfq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-12b9bfq",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Зашифрованные блокноты не поддерживают семантический поиск"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-bso08uh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-bso08uh",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-go7pytp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-go7pytp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Блоки содержимого размером менее 7 байт или более 12000 байт в кодировке UTF-8 не получают векторы эмбеддингов"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-pm43sow",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-pm43sow",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-qypzoh6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-qypzoh6",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При сбое вызова модели переранжирования результаты возвращаются к сортировке по векторному сходству"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

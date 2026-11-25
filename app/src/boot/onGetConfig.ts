@@ -1,5 +1,8 @@
 import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs, setTabPosition} from "../layout/tabUtil";
+/// #if BROWSER
+import {initHarmonyWindowControls} from "./harmonyWindowControls";
+/// #endif
 import {applyPlatformClasses, initWindowOpenOverride, isMac, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {initNativeDialogOverride} from "../protyle/util/compatibility";
@@ -152,6 +155,9 @@ export const onGetConfig = async (isStart: boolean, app: App) => {
             });
         }, Constants.TIMEOUT_RESIZE);
     });
+    /// #if BROWSER
+    initHarmonyWindowControls();
+    /// #endif
     await Promise.all([layoutReady, windowReady, inlineStyleReady]);
     adjustLayout();
 };
@@ -227,10 +233,10 @@ export const initWindow = async (app: App) => {
         onWindowsMsg(ipcData);
     });
     ipcRenderer.on(Constants.SIYUAN_HOTKEY, (e, data) => {
-        if (Array.isArray(data.failed)) {
-            if (data.failed.length) {
+        if (Array.isArray(data.newlyFailed)) {
+            if (data.newlyFailed.length) {
                 showMessage(window.siyuan.languages.keymapSystemScope + " " + window.siyuan.languages.conflict +
-                    " [" + data.failed.map(updateHotkeyTip).join("] [") + "]");
+                    " [" + data.newlyFailed.map(updateHotkeyTip).join("] [") + "]");
             }
         } else if (!isWindow()) {
             dispatchPluginGlobalShortcut(app.plugins, data.hotkey, window.siyuan.config.keymap.plugin, isMac());

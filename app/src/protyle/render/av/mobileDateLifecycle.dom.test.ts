@@ -161,9 +161,13 @@ test("mobile date panels settle after opening, preserve editing and release obse
         await settle("Activate end date");
         equal(inputs[1].dataset.datePickerActive, "true", "Focus selects the end endpoint");
         const selected = panel.menu.querySelector<HTMLButtonElement>("button[data-date]:not(:disabled)");
-        const expectedDate = selected.dataset.date;
         selected.click();
-        equal(inputs[1].value, expectedDate, "Calendar selection changes the active endpoint");
+        equal(inputs[1].value, selected.dataset.date, "Calendar selection changes the active endpoint");
+        const expectedDate = "2027-11-22";
+        inputs[1].value = "20271122";
+        inputs[1].dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertFromPaste"}));
+        equal(panel.menu.querySelector<HTMLButtonElement>('[aria-selected="true"] button[data-date]')?.dataset.date, expectedDate,
+            "A pasted compact date immediately selects the end day in the mobile calendar");
         inputs[3].click();
         await settle("Enable time");
         equal(inputs[0].dataset.datePickerType, "datetime-local", "Include time preserves datetime semantics");

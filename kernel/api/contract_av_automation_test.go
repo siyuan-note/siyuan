@@ -532,7 +532,7 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		}
 	})
 	t.Run("manual row progress contract", func(t *testing.T) {
-		util.IncBootProgress(100-util.GetBootProgress(), "")
+		util.IncBootProgress(100-util.GetBootProgress(), util.BootStageNone)
 		connectSettingNotifications(t, gin.New())
 		stored, err := av.ParseAttributeView(database.ID)
 		if err != nil {
@@ -582,7 +582,7 @@ func TestAVContractAutomationWrites(t *testing.T) {
 		}
 	})
 	t.Run("automatic HTTP editing contract", func(t *testing.T) {
-		util.IncBootProgress(100-util.GetBootProgress(), "")
+		util.IncBootProgress(100-util.GetBootProgress(), util.BootStageNone)
 		connectSettingNotifications(t, gin.New())
 		automatic := rule("changed", fixture.textKeyID, fixture.textKeyID, &av.Value{Type: av.KeyTypeText})
 		automatic.TimeZone = "UTC"

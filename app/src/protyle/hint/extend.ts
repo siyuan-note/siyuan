@@ -823,7 +823,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
             } else if (createItemCount > 0 && dataList.length > createItemCount) {
                 dataList[createItemCount].focus = true;
             }
-            protyle.hint.genHTML(dataList, protyle, true, source);
+            protyle.hint.genHTML(dataList, protyle, true, source, source === "av" ? key : undefined);
         });
     }).catch(() => {
         if (createTarget.isCurrent()) {

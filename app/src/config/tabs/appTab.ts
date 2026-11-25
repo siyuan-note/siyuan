@@ -1,7 +1,4 @@
-import {openInputDialog} from "../../dialog/inputDialog";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {AdaptiveDialog} from "../../dialog/adaptiveDialog";
-import {switchWorkspace, importConfiguration} from "../util/resourceConfig";
+import {importConfiguration} from "../util/resourceConfig";
 import {config as configApi} from "../util/configApi";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -10,7 +7,7 @@ import * as path from "path";
 import type {SettingTabBuilder} from "../setting/builder";
 import {confirmResetSettings} from "../setting/reset";
 import {Constants} from "../../constants";
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchPost} from "../../util/fetch";
 /// #if !MOBILE
 import {reloadUI} from "../../layout/util";
 /// #endif
@@ -18,9 +15,7 @@ import {showMessage} from "../../dialog/message";
 import {isMac, saveExportFile} from "../../protyle/util/compatibility";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 /// #if MOBILE
-import {isInMobileApp} from "../../protyle/util/compatibility";
-import {pathPosix} from "../../util/pathName";
-import {escapeAttr, escapeHtml} from "../../util/escape";
+import {canManageMobileWorkspaces, mountMobileWorkspaceManager, renderMobileWorkspaceManager} from "../../mobile/menu/workspaceManager";
 /// #endif
 /// #if !BROWSER
 import {afterExport} from "../../protyle/export/util";
@@ -33,7 +28,7 @@ import {importDataFile} from "../../menus/importData";
 
 /// #if MOBILE
 const registerAppWorkspaceGroup = (tab: SettingTabBuilder) => {
-    if (!isInMobileApp() || window.siyuan.config.readonly || !getHostCapabilities().workspaces) {
+    if (!canManageMobileWorkspaces()) {
         return;
     }
     const group = tab.group("workspace", window.siyuan.languages.workspaceList);
@@ -45,148 +40,8 @@ const registerAppWorkspaceGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.new,
             window.siyuan.languages.removeWorkspacePhysically,
         ],
-        html: () => `<div class="b3-label config-item">
-    <button id="openWorkspace" class="b3-button b3-button--outline fn__block">${window.siyuan.languages.openBy}...</button>
-    <div class="fn__hr--small"></div>
-    <ul id="workspaceDir" class="b3-list b3-list--background"></ul>
-    <div class="fn__hr--small"></div>
-    <button id="creatWorkspace" class="b3-button fn__block">${window.siyuan.languages.new}</button>
-</div>`,
-        afterMount: mountAppWorkspaceSlot,
-    });
-};
-
-const renderWorkspaceList = (workspaceDirElement: Element) => {
-    fetchPost("/api/system/getWorkspaces", {}, (response) => {
-        let html = "";
-        response.data.forEach((item: IWorkspace) => {
-            html += `<li data-path="${escapeAttr(escapeHtml(item.path))}" class="b3-list-item b3-list-item--narrow${window.siyuan.config.system.workspaceDir === item.path ? " b3-list-item--focus" : ""}">
-    <span class="b3-list-item__text">${escapeHtml(pathPosix().basename(item.path))}</span>
-    <span data-type="remove" class="b3-list-item__action">
-        <svg><use xlink:href="#iconMin"></use></svg>
-    </span>
-</li>`;
-        });
-        workspaceDirElement.innerHTML = html;
-    });
-};
-
-const mountAppWorkspaceSlot = (root: HTMLElement) => {
-    if (!getHostCapabilities().workspaces) {
-        return;
-    }
-    const workspaceDirElement = root.querySelector("#workspaceDir");
-    if (!workspaceDirElement) {
-        return;
-    }
-    renderWorkspaceList(workspaceDirElement);
-    root.addEventListener("click", (event) => {
-        let target = event.target as HTMLElement;
-        while (target && target !== root) {
-            if (target.id === "openWorkspace") {
-                fetchPost("/api/system/getMobileWorkspaces", {}, (response) => {
-                    let selectHTML = "";
-                    response.data.forEach((item: string, index: number) => {
-                        selectHTML += `<option value="${escapeAttr(escapeHtml(item))}"${index === 0 ? " selected" : ""}>${escapeHtml(pathPosix().basename(item))}</option>`;
-                    });
-                    const openWorkspaceDialog = new AdaptiveDialog({
-                        title: window.siyuan.languages.openBy,
-                        content: `<div class="b3-dialog__content">
-    <select class="b3-text-field fn__block">${selectHTML}</select>
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                        width: "92vw",
-                    });
-                    openWorkspaceDialog.element.setAttribute("data-key", Constants.SIYUAN_OPEN_WORKSPACE);
-                    const btnsElement = openWorkspaceDialog.element.querySelectorAll(".b3-button");
-                    btnsElement[0].addEventListener("click", () => {
-                        openWorkspaceDialog.destroy();
-                    });
-                    btnsElement[1].addEventListener("click", () => {
-                        const openPath = (openWorkspaceDialog.element.querySelector("select") as HTMLSelectElement).value;
-                        if (openPath === window.siyuan.config.system.workspaceDir) {
-                            openWorkspaceDialog.destroy();
-                            return;
-                        }
-                        confirmDialog({
-                            title: window.siyuan.languages.confirm,
-                            text: `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(openPath))}?`,
-                            confirm: () => {
-                                switchWorkspace(openPath);
-                            },
-                        });
-                    });
-                });
-                event.preventDefault();
-                event.stopPropagation();
-                break;
-            } else if (target.id === "creatWorkspace") {
-                const createWorkspaceDialog = openInputDialog({
-                    awaitConfirm: true,
-                    title: window.siyuan.languages.new,
-                    value: "",
-                    onConfirm: async (value) => {
-                        const response = await fetchSyncPost("/api/system/createWorkspaceDir", {
-                            path: pathPosix().join(pathPosix().dirname(window.siyuan.config.system.workspaceDir), value),
-                        });
-                        if (response.code !== 0) return false;
-                        renderWorkspaceList(workspaceDirElement);
-                        return true;
-                    },
-                });
-                createWorkspaceDialog.element.setAttribute("data-key", Constants.DIALOG_CREATEWORKSPACE);
-                event.preventDefault();
-                event.stopPropagation();
-                break;
-            } else if (target.getAttribute("data-type") === "remove") {
-                const removePath = target.parentElement?.getAttribute("data-path");
-                if (!removePath) {
-                    break;
-                }
-                event.preventDefault();
-                event.stopPropagation();
-                if (removePath === window.siyuan.config.system.workspaceDir) {
-                    fetchPost("/api/system/removeWorkspaceDir", {path: removePath});
-                    break;
-                }
-                confirmDialog({
-                    title: window.siyuan.languages.deleteOpConfirm,
-                    text: window.siyuan.languages.removeWorkspacePhysically.replace("${x}", () => escapeHtml(removePath)),
-                    confirm: async () => {
-                        const response = await fetchSyncPost("/api/system/removeWorkspaceDirPhysically", {path: removePath});
-                        if (response.code !== 0) return false;
-                        renderWorkspaceList(workspaceDirElement);
-                        return true;
-                    },
-                    cancel: () => {
-                        fetchPost("/api/system/removeWorkspaceDir", {path: removePath}, () => {
-                            renderWorkspaceList(workspaceDirElement);
-                        });
-                    },
-                    isDelete: true,
-                });
-                break;
-            } else if (target.classList.contains("b3-list-item") && !target.classList.contains("b3-list-item--focus")) {
-                const workspacePath = target.getAttribute("data-path");
-                if (!workspacePath) {
-                    break;
-                }
-                confirmDialog({
-                    title: window.siyuan.languages.confirm,
-                    text: `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(workspacePath))}?`,
-                    confirm: () => {
-                        switchWorkspace(workspacePath);
-                    },
-                });
-                event.preventDefault();
-                event.stopPropagation();
-                break;
-            }
-            target = target.parentElement;
-        }
+        html: renderMobileWorkspaceManager,
+        afterMount: mountMobileWorkspaceManager,
     });
 };
 /// #endif

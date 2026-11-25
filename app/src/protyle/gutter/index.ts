@@ -117,7 +117,6 @@ import {openMobileFileById} from "../../mobile/editor";
 /// #endif
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
-import {getDockByType} from "../../layout/tabUtil";
 import * as path from "path";
 /// #endif
 import {showMessage} from "../../dialog/message";
@@ -1610,9 +1609,6 @@ export class Gutter {
             embedContext.targetElement.querySelectorAll(":scope > [data-type=\"NodeListItem\"]").length === 1;
         const allowRemoval = allowStructuralMutation && !isOnlyTargetListItem;
         const type = nodeElement.getAttribute("data-type");
-        if (type === "NodeAttributeView") {
-            window.siyuan.menus.menu.element.setAttribute("data-sheet-expandable", "true");
-        }
         const subType = nodeElement.getAttribute("data-subtype");
         const turnIntoSubmenu: IMenu[] = [];
         hideElements(["select"], protyle);
@@ -4129,12 +4125,6 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
     }
 }
 
-// 仅声明调用所需的最小接口，避免在 gutter 中 import AgentChat 类而引入
-// gutter → AgentChat → platformUtils → compatibility → gutter 的循环依赖（TDZ）。
-interface AgentChatLike {
-    insertBlockMentions: (mentions: Array<{ id: string; label: string }>) => void;
-}
-
 // 将选中的块以区块引用形式追加到智能体会话发送框末尾，等价于拖拽块到发送框或在框内搜索选块。
 export const addBlockToAgent = async (blockIds: string[]) => {
     const ids = blockIds.filter(Boolean);
@@ -4155,30 +4145,7 @@ export const addBlockToAgent = async (blockIds: string[]) => {
         }
         return {id, label};
     }));
-    /// #if MOBILE
-    const {insertMobileAgentMentions} = await import("../../mobile/agent/MobileAgentChat");
-    insertMobileAgentMentions(window.siyuan.ws.app, mentions);
-    /// #else
-    const dock = getDockByType("agentChat");
-    if (!dock) {
-        return;
-    }
-    // 智能体面板首次打开前 dock.data.agentChat 是占位值（非 AgentChat 实例）。
-    const isReady = (m: unknown): m is AgentChatLike =>
-        !!m && typeof (m as AgentChatLike).insertBlockMentions === "function";
-    let agentChat = dock.data.agentChat;
-    // 实例未就绪（面板从未打开）或面板被折叠时，先 toggleModel 打开/展开：
-    // show=true 既会同步 new AgentChat() 构造常驻实例，也会把折叠的面板重新展开。
-    const dockItem = document.querySelector(".dock__item[data-type=\"agentChat\"]");
-    const isCollapsed = !dockItem || !dockItem.classList.contains("dock__item--active");
-    if (!isReady(agentChat) || isCollapsed) {
-        dock.toggleModel("agentChat", true);
-        agentChat = dock.data.agentChat;
-    }
-    if (!isReady(agentChat)) {
-        // 极端情况下实例仍未就绪，放弃插入避免报错。
-        return;
-    }
-    agentChat.insertBlockMentions(mentions);
-    /// #endif
+    const {openEditorAgent} = await import("../../ai/editorAgent");
+    const chat = await openEditorAgent(window.siyuan.ws.app);
+    chat?.insertBlockMentions(mentions);
 };

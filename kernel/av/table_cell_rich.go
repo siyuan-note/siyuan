@@ -17,6 +17,7 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 )
 
 var (
@@ -59,6 +60,28 @@ func RenderTableCellRich(tree *parse.Tree) (string, error) {
 	}
 	content, _, err := normalizeValueTextRichTreeSourceWithImages(tree, true)
 	return content, err
+}
+
+func AutoSpaceTableCellRich(rich *ast.TableCellRich) (string, error) {
+	tree, err := ParseTableCellRich(rich)
+	if err != nil {
+		return "", err
+	}
+
+	engine := newValueTextRichLute()
+	format := func() string {
+		renderer := render.NewFormatRenderer(tree, engine.RenderOptions, engine.ParseOptions)
+		renderer.PreserveTextCodeFences = true
+		return strings.Trim(string(renderer.Render()), "\n")
+	}
+	// 没有间距变化时保留源文本的原始写法。
+	before := format()
+	engine.SetAutoSpace(true)
+	after := format()
+	if after == before {
+		return rich.Content, nil
+	}
+	return after, nil
 }
 
 func isTableCellRichCustomTextMark(node *ast.Node) bool {

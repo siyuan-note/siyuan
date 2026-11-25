@@ -28,8 +28,10 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
     const escape = {} as typeof import("../../../util/escape");
     new Function("exports", sources.escape)(escape);
     tooltip.initTooltips();
-    const Harness = new Function("showTooltip", "hideTooltip", "escapeHtmlTextAndAttr", sources.chat)(
-        tooltip.showTooltip, tooltip.hideTooltip, escape.escapeHtmlTextAndAttr);
+    const quotes = {} as typeof import("./agentQuote");
+    new Function("exports", "require", sources.quotes)(quotes, () => ({}));
+    const Harness = new Function("showTooltip", "hideTooltip", "escapeHtmlTextAndAttr", "quotePreview", sources.chat)(
+        tooltip.showTooltip, tooltip.hideTooltip, escape.escapeHtmlTextAndAttr, quotes.quotePreview);
     const chat = new Harness() as {
         navRail: HTMLElement;
         entries: Array<{type: string, id: string, content: string}>;
@@ -294,7 +296,7 @@ test("agent navigation keeps previews outside its click targets, paints short li
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
     const sources: Record<string, string> = {chat: transpile(`class Harness {${methods.join("\n")}}\nreturn Harness;`)};
-    for (const [name, file] of Object.entries({hoverInput: "util/hoverInput.ts", tooltip: "dialog/tooltip.ts", escape: "util/escape.ts"})) {
+    for (const [name, file] of Object.entries({hoverInput: "util/hoverInput.ts", tooltip: "dialog/tooltip.ts", escape: "util/escape.ts", quotes: "layout/dock/agent/agentQuote.ts"})) {
         sources[name] = transpile(readFileSync(path.resolve(__dirname, "../../..", file), "utf8"));
     }
     const sheets = ["base", "mobile"].map(name => ({name, css: compile(path.resolve(__dirname,

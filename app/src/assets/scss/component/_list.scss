@@ -42,8 +42,8 @@
   --file-toggle-width: 0px;
   padding-bottom: 8px;
   margin-bottom: 6px;
-  flex-shrink: 0;
-  max-height: 40%;
+  flex: 2 1 0px;
+  max-height: max-content;
   min-height: 30px;
   overflow: hidden;
   border-bottom: 1px solid var(--b3-border-color);
@@ -72,6 +72,13 @@
   .b3-list--background .b3-list-item.dragover__bottom::after {
     bottom: 0;
   }
+}
+
+// 两个滚动区按 2:3 分配空间，内容较短的一侧让出用不完的高度。
+.file-tree__pins:not(.fn__none) + .file-tree__items {
+  flex: 3 1 0px;
+  max-height: max-content;
+  margin-bottom: auto;
 }
 
 .b3-list {

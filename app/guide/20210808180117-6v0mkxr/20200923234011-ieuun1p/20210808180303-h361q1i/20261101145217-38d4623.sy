@@ -6,7 +6,7 @@
 		"id": "20261101145217-38d4623",
 		"title": "Standalone Markdown editor",
 		"type": "doc",
-		"updated": "20261120092311"
+		"updated": "20261125133044"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-3a481f4",
-				"updated": "20261106132257"
+				"updated": "20261125133044"
 			},
 			"Children": [
 				{
@@ -213,12 +213,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-918e675",
-				"updated": "20261101145217"
+				"updated": "20261125133044"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After installing a desktop package with file association support, choose SiYuan from the system Open With menu. Installation adds a candidate without taking over your existing default application. You can also pass --markdown to the desktop executable for a blank document, or --markdown=\"path/to/file.md\" to open a file. In the editor, choose "
+					"Data": "On Windows, both the official installer and the Microsoft Store version support file associations for .md and .markdown. After installing a desktop package with file association support, choose SiYuan from the system Open With menu. Installation adds a candidate without taking over your existing default application. You can also pass --markdown to the desktop executable for a blank document, or --markdown=\"path/to/file.md\" to open a file. In the editor, choose "
 				},
 				{
 					"Type": "NodeTextMark",

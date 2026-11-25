@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
@@ -443,7 +444,8 @@ var getBlocksWordCount = contractHandler(apicontract.GetBlocksWordCount, func(c 
 })
 
 var getTreeStat = contractHandler(apicontract.GetTreeStat, func(c *gin.Context, request apicontract.TreeStatRequest) apicontract.Response[apicontract.TreeStatData] {
-	id, includeEmbed := strings.TrimSpace(request.ID), request.IncludeEmbed
+	id := strings.TrimSpace(request.ID)
+	includeEmbed := request.IncludeEmbed && !model.IsReadOnlyRoleContext(c)
 	if id == "" {
 		return apicontract.Failure[apicontract.TreeStatData](-1, "Field [id] must not be empty")
 	}
@@ -457,22 +459,13 @@ var getTreeStat = contractHandler(apicontract.GetTreeStat, func(c *gin.Context, 
 	if !isBlockPublishAccessible(c, id, boxID) {
 		return apicontract.Success(apicontract.TreeStatData{ReqID: request.ReqID})
 	}
-	var accessChecker model.EmbedBlockAccessChecker
-	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		accessChecker = func(blockID string) bool {
-			return model.CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, blockID, boxID)
-		}
-	}
-	stat := model.GetDocumentStat(c.Request.Context(), id, boxID, includeEmbed, accessChecker)
+	stat := model.GetDocumentStat(c.Request.Context(), id, boxID, includeEmbed)
 	return apicontract.Success(treeStatContract(request.ReqID, stat, includeEmbed))
 })
 
 var getDOMText = contractHandler(apicontract.GetDOMText, func(c *gin.Context, request apicontract.DOMTextRequest) apicontract.Response[string] {
-	if model.GetGinContextRole(c) == model.RoleReader {
-		// 读者不能通过调用方构造的 DOM 读取未发布资源的 OCR 文本
-		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-vmvr-gf8m-x483
-		return apicontract.Success(model.GetDOMTextWithoutOCRAssets(request.DOM))
+	if model.IsReadOnlyRoleContext(c) {
+		return apicontract.Success(model.GetDOMTextForPublish(c, request.DOM))
 	}
 	return apicontract.Success(model.GetDOMText(request.DOM))
 })
@@ -523,10 +516,12 @@ var getRefIDs = contractHandler(apicontract.GetRefIDs, func(c *gin.Context, requ
 	if err != nil {
 		return apicontract.Failure[apicontract.RefIDsData](-1, err.Error())
 	}
-	refDefs, originalRefBlockIDs := model.GetBlockRefsInBox(id, boxID)
+	var refDefs []*model.RefDefs
+	var originalRefBlockIDs map[string]string
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		refDefs, originalRefBlockIDs = model.FilterRefDefsByPublishAccess(c, publishAccess, refDefs)
+		refDefs, originalRefBlockIDs = model.GetPublishedBlockRefsInBox(c, id, boxID)
+	} else {
+		refDefs, originalRefBlockIDs = model.GetBlockRefsInBox(id, boxID)
 	}
 	return apicontract.Success(apicontract.RefIDsData{RefDefs: refDefContracts(refDefs), OriginalRefBlockIDs: originalRefBlockIDs})
 })
@@ -551,17 +546,19 @@ var getRefIDsByFileAnnotationID = contractHandler(apicontract.GetRefIDsByFileAnn
 
 var getBlockDefIDsByRefText = contractHandler(apicontract.GetBlockDefIDsByRefText, func(c *gin.Context, request apicontract.RefTextQueryRequest) apicontract.Response[apicontract.RefDefsData] {
 	anchor := request.Anchor
-	boxID := request.Notebook
-	ids := model.GetBlockDefIDsByRefTextInBox(anchor, boxID)
-	ids = filterBlockIDsByPublishAccess(c, ids, "")
-	var retRefDefs []apicontract.RefDefs
+	notebook := request.Notebook
+	if isEncryptedNotebookDeniedForPublish(c, notebook) || holdEncryptedBoxRequest(c, notebook) != nil {
+		return apicontract.Success(apicontract.RefDefsData{RefDefs: []apicontract.RefDefs{}})
+	}
+	boxID := ""
+	if model.IsEncryptedBox(notebook) {
+		boxID = notebook
+	}
+	ids := model.GetBlockDefIDsByRefTextInBox(anchor, boxID, model.NewPublishRefAccessChecker(c))
+	retRefDefs := make([]apicontract.RefDefs, 0, len(ids))
 	for _, id := range ids {
 		retRefDefs = append(retRefDefs, apicontract.RefDefs{RefID: id, DefIDs: []string{}})
 	}
-	if 1 > len(retRefDefs) {
-		retRefDefs = []apicontract.RefDefs{}
-	}
-
 	return apicontract.Success(apicontract.RefDefsData{RefDefs: retRefDefs})
 })
 
@@ -631,12 +628,12 @@ var getBlockIndex = contractHandler(apicontract.GetBlockIndex, func(c *gin.Conte
 })
 
 var getBlocksIndexes = contractHandler(apicontract.GetBlocksIndexes, func(c *gin.Context, request apicontract.BlocksQueryRequest) apicontract.Response[map[string]int] {
-	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
+	ids := gulu.Str.RemoveDuplicatedElem(request.IDs)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, ids)
 	if err != nil {
 		return apicontract.Failure[map[string]int](-1, err.Error())
 	}
-	ids := filterBlockIDsByPublishAccess(c, request.IDs, boxID)
-	return apicontract.Success(model.GetBlocksIndexes(ids))
+	return apicontract.Success(model.GetBlocksIndexes(filterBlockIDsByPublishAccess(c, ids, boxID)))
 })
 
 var getDocBlocksOrders = contractHandler(apicontract.GetDocBlocksOrders, func(c *gin.Context, request apicontract.DocOrdersRequest) apicontract.Response[[]string] {

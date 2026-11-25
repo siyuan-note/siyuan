@@ -48,6 +48,10 @@ html[data-frontend="mobile"] body.body--android {
     padding-bottom: calc(24px + var(--android-navigation-bar-height, 0px));
   }
 
+  &.mobile-keyboard--open .mobile-bottom-sheet-dialog[data-key="dialog-opencard"] .mobile-bottom-sheet {
+    padding-bottom: 0;
+  }
+
   .side-panel > .b3-list--mobile {
     > [data-type="sidebar-bookmark"] > .bookmarkList::after,
     > [data-type="sidebar-tag"] > .tagList::after,
@@ -1788,6 +1792,52 @@ body.mobile-topbar--merged {
       padding: 8px 16px max(16px, var(--mobile-bottom-bar-safe-area));
     }
 
+    &.av__filter-panel {
+      .av__filter-row,
+      .av__filter-group-item {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        padding-block: 8px;
+      }
+
+      // 字段与规则菜单共用首行，条件控件和子分组使用整行宽度。
+      .av__filter-rowinner {
+        display: contents;
+      }
+
+      .av__field-wrapper {
+        grid-area: 1 / 2;
+        min-width: 0;
+      }
+
+      .av__filter-field {
+        max-width: 100%;
+      }
+
+      [data-type="moreFilter"] {
+        grid-area: 1 / 3;
+        margin: 0;
+        opacity: 1;
+      }
+
+      .av__filter-rowinner > .b3-select,
+      .av__filter-value,
+      .av__filter-date-controls,
+      .av__filter-group-children {
+        grid-column: 1 / -1;
+        min-width: 0;
+      }
+
+      .av__filter-date-controls .av__filter-value {
+        flex-basis: 100%;
+      }
+
+      .av__filter-date-config,
+      .b3-select {
+        max-width: 100%;
+      }
+    }
+
     .b3-chips {
       max-width: none !important;
       flex-shrink: 0;
@@ -2228,6 +2278,45 @@ body.mobile-topbar--merged {
     }
   }
 
+}
+
+.editor-tool-sheet {
+  &__content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    gap: 8px;
+  }
+
+  &__search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    > input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__list,
+  &__preview {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  &__text {
+    flex: 1;
+    min-height: 0;
+    resize: none;
+  }
+
+  &__source {
+    font-family: var(--b3-font-family-editor-code, var(--b3-font-family-code));
+  }
 }
 
 .mobile-attributes-sheet .b3-dialog__body > .fn__flex-column {

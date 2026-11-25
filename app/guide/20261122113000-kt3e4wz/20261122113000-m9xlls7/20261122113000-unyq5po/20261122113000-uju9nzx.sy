@@ -1,0 +1,660 @@
+{
+	"ID": "20261122113000-uju9nzx",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-uju9nzx",
+		"title": "Аннотации PDF",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-9nokj8p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-9nokj8p",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fmz3lw3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-fmz3lw3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan поддерживает предпросмотр и аннотирование PDF-файлов: можно выделять текст или области в PDF и копировать ссылки на аннотации в документы, обеспечивая двустороннюю связь между чтением литературы и ведением заметок."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-0gdcs1j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-0gdcs1j",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При открытии одного и того же PDF в нескольких окнах просмотра изменения разных аннотаций объединяются при сохранении. Если одна и та же аннотация была изменена или удалена другим окном просмотра, устаревшее сохранение будет отклонено с предложением переоткрыть PDF. Сначала проверьте и скопируйте несохранённые изменения, которые нужно сохранить, затем переоткройте PDF для загрузки последних аннотаций и продолжите редактирование."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-o9brlaj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-o9brlaj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вставка PDF-ресурсов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9h69zi0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-9h69zi0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После загрузки и вставки PDF-файла через редактор он помещается в папку assets, а в документе создаётся ссылка вида "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[filename](assets/filename.pdf)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. Нажмите на эту ссылку для предпросмотра в SiYuan."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fdo742q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-fdo742q",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Переход к странице по гиперссылке"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-46zhul6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-46zhul6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Открытие предпросмотра PDF в новой вкладке поддерживает указание номера страницы; для этого к ссылке нужно добавить параметр "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "page"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, например, чтобы перейти на седьмую страницу, отредактируйте ссылку как "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[filename](assets/filename.pdf?page=7)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7kwwd50",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-7kwwd50",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Аннотирование"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-szzexgu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-szzexgu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В предпросмотре PDF можно аннотировать текст или области и копировать ссылки на аннотации в документы для связи чтения литературы с ведением заметок."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-e9hze5a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-e9hze5a",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Создание аннотаций"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-wtnoano",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-wtnoano",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-5wtwdr3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-5wtwdr3",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-y6o1y0g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-y6o1y0g",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Выделение текста"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": выделите текст в PDF, появится панель цветов — нажмите на цвет, чтобы добавить полупрозрачную фоновую аннотацию. Одновременно текст ссылки на аннотацию автоматически копируется в буфер обмена и может быть вставлен прямо в документ как ссылка"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-x7oxkfd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-x7oxkfd",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-6d7wis6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-6d7wis6",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Аннотация прямоугольной области"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите кнопку аннотации области на панели инструментов PDF и перетащите курсор по странице PDF, чтобы нарисовать прямоугольную область. Поддерживаются два стиля: залитый прямоугольник (с цветом фона) и контурный прямоугольник (только рамка), которые можно переключать кнопкой смены стиля в меню аннотации"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-bjflek3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-bjflek3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Аннотации поддерживают 7 предустановленных цветов, а данные аннотаций автоматически сохраняются в файл "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sya"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ с тем же именем, что и PDF, в той же директории."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-tlsdczi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-tlsdczi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Операции с аннотациями"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cpixoj1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-cpixoj1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Нажмите на существующую аннотацию на странице PDF, чтобы открыть меню действий:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-jxbygd2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-jxbygd2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-hsyf12q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hsyf12q",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-bj9dsnl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-bj9dsnl",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Изменить цвет"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите на новый цвет, чтобы изменить цвет аннотации"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-xybbqh3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-xybbqh3",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-okkk8r8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-okkk8r8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Переключить стиль"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите кнопку переключения стиля для смены между залитым и контурным прямоугольником (только для аннотаций области)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-joudqis",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-joudqis",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5e79e96",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5e79e96",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Удалить аннотацию"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите кнопку удаления, чтобы убрать аннотацию"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-qdc7ej2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-qdc7ej2",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ysfn75q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ysfn75q",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Копировать снова"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите кнопку копирования, чтобы повторно скопировать текст ссылки на аннотацию в буфер обмена"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-muxafhi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-muxafhi",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-h2thqld",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-h2thqld",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Связанный блок"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите кнопку связывания и введите ID существующего блока, чтобы вручную установить связь между аннотацией и блоком документа"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mg74tjw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-mg74tjw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ссылки на аннотации"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pchvfg7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-pchvfg7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Аннотации поддерживают двустороннюю связь с документами:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-18gxp5z",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-18gxp5z",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-inf9izv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-inf9izv",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-i863k2o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-i863k2o",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Копирование в документ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": после создания аннотации текст ссылки имеет формат "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "&lt;&lt;assets/xxx.pdf/ID_аннотации \"Выделенный текст\"&gt;&gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, и его можно вставить прямо в документ для создания ссылки на аннотацию. При копировании прямоугольной аннотации также прикладывается скриншот выделенной области"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-rjeeiic",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-rjeeiic",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-n67kbdi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-n67kbdi",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Переход из документа"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажатие на ссылку аннотации в документе автоматически открывает PDF и переходит на страницу с аннотацией, при этом прямоугольник аннотации мигает для удобства поиска"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-t5y4kk3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-t5y4kk3",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-s4zk9de",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-s4zk9de",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Предпросмотр обратных ссылок"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": наведите курсор или нажмите на аннотацию на странице PDF, чтобы просмотреть список блоков документа, ссылающихся на эту аннотацию"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ow6vuee",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ow6vuee",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Текст якоря ссылки на аннотацию в документе можно редактировать: нажмите правой кнопкой мыши, чтобы изменить отображаемый текст или преобразовать его в обычный текст."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-lwulei7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-lwulei7",
+				"updated": "20261122113000"
+			}
+		}
+	]
+}

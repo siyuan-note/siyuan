@@ -1181,7 +1181,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         const marketSection = available ? `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarMarketInfo}</div>
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.version, `v${available.version}`)}
-    ${bazaar._genReadmeMetaRow(window.siyuan.languages.releaseDate, available.hUpdated)}
+    ${bazaar._genReadmeMetaRow(window.siyuan.languages.bazaarUpdateDate, available.hUpdated)}
     ${bazaar._genReadmeMetaRow(window.siyuan.languages.pkgSize, available.hSize)}
     ${available.keywords?.length ? bazaar._genReadmeMetaRow(window.siyuan.languages.keywords, bazaar._genReadmeKeywords(available.keywords), true) : ""}
 </section>` : "";

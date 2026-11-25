@@ -183,7 +183,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "所有打过标签的内容块会在标签页签（"
+					"Data": "打开标签面板（"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -219,7 +219,39 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​）中列出。如果需要取消标签，在内容块中删掉该标签即可。"
+					"Data": "​）。在桌面端点击标签，会在全局搜索中显示匹配的内容块。要移除内容块上的标签，直接在块中删除该标签即可。"
+				}
+			]
+		},
+		{
+			"ID": "20261124191611-m3n9h5v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261124191611-m3n9h5v",
+				"updated": "20261124191611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在移动端，点击文档页头的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "添加标签"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 打开标签选择面板。候选列表中的勾选标记表示该标签已添加到文档。添加完毕后，点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "关闭"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

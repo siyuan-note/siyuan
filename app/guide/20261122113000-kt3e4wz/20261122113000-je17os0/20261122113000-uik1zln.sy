@@ -1,0 +1,534 @@
+{
+	"ID": "20261122113000-uik1zln",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-uik1zln",
+		"title": "Гарантии доступности данных",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-9h4hubh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-9h4hubh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Локальное устройство"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-fla6bx7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-fla6bx7",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan обеспечивает разные уровни локального восстановления с помощью автосохранения, истории файлов и снимков данных:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-h0jas2i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-h0jas2i",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-w4umrdo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-w4umrdo",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-8bosdj1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-8bosdj1",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Изменения содержимого в редакторе автоматически сохраняются на диск; фактическое время записи зависит от размера документа и обычно завершается менее чем за 1 секунду"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-wym20lu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-wym20lu",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ita1by5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ita1by5",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Поддерживается "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-lz910jw",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "История файлов"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-c7yaqby",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-c7yaqby",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-nglcvfr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-nglcvfr",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Поддерживается "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-n08nhqf",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "снимков данных"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-6hsyhrg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-6hsyhrg",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-j159rlc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-j159rlc",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Поддерживается экспорт и импорт архива Data, содержащего каталог `data`; это не полная резервная копия рабочего пространства с настройками, историей файлов и локальным репозиторием"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-smibwgh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-smibwgh",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-orr5jcg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-orr5jcg",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Запрещено синхронизировать данные через сторонние облачные диски во избежание повреждения файлов"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xlqc2hy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xlqc2hy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Благодаря этим мерам мы максимально обеспечили доступность данных на локальном устройстве. Однако учитывайте, что это работает при условии исправности диска устройства и отсутствия аппаратных сбоев."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-363q5gj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-363q5gj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Облачная синхронизация"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-a9vk742",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-a9vk742",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Повышения доступности данных только на локальном устройстве недостаточно, поскольку облачная "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-pocthw9",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "синхронизации данных"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " является одной из базовых потребностей. Синхронизация данных влияет на локальные данные, поэтому мы также обеспечиваем доступность данных после синхронизации:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1scixnj",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-1scixnj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-2a8o52d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-2a8o52d",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-srq9y0d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-srq9y0d",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Перед синхронизацией создаётся снимок данных; при неожиданном результате синхронизации можно откатиться к этому снимку"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-7bfpzpn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-7bfpzpn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-1ump27e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-1ump27e",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При возникновении конфликта файлов во время синхронизации:"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-r0417si",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-r0417si",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-4i6by5j",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-4i6by5j",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-3qo5a7h",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-3qo5a7h",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Автоматически создаётся история файлов, через которую можно выполнить откат"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-etcffbt",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-etcffbt",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-j4u62jg",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-j4u62jg",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Также можно включить "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Настройки"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Аккаунт и синхронизация"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Создавать документацию конфликтов при возникновении конфликтов синхронизации"
+												},
+												{
+													"Type": "NodeText",
+													"Data": ""
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-j9ye1kl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-j9ye1kl",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-6qykr05",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-6qykr05",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "История данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Снимок данных"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; в широком окне используйте облачную вкладку, а в узком переключитесь на "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Облачный снимок"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8lkovux",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-8lkovux",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Итог"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vkjxrgm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-vkjxrgm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Надеемся, что благодаря этим мерам вы сможете спокойно пользоваться приложением, не беспокоясь о доступности данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-t3mnznm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-t3mnznm",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Тем не менее мы по-прежнему рекомендуем регулярно создавать резервные копии по правилу 3-2-1 (минимум 3 копии, 2 разных носителя и 1 удалённое хранилище)."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-zcikano",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-zcikano",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Будем рады вашим предложениям: доступность данных — наш главный приоритет, и мы стремимся постоянно её улучшать вместе с вами."
+				}
+			]
+		}
+	]
+}

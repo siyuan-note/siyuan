@@ -48,7 +48,7 @@ export type AIEditorActionIDRequestInput = { "id": string; };
 
 export type AIEditorActionSaveRequestInput = { "action": string; "id"?: string | null; "name": string; };
 
-export type AIEditorChatRequestInput = { "action"?: string | null; "history"?: Array<AIEditorMessageInput> | null; "ids"?: Array<string> | null; "input"?: string | null; "taskID"?: string | null; };
+export type AIEditorChatRequestInput = { "action"?: string | null; "history"?: Array<AIEditorMessageInput> | null; "ids"?: Array<string> | null; "input"?: string | null; "modelId"?: string | null; "reasoningEffort"?: string | null; "taskID"?: string | null; };
 
 export type AIEditorContext = { "activeDocID"?: string; "activeDocTitle"?: string; "focusedBlockID"?: string; "notebookID"?: string; "selectedBlockIDs"?: Array<string>; "visibleBlockIDs"?: Array<string>; };
 
@@ -132,11 +132,13 @@ export type AIProviderRequestInput = { "provider"?: string | null; "providerConf
 
 export type AIQuestionRequestInput = { "answers"?: Array<string> | null; "questionID"?: string | null; };
 
-export type AIReference = { "id": string; "title": string; };
+export type AIReference = { "id": string; "messageID"?: string; "title": string; };
 
-export type AIReferenceInput = { "id"?: string | null; "title"?: string | null; };
+export type AIReferenceInput = { "id"?: string | null; "messageID"?: string | null; "title"?: string | null; };
 
 export type AIRerankTestData = { "matched": boolean; "msg"?: string; };
+
+export type AISSEAgentError = { "message": string; "snapshotFailed"?: boolean; };
 
 export type AISSEBrowserCapabilityCall = { "arguments": { [key: string]: JSONValue } | null; "callID": string; "capabilityID": string; "generation": number; "name": string; };
 
@@ -152,7 +154,7 @@ export type AISSERetry = { "attempt": number; "maxRetries": number; };
 
 export type AISSESnapshot = { "roundID": string; "snapshotID": string; };
 
-export type AISSEStart = { "taskID": string; };
+export type AISSEStart = { "prompt"?: string; "taskID": string; };
 
 export type AISSEThinking = { "reasoning": string; "roundID": string; };
 
@@ -206,9 +208,9 @@ export type AISessionExtensionAIPDFImageSelection = ({ "object"?: number | null;
 
 export type AISessionExtensionAIPDFImageSelectionInput = ({ "object"?: number | null; "page"?: number | null; "revision"?: string | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAIReference = ({ "id"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAIReference = ({ "id"?: string | null; "messageID"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
 
-export type AISessionExtensionAIReferenceInput = ({ "id"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
+export type AISessionExtensionAIReferenceInput = ({ "id"?: string | null; "messageID"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
 
 export type AISessionExtensionAISessionEntry = ({ "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AISessionExtensionAIEditorContext | null; "id"?: string | null; "name"?: string | null; "nativeContent"?: AISessionExtensionAINativeContent | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReference> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionExtensionAISessionEntryStep> | null; "timestamp"?: number | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCall> | null; "type"?: string | null; } & { [key: string]: JSONValue });
 
@@ -2576,9 +2578,9 @@ export type SettingDecisionProfile = { "apiKey": string; "endpoint": string; "na
 
 export type SettingDecisionProfileInput = { "apiKey": string; "endpoint": string; "name": string; "timeout": number; };
 
-export type SettingEditing = { "maxCompletionTokens": number; "maxHistoryMessages": number; "modelId": string; "temperature": number; };
+export type SettingEditing = { "maxCompletionTokens": number; "maxHistoryMessages": number; "modelId": string; "reasoningEffort": string; "temperature": number; };
 
-export type SettingEditingInput = { "maxCompletionTokens"?: number | null; "maxHistoryMessages"?: number | null; "modelId"?: string | null; "temperature"?: number | null; };
+export type SettingEditingInput = { "maxCompletionTokens"?: number | null; "maxHistoryMessages"?: number | null; "modelId"?: string | null; "reasoningEffort"?: string | null; "temperature"?: number | null; };
 
 export type SettingEditor = { "allowHTMLBLockScript": boolean; "allowSVGScript": boolean; "assetOpen": SettingAssetOpen | null; "autoCloseRefBrackets": boolean; "autoDirection": boolean; "backlinkBlockSort": number; "backlinkContainChildren": boolean; "backlinkExpandCount": number; "backlinkGlobalSort": number; "backlinkHideReference": boolean; "backlinkMentionExclude": string; "backlinkShowBottom": boolean; "backlinkSort": number | null; "backmentionExpandCount": number; "backmentionSort": number | null; "blockGutterMode": boolean; "blockRefDynamicAnchorTextMaxLen": number; "checkBlockRef": boolean | null; "codeFontFamilies": Array<SettingEditorFont | null> | null; "codeLigatures": boolean; "codeLineWrap": boolean; "codeSyntaxHighlightLineNum": boolean; "codeTabSpaces": number; "cursorSurroundingLines": number; "databaseAttrClickMode": number; "databaseAttrHideEmpty": boolean; "databaseAttrLayout": number | null; "databaseAttrShow": boolean | null; "databaseAttrUseTabs": boolean | null; "databaseAttrViewMode": number; "databaseShowIcon": boolean | null; "databaseShowRelationIcon": boolean | null; "displayBookmarkIcon": boolean; "displayImgAlt": boolean; "displayImgName": boolean; "displayNetImgMark": boolean; "dragHTMLFileToIframe": boolean; "dynamicLoadBlocks": number; "embedBlockBreadcrumb": boolean; "embedBlockBreadcrumbParentPath": boolean | null; "emoji": Array<string> | null; "floatWindowDelay": number | null; "floatWindowMode": number; "fontFamilies": Array<SettingEditorFont | null> | null; "fontFamily": string; "fontFamilyDisplay": string; "fontSize": number; "fontSizeScrollZoom": boolean; "fontWeight": number; "fullWidth": boolean; "generateHistoryInterval": number; "globalBreadcrumb": boolean; "hashTagSearch": boolean | null; "headingEmbedMode": number; "headingNumber": boolean; "headingNumberFormat": string; "hideBreadcrumbIcons": boolean; "historyRetentionDays": number; "justify": boolean; "katexMacros": string; "keepLoadedContent": boolean; "listItemDotNumberClickFocus": boolean; "listLogicalOutdent": boolean; "markdown": SettingMarkdown | null; "mathDelimiterCompatibility": boolean | null; "onlySearchForDoc": boolean; "pageScrollButtons": boolean; "pasteURLAutoConvert": boolean; "plantUMLServePath": string; "readOnly": boolean; "rtl": boolean; "spellcheck": boolean; "spellcheckLanguages": Array<string> | null; "virtualBlockRef": boolean; "virtualBlockRefExclude": string; "virtualBlockRefInclude": string; };
 
@@ -3247,6 +3249,9 @@ export interface APIGETRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 返回数值进度和本地化阶段，阶段文案只包含公开的启动状态。
+     */
     "/api/system/bootProgress": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3254,6 +3259,9 @@ export interface APIGETRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["public"];
     };
+    /**
+     * 以 SSE 推送数值进度和本地化阶段，阶段文案只包含公开的启动状态。
+     */
     "/api/system/bootProgressSSE": {
         request: EmptyRequestInput;
         response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -3445,6 +3453,7 @@ export interface APIPOSTRoutes {
      * 未知原生版本保留原会话并报错；缺失终止事件、失败或不完整的响应不会执行工具调用。
      * 流式事件按序发送；消费停滞会取消生成，待工具结果和运行时检查点收尾后发送 interrupted。
      * 同轮重试保留原 thinking 轮次；上下文压缩的 thinking 事件携带该轮 roundID。
+     * references 中带 messageID 的条目使用 ⟦id⟧ 定位整条消息引用；title 保存快照，压缩后的历史仍可引用原文。
      */
     "/api/ai/agent/chat": {
         request: AIAgentChatRequestInput;
@@ -3454,7 +3463,7 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
         output: "sse";
         additionalErrorStatuses: [409];
-        sse: { events: { "browser_capability_call": AISSEBrowserCapabilityCall; "confirm": AISSEConfirm; "content": AISSEToken; "done": AISSETurn; "error": AISSEMessage; "interrupted": AISSEMessage; "permission": AIPermissionData; "question": AISSEQuestion; "reasoning": AISSEToken; "retry": AISSERetry; "snapshot": AISSESnapshot; "thinking": AISSEThinking; "tool_call": AISSEToolCall; "tool_result": AISSEToolResult; "turn": AISSETurn; "usage": AISSEUsage; }; };
+        sse: { events: { "browser_capability_call": AISSEBrowserCapabilityCall; "confirm": AISSEConfirm; "content": AISSEToken; "done": AISSETurn; "error": AISSEAgentError; "interrupted": AISSEMessage; "permission": AIPermissionData; "question": AISSEQuestion; "reasoning": AISSEToken; "retry": AISSERetry; "snapshot": AISSESnapshot; "thinking": AISSEThinking; "tool_call": AISSEToolCall; "tool_result": AISSEToolResult; "turn": AISSETurn; "usage": AISSEUsage; }; };
     };
     "/api/ai/agent/confirm": {
         request: AIConfirmRequestInput;
@@ -3725,6 +3734,12 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 按块请求的 start 事件携带本轮实际展开的 prompt，供显式转入智能体时保留原文快照。
+     * modelId 可覆盖智能编辑的模型，必须是已启用模型的 ID；省略、null 或空字符串沿用设置。
+     * reasoningEffort 省略或为 null 时沿用设置，空字符串使用模型默认值。覆盖仅作用于本次请求。
+     * 可选档位为 none、low、medium、high、xhigh、max，实际支持范围由供应商和模型决定。
+     */
     "/api/ai/editor/chat": {
         request: AIEditorChatRequestInput;
         response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5304,6 +5319,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 发布只读会话只返回可访问的目标，引用锚文本匹配还要求引用来源可访问。
+     * 没有可访问的匹配项时 refDefs 为空数组。
+     */
     "/api/block/getBlockDefIDsByRefText": {
         request: RefTextQueryRequestInput;
         response: { "code": 0; "data": RefDefsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5396,6 +5415,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 发布只读会话只解析有权访问的数据库名称，且不读取资源的 OCR 文本。
+     */
     "/api/block/getDOMText": {
         request: DOMTextRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5425,7 +5447,8 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated"];
     };
     /**
-     * 读取完整文档标题源及编辑用 BlockDOM，按文档 ID 寻址并保留加密笔记本响应租约。
+     * 按文档 ID 读取标题并保留加密笔记本响应租约。可编辑角色可读取完整标题源及编辑用 BlockDOM。
+     * 发布只读角色读取可见标题，BlockDOM 不含行级备注正文，source 为 null，revision 为空字符串。
      * 旧纯文本不解释为 Markdown；纯文本摘要不能作为富标题完整源回写，写入使用 setDocTitle 事务。
      * 笔记本文档使用笔记本 ID 读取，其纯文本摘要与笔记本名称同步。
      */
@@ -5499,6 +5522,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 发布只读会话只返回可访问的引用块、目标块和反链归并父块。
+     */
     "/api/block/getRefIDs": {
         request: RefIDsRequestInput;
         response: { "code": 0; "data": RefIDsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -5527,6 +5553,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 发布只读会话只统计文档正文，响应省略 statWithEmbed 和 embedStat。
+     */
     "/api/block/getTreeStat": {
         request: TreeStatRequestInput;
         response: { "code": 0; "data": TreeStatData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6263,6 +6292,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 发布只读会话请求禁止发布的文档时按文档不存在处理。虚拟引用标记只使用当前会话可解析的引用。
+     */
     "/api/filetree/getDoc": {
         request: FileTreeGetDocRequestInput;
         response: { "code": 0; "data": FileTreeGetDocData; "msg": string; } | { "code": -1 | 1 | 3; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -6413,6 +6445,7 @@ export interface APIPOSTRoutes {
     /**
      * 按可见直接子文档的当前排序读取范围；parentID 为空表示笔记本根级，其他值必须属于指定笔记本。
      * offset 为非负整数，limit 为 1..10240 的整数，省略时采用 docTreeBatchSize。返回 offset 不超过 total。
+     * 发布读者的 revision 只反映所请求目录的可见顺序。
      * revision 是不透明的目录顺序版本。传入旧版本时返回 stale=true 和空 files，客户端须替换该目录状态后重试。
      * 隐藏、发布不可见及笔记本文档不计入 total；响应保留加密笔记本租约。旧 listDocsByPath 的上限语义不变。
      * files 可附带标题格式 titleFormat 和语义源版本 titleRevision；索引未就绪时省略，name 始终为纯文本摘要。
@@ -6437,6 +6470,7 @@ export interface APIPOSTRoutes {
     /**
      * 返回目标在各级可见兄弟列表中的位置和版本，steps 按根级到目标排列，无需先读取所有前置范围。
      * 任一祖先隐藏、发布不可见或目标不属于指定笔记本时返回错误，不泄露不可访问的数量和位置。
+     * 发布读者的各级版本使用与 listDocTreeRange 相同的可见顺序。
      */
     "/api/filetree/locateDocTreeItem": {
         request: FileTreeLocateRequestInput;
@@ -7932,6 +7966,7 @@ export interface APIPOSTRoutes {
     /**
      * 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
      * 可选 sourceFilter.database 按单个数据库的字段筛选反链及数量，不影响提及或数据库原视图。
+     * 发布读者无法访问目标块时返回空列表、空笔记本 ID 和零计数。
      */
     "/api/ref/getBacklink2": {
         request: BacklinkListRequestInput;
@@ -8417,6 +8452,7 @@ export interface APIPOSTRoutes {
      * SQL 模式保留换行、注释与字面量大小写，支持带别名的完整块投影。
      * 关键字和查询语法模式下，精确块 ID 仍遵循笔记本、文档路径、类型、子类型和忽略条件。
      * 关键字模式的多词文档搜索按字面量匹配 %、_ 和反斜杠；按文档分组只整理当前页，不改变分页单位。
+     * 发布读者的结果、匹配数和分页均排除块备注及原始块属性列。
      */
     "/api/search/fullTextSearchBlock": {
         request: FullTextSearchBlockRequestInput;
@@ -8667,6 +8703,7 @@ export interface APIPOSTRoutes {
      * 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
      * 旧客户端的平铺 decision.endpoint、apiKey、name、timeout 迁移到 profiles.typesafe；提交 profiles 时以该对象为准。
      * ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
+     * editing.reasoningEffort 配置智能编辑的默认思考强度。省略保留当前设置，null 或空字符串使用模型默认值。
      */
     "/api/setting/setAI": {
         request: SetAIRequestInput;
@@ -9155,6 +9192,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 返回同步信息。synced 是上次成功同步的 Unix 毫秒时间戳，无记录时为 0。
+     * 同步失败时保留该时间戳，升级后沿用工作空间中已有的记录。stat 是本地化状态文本。
+     */
     "/api/sync/getSyncInfo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SyncInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -9227,10 +9268,12 @@ export interface APIPOSTRoutes {
         authorization?: readonly ["authenticated","admin","writable"];
     };
     /**
-     * retains automatic and fully manual mode behavior when source is omitted.
+     * 执行双向同步，完全手动模式按指定方向上传或下载。
+     * 同步失败返回 code -1、错误消息和 null data。
+     * 移动端切换前后台时，如果启动尚未完成、用户未登录或同步未启用，则直接返回成功。
      * A source decision requires upload, localID and cloudID from getSyncSourceState and performs one-way sync in any mode.
      * 来源和两个快照 ID 会在应用文件前重新校验；预览失效返回 code 2、空 msg 和 null data，需重新预览并确认。
-     * 其他选择失败返回 code -1；code 2 不推送错误通知，避免通知记录使预览继续失效。
+     * code 2 不推送错误通知，避免通知记录使预览继续失效。
      * Automatic sync rejects a changed nonempty source until an explicit direction succeeds; empty sources use local data.
      */
     "/api/sync/performSync": {
@@ -9401,6 +9444,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 返回数值进度和本地化阶段，阶段文案只包含公开的启动状态。
+     */
     "/api/system/bootProgress": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -9544,6 +9590,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 发布读者的文档树设置清空新建文档、块引新建文档和闪念速记的保存目标及模板路径。
+     */
     "/api/system/getConf": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": SystemConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -9558,6 +9607,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated"];
     };
+    /**
+     * 发布只读会话可读取内置表情及当前有权访问的文档引用的自定义表情。
+     */
     "/api/system/getEmojiConf": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<SystemEmojiGroup | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -9931,6 +9983,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * sort 为 6 时读取同级手动顺序，为 16 时按最新可见关联的添加时间降序排列同级标签。无记录的标签使用名称自然顺序。
+     * 发布只读角色仅使用其可访问的文档统计标签引用数、排序和截断列表。
      * ignoreMaxListHint 为 true 时返回完整标签树。
      */
     "/api/tag/getTag": {
@@ -10187,6 +10240,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * 授权票据绑定登录会话和浏览器。每个会话最多保留 8 个未兑换授权码，超出时替换该会话最早到期的授权码。
+     */
     "/oauth/mcp/consent": {
         request: MCPOAuthConsentRequestInput;
         response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

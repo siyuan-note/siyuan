@@ -237,15 +237,37 @@
   min-height: 96px;
 }
 
+.sy__agentChat [custom-agent-quote] {
+  display: inline-block;
+  max-width: min(26ch, 90%);
+  padding-inline: .32em;
+  overflow: hidden;
+  border-radius: var(--b3-border-radius);
+  background: var(--b3-theme-primary-lightest);
+  color: var(--b3-theme-primary);
+  vertical-align: bottom;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
 .agent-chat__msg--editing .agent-chat__msg-actions {
   margin-top: 4px;
   opacity: 1;
 }
 
 .agent-chat__msg-meta {
+  order: -1;
+  margin-right: auto;
   font-size: 13px;
   color: var(--b3-theme-on-surface-light);
   align-self: center;
+}
+
+.agent-chat__selection-quote {
+  position: absolute;
+  max-width: 100%;
+  z-index: 1;
 }
 
 .agent-chat__msg-time--ai {
@@ -270,11 +292,6 @@
 .agent-chat__msg--ai:hover .agent-chat__msg-actions,
 .agent-chat__msg--user:hover .agent-chat__msg-actions {
   opacity: 1;
-}
-
-.agent-chat__msg--user .agent-chat__msg-actions {
-  width: auto;
-  justify-content: flex-end;
 }
 
 .agent-chat__body--streaming {
@@ -386,6 +403,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.agent-chat__snapshot-recovery {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .agent-chat__snapshot-body {

@@ -13,7 +13,7 @@ const browserCases = async (source: string, pasteSource: string) => {
     const noop = () => {};
     const transactions: {before: string, after: string}[] = [];
     const dependencies = {
-        Constants: {ZWSP: "\u200b"}, dayjs: () => ({format: () => "20261020000000"}),
+        Constants: {ZWSP: "\u200b", CUSTOM_SY_AI_SOURCE: "custom-sy-ai-source"}, dayjs: () => ({format: () => "20261020000000"}),
         getTextWithoutSemanticMarkers: (node: Node) => node.textContent,
         updateTransaction: (_owner: IProtyle, block: HTMLElement, before: string) => {
             transactions.push({before, after: block.outerHTML});
@@ -23,11 +23,13 @@ const browserCases = async (source: string, pasteSource: string) => {
     const api = new Function(...Object.keys(dependencies), source + "\nreturn {getAgentLute, configureAVRichTextLute, " +
         "getAVRichTextUnsupportedPasteBlocks, getTableClipboardBlockDOM, getTableRangeHTML, processTable, getTablePasteTarget, " +
         "hasClosestBlock, getTableCellRichContext, setTableCellRichContext, restoreTableVirtualizationDOM, " +
-        "setTableCellRich, getTableCellRichBlockDOM, markdownMathPaste, htmlMathPaste};")(...Object.values(dependencies)) as
+        "setTableCellRich, getTableCellRichBlockDOM, markdownMathPaste, htmlMathPaste, " +
+        "neutralizePastedJSEmbeds, neutralizePastedJSEmbedHTML};")(...Object.values(dependencies)) as
         typeof import("../render/setLute") & typeof import("../render/av/richText") & typeof import("./table") &
         typeof import("./hasClosest") & typeof import("./tableCellRichContext") & typeof import("./tableCellRich") &
         typeof import("./tableVirtualizationDOM") & typeof import("./mathPaste") & {
-            processTable: (range: Range, html: string, protyle: IProtyle, block: HTMLElement, target: unknown) => boolean,
+            processTable: (range: Range, html: string, protyle: IProtyle, block: HTMLElement, target: unknown,
+                           aiSource?: "agent" | "editor") => boolean,
             getTablePasteTarget: (range: Range) => unknown,
         };
     Object.assign(window, {siyuan: {languages: {table: "Table", cellPasteUnsupported: "Unsupported: ${x}"},
@@ -45,6 +47,7 @@ const browserCases = async (source: string, pasteSource: string) => {
         "../../util/pathName": {isEncryptedBox: () => false},
         "./tableCellRichContext": api, "./hasClosest": api, "./tableVirtualizationDOM": api,
         "./mathPaste": api,
+        "./queryEmbedClipboard": api,
         "../runtimeCapabilities": {
             getProtyleBlockDOMSanitizer: (protyle: IProtyle) => protyle === cellEditor ? (html: string) => html : undefined,
             getProtylePasteTransform: (): undefined => undefined,
@@ -197,6 +200,20 @@ const browserCases = async (source: string, pasteSource: string) => {
         }
         ownerElement.remove();
     }
+    const table = document.createElement("div");
+    table.innerHTML = lute.Md2BlockDOM("| H |\n| --- |\n| original |");
+    const block = table.firstElementChild as HTMLElement;
+    const range = document.createRange();
+    range.selectNodeContents(block.querySelector("td"));
+    range.collapse(false);
+    transactions.length = 0;
+    const original = block.outerHTML;
+    check.equal(api.processTable(range, lute.Md2BlockDOM("| generated |\n| --- |\n| additional |"),
+        {lute} as IProtyle, block, api.getTablePasteTarget(range), "editor"), true);
+    check.equal(transactions.length, 1);
+    check.equal(transactions[0].before, original);
+    check.match(transactions[0].after, /custom-sy-ai-source="editor"/);
+    check.match(transactions[0].after, /generated/);
     return "table-cell-paste-ok";
 };
 
@@ -212,7 +229,8 @@ test("table clipboard fills the outer grid while a cell editor is active", {time
         .map(statement => statement.getText(insert)).join("\n");
     const source = ["longTextWrap.ts", "inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts", "../../util/escape.ts",
         "../render/setLute.ts", "../render/av/richTextValue.ts", "../render/av/richText.ts", "tableCellRichValue.ts",
-        "tableCellRich.ts", "tableCellRichContext.ts", "tableVirtualizationDOM.ts", "hasClosest.ts", "table.ts", "mathPaste.ts"]
+        "tableCellRich.ts", "tableCellRichContext.ts", "tableVirtualizationDOM.ts", "hasClosest.ts", "table.ts", "mathPaste.ts",
+        "queryEmbedClipboard.ts"]
         .map(name => compile(read(name))).join("\n") + "\n" + compile(processTable);
     const pasteSource = transpileModule(read("paste.ts"), {
         compilerOptions: {target: ScriptTarget.ES2022, module: ModuleKind.CommonJS},

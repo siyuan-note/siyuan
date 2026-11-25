@@ -86,7 +86,7 @@ func TestTagRemovalBatchFinalStateAndUndo(t *testing.T) {
 	if want := (tagSortGroups{"": {"xtodo", "offline"}, "todo/": {"todo/child"}}); err != nil || !reflect.DeepEqual(order, want) {
 		t.Fatalf("manual order after deletion = %v, want %v, err %v", order, want, err)
 	}
-	recreated := buildTagTree(map[string]int{"done": 1, "xtodo": 1, "todo/child": 1}, util.SortModeCustom, order)
+	recreated := buildTagTree(map[string]int{"done": 1, "xtodo": 1, "todo/child": 1}, util.SortModeCustom, order, nil)
 	if len(recreated) != 3 || recreated[0].Name != "xtodo" || recreated[1].Name != "done" {
 		t.Fatalf("recreated tag retained its previous position: %+v", recreated)
 	}

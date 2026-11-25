@@ -314,7 +314,7 @@ for (const [width, scheme, frontend] of [[400, "daylight", "browser-desktop"], [
         frontend, languages: readFileSync("appearance/langs/de.json", "utf8"),
         icons: readFileSync("appearance/icons/litheness/icon.js", "utf8")};
         const css = readFileSync(`appearance/themes/${scheme}/theme.css`, "utf8") +
-            compile(`src/assets/scss/${frontend === "mobile" ? "mobile" : "base"}.scss`, {logger: {warn() {}}}).css;
+            compile(`src/assets/scss/${frontend === "browser-desktop" ? "base" : "mobile"}.scss`, {logger: {warn() {}}}).css;
         const result = await runBrowserCase(async (source, stylesheet) => {
             const ok = (value: unknown, message: string) => { if (!value) { throw new Error(message); } };
             const style = document.createElement("style");
@@ -343,10 +343,9 @@ for (const [width, scheme, frontend] of [[400, "daylight", "browser-desktop"], [
                 menu.className = "b3-menu " + ({view: "av__filter-panel", color: "av__conditional-panel", automation: "av__automation-panel"})[kind];
                 menu.style.left = "16px";
                 menu.style.top = "16px";
-                if (source.frontend === "mobile") {
-                    // Match the sheet shell and height installed by bindMobileAVPanel.
+                if (source.frontend !== "browser-desktop") {
                     menu.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
-                    menu.style.height = `${innerHeight * .56}px`;
+                    menu.style.height = `${innerHeight / 2}px`;
                     menu.style.maxHeight = `${innerHeight}px`;
                 }
                 if (innerWidth === 1000) { menu.style.width = "730px"; }
@@ -388,7 +387,10 @@ for (const [width, scheme, frontend] of [[400, "daylight", "browser-desktop"], [
                 ok(calendar.scrollWidth <= calendar.clientWidth + 1, kind + " calendar fits without horizontal clipping");
                 const numberRow = menu.querySelector<HTMLElement>('[data-column="number"]');
                 if (numberRow) {
-                    ok(getComputedStyle(numberRow).display === "flex", "mixed number condition retains ordinary flex layout");
+                    const operator = numberRow.querySelector("[data-type=operation]").getBoundingClientRect();
+                    const input = numberRow.querySelector("[data-type=filterValue]").getBoundingClientRect();
+                    ok(source.frontend === "browser-desktop" ? input.left >= operator.right : input.top >= operator.bottom,
+                        "opening a date picker preserves the neighboring number condition's layout");
                 }
                 const buttons = popup.querySelectorAll<HTMLButtonElement>(".date-picker__navigation button, [data-date]:not(:disabled), [data-action]");
                 ok(buttons.length >= 30, kind + " has operable navigation, dates and actions");

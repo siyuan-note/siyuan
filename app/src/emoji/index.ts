@@ -276,26 +276,11 @@ export class EmojiPanelController {
         this.selectFirst();
     }
 
-    public loadMoreEmojis(direction: "previous" | "next" = "next") {
-        if (this.searchMode || (this.pageMode !== "common" && this.pageMode !== "custom")) {
-            return false;
-        }
-        const chunks = Array.from(this.panelElement.querySelectorAll<HTMLElement>(".emojis__chunk"));
-        const currentChunk = this.panelElement.querySelector(".emojis__item--current")?.closest<HTMLElement>(".emojis__chunk");
-        const currentIndex = currentChunk ? chunks.indexOf(currentChunk) : -1;
-        const adjacentChunk = direction === "previous" ? chunks[currentIndex - 1] : chunks[currentIndex + 1];
-        if (!adjacentChunk || adjacentChunk.childElementCount > 0) {
-            return false;
-        }
-        this.renderVirtualChunk(adjacentChunk);
-        return true;
-    }
-
     public moveSelection(key: string) {
         const nextElement = moveEmojiSelection(
             this.panelElement,
             key,
-            (direction) => this.loadMoreEmojis(direction),
+            (chunk) => this.renderVirtualChunk(chunk),
         );
         if (nextElement) {
             this.selectedUnicode = nextElement.dataset.unicode || "";
@@ -604,11 +589,12 @@ export class EmojiPanelController {
 
     private ensureCurrentSelection() {
         const currentElement = this.panelElement.querySelector<HTMLElement>(".emojis__item--current");
-        const currentChunk = currentElement?.closest<HTMLElement>(".emojis__chunk");
-        const currentCategoryID = currentElement?.closest<HTMLElement>(".emojis__section")?.dataset.category;
-        if (currentElement && ((currentChunk && this.visibleChunks.has(currentChunk)) ||
-            (!currentChunk && (this.pageMode !== "common" || currentCategoryID === this.categoryID)))) {
-            return currentElement;
+        if (currentElement) {
+            const panelRect = this.panelElement.getBoundingClientRect();
+            const itemRect = currentElement.getBoundingClientRect();
+            if (this.searchMode || (itemRect.bottom > panelRect.top && itemRect.top < panelRect.bottom)) {
+                return currentElement;
+            }
         }
         const categoryElement = this.pageMode === "common" ? this.getCategoryElement(this.categoryID) : undefined;
         const visibleChunk = this.pageMode === "common" ? this.renderVisibleBuiltInChunks(this.categoryID) :
@@ -753,44 +739,58 @@ export class EmojiPanelController {
 export const moveEmojiSelection = (
     panelElement: HTMLElement,
     key: string,
-    loadMore?: (direction: "previous" | "next") => boolean,
+    renderChunk: (chunk: HTMLElement) => void,
 ) => {
-    let items = Array.from(panelElement.querySelectorAll<HTMLElement>(".emojis__item"));
-    const currentElement = panelElement.querySelector<HTMLElement>(".emojis__item--current") || items[0];
-    if (!currentElement || !key.startsWith("Arrow")) {
+    const currentElement = panelElement.querySelector<HTMLElement>(".emojis__item--current") ||
+        panelElement.querySelector<HTMLElement>(".emojis__item");
+    if (!currentElement || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(key)) {
         return;
     }
-    let currentIndex = items.indexOf(currentElement);
-    const columnCount = Math.max(1, Math.floor(currentElement.parentElement.clientWidth / 34));
-    const currentContent = currentElement.closest<HTMLElement>(".emojis__content");
-    const contentItems = currentContent ? Array.from(currentContent.querySelectorAll<HTMLElement>(".emojis__item")) : items;
-    const contentIndex = contentItems.indexOf(currentElement);
-    const direction = (key === "ArrowLeft" && contentIndex === 0) ||
-        (key === "ArrowUp" && contentIndex < columnCount) ? "previous" :
-        (key === "ArrowRight" && contentIndex === contentItems.length - 1) ||
-        (key === "ArrowDown" && contentIndex + columnCount >= contentItems.length) ? "next" : undefined;
-    if (direction) {
-        if (loadMore?.(direction)) {
-            items = Array.from(panelElement.querySelectorAll<HTMLElement>(".emojis__item"));
-            currentIndex = items.indexOf(currentElement);
+    const backward = key === "ArrowUp" || key === "ArrowLeft";
+    const vertical = key === "ArrowUp" || key === "ArrowDown";
+    const sibling = backward ? "previousElementSibling" : "nextElementSibling";
+    let nextElement = currentElement[sibling] as HTMLElement | null;
+    if (vertical) {
+        while (nextElement && nextElement.offsetTop === currentElement.offsetTop) {
+            nextElement = nextElement[sibling] as HTMLElement | null;
         }
     }
-    let nextIndex = currentIndex;
-    if (key === "ArrowLeft") {
-        nextIndex--;
-    } else if (key === "ArrowRight") {
-        nextIndex++;
-    } else if (key === "ArrowUp") {
-        nextIndex -= columnCount;
-    } else if (key === "ArrowDown") {
-        nextIndex += columnCount;
+    if (!nextElement) {
+        const contents = Array.from(panelElement.querySelectorAll<HTMLElement>(".emojis__content"));
+        const currentIndex = contents.indexOf(currentElement.parentElement);
+        for (let index = currentIndex + (backward ? -1 : 1); index >= 0 && index < contents.length;
+            index += backward ? -1 : 1) {
+            const content = contents[index];
+            if (!content.firstElementChild && content.classList.contains("emojis__chunk")) {
+                renderChunk(content);
+            }
+            nextElement = (backward ? content.lastElementChild : content.firstElementChild) as HTMLElement | null;
+            if (nextElement) {
+                break;
+            }
+        }
     }
-    nextIndex = Math.max(0, Math.min(items.length - 1, nextIndex));
-    const nextElement = items[nextIndex];
-    if (nextElement === currentElement) {
+    if (!nextElement) {
         return currentElement;
     }
-    currentElement.classList.remove("emojis__item--current");
+    if (vertical) {
+        const centerX = (element: HTMLElement) => {
+            const rect = element.getBoundingClientRect();
+            return rect.left + rect.width / 2;
+        };
+        const currentX = centerX(currentElement);
+        const rowTop = nextElement.offsetTop;
+        let distance = Math.abs(centerX(nextElement) - currentX);
+        for (let item = nextElement[sibling] as HTMLElement | null; item?.offsetTop === rowTop;
+            item = item[sibling] as HTMLElement | null) {
+            const itemDistance = Math.abs(centerX(item) - currentX);
+            if (itemDistance < distance) {
+                nextElement = item;
+                distance = itemDistance;
+            }
+        }
+    }
+    panelElement.querySelector(".emojis__item--current")?.classList.remove("emojis__item--current");
     nextElement.classList.add("emojis__item--current");
     const panelRect = panelElement.getBoundingClientRect();
     const itemRect = nextElement.getBoundingClientRect();
@@ -1082,9 +1082,7 @@ export const openEmojiPanel = (
             }
             destroyDialog(destroyOptions);
         };
-        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy(), undefined, undefined, {
-            mode: "standard", fitContent: false,
-        });
+        disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
         if (type === "insert" && options?.insertRange) {
             disposeSelection = bindEmojiSheetSelection(
                 dialog.element.querySelector(".b3-dialog__container"), options.insertRange.cloneRange());

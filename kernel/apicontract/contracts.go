@@ -98,6 +98,8 @@ var MCPOAuthMetadata = define[EmptyRequest, BinaryContent]("mcpOAuthMetadata", "
 var MCPOAuthToken = define[MCPOAuthTokenRequest, BinaryContent]("mcpOAuthToken", "/oauth/mcp/token", PublicAccess, FormBody, mcpOAuthContentOptions(), "POST")
 var MCPOAuthRevoke = define[MCPOAuthTokenRequest, BinaryContent]("mcpOAuthRevoke", "/oauth/mcp/revoke", PublicAccess, FormBody, mcpOAuthContentOptions(), "POST")
 var MCPOAuthAuthorize = define[EmptyRequest, BinaryContent]("mcpOAuthServerAuthorize", "/oauth/mcp/authorize", PublicAccess, NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 302, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}), "GET")
+
+// 授权票据绑定登录会话和浏览器。每个会话最多保留 8 个未兑换授权码，超出时替换该会话最早到期的授权码。
 var MCPOAuthConsent = define[MCPOAuthConsentRequest, BinaryContent]("mcpOAuthConsent", "/oauth/mcp/consent", PublicAccess, FormBody, HTTPContentOptions(HTTPContentVariant{Status: 302, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}), "POST")
 
 // 返回内置 MCP 服务端 OAuth 的公开地址、开关和预注册客户端列表，不返回凭证摘要或客户端密钥。
@@ -336,8 +338,9 @@ var (
 	// 包含运行版本、UID、文件系统类型、零 inode、路径差异、目录变化及读取错误；路径相对于 data。
 	// 不支持原始目录读取的平台返回 rawSupported=false，不将未执行的比较视为通过。
 	// 并发诊断返回 code=-1；请求取消或 60 秒超时会停止后续扫描，不保证并发编辑时的原子快照。
-	CheckFileTraversal        = define[EmptyRequest, SystemFileTraversalData]("checkFileTraversal", "/api/system/checkFileTraversal", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
-	CurrentTime               = define[EmptyRequest, int64]("currentTime", "/api/system/currentTime", PublicAccess, NoBody, ResponseOptions{}, "POST")
+	CheckFileTraversal = define[EmptyRequest, SystemFileTraversalData]("checkFileTraversal", "/api/system/checkFileTraversal", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+	CurrentTime        = define[EmptyRequest, int64]("currentTime", "/api/system/currentTime", PublicAccess, NoBody, ResponseOptions{}, "POST")
+	// 返回数值进度和本地化阶段，阶段文案只包含公开的启动状态。
 	BootProgress              = define[EmptyRequest, BootProgressData]("bootProgress", "/api/system/bootProgress", PublicAccess, NoBody, ResponseOptions{}, "GET", "POST")
 	SetFollowSystemLockScreen = define[LockScreenRequest, Null]("setFollowSystemLockScreen", "/api/system/setFollowSystemLockScreen", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "system"}}, "POST")
 	SetAutoLaunch             = define[AutoLaunchRequest, Null]("setAutoLaunch", "/api/system/setAutoLaunch", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "system"}}, "POST")
@@ -350,10 +353,11 @@ var (
 	SetNetworkProxy    = define[NetworkProxy, Null]("setNetworkProxy", "/api/system/setNetworkProxy", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "system"}}, "POST")
 	GetBookmarkLabels  = define[EmptyRequest, []string]("getBookmarkLabels", "/api/attr/getBookmarkLabels", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 	BatchGetBlockAttrs = define[BlockIDsRequest, map[string]map[string]string]("batchGetBlockAttrs", "/api/attr/batchGetBlockAttrs", AuthenticatedAccess, JSONBody, ResponseOptions{NonNullable: true}, "POST")
-	GetDOMText         = define[DOMTextRequest, string]("getDOMText", "/api/block/getDOMText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-	RemoveBookmark     = define[RemoveBookmarkRequest, Null]("removeBookmark", "/api/bookmark/removeBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	RenameBookmark     = define[RenameBookmarkRequest, Null]("renameBookmark", "/api/bookmark/renameBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
-	RemoveTag          = define[RemoveTagRequest, Null]("removeTag", "/api/tag/removeTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	// 发布只读会话只解析有权访问的数据库名称，且不读取资源的 OCR 文本。
+	GetDOMText     = define[DOMTextRequest, string]("getDOMText", "/api/block/getDOMText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	RemoveBookmark = define[RemoveBookmarkRequest, Null]("removeBookmark", "/api/bookmark/removeBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	RenameBookmark = define[RenameBookmarkRequest, Null]("renameBookmark", "/api/bookmark/renameBookmark", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+	RemoveTag      = define[RemoveTagRequest, Null]("removeTag", "/api/tag/removeTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	// 精确匹配标签及其子标签前缀，通过单笔可撤销事务改名并广播编辑操作；成功仍返回 null。
 	// 无匹配时不写入；源快照变化时拒绝提交，保留并发编辑。自动收集保留已有条目和字段。
 	RenameTag = define[RenameTagRequest, Null]("renameTag", "/api/tag/renameTag", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -371,6 +375,7 @@ var (
 	ClearWorkspaceHistory     = define[EmptyRequest, Null]("clearWorkspaceHistory", "/api/history/clearWorkspaceHistory", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 	BatchSetBlockAttrs        = define[BatchSetBlockAttrsRequest, Null]("batchSetBlockAttrs", "/api/attr/batchSetBlockAttrs", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 	// sort 为 6 时读取同级手动顺序，为 16 时按最新可见关联的添加时间降序排列同级标签。无记录的标签使用名称自然顺序。
+	// 发布只读角色仅使用其可访问的文档统计标签引用数、排序和截断列表。
 	// ignoreMaxListHint 为 true 时返回完整标签树。
 	GetTag = define[GetTagRequest, []*TagData]("getTag", "/api/tag/getTag", AuthenticatedAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "tag", Mode: SettingSilent}}, "POST")
 )
@@ -435,10 +440,13 @@ var (
 )
 
 var (
-	GetRefText                  = define[BlockQueryRequest, string]("getRefText", "/api/block/getRefText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	GetRefText = define[BlockQueryRequest, string]("getRefText", "/api/block/getRefText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	// 发布只读会话只返回可访问的引用块、目标块和反链归并父块。
 	GetRefIDs                   = define[RefIDsRequest, RefIDsData]("getRefIDs", "/api/block/getRefIDs", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 	GetRefIDsByFileAnnotationID = define[FileAnnotationRefRequest, RefDefsData]("getRefIDsByFileAnnotationID", "/api/block/getRefIDsByFileAnnotationID", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
-	GetBlockDefIDsByRefText     = define[RefTextQueryRequest, RefDefsData]("getBlockDefIDsByRefText", "/api/block/getBlockDefIDsByRefText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+	// 发布只读会话只返回可访问的目标，引用锚文本匹配还要求引用来源可访问。
+	// 没有可访问的匹配项时 refDefs 为空数组。
+	GetBlockDefIDsByRefText = define[RefTextQueryRequest, RefDefsData]("getBlockDefIDsByRefText", "/api/block/getBlockDefIDsByRefText", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 )
 
 var (
@@ -451,13 +459,15 @@ var (
 
 var GetDocInfo = define[BlockQueryRequest, *DocInfo]("getDocInfo", "/api/block/getDocInfo", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
-// GetDocTitle 读取完整文档标题源及编辑用 BlockDOM，按文档 ID 寻址并保留加密笔记本响应租约。
+// GetDocTitle 按文档 ID 读取标题并保留加密笔记本响应租约。可编辑角色可读取完整标题源及编辑用 BlockDOM。
+// 发布只读角色读取可见标题，BlockDOM 不含行级备注正文，source 为 null，revision 为空字符串。
 // 旧纯文本不解释为 Markdown；纯文本摘要不能作为富标题完整源回写，写入使用 setDocTitle 事务。
 // 笔记本文档使用笔记本 ID 读取，其纯文本摘要与笔记本名称同步。
 var GetDocTitle = define[DocumentTitleRequest, DocumentTitleData]("getDocTitle", "/api/block/getDocTitle", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 var GetDocsInfo = define[DocsInfoRequest, []*DocInfo]("getDocsInfo", "/api/block/getDocsInfo", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 发布只读会话只统计文档正文，响应省略 statWithEmbed 和 embedStat。
 var GetTreeStat = define[TreeStatRequest, TreeStatData]("getTreeStat", "/api/block/getTreeStat", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 var TransferBlockRef = define[TransferBlockRefRequest, Null]("transferBlockRef", "/api/block/transferBlockRef", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -776,6 +786,7 @@ var GetBacklinkDoc = define[BacklinkDocumentRequest, BacklinkContextData]("getBa
 
 // 提及数量提示使用可选请求头 X-SiYuan-App-ID 定向；无标识时广播，发布读者不发送提示。
 // 可选 sourceFilter.database 按单个数据库的字段筛选反链及数量，不影响提及或数据库原视图。
+// 发布读者无法访问目标块时返回空列表、空笔记本 ID 和零计数。
 var GetBacklink2 = define[BacklinkListRequest, BacklinkListData]("getBacklink2", "/api/ref/getBacklink2", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
 
 // 返回实际绑定反链来源的数据库名称及字段元数据，不返回条目值。
@@ -922,6 +933,7 @@ var SemanticSearchBlock = define[SearchBlockRequest, SearchBlocksData]("semantic
 // SQL 模式保留换行、注释与字面量大小写，支持带别名的完整块投影。
 // 关键字和查询语法模式下，精确块 ID 仍遵循笔记本、文档路径、类型、子类型和忽略条件。
 // 关键字模式的多词文档搜索按字面量匹配 %、_ 和反斜杠；按文档分组只整理当前页，不改变分页单位。
+// 发布读者的结果、匹配数和分页均排除块备注及原始块属性列。
 var FullTextSearchBlock = define[FullTextSearchBlockRequest, *FullTextSearchBlockData]("fullTextSearchBlock", "/api/search/fullTextSearchBlock", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 
 // SearchRefBlock 的 exactDocTitle 默认关闭，保留候选搜索行为；启用后仅匹配完整文档标题，
@@ -1077,10 +1089,12 @@ var ListCloudSyncDir = define[EmptyRequest, CloudSyncDirsData]("listCloudSyncDir
 // The returned source/localID/cloudID must accompany an explicit performSync direction; stale previews are rejected.
 var GetSyncSourceState = define[EmptyRequest, SyncSourceState]("getSyncSourceState", "/api/sync/getSyncSourceState", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{}, "POST")
 
-// PerformSync retains automatic and fully manual mode behavior when source is omitted.
+// PerformSync 执行双向同步，完全手动模式按指定方向上传或下载。
+// 同步失败返回 code -1、错误消息和 null data。
+// 移动端切换前后台时，如果启动尚未完成、用户未登录或同步未启用，则直接返回成功。
 // A source decision requires upload, localID and cloudID from getSyncSourceState and performs one-way sync in any mode.
 // 来源和两个快照 ID 会在应用文件前重新校验；预览失效返回 code 2、空 msg 和 null data，需重新预览并确认。
-// 其他选择失败返回 code -1；code 2 不推送错误通知，避免通知记录使预览继续失效。
+// code 2 不推送错误通知，避免通知记录使预览继续失效。
 // Automatic sync rejects a changed nonempty source until an explicit direction succeeds; empty sources use local data.
 var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/performSync", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{2}}, "POST")
 
@@ -1103,6 +1117,9 @@ var GetSyncCheckout = define[SyncCheckoutClientRequest, SyncCheckoutSnapshot]("g
 var ConfirmSyncCheckout = define[ConfirmSyncCheckoutRequest, CancelSyncCheckoutData]("confirmSyncCheckout", "/api/sync/confirmSyncCheckout", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
 var PerformBootSync = define[EmptyRequest, Null]("performBootSync", "/api/sync/performBootSync", AuthenticatedAccess|AdminAccess|WritableAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetBootSync = define[EmptyRequest, Null]("getBootSync", "/api/sync/getBootSync", AuthenticatedAccess, NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+// GetSyncInfo 返回同步信息。synced 是上次成功同步的 Unix 毫秒时间戳，无记录时为 0。
+// 同步失败时保留该时间戳，升级后沿用工作空间中已有的记录。stat 是本地化状态文本。
 var GetSyncInfo = define[EmptyRequest, SyncInfoData]("getSyncInfo", "/api/sync/getSyncInfo", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var ExportSyncProviderS3 = define[EmptyRequest, SyncProviderExportData]("exportSyncProviderS3", "/api/sync/exportSyncProviderS3", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var ImportSyncProviderS3 = define[SyncProviderImportRequest, SyncS3Data]("importSyncProviderS3", "/api/sync/importSyncProviderS3", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{DataOnError: true, Setting: SettingWrite{Namespace: "sync"}}, "POST")
@@ -1322,6 +1339,7 @@ var ListDocsByPath = define[FileTreeListRequest, FileTreeListData]("listDocsByPa
 
 // 按可见直接子文档的当前排序读取范围；parentID 为空表示笔记本根级，其他值必须属于指定笔记本。
 // offset 为非负整数，limit 为 1..10240 的整数，省略时采用 docTreeBatchSize。返回 offset 不超过 total。
+// 发布读者的 revision 只反映所请求目录的可见顺序。
 // revision 是不透明的目录顺序版本。传入旧版本时返回 stale=true 和空 files，客户端须替换该目录状态后重试。
 // 隐藏、发布不可见及笔记本文档不计入 total；响应保留加密笔记本租约。旧 listDocsByPath 的上限语义不变。
 // files 可附带标题格式 titleFormat 和语义源版本 titleRevision；索引未就绪时省略，name 始终为纯文本摘要。
@@ -1329,7 +1347,10 @@ var ListDocTreeRange = define[FileTreeRangeRequest, FileTreeRangeData]("listDocT
 
 // 返回目标在各级可见兄弟列表中的位置和版本，steps 按根级到目标排列，无需先读取所有前置范围。
 // 任一祖先隐藏、发布不可见或目标不属于指定笔记本时返回错误，不泄露不可访问的数量和位置。
+// 发布读者的各级版本使用与 listDocTreeRange 相同的可见顺序。
 var LocateDocTreeItem = define[FileTreeLocateRequest, FileTreeLocateData]("locateDocTreeItem", "/api/filetree/locateDocTreeItem", AuthenticatedAccess, JSONBody, ResponseOptions{}, "POST")
+
+// 发布只读会话请求禁止发布的文档时按文档不存在处理。虚拟引用标记只使用当前会话可解析的引用。
 var GetDoc = define[FileTreeGetDocRequest, FileTreeGetDocData]("getDoc", "/api/filetree/getDoc", AuthenticatedAccess, JSONBody, ResponseOptions{AdditionalCodes: []int{1, 3}}, "POST")
 var SetPublishAccess = define[FileTreeSetPublishRequest, Null]("setPublishAccess", "/api/filetree/setPublishAccess", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 var GetPublishAccess = define[FileTreePublishIDsRequest, FileTreePublishData]("getPublishAccess", "/api/filetree/getPublishAccess", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
@@ -1546,6 +1567,7 @@ var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/sett
 // 嵌入并发数和批大小省略、null 或小于 1 时分别使用 8 和 10，超过上限时分别限制为 64 和 128。
 // 旧客户端的平铺 decision.endpoint、apiKey、name、timeout 迁移到 profiles.typesafe；提交 profiles 时以该对象为准。
 // ChatGPT 账户绑定变化时与主配置一起可恢复提交，失败时回滚且不发布新配置；未变化时不访问绑定存储。
+// editing.reasoningEffort 配置智能编辑的默认思考强度。省略保留当前设置，null 或空字符串使用模型默认值。
 var SetAI = define[SetAIRequest, *SettingAI]("setAI", "/api/setting/setAI", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "ai", Merge: true}}, "POST")
 var SetSecrets = define[SetSecretsRequest, *SettingSecrets]("setSecrets", "/api/setting/setSecrets", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "secrets", Merge: true}}, "POST")
 var SetVariables = define[SetVariablesRequest, *SettingVariables]("setVariables", "/api/setting/setVariables", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{Setting: SettingWrite{Namespace: "variables", Merge: true}}, "POST")
@@ -1894,12 +1916,17 @@ var AIRenameSkill = define[AISkillRenameRequest, Null]("renameSkill", "/api/ai/a
 // 路径穿越、平台别名、链接、过期版本，以及单独修改不支持的内容或重命名、删除根 SKILL.md 均被拒绝。
 var AIManageSkills = define[AISkillFileRequest, AISkillFileData]("manageSkills", "/api/ai/agent/manageSkills", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// 按块请求的 start 事件携带本轮实际展开的 prompt，供显式转入智能体时保留原文快照。
+// modelId 可覆盖智能编辑的模型，必须是已启用模型的 ID；省略、null 或空字符串沿用设置。
+// reasoningEffort 省略或为 null 时沿用设置，空字符串使用模型默认值。覆盖仅作用于本次请求。
+// 可选档位为 none、low、medium、high、xhigh、max，实际支持范围由供应商和模型决定。
 var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/editor/chat", AuthenticatedAccess|AdminAccess, StructJSONBody, aiEditorSSEOptions(), "POST")
 
 // gemini-interactions 使用 store=false 和本地会话历史，nativeContent 版本 1 保留完整原生步骤及思考签名。
 // 未知原生版本保留原会话并报错；缺失终止事件、失败或不完整的响应不会执行工具调用。
 // 流式事件按序发送；消费停滞会取消生成，待工具结果和运行时检查点收尾后发送 interrupted。
 // 同轮重试保留原 thinking 轮次；上下文压缩的 thinking 事件携带该轮 roundID。
+// references 中带 messageID 的条目使用 ⟦id⟧ 定位整条消息引用；title 保存快照，压缩后的历史仍可引用原文。
 var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, aiAgentSSEOptions(), "POST")
 var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", PublicAccess, NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
 
@@ -1935,6 +1962,7 @@ var GetDynamicIcon = define[EmptyRequest, BinaryContent]("getDynamicIcon", "/api
 // 未登录、站点与账号区域不匹配或获取原文失败时，使用提交的 DOM 和上传资源；局部剪藏直接使用 DOM。
 var ExtensionCopy = define[ExtensionCopyRequest, *ExtensionCopyData]("extensionCopy", "/api/extension/copy", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{DataOnError: true}, "POST")
 
+// 以 SSE 推送数值进度和本地化阶段，阶段文案只包含公开的启动状态。
 var SystemBootProgressSSE = define[EmptyRequest, Null]("bootProgressSSE", "/api/system/bootProgressSSE", PublicAccess, NoBody, SSEOptions(SSEEvent[BootProgressData]("")), "GET")
 var SystemGetBootAppearance = define[EmptyRequest, *SettingBootAppearance]("getBootAppearance", "/api/system/getBootAppearance", PublicAccess, NoBody, ResponseOptions{EmptyResponseStatuses: []int{403}}, "GET")
 var SystemGetCaptcha = define[EmptyRequest, BinaryContent]("getCaptcha", "/api/system/getCaptcha", PublicAccess, NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200, ContentVariants: []HTTPContentVariant{{Status: 200, ContentType: "image/png"}}, EmptyResponseStatuses: []int{500}}, "GET")
@@ -1972,8 +2000,12 @@ var SystemExportTLSCACert = define[EmptyRequest, SystemPathData]("exportTLSCACer
 
 // SystemGetChangelog 读取版本更新日志；未指定 force 时同时清除待显示标记并落盘 conf.json，因此需要写权限。
 var SystemGetChangelog = define[SystemChangelogRequest, SystemChangelogData]("getChangelog", "/api/system/getChangelog", AuthenticatedAccess|AdminAccess|WritableAccess, LegacyOptionalBody, ResponseOptions{Setting: SettingWrite{Namespace: "system", Mode: SettingSilent}}, "POST")
+
+// 发布读者的文档树设置清空新建文档、块引新建文档和闪念速记的保存目标及模板路径。
 var SystemGetConf = define[EmptyRequest, SystemConfData]("getConf", "/api/system/getConf", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 var SystemGetCustomFonts = define[EmptyRequest, []*SystemCustomFont]("getCustomFonts", "/api/system/getCustomFonts", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
+
+// 发布只读会话可读取内置表情及当前有权访问的文档引用的自定义表情。
 var SystemGetEmojiConf = define[EmptyRequest, []*SystemEmojiGroup]("getEmojiConf", "/api/system/getEmojiConf", AuthenticatedAccess, NoBody, ResponseOptions{}, "POST")
 var SystemGetMobileWorkspaces = define[EmptyRequest, []string]("getMobileWorkspaces", "/api/system/getMobileWorkspaces", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var SystemGetSysFonts = define[EmptyRequest, []*SystemFont]("getSysFonts", "/api/system/getSysFonts", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")

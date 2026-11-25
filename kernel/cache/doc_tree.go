@@ -46,6 +46,7 @@ type DocTreeOrder struct {
 // DocTreeOrderScope 只声明影响该顺序的源字段，元数据展示仍由范围请求读取当前源。
 type DocTreeOrderScope struct {
 	Directory            string
+	PublicRevisionKey    string
 	Title, Updated, Size bool
 	Sorts                []int
 	ChildCounts          []int
@@ -335,7 +336,12 @@ func PutDocTreeOrder(key, box string, refs bool, version DocTreeVersion, ids []s
 		cost += 40 + len(id)
 	}
 	digest := sha256.New()
-	fmt.Fprintf(digest, "%s\x00%d/%d/%d\x00", key, version.Global, version.Source, version.Refs)
+	if scope.PublicRevisionKey != "" {
+		digest.Write([]byte(scope.PublicRevisionKey))
+		digest.Write([]byte{0})
+	} else {
+		fmt.Fprintf(digest, "%s\x00%d/%d/%d\x00", key, version.Global, version.Source, version.Refs)
+	}
 	for _, id := range ids {
 		digest.Write([]byte(id))
 		digest.Write([]byte{0})

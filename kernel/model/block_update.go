@@ -19,10 +19,11 @@ import (
 
 // BlockUpdateInput 描述一个外部块更新请求。
 type BlockUpdateInput struct {
-	ID       string
-	Data     string
-	DataType string
-	LockType bool
+	ID             string
+	Data           string
+	DataType       string
+	LockType       bool
+	AgentGenerated bool
 }
 
 type blockUpdateTreeKey struct {
@@ -131,6 +132,10 @@ func buildBlockUpdateOperations(inputs []BlockUpdateInput, resolveTree blockUpda
 					"createEmptyParagraph": false, // 清空文档后前端不要创建空段落
 				}})
 			}
+			if input.AgentGenerated {
+				markAgentBlocks(dataTree.Root, oldNode, luteEngine)
+				data = luteEngine.Tree2BlockDOM(dataTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+			}
 			operations = append(operations, &Operation{Action: "appendInsert", Data: data, ParentID: input.ID})
 			continue
 		}
@@ -152,6 +157,9 @@ func buildBlockUpdateOperations(inputs []BlockUpdateInput, resolveTree blockUpda
 			explicitIDs = explicitBlockUpdateDOMIDs(input.Data)
 		}
 		pinDescendantBlockIDs(oldNode, updatedNode, explicitIDs)
+		if input.AgentGenerated {
+			markAgentBlocks(updatedNode, oldNode, luteEngine)
+		}
 		data = luteEngine.Tree2BlockDOM(normalizedTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		operations = append(operations, &Operation{
 			Action:   "update",

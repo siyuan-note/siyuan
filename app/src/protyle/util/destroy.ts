@@ -17,13 +17,21 @@ import {destroyAutoDirection} from "../render/autoDirection";
 import {destroyTableCorners} from "../render/tableCorners";
 import {disposeSyncEditorSave} from "./editorSave";
 import {destroyRelatedAVViews} from "../render/av/relatedView";
+import {invalidateMobileEditorSheet} from "../toolbar/mobileEditorSheet";
+/// #if !MOBILE
+import {destroyAVHorizontalScrollbar} from "../render/av/horizontalScrollbar";
+/// #endif
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
+    invalidateMobileEditorSheet(protyle);
     protyle.title?.cancelPendingInput();
     destroyRelatedAVViews(protyle.id);
+    /// #if !MOBILE
+    destroyAVHorizontalScrollbar(protyle);
+    /// #endif
     protyle.title?.destroy?.();
     disposeSyncEditorSave(protyle);
     destroyFoldedRender(protyle);

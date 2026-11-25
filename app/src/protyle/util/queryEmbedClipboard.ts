@@ -1,4 +1,4 @@
-// 仅展开选区副本中的查询结果，保留原始嵌入块供思源内部粘贴。
+// 展开选区副本中的查询结果，供外部剪贴板使用。
 export const expandQueryEmbedsForClipboard = (blockDOM: string): string => {
     if (!blockDOM.includes("NodeBlockQueryEmbed") && !blockDOM.includes("protyle-wysiwyg__embed")) {
         return blockDOM;
@@ -17,4 +17,36 @@ export const expandQueryEmbedsForClipboard = (blockDOM: string): string => {
         element.replaceWith(...blocks);
     });
     return template.innerHTML;
+};
+
+// 将剪贴板中的 JavaScript 查询保存为代码块，避免在插入后直接执行。
+export const neutralizePastedJSEmbeds = (root: ParentNode, lute: Lute): boolean => {
+    let changed = false;
+    root.querySelectorAll('[data-type="NodeBlockQueryEmbed"][data-content]').forEach(element => {
+        const content = Lute.UnEscapeHTMLStr(element.getAttribute("data-content"));
+        // Lute 渲染查询时会移除临时光标标记。
+        if (!content.replaceAll(Lute.Caret, "").trimStart().startsWith("//!js")) {
+            return;
+        }
+        const template = document.createElement("template");
+        template.innerHTML = lute.Md2BlockDOM("```js\n```");
+        const code = template.content.firstElementChild;
+        code.querySelector('[contenteditable="true"]').textContent = content;
+        const id = element.getAttribute("data-node-id");
+        if (id) {
+            code.setAttribute("data-node-id", id);
+        }
+        element.replaceWith(code);
+        changed = true;
+    });
+    return changed;
+};
+
+export const neutralizePastedJSEmbedHTML = (html: string, lute: Lute): string => {
+    if (!html.includes("<")) {
+        return html;
+    }
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    return neutralizePastedJSEmbeds(template.content, lute) ? template.innerHTML : html;
 };

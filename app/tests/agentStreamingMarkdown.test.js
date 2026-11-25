@@ -30,7 +30,7 @@ const runCases = async (sources, css, luteScript) => {
     const check = require("node:assert/strict");
     const resolve = require("node:path").posix;
     const cache = {};
-    const counts = {parse: 0, postRender: 0, copy: 0};
+    const counts = {parse: 0, postRender: 0};
     let parsedLength = 0;
     let parserMilliseconds = 0;
     let parseCost = 0;
@@ -344,7 +344,8 @@ const runCases = async (sources, css, luteScript) => {
             updateSendButtonState: () => {}, applyPermissionMode: () => {}, recoverInterruptedTurn: async () => {},
             saveSession: async () => undefined, reloadFromDisk: async () => {},
             sendBtn: document.createElement("button"), stopBtn: document.createElement("button"),
-            addCopyButton: () => counts.copy++,
+            renderedActions: [],
+            addAssistantActions(_element, content, _timestamp, final = true) { this.renderedActions.push({content, final}); },
             scrollToBottom: function (force = false) { this.scrollCalls.push(force); },
         });
         return chat;
@@ -406,6 +407,7 @@ const runCases = async (sources, css, luteScript) => {
         check.equal(body.classList.contains("agent-chat__body--streaming"), false);
         check.equal(body.classList.contains("agent-chat__body--streaming-markdown"), false);
         check.equal(counts.postRender, beforePost + 1);
+        check.deepEqual(chat.renderedActions, [{content: finalContent, final: finish !== "round"}]);
         check.equal(counts.parse, parses);
         check.equal(chat.streamingMarkdown, undefined);
         if (finish !== "error" && finish !== "config") {

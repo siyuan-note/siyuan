@@ -1,0 +1,200 @@
+{
+	"ID": "20261122113000-s7bz5p5",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f3a8",
+		"id": "20261122113000-s7bz5p5",
+		"title": "Настройка внешнего вида",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-qo2ju9r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-qo2ju9r",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-iv7j3s2",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Иконки"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-w9y6jx1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-w9y6jx1",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-ues0d7c",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Темы"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5ohrjls",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-5ohrjls",
+				"updated": "20261122113000"
+			}
+		},
+		{
+			"ID": "20261122113000-mixuab0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-mixuab0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Компактный режим"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-rqe9rnu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-rqe9rnu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При включении в «"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Внешний вид"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Интерфейс"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Компактный режим"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "» уменьшаются отступы панелей инструментов, вкладок, списков навигации, меню и диалоговых окон в десктопном интерфейсе, а также в десктопном режиме приложения для планшетов. По умолчанию этот параметр отключён и применяется сразу после переключения; он не изменяет размер шрифта в редакторе, вёрстку документов и баз данных, результаты экспорта и мобильный интерфейс."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-35ie6ja",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-35ie6ja",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Встроенные светлая и тёмная темы поддерживают компактный режим. В темах сообщества результат зависит от стилей самой темы — в некоторых областях отступы могут оставаться прежними."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8donwyd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-8donwyd",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Всплывающая строка состояния"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-dux5jpa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-dux5jpa",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После скрытия нижней строки состояния можно включить параметр «"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Внешний вид"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Интерфейс"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Показывать скрытую строку состояния при наведении на правый нижний угол окна"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "», чтобы временно отображать её при наведении курсора на правый нижний угол окна. Пока курсор остаётся на строке состояния, она остаётся развёрнутой, а при уводе — сворачивается. Параметр предназначен для десктопного интерфейса, отключён по умолчанию и применяется сразу после переключения."
+				}
+			]
+		}
+	]
+}

@@ -12,6 +12,26 @@
   margin: 4px 8px 8px;
 }
 
+.av__horizontal-scrollbar {
+  position: absolute;
+  z-index: 5;
+  box-sizing: border-box;
+  height: 10px;
+  transform: translateY(-100%);
+  overflow: scroll hidden;
+  overscroll-behavior-inline: contain;
+  scroll-behavior: auto;
+
+  > div {
+    height: 1px;
+    pointer-events: none;
+  }
+
+  @media print {
+    display: none;
+  }
+}
+
 .av__lunar-date-controls {
   display: flex;
   flex-wrap: wrap;

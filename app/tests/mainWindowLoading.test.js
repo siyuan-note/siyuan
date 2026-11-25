@@ -69,6 +69,7 @@ const runCase = async (sources, options) => {
     const {onGetConfig} = load(options.browser ? sources.browserHost : sources.host, {
         electron, "../constants": {Constants: constants}, "../util/functions": functions,
         "../protyle/util/compatibility": compatibility, "./windowControls": controls,
+        "./harmonyWindowControls": load(sources.harmonyControls),
         "./globalEvent/commonHotkey": {correctHotkey() {}, syncAppMenuShortcuts() {}},
         "../markdown/keymapSync": {syncMarkdownKeymap() {}},
         "./globalEvent/globalShortcut": {sendGlobalShortcut() {}}, "../util/ensureUILayout": {ensureUILayout() {}},
@@ -178,7 +179,8 @@ if (process.versions.electron && process.type === "browser") {
         const ts = require("typescript");
         for (const [key, file] of Object.entries({host: "boot/onGetConfig.ts", browserHost: "boot/onGetConfig.ts",
             loading: "boot/loading.ts", paint: "util/windowPaint.ts", controls: "boot/windowControls.ts",
-            overlay: "boot/windowControlsOverlay.ts", tabs: "layout/tabUtil.ts", color: "util/color.ts"})) {
+            overlay: "boot/windowControlsOverlay.ts", harmonyControls: "boot/harmonyWindowControls.ts",
+            tabs: "layout/tabUtil.ts", color: "util/color.ts"})) {
             const source = require("ifdef-loader/preprocessor").parse(fs.readFileSync(path.join(__dirname, "../src", file), "utf8"),
                 {BROWSER: key === "browserHost", MOBILE: false}, false, true);
             sources[key] = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS,

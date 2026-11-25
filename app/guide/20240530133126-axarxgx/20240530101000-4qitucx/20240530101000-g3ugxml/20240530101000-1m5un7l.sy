@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20261112034624"
+		"updated": "20261122235513"
 	},
 	"Children": [
 		{
@@ -717,6 +717,112 @@
 				{
 					"Type": "NodeText",
 					"Data": " でキャンセルできます。入力欄の外側をクリックするか、フォーカスを移しても保存されます。モバイルで戻る操作を行うと、まず保存して入力欄を閉じます。変更は現在の画像参照にのみ適用され、アセットファイル名は変更されません。読み取り専用ドキュメントでは編集できません。"
+				}
+			]
+		},
+		{
+			"ID": "20261122120803-tv4vexo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122120803-tv4vexo",
+				"updated": "20261122235513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "モバイルでアセットを共有・保存する"
+				}
+			]
+		},
+		{
+			"ID": "20261122120803-4e00rw4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122120803-4e00rw4",
+				"updated": "20261122120803"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Android と HarmonyOS では、画像、添付ファイルのリンク、またはデータベースの添付ファイルのメニューから "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "共有"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択します。音声、動画、埋め込まれたローカル HTML ファイルの場合は、ブロックメニューを開いて "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "共有"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択します。システムの共有パネルから元の形式で添付ファイルを送信できます。iOS では、アセットメニューに "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エクスポート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " がある場合に選択すると、システムの共有パネルが開きます。"
+				}
+			]
+		},
+		{
+			"ID": "20261122235513-93568d9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122235513-93568d9",
+				"updated": "20261122235513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Android では、ローカル画像を長押しして "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ギャラリーに保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択します。ローカル動画の場合は、ブロックメニューを開いて "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ギャラリーに保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択します。元のファイルはシステムのギャラリーに保存されます。"
 				}
 			]
 		},

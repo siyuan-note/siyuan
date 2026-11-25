@@ -5,6 +5,7 @@
 package model
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -126,25 +127,43 @@ func TestUploadAssetsNotificationScope(t *testing.T) {
 					if count != 0 || uploadErr != nil {
 						t.Fatalf("unexpected upload result: count=%d err=%v", count, uploadErr)
 					}
-					// 屏障与通知按连接排队，断言没有通知时无需等待读超时。
-					if broadcastErr := push.Broadcast([]byte(`{"cmd":"asset-notification-barrier"}`)); broadcastErr != nil {
+					// 同步状态可与上传提示交错发送，且 data 是布尔值。
+					notifySyncPending(true)
+					// 每个连接都读取到本轮屏障后再断言，避免失败子测试遗留的消息串入下一轮。
+					barrier := "asset-notification-barrier:" + t.Name()
+					if broadcastErr := push.Broadcast(fmt.Appendf(nil, `{"cmd":%q}`, barrier)); broadcastErr != nil {
 						t.Fatal(broadcastErr)
 					}
+					collected := make([][]assetUploadNotificationEvent, len(connections))
 					for i, connection := range connections {
 						if deadlineErr := connection.SetReadDeadline(time.Now().Add(5 * time.Second)); deadlineErr != nil {
 							t.Fatal(deadlineErr)
 						}
-						var events []assetUploadNotificationEvent
 						for {
-							var event assetUploadNotificationEvent
-							if readErr := connection.ReadJSON(&event); readErr != nil {
+							var envelope struct {
+								Cmd  string
+								Code int
+								Msg  string
+								Data json.RawMessage
+							}
+							if readErr := connection.ReadJSON(&envelope); readErr != nil {
 								t.Fatal(readErr)
 							}
-							if event.Cmd == "asset-notification-barrier" {
+							if envelope.Cmd == barrier {
 								break
 							}
-							events = append(events, event)
+							if envelope.Cmd != "msg" && envelope.Cmd != "cmsg" {
+								continue
+							}
+							event := assetUploadNotificationEvent{Cmd: envelope.Cmd, Code: envelope.Code, Msg: envelope.Msg}
+							if err := json.Unmarshal(envelope.Data, &event.Data); err != nil {
+								t.Errorf("client %d invalid %q notification payload: %v", i, envelope.Cmd, err)
+								continue
+							}
+							collected[i] = append(collected[i], event)
 						}
+					}
+					for i, events := range collected {
 						receives := i == 0 && (target == "first" || target == "legacy") || i == 1 && (target == "second" || target == "legacy")
 						if !receives {
 							if len(events) != 0 {

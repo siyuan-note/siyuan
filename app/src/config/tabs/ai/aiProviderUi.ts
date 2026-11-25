@@ -417,6 +417,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     const initialHeadersText = Object.keys(draft.headers || {}).length ? JSON.stringify(draft.headers, null, 2) : "";
     const initialJSON = JSON.stringify(draft);
     const openedFromCatalog = !existing && !!preset;
+    const baseURLReadOnly = (existing ? findPreset(existing) : preset)?.category === "official";
     const view = createProviderView(
         root,
         openedFromCatalog ? window.siyuan.languages.addAiProvider : window.siyuan.languages.apiProvider,
@@ -436,7 +437,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             <label class="fn__flex b3-label config-item">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiBaseURL)}
                 <span class="fn__space"></span>
-                <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="baseURL" type="text" spellcheck="false" value="${escapeHTML(draft.baseURL)}">
+                <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="baseURL" type="text" spellcheck="false" value="${escapeHTML(draft.baseURL)}"${baseURLReadOnly ? " readonly" : ""}>
             </label>
             <label class="fn__flex b3-label config-item" data-type="openAIApiType">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiType,
@@ -817,6 +818,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         const providerField = target.dataset.providerField as
             "displayName" | "baseURL" | "apiKey" | "protocol" | "requestTimeout";
         if (providerField) {
+            if (providerField === "baseURL" && baseURLReadOnly) {
+                return;
+            }
             if (providerField === "requestTimeout") {
                 draft.requestTimeout = Number.isFinite(target.valueAsNumber) ? target.valueAsNumber : 120;
             } else {

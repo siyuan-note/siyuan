@@ -15,6 +15,10 @@ const setup = (source: string) => {
     const editor = document.querySelector<HTMLElement>("#editor");
     const block = editor.querySelector<HTMLElement>(".av");
     const cursor = editor.querySelector<HTMLElement>(".av__cursor");
+    // Model a cursor below a real multi-row table; its own box has the production zero height.
+    document.head.innerHTML = "<style>.av__cell {width: 180px; height: 32px;} " +
+        "#text {margin-top: 16px; margin-left: 80px;} " +
+        ".av__cursor {width: .1px; height: 0; opacity: 0;}</style>";
     const forwarded: string[] = [];
     const opened: string[][] = [];
     const options = {history: {}};
@@ -56,6 +60,16 @@ const setup = (source: string) => {
     api.selectNewAVPrimary(protyle as IProtyle, block, editor.querySelector("#primary"));
     Object.assign(window, {
         select,
+        geometry: () => {
+            const range = document.createRange();
+            range.setStart(cursor.firstChild, 0);
+            range.collapse(true);
+            const caret = range.getBoundingClientRect();
+            const end = getSelection().getRangeAt(0).getBoundingClientRect();
+            const current = editor.querySelector(".av__cell--select").getBoundingClientRect();
+            return {caretTop: caret.top, caretLeft: caret.left, caretHeight: caret.height, preeditEndTop: end.top,
+                cellTop: current.top, cellBottom: current.bottom, cellLeft: current.left, translate: cursor.style.translate};
+        },
         state: () => ({opened, forwarded, cursor: cursor.textContent, selected: editor.querySelector(".av__cell--select")?.id}),
     });
 };
@@ -87,14 +101,24 @@ app.whenReady().then(async () => {
         const insert = text => cdp("Input.insertText", {text});
         const initial = {opened: [], forwarded: [], cursor: "\\u200b", selected: "primary"};
         assert.deepEqual(await state(), initial);
+        const distance = await run("geometry()");
+        assert.ok(distance.caretTop >= distance.cellBottom, "fixture caret begins below the selected cell");
         await preedit("zhong");
+        const anchored = await run("geometry()");
+        assert.ok(anchored.caretHeight > 0);
+        assert.ok(anchored.caretTop >= anchored.cellTop && anchored.caretTop < anchored.cellBottom,
+            "native composing caret is positioned inside the selected cell");
+        assert.ok(Math.abs(anchored.caretLeft - anchored.cellLeft) < 1);
+        assert.ok(Math.abs(anchored.preeditEndTop - anchored.caretTop) < 1, "preedit does not wrap into the next line");
         assert.deepEqual((await state()).opened, []);
         await preedit("");
         assert.deepEqual(await state(), initial);
+        assert.equal((await run("geometry()")).translate, "", "cancel restores the default AV cursor");
         await preedit("zhongwen");
         await insert("中文");
         const committed = {...initial, opened: [["primary", "中文"]]};
         assert.deepEqual(await state(), committed);
+        assert.equal((await run("geometry()")).translate, "", "commit restores the default AV cursor");
         await preedit("hao");
         await run("select('text'); void 0;");
         await insert("好");

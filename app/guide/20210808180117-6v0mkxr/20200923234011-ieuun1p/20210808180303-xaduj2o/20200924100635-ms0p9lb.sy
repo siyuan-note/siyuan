@@ -183,7 +183,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "All tagged content blocks will be listed in the tag tab ("
+					"Data": "Open the tag panel ("
 				},
 				{
 					"Type": "NodeTextMark",
@@ -219,7 +219,39 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​). If you need to cancel the tag, just delete the tag in the content block."
+					"Data": "​). On desktop, click a tag to find matching blocks in global search. To remove a tag from a content block, delete it in the block."
+				}
+			]
+		},
+		{
+			"ID": "20261124191611-a6d0w2k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261124191611-a6d0w2k",
+				"updated": "20261124191611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On mobile, tap "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Add tag"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the document header to open the tag picker. A checkmark shows which tags are applied to the document. Tap "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Close"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " after adding tags."
 				}
 			]
 		},

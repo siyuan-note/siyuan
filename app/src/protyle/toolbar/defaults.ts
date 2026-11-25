@@ -40,6 +40,10 @@ export const DESKTOP_TOOLBAR_ENTRIES: IToolbarEntry[] = [{
     name: "ai",
     lang: "aiEdit",
 }, {
+    key: "agentQuote",
+    name: "agentQuote",
+    lang: "agentQuote",
+}, {
     key: "separator_1",
     name: "|",
     separator: true,

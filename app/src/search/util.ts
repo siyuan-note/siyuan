@@ -1303,7 +1303,13 @@ export const getArticle = (options: {
     value?: string,
     matches?: IAVSearchMatch[],
 }) => {
-    const isCurrent = beginSearchPreviewRequest(options.edit.protyle);
+    const protyle = options.edit.protyle;
+    const isCurrent = beginSearchPreviewRequest(protyle);
+    const showPreview = () => {
+        if (isCurrent()) {
+            protyle.contentElement.classList.remove("fn__hidden");
+        }
+    };
     checkFold(options.id, (zoomIn) => {
         if (!isCurrent()) {
             return;
@@ -1337,13 +1343,19 @@ export const getArticle = (options: {
                 if (!isCurrent()) {
                     return;
                 }
+                if (getResponse.code !== 0) {
+                    showPreview();
+                }
                 onGet({
                     updateReadonly: true,
                     isValid: isCurrent,
+                    onAVRenderError: showPreview,
                     data: getResponse,
                     protyle: options.edit.protyle,
                     action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
                     beforeAVRender: () => {
+                        // 正文换载后等待命中定位，避免在异步渲染期间显示文档开头。
+                        protyle.contentElement.classList.add("fn__hidden");
                         options.edit.protyle.query = {
                             key: options.value || null,
                             method: options.config?.method || null,
@@ -1385,6 +1397,7 @@ export const getArticle = (options: {
                             options.edit.protyle.highlight.mark.clear();
                             options.edit.protyle.highlight.markHL.clear();
                             options.edit.protyle.highlight.ranges = [];
+                            showPreview();
                             return;
                         }
                         const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
@@ -1411,13 +1424,12 @@ export const getArticle = (options: {
                                         highlightById(options.edit.protyle, options.id, "center");
                                     }
                                 };
-                                if (observer) {
-                                    observer.disconnect();
-                                }
-                                highlightKeys();
-                                observer = new ResizeObserver(() => {
+                                try {
                                     highlightKeys();
-                                });
+                                } finally {
+                                    showPreview();
+                                }
+                                observer = new ResizeObserver(highlightKeys);
                                 observer.observe(options.edit.protyle.wysiwyg.element);
                                 setTimeout(() => {
                                     observer.disconnect();
@@ -1431,16 +1443,17 @@ export const getArticle = (options: {
                             });
                         } else {
                             const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
-                            if (matchElements.length === 0) {
-                                return;
+                            if (matchElements.length > 0) {
+                                matchElements[0].classList.add("search-mark--hl");
+                                protyle.contentElement.scrollTop += matchElements[0].getBoundingClientRect().top -
+                                    contentRect.top - contentRect.height / 2;
                             }
-                            matchElements[0].classList.add("search-mark--hl");
-                            options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElements[0].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                            showPreview();
                         }
                     }
                 });
-            });
-        });
+            }, undefined, showPreview);
+        }, undefined, showPreview);
     });
 };
 

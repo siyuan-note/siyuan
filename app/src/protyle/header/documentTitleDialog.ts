@@ -118,7 +118,7 @@ export const openDocumentTitleDialog = (options: {id: string, notebook?: string,
     const unbindSheet = bindBottomSheetDialog(dialog, async () => { dialog.destroy(); }, undefined, () => {
         sheetReady = true;
         void focusTitle().catch(error => console.error(error));
-    }, {mode: "standard", canStart: () => !closePending && isCurrent()});
+    }, {canStart: () => !closePending && isCurrent()});
     disposeSheet = unbindSheet;
     /// #endif
     const editor = new Protyle(options.app || window.siyuan.ws.app,

@@ -3,7 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
-import {getMobileSheetBounds, moveSheetGesture} from "../../../mobile/util/mobileSheetGesture";
+import {getMobileSheetDragAction, getMobileSheetHeight} from "../../../mobile/util/mobileSheetGesture";
 import {getVisibleSheetViewport} from "../../../menus/sheetOpen";
 
 const compiled = transpileModule(readFileSync("src/protyle/render/av/mobilePanel.ts", "utf8"), {
@@ -54,7 +54,7 @@ const createPanel = () => {
     const exports: {bindMobileAVPanel?: (panel: unknown, menu: unknown) => void} = {};
     runInNewContext(compiled, {
         exports,
-        require: () => ({getMobileSheetBounds, moveSheetGesture, waitForSheetViewport: () => () => {}, getVisibleSheetViewport,
+        require: () => ({getMobileSheetDragAction, getMobileSheetHeight, waitForSheetViewport: () => () => {}, getVisibleSheetViewport,
             escapeAttr: (value: string) => value || "",
             setSheetExpanded: (_menu: unknown, expanded: boolean) => {
                 if (expanded) {
@@ -82,16 +82,17 @@ const createPanel = () => {
         CustomEvent: class {detail: unknown; constructor(_name: string, options: {detail: unknown}) { this.detail = options.detail; }},
     });
     exports.bindMobileAVPanel(panel, menu);
+    menu.style.transform = "";
     const drag = (sortable: boolean, offset: number, title = false) => {
         const target = {
             closest: (selector: string) => sortable && selector.includes('[draggable="true"]') ||
                 title && selector === ".b3-menu__title--actions" ? {} : null,
             parentElement: menu,
         };
-        listeners.get("touchstart")({target, touches: [{clientX: 80, clientY: 100}]});
-        listeners.get("touchmove")({touches: [{clientX: 80, clientY: 100 + offset}]});
+        listeners.get("touchstart")({target, touches: [{identifier: 1, clientX: 80, clientY: 100}]});
+        listeners.get("touchmove")({touches: [{identifier: 1, clientX: 80, clientY: 100 + offset}]});
     };
-    const end = (offset = 200) => listeners.get("touchend")({changedTouches: [{clientY: 100 + offset}]});
+    const end = (offset = 200) => listeners.get("touchend")({changedTouches: [{identifier: 1, clientY: 100 + offset}]});
     // 触发内容观察者，模拟数据库面板内容整体重绘
     const rerender = () => observers[0]();
     const click = (type: string) => listeners.get("click")({
@@ -115,58 +116,43 @@ test("database panel handle is hosted by a root menu title", () => {
     assert.equal(panel.menu.insertedHTML.length, 2);
 });
 
-test("database panel title dragging retains continuously selected heights", () => {
+test("the database grip expands only on release and dismisses from full height", () => {
     const panel = createPanel();
     panel.drag(false, -120, true);
+    assert.equal(panel.menu.style.height, "400px");
     panel.end(-120);
-    assert.equal(panel.classes.has("b3-menu--expanded"), false);
-    assert.equal(panel.menu.style.height, "568px");
-    panel.resize();
-    assert.equal(panel.menu.style.height, "568px");
-    panel.drag(false, 200, true);
-    panel.end();
-    assert.equal(panel.classes.has("b3-menu--expanded"), false);
-    assert.ok(Math.abs(parseFloat(panel.menu.style.height) - 368) < .01);
-    assert.equal(panel.closes(), 0);
+    assert.equal(panel.menu.style.height, "800px");
+    panel.drag(false, 80, true);
+    panel.end(80);
+    assert.equal(panel.closes(), 1);
 });
 
-test("database panel gestures refresh bounds when the viewport shrinks during a drag", () => {
+test("changing the viewport cancels a pending expansion", () => {
     const panel = createPanel();
     panel.drag(false, -100, true);
     panel.viewport.height = 100;
     panel.resize();
     panel.end(-100);
     assert.equal(panel.menu.style.height, "100px");
-    assert.equal(panel.closes(), 0);
-});
-
-test("background swipes collapse a manually expanded database panel", () => {
-    const panel = createPanel();
-    panel.drag(false, -500, true);
-    panel.end(-500);
-    assert.equal(panel.menu.style.height, "800px");
-    assert.equal(panel.classes.has("b3-menu--expanded"), true);
-    panel.drag(false, 200);
-    panel.end(200);
     assert.equal(panel.classes.has("b3-menu--expanded"), false);
-    assert.ok(Math.abs(parseFloat(panel.menu.style.height) - 448) < .01);
     assert.equal(panel.closes(), 0);
 });
 
-test("canceling a database panel gesture keeps its selected height", () => {
+test("canceling a database panel drag keeps half height", () => {
     const panel = createPanel();
     panel.drag(false, -120, true);
     panel.cancel();
+    panel.end(-120);
     assert.equal(panel.classes.has("b3-menu--expanded"), false);
-    assert.ok(Math.abs(parseFloat(panel.menu.style.height) - 568) < .01);
+    assert.equal(panel.menu.style.height, "400px");
 });
 
-test("database panel redraws keep the back control and never inject expansion controls", () => {
+test("database panel redraws keep the back control and full height", () => {
     const panel = createPanel();
     panel.drag(false, -120, true);
     panel.end(-120);
     panel.rerender();
-    assert.equal(panel.menu.style.height, "568px");
+    assert.equal(panel.menu.style.height, "800px");
     for (const html of panel.menu.insertedHTML) {
         assert.match(html, /data-type="sheet-back"/);
         assert.doesNotMatch(html, /sheet-expand|b3-menu__actions/);

@@ -32,15 +32,23 @@ var getDocOutline = contractHandler(apicontract.GetDocOutline, func(c *gin.Conte
 	}
 	var headings []*model.Path
 	var err error
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	if notebook != "" && model.IsEncryptedBox(notebook) {
-		headings, err = model.OutlineInBox(rootID, preview, notebook)
+		if isReadOnlyRole {
+			headings, err = model.OutlineInBoxForReader(rootID, preview, notebook)
+		} else {
+			headings, err = model.OutlineInBox(rootID, preview, notebook)
+		}
 	} else {
-		headings, err = model.Outline(rootID, preview)
+		if isReadOnlyRole {
+			headings, err = model.OutlineForReader(rootID, preview)
+		} else {
+			headings, err = model.Outline(rootID, preview)
+		}
 	}
 	if err != nil {
 		return apicontract.Failure[[]*apicontract.SearchPath](1, err.Error())
 	}
-	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	if isReadOnlyRole {
 		publishAccess := model.GetPublishAccess()
 		bt := treenode.GetBlockTree(rootID)

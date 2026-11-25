@@ -25,6 +25,7 @@ func aiProviderAdmission(c *gin.Context) *apicontract.Response[apicontract.Null]
 
 func aiEditorRequest(request apicontract.AIEditorChatRequest) aiEditorChatReq {
 	result := aiEditorChatReq{TaskID: request.TaskID, IDs: request.IDs, Input: request.Input, Action: request.Action}
+	result.Options = model.AIEditorChatOptions{ModelID: request.ModelID, ReasoningEffort: request.ReasoningEffort}
 	if request.History != nil {
 		result.History = make([]model.AIEditorMessage, len(request.History))
 		for i, item := range request.History {

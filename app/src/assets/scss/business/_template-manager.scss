@@ -165,14 +165,13 @@
   }
 
   &__context-fields {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: center;
     gap: 8px;
 
     input, select {
       min-width: 0;
-      flex: 1;
     }
   }
 
@@ -186,21 +185,50 @@
 
 .template-manager--wide {
   .template-manager__editor {
-    flex-direction: row;
-    overflow: hidden;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto minmax(180px, 1fr) auto;
+    grid-template-areas:
+      "heading context"
+      "source preview"
+      "actions .";
+    column-gap: 16px;
   }
 
   .template-manager__source-panel,
   .template-manager__preview-panel {
-    flex: 1 1 0;
+    display: contents;
+  }
+
+  .template-manager__heading {
+    grid-area: heading;
+    align-self: start;
+  }
+
+  .template-manager__context {
+    grid-area: context;
+  }
+
+  .template-manager__context-heading {
+    align-content: center;
+    min-height: 36px;
+  }
+
+  .template-manager__source {
+    grid-area: source;
     min-height: 0;
-    overflow: auto;
+    resize: none;
   }
 
   .template-manager__preview {
-    flex: 1 0 180px;
+    grid-area: preview;
     max-height: none;
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+  }
+
+  .template-manager__source-panel > .template-manager__actions {
+    grid-area: actions;
   }
 }
 
@@ -219,9 +247,7 @@
     }
 
     &__context-fields {
-      input, select {
-        flex-basis: 100%;
-      }
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 }

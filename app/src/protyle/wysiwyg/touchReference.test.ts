@@ -1,6 +1,8 @@
 import * as assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
 import {test} from "node:test";
-import {ScriptTarget} from "typescript";
+import {runInNewContext} from "node:vm";
+import {ScriptTarget, transpileModule} from "typescript";
 import {loadModule} from "../../testSupport/loadModule";
 
 const fixture = (options: {reference?: string, uri?: any, selection?: string, root?: boolean, hidden?: boolean} = {}) => {
@@ -59,5 +61,36 @@ test("text selection, ordinary text and external or invalid links do not navigat
         const f = fixture(options);
         assert.equal(f.result, false);
         assert.deepEqual(f.calls, []);
+    }
+});
+
+test("touching a virtual reference opens a target only when the lookup returns one", () => {
+    const source = readFileSync("src/protyle/wysiwyg/index.ts", "utf8");
+    const start = source.indexOf("const virtualRefElement = ");
+    const end = source.indexOf("/// #endif", start);
+    assert.ok(start >= 0 && end > start);
+    const code = transpileModule(`(function(event) {${source.slice(start, end)}})`, {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
+    const opened: string[] = [];
+    for (const response of [
+        {code: 0, data: {refDefs: []}},
+        {code: -1, data: null},
+        {code: 0, data: {refDefs: [{refID: "visible-target"}]}},
+    ]) {
+        const click = runInNewContext(code, {
+            hasClosestByAttribute: () => ({textContent: "Topic"}),
+            range: {toString: () => ""},
+            isEncryptedBox: () => false,
+            protyle: {app: {}},
+            fetchPost: (_url: string, _request: object, callback: (value: typeof response) => void) => callback(response),
+            checkReferenceFold: (_id: string, callback: (zoomIn: boolean) => void) => callback(false),
+            mobileBlur: false,
+            activeBlur: () => {},
+            openMobileFileById: (_app: object, id: string) => opened.push(id),
+            Constants: {},
+        });
+        click({stopPropagation: () => {}, preventDefault: () => {}});
+        assert.deepEqual(opened, response.data?.refDefs.length ? ["visible-target"] : []);
     }
 });

@@ -74,3 +74,18 @@ func TestCreatedAndUpdatedDateDisplayFormat(t *testing.T) {
 		t.Fatalf("unexpected updated date: %q", updated.FormattedContent)
 	}
 }
+
+func TestFormattedValueDateWithoutEndTimestamp(t *testing.T) {
+	start := time.Date(2024, time.March, 5, 0, 0, 0, 0, time.Local).UnixMilli()
+	for _, enabled := range []bool{false, true} {
+		date := NewFormattedValueDate(start, 0, DateFormatNone, true, enabled)
+		if date.IsNotEmpty2 || date.HasEndDate != enabled || "2024-03-05" != date.FormattedContent {
+			t.Fatalf("unexpected date without an end timestamp: %+v", date)
+		}
+	}
+	negative := time.Date(1969, time.December, 1, 0, 0, 0, 0, time.Local).UnixMilli()
+	date := NewFormattedValueDate(negative, negative, DateFormatNone, true, true)
+	if !date.IsNotEmpty2 || "1969-12-01 → 1969-12-01" != date.FormattedContent {
+		t.Fatalf("unexpected date range before the Unix epoch: %+v", date)
+	}
+}

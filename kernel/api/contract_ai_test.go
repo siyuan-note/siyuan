@@ -267,6 +267,9 @@ func TestAPIContractAIEditorSSE(t *testing.T) {
 	if err = bundle.ValidateHTTPResponse("POST", "/api/ai/editor/chat", recorder.Code, recorder.Header().Get("Content-Type"), recorder.Body.Bytes()); err != nil {
 		t.Fatalf("%v: %s", err, recorder.Body.String())
 	}
+	if err = bundle.ValidateSSEEvent("POST", "/api/ai/editor/chat", "start", []byte(`{"taskID":"task","prompt":"Summarize the selected blocks"}`)); err != nil {
+		t.Fatal(err)
+	}
 	for frame := range strings.SplitSeq(strings.TrimSpace(recorder.Body.String()), "\n\n") {
 		lines := strings.SplitN(frame, "\n", 2)
 		if len(lines) != 2 {
@@ -280,6 +283,67 @@ func TestAPIContractAIEditorSSE(t *testing.T) {
 	}
 	if !strings.Contains(recorder.Body.String(), "event:content") || !strings.Contains(recorder.Body.String(), "event:done") {
 		t.Fatalf("stream did not complete: %s", recorder.Body.String())
+	}
+}
+
+func TestAPIContractAIEditorRequestOptions(t *testing.T) {
+	aiContractConfiguration(t)
+	type upstreamRequest struct {
+		Model  string `json:"model"`
+		Effort string `json:"reasoning_effort"`
+	}
+	requests := make(chan upstreamRequest, 1)
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body upstreamRequest
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		requests <- body
+		w.Header().Set("Content-Type", "text/event-stream")
+		fmt.Fprint(w, "data: [DONE]\n\n")
+	}))
+	defer upstream.Close()
+	ai := model.Conf.AI.Load()
+	ai.Providers = []*conf.Provider{{ID: "provider", Enabled: true, BaseURL: upstream.URL, Protocol: "openai",
+		APIKey: "test", Models: []*conf.Model{
+			{ID: "default-id", Name: "default-model", Enabled: true},
+			{ID: "other-id", Name: "other-model", Enabled: true},
+			{ID: "disabled-id", Name: "disabled-model"},
+		}}}
+	ai.Editing.ModelID, ai.Editing.ReasoningEffort = "default-id", "medium"
+	engine := gin.New()
+	engine.POST("/api/ai/editor/chat", aiEditorChat)
+	for _, tc := range []struct {
+		name   string
+		fields string
+		want   upstreamRequest
+	}{
+		{"configured defaults", "", upstreamRequest{"default-model", "medium"}},
+		{"null uses defaults", `,"modelId":null,"reasoningEffort":null`, upstreamRequest{"default-model", "medium"}},
+		{"temporary overrides", `,"modelId":"other-id","reasoningEffort":"high"`, upstreamRequest{"other-model", "high"}},
+		{"model default override", `,"reasoningEffort":""`, upstreamRequest{"default-model", ""}},
+		{"disabled reasoning", `,"reasoningEffort":"none"`, upstreamRequest{"default-model", "none"}},
+		{"disabled model", `,"modelId":"disabled-id"`, upstreamRequest{}},
+		{"model name is not an ID", `,"modelId":"other-model"`, upstreamRequest{}},
+		{"invalid effort", `,"reasoningEffort":"invalid"`, upstreamRequest{}},
+		{"defaults survive overrides", "", upstreamRequest{"default-model", "medium"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/ai/editor/chat",
+				strings.NewReader(`{"input":"hello"`+tc.fields+`}`)))
+			select {
+			case got := <-requests:
+				if got != tc.want || !strings.Contains(recorder.Header().Get("Content-Type"), "text/event-stream") {
+					t.Fatalf("upstream request %+v, want %+v; response %s", got, tc.want, recorder.Body)
+				}
+			default:
+				if tc.want.Model != "" || !strings.Contains(recorder.Body.String(), `"code":-1`) {
+					t.Fatalf("unexpected rejection: %s", recorder.Body)
+				}
+			}
+		})
 	}
 }
 

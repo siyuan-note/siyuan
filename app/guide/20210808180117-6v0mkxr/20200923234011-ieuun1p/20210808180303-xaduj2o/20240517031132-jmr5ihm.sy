@@ -337,6 +337,34 @@
 			]
 		},
 		{
+			"ID": "20261122110827-2ye0v69",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122110827-2ye0v69",
+				"updated": "20261122110827"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the published view, document word and character counts cover the document itself. Content from query embeds is excluded."
+				}
+			]
+		},
+		{
+			"ID": "20261122115437-uy7h2ma",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122115437-uy7h2ma",
+				"updated": "20261122115437"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The publish service applies access rules to backlinks and database names. The custom emoji catalog lists only emoji referenced by documents the reader can access. Full-text search excludes block memos and raw block attributes."
+				}
+			]
+		},
+		{
 			"ID": "20260613195415-pbh6hjr",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

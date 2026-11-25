@@ -1055,6 +1055,7 @@ export const showAVColumnWidthMenu = (protyle: IProtyle, blockElement: HTMLEleme
                 action: "syncAttrViewTableColWidth",
                 keyID: columnID,
                 avID: blockElement.dataset.avId,
+                blockID: blockElement.dataset.nodeId,
                 id: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
             }]);
         }

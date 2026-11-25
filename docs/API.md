@@ -2161,6 +2161,7 @@ Incoming titles containing ASCII `/` must declare `Spec` at least `6`; otherwise
 
 * `/api/system/bootProgress`
 * No parameters
+* `details` contains the localized startup stage and may include work counters. It omits workspace paths and identifiers
 * Return value
 
   ```json

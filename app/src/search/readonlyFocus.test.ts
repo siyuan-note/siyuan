@@ -19,7 +19,7 @@ test("locking a focusable search preview retains shortcut focus without stealing
                 hasAttribute: () => focusable,
                 focus: (options: FocusOptions) => { assert.equal(options.preventScroll, true); focusCalls++; },
             };
-            const protyle = {element, disabled: false, wysiwyg: {element: {querySelectorAll: (): unknown[] => []}}};
+            const protyle = {element, contentElement: {}, disabled: false, wysiwyg: {element: {querySelectorAll: (): unknown[] => []}}};
             runInNewContext(code + "\ndisabledProtyle(protyle);", {
                 protyle, document,
                 window: {siyuan: {mobile: {}, menus: {menu: {remove() {}}}}},

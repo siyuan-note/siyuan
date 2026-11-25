@@ -62,7 +62,7 @@ const setup = async (directory, mobile, fullHeight) => {
     Constants.TIMEOUT_OPENDIALOG = 0;
     Constants.TIMEOUT_DBLCLICK = 0;
     window.siyuan = {dialogs: [], zIndex: 1, emojis: categories,
-        config: {lang: "en_US", readonly: false, editor: {emoji: []}},
+        config: {lang: "en_US", readonly: false, editor: {emoji: categories[0].items.slice(0, 2).map(item => item.unicode)}},
         storage: {[Constants.LOCAL_EMOJIS]: {currentTab: "emoji"}},
         mobile: {size: {portrait: {height1: fullHeight}, landscape: {height1: fullHeight}, isLandscape: innerWidth > fullHeight}},
         languages: JSON.parse(fs.readFileSync(path.join(directory, "appearance/langs/en.json"), "utf8")),
@@ -95,6 +95,50 @@ const setup = async (directory, mobile, fullHeight) => {
             gridHeight: panel.clientHeight, scrollHeight: panel.scrollHeight};
     };
     geometry();
+    const input = tabbody.querySelector('[data-type="tab-emoji"] .b3-text-field');
+    const selected = () => panel.querySelector(".emojis__item--current");
+    const press = (key) => {
+        const event = new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true});
+        input.dispatchEvent(event);
+        check.equal(event.defaultPrevented, true);
+        return selected();
+    };
+    const checkRows = () => {
+        const [recent, results] = panel.querySelectorAll(".emojis__section");
+        const [firstRecent, secondRecent] = recent.querySelectorAll(".emojis__item");
+        check.equal(selected(), firstRecent);
+        check.equal(press("ArrowUp"), firstRecent);
+        check.equal(press("ArrowRight"), secondRecent);
+        const firstResult = press("ArrowDown");
+        const buttons = [...results.querySelectorAll(".emojis__item")];
+        const secondRow = buttons.findIndex(item => item.offsetTop > buttons[0].offsetTop);
+        check.ok(secondRow > 2, "recent emoji occupy only part of a result row");
+        check.equal(firstResult, buttons[1]);
+        check.equal(press("ArrowDown"), buttons[secondRow + 1]);
+        check.equal(press("ArrowUp"), buttons[1]);
+        check.equal(press("ArrowUp"), secondRecent);
+        check.equal(press("ArrowLeft"), firstRecent);
+        return results;
+    };
+    const people = checkRows();
+    const [firstChunk, nextChunk] = people.querySelectorAll(".emojis__chunk");
+    check.equal(nextChunk.childElementCount, 0);
+    const lastButton = firstChunk.lastElementChild;
+    selected().classList.remove("emojis__item--current");
+    lastButton.classList.add("emojis__item--current");
+    panel.scrollTop += lastButton.getBoundingClientRect().bottom - panel.getBoundingClientRect().bottom;
+    // 让第一行的最后一列与当前列对齐，即使下一分块还没有渲染。
+    const lastRowStart = [...firstChunk.children].findIndex(item => item.offsetTop === lastButton.offsetTop);
+    const column = firstChunk.childElementCount - lastRowStart - 1;
+    const nextButton = press("ArrowDown");
+    check.equal(nextButton, nextChunk.children[column]);
+    check.equal(press("ArrowUp"), lastButton);
+
+    input.value = "people";
+    input.dispatchEvent(new Event("input", {bubbles: true}));
+    checkRows();
+    input.value = "";
+    input.dispatchEvent(new Event("input", {bubbles: true}));
     const headerTop = header.getBoundingClientRect().top;
     const categoriesTop = types.getBoundingClientRect().top;
     panel.scrollTop = 180;
@@ -191,7 +235,7 @@ if (process.versions.electron && process.type === "browser") {
         app.exit(0);
     })().catch(error => {console.error(error); require("electron").app.exit(1);});
 } else {
-    require("node:test").test("emoji picker grids scroll inside mobile sheets and desktop dialogs", {timeout: 60000}, async () => {
+    require("node:test").test("emoji picker keyboard navigation and scrolling work in mobile sheets and desktop dialogs", {timeout: 60000}, async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-emoji-layout-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

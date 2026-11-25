@@ -6,7 +6,7 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
 import {compile, Logger} from "sass";
-import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {ModuleKind, ScriptTarget, createSourceFile, forEachChild, isMethodDeclaration, transpileModule} from "typescript";
 
 const browserCases = async (sources: Record<string, string>, css: string,
                             themeLabels: {language: string, labels: Record<string, string>}[]) => {
@@ -161,6 +161,50 @@ const browserCases = async (sources: Record<string, string>, css: string,
         menu.remove();
         menu.element.remove();
     };
+
+    Object.assign(window.siyuan.languages, {tag: "Tag", close: "Close", new: "New"});
+    Object.assign(window, {Lute: {UnEscapeHTMLStr: (value: string) => value}});
+    const {hasClosestByClassName} = load("protyle/util/hasClosest");
+    const tagTrigger = document.createElement("button");
+    document.body.append(tagTrigger);
+    for (const touch of [false, true]) {
+        mobile = touch;
+        const tagMenu = createMenu();
+        const tags: string[] = [];
+        const picker = new Function("toggleMenu", "Menu", "markMenuInnerScroll", "isMobile", "fetchPost",
+            "hasClosestByClassName", "upDownHint", "escapeHtml", sources[touch ? "mobileTagPicker" : "desktopTagPicker"])(
+            ({build}: {build: (menu: unknown, session: {show: (show: () => void) => void}) => void}) =>
+                build(undefined, {show: show => show()}), PluginMenu, markMenuInnerScroll, () => mobile,
+            (_url: string, {k}: {k: string}, callback: (result: unknown) => void) => {
+                queueMicrotask(() => callback({data: {k, tags: k ? [] : ["Existing"]}}));
+            }, hasClosestByClassName, () => {}, (value: string) => value);
+        picker.getTags = () => tags;
+        picker.addTags = (tag: string, _protyle: unknown, saved: () => void) => {
+            tags.push(tag);
+            saved();
+        };
+        picker.openTag({}, tagTrigger);
+        await settle();
+        const close = tagMenu.element.querySelector<HTMLButtonElement>('button[data-type="close"]');
+        check.equal(Boolean(close), touch, "only the mobile tag sheet has a Close button");
+        if (touch) {
+            check.equal(close.textContent, "Close");
+            check.ok(tagMenu.element.classList.contains("b3-menu--sheet"));
+            tagMenu.element.querySelector<HTMLElement>(".b3-list-item").click();
+            check.ok(tagMenu.element.querySelector(".b3-menu__checked"), "selected tags are marked with the sheet still open");
+            const search = tagMenu.element.querySelector("input");
+            search.value = "Unsubmitted";
+            search.dispatchEvent(new Event("input"));
+            await settle();
+            close.click();
+            await settle();
+            check.ok(tagMenu.element.classList.contains("fn__none"), "Close dismisses the sheet");
+            check.deepEqual(tags, ["Existing"], "closing does not submit text in the search field");
+        }
+        dispose(tagMenu);
+    }
+    tagTrigger.remove();
+    mobile = false;
 
     const {embedBreadcrumbMenu}: typeof import("../protyle/gutter/embedBreadcrumbMenu") = load("protyle/gutter/embedBreadcrumbMenu");
     Object.assign(window.siyuan.languages, {embedBlockBreadcrumb: "Breadcrumb", embedBlockBreadcrumbParentPath: "Parent path",
@@ -871,7 +915,6 @@ const browserCases = async (sources: Record<string, string>, css: string,
     keyboardToolbar.style.cssText = "position:fixed;bottom:0;height:40px;width:100%";
     document.body.append(keyboardToolbar);
     const sheet = createMenu();
-    sheet.element.classList.add("b3-menu--fit");
     addItems(sheet, 2);
     sheet.fullscreen("bottom", undefined, {preserveKeyboard: true});
     await settle();
@@ -886,8 +929,11 @@ const browserCases = async (sources: Record<string, string>, css: string,
     pointer(sheetItems, .3);
     pointer(sheetItems, .7);
     check.equal(sheetItems.scrollTop, 0, "Mobile sheets ignore mouse-follow scrolling even with a saved preference");
-    check.ok(sheet.element.getBoundingClientRect().height > sheetHeight);
-    check.ok(sheet.element.getBoundingClientRect().height <= innerHeight * .9 + .5);
+    const updatedSheetHeight = sheet.element.getBoundingClientRect().height;
+    // A compositor transform can round the same CSS height differently across frames.
+    check.ok(Math.abs(updatedSheetHeight - sheetHeight) < .01,
+        `Updating menu contents preserves the sheet height: ${sheetHeight}px -> ${updatedSheetHeight}px`);
+    check.ok(sheet.element.getBoundingClientRect().height <= innerHeight / 2 + .5);
     check.equal(sheetResets, 1);
     await settle();
     check.equal(sheetResets, 1, "Sheet title updates must not cause a layout loop");
@@ -975,7 +1021,7 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     timeout: 45000,
 }, async () => {
     const sources = Object.fromEntries(["menus/Menu", "menus/menuPosition", "menus/menuMouseScroll", "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
-        "util/setPosition", "util/zIndex", "protyle/util/hasClosest", "plugin/Menu", "menus/overlayOwnership", "protyle/render/av/openMenuPanel", "protyle/render/av/cellPanelPosition", "protyle/render/av/renderData",
+        "util/setPosition", "util/zIndex", "protyle/util/hasClosest", "plugin/Menu", "menus/overlayOwnership", "protyle/render/av/openMenuPanel", "protyle/render/av/cellPanelPosition", "protyle/render/av/renderData", "protyle/render/av/viewVisibility",
         "asset/pdf/viewerTemplate", "asset/pdf/secondary_toolbar.js", "protyle/render/av/calendar/undated", "protyle/gutter/embedBreadcrumbMenu",
         "layout/dock/agent/AgentSessionPanel", "protyle/render/listMindmap/appearance"].map(name => [name,
         transpileModule(readFileSync(path.join(__dirname, "..", name.endsWith(".js") ? name : name + ".ts"), "utf8"), {
@@ -986,6 +1032,24 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
         providerSource.indexOf("const showTestResult =")), {
         compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
     }).outputText;
+    const background = readFileSync(path.join(__dirname, "../protyle/header/Background.ts"), "utf8");
+    const {parse} = require("ifdef-loader/preprocessor");
+    for (const mobile of [false, true]) {
+        const source = createSourceFile("Background.ts", parse(background, {MOBILE: mobile}), ScriptTarget.Latest, true);
+        let openTag: string;
+        const findOpenTag = (node: import("typescript").Node) => {
+            if (isMethodDeclaration(node) && node.name.getText(source) === "openTag") {
+                openTag = node.getText(source);
+            }
+            forEachChild(node, findOpenTag);
+        };
+        findOpenTag(source);
+        assert.ok(openTag);
+        sources[mobile ? "mobileTagPicker" : "desktopTagPicker"] = transpileModule(
+            `class TagPicker {${openTag}} return new TagPicker();`, {
+                compilerOptions: {target: ScriptTarget.ES2021},
+            }).outputText;
+    }
     const css = ["component/_menu.scss", "component/_list.scss", "component/_text-field.scss", "util/_function.scss",
         "business/_av.scss", "business/_av-calendar.scss", "business/_ai_agent.scss", "pdf/_pdf.scss",
         "protyle/_mindmap-view.scss"].map(name =>

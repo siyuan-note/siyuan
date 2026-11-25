@@ -101,8 +101,17 @@ const cases = async () => {
     assert.equal(window.transactions.length, 1);
     assert.equal(window.transactions[0][1][0].action, "setAttrViewBlockView");
     window.transactions.length = 0;
-    click(carrier.querySelector('[data-type="av-group-fold"]'));
+    const group = carrier.querySelector('[data-type="av-group-fold"]');
+    const wasOpen = group.firstElementChild.classList.contains("av__group-arrow--open");
+    click(group);
+    const foldOperation = {
+        action: "foldAttrViewGroup", avID: "database", blockID: "carrier", viewID: "first", id: "a",
+    };
+    assert.deepEqual(window.transactions, [[protyle, [{...foldOperation, data: wasOpen}],
+        [{...foldOperation, data: !wasOpen}]]]);
+    window.transactions.length = 0;
     protyle.disabled = true;
+    click(group);
     await new Promise(resolve => setTimeout(resolve, 10));
     assert.equal(window.transactions.length, 0);
     window.avAssets.editAssetItem({protyle});

@@ -34,7 +34,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Optimize typography adds spacing around inline elements and between CJK and Western text to make spacing consistent throughout a document."
+					"Data": "Optimize typography adds spacing around inline elements and between CJK and Western text to make spacing consistent throughout a document. It also formats text inside rich-text table cells."
 				}
 			]
 		},

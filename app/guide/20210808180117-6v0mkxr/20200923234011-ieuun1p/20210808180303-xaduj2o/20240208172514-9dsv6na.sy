@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20261121231653"
+		"updated": "20261123215221"
 	},
 	"Children": [
 		{
@@ -387,7 +387,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261024161058-v4cp9kf",
-				"updated": "20261111211629"
+				"updated": "20261123215221"
 			},
 			"Children": [
 				{
@@ -396,6 +396,20 @@
 				}
 			],
 			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261123215221-fe33ce8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123215221-fe33ce8",
+				"updated": "20261123215221"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When you hide the current view’s tab, the database switches to the nearest visible tab to its left, or to the nearest one on its right if none are visible on the left. Undo restores both the tab and the current view."
+				}
+			]
 		},
 		{
 			"ID": "20261110134234-mano130",
@@ -526,7 +540,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613162855-gkemixn",
-				"updated": "20260613162855"
+				"updated": "20261122174056"
 			},
 			"Children": [
 				{
@@ -540,12 +554,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613162855-6ui96ya",
-				"updated": "20260613162855"
+				"updated": "20261122174056"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The default database view, displaying data in a tabular row-and-column format."
+					"Data": "The default database view, displaying data in a tabular row-and-column format. In a desktop editor, a wide table shows a horizontal scrollbar at the bottom of the visible area when the scrollbar at the end of the table is out of view."
 				}
 			]
 		},
@@ -618,7 +632,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Each column represents a field. Drag to resize columns and reorder them. Right-click the column header to edit, delete, or hide the field"
+									"Data": ": Each column represents a field. Drag to resize columns and reorder them. Right-click the column header to edit, delete, or hide the field. Undo restores the previous width after resizing and restores each affected view's previous width after applying a width to other views"
 								}
 							]
 						}
@@ -2300,7 +2314,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Click the delete button on the right of a filter condition to remove it individually; use the filter menu to clear all at once"
+									"Data": ": Delete a condition from its More menu on the right. On a phone, this menu is beside the field name. To clear all conditions, use the button at the bottom of the filter panel"
 								}
 							]
 						}

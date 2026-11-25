@@ -16,6 +16,7 @@ import (
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -150,8 +151,12 @@ func IsSyncCheckoutApplying() bool {
 	return false
 }
 
-// prepareApply 先排空各窗口输入，再取得既有写接口和编辑事务的串行区。
 func (task *syncCheckoutTask) prepareApply() error {
+	return task.prepareWriteProtection(true)
+}
+
+// prepareWriteProtection 先排空各窗口输入，再取得既有写接口和编辑事务的串行区。
+func (task *syncCheckoutTask) prepareWriteProtection(deferForRecovery bool) error {
 	if err := task.ctx.Err(); err != nil {
 		return err
 	}
@@ -161,6 +166,9 @@ func (task *syncCheckoutTask) prepareApply() error {
 		return nil
 	}
 	task.Unlock()
+	if deferForRecovery && sql.IndexRecoveryPending() {
+		return errSyncCheckoutBusy
+	}
 	var sessions []*melody.Session
 	for {
 		if err := waitForSyncUI(task.ctx, false, false); err != nil {

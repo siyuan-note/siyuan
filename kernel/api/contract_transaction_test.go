@@ -179,13 +179,13 @@ func TestTransactionContractBootBeforeOperationBinding(t *testing.T) {
 	}
 	oldConf, oldLangs := model.Conf, util.Langs
 	progress := util.GetBootProgress()
-	util.IncBootProgress(-progress, "")
+	util.IncBootProgress(-progress, util.BootStageNone)
 	model.Conf = model.NewAppConf()
 	model.Conf.Lang = "en"
 	util.Langs = map[string]map[int]string{"en": {74: "boot progress %d"}}
 	t.Cleanup(func() {
 		model.Conf, util.Langs = oldConf, oldLangs
-		util.IncBootProgress(progress-util.GetBootProgress(), "")
+		util.IncBootProgress(progress-util.GetBootProgress(), util.BootStageNone)
 	})
 	router := gin.New()
 	router.POST("/api/transactions", performTransactions)

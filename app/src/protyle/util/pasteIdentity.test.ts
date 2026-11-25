@@ -27,6 +27,7 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
         "../wysiwyg/blockSelection": {BLOCK_SELECTION_MODE_CLASS: "protyle-wysiwyg--block-select"},
     });
     const pasteSource = load(sources.pasteSource, {});
+    const queryEmbedClipboard = load(sources.queryEmbedClipboard, {});
     const tabsCopy = load(sources.tabsCopy, {});
     const viewVisibility = load(sources.viewVisibility, {"../../../constants": constants});
     const originalID = "20261007000000-abcdefg";
@@ -39,8 +40,14 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
         <div class="av__container"><div class="av__header" data-view-ids="main,mirror"><div class="av__views">
         <div class="layout-tab-bar"><div class="item" data-id="main">Main</div>
         <div class="item item--focus" data-id="mirror">Mirror</div></div></div></div></div></div>`;
-    for (const mode of ["copy", "cut", "mixed", "error", "target removed", "view mirror"]) {
-        const clipboardHTML = mode === "view mirror" ? mirrorHTML : html;
+    const jsSource = "//!js\n// Notes < & >";
+    const sqlSource = "SELECT * FROM blocks";
+    const embedSources = new Map([["js embed", jsSource], ["js embed with caret", Lute.Caret + jsSource], ["sql embed", sqlSource]]);
+    for (const mode of ["copy", "cut", "mixed", "error", "target removed", "view mirror", ...embedSources.keys()]) {
+        const source = embedSources.get(mode);
+        const clipboardHTML = mode === "view mirror" ? mirrorHTML : source ?
+            html.replace('data-type="NodeParagraph" class="p" refcount="1"',
+                'data-type="NodeBlockQueryEmbed" class="render-node" data-content="' + Lute.EscapeHTMLStr(source) + '"') : html;
         const editor = document.createElement("div");
         editor.innerHTML = clipboardHTML + '<div data-node-id="20261007000002-abcdefg" data-type="NodeParagraph" class="p">' +
             '<div contenteditable="true">Target</div></div>';
@@ -65,6 +72,7 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
             "../../util/pathName": {isEncryptedBox: () => true},
             "./pasteAssets": {preparePasteAssets: async (_box: string, value: string) => value},
             "./pasteSource": pasteSource,
+            "./queryEmbedClipboard": queryEmbedClipboard,
             "./clear": clear,
             "./tabsCopy": tabsCopy,
             "../render/listMindmap/model": {remapListMindmapIDs: () => {}},
@@ -122,6 +130,12 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
                 check.notEqual(pasted.getAttribute("data-node-id"), originalID);
                 check.equal(pasted.getAttribute("custom-sy-av-visible-views"), "mirror");
                 check.deepEqual(Array.from(pasted.querySelectorAll(".layout-tab-bar .item"), tab => tab.getAttribute("data-id")), ["mirror"]);
+            } else if (mode === "sql embed") {
+                check.equal(pastedChild.getAttribute("data-type"), "NodeBlockQueryEmbed");
+                check.equal(Lute.UnEscapeHTMLStr(pastedChild.getAttribute("data-content")), sqlSource);
+            } else if (source) {
+                check.equal(pastedChild.getAttribute("data-type"), "NodeCodeBlock");
+                check.equal(pastedChild.querySelector('[contenteditable="true"]').textContent, source);
             } else if (mode === "copy") {
                 check.notEqual(pasted.getAttribute("data-node-id"), originalID);
                 check.notEqual(pastedChild.getAttribute("data-node-id"), childID);
@@ -143,9 +157,9 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
     return "paste-identity-ok";
 };
 
-test("internal block paste preserves block identity rules and shows only the selected view in pasted mirrors", {timeout: 30000}, async () => {
+test("internal block paste preserves identity, mirror visibility, and inert JavaScript source", {timeout: 30000}, async () => {
     const directory = mkdtempSync(path.join(tmpdir(), "siyuan-paste-identity-"));
-    const sources = Object.fromEntries(["paste", "clear", "pasteSource", "tabsCopy"].map(name => [name,
+    const sources = Object.fromEntries(["paste", "clear", "pasteSource", "tabsCopy", "queryEmbedClipboard"].map(name => [name,
         transpileModule(readFileSync(`src/protyle/util/${name}.ts`, "utf8"), {
             compilerOptions: {target: ScriptTarget.ES2022, module: ModuleKind.CommonJS},
         }).outputText]));

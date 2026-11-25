@@ -36,10 +36,11 @@ func (t *miniMaxImageTransport) Do(req *http.Request) (*http.Response, error) {
 		return t.base.Do(req)
 	}
 	var input struct {
-		Model  string `json:"model"`
-		Prompt string `json:"prompt"`
-		Size   string `json:"size"`
-		N      int    `json:"n"`
+		Model        string `json:"model"`
+		Prompt       string `json:"prompt"`
+		Size         string `json:"size"`
+		N            int    `json:"n"`
+		OutputFormat string `json:"output_format"`
 	}
 	err := json.NewDecoder(req.Body).Decode(&input)
 	req.Body.Close()
@@ -48,33 +49,48 @@ func (t *miniMaxImageTransport) Do(req *http.Request) (*http.Response, error) {
 	}
 	payload := map[string]any{
 		"model": input.Model, "prompt": input.Prompt, "n": input.N,
-		"response_format": "url", "prompt_optimizer": true,
+		"response_format": "url",
 	}
-	if input.Size == "" || input.Size == "auto" {
-		payload["aspect_ratio"] = "1:1"
+	converted := req.Clone(req.Context())
+	isH3 := input.Model == "MiniMax-H3-Image" || input.Model == "MiniMax-H3-Image-Highspeed"
+	if isH3 {
+		if input.Size != "" {
+			payload["size"] = input.Size
+		}
+		if input.OutputFormat != "" {
+			payload["output_format"] = input.OutputFormat
+		}
 	} else {
-		dimensions := strings.Split(input.Size, "x")
-		if len(dimensions) != 2 {
-			return nil, errors.New("MiniMax image size must be WIDTHxHEIGHT")
+		converted.URL.Path = strings.TrimSuffix(req.URL.Path, "/images/generations") + "/image_generation"
+		converted.URL.RawPath = ""
+		payload["prompt_optimizer"] = true
+		if input.Size == "" || input.Size == "auto" {
+			payload["aspect_ratio"] = "1:1"
+		} else {
+			dimensions := strings.Split(input.Size, "x")
+			if len(dimensions) != 2 {
+				return nil, errors.New("MiniMax image size must be WIDTHxHEIGHT")
+			}
+			width, widthErr := strconv.Atoi(dimensions[0])
+			height, heightErr := strconv.Atoi(dimensions[1])
+			if widthErr != nil || heightErr != nil || width <= 0 || height <= 0 {
+				return nil, errors.New("MiniMax image dimensions must be positive integers")
+			}
+			payload["width"], payload["height"] = width, height
 		}
-		width, widthErr := strconv.Atoi(dimensions[0])
-		height, heightErr := strconv.Atoi(dimensions[1])
-		if widthErr != nil || heightErr != nil || width <= 0 || height <= 0 {
-			return nil, errors.New("MiniMax image dimensions must be positive integers")
-		}
-		payload["width"], payload["height"] = width, height
 	}
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
-	converted := req.Clone(req.Context())
-	converted.URL.Path = strings.TrimSuffix(req.URL.Path, "/images/generations") + "/image_generation"
-	converted.URL.RawPath = ""
 	converted.Body = io.NopCloser(bytes.NewReader(body))
 	converted.ContentLength = int64(len(body))
 	converted.GetBody = func() (io.ReadCloser, error) { return io.NopCloser(bytes.NewReader(body)), nil }
 	resp, err := t.base.Do(converted)
+	if isH3 {
+		// H3 的响应符合 OpenAI 图片接口的格式。
+		return resp, err
+	}
 	if err != nil {
 		return nil, err
 	}

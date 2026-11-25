@@ -10,7 +10,7 @@ import {
     SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE,
     setSubElementSource,
 } from "./subElementLifecycle";
-import {escapeAttr} from "../../util/escape";
+import {escapeAttr, escapeHtmlTextAndAttr} from "../../util/escape";
 import {
     decodeStyle1,
     encodeStyle1,
@@ -39,6 +39,7 @@ import {
     stripSemanticMarkersFromRangeText
 } from "../util/inlineElementMarker";
 import {setInlineMemoContentIfMissing} from "./inlineMemoSelection";
+import {encodeInlineMemoContent} from "../util/inlineMemo";
 import {
     getInlineFontFamilyLabel,
     getInlineFontFamilyState,
@@ -550,7 +551,7 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
     }
 };
 
-export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) => {
+export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption, inlineDraft?: string) => {
     const setBlockRef = (blockRefOption: string) => {
         const blockRefData = blockRefOption.split(Constants.ZWSP);
         // 标签等元素中包含 ZWSP，需移除后拼接 https://github.com/siyuan-note/siyuan/issues/6466
@@ -627,8 +628,10 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 textElement.className = "render-node";
                 textElement.setAttribute("contenteditable", "false");
                 textElement.setAttribute("data-subtype", "math");
-                textElement.setAttribute("data-content", hasSemanticInlineType(textElement.getAttribute("data-type")) ?
-                    getSemanticInlineVisibleText(textElement) : textElement.textContent.replace(Constants.ZWSP, ""));
+                textElement.setAttribute("data-content", inlineDraft === undefined ?
+                    (hasSemanticInlineType(textElement.getAttribute("data-type")) ?
+                        getSemanticInlineVisibleText(textElement) : textElement.textContent.replace(Constants.ZWSP, "")) :
+                    escapeHtmlTextAndAttr(inlineDraft));
                 textElement.removeAttribute("data-render");
                 textElement.textContent = "";
                 break;
@@ -641,7 +644,11 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
             case "inline-memo":
                 textElement.removeAttribute("contenteditable");
                 textElement.removeAttribute("data-content");
-                setInlineMemoContentIfMissing(textElement, textOption.color);
+                if (inlineDraft === undefined) {
+                    setInlineMemoContentIfMissing(textElement, textOption.color);
+                } else {
+                    textElement.setAttribute("data-inline-memo-content", encodeInlineMemoContent(inlineDraft));
+                }
                 break;
         }
 

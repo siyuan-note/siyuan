@@ -612,7 +612,7 @@ ${this.host.readonly() ? "" : `<button type="button" class="b3-button b3-button-
         let page = 1;
         let keyword = "";
         const dialog = new AdaptiveDialog({title: window.siyuan.languages._attrView.relatedDatabaseViewAdd,
-            width: "520px", mobileSheet: {mode: "expanded"},
+            width: "520px",
             content: `<div class="b3-dialog__content av-related-view__picker">
     <input class="b3-text-field fn__block" type="search" placeholder="${window.siyuan.languages.searchPlaceholder}" aria-label="${window.siyuan.languages.search}">
     <div class="b3-list av-related-view__candidates"></div>

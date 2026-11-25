@@ -39,6 +39,7 @@ test("node width changes and mixed-width restoration save one undoable snapshot 
                 nodes: new Map([["a", {children: []}], ["b", {children: []}]])}),
             getListMindmapSiblingIDs: () => new Map(),
             normalizeListMindmapSummaryMetadata: () => {}, cleanListMindmapHTML: (value: string) => value,
+            dayjs: () => ({format: () => "20261125120000"}), updateListMindmapTimestamps: () => {},
             writeListMindmapMetadata: (_list: unknown, value: typeof metadata) => metadata = value,
             updateTransaction: (_owner: unknown, _list: unknown, before: string) => history.push({before, after: list.outerHTML}),
             showMessage: () => messages++, window: {siyuan: {languages: {listMindmapStale: "stale"}}}};

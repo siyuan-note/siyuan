@@ -15,23 +15,26 @@ import (
 const (
 	captchaChallengeTTL         = 5 * time.Minute
 	captchaChallengeMaxEntries  = 10000
+	captchaChallengeMaxPerIP    = 128
 	captchaChallengeSweepPeriod = time.Minute
 )
 
 // captchaChallenge 保存验证码答案和过期时间，答案只保留在服务端内存中。
 type captchaChallenge struct {
-	answer  string
-	expires time.Time
+	answer   string
+	clientIP string
+	expires  time.Time
 }
 
 var (
 	captchaChallengeLock      = sync.Mutex{}
 	captchaChallenges         = map[string]*captchaChallenge{} // key: 挑战 ID
+	captchaChallengesByIP     = map[string]int{}
 	captchaChallengeLastSweep = time.Time{}
 )
 
-// NewCaptchaChallenge 保存验证码答案并返回随机挑战 ID，调用方只应把 ID 写入会话；生成失败时返回空字符串。
-func NewCaptchaChallenge(answer string) string {
+// NewCaptchaChallenge 的 previousID 只能来自已验证的会话 Cookie。容量不足时保留其他会话的有效挑战。
+func NewCaptchaChallenge(answer, clientIP, previousID string) string {
 	idBytes, err := randomBytes(16)
 	if err != nil {
 		return ""
@@ -43,15 +46,35 @@ func NewCaptchaChallenge(answer string) string {
 	defer captchaChallengeLock.Unlock()
 
 	sweepCaptchaChallengesLocked(now)
-	if captchaChallengeMaxEntries <= len(captchaChallenges) {
-		// 达到条数上限后淘汰一个旧挑战，避免公开接口被用于无限占用内存
-		for key := range captchaChallenges {
-			delete(captchaChallenges, key)
-			break
+	previous := captchaChallenges[previousID]
+	if previous == nil && captchaChallengeMaxEntries <= len(captchaChallenges) {
+		return ""
+	}
+	if captchaChallengeMaxPerIP <= captchaChallengesByIP[clientIP] && (previous == nil || previous.clientIP != clientIP) {
+		return ""
+	}
+	removeCaptchaChallengeLocked(previousID)
+	captchaChallenges[id] = &captchaChallenge{answer: normalizeCaptchaAnswer(answer), clientIP: clientIP, expires: now.Add(captchaChallengeTTL)}
+	captchaChallengesByIP[clientIP]++
+	return id
+}
+
+func DiscardCaptchaChallenge(id string) {
+	captchaChallengeLock.Lock()
+	defer captchaChallengeLock.Unlock()
+	removeCaptchaChallengeLocked(id)
+}
+
+func removeCaptchaChallengeLocked(id string) *captchaChallenge {
+	challenge := captchaChallenges[id]
+	if challenge != nil {
+		delete(captchaChallenges, id)
+		captchaChallengesByIP[challenge.clientIP]--
+		if captchaChallengesByIP[challenge.clientIP] == 0 {
+			delete(captchaChallengesByIP, challenge.clientIP)
 		}
 	}
-	captchaChallenges[id] = &captchaChallenge{answer: normalizeCaptchaAnswer(answer), expires: now.Add(captchaChallengeTTL)}
-	return id
+	return challenge
 }
 
 // ConsumeCaptchaChallenge 校验验证码并立即删除挑战，同一挑战只能使用一次；
@@ -64,8 +87,7 @@ func ConsumeCaptchaChallenge(id, answer string) bool {
 	now := time.Now()
 	captchaChallengeLock.Lock()
 	sweepCaptchaChallengesLocked(now)
-	challenge := captchaChallenges[id]
-	delete(captchaChallenges, id)
+	challenge := removeCaptchaChallengeLocked(id)
 	captchaChallengeLock.Unlock()
 
 	if nil == challenge || now.After(challenge.expires) {
@@ -87,7 +109,7 @@ func sweepCaptchaChallengesLocked(now time.Time) {
 	captchaChallengeLastSweep = now
 	for id, challenge := range captchaChallenges {
 		if now.After(challenge.expires) {
-			delete(captchaChallenges, id)
+			removeCaptchaChallengeLocked(id)
 		}
 	}
 }

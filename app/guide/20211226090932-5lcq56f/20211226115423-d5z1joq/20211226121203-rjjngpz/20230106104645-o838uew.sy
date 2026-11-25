@@ -252,7 +252,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "行動端可以在 "
+									"Data": "行動端在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -266,29 +266,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設定"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "應用"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
 									"TextMarkTextContent": "工作空間"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中切換不同的工作空間"
+									"Data": " 中點選目標空間並確認切換。應用程式關閉後，重新開啟即可進入目標空間。在同一分組點選 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "管理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 可開啟、新建或移除工作空間"
 								}
 							]
 						}

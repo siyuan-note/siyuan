@@ -1,0 +1,933 @@
+{
+	"ID": "20261122113000-pq1n4xn",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f3d8",
+		"id": "20261122113000-pq1n4xn",
+		"title": "Ресурсы сообщества",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-03gjizb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-03gjizb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-eb2kzuv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-eb2kzuv",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Мы собрали лучшие материалы от сообщества. Если вы нашли другие полезные ресурсы, пожалуйста, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/article/1649901726096",
+					"TextMarkTextContent": "сообщите"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " нам."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2jjzk2w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-2jjzk2w",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вводные видеоуроки"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-t12jjdw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-t12jjdw",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-92lfbm3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-92lfbm3",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-guvbow2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-guvbow2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1M24y1k7Qb/",
+									"TextMarkTextContent": "① Базовое знакомство"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-hgkd05m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hgkd05m",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-v1hsz3r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-v1hsz3r",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1nR4y1k7RL/",
+									"TextMarkTextContent": "② Общие операции"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-espjmel",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-espjmel",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-zcjcx01",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-zcjcx01",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV16M411h7cG/",
+									"TextMarkTextContent": "③ Облачные функции"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-btounhu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-btounhu",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-s5aj35z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-s5aj35z",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1bv4y1r7tA/",
+									"TextMarkTextContent": "④ Продвинутые функции"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-iimseve",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-iimseve",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Видеокурс от новичка до профессионала"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ir2hwew",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-ir2hwew",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-qospqm5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-qospqm5",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-gccjj3g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-gccjj3g",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1Wg4y1K7ro/",
+									"TextMarkTextContent": "① Основы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-l17zi01",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-l17zi01",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-14d1ldo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-14d1ldo",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1zF411X7zh/",
+									"TextMarkTextContent": "② Редактирование текста"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-p1tavxx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-p1tavxx",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-8y3znkg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-8y3znkg",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1Ez4y1p7bg/",
+									"TextMarkTextContent": "③ Блоки содержимого"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-yze22zc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-yze22zc",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-hpbhd8n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-hpbhd8n",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1uG411o7vb/",
+									"TextMarkTextContent": "④ Двунаправленные ссылки"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-92pr7y6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-92pr7y6",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-0uk5rwc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-0uk5rwc",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1SM411Z7eU/",
+									"TextMarkTextContent": "⑤ Общие операции (часть 1)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-mbbq4kn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-mbbq4kn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-yp77iyc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-yp77iyc",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1mw4m1Y7r6/",
+									"TextMarkTextContent": "⑥ Общие операции (часть 2)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-17o6co3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-17o6co3",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ciud3vg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ciud3vg",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1tCWdesELS/",
+									"TextMarkTextContent": "⑦ Базы данных и поиск"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-q54zl7v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-q54zl7v",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-lg1mqz9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-lg1mqz9",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1tHsKeJEN4/",
+									"TextMarkTextContent": "⑧ Облачные сервисы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-rpnefr1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-rpnefr1",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-anq454u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-anq454u",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV191HbenExk/",
+									"TextMarkTextContent": "⑨ Ввод специализированных блоков"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-r7q2a8v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-r7q2a8v",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-uj5cqgk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-uj5cqgk",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1ZepGemEvC/",
+									"TextMarkTextContent": "⑩ Маркетплейс"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-98hvjxg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-98hvjxg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Иллюстрированные руководства для начинающих"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8uwi5dy",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-8uwi5dy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-w17817b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-w17817b",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-4kavm8o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-4kavm8o",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/u25584857/ryp75p/cd49lz",
+									"TextMarkTextContent": "Подробный разбор базовых функций SiYuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-9qesx7s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9qesx7s",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-i5ip2yz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-i5ip2yz",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/u25584857/ryp75p/tcv57u",
+									"TextMarkTextContent": "Подробное руководство по двунаправленным ссылкам в SiYuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-p8cvz78",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-p8cvz78",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-z0zrxtq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-z0zrxtq",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/u25584857/ryp75p/sgf58w",
+									"TextMarkTextContent": "Подробное руководство по настройке внешнего вида SiYuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-uyh1n38",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-uyh1n38",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-14f93ws",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-14f93ws",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/siyuannote/docs",
+									"TextMarkTextContent": "Сборник руководств по SiYuan"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-f9ubmac",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-f9ubmac",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Опыт использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-eg33kl0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-eg33kl0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-xzf4vsm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-xzf4vsm",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2rt0rns",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2rt0rns",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1668217980464",
+									"TextMarkTextContent": "Справочник по комфортной работе в SiYuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-wx2udqx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-wx2udqx",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-3hawvcj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-3hawvcj",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1658109483457",
+									"TextMarkTextContent": "Мой рабочий процесс с Daily Note"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-9lj9o7w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-9lj9o7w",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-85nxp3w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-85nxp3w",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1679134353655",
+									"TextMarkTextContent": "Использование виртуальных ссылок при чтении длинного романа «Песнь льда и огня»"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-w46mop6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-w46mop6",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Методология управления знаниями"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pzgl26r",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-pzgl26r",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-hacnryt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-hacnryt",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-8tes6d5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-8tes6d5",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/deerain/gannbs/ffqk2e",
+									"TextMarkTextContent": "Быстрые заметки без стресса в эпоху двунаправленных ссылок"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-vhz30ag",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-vhz30ag",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-dhl05pl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-dhl05pl",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/deerain/gannbs/hb0gsd",
+									"TextMarkTextContent": "MOC — управление ссылками вместо самих объектов"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-qctozn7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-qctozn7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-9zohaqv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-9zohaqv",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1633719399031",
+									"TextMarkTextContent": "Размышления о двунаправленных ссылках и письме на практике"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-m7gjz18",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-m7gjz18",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-h9zxzn5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-h9zxzn5",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1681801981651",
+									"TextMarkTextContent": "Прогулка по мыслям: радость и ограничения в обучении"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

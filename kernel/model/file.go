@@ -681,14 +681,14 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	return
 }
 
-func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo, forPublish bool) (
+func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, publishDocAccess, publishRefAccess func(string, string) bool) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, keywords []string, headingNumbers map[string]string, docInfo *BlockInfo, err error) {
-	return GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, "", forPublish)
+	return GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, "", publishDocAccess, publishRefAccess)
 }
 
 // GetDocInBox 与 GetDoc 一致，但按 boxID 路由到加密 db 或全局 db。
 // 加密笔记本打开文档时传入 boxID，blocktree/content 查询走加密 db；boxID 为空时 fall-through 全局 db。
-func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, boxID string, forPublish bool) (
+func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, boxID string, publishDocAccess, publishRefAccess func(string, string) bool) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxIDOut, docPath string, isBacklinkExpand bool, keywords []string, headingNumbers map[string]string, docInfo *BlockInfo, err error) {
 	timing := util.BeginPerformance("document.load")
 	defer func() {
@@ -716,6 +716,13 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	}
 	if nil == tree {
 		err = ErrBlockNotFound
+		return
+	}
+	if publishDocAccess != nil && !publishDocAccess(tree.Box, tree.Path) {
+		err = ErrBlockNotFound
+		if 0 == mode {
+			err = ErrTreeNotFound
+		}
 		return
 	}
 	if includeDocInfo {
@@ -891,6 +898,11 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 
 	refCount := sql.QueryRootChildrenRefCountInBox(rootID, boxID)
 	virtualBlockRefKeywords := getBlockVirtualRefKeywords(tree.Root, tree.Box)
+	virtualRefCounts := refCount
+	if publishRefAccess != nil {
+		virtualBlockRefKeywords = sql.FilterVirtualRefKeywordsByAccess(virtualBlockRefKeywords, boxID, publishRefAccess)
+		virtualRefCounts = nil
+	}
 
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 
@@ -996,7 +1008,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 					}
 				}
 
-				if processVirtualRef(n, &unlinks, virtualBlockRefKeywords, refCount, luteEngine) {
+				if processVirtualRef(n, &unlinks, virtualBlockRefKeywords, virtualRefCounts, luteEngine) {
 					return ast.WalkContinue
 				}
 			}
@@ -1012,8 +1024,8 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 
 	luteEngine.RenderOptions.NodeIndexStart = index
 	timing.Stage("render")
-	if forPublish {
-		clearInlineMemoContent(subTree.Root)
+	if publishRefAccess != nil {
+		clearPublishDOMMemos(subTree.Root)
 	}
 	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 
@@ -1365,15 +1377,19 @@ func createTreeTx(tree *parse.Tree) {
 var createDocLock = sync.Mutex{}
 
 func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]any) (tree *parse.Tree, err error) {
-	return createDocByMd(boxID, p, title, md, sorts, arg, false)
+	return createDocByMd(boxID, p, title, md, sorts, arg, false, false)
+}
+
+func CreateAgentDocByMd(boxID, p, title, md string) (tree *parse.Tree, err error) {
+	return createDocByMd(boxID, p, title, md, nil, nil, false, strings.TrimSpace(md) != "")
 }
 
 // CreateDocByMdSync 同步创建 Markdown 文档并返回事务落盘错误，供成功后需要清理源数据的调用方使用。
 func CreateDocByMdSync(boxID, p, title, md string, sorts []string, arg map[string]any) (tree *parse.Tree, err error) {
-	return createDocByMd(boxID, p, title, md, sorts, arg, true)
+	return createDocByMd(boxID, p, title, md, sorts, arg, true, false)
 }
 
-func createDocByMd(boxID, p, title, md string, sorts []string, arg map[string]any, syncWrite bool) (tree *parse.Tree, err error) {
+func createDocByMd(boxID, p, title, md string, sorts []string, arg map[string]any, syncWrite, agentGenerated bool) (tree *parse.Tree, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1398,7 +1414,7 @@ func createDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	dom := luteEngine.Md2BlockDOM(md, false)
-	tree, err = createDoc0(box.ID, p, title, dom, false, syncWrite)
+	tree, err = createDoc0(box.ID, p, title, dom, false, syncWrite, agentGenerated)
 	if err != nil {
 		return
 	}
@@ -2689,14 +2705,14 @@ func cleanBoxDocDir(p string) string {
 }
 
 func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
-	return createDoc0(boxID, p, title, dom, titleEmpty, false)
+	return createDoc0(boxID, p, title, dom, titleEmpty, false, false)
 }
 
 func createDocSync(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
-	return createDoc0(boxID, p, title, dom, titleEmpty, true)
+	return createDoc0(boxID, p, title, dom, titleEmpty, true, false)
 }
 
-func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool, attributes ...map[string]string) (tree *parse.Tree, err error) {
+func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite, agentGenerated bool, attributes ...map[string]string) (tree *parse.Tree, err error) {
 	validation, err := validateCreateDoc(boxID, p, title, titleEmpty)
 	if nil != err {
 		return
@@ -2709,6 +2725,9 @@ func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool, attribu
 	}
 	tree, err = buildCreateDocTree(boxID, validation, dom, attributes...)
 	if err == nil {
+		if agentGenerated {
+			markAgentBlocks(tree.Root, nil, util.NewLute())
+		}
 		err = performCreateDocTransaction(tree, syncWrite)
 	}
 	return

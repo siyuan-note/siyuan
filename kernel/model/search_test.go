@@ -441,7 +441,7 @@ func TestFTSAndHPathMatchesDeduplicateAndSort(t *testing.T) {
 	insertSearchHPathTestBlock(t, testDB, "20260729120001-child01", "20260729120001-child01", "/Parent/Child", "Child", "d")
 	insertSearchHPathTestBlock(t, testDB, "20260729120002-block01", "20260729120001-child01", "/Parent/Child", "Parent body", "p")
 
-	cte, args := buildFTSAndHPathMatchesCTE("Parent", "\"Parent\"", "", "", nil, nil, "(type IN ('d', 'p'))", "")
+	cte, args := buildFTSAndHPathMatchesCTE("Parent", columnFilter()+`:("Parent")`, "", "", nil, nil, "(type IN ('d', 'p'))", "")
 	if countPlaceholder(cte) != len(args) {
 		t.Fatalf("候选查询占位符数量错误：%q，参数：%v", cte, args)
 	}
@@ -763,7 +763,7 @@ func TestDocumentSearchFinalOrderPrioritizesDirectMatches(t *testing.T) {
 	}
 
 	queryResult := func(query string, keywords []string, orderBy, pageSize int) (ids []string, sources, scores []int) {
-		stmt := buildDocumentSearchStatement(query, keywords, "type IN ('d')", "", "", "", orderBy, 1, pageSize, true)
+		stmt := buildDocumentSearchStatement(Conf.LoadSearch(), query, keywords, "type IN ('d')", "", "", "", orderBy, 1, pageSize, true)
 		rows, err := testDB.Query("SELECT id, docContent, matchSource, docMatchScore FROM (" + stmt + ")")
 		if err != nil {
 			t.Fatal(err)
@@ -820,7 +820,7 @@ func TestDocumentSearchFieldMatchesMultipleHPathLevels(t *testing.T) {
 	insertSearchHPathTestBlock(t, testDB, "20260729121002-content", "20260729121002-content", "/Other", "Project Parent keyword", "d")
 	insertSearchHPathTestBlock(t, testDB, "20260729121003-mixed01", "20260729121003-mixed01", "/Project/Parent/keyword", "keyword", "d")
 
-	contentField := columnConcat()
+	contentField := strings.Join(searchColumns(Conf.LoadSearch()), "||")
 	keywords := []string{"Project", "Parent", "keyword"}
 	hPathField := "MAX(CASE WHEN type = 'd' THEN " + normalizedHPathSearchField("hpath") + " ELSE '' END)"
 	contentFilter := buildSearchDocumentLikeFilter("GROUP_CONCAT("+contentField+")", keywords)

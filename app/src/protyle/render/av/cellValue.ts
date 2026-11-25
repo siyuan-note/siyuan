@@ -38,6 +38,19 @@ export const getAVBlockRefSubtype = (value?: IAVCellValue): "s" | "d" => value?.
 export const getAVBindingCandidateSubtype = (ial: Record<string, string> | undefined, staticTextKey: string): "s" | "d" =>
     staticTextKey && ial?.[staticTextKey] ? "s" : "d";
 
+export const getStoredCellValueByElement = (cellElement: HTMLElement) => {
+    const valueElement = cellElement.dataset.cellValue ? cellElement :
+        cellElement.querySelector<HTMLElement>("[data-cell-value]");
+    if (!valueElement?.dataset.cellValue) {
+        return;
+    }
+    try {
+        return JSON.parse(decodeURIComponent(valueElement.dataset.cellValue)) as IAVCellValue;
+    } catch {
+        return;
+    }
+};
+
 export const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string) => ({
     type,
     keyID,

@@ -7,11 +7,11 @@ import {openMenuPanel} from "./openMenuPanel";
 import {focusBlock, getEditorRange} from "../../util/selection";
 import {focusByRange} from "../../util/selectionOffsets";
 import {upDownHint} from "../../../util/upDownHint";
-import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
 import {clearSelect} from "../../util/clear";
-import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "./viewVisibility";
+import {getAVVisibleViewIDs, setAVVisibleViewIDs, updateAVVisibleViews} from "./viewVisibility";
 import {isNotEditBlock} from "../../wysiwyg/getBlock";
 import {countFilterLeaves} from "./filterTree";
 import {isMobile} from "../../../util/functions";
@@ -31,18 +31,8 @@ export const setAVBlockVisibleViewIDs = (
         return false;
     }
 
-    setAVVisibleViewIDs(blockElement, viewIDs);
-    transaction(protyle, [{
-        action: "setAttrViewBlockVisibleViews",
-        avID: blockElement.getAttribute("data-av-id"),
-        blockID: blockElement.getAttribute("data-node-id"),
-        viewIDs,
-    }], [{
-        action: "setAttrViewBlockVisibleViews",
-        avID: blockElement.getAttribute("data-av-id"),
-        blockID: blockElement.getAttribute("data-node-id"),
-        viewIDs: oldViewIDs,
-    }]);
+    const {operations, undoOperations} = updateAVVisibleViews(blockElement, allViewIDs, oldViewIDs, viewIDs);
+    transaction(protyle, operations, undoOperations);
     return true;
 };
 
@@ -439,9 +429,9 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string, blockElement: 
     let hiddenHTML = "";
     views.forEach((item) => {
         const visible = visibleViewIDs.includes(item.id);
-        const html = `<button ${readonly ? 'data-type="av-view-switch"' : 'draggable="true"'} class="b3-menu__item${item.id === viewId ? " b3-menu__item--current" : ""}" data-id="${item.id}" data-page="${item.pageSize}" data-av-view-visibility="${visible ? "visible" : "hidden"}">
+        const html = `<button ${readonly ? 'data-type="av-view-switch"' : 'draggable="true"'} class="b3-menu__item${item.id === viewId ? " b3-menu__item--current" : ""}" data-id="${escapeHtmlTextAndAttr(item.id)}" data-page="${item.pageSize}" data-av-view-visibility="${visible ? "visible" : "hidden"}">
     ${readonly ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
-    <div class="b3-menu__label fn__flex" data-type="av-view-switch" data-av-type="${item.type}">
+    <div class="b3-menu__label fn__flex" data-type="av-view-switch" data-av-type="${escapeHtmlTextAndAttr(item.type)}">
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getViewIcon(item.type)}"></use></svg>`}
         <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
     </div>

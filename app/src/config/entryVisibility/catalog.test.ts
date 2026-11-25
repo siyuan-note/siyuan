@@ -1038,6 +1038,10 @@ test("table catalog follows the menu arrays and conditional declarations", () =>
         new RegExp(`${array}\\.push\\(\\{\\s*id: (?:"([^"]+)"|\\w+ \\? "([^"]+)" : "([^"]+)")`, "g"),
     )).flatMap(([, id, enabled, disabled]) => id ? [id] : [disabled, enabled]);
     const other = pushedIDs("otherMenus");
+    const pinStart = other.indexOf("pinTableHead");
+    assert.deepEqual(other.slice(pinStart, pinStart + 6), [
+        "pinTableHead", "unpinTableHead", "pinTableHeaderColumn", "unpinTableHeaderColumn", "tableHeaderRow", "tableHeaderColumn",
+    ]);
     const moves = pushedIDs("other2Menus");
     const inserts = pushedIDs("insertMenus");
     const removes = pushedIDs("removeMenus");
@@ -1064,9 +1068,16 @@ test("conditional copy and image actions have configuration entries in menu orde
         "copyMirror", "copy", "duplicate", "duplicateMirror", "duplicateCompletely",
     ]);
     const image = getEntryCatalogChildren("inline.image").map(item => item.key);
-    assert.deepEqual(image.slice(image.indexOf("separator_3")), ["separator_3", "openBy", "export", "copyFile", "copyAsPNG"]);
+    assert.deepEqual(image.slice(image.indexOf("separator_3")), [
+        "separator_3", "openBy", "export", "shareAsset", "saveToGallery", "copyFile", "copyAsPNG",
+    ]);
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.assetVideo").map(item => item.key).slice(-4),
+        ["export", "shareAsset", "saveToGallery", "copyFile"]);
+    assert.deepEqual(getEntryCatalogChildren("inline.link").map(item => item.key).slice(-3), ["export", "shareAsset", "copyFile"]);
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.assetIFrame").map(item => item.key).slice(-2), ["openBy", "shareAsset"]);
     ["gutter.single.table.cancelMerged", "gutter.single.table.transposeTable", "inline.text.more.cancelMerged",
-        "gutter.single.copy.copyMirror", "inline.image.openBy"].forEach(path => {
+        "gutter.single.copy.copyMirror", "inline.image.openBy", "inline.image.shareAsset", "inline.link.shareAsset",
+        "gutter.single.assetIFrame.shareAsset", "gutter.single.assetVideo.saveToGallery", "inline.image.saveToGallery"].forEach(path => {
         assert.equal(getEntryCatalogNode(path).type, "entry");
         assert.equal(getEntryCatalogNode(path).simple, true);
     });

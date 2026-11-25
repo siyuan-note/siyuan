@@ -145,6 +145,24 @@
     background-color: var(--b3-theme-surface-lighter);
   }
 
+  &--secondary.b3-button--overlay {
+    --b3-button-overlay-tint: transparent;
+    background-color: var(--b3-theme-background);
+    background-image: linear-gradient(var(--b3-button-overlay-tint), var(--b3-button-overlay-tint)),
+      linear-gradient(var(--b3-theme-surface-lighter), var(--b3-theme-surface-lighter));
+
+    &:enabled:not([aria-disabled="true"]) {
+      &:hover,
+      &:focus-visible {
+        --b3-button-overlay-tint: var(--b3-list-hover);
+      }
+
+      &:active {
+        --b3-button-overlay-tint: var(--b3-list-icon-hover);
+      }
+    }
+  }
+
   &--outline {
     color: var(--b3-theme-primary, ButtonText);
     box-shadow: inset 0 0 0 .6px var(--b3-theme-primary);

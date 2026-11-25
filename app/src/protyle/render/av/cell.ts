@@ -41,6 +41,7 @@ import {
     genRelationAVCellValue,
     getAVBlockRefSubtype,
     getConvertedEmptyAVCellValue,
+    getStoredCellValueByElement,
     hasAVCachedCellType,
     hasAVRenderTemplateResult,
     updateAVCachedCellValue,
@@ -196,19 +197,6 @@ const openAVRelationIcon = async (protyle: IProtyle, target: HTMLElement, relati
 
 const renderCellURL = (urlContent: string) => {
     return `<span class="av__celltext av__celltext--url" data-type="url" data-href="${escapeAttr(urlContent)}">${escapeHtmlTextAndAttr(urlContent)}</span>`;
-};
-
-const getStoredCellValueByElement = (cellElement: HTMLElement) => {
-    const valueElement = cellElement.dataset.cellValue ? cellElement :
-        cellElement.querySelector<HTMLElement>("[data-cell-value]");
-    if (!valueElement?.dataset.cellValue) {
-        return;
-    }
-    try {
-        return JSON.parse(decodeURIComponent(valueElement.dataset.cellValue)) as IAVCellValue;
-    } catch {
-        return;
-    }
 };
 
 export const getCellText = (cellElement: HTMLElement | false, purpose: "copy" | "display" = "copy") => {

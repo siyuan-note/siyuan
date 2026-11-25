@@ -244,6 +244,7 @@ test("text history records the edited node even when selection changes before it
         canEdit: () => true, readListMindmap: () => ({nodes, root: nodes.get("root"),
             metadata: {version: 1, nodes: {}, relations: [] as unknown[]}}),
         cleanListMindmapHTML: (html: string) => html, getListMindmapSiblingIDs: () => new Map(),
+        dayjs: () => ({format: () => "20261125120000"}), updateListMindmapTimestamps: () => {},
         normalizeListMindmapSummaryMetadata: () => {},
         updateTransaction: (_owner: unknown, _list: unknown, _before: string, undo: Record<string, string>,
                             additional: {context: Record<string, string>}) => operations.push({undo, redo: additional.context}),
@@ -315,6 +316,7 @@ test("mind map transaction focus survives insertion, deletion and repeated undo/
     roots.set(owner, root);
     const context: any = {
         roots, canEdit: () => true, readListMindmap: getModel, cleanListMindmapHTML: (html: string) => html,
+        dayjs: () => ({format: () => "20261125120000"}), updateListMindmapTimestamps: () => {},
         hasMindmapFocusOverlay: () => false,
         getListMindmapSiblingIDs: () => new Map(), normalizeListMindmapSummaryMetadata: () => {},
         updateTransaction: (_owner: unknown, _list: unknown, before: string, undo: FocusContext,

@@ -236,6 +236,35 @@
 			]
 		},
 		{
+			"ID": "20261123123905-jun9eys",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261123123905-jun9eys",
+				"updated": "20261123123905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "刪除或剪下前檢查"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20261123123905-85b2ofr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123123905-85b2ofr",
+				"updated": "20261123123905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果區塊引用和資料庫綁定的檢查耗時較長，可以在進度視窗中點擊「取消」，停止這次刪除或剪下。"
+				}
+			]
+		},
+		{
 			"ID": "20211226120337-nfx8mlg",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

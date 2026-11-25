@@ -1092,6 +1092,8 @@ ${getIconScript(servePath)}
             await fixBlockWidth(true);
             await document.fonts.ready;
             await waitForImages();
+            // 用打印宽度同步重排脑图，长页测量和打印使用同一布局。
+            Protyle.mindmapRender(previewElement, "${servePath}stage/protyle");
             let exportConfig;
             if (!isPaged) {
                 const dimensions = getPageSizeDimensions();
@@ -1273,7 +1275,7 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
     </style>
     ${getSnippetCSS()}
 </head>
-<body>
+<body${exportOption.type === "pdf" ? ' data-export-pdf="true"' : ""}>
 <div class="${["htmlmd", "word"].includes(exportOption.type) ? "b3-typography" : "protyle-wysiwyg" + (window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : "")}" 
 style="max-width: 800px;margin: 0 auto;" id="preview">${data.data.content}</div>
 ${getIconScript(servePath)}

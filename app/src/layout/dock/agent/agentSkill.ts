@@ -1,23 +1,25 @@
 import {hasClosestBlock} from "../../../protyle/util/hasClosest";
+import {AGENT_QUOTE_SELECTOR} from "./agentQuote";
 import {getUndoFocusContext} from "../../../protyle/util/selection";
 import {focusByRange} from "../../../protyle/util/selectionOffsets";
 import {updateTransaction} from "../../../protyle/wysiwyg/transaction";
 
 export const AGENT_SKILL_SELECTOR = '[data-type~="text"][custom-agent-skill="true"]';
+const atomicSelector = AGENT_SKILL_SELECTOR + ", " + AGENT_QUOTE_SELECTOR;
 
-const getAgentSkill = (node: Node) => (node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement)
-    ?.closest(AGENT_SKILL_SELECTOR);
+const getAgentToken = (node: Node) => (node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement)
+    ?.closest(atomicSelector);
 
-export const normalizeAgentSkills = (element: ParentNode) => {
-    // 渲染、撤销和草稿恢复后继续将技能视为整体，兼容已有的技能标记。
-    element.querySelectorAll<HTMLElement>(AGENT_SKILL_SELECTOR).forEach(skill => {
-        skill.contentEditable = "false";
+export const normalizeAgentTokens = (element: ParentNode) => {
+    // 渲染、撤销和草稿恢复后继续将技能和引用标记视为整体。
+    element.querySelectorAll<HTMLElement>(atomicSelector).forEach(token => {
+        token.contentEditable = "false";
     });
 };
 
-export const expandAgentSkillSelection = (range: Range) => {
-    const start = getAgentSkill(range.startContainer);
-    const end = getAgentSkill(range.endContainer);
+export const expandAgentTokenSelection = (range: Range) => {
+    const start = getAgentToken(range.startContainer);
+    const end = getAgentToken(range.endContainer);
     if (range.collapsed) {
         if (start) {
             range.setStartAfter(start);
@@ -25,7 +27,7 @@ export const expandAgentSkillSelection = (range: Range) => {
         }
         return;
     }
-    // 触摸选区或全选可能落在不可编辑元素内部，替换、剪切时将边界扩展至整个技能。
+    // 触摸选区或全选可能落在不可编辑元素内部，替换、剪切时将边界扩展至整个标记。
     if (start) {
         range.setStartBefore(start);
     }
@@ -34,7 +36,7 @@ export const expandAgentSkillSelection = (range: Range) => {
     }
 };
 
-export const deleteAgentSkill = (protyle: IProtyle, event: InputEvent) => {
+export const deleteAgentToken = (protyle: IProtyle, event: InputEvent) => {
     if (protyle.disabled || !event.cancelable || event.isComposing ||
         !["deleteContentBackward", "deleteContentForward"].includes(event.inputType)) {
         return false;
@@ -51,8 +53,8 @@ export const deleteAgentSkill = (protyle: IProtyle, event: InputEvent) => {
     }
     if (range.collapsed) {
         const backward = event.inputType === "deleteContentBackward";
-        let skill = getAgentSkill(range.startContainer);
-        if (!skill) {
+        let token = getAgentToken(range.startContainer);
+        if (!token) {
             let node = range.startContainer;
             const element = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement;
             const editable = element.closest('[contenteditable="true"]');
@@ -70,8 +72,8 @@ export const deleteAgentSkill = (protyle: IProtyle, event: InputEvent) => {
                 } else {
                     const child = node.childNodes[backward ? offset - 1 : offset];
                     if (child) {
-                        if (child instanceof Element && child.matches(AGENT_SKILL_SELECTOR)) {
-                            skill = child;
+                        if (child instanceof Element && child.matches(atomicSelector)) {
+                            token = child;
                             break;
                         }
                         if (child instanceof Element && (child.tagName === "BR" || child.getAttribute("contenteditable") === "false")) {
@@ -89,21 +91,21 @@ export const deleteAgentSkill = (protyle: IProtyle, event: InputEvent) => {
                 node = node.parentNode;
             }
         }
-        if (!skill) {
+        if (!token) {
             return false;
         }
-        if (getAgentSkill(range.startContainer)) {
-            range.selectNode(skill);
+        if (getAgentToken(range.startContainer)) {
+            range.selectNode(token);
         } else if (backward) {
-            range.setStartBefore(skill);
+            range.setStartBefore(token);
         } else {
-            range.setEndAfter(skill);
+            range.setEndAfter(token);
         }
     } else {
-        if (!Array.from(block.querySelectorAll(AGENT_SKILL_SELECTOR)).some(skill => range.intersectsNode(skill))) {
+        if (!Array.from(block.querySelectorAll(atomicSelector)).some(token => range.intersectsNode(token))) {
             return false;
         }
-        expandAgentSkillSelection(range);
+        expandAgentTokenSelection(range);
     }
     const oldHTML = block.outerHTML;
     const undoContext = getUndoFocusContext(root, selection.getRangeAt(0));

@@ -37,6 +37,7 @@ test("resizing uses one source update with both dimensions and retains the exact
             metadata: {version: 1, nodes: {}, relations: [] as unknown[]}}),
         getListMindmapSiblingIDs: () => new Map(), normalizeListMindmapSummaryMetadata: () => {},
         cleanListMindmapHTML: (html: string) => html,
+        dayjs: () => ({format: () => "20261125120000"}), updateListMindmapTimestamps: () => {},
         setBlockHeight: (block: typeof list, height: string) => block.style.height = height,
         updateTransaction: (_owner: unknown, _list: unknown, before: string, undoContext: Record<string, string>,
                             additional: {context: Record<string, string>}) => {

@@ -7925,7 +7925,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Scroll up one screen"
+									"Data": "Scroll up one screen (click the document body first if editing is locked)"
 								}
 							]
 						},
@@ -7997,7 +7997,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Scroll down one screen"
+									"Data": "Scroll down one screen (click the document body first if editing is locked)"
 								}
 							]
 						},

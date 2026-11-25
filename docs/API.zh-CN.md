@@ -2157,6 +2157,7 @@ if (response.code === 0 && response.data) {
 
 * `/api/system/bootProgress`
 * 不带参
+* `details` 为本地化的启动阶段文案，可附带任务计数，不含工作空间路径或标识
 * 返回值
 
   ```json

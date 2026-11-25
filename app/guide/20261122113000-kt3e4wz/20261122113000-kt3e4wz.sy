@@ -1,0 +1,23 @@
+{
+	"ID": "20261122113000-kt3e4wz",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"custom-hidden": "true",
+		"icon": "1f4d4",
+		"id": "20261122113000-kt3e4wz",
+		"title": "Руководство пользователя SiYuan",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-ixwnwvo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ixwnwvo",
+				"updated": "20261122113000"
+			}
+		}
+	]
+}

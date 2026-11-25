@@ -10,6 +10,8 @@ import {isBrowser} from "./functions";
 import {applySettingTask} from "../config/setting/taskBlocker";
 import {notifyOCRChanged} from "../config/ocrRuntime";
 
+const shownSyncNotices = new Set<string>();
+
 export const processMessage = (response: IWebSocketData) => {
     if (response.cmd === "notebookIconChanged") {
         const {updateNotebookBreadcrumbIcon}: typeof import("../protyle/breadcrumb/iconRefresh") = require("../protyle/breadcrumb/iconRefresh");
@@ -52,7 +54,18 @@ export const processMessage = (response: IWebSocketData) => {
         return false;
     }
     if ("msg" === response.cmd) {
-        const id = showMessage(response.msg, response.data.closeTimeout, response.code === 0 ? "info" : "error", response.data.id);
+        const noticeId = response.data.id;
+        const syncNotice = typeof noticeId === "string" && /^sync-notice-[a-z0-9]{16}$/.test(noticeId);
+        if (syncNotice && shownSyncNotices.has(noticeId)) {
+            return false;
+        }
+        const id = showMessage(response.msg, response.data.closeTimeout, response.code === 0 ? "info" : "error", noticeId);
+        if (syncNotice) {
+            shownSyncNotices.add(noticeId);
+            if (shownSyncNotices.size > 256) {
+                shownSyncNotices.delete(shownSyncNotices.values().next().value);
+            }
+        }
         document.querySelector("#message #addMicrosoftDefenderExclusion")?.addEventListener("click", (event) => {
             const button = event.currentTarget as HTMLButtonElement;
             if (button.disabled) {

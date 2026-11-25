@@ -110,9 +110,18 @@ const (
 // behavior from the model registry. See https://github.com/siyuan-note/siyuan/issues/17797
 type Editing struct {
 	ModelID             string  `json:"modelId"`
+	ReasoningEffort     string  `json:"reasoningEffort"`
 	MaxHistoryMessages  int     `json:"maxHistoryMessages"`  // Max number of prior turns kept as context
 	Temperature         float64 `json:"temperature"`         // Alignment with Agent.Temperature
 	MaxCompletionTokens int     `json:"maxCompletionTokens"` // Alignment with Agent.MaxCompletionTokens
+}
+
+func IsAIReasoningEffort(value string) bool {
+	switch value {
+	case "", "none", "low", "medium", "high", "xhigh", "max":
+		return true
+	}
+	return false
 }
 
 // ImageGeneration 配置图片生成场景的模型和默认输出参数。
@@ -745,6 +754,9 @@ func (ai *AI) Normalize() {
 	if ai.Editing == nil {
 		ai.Editing = defaultEditing()
 	} else {
+		if !IsAIReasoningEffort(ai.Editing.ReasoningEffort) {
+			ai.Editing.ReasoningEffort = ""
+		}
 		if 0 > ai.Editing.MaxCompletionTokens {
 			ai.Editing.MaxCompletionTokens = 0
 		}

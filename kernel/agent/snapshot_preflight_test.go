@@ -82,3 +82,58 @@ func TestAgentSnapshotPreflightKeepsReadsAndRejectsWritesBeforeConfirmation(t *t
 		t.Fatal(err)
 	}
 }
+
+func TestAgentSnapshotFailureAfterConfirmationStopsWorkspaceWrite(t *testing.T) {
+	setupToolRoundLimitAgentTest(t, 0)
+	const name = "test_snapshot_abort"
+	const prerequisite = "Initialize the local data repository key first"
+	util.Langs["en"][26] = prerequisite
+	kernelModel.Conf.Lang = "en"
+	repo := conf.NewRepo()
+	repo.Key = []byte("0123456789abcdef0123456789abcdef")
+	kernelModel.Conf.Repo.Store(repo)
+	var writes atomic.Int32
+	tools.SetTool(name, &tools.Tool{
+		Name: name, Source: "native",
+		InputSchema:   tools.ToolSchema{Type: "object", Properties: map[string]tools.Property{"action": {Type: "string"}}},
+		ActionEffects: map[string]tools.ToolEffects{"write": {LocalWrite: true}},
+		Handler: func(map[string]any) (tools.CallToolResult, error) {
+			writes.Add(1)
+			return tools.CallToolResult{}, nil
+		},
+	})
+	t.Cleanup(func() { tools.RemoveTool(name) })
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		flusher := prepareTestStream(t, w)
+		_, _ = fmt.Fprintf(w, "data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"write-call\",\"type\":\"function\",\"function\":{\"name\":%q,\"arguments\":%q}}]},\"finish_reason\":\"tool_calls\"}]}\n\n", name, `{"action":"write"}`)
+		flusher.Flush()
+		writeTestStreamDone(t, w, flusher)
+	}))
+	defer server.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	var confirmation string
+	var snapshotFailed bool
+	for event := range AgentChat(ctx, util.NewAIClientWithModel("key", server.URL+"/v1", "test-model"), "openai", "test-model", "", 0,
+		testSessionID, "user-1", 1, "read and edit", nil, "English", nil, EditorContext{}, nil, false,
+		time.Second, 0, "", time.Second, time.Second) {
+		switch event.Type {
+		case "confirm":
+			confirmation = event.ConfirmID
+			kernelModel.Conf.Repo.Store(conf.NewRepo())
+			if accepted, err := ConfirmSession(confirmation, true, false); err != nil || !accepted {
+				t.Fatalf("approve tool: %v, %v", accepted, err)
+			}
+		case "snapshot", "done":
+			t.Errorf("unexpected event after snapshot failure: %s", event.Type)
+		case "error":
+			snapshotFailed = event.SnapshotFailed && strings.Contains(event.Error, prerequisite)
+		}
+	}
+	if confirmation == "" || !snapshotFailed || writes.Load() != 0 {
+		t.Fatalf("snapshot abort: confirmed=%v failure=%v writes=%d", confirmation != "", snapshotFailed, writes.Load())
+	}
+	if accepted, err := ConfirmSession(confirmation, true, false); err != nil || accepted {
+		t.Fatalf("expired confirmation was reusable: %v, %v", accepted, err)
+	}
+}

@@ -29,7 +29,7 @@ const updateGlobalShortcutBindings = (owner: {
     languages?: unknown;
 }, {
     workspaces, globalShortcut, convert, getActiveId, toggle, dispatch, reportError,
-}: ShortcutBindingsOptions): string[] => {
+}: ShortcutBindingsOptions): Map<string, string> | undefined => {
     const previous = owner.hotkeys || [];
     owner.shortcutsSuspended = data.suspended === true;
     if (!owner.shortcutsSuspended) {
@@ -45,7 +45,7 @@ const updateGlobalShortcutBindings = (owner: {
                 globalShortcut.unregister(key);
             }
         });
-        return [];
+        return;
     }
     previous.forEach((key: string) => {
         const accelerator = convert(key);
@@ -53,7 +53,7 @@ const updateGlobalShortcutBindings = (owner: {
             globalShortcut.unregister(accelerator);
         }
     });
-    const failed: string[] = [];
+    const failed = new Map<string, string>();
     const registered = new Set<string>();
     keys.forEach((key: string) => {
         const accelerator = convert(key);
@@ -84,7 +84,7 @@ const updateGlobalShortcutBindings = (owner: {
             reportError(error);
         }
         if (!success) {
-            failed.push(key);
+            failed.set(accelerator, key);
         }
     });
     return failed;

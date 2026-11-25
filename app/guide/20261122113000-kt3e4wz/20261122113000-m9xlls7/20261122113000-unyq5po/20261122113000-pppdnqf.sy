@@ -1,0 +1,794 @@
+{
+	"ID": "20261122113000-pppdnqf",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-pppdnqf",
+		"title": "Служба публикации",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-8ug70jo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-8ug70jo",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gcz19ch",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-gcz19ch",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan поддерживает публикацию содержимого текущего рабочего пространства в локальной сети в режиме только для чтения."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-a5wsmox",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-a5wsmox",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Способ использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m3umso0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-m3umso0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-863sadx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-863sadx",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-s3cbvq1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-s3cbvq1",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Откройте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Публикация"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", чтобы открыть панель настроек службы публикации"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-l5i8bgv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-l5i8bgv",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-c6jg1fo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-c6jg1fo",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Настройка "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Порт сервиса"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-kq97wj2",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-kq97wj2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-g39zg8n",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-g39zg8n",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-xcv9o8x",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-xcv9o8x",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Порт по умолчанию — "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "6808"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeText",
+													"Data": ". При развёртывании через Docker с включённым сервисом публикации, помимо проброса основного порта сервера, в команду создания контейнера необходимо добавить "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "-p 6808:6808"
+												},
+												{
+													"Type": "NodeText",
+													"Data": ". Формат проброса портов Docker — порт_хоста:порт_контейнера; при изменении порта службы публикации необходимо синхронно изменить порт контейнера, а для доступа использовать порт хоста. Задавайте фиксированный порт службы публикации и не устанавливайте значение 0"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-adry07x",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-adry07x",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-59k5syz",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-59k5syz",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Если указать порт "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "0"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​, будет использоваться случайный порт"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-qbes7qo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-qbes7qo",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2aos67q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2aos67q",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При включении в «"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Сервис публикации"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (переключатель)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-gzge8gb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-gzge8gb",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-tq4cllr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-tq4cllr",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "При включении в «"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Базовая аутентификация сервиса"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ и добавьте "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Аутентифицированные учётные записи"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: будет использоваться "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Guides/Authentication#basic_%E9%AA%8C%E8%AF%81%E6%96%B9%E6%A1%88",
+									"TextMarkTextContent": "схема Basic-аутентификации"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " для аутентификации посетителей. Перед просмотром опубликованного содержимого посетитель должен правильно ввести имя пользователя и пароль, заданные в разделе "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Аутентифицированные учётные записи"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-cyugzba",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-cyugzba",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "На опубликованной странице подсчёт слов и символов учитывает только сам документ; содержимое встроенных блоков запросов в статистику не включается."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-dnoqd0a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-dnoqd0a",
+				"updated": "20261122115437"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Служба публикации предоставляет обратные ссылки и названия баз данных в соответствии с правами доступа. В списке пользовательских эмодзи отображаются только те, на которые ссылаются доступные читателю документы. При полнотекстовом поиске примечания к блокам и необработанные атрибуты блоков исключаются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-n6k3npo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-n6k3npo",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Контроль доступа"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-h2d6gpp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-h2d6gpp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для блокнотов и документов можно задать уровень доступа при публикации, обеспечивая гибкое управление правами. Контроль доступа и Basic-аутентификация — два независимых механизма: Basic-аутентификация действует глобально и требует единый пароль от всех посетителей, тогда как контроль доступа настраивается отдельно для каждого блокнота или документа и может использоваться как самостоятельно, так и совместно с Basic-аутентификацией."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-w3h5mve",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-w3h5mve",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-4iqb1xs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-4iqb1xs",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-63ura19",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-63ura19",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Точка входа"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": нажмите меню «Ещё» на панели документов и выберите «Контроль доступа публикации», чтобы открыть экран настройки доступа"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-mfv7mxz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-mfv7mxz",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-jgrup02",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-jgrup02",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Область настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": поддерживает отдельную настройку уровня доступа для блокнота или конкретного документа"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-16abmw7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-16abmw7",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-1detrcw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-1detrcw",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Уровни доступа"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-ecyuoop",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20261122113000-ecyuoop",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"ID": "20261122113000-ngcx7qd",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-ngcx7qd",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-dyb2n5a",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-dyb2n5a",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "🌐 Публичный: открытая публикация, доступ без пароля"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-64g8jfw",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-64g8jfw",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-rpcz07o",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-rpcz07o",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "🔒 Защищённый: открытая публикация, но для доступа требуется пароль"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-66946ya",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-66946ya",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-i9rj33m",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-i9rj33m",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "👻 Скрытый: не отображается в оглавлении, но доступен по прямой ссылке"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-jjdj1sj",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-jjdj1sj",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-5nebjce",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-5nebjce",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "🤫 Приватный: скрыт и защищён паролем; доступен только пользователям со ссылкой и паролем"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20261122113000-0ew38aq",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20261122113000-0ew38aq",
+										"updated": "20261122113000"
+									},
+									"Children": [
+										{
+											"ID": "20261122113000-w25xbi3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20261122113000-w25xbi3",
+												"updated": "20261122113000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "🚫 Запрещённый: доступ полностью закрыт, блокнот или документ не публикуется"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-k8uuvp5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-k8uuvp5",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-u14twje",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-u14twje",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Настройка пароля"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": после выбора уровня доступа, требующего пароль, задайте его в открывшемся окне"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-xcvgbt6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-xcvgbt6",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-nzcsgki",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-nzcsgki",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Поведение по умолчанию"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": обычные блокноты без заданных ограничений по умолчанию публикуются открыто; на документы также влияют настройки родительских документов и блокнота — они наследуют применимые правила пароля, скрытия и запрета публикации. Зашифрованные блокноты нельзя опубликовать, даже если они разблокированы"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1tc0320",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-1tc0320",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2nz3nei",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-2nz3nei",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-igcim5i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-igcim5i",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-gx1nyu8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-gx1nyu8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "После включения службы публикации посетители по умолчанию получают доступ ко всему содержимому рабочего пространства — убедитесь, что в нём нет конфиденциальной информации"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

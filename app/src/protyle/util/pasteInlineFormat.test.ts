@@ -375,7 +375,8 @@ test("block references and inline formatting survive repeated toggles, paste ord
     const sources = Object.fromEntries(["protyle/wysiwyg/compositionInput", "protyle/wysiwyg/blockSelection", "protyle/util/longTextWrap",
         "protyle/util/inlineElementBoundary", "protyle/util/inlineElementMarker", "protyle/toolbar/inlineRangeBoundary",
         "protyle/toolbar/inlineFormat", "protyle/toolbar/fontFamilyCore", "protyle/toolbar/inlineDirectionStyle",
-        "protyle/util/hasClosest", "protyle/util/paste", "protyle/util/pasteSource", "protyle/util/normalizeText"].map(name => [name, compile(read(name))]));
+        "protyle/util/hasClosest", "protyle/util/paste", "protyle/util/pasteSource", "protyle/util/normalizeText",
+        "protyle/util/queryEmbedClipboard"].map(name => [name, compile(read(name))]));
     const snippets = {
         selection: extract("protyle/util/selection", ["selectAll"]) +
             extract("protyle/util/selectionOffsets", ["selectIsEditor", "getSelectionOffset"]),

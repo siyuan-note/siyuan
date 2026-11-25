@@ -186,6 +186,10 @@
     }
   }
 
+  .mobile-bottom-sheet &__snapshot-detail-meta {
+    max-height: min(25vh, 40%);
+  }
+
   @media (max-width: 600px) {
     &__snapshot-detail-panels {
       flex-direction: column;
@@ -195,6 +199,10 @@
       width: auto;
       max-height: 25vh;
       flex-shrink: 0;
+    }
+
+    .mobile-bottom-sheet &__snapshot-detail-files {
+      max-height: min(25vh, 45%);
     }
   }
 

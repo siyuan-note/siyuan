@@ -11,6 +11,30 @@ import (
 	"testing"
 )
 
+func TestInlineMessageQuotesUseAvailableHistory(t *testing.T) {
+	snapshot := strings.Repeat("長文", 80)
+	refs := []Reference{{ID: "first", MessageID: "assistant", Title: snapshot}, {ID: "second", MessageID: "user", Title: "draft"}}
+	input := "Review ⟦second⟧ then ⟦first⟧"
+	restored := buildUserMessageContent(input, refs, nil, nil)
+	if restored != "Review \"draft\" then \""+snapshot+"\"" {
+		t.Fatalf("missing or compacted history: %q", restored)
+	}
+	history := []AgentMessage{{Role: "assistant", EntryID: "assistant", Content: snapshot}}
+	linked := buildUserMessageContent(input, refs, nil, nil, history...)
+	if !strings.HasPrefix(linked, "Review \"draft\" then ") || !strings.Contains(linked, "earlier assistant message") ||
+		strings.Contains(linked, snapshot) || strings.Contains(linked, "⟦") {
+		t.Fatalf("available history: %q", linked)
+	}
+	short := buildUserMessageContent(input, refs, nil, nil, AgentMessage{EntryID: "user", Role: "user", Content: "draft"})
+	if strings.Contains(short, "draft") || !strings.Contains(short, "the earlier user message") {
+		t.Fatalf("short historical message was duplicated: %q", short)
+	}
+	history[0].Content = "edited"
+	if actual := buildUserMessageContent(input, refs, nil, nil, history...); actual != restored {
+		t.Fatalf("edited message discarded its snapshot: %q", actual)
+	}
+}
+
 func TestSystemPromptRequiresSourceContentReads(t *testing.T) {
 	for _, instruction := range []string{
 		"including a bare block ID",

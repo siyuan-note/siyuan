@@ -28,6 +28,11 @@ func visibleConf(c *gin.Context) (masked *model.AppConf, isPublish bool, err err
 	isPublish = model.IsReadOnlyRole(role)
 	if isPublish {
 		masked.ReadOnly = true
+		if fileTree := masked.FileTree.Load(); fileTree != nil {
+			fileTree.RefCreateSaveBox, fileTree.RefCreateSavePath = "", ""
+			fileTree.DocCreateSaveBox, fileTree.DocCreateSavePath, fileTree.DocCreateTemplatePath = "", "", ""
+			fileTree.ShorthandSaveBox, fileTree.ShorthandSavePath = "", ""
+		}
 	}
 	if !model.IsValidRole(role, []model.Role{model.RoleAdministrator}) {
 		model.HideConfSecret(masked)

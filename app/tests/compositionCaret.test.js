@@ -137,7 +137,7 @@ const rendererSource = () => {
             let isComposition = false, beforeInputCompositionHandled = false;
             let recoveredComposition = false, compositionSnapshot;
             let lineBreakUndoContext, forwardDeleteUndoContext;
-            let compositionRange, crossBlockComposition;
+            let compositionRange, crossBlockComposition, inlineMathComposition;
             let compositionInputText = "";
             const isAfterInlineMath = ${isAfterInlineMath};
             const pending = [];

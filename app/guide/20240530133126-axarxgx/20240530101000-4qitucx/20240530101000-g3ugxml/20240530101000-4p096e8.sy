@@ -280,29 +280,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設定"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "アプリ"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
 									"TextMarkTextContent": "ワークスペース"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " でワークスペースを切り替えられます"
+									"Data": " で切り替え先を選び、確認します。アプリの終了後に開き直すと、選んだワークスペースが開きます。同じグループの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "管理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " から、ワークスペースを開くことや新規作成、削除ができます"
 								}
 							]
 						}

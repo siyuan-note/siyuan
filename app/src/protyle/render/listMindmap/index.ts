@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import {toggleMenu} from "../../../menus/menuToggle";
 import {Constants} from "../../../constants";
 import {showMessage} from "../../../dialog/message";
@@ -28,6 +29,7 @@ import {
     moveListMindmapNode, readListMindmap, replaceListMindmapContent,
     writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch, normalizeListMindmapSummaryMetadata,
     convertListMindmapToList, hasListMindmapRootTitle, clearListMindmapHeight, initializeListMindmapConnectorStyle,
+    updateListMindmapTimestamps,
 } from "./model";
 import {prepareListMindmapConversion} from "./conversion";
 import type {ListMindmapMetadata, ListMindmapModel, ListMindmapNodeStyle} from "./model";
@@ -790,7 +792,9 @@ class ListMindmapController {
             if (next.metadata.appearance?.palette.length && assignListMindmapBranchColors(next)) {
                 writeListMindmapMetadata(this.list, next.metadata);
             }
-            if (cleanListMindmapHTML(this.list.outerHTML) !== before) {
+            const after = cleanListMindmapHTML(this.list.outerHTML);
+            if (after !== before) {
+                updateListMindmapTimestamps(this.list, before, after, dayjs().format("YYYYMMDDHHmmss"));
                 const nextID = [focusID, selectedID, siblings[index + 1]?.id, siblings[index - 1]?.id,
                     selected?.parentId].find(id => next.nodes.has(id)) || next.root.id;
                 // 将操作前后的节点分别记录在事务中，重做时可定位到重新插入的节点。

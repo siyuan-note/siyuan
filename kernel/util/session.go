@@ -163,6 +163,7 @@ type SessionData struct {
 }
 
 type WorkspaceSession struct {
+	AuthSessionID         string `json:",omitempty"`
 	AccessAuthCodeVersion string // 锁屏密码的 HMAC 摘要，会话不保存密码原文；修改密码后既有会话随之失效
 	OIDCSessionVersion    string
 	DesktopSessionID      string `json:",omitempty"` // 未记住的本机桌面登录所属内核启动批次

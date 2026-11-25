@@ -86,6 +86,7 @@ export const fetchPost = ((
         init.signal = signal;
     }
     let isGetFile202 = false;
+    let syncNotice: string;
     return trackEditorSaveRequest(url, data, trackSettingRequest(url, withFetchTimeout((requestSignal) => fetchWithAppId(url, {...init, signal: requestSignal}).then((response): Promise<IWebSocketData | string> | IWebSocketData => {
         switch (response.status) {
             case 403:
@@ -111,6 +112,9 @@ export const fetchPost = ((
                     isGetFile202 = true;
                 }
                 if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
+                    if (url === "/api/sync/performSync" && headers?.[Constants.SIYUAN_SYNC_NOTICE_HEADER] === "2") {
+                        syncNotice = response.headers.get(Constants.SIYUAN_SYNC_NOTICE_HEADER);
+                    }
                     return response.json();
                 } else {
                     return response.text();
@@ -139,6 +143,14 @@ export const fetchPost = ((
             }
         }
         if (typeof response === "object" && typeof response.msg === "string" && typeof response.code === "number") {
+            if (response.code === -1) {
+                const notice = syncNotice?.match(/^(sync-notice-[a-z0-9]{16});(0|-1);(\d+)$/);
+                if (notice) {
+                    processMessage({cmd: "msg", msg: response.msg, code: Number(notice[2]),
+                        data: {id: notice[1], closeTimeout: Number(notice[3])}});
+                    return;
+                }
+            }
             if (processMessage(response) && cb) {
                 cb(response);
             }

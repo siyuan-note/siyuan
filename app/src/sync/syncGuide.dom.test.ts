@@ -17,10 +17,10 @@ const browserCases = async (sources: string[], styles: string[]) => {
         document.head.replaceChildren(style);
         for (const initializeKey of [false, true]) {
             document.body.innerHTML = "";
-            const requests: {url: string, data: unknown, reply: (response: unknown) => void}[] = [];
+            const requests: {url: string, data: unknown, headers?: Record<string, string>, reply: (response: unknown) => void}[] = [];
             const confirmations: (() => void)[] = [];
 			const messages: string[] = [];
-            const config = {readonly: false, sync: {provider: 0, enabled: false, cloudName: "main"},
+            const config = {readonly: false, sync: {provider: 0, enabled: false, cloudName: "main", mode: 0},
                 repo: {key: initializeKey ? "" : "fixture-key"}};
             class Dialog {
                 element = document.createElement("div");
@@ -49,14 +49,20 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 "../util/needSubscribe": {needSubscribe: () => false, isPaidUser: () => true},
                 "./checkoutProgress": {openSyncCheckoutProgress: () => false},
                 "../util/functions": {isMobile: () => !!mobile},
-                "../constants": {Constants: {DIALOG_SYNCCHOOSEDIR: "choose-dir", DIALOG_SETPASSWORD: "set-password"}},
+                "../constants": {Constants: {DIALOG_SYNCCHOOSEDIR: "choose-dir", DIALOG_SETPASSWORD: "set-password",
+                    SIYUAN_SYNC_NOTICE_HEADER: "X-Siyuan-Sync-Notice"}},
                 "../util/hostCapabilities": {sanitizeKernelHTML: (value: string) => value},
                 "../dialog/processSystem": {processSync() {}},
                 "../dialog/confirmDialog": {confirmDialog: ({confirm}: {confirm: () => void}) =>
                     confirmations.push(confirm)},
-                "../util/fetch": {fetchPost: (url: string, data: unknown, reply: (response: unknown) => void) =>
-                    requests.push({url, data, reply}), fetchSyncPost: (url: string, data: unknown) =>
-                    new Promise(resolve => requests.push({url, data, reply: resolve}))},
+                "../util/fetch": {
+                    fetchPost: (url: string, data: unknown, reply: (response: unknown) => void, headers: Record<string, string>) =>
+                        new Promise<void>(resolve => requests.push({url, data, headers, reply: (response: {code?: number}) => {
+                            if (response.code >= 0 || typeof response.code === "undefined") reply(response);
+                            resolve();
+                        }})),
+                    fetchSyncPost: (url: string, data: unknown) => new Promise(resolve => requests.push({url, data, reply: resolve})),
+                },
                 "../config/util/configApi": {config: {set: (name: string, value: unknown, applied: () => void) =>
                     new Promise<void>((resolve, reject) => {
                         requests.push({url: "/api/setting/patch", data: {[name]: value}, reply: (response: {code: number}) => {
@@ -160,8 +166,10 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 check.equal(buttons[1].isConnected, true);
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {upload: !mobile, source: "new-source", localID: "local", cloudID: "cloud"});
-                requests.shift().reply({code: -1});
+                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "2");
+                requests.shift().reply({code: -1, msg: "lock cloud repo failed", data: null});
                 await new Promise(resolve => setTimeout(resolve, 0));
+                check.deepEqual(messages, ["plsChoose"]);
                 check.equal(buttons[1].isConnected, true, "failed submission preserves the direction form");
                 check.equal(document.querySelector<HTMLInputElement>('input[name="upload"]:checked').value, String(!mobile));
                 buttons[1].click();
@@ -208,13 +216,19 @@ const browserCases = async (sources: string[], styles: string[]) => {
             } else {
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {});
-                requests.shift();
+                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "2");
+                const messageCount = messages.length;
+                requests.shift().reply({code: -1, msg: "context canceled", data: null});
+                await new Promise(resolve => setTimeout(resolve, 0));
+                check.equal(messages.length, messageCount);
                 guide.syncGuide();
                 check.equal(requests[0].url, "/api/sync/getSyncSourceState");
                 requests.shift().reply({data: {pending: false, source: "empty-source", localID: "local", cloudID: ""}});
                 check.equal(requests[0].url, "/api/sync/performSync");
                 check.deepEqual(requests[0].data, {upload: true, source: "empty-source", localID: "local", cloudID: ""});
+                check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "2");
                 requests.shift().reply({code: 2, msg: "", data: null});
+                await new Promise(resolve => setTimeout(resolve, 0));
                 check.equal(requests[0].url, "/api/sync/getSyncSourceState");
                 requests.shift().reply({code: 0, data: {pending: false, source: "empty-source", localID: "fresh-empty-local", cloudID: ""}});
                 await new Promise(resolve => setTimeout(resolve, 0));
@@ -226,12 +240,28 @@ const browserCases = async (sources: string[], styles: string[]) => {
                 requests.shift().reply({code: 0});
                 await new Promise(resolve => setTimeout(resolve, 0));
             }
+            config.sync.mode = 3;
+            guide.syncGuide();
+            check.equal(requests[0].url, "/api/sync/getSyncSourceState");
+            requests.shift().reply({code: 0, data: {pending: false, source: ""}});
+            document.querySelector<HTMLInputElement>(`input[name="upload"][value="${!mobile}"]`).checked = true;
+            const manualConfirm = document.querySelectorAll<HTMLButtonElement>(".b3-dialog__action button")[1];
+            manualConfirm.click();
+            manualConfirm.click();
+            check.equal(requests.length, 1);
+            check.equal(requests[0].url, "/api/sync/performSync");
+            check.deepEqual(requests[0].data, {upload: !mobile});
+            check.equal(requests[0].headers["X-Siyuan-Sync-Notice"], "2");
+            check.equal(manualConfirm.isConnected, false, "manual sync leaves the editor usable while the request is pending");
+            requests.shift().reply({code: -1, msg: "Sync unavailable", data: {closeTimeout: 5000}});
+            await new Promise(resolve => setTimeout(resolve, 0));
+            check.equal(manualConfirm.isConnected, false);
         }
     }
     return "Sync setup directory cases passed";
 };
 
-test("sync setup and stale preview recovery require confirmed choices on desktop and mobile", {
+test("sync setup, stale previews, and error notifications work on desktop and mobile", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
     timeout: 65000,

@@ -124,6 +124,10 @@ var getLocalGraph = contractHandler(apicontract.GetLocalGraph, func(c *gin.Conte
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		nodes, links = model.FilterGraphByPublishAccess(c, publishAccess, nodes, links)
+		if !model.CheckBlockIdMetadataAccessableByPublishAccess(c, publishAccess, id) {
+			// 过滤后不保留不可访问目标所属笔记本的标识
+			boxID = ""
+		}
 	}
 	return apicontract.Success(apicontract.GraphQueryResult(apicontract.LocalGraphResult{GraphElements: graphElementsContract(request.ReqID, boxID, nodes, links), ID: id, Conf: localGraphContract(local)}))
 })

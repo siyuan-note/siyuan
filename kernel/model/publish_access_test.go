@@ -18,7 +18,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -1427,7 +1426,7 @@ func TestFilterGraphByPublishAccess(t *testing.T) {
 	}
 }
 
-func TestFilterTagsByPublishAccess(t *testing.T) {
+func TestTagPublishVisibility(t *testing.T) {
 	const (
 		boxID             = "20260726000000-boxid01"
 		publicDocID       = "20260726000001-public1"
@@ -1441,38 +1440,26 @@ func TestFilterTagsByPublishAccess(t *testing.T) {
 		{ID: hiddenDocID, Visible: false},
 		{ID: disabledDocID, Visible: true, Disable: true},
 	}
-	spans := []*sql.Span{
-		{Box: boxID, Path: "/" + publicDocID + ".sy", Content: "shared"},
-		{Box: boxID, Path: "/" + protectedDocID + ".sy", Content: "shared"},
-		{Box: boxID, Path: "/" + protectedDocID + ".sy", Content: "protected"},
-		{Box: boxID, Path: "/" + hiddenDocID + ".sy", Content: "hidden"},
-		{Box: boxID, Path: "/" + disabledDocID + ".sy", Content: "disabled"},
-	}
-	newTags := func() *Tags {
-		return &Tags{
-			{Name: "shared", Label: "shared", Type: "tag", Count: 2},
-			{Name: "protected", Label: "protected", Type: "tag", Count: 1},
-			{Name: "hidden", Label: "hidden", Type: "tag", Count: 1},
-			{Name: "disabled", Label: "disabled", Type: "tag", Count: 1},
-		}
-	}
-
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
-	filtered := filterTagsByPublishAccess(c, publishAccess, newTags(), spans)
-	if len(*filtered) != 1 || (*filtered)[0].Label != "shared" || (*filtered)[0].Count != 1 {
-		t.Fatalf("unexpected unauthenticated tags: %+v", *filtered)
+	visible := TagPublishVisibility(c, publishAccess)
+	if !visible(boxID, "/"+publicDocID+".sy") {
+		t.Fatal("public document did not contribute tags")
+	}
+	for _, id := range []string{protectedDocID, hiddenDocID, disabledDocID} {
+		if visible(boxID, "/"+id+".sy") {
+			t.Fatalf("inaccessible document %s contributed tags", id)
+		}
 	}
 
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + protectedDocID,
 		Value: PublishAuthCookieValue(protectedDocID, protectedPassword),
 	})
-	filtered = filterTagsByPublishAccess(c, publishAccess, newTags(), spans)
-	if len(*filtered) != 2 ||
-		(*filtered)[0].Label != "shared" || (*filtered)[0].Count != 2 ||
-		(*filtered)[1].Label != "protected" || (*filtered)[1].Count != 1 {
-		t.Fatalf("unexpected authenticated tags: %+v", *filtered)
+	visible = TagPublishVisibility(c, publishAccess)
+	if !visible(boxID, "/"+protectedDocID+".sy") ||
+		visible(boxID, "/"+hiddenDocID+".sy") || visible(boxID, "/"+disabledDocID+".sy") {
+		t.Fatal("unlocking the protected document changed the wrong tag sources")
 	}
 }
 

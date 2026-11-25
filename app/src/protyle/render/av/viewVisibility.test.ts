@@ -7,6 +7,7 @@ let getAVCurrentViewID: typeof import("./viewVisibility").getAVCurrentViewID;
 let getAVVisibleViewIDs: typeof import("./viewVisibility").getAVVisibleViewIDs;
 let getAVVisibleViewIDsAfterHidingAll: typeof import("./viewVisibility").getAVVisibleViewIDsAfterHidingAll;
 let setAVVisibleViewIDs: typeof import("./viewVisibility").setAVVisibleViewIDs;
+let updateAVVisibleViews: typeof import("./viewVisibility").updateAVVisibleViews;
 let getAVViewPageSize: typeof import("./viewVisibility").getAVViewPageSize;
 let serializeAVViewPageSizes: typeof import("./viewVisibility").serializeAVViewPageSizes;
 
@@ -22,6 +23,7 @@ before(async () => {
     getAVVisibleViewIDs = visibility.getAVVisibleViewIDs;
     getAVVisibleViewIDsAfterHidingAll = visibility.getAVVisibleViewIDsAfterHidingAll;
     setAVVisibleViewIDs = visibility.setAVVisibleViewIDs;
+    updateAVVisibleViews = visibility.updateAVVisibleViews;
     getAVViewPageSize = visibility.getAVViewPageSize;
     serializeAVViewPageSizes = visibility.serializeAVViewPageSizes;
 });
@@ -60,8 +62,34 @@ const views = [
 ] as IAVView[];
 
 describe("database block visible views", () => {
-    it("keeps the rendered current view available when its tab is hidden", () => {
+    it("reads the current view even when its tab was already hidden", () => {
         assert.equal(getAVCurrentViewID(createBlockElement(undefined, undefined, "view-b")), "view-b");
+    });
+
+    it("switches to the nearest visible tab on the left, then on the right", () => {
+        const order = ["a", "b", "c", "d", "e"];
+        for (const [before, after, next] of [
+            [["a", "b", "c", "d"], ["a", "b", "d"], "b"],
+            [["a", "c", "d"], ["a", "d"], "a"],
+            [["c", "e"], ["e"], "e"],
+        ] as const) {
+            const block = createBlockElement(before.join(","), "c");
+            const {operations, undoOperations} = updateAVVisibleViews(block, order, [...before], [...after]);
+            assert.deepEqual(operations.map(op => op.action), ["setAttrViewBlockVisibleViews", "setAttrViewBlockView"]);
+            assert.deepEqual(undoOperations.map(op => op.action), ["setAttrViewBlockVisibleViews", "setAttrViewBlockView"]);
+            assert.equal(getAVCurrentViewID(block), next);
+            assert.equal(getAVVisibleViewIDs(block, order).join(","), after.join(","));
+            assert.equal(undoOperations.find(op => op.action === "setAttrViewBlockView").id, "c");
+        }
+    });
+
+    it("leaves a current view alone when another tab is hidden", () => {
+        for (const before of [["a", "b", "c"], ["a", "b"]]) {
+            const block = createBlockElement(before.join(","), "c");
+            const {operations} = updateAVVisibleViews(block, ["a", "b", "c"], before, before.filter(id => id !== "b"));
+            assert.equal(operations.length, 1);
+            assert.equal(getAVCurrentViewID(block), "c");
+        }
     });
 
     it("prefers the persisted current view and supports legacy focused tabs", () => {

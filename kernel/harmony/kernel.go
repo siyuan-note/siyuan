@@ -180,6 +180,16 @@ func GetAssetAbsPath(relativePath *C.char) *C.char {
 	return C.CString(absPath)
 }
 
+//export GetAssetSharePath
+func GetAssetSharePath(asset *C.char) *C.char {
+	path, err := model.PrepareAssetForExternalShare(C.GoString(asset))
+	if err != nil {
+		logging.LogWarnf("prepare asset for sharing failed: %s", err)
+		return nil
+	}
+	return C.CString(path)
+}
+
 //export GetMimeTypeByExt
 func GetMimeTypeByExt(ext *C.char) *C.char {
 	return C.CString(util.GetMimeTypeByExt(C.GoString(ext)))

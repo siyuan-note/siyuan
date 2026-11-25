@@ -25,6 +25,7 @@ import {setAVCellPanelPosition} from "./cellPanelPosition";
 import {getAVHostIdentity, getAVRelationHost} from "./host";
 import {showMessage} from "../../../dialog/message";
 import {isAVRenderData} from "./renderData";
+import {getAVCurrentViewID} from "./viewVisibility";
 import {captureAVCellInput, type IAVCellInputElements} from "./cell";
 
 export const openMenuPanel = (options: IOpenAVPanelOptions) => {
@@ -172,6 +173,7 @@ export const openMenuPanel = (options: IOpenAVPanelOptions) => {
             bindMobileAVPanel(avPanelElement as HTMLElement, menuElement);
         }
         const rerenderSwitcher = () => {
+            data.viewID = getAVCurrentViewID(options.blockElement) || data.viewID;
             const keyword = (menuElement.querySelector(".b3-text-field") as HTMLInputElement)?.value || "";
             menuElement.innerHTML = getSwitcherHTML(data.views, data.viewID, options.blockElement);
             bindSwitcherEvent({

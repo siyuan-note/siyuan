@@ -176,6 +176,111 @@ func TestAPIContractSyncBootRole(t *testing.T) {
 	}
 }
 
+func TestAPIContractSyncFailuresPreserveLastSuccess(t *testing.T) {
+	syncTestConfiguration(t)
+	langs, statusBar := util.Langs, util.StatusBarCfg.Load()
+	t.Cleanup(func() {
+		util.Langs = langs
+		util.StatusBarCfg.Store(statusBar)
+	})
+	util.StatusBarCfg.Store(&util.StatusBar{})
+	const missingKey = "Repository key is missing"
+	util.Langs = map[string]map[int]string{"en": {26: missingKey, 80: "Sync failed: %s"}}
+	model.Conf.SetUser(&conf.User{UserSiYuanOneTimePayStatus: 1})
+	model.Conf.Repo.Store(conf.NewRepo())
+	syncConf := model.Conf.Sync.Load()
+	syncConf.Enabled, syncConf.Provider, syncConf.Synced = true, conf.ProviderS3, 42
+
+	engine := gin.New()
+	engine.POST("/api/sync/performSync", performSync)
+	engine.POST("/api/sync/getSyncInfo", getSyncInfo)
+	for _, entry := range []struct {
+		name string
+		mode int
+		body string
+	}{
+		{"bidirectional", 1, `{}`},
+		{"upload", 3, `{"upload":true}`},
+		{"download", 3, `{"upload":false}`},
+		{"source decision", 1, `{"upload":true,"source":"source","localID":"local","cloudID":"cloud"}`},
+	} {
+		t.Run(entry.name, func(t *testing.T) {
+			model.Conf.Sync.Load().Mode = entry.mode
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(entry.body))
+			request.Header.Set(syncNoticeHeader, "1")
+			engine.ServeHTTP(recorder, request)
+			requireAPIContract(t, "POST", "/api/sync/performSync", recorder)
+			if notice := recorder.Header().Get(syncNoticeHeader); notice != "pushed" {
+				t.Fatalf("missing kernel sync notice: %q", notice)
+			}
+			withoutOptIn := httptest.NewRecorder()
+			engine.ServeHTTP(withoutOptIn, httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(entry.body)))
+			if notice := withoutOptIn.Header().Get(syncNoticeHeader); notice != "" {
+				t.Fatalf("unexpected kernel sync notice without opt-in: %q", notice)
+			}
+			if withoutOptIn.Body.String() != recorder.Body.String() {
+				t.Fatalf("opt-in changed the sync response: %s", withoutOptIn.Body.String())
+			}
+			withNoticeID := httptest.NewRecorder()
+			request = httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(entry.body))
+			request.Header.Set(syncNoticeHeader, "2")
+			engine.ServeHTTP(withNoticeID, request)
+			requireAPIContract(t, "POST", "/api/sync/performSync", withNoticeID)
+			notice := withNoticeID.Header().Get(syncNoticeHeader)
+			if !strings.HasPrefix(notice, "sync-notice-") || !strings.HasSuffix(notice, ";-1;0") ||
+				len(notice) != len("sync-notice-")+16+len(";-1;0") || withNoticeID.Body.String() != recorder.Body.String() {
+				t.Fatalf("unexpected sync notice response: %q %s", notice, withNoticeID.Body.String())
+			}
+			var response struct {
+				Code int
+				Msg  string
+				Data json.RawMessage
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 ||
+				response.Msg != missingKey || string(response.Data) != "null" {
+				t.Fatalf("unexpected sync failure response: %s (%v)", recorder.Body.String(), err)
+			}
+
+			recorder = httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", "/api/sync/getSyncInfo", nil))
+			requireAPIContract(t, "POST", "/api/sync/getSyncInfo", recorder)
+			var info struct{ Data apicontract.SyncInfoData }
+			if err := json.Unmarshal(recorder.Body.Bytes(), &info); err != nil || info.Data.Synced != 42 ||
+				!strings.Contains(info.Data.Stat, missingKey) {
+				t.Fatalf("unexpected sync status: %s (%v)", recorder.Body.String(), err)
+			}
+		})
+	}
+}
+
+func TestAPIContractSyncAdmissionNotice(t *testing.T) {
+	syncTestConfiguration(t)
+	langs := util.Langs
+	t.Cleanup(func() { util.Langs = langs })
+	const disabled = "Sync is disabled"
+	util.Langs = map[string]map[int]string{"en": {124: disabled}}
+	model.Conf.Sync.Load().Enabled = false
+	engine := gin.New()
+	engine.POST("/api/sync/performSync", performSync)
+	request := httptest.NewRequest("POST", "/api/sync/performSync", strings.NewReader(`{}`))
+	request.Header.Set(syncNoticeHeader, "2")
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, request)
+	requireAPIContract(t, "POST", "/api/sync/performSync", recorder)
+	notice := recorder.Header().Get(syncNoticeHeader)
+	if !strings.HasPrefix(notice, "sync-notice-") || !strings.HasSuffix(notice, ";0;5000") {
+		t.Fatalf("unexpected admission notice: %q", notice)
+	}
+	var response struct {
+		Code int
+		Msg  string
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || response.Code != -1 || response.Msg != disabled {
+		t.Fatalf("unexpected admission failure: %s (%v)", recorder.Body.String(), err)
+	}
+}
+
 func TestAPIContractSyncPermissionBeforeBody(t *testing.T) {
 	syncTestConfiguration(t)
 	for path, handler := range map[string]gin.HandlerFunc{

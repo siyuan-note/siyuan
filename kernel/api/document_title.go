@@ -18,7 +18,11 @@ var getDocTitle = contractHandler(apicontract.GetDocTitle, func(c *gin.Context, 
 	if err := checkBlockPublishAccessInBox(c, request.ID, boxID); err != nil {
 		return apicontract.FailureFrom[apicontract.DocumentTitleData](err)
 	}
-	title, err := model.GetDocTitle(request.ID, boxID)
+	readTitle := model.GetDocTitle
+	if model.IsReadOnlyRoleContext(c) {
+		readTitle = model.GetDocTitleForReader
+	}
+	title, err := readTitle(request.ID, boxID)
 	if err != nil {
 		return apicontract.Failure[apicontract.DocumentTitleData](-1, err.Error())
 	}

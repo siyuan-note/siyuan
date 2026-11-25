@@ -1,17 +1,38 @@
 .ai-editor-panel {
   position: absolute;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template:
+    "grip" auto
+    "header" auto
+    "options" auto
+    "thinking-title" auto
+    "thinking-body" fit-content(50%)
+    "result" 1fr
+    "actions" auto / minmax(0, 1fr);
   box-sizing: border-box;
   width: min(520px, calc(100% - 32px));
   max-height: min(480px, 60%);
-  overflow: hidden;
+  overflow: auto;
   background: var(--b3-theme-background);
   border: 1px solid var(--b3-theme-surface-lighter);
   border-radius: var(--b3-border-radius-b);
   box-shadow: var(--b3-dialog-shadow);
 
+  &:not(.ai-editor-panel--mobile) {
+    resize: both;
+    min-width: min(280px, calc(100% - 16px));
+    max-width: calc(100% - 16px);
+  }
+
+  &--resized {
+    min-height: min(128px, calc(100% - 16px));
+    max-height: calc(100% - 16px);
+  }
+
   &__header {
+    grid-area: header;
+    cursor: move;
+    touch-action: none;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -22,20 +43,19 @@
     font-size: 13px;
   }
 
-  &__title,
-  &__details {
+  &__title {
     white-space: nowrap;
   }
 
-  &__details {
-    gap: 4px;
+  &__options {
+    grid-area: options;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    padding: 4px 8px;
 
-    > :empty {
-      display: none;
-    }
-
-    .ai-editor-panel__model {
-      margin-inline-start: 0;
+    > button {
+      max-width: 100%;
     }
   }
 
@@ -46,13 +66,8 @@
     white-space: nowrap;
   }
 
-  &__model {
-    margin-inline-start: 4px;
-    color: var(--b3-theme-on-surface-light);
-    font-weight: normal;
-  }
-
   &__body.protyle-wysiwyg {
+    grid-area: result;
     box-sizing: border-box;
     min-height: 36px;
     padding: 6px 8px;
@@ -69,16 +84,39 @@
   }
 
   &__thinking {
-    flex-shrink: 0;
-    padding: 2px 8px;
+    display: contents;
+
+    .agent-chat__thinking-card,
+    .agent-chat__thinking-header,
+    .agent-chat__thinking-body {
+      opacity: inherit;
+    }
+
+    .agent-chat__thinking-card {
+      display: contents;
+    }
+
+    .agent-chat__thinking-header {
+      grid-area: thinking-title;
+      position: static;
+      margin: 2px 8px 0;
+    }
+
+    .agent-chat__thinking-body {
+      grid-area: thinking-body;
+      min-height: 0;
+      margin: 0 8px 2px;
+    }
 
     .agent-chat__thinking-body--expanded {
+      min-height: 1lh;
       max-height: 240px;
       overflow-y: auto;
     }
   }
 
   &__actions {
+    grid-area: actions;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
@@ -90,10 +128,32 @@
   &--mobile {
     top: auto !important;
     right: max(8px, env(safe-area-inset-right));
-    bottom: calc(var(--mobile-bottom-bar-offset, var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom))) + 8px);
+    bottom: calc(max(var(--ai-editor-keyboard-offset, 0px), var(--mobile-bottom-bar-offset, var(--mobile-bottom-bar-safe-area, env(safe-area-inset-bottom)))) + 8px);
     left: max(8px, env(safe-area-inset-left)) !important;
     width: auto;
     max-height: 55%;
+
+    .ai-editor-panel__header {
+      cursor: auto;
+      touch-action: auto;
+    }
+
+    .ai-editor-panel__grip {
+      grid-area: grip;
+      display: grid;
+      height: 22px;
+      place-items: center;
+      cursor: ns-resize;
+      touch-action: none;
+
+      &::before {
+        content: "";
+        width: 32px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--b3-theme-on-surface-light);
+      }
+    }
 
     .ai-editor-panel__actions .b3-button {
       min-height: 36px;

@@ -479,9 +479,17 @@ const checkMobileSafeArea = async (safeTop, width, height) => {
         document.documentElement.dataset.frontend = frontend;
         document.body.className = "body--" + platform;
         const dialog = window.qaAVAdaptiveDialog({content: '<div class="av__richtext-editor av__richtext-editor--sheet"><div class="av__richtext-host">Text</div></div><div class="b3-dialog__action"><button class="b3-button b3-button--text">Confirm</button></div>',
-            containerClassName: "mobile-av-richtext-sheet", mobileSheet: {mode: "expanded"}});
+            containerClassName: "mobile-av-richtext-sheet"});
         await new Promise(resolve => setTimeout(resolve, 180));
         const panel = dialog.element.querySelector(".mobile-sheet-panel");
+        const grip = panel.querySelector(".b3-menu__title--root");
+        assert.equal(panel.getBoundingClientRect().height, height / 2);
+        for (const [type, y] of [["touchstart", 100], ["touchmove", 40], ["touchend", 40]]) {
+            const point = {identifier: 1, clientX: 100, clientY: y};
+            const event = new Event(type, {bubbles: true, cancelable: true});
+            Object.assign(event, {touches: [point], changedTouches: [point]});
+            grip.dispatchEvent(event);
+        }
         const confirm = dialog.element.querySelector(".b3-button");
         const rect = panel.getBoundingClientRect();
         const label = `${frontend}/${platform}, safe area ${safeTop}px, viewport ${innerWidth}x${innerHeight}`;

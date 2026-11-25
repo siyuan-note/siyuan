@@ -1,0 +1,35 @@
+{
+  "name": "@siyuan-note/cli",
+  "version": "0.1.1",
+  "description": "Launcher for the SiYuan kernel CLI bundled with the desktop client",
+  "keywords": [
+    "siyuan",
+    "cli",
+    "notes"
+  ],
+  "homepage": "https://github.com/siyuan-note/siyuan#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/siyuan-note/siyuan.git",
+    "directory": "scripts/npm-cli"
+  },
+  "license": "AGPL-3.0-only",
+  "author": "B3log",
+  "bin": {
+    "siyuan": "bin/siyuan.js"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node bin/siyuan.js --version",
+    "pack:check": "npm pack --dry-run"
+  }
+}

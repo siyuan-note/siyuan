@@ -60,7 +60,9 @@ func TestReaderSearchWithoutBlockMemo(t *testing.T) {
 	model.Conf.Lang = "en"
 	model.Conf.FileTree.Store(conf.NewFileTree())
 	model.Conf.Sync.Store(conf.NewSync())
-	model.Conf.Search.Store(conf.NewSearch())
+	searchSettings := conf.NewSearch()
+	searchSettings.IAL = true
+	model.Conf.Search.Store(searchSettings)
 	model.Conf.Editor.Store(conf.NewEditor())
 	model.Conf.Export.Store(conf.NewExport())
 	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
@@ -109,7 +111,10 @@ func TestReaderSearchWithoutBlockMemo(t *testing.T) {
 	type memoResponse struct {
 		Code int `json:"code"`
 		Data struct {
-			Blocks []struct {
+			MatchedBlockCount int `json:"matchedBlockCount"`
+			MatchedRootCount  int `json:"matchedRootCount"`
+			PageCount         int `json:"pageCount"`
+			Blocks            []struct {
 				ID   string            `json:"id"`
 				Memo string            `json:"memo"`
 				IAL  map[string]string `json:"ial"`
@@ -189,6 +194,36 @@ func TestReaderSearchWithoutBlockMemo(t *testing.T) {
 		t.Fatalf("administrator lost the block memo from fullTextSearchBlock: memo=%q ial=%q", memo, ialMemo)
 	}
 
+	for _, tc := range []struct {
+		name                      string
+		method                    int
+		searchHPath               bool
+		privateQuery, publicQuery string
+	}{
+		{"keywords", 0, false, memoCanary, "broken"},
+		{"keywords with path", 0, true, memoCanary, "broken"},
+		{"document keywords", 0, true, memoCanary + " broken", "broken reference"},
+		{"query syntax", 1, false, memoCanary, "(broken OR missing)"},
+		{"regular expression", 3, false, memoCanary, "broken.*reference"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			search := func(role model.Role, query string) memoResponse {
+				body := fmt.Sprintf(`{"query":%q,"method":%d,"page":1,"pageSize":20,"searchHPath":%t}`, query, tc.method, tc.searchHPath)
+				return post(role, "/api/search/fullTextSearchBlock", body, fullTextSearchBlock)
+			}
+			data := search(model.RoleReader, tc.privateQuery).Data
+			if len(data.Blocks) != 0 || data.MatchedBlockCount != 0 || data.MatchedRootCount != 0 || data.PageCount != 0 {
+				t.Fatalf("private memo changed the reader's search matches: %+v", data)
+			}
+			for _, response := range []memoResponse{search(model.RoleReader, tc.publicQuery), search(model.RoleAdministrator, tc.privateQuery)} {
+				data := response.Data
+				if len(data.Blocks) == 0 || data.MatchedBlockCount == 0 || data.MatchedRootCount == 0 || data.PageCount == 0 {
+					t.Fatalf("search lost accessible matches: %+v", data)
+				}
+			}
+		})
+	}
+
 	blockBody := fmt.Sprintf(`{"id":%q}`, blockID)
 	attrOf := func(role model.Role, label string) map[string]any {
 		t.Helper()
@@ -259,5 +294,31 @@ func TestReaderSearchWithoutBlockMemo(t *testing.T) {
 	}
 	if adminKramdowns := kramdownsOf(model.RoleAdministrator, "administrator getBlockKramdowns"); !strings.Contains(adminKramdowns, memoCanary) || !strings.Contains(adminKramdowns, "broken reference") {
 		t.Fatalf("administrator getBlockKramdowns content is wrong: %s", adminKramdowns)
+	}
+
+	const backlinkPath = "/api/ref/getBacklink2"
+	backlinks := func(role model.Role) map[string]any {
+		body := fmt.Sprintf(`{"id":%q,"k":"","mk":"","includeMentions":false}`, docID)
+		return dataOf(call(role, backlinkPath, body, getBacklink2), backlinkPath)
+	}
+	if data := backlinks(model.RoleReader); data["box"] != boxID {
+		t.Fatalf("reader lost the published backlink target: %#v", data)
+	}
+	if err := model.SetPublishAccess(model.PublishAccess{{ID: docID, Disable: true}}); err != nil {
+		t.Fatal(err)
+	}
+	for _, role := range []model.Role{model.RoleReader, model.RoleVisitor} {
+		data := backlinks(role)
+		for _, key := range []string{"backlinks", "backmentions"} {
+			if list, ok := data[key].([]any); !ok || len(list) != 0 {
+				t.Fatalf("role %d received %s for a disabled target: %#v", role, key, data)
+			}
+		}
+		if data["box"] != "" || data["linkRefsCount"] != float64(0) || data["mentionsCount"] != float64(0) {
+			t.Fatalf("role %d received metadata for a disabled target: %#v", role, data)
+		}
+	}
+	if data := backlinks(model.RoleAdministrator); data["box"] != boxID {
+		t.Fatalf("administrator lost metadata for the backlink target: %#v", data)
 	}
 }

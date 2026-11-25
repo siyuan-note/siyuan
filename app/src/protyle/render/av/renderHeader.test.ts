@@ -6,6 +6,7 @@ import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import * as escape from "../../../util/escape";
+import {DOMFixture} from "./testDOM";
 import {getAVHeaderEditingState} from "./headerEditing";
 
 before(() => {
@@ -45,14 +46,14 @@ describe("database default item templates", () => {
         compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
     }).outputText;
     const renderHeader = (mobile: boolean, layout: TAVView, itemTemplate?: IAVNewItemTemplate,
-                          defaultTemplateID = itemTemplate?.id || "") => {
+                          defaultTemplateID = itemTemplate?.id || "", viewID = "view") => {
         const module = {exports: {}};
         const mocks: Record<string, unknown> = {
             "../../../util/escape": escape,
             "../../../util/functions": {isMobile: () => mobile},
             "./view": {getFieldsByData: (): IAVColumn[] => [], getViewIcon: () => "iconTable"},
             "./viewVisibility": {
-                getAVVisibleViewIDs: () => ["view"], serializeAVViewPageSizes: () => "{}",
+                getAVVisibleViewIDs: () => [viewID], serializeAVViewPageSizes: () => "{}",
             },
             "./headerEditing": {getAVHeaderEditingState},
             "./contextFilterState": {getContextFilterKeyID: () => ""},
@@ -62,13 +63,25 @@ describe("database default item templates", () => {
             window: {siyuan: {languages: {_kernel: {}}, config: {editor: {spellcheck: false}}}},
         });
         const data = {
-            viewID: "view", views: [{id: "view", type: layout, name: "View"}],
+            viewID, views: [{id: viewID, type: layout, name: "View"}],
             view: {filters: [], sorts: []}, newItemTemplates: itemTemplate ? [itemTemplate] : [],
             defaultTemplateID,
         } as IAV;
         const block = {classList: {contains: () => true}, hasAttribute: () => false} as unknown as Element;
         return (module.exports as typeof import("./render")).genTabHeaderHTML(data, false, true, block);
     };
+
+    it("keeps database identifiers as literal HTML attribute values", () => {
+        const viewID = 'view &quot; "main" <1>';
+        for (const mobile of [false, true]) {
+            const document = new DOMFixture();
+            document.body.innerHTML = renderHeader(mobile, "table", undefined, "", viewID);
+            const header = document.body.querySelector(".av__header");
+            assert.equal(header.getAttribute("data-view-ids"), viewID);
+            assert.equal(header.getAttribute("data-current-view-id"), viewID);
+            assert.equal(header.querySelector(".item").getAttribute("data-id"), viewID);
+        }
+    });
 
     it("keeps icon-only default templates available to creation buttons on desktop and mobile", () => {
         for (const mobile of [false, true]) {

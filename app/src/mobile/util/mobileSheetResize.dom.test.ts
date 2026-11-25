@@ -81,72 +81,32 @@ const browserCases = async (sources: string[]) => {
 <div class="b3-dialog__action"><button class="b3-button">Confirm</button></div></div></div></div></div>`;
     const markup = document.body.innerHTML;
     const sheet = document.querySelector<HTMLElement>(".b3-dialog__container");
-    const body = sheet.querySelector<HTMLElement>(".b3-dialog__body");
     const content = sheet.querySelector<HTMLElement>(".b3-dialog__content");
     const footer = sheet.querySelector<HTMLElement>(".b3-dialog__action");
     const layout = dependencies.bindMobileSheetLayout(document.querySelector(".b3-dialog"), sheet);
-    const natural = sheet.getBoundingClientRect().height;
-    layout.setPreferredHeight(650);
-    const bounds = layout.getBounds();
-    check.ok(bounds.min <= natural + 1, "a stretched flex body must not inflate the natural minimum");
-    check.equal(bounds.max, 750, "safe regions are subtracted once");
-    check.equal(sheet.getBoundingClientRect().height, 650);
-    check.equal(body.style.flex, "");
-    layout.setPreferredHeight(bounds.min);
+    check.equal(sheet.getBoundingClientRect().height, Math.max(innerHeight, 800) / 2);
     check.ok(footer.getBoundingClientRect().bottom <= sheet.getBoundingClientRect().bottom + 1);
     content.innerHTML = "<div style='height:1200px'>Long content</div>";
-    layout.setPreferredHeight(650);
-    layout.resize();
-    check.equal(sheet.getBoundingClientRect().height, 650, "content mutation preserves the manual height");
     content.scrollTop = 300;
     check.equal(content.scrollTop, 300);
-    layout.getBounds();
-    check.equal(content.scrollTop, 300, "natural height measurement preserves the scrolled settings");
-    layout.setPreferredHeight(600);
-    check.equal(content.scrollTop, 300, "dragging the grip preserves the scrolled settings");
-    content.firstElementChild.append(document.createTextNode("Updated setting"));
-    await settle();
-    check.equal(content.scrollTop, 300, "setting content mutation preserves the scrolled settings");
-    const nested = document.createElement("div");
-    nested.style.cssText = "width:200px;height:100px;overflow:auto";
-    nested.innerHTML = "<div style='width:1000px;height:400px'>Nested settings</div>";
-    content.firstElementChild.append(nested);
-    await settle();
-    nested.scrollTop = 80;
-    nested.scrollLeft = 100;
-    check.equal(nested.scrollLeft, 100);
-    layout.getBounds();
-    check.equal(nested.scrollTop, 80, "nested scrolling is preserved");
-    check.equal(nested.scrollLeft, 100, "horizontal scrolling is preserved");
-    check.equal(content.scrollTop, 300, "nested scrolling does not displace the outer content");
+    layout.setMode("expanded");
+    check.equal(sheet.getBoundingClientRect().height, 750, "full height subtracts the safe regions once");
+    check.equal(content.scrollTop, 300, "expanding a long sheet keeps the scroll position");
     const settingInput = document.createElement("input");
     settingInput.value = "plugin setting";
-    content.firstElementChild.append(settingInput);
-    await settle();
+    content.firstElementChild.prepend(settingInput);
     settingInput.focus({preventScroll: true});
     settingInput.setSelectionRange(2, 5);
-    layout.getBounds();
-    check.equal(document.activeElement, settingInput);
-    check.equal(settingInput.selectionStart, 2);
-    check.equal(settingInput.selectionEnd, 5);
-    check.equal(content.scrollTop, 300, "measurement preserves the focused setting without moving it");
-    settingInput.blur();
-    layout.setPreferredHeight(650);
-    const longBounds = layout.getBounds();
-    check.ok(longBounds.min > bounds.min && longBounds.min < 650);
-    layout.setMode("expanded");
-    check.equal(sheet.getBoundingClientRect().height, 750);
-    layout.setMode("standard");
-    check.equal(sheet.getBoundingClientRect().height, 650);
     viewport.bottom = 300;
     layout.resize();
     check.equal(sheet.getBoundingClientRect().height, 250);
     viewport.bottom = 800;
     layout.resize();
-    check.equal(sheet.getBoundingClientRect().height, 650, "keyboard recovery restores the preferred height");
-    content.innerHTML = "Short settings";
-    await settle();
-    check.equal(content.scrollTop, 0, "shortened content clamps scrolling to the valid range");
+    check.equal(sheet.getBoundingClientRect().height, 750, "keyboard recovery restores full height");
+    check.equal(content.scrollTop, 300);
+    check.equal(document.activeElement, settingInput);
+    check.equal(settingInput.selectionStart, 2);
+    check.equal(settingInput.selectionEnd, 5);
     layout.dispose();
     document.body.classList.add("body--ios");
     for (const safeArea of [34, 21, 0]) {
@@ -171,8 +131,57 @@ const browserCases = async (sources: string[]) => {
         }
     }
     document.body.classList.remove("body--ios");
+    document.documentElement.dataset.frontend = "mobile";
+    document.body.classList.add("body--android");
+    document.body.style.setProperty("--android-navigation-bar-height", "48px");
+    document.body.innerHTML = markup;
+    const flashcard = document.querySelector<HTMLElement>(".mobile-bottom-sheet-dialog");
+    flashcard.dataset.key = "dialog-opencard";
+    const flashcardPanel = flashcard.querySelector<HTMLElement>(".mobile-bottom-sheet");
+    flashcardPanel.querySelector(".b3-dialog__body").innerHTML = `<div class="card__main" style="height:100%">
+<div class="card__block protyle fn__flex-1"><div class="protyle-content">Card</div></div>
+<div class="card__action"><button class="b3-button">Rate</button></div></div>`;
+    check.equal(getComputedStyle(flashcardPanel).paddingBottom, "48px");
+    document.body.classList.add("mobile-keyboard--open");
+    check.equal(getComputedStyle(flashcardPanel).paddingBottom, "0px",
+        "flashcard ratings do not reserve the navigation area above the keyboard");
+    document.body.insertAdjacentHTML("beforeend", '<div id="keyboardToolbar" style="position:fixed;top:450px;height:48px;width:100%"></div>');
+    const flashcardLayout = dependencies.bindMobileSheetLayout(flashcard.querySelector(".b3-dialog"), flashcardPanel,
+        {initiallyExpanded: true});
+    const editor = flashcardPanel.querySelector<HTMLElement>(".card__block");
+    const rate = flashcardPanel.querySelector("button");
+    const gap = () => flashcardPanel.getBoundingClientRect().bottom - rate.getBoundingClientRect().bottom;
+    const normalGap = gap();
+    dependencies.getMobileToolbarPaddingElement({element: editor})?.style.setProperty("padding-bottom", "48px");
+    check.equal(gap(), normalGap, "the flashcard drawer already positions its ratings above the keyboard toolbar");
+    flashcardLayout.dispose();
+    flashcard.removeAttribute("data-key");
+    check.equal(getComputedStyle(flashcardPanel).paddingBottom, "48px");
+    flashcard.dataset.key = "dialog-opencard";
+    document.body.classList.remove("mobile-keyboard--open");
+    check.equal(getComputedStyle(flashcardPanel).paddingBottom, "48px",
+        "flashcard ratings regain the Android navigation inset after input ends");
+    document.body.classList.remove("body--android");
+    delete document.documentElement.dataset.frontend;
+    document.body.style.removeProperty("--android-navigation-bar-height");
     document.body.style.setProperty("--mobile-bottom-bar-safe-area", "30px");
     viewport.bottom = 800;
+    document.body.innerHTML = markup;
+    const expandedRoot = document.querySelector<HTMLElement>(".mobile-bottom-sheet-dialog");
+    const expandedPanel = expandedRoot.querySelector<HTMLElement>(".b3-dialog__container");
+    expandedPanel.querySelector(".b3-menu__title").remove();
+    let heightAtOpen: number;
+    const disposeExpanded = dependencies.bindBottomSheetDialog({element: expandedRoot}, async () => true, undefined,
+        () => { heightAtOpen = expandedPanel.getBoundingClientRect().height; }, {initiallyExpanded: true});
+    check.equal(heightAtOpen, 750, "an initially expanded sheet opens at full available height");
+    viewport.bottom = 500;
+    window.dispatchEvent(new Event("resize"));
+    check.equal(expandedPanel.getBoundingClientRect().height, 450, "the keyboard clips the expanded sheet");
+    viewport.bottom = 800;
+    window.dispatchEvent(new Event("resize"));
+    check.equal(expandedPanel.getBoundingClientRect().height, 750, "the sheet returns to full height after keyboard dismissal");
+    disposeExpanded();
+
     for (const gate of ["child", "root-inert", "body-inert", "root-busy", "body-busy", "business", "closing"]) {
         document.body.innerHTML = markup;
         const root = document.querySelector<HTMLElement>(".mobile-bottom-sheet-dialog");
@@ -213,13 +222,24 @@ const browserCases = async (sources: string[]) => {
         block(false);
         touch("touchstart", 0);
         touch("touchmove", -100);
-        const resized = panel.getBoundingClientRect().height;
-        check.ok(resized > initial, gate + " allows the owning ready dialog");
+        check.equal(panel.getBoundingClientRect().height, initial, gate + " defers expansion until release");
         block(true);
         touch("touchend", -200);
-        check.equal(panel.getBoundingClientRect().height, resized, gate + " blocks active completion");
+        check.equal(panel.getBoundingClientRect().height, initial, gate + " blocks active completion");
         if (gate === "closing") check.equal(panel.style.transform, "translateY(100%)");
         check.equal(closes, 0);
+        block(false);
+        touch("touchstart", 0);
+        touch("touchmove", -100);
+        touch("touchend", -100);
+        const expansion = panel.getAnimations().find(animation => !(animation instanceof CSSTransition));
+        check.ok(expansion, gate + " animates the height on release");
+        expansion.pause();
+        expansion.currentTime = Number(expansion.effect.getComputedTiming().duration) / 2;
+        const height = panel.getBoundingClientRect().height;
+        check.ok(height > initial && height < 750, gate + " passes through intermediate heights");
+        expansion.finish();
+        check.equal(panel.getBoundingClientRect().height, 750, gate + " allows a fresh grip gesture");
         dispose();
     }
     viewport.bottom = window.innerHeight;
@@ -296,12 +316,12 @@ const browserCases = async (sources: string[]) => {
 
 const headless = process.env.SIYUAN_TEST_HEADLESS === "1";
 
-test("real sheet geometry keeps short minimums and footer visible across manual and keyboard resizing", {
+test("real sheet geometry preserves its selected height, safe areas and guarded dismissal", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !headless,
     // 样式编译和临时目录清理计入父测试，浏览器仍受独立的执行期限约束。
     timeout: 45000,
 }, async () => {
-    const sources = ["protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu", "mobile/util/keyboardSheetState",
+    const sources = ["protyle/util/browserCompatibility", "protyle/wysiwyg/nativeTextMenu", "protyle/lite/mobileToolbar", "mobile/util/keyboardSheetState",
         "mobile/util/mobileSheetGesture", "mobile/util/mobileSheetLayout", "mobile/util/bindBottomSheetDrag",
         "mobile/util/bindBottomSheetDialog"].map(id => transpileModule(
         readFileSync(`src/${id}.ts`, "utf8"), {
@@ -322,6 +342,14 @@ app.whenReady().then(async () => {
             win.showInactive();
             win.webContents.enableDeviceEmulation({screenPosition:"mobile", screenSize:{width:390,height:900},
                 viewSize:{width:390,height:900}, deviceScaleFactor:1, scale:1});
+        }
+        // Exercise actual animation regardless of the runner's accessibility settings.
+        win.webContents.debugger.attach();
+        await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {
+            features: [{name: "prefers-reduced-motion", value: "no-preference"}],
+        });
+        if (!await win.webContents.executeJavaScript('matchMedia("(prefers-reduced-motion: no-preference)").matches')) {
+            throw new Error("Sheet resize test could not disable reduced motion emulation");
         }
         await win.webContents.insertCSS(${JSON.stringify(css)});
         console.log(await win.webContents.executeJavaScript(${JSON.stringify(code)}));

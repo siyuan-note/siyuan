@@ -213,6 +213,7 @@ interface Window {
         exportByDefault(url: string): void
         saveExportFile(url: string): void
         saveExportFileV2?(url: string, requestID: string): void
+        saveAssetToGallery?(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
@@ -259,6 +260,10 @@ interface Window {
         setNativeTextSelectionMenuDisabled(disabled: boolean): void
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
         cancelNotification(id: number): void
+    };
+    SiYuanHarmonyWindowControls?: {
+        connect(): string
+        setDragArea(left: number, top: number, right: number, bottom: number): void
     };
     handleSaveExportFileResult(requestID: string, resultJSON: string): void
 
@@ -416,7 +421,7 @@ interface IPosition {
 
 interface ISaveLayout {
     name: string,
-    layout: IObject
+    layout: Config.IUiLayout & import("./api").APIPOSTRoutes["/api/system/setUILayout"]["request"]["layout"]
     time: number
     filesPaths: IFilesPath[]
 }

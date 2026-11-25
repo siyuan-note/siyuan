@@ -15,7 +15,8 @@ import {
     isUploadInsertPositionAvailable,
 } from "../upload/insertPosition";
 import {processPasteCode, processRender} from "./processCode";
-import {getLocalFiles, getTextSiyuanFromTextHTML, isInHarmony, readClipboard, readText} from "./compatibility";
+import {getLocalFiles, getTextSiyuanFromTextHTML, isInAndroid, isInHarmony, readClipboard, readText} from "./compatibility";
+import {getAndroidClipboardImageBridge, getAndroidClipboardPaste, readAndroidClipboardImage} from "./androidClipboardImage";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {focusByOffset, getEditorRange, getUndoFocusContext} from "./selection";
 import {focusByRange, getSelectionOffset} from "./selectionOffsets";
@@ -76,7 +77,7 @@ import {
 } from "./wpsPresentation";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
-import {expandQueryEmbedsForClipboard} from "./queryEmbedClipboard";
+import {expandQueryEmbedsForClipboard, neutralizePastedJSEmbedHTML, neutralizePastedJSEmbeds} from "./queryEmbedClipboard";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
 import {getTextWithoutSemanticMarkers, normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
@@ -685,7 +686,7 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
 
 const insertConvertedBlockDOM = (protyle: IProtyle, dom: string, range: Range) => {
     protyle.toolbar.range = range;
-    insertHTML(dom, protyle, false, true, true);
+    insertHTML(neutralizePastedJSEmbedHTML(dom, protyle.lute), protyle, false, true, true);
     protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
         if (item.textContent === "") {
             fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
@@ -708,6 +709,52 @@ export const shouldPasteClipboardImage = (textHTML: string, isAVTarget: boolean)
     }
     return textHTML.startsWith("<img") ||  // 浏览器上复制单个图片
         (textHTML.startsWith("<table") && textHTML.indexOf("<img") > -1);  // Excel 或者浏览器中复制带有图片的表格
+};
+
+const capturePasteSelection = (editor: HTMLElement) => {
+    const selection = getSelection();
+    const focus = document.activeElement;
+    const start = selection?.anchorNode;
+    const end = selection?.focusNode;
+    const startOffset = selection?.anchorOffset;
+    const endOffset = selection?.focusOffset;
+    return () => {
+        const current = getSelection();
+        return !!focus && editor.contains(focus) && focus === document.activeElement &&
+            !!start && !!end && start === current?.anchorNode && end === current?.focusNode &&
+            startOffset === current.anchorOffset && endOffset === current.focusOffset;
+    };
+};
+
+export const pasteFromMenu = async (protyle: IProtyle, target: HTMLElement, trusted: boolean) => {
+    const bridge = trusted && isInAndroid() ? getAndroidClipboardImageBridge(window) : undefined;
+    if (!bridge && document.queryCommandSupported("paste")) {
+        document.execCommand("paste");
+        return;
+    }
+    if (!bridge) {
+        return paste(protyle, Object.assign(await readClipboard(), {target}));
+    }
+    const insertPosition = createUploadInsertPosition(getEditorRange(protyle.wysiwyg.element));
+    const targetDocument = captureUploadDocument(protyle);
+    const selectionUnchanged = capturePasteSelection(protyle.wysiwyg.element);
+    const canPaste = () => !protyle.disabled && selectionUnchanged() && isUploadDocumentAvailable(protyle, targetDocument) &&
+        isUploadInsertPositionAvailable(protyle.wysiwyg.element, insertPosition);
+    const data = await readClipboard();
+    if (!canPaste()) {
+        return;
+    }
+    if (!data.textPlain && !data.textHTML && !data.siyuanHTML && !data.files?.length && !data.localFiles?.length) {
+        if (isProtyleUploadDisabled(protyle)) {
+            return;
+        }
+        const image = await readAndroidClipboardImage(bridge);
+        if (!image || !canPaste()) {
+            return;
+        }
+        data.files = [image];
+    }
+    return paste(protyle, Object.assign(data, {target}), {insertPosition, document: targetDocument});
 };
 
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | IClipboardData) & {
@@ -734,7 +781,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     };
     const insertAtPasteRange = (html: string, range: Range, isBlock = false, insertByCursor = false) => {
         protyle.toolbar.range = range;
-        insertHTML(html, protyle, isBlock, true, insertByCursor);
+        insertHTML(neutralizePastedJSEmbedHTML(html, protyle.lute), protyle, isBlock, true, insertByCursor);
     };
     const assetUploadOptions: IUploadInsertOptions = {
         ...uploadOptions,
@@ -769,6 +816,29 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         files = event.clipboardData.files;
         wpsPresentation = extractWPSPresentationClipboard(event.clipboardData.types,
             (type) => event.clipboardData.getData(type));
+        if (window.JSAndroid && isInAndroid()) {
+            const otherContent = !!(textHTML || siyuanHTML || vscodeEditorData || wpsPresentation);
+            const clipboard = getAndroidClipboardPaste(event.clipboardData, event.isTrusted, textPlain, otherContent);
+            files = clipboard.files;
+            textPlain = clipboard.textPlain;
+            if (clipboard.recoverImage) {
+                if (protyle.disabled || isProtyleUploadDisabled(protyle)) {
+                    return;
+                }
+                const selectionUnchanged = capturePasteSelection(protyle.wysiwyg.element);
+                if (!selectionUnchanged()) {
+                    return;
+                }
+                const image = await readAndroidClipboardImage(getAndroidClipboardImageBridge(window));
+                if (!image || protyle.disabled || !selectionUnchanged() ||
+                    !isUploadDocumentAvailable(protyle, assetUploadOptions.document) || !isPasteInsertPositionAvailable()) {
+                    return;
+                }
+                files = [image];
+            } else if (event.clipboardData.files.length && !files.length && !textPlain && !otherContent) {
+                return;
+            }
+        }
     } else if ("dataTransfer" in event) {
         textHTML = event.dataTransfer.getData("text/html");
         textPlain = event.dataTransfer.getData("text/plain");
@@ -1207,6 +1277,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         } else {
             tempElement.innerHTML = siyuanHTML;
         }
+        neutralizePastedJSEmbeds(tempElement, protyle.lute);
         normalizeSemanticInlineElements(tempElement);
         const preservePastedBlockStructure = shouldPreservePastedBlockStructure(tempElement.children);
         const startRangeBlockElement = hasClosestBlock(range.startContainer);

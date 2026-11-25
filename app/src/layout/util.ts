@@ -28,8 +28,10 @@ import {showMessage} from "../dialog/message";
 import {isEncryptedBox, parseUriInfo} from "../util/pathName";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
+/// #if !MOBILE
 import {newDatabaseRowModel} from "../editor/databaseRow";
 import {showDatabaseRowPreview} from "../protyle/render/av/openDatabaseRow";
+/// #endif
 import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {resolveCustomModelFactory} from "../plugin/customTabOwner";
@@ -469,6 +471,12 @@ const JSONToDock = (json: any, app: App) => {
 
 const removedTabs: Tab[] = [];
 
+// 兼容 3.8.12 Alpha 2 保存的标签搜索页签，查询配置仍按普通搜索读取。
+const isSavedTagSearch = (tab: Config.TPersistedUILayoutItem) => {
+    const children = Array.isArray(tab.children) ? tab.children : [tab.children];
+    return children.some(child => child?.instance === "Search" && "tagPanel" in child && child.tagPanel === true);
+};
+
 export const JSONToCenter = (
     app: App,
     json: Config.TPersistedUILayoutItem,
@@ -513,12 +521,11 @@ export const JSONToCenter = (
         if (!json.title) {
             child = newCenterEmptyTab(app);
         } else {
-            let title = json.title;
-            if (json.lang) {
-                title = window.siyuan.languages[json.lang];
-            }
+            const tagSearch = isSavedTagSearch(json);
+            const title = tagSearch ? window.siyuan.languages.search : json.lang ?
+                window.siyuan.languages[json.lang] : json.title;
             child = new Tab({
-                icon: json.icon,
+                icon: tagSearch ? "iconSearch" : json.icon,
                 docIcon: json.docIcon,
                 title
             });
@@ -998,12 +1005,14 @@ export const newModelByInitData = (app: App, tab: Tab, json: any, afterInitProty
                 tab: tab,
                 data: json.customModelData
             });
+        /// #if !MOBILE
         } else if (json.customModelType === "siyuan-database-row") {
             model = newDatabaseRowModel({
                 app,
                 tab,
                 data: json.customModelData,
             });
+        /// #endif
         } else {
             const factory = resolveCustomModelFactory(app, json.customModelType, tab);
             if (factory) {
@@ -1048,9 +1057,12 @@ export const newModelByInitData = (app: App, tab: Tab, json: any, afterInitProty
             scrollAttr: json.scrollAttr,
             action,
             afterInitProtyle(editor) {
+                /// #if !MOBILE
                 if (json.databaseRow?.navigation) {
                     showDatabaseRowPreview(editorModel, json.databaseRow, editor.protyle);
-                } else if (json.databaseRowId) {
+                } else
+                /// #endif
+                if (json.databaseRowId) {
                     editor.protyle.databaseAttributePanel?.expand();
                     editor.protyle.contentElement.scrollTop = 0;
                 }

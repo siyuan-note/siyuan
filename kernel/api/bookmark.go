@@ -12,8 +12,8 @@ import (
 
 var getBookmark = contractHandler(apicontract.GetBookmark, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.Bookmark] {
 
-	bookmarks := model.BuildBookmark()
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	bookmarks := model.BuildBookmark(isReadOnlyRole)
 	if isReadOnlyRole {
 		publishAccess := model.GetPublishAccess()
 		tempBookmarks := &model.Bookmarks{}

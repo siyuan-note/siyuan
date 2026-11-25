@@ -449,7 +449,10 @@ func upsertTreeWithChanges(tx *sql.Tx, tree *parse.Tree, context map[string]any,
 	if err != nil {
 		return
 	}
-	oldBlockHashes := queryBlockHashes(tx, tree.ID)
+	oldBlockHashes, err := queryBlockHashes(tx, tree.ID)
+	if err != nil {
+		return
+	}
 	blocks, spans, assets, attributes := fromTreeWithChanges(tree.Root, tree, changes)
 	timing.Count("blocks_total", int64(len(oldBlockHashes)))
 	timing.Count("blocks_projected", int64(len(blocks)))

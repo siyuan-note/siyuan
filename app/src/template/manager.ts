@@ -81,7 +81,7 @@ ${canOpenFolder ? button("open", lang.showInFolder) : ""}
 </div>
 <div class="template-manager__preview-panel">
 <div class="template-manager__context">
-<div>${lang.templateContext}<span class="template-manager__context-name"></span></div>
+<div class="template-manager__context-heading">${lang.templateContext}<span class="template-manager__context-name"></span></div>
 <div class="ft__on-surface">${lang.templateContextTip}</div>
 <div class="template-manager__context-fields">
 <input spellcheck="false" class="b3-text-field" type="search" placeholder="${lang.templateContextSearch}" aria-label="${lang.templateContextSearch}">

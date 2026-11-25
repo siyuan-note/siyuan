@@ -13,6 +13,7 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
             await tick();
         }
     };
+    document.body.classList.toggle("body--windows", !mobile);
     document.body.innerHTML = '<div id="model"><button class="toolbar__icon">Back</button><div id="modelMain"></div></div>';
     new Function(sources.icons)();
     const style = document.createElement("style");
@@ -281,28 +282,46 @@ const runCases = async (sources, css, mobile, legacyMobile) => {
     await tick();
     assert.equal(closed, 0);
 
-    for (const width of mobile ? [360, 740] : [1440, 850]) {
+    for (const width of mobile ? [360, 740] : [1440, 1376, 850]) {
         await require("electron").ipcRenderer.invoke("template-manager-size", width, 800);
-        const wide = !mobile && width === 1440;
-        await waitFor(() => window.innerWidth === width && root.classList.contains("template-manager--wide") === wide &&
-            getComputedStyle(root.querySelector(".template-manager__editor")).flexDirection === (wide ? "row" : "column"),
-        `${mobile}/${width}: resized manager layout did not settle`);
-        assert.equal(root.classList.contains("template-manager--wide"), wide);
-        assert.equal(getComputedStyle(root.querySelector(".template-manager__editor")).flexDirection, wide ? "row" : "column");
+        const wide = !mobile && width >= 1376;
+        await waitFor(() => window.innerWidth === width && root.classList.contains("template-manager--wide") === wide,
+            `${mobile}/${width}: resized manager layout did not settle`);
         assert.ok(root.scrollWidth <= root.clientWidth + 1, `${mobile}/${width}: manager overflows`);
         assert.ok(root.getBoundingClientRect().top < 100, "manager must stay within the viewport");
         const editor = root.querySelector(".template-manager__editor");
+        const preview = root.querySelector(".template-manager__preview");
         assert.ok(editor.scrollWidth <= editor.clientWidth + 1, `${mobile}/${width}: editor overflows`);
+        const checkAlignment = () => {
+            const sourceRect = source.getBoundingClientRect();
+            const previewRect = preview.getBoundingClientRect();
+            if (wide) {
+                assert.ok(sourceRect.right < previewRect.left, `${width}: source and preview are side by side`);
+                assert.ok(Math.abs(sourceRect.top - previewRect.top) <= 1, "source and preview share their top edge");
+                assert.ok(Math.abs(sourceRect.bottom - previewRect.bottom) <= 1, "source and preview share their bottom edge");
+            } else {
+                assert.ok(sourceRect.bottom < previewRect.top, "preview is below the source");
+            }
+        };
+        checkAlignment();
+        const [search, selectContext] = root.querySelector(".template-manager__context-fields").children;
+        assert.ok(Math.abs(search.getBoundingClientRect().width - selectContext.getBoundingClientRect().width) <= 1,
+            "context search and selection have equal widths");
+        const contextName = root.querySelector(".template-manager__context-name");
+        const originalContextName = contextName.textContent;
+        contextName.textContent = "A preview context with a long document title ".repeat(5);
         button("source").textContent = "Open the document from which this template was originally exported";
         root.style.fontSize = "28px";
         await tick();
         assert.ok(root.scrollWidth <= root.clientWidth + 1, `${mobile}/${width}: large text overflows`);
         assert.ok(editor.scrollWidth <= editor.clientWidth + 1, `${mobile}/${width}: large editor text overflows`);
+        checkAlignment();
         root.style.fontSize = "";
+        contextName.textContent = originalContextName;
         button("source").textContent = languages.templateOpenSourceDoc;
         const original = source.value;
         source.value = "# Project plan\n\n## Goals\n\n- Plan the next milestone\n- Review progress\n\n## Notes\n\n.action{.title}";
-        root.querySelector(".template-manager__preview").innerHTML = '<div class="protyle-wysiwyg"><h1>Project plan</h1><h2>Goals</h2><ul><li>Plan the next milestone</li><li>Review progress</li></ul><h2>Notes</h2><p>Context document</p></div>';
+        preview.innerHTML = '<div class="protyle-wysiwyg"><h1>Project plan</h1><h2>Goals</h2><ul><li>Plan the next milestone</li><li>Review progress</li></ul><h2>Notes</h2><p>Context document</p></div>';
         await tick();
         await require("electron").ipcRenderer.invoke("template-manager-capture", `${mobile ? "mobile" : "desktop"}-${width}`);
         source.value = original;
@@ -372,7 +391,7 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("template manager preserves action targets, unsaved edits, source navigation and mobile layout", async () => {
+    test("template manager preserves action targets, unsaved edits, source navigation and responsive alignment", async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-template-manager-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

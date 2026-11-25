@@ -43,11 +43,11 @@ func authorization(c apicontract.MCPOAuthClientSecret, verifier string) url.Valu
 func codeRequest(t *testing.T, s *Service, c apicontract.MCPOAuthClientSecret) apicontract.MCPOAuthTokenRequest {
 	t.Helper()
 	verifier := random()
-	ticket, _, err := s.Begin(authorization(c, verifier), "browser")
+	ticket, _, err := s.Begin(authorization(c, verifier), "browser", "session")
 	if err != nil {
 		t.Fatal(err)
 	}
-	location, err := s.Consent(ticket, "browser", true)
+	location, err := s.Consent(ticket, "browser", "session", true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,14 +130,17 @@ func TestMCPOAuthAuthorizationValidation(t *testing.T) {
 			t.Fatal("invalid authorization accepted", v)
 		}
 	}
-	ticket, _, err := s.Begin(authorization(c, random()), "browser")
+	ticket, _, err := s.Begin(authorization(c, random()), "browser", "session")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = s.Consent(ticket, "attacker", true); err == nil {
+	if _, err = s.Consent(ticket, "other-browser", "session", true); err == nil {
 		t.Fatal("cross-browser consent accepted")
 	}
-	location, err := s.Consent(ticket, "browser", false)
+	if _, err = s.Consent(ticket, "browser", "other-session", true); err == nil {
+		t.Fatal("cross-session consent accepted")
+	}
+	location, err := s.Consent(ticket, "browser", "session", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,8 +148,86 @@ func TestMCPOAuthAuthorizationValidation(t *testing.T) {
 	if u.Query().Get("error") != "access_denied" || u.Query().Get("iss") == "" || u.Query().Get("code") != "" {
 		t.Fatal(location)
 	}
-	if _, err = s.Consent(ticket, "browser", true); err == nil {
+	if _, err = s.Consent(ticket, "browser", "session", true); err == nil {
 		t.Fatal("consent replay accepted")
+	}
+}
+
+func TestMCPOAuthPendingAdmissionUnderSaturation(t *testing.T) {
+	s, c := setup(t)
+	now := time.Date(2026, 11, 22, 10, 0, 0, 0, time.UTC)
+	s.now = func() time.Time { return now }
+	first := ""
+	for i := 0; i < maxPending; i++ {
+		ticket, _, err := s.Begin(authorization(c, random()), "browser", "session")
+		if err != nil {
+			t.Fatalf("begin %d failed: %v", i, err)
+		}
+		if 0 == i {
+			first = ticket
+		}
+		now = now.Add(time.Millisecond)
+	}
+	if len(s.pending) != maxPending {
+		t.Fatalf("pending tickets = %d, want %d", len(s.pending), maxPending)
+	}
+
+	ticket, _, err := s.Begin(authorization(c, random()), "other-browser", "other-session")
+	if err != nil {
+		t.Fatalf("authorization after saturation failed: %v", err)
+	}
+	if len(s.pending) != maxPending {
+		t.Fatalf("pending tickets after eviction = %d, want %d", len(s.pending), maxPending)
+	}
+	if _, err = s.Consent(first, "browser", "session", true); !errors.Is(err, ErrInvalid) {
+		t.Fatalf("oldest ticket survived eviction: %v", err)
+	}
+	if _, err = s.Consent(ticket, "other-browser", "other-session", false); err != nil {
+		t.Fatalf("new ticket unusable: %v", err)
+	}
+}
+
+func TestMCPOAuthCodeCapacityIsolatedBySession(t *testing.T) {
+	s, c := setup(t)
+	now := time.Date(2026, 11, 22, 10, 0, 0, 0, time.UTC)
+	s.now = func() time.Time { return now }
+	request := func(binding, session string) apicontract.MCPOAuthTokenRequest {
+		t.Helper()
+		verifier := random()
+		ticket, _, err := s.Begin(authorization(c, verifier), binding, session)
+		if err != nil {
+			t.Fatal(err)
+		}
+		location, err := s.Consent(ticket, binding, session, true)
+		if err != nil {
+			t.Fatal(err)
+		}
+		redirect, err := url.Parse(location)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return apicontract.MCPOAuthTokenRequest{GrantType: "authorization_code", ClientID: c.ID,
+			ClientSecret: c.Secret, Code: redirect.Query().Get("code"), RedirectURI: c.RedirectURI,
+			CodeVerifier: verifier, Resource: "https://note.example.com/mcp"}
+	}
+	first := request("first-browser-binding", "session")
+	for range maxCodesPerSession - 1 {
+		now = now.Add(time.Millisecond)
+		request("different-browser-binding", "session")
+	}
+	other := request("other-browser", "other-session")
+	now = now.Add(time.Millisecond)
+	newest := request("new-browser-binding", "session")
+	if len(s.codes) != maxCodesPerSession+1 {
+		t.Fatalf("stored codes = %d, want %d", len(s.codes), maxCodesPerSession+1)
+	}
+	if _, err := s.Token(first); !errors.Is(err, ErrGrant) {
+		t.Fatalf("oldest code remained redeemable: %v", err)
+	}
+	for _, req := range []apicontract.MCPOAuthTokenRequest{other, newest} {
+		if _, err := s.Token(req); err != nil {
+			t.Fatalf("active code could not be redeemed: %v", err)
+		}
 	}
 }
 

@@ -1010,6 +1010,26 @@
             }
           ]
         },
+        "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasoningEffort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "taskID": {
           "anyOf": [
             {
@@ -2242,6 +2262,9 @@
         "id": {
           "type": "string"
         },
+        "messageID": {
+          "type": "string"
+        },
         "title": {
           "type": "string"
         }
@@ -2256,6 +2279,16 @@
       "type": "object",
       "properties": {
         "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "messageID": {
           "anyOf": [
             {
               "type": "string"
@@ -2290,6 +2323,21 @@
       },
       "required": [
         "matched"
+      ],
+      "additionalProperties": false
+    },
+    "AISSEAgentError": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "snapshotFailed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "message"
       ],
       "additionalProperties": false
     },
@@ -2458,6 +2506,9 @@
     "AISSEStart": {
       "type": "object",
       "properties": {
+        "prompt": {
+          "type": "string"
+        },
         "taskID": {
           "type": "string"
         }
@@ -4123,6 +4174,16 @@
             }
           ]
         },
+        "messageID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "title": {
           "anyOf": [
             {
@@ -4142,6 +4203,16 @@
       "type": "object",
       "properties": {
         "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "messageID": {
           "anyOf": [
             {
               "type": "string"
@@ -56356,6 +56427,9 @@
         "modelId": {
           "type": "string"
         },
+        "reasoningEffort": {
+          "type": "string"
+        },
         "temperature": {
           "type": "number"
         }
@@ -56364,6 +56438,7 @@
         "maxCompletionTokens",
         "maxHistoryMessages",
         "modelId",
+        "reasoningEffort",
         "temperature"
       ],
       "additionalProperties": false
@@ -56392,6 +56467,16 @@
           ]
         },
         "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasoningEffort": {
           "anyOf": [
             {
               "type": "string"
@@ -140590,7 +140675,7 @@
             "$ref": "#/$defs/AISSETurn"
           },
           "error": {
-            "$ref": "#/$defs/AISSEMessage"
+            "$ref": "#/$defs/AISSEAgentError"
           },
           "interrupted": {
             "$ref": "#/$defs/AISSEMessage"

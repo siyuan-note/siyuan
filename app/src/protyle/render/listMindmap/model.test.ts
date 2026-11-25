@@ -337,7 +337,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
                             inputSource: string, controllerSource: string) => {
     const check = require("node:assert/strict");
     const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
-        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
+        "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, updateListMindmapTimestamps, " +
+        "convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
         "getListMindmapSiblingIDs, normalizeListMindmapSummaryMetadata, getListMindmapSummaryRange, getListMindmapSiblingFoldStates, " +
         "addListMindmapSummaryRanges, getListMindmapSummarySnapshot, " +
         "normalizeLegacyMindmapCodes, replaceLegacyMindmapHTML, spinListMindmapDOM, focusListMindmap, " +
@@ -385,6 +386,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         const controllers: any[] = [];
         const historyRoots: string[] = [];
         const dependencies = {...api,
+            dayjs: () => ({format: () => "20261125120000"}),
             Constants: {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing",
                 CUSTOM_SY_LIST_MINDMAP: "custom-sy-list-mindmap", CUSTOM_SY_LIST_MINDMAP_DATA: "custom-sy-list-mindmap-data"},
             isProtyleListItemFragment: () => false, isHiddenTabContent: () => false,
@@ -445,6 +447,8 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         check.equal(operations[0].undoOperations[0].context.undoFocusEmbedId, "first");
         check.equal(operations[0].undoOperations[0].context.undoFocusIndex, "1");
         check.match(operations[0].doOperations[0].data as string, /Folded child/);
+        check.equal(copies[0].getAttribute("updated"), "20261125120000");
+        check.equal(copies[1].getAttribute("updated"), "20261125120000");
         await target.view.options.onAdd(itemID, "child");
         const addedID = target.view.getSelectedId();
         check.notEqual(addedID, itemID);
@@ -845,6 +849,31 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(typedRootItem.querySelector(':scope > [data-type="NodeList"]'), null);
     check.ok(typedRootItem.querySelector(':scope > [data-type="NodeMindmap"] > [data-type="NodeMindmapItem"]'));
     check.equal(api.readListMindmap(typedMindmap).root.children.length, 1);
+    for (const legacy of [false, true]) {
+        const timestampList = reset("* Root\n  * Edited\n  * Unchanged\n");
+        if (legacy) {
+            timestampList.setAttribute("custom-sy-list-mindmap", "1");
+        } else {
+            api.retagMindmapBranch(timestampList, true);
+        }
+        const timestampModel = api.readListMindmap(timestampList);
+        const [editedNode, siblingNode] = timestampModel.root.children;
+        const previousTimestamp = "20260101000000";
+        const updatedTimestamp = "20261125120000";
+        [timestampList, ...timestampList.querySelectorAll("[data-node-id]")].forEach(block =>
+            block.setAttribute("updated", previousTimestamp));
+        const beforeUpdate = api.cleanListMindmapHTML(timestampList.outerHTML);
+        const editedBlock = editedNode.contentBlocks[0];
+        editedBlock.querySelector('[contenteditable="true"]').textContent = "Edited text";
+        const afterUpdate = api.cleanListMindmapHTML(timestampList.outerHTML);
+        api.updateListMindmapTimestamps(timestampList, beforeUpdate, afterUpdate, updatedTimestamp);
+        for (let block = editedBlock; block !== timestampList.parentElement; block = block.parentElement) {
+            check.equal(block.getAttribute("updated"), updatedTimestamp);
+        }
+        check.equal(timestampModel.root.contentBlocks[0].getAttribute("updated"), previousTimestamp);
+        check.equal(siblingNode.element.getAttribute("updated"), previousTimestamp);
+        check.equal(siblingNode.contentBlocks[0].getAttribute("updated"), previousTimestamp);
+    }
     const layered = document.createElement("div");
     layered.innerHTML = '<div data-type="NodeList" class="list"><div data-type="NodeListItem" class="li">' +
         '<div data-type="NodeSuperBlock"><div data-type="NodeList" class="list"></div></div>' +
@@ -3917,11 +3946,17 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     model = api.readListMindmap(list);
     options.model = model;
 
-    const titleView = new api.ListMindmapView({...options, onRootTitleChange: (title: string) => {
-        model.metadata.rootTitle = title;
-        api.writeListMindmapMetadata(list, model.metadata);
-        titleView.update(model);
-    }});
+    const rootTitleAdditions: {id: string; kind: string; title: string}[] = [];
+    const titleView = new api.ListMindmapView({...options,
+        onRootTitleChange: (title: string) => {
+            model.metadata.rootTitle = title;
+            api.writeListMindmapMetadata(list, model.metadata);
+            titleView.update(model);
+        },
+        onAdd: (id: string, kind: string) => {
+            rootTitleAdditions.push({id, kind, title: api.readListMindmap(list).metadata.rootTitle});
+        },
+    });
     await settle();
     const renameRoot = async (title: string, key: string) => {
         const node = nodeElement(model.root.id);
@@ -3956,6 +3991,47 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(titleView.getContentHost(model.root.id).textContent, "");
     check.ok(nodeElement(model.root.id).classList.contains("mindmap-view__node--untitled"));
     check.equal(nodeElement(model.root.id).offsetWidth, nodeElement(model.root.id).offsetHeight);
+    const beginRootTitle = () => {
+        titleView.focusNode(model.root.id, false);
+        titleView.getContentHost(model.root.id).dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+        const input = host.querySelector<HTMLTextAreaElement>(".mindmap-view__root-title");
+        check.equal(document.activeElement, input);
+        return input;
+    };
+    const titleKey = (input: HTMLElement, key: string, init: KeyboardEventInit = {}) => {
+        const event = new KeyboardEvent("keydown", {key, bubbles: true, cancelable: true, ...init});
+        input.dispatchEvent(event);
+        return event.defaultPrevented;
+    };
+    const titleInputForTab = beginRootTitle();
+    titleInputForTab.value = "Tab title";
+    check.equal(titleKey(titleInputForTab, "Tab", {shiftKey: true}), false, "Shift+Tab keeps native navigation");
+    check.equal(titleKey(titleInputForTab, "Tab", {repeat: true}), true);
+    check.equal(document.activeElement, titleInputForTab, "a repeated Tab does not finish editing");
+    check.equal(rootTitleAdditions.length, 0);
+    check.equal(titleKey(titleInputForTab, "Tab"), true);
+    check.deepEqual(rootTitleAdditions, [{id: model.root.id, kind: "child", title: "Tab title"}]);
+
+    const composingTitleInput = beginRootTitle();
+    const nativeTitleKey = (key: string, code: number) =>
+        require("electron").ipcRenderer.invoke("mindmap-view-native-key", key, code);
+    const titleEnters: boolean[] = [];
+    composingTitleInput.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            titleEnters.push(event.isComposing);
+        }
+    });
+    await ime("zhong");
+    check.equal(titleKey(composingTitleInput, "Tab", {isComposing: true}), false, "IME owns Tab while composing");
+    await nativeTitleKey("Enter", 13);
+    check.deepEqual(titleEnters, [true]);
+    check.equal(document.activeElement, composingTitleInput, "IME Enter does not exit the root title editor");
+    await insertText("中文根节点");
+    check.equal(document.activeElement, composingTitleInput);
+    check.equal(rootTitleAdditions.length, 1);
+    await nativeTitleKey("Tab", 9);
+    check.deepEqual(rootTitleAdditions, [{id: model.root.id, kind: "child", title: "Tab title"},
+        {id: model.root.id, kind: "child", title: "中文根节点"}]);
     titleView.destroy();
 
     const singleList = reset("* Single\n");
@@ -4908,6 +4984,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const operations: {id: string, before: string, after: string}[] = [];
     const taskAPI = new Function("readListMindmap", "canEdit", "Constants", "dayjs", "updateTransaction", "showMessage",
         "getListMindmapTabItem", "getTabTask", "cleanListMindmapHTML", "getListMindmapSiblingIDs", "normalizeListMindmapSummaryMetadata",
+        "updateListMindmapTimestamps",
         taskSource + "; return {setTaskListItemMarker, nextTaskListMarker, nextTaskListStatus, TaskController};")(
         api.readListMindmap, (owner: any) => !owner.disabled && !owner.history && !owner.embedded,
         {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing"},
@@ -4915,7 +4992,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         (_owner: unknown, element: HTMLElement, before: string) => operations.push({id: element.dataset.nodeId,
             before, after: api.cleanListMindmapHTML(element.outerHTML)}), () => check.fail("Task update failed"),
         api.getListMindmapTabItem, api.getTabTask, api.cleanListMindmapHTML,
-        api.getListMindmapSiblingIDs, api.normalizeListMindmapSummaryMetadata);
+        api.getListMindmapSiblingIDs, api.normalizeListMindmapSummaryMetadata, api.updateListMindmapTimestamps);
     const owner = {disabled: false, history: false, embedded: false, options: {action: [] as string[]}};
     let finishTask: boolean | Promise<boolean> = true;
     let menus = 0;
@@ -6160,6 +6237,11 @@ app.whenReady().then(async () => {
     });
     ipcMain.handle("mindmap-view-insert-text", async (_event, text) => {
         await win.webContents.debugger.sendCommand("Input.insertText", {text});
+    });
+    ipcMain.handle("mindmap-view-native-key", async (_event, key, windowsVirtualKeyCode) => {
+        const params = {key, code: key, windowsVirtualKeyCode};
+        await win.webContents.debugger.sendCommand("Input.dispatchKeyEvent", {type: "rawKeyDown", ...params});
+        await win.webContents.debugger.sendCommand("Input.dispatchKeyEvent", {type: "keyUp", ...params});
     });
     ipcMain.handle("mindmap-view-print-media", async (_event, media) => {
         await win.webContents.debugger.sendCommand("Emulation.setEmulatedMedia", {media});

@@ -34,6 +34,7 @@ const browserCases = async (source: string) => {
         fixAdjacentTags: () => {},
         focusByOffset: () => {},
         updateTransaction: () => {},
+        setInsertWbrHTML: () => {},
         dayjs: () => ({format: () => "20261101000000"}),
         getRangeBlockRefCheckTargets: (): {elements: HTMLElement[], exactIDs: string[], deletedIDs: string[]} =>
             ({elements: [], exactIDs: [], deletedIDs: []}),
@@ -75,6 +76,7 @@ const browserCases = async (source: string) => {
     document.body.append(root);
     const editor = new api.CopyEditor();
     editor.element = root;
+    editor.lastHTMLs = {};
     const protyle = {wysiwyg: editor, lute, toolbar: {getCurrentType: (): string[] => []}, notebookId: "notebook",
         options: {render: {breadcrumb: false}}, hint: {render: () => {}}};
     editor.bindCopy(protyle);
@@ -141,6 +143,54 @@ const browserCases = async (source: string) => {
     const cut = await copy(html, false, false, undefined, true);
     check.equal(imageCount(cut.siyuan), 2, "cross-block cut uses the same lossless copy path");
 
+    const tableCellPreview = (blockDOM: string) => {
+        const template = document.createElement("template");
+        template.innerHTML = blockDOM;
+        template.content.querySelectorAll("[data-node-id]").forEach(block => {
+            block.setAttribute("data-table-cell-node", "");
+            block.removeAttribute("data-node-id");
+        });
+        template.content.querySelectorAll("[spellcheck]").forEach(content => {
+            content.setAttribute("data-table-cell-content", "");
+            content.setAttribute("contenteditable", "false");
+            content.removeAttribute("spellcheck");
+        });
+        return '<div data-node-id="20261119120000-abcdefg" data-type="NodeTable" class="table">' +
+            '<table><tbody><tr><td><div class="table__cell-rich">' + template.innerHTML + "</div></td></tr></tbody></table></div>";
+    };
+    const selectCellText = (element: HTMLElement, range: Range) => {
+        const contents = element.querySelectorAll("[data-table-cell-content]");
+        range.setStart(contents[0].firstChild, 2);
+        const last = contents[contents.length - 1].firstChild;
+        const text = last.nodeType === Node.TEXT_NODE ? last : last.firstChild;
+        range.setEnd(text, 3);
+    };
+    const preview = tableCellPreview(paragraph("Before<br />next") + paragraph("**After**"));
+    for (const isCut of [false, true]) {
+        const payload = await copy(preview, false, false, selectCellText, isCut);
+        check.equal(payload.plain, "fore\nnext\nAft");
+        check.doesNotMatch(payload.siyuan, /data-table-cell-(?:node|content)|Before|After/);
+        check.match(payload.html, /<span data-type="strong">Aft<\/span>/);
+        check.doesNotMatch(payload.html, /data-table-cell-(?:node|content)/);
+        const template = document.createElement("template");
+        template.innerHTML = payload.siyuan;
+        const blocks = Array.from(template.content.children);
+        check.deepEqual(blocks.map(block => block.getAttribute("data-type")), ["NodeParagraph", "NodeParagraph"]);
+        const ids = blocks.map(block => block.getAttribute("data-node-id"));
+        check.ok(ids.every(Boolean));
+        check.equal(new Set(ids).size, 2);
+        check.equal(template.content.querySelectorAll('[contenteditable="true"][spellcheck]').length, 2);
+        check.doesNotMatch(lute.SpinBlockDOM(payload.siyuan), /data-type="NodeHTMLBlock"/);
+    }
+
+    const listPreview = tableCellPreview(paragraph("1. First\n2. Second") + paragraph("**After**"));
+    const fromList = await copy(listPreview, false, false, selectCellText);
+    const listFragment = document.createElement("template");
+    listFragment.innerHTML = fromList.siyuan;
+    check.equal(listFragment.content.querySelectorAll('[data-type="NodeListItem"] > .protyle-action').length, 2,
+        "copy restores the list marker on the partially selected boundary item");
+    check.match(lute.BlockDOM2StdMd(fromList.siyuan), /1\. rst\n2\. Second/);
+
     for (const payload of [selected, partial, cut]) {
         root.innerHTML = paragraph("Target");
         const range = document.createRange();
@@ -156,17 +206,18 @@ const browserCases = async (source: string) => {
         check.equal(imageCount(lute.SpinBlockDOM(root.innerHTML)), 2, "subsequent editing preserves emoji");
     }
     root.remove();
-    return "Emoji clipboard cases passed";
+    return "Text selection clipboard cases passed";
 };
 
-test("custom emoji survive cross-block copy, cut and paste", {
+test("editor text selections preserve formatting and block structure on the clipboard", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
     const sourceFile = createSourceFile("index.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);
     const editor = sourceFile.statements.find(isClassDeclaration);
-    const methods = editor.members.filter(member => isMethodDeclaration(member) &&
-        ["emojiToMd", "clearAttrContent", "normalizeCrossBlockCopy"].includes(member.name.getText(sourceFile)));
+    const methods = editor.members.filter(member => isMethodDeclaration(member) && ["emojiToMd", "clearAttrContent",
+        "normalizeCrossBlockCopy", "normalizeTableCellClipboardSelection", "getTableCellClipboardText"
+    ].includes(member.name.getText(sourceFile)));
     const bind = editor.members.find(member => isMethodDeclaration(member) &&
         member.name.getText(sourceFile) === "bindCommonEvent");
     assert.ok(bind && isMethodDeclaration(bind));
@@ -187,7 +238,7 @@ test("custom emoji survive cross-block copy, cut and paste", {
         extract("paste.ts", ["getPlainText", "normalizeVirtualBlockRef", "pasteCrossBlockRange"]) +
         compile(`class CopyEditor {${methods.map(method => method.getText(sourceFile)).join("\n")}
 bindCopy(protyle) {${copy}} bindCut(protyle) {${cut}}}`);
-    const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-emoji-clipboard-"));
+    const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-text-selection-clipboard-"));
     const script = path.join(temporary, "run.cjs");
     const lutePath = path.resolve(__dirname, "../../../stage/protyle/js/lute/lute.min.js");
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
@@ -213,10 +264,10 @@ app.whenReady().then(async () => {
     try {
         const result = await promisify(execFile)(require("electron") as unknown as string, [script],
             {env, timeout: 25000, windowsHide: true});
-        assert.match(result.stdout, /Emoji clipboard cases passed/);
+        assert.match(result.stdout, /Text selection clipboard cases passed/);
     } finally {
         if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) &&
-            path.basename(temporary).startsWith("siyuan-emoji-clipboard-")) {
+            path.basename(temporary).startsWith("siyuan-text-selection-clipboard-")) {
             rmSync(temporary, {recursive: true, force: true});
         }
     }

@@ -235,6 +235,7 @@ func settingEditingPayload(value *conf.Editing) *apicontract.SettingEditing {
 	}
 	result := &apicontract.SettingEditing{}
 	result.ModelID = value.ModelID
+	result.ReasoningEffort = value.ReasoningEffort
 	result.MaxHistoryMessages = value.MaxHistoryMessages
 	result.Temperature = value.Temperature
 	result.MaxCompletionTokens = value.MaxCompletionTokens

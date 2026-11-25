@@ -34,39 +34,29 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// publishSyncResult persists the completed outcome before publishing it to every frontend.
 func publishSyncResult(code int, syncErr error) {
-	UpdateSyncConf(func(s *conf.Sync) {
+	snapshot := UpdateSyncConf(func(s *conf.Sync) {
 		s.LastResult = code
 		if syncErr != nil {
 			s.Stat = formatSyncRepoErrorMsg(syncErr)
+		} else if code == 1 {
+			s.Synced = util.CurrentTimeMillis()
 		}
 	})
-	util.BroadcastByType("main", "syncing", code, Conf.Sync.Load().Stat, nil)
+	util.BroadcastByType("main", "syncing", code, snapshot.Stat, nil)
 }
 
 func SyncDataDownload(decisions ...SyncSourceDecision) (err error) {
 	err = errors.New("sync download did not complete")
 	defer logging.Recover()
 
-	if !checkSync(false, false, true) {
-		return
-	}
-
-	unlock, ok := lockSyncRequest(&syncDownloadRequests)
-	if !ok {
-		return
-	}
-	defer unlock()
-	err = syncDataDownloadLocked(decisions...)
-	return
+	return runManualSync(false, err, func() error {
+		return syncDataDownloadLocked(decisions...)
+	})
 }
 
 func syncDataDownloadLocked(decisions ...SyncSourceDecision) (err error) {
 	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-
-	now := util.CurrentTimeMillis()
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
 	err = syncRepoDownloadWithDNSRetry(decisions...)
 	code := 1
@@ -124,29 +114,19 @@ func SyncDataUpload(decisions ...SyncSourceDecision) (err error) {
 	err = errors.New("sync upload did not complete")
 	defer logging.Recover()
 
-	if !checkSync(false, false, true) {
-		return
-	}
+	return runManualSync(false, err, func() error {
+		revision := pendingSync.begin()
+		util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
 
-	unlock, ok := lockSyncRequest(&syncUploadRequests)
-	if !ok {
-		return
-	}
-	defer unlock()
-	revision := pendingSync.begin()
-	util.BroadcastByType("main", "syncing", 0, Conf.Language(81), nil)
-
-	now := util.CurrentTimeMillis()
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
-
-	err = syncRepoUploadWithDNSRetry(decisions...)
-	code := 1
-	if err != nil {
-		code = 2
-	}
-	publishSyncResult(code, err)
-	pendingSync.finish(revision, err == nil, notifySyncPending)
-	return
+		syncErr := syncRepoUploadWithDNSRetry(decisions...)
+		code := 1
+		if syncErr != nil {
+			code = 2
+		}
+		publishSyncResult(code, syncErr)
+		pendingSync.finish(revision, syncErr == nil, notifySyncPending)
+		return syncErr
+	})
 }
 
 var (
@@ -211,7 +191,7 @@ func bootSyncData() {
 
 	afterBoot := util.IsBooted()
 	if !afterBoot {
-		util.IncBootProgress(3, Conf.Language(307))
+		util.IncBootProgress(3, util.BootStageSyncing)
 	}
 	BootSyncSucc.Store(-1)
 	if afterBoot {
@@ -220,8 +200,6 @@ func bootSyncData() {
 		logging.LogInfof("sync before boot")
 	}
 
-	now := util.CurrentTimeMillis()
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 	revision := pendingSync.begin()
 	if afterBoot {
 		// 本地界面已可编辑，保持同步入口可见直到云端合并成功。
@@ -335,32 +313,51 @@ func lockSyncRequest(state *syncRequestState) (unlock func(), ok bool) {
 	return unlock, true
 }
 
+// Explicit sync callers need the outcome of their own operation. In particular,
+// a direction and its source preview must be validated while holding the lock.
+func runManualSync(exit bool, notCompleted error, run func() error) error {
+	if err := checkManualSync(exit, notCompleted); err != nil {
+		return err
+	}
+	lockSync()
+	defer unlockSync()
+	if err := checkManualSync(exit, notCompleted); err != nil {
+		return err
+	}
+	return run()
+}
+
+func checkManualSync(exit bool, notCompleted error) error {
+	ok, notice := syncAdmission(false, exit, true)
+	if ok {
+		return nil
+	}
+	if notice != "" {
+		return notifiedSyncError{notCompleted, pushSyncNotice(notice, 0, 5000)}
+	}
+	return notCompleted
+}
+
 func syncData(exit, byHand bool) (err error) {
 	err = errors.New("sync did not complete")
 	defer logging.Recover()
 
-	if !checkSync(false, exit, byHand) {
-		if byHand {
-			return err
-		}
+	if byHand {
+		return runManualSync(exit, err, func() error { return syncDataLocked(exit, true) })
+	}
+	if !checkSync(false, exit, false) {
 		return nil
 	}
-
 	requests := &syncAutoRequests
-	if byHand {
-		requests = &syncManualRequests
-	} else if exit {
+	if exit {
 		requests = &syncExitRequests
 	}
 	unlock, ok := lockSyncRequest(requests)
 	if !ok {
-		if byHand {
-			return err
-		}
 		return nil
 	}
 	defer unlock()
-	return syncDataLocked(exit, byHand)
+	return syncDataLocked(exit, false)
 }
 
 func syncDataLocked(exit, byHand bool) error {
@@ -385,9 +382,6 @@ func syncDataLockedContext(ctx context.Context, exit, byHand bool) (err error) {
 			util.PushClearMsg(msgId)
 		}()
 	}
-
-	now := util.CurrentTimeMillis()
-	UpdateSyncConf(func(s *conf.Sync) { s.Synced = now })
 
 	cloudPublished, err := syncRepoWithDNSRetryContext(ctx, exit, byHand)
 	code := 1
@@ -442,56 +436,64 @@ func finishSyncPerception(cloudPublished bool, err error, reconnect bool) {
 }
 
 func checkSync(boot, exit, byHand bool) bool {
+	ok, notice := syncAdmission(boot, exit, byHand)
+	if notice != "" {
+		util.PushMsg(notice, 5000)
+	}
+	return ok
+}
+
+func syncAdmission(boot, exit, byHand bool) (bool, string) {
 	if util.IsExiting.Load() {
-		return false
+		return false, ""
 	}
 	if !boot && !exit && !byHand && bootSyncScheduled.Load() {
-		return false
+		return false, ""
 	}
 	confSyncReadSnapshot := Conf.LoadSync()
 
 	if 2 == confSyncReadSnapshot.Mode && !boot && !exit && !byHand { // 手动模式下只有启动和退出进行同步
-		return false
+		return false, ""
 	}
 
 	if 3 == confSyncReadSnapshot.Mode && !byHand { // 完全手动模式下只有手动进行同步
-		return false
+		return false, ""
 	}
 
 	if !confSyncReadSnapshot.Enabled {
 		if byHand {
-			util.PushMsg(Conf.Language(124), 5000)
+			return false, Conf.Language(124)
 		}
-		return false
+		return false, ""
 	}
 
 	if conf.ProviderS3 != confSyncReadSnapshot.Provider && !cloud.IsValidCloudDirName(confSyncReadSnapshot.CloudName) {
 		if byHand {
-			util.PushMsg(Conf.Language(123), 5000)
+			return false, Conf.Language(123)
 		}
-		return false
+		return false, ""
 	}
 	if nil == Conf.GetUser() {
-		return false
+		return false, ""
 	}
 
 	switch confSyncReadSnapshot.Provider {
 	case conf.ProviderSiYuan:
 		if !IsSubscriber() {
 			UpdateSyncConf(func(s *conf.Sync) { s.Enabled = false })
-			return false
+			return false, ""
 		}
 	case conf.ProviderWebDAV, conf.ProviderS3, conf.ProviderLocal:
 		if !IsPaidUser() {
 			UpdateSyncConf(func(s *conf.Sync) { s.Enabled = false })
-			return false
+			return false, ""
 		}
 	}
 
 	if !byHand && !exit && notifyAutoSyncPaused() {
-		return false
+		return false, ""
 	}
-	return true
+	return true, ""
 }
 
 // incReindex 增量重建索引。
@@ -499,7 +501,7 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 	upsertRootIDs = []string{}
 	removeRootIDs = []string{}
 
-	util.IncBootProgress(3, Conf.Language(308))
+	util.IncBootProgress(3, util.BootStageSyncReindexing)
 	removeRootIDs = removeIndexes(removes) // 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
 	upsertRootIDs = upsertIndexes(upserts)
 
@@ -516,7 +518,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 	finishDocTreeChange := cache.BeginDocTreeMutation("")
 	defer finishDocTreeChange()
 	bootProgressPart := int32(10 / float64(len(removeFilePaths)))
-	for _, removeFile := range removeFilePaths {
+	for i, removeFile := range removeFilePaths {
 		if !strings.HasSuffix(removeFile, ".sy") {
 			continue
 		}
@@ -526,7 +528,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 
 		msg := fmt.Sprintf(Conf.Language(39), rootID)
 		updateSyncCheckoutIndexMessage(msg)
-		util.IncBootProgress(bootProgressPart, msg)
+		util.UpdateBootProgress(bootProgressPart, util.BootStageSyncReindexing, int64(i+1), int64(len(removeFilePaths)))
 		pushSyncStatusBar(msg)
 
 		cache.RemoveTreeData(rootID)
@@ -555,7 +557,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 	defer finishDocTreeChange()
 	luteEngine := util.NewLute()
 	bootProgressPart := int32(10 / float64(len(upsertFilePaths)))
-	for _, upsertFile := range upsertFilePaths {
+	for i, upsertFile := range upsertFilePaths {
 		rootID, indexed := func() (string, bool) {
 			if !strings.HasSuffix(upsertFile, ".sy") {
 				return "", false
@@ -584,7 +586,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 			defer hpathRefresh.Unlock()
 			msg := fmt.Sprintf(Conf.Language(40), util.GetTreeID(p))
 			updateSyncCheckoutIndexMessage(msg)
-			util.IncBootProgress(bootProgressPart, msg)
+			util.UpdateBootProgress(bootProgressPart, util.BootStageSyncReindexing, int64(i+1), int64(len(upsertFilePaths)))
 			pushSyncStatusBar(msg)
 
 			rootID := util.GetTreeID(p)
@@ -862,13 +864,10 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 }
 
 var (
-	syncLock             = sync.Mutex{}
-	isSyncing            = atomic.Bool{}
-	syncAutoRequests     = syncRequestState{}
-	syncManualRequests   = syncRequestState{}
-	syncExitRequests     = syncRequestState{}
-	syncUploadRequests   = syncRequestState{}
-	syncDownloadRequests = syncRequestState{}
+	syncLock         = sync.Mutex{}
+	isSyncing        = atomic.Bool{}
+	syncAutoRequests = syncRequestState{}
+	syncExitRequests = syncRequestState{}
 )
 
 func CreateCloudSyncDir(name string) (err error) {

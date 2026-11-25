@@ -1,0 +1,463 @@
+{
+	"ID": "20261122113000-lkstmvr",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-lkstmvr",
+		"title": "Статистика содержимого",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-9d3k8n3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-9d3k8n3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mm10c92",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-mm10c92",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После открытия документа в настольной версии статистику текущего документа можно посмотреть в нижней строке состояния редактора и в меню сведений о документе."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-g2164gy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-g2164gy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Статистика в строке состояния"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-k369v1l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-k369v1l",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Строка состояния расположена внизу редактора и по умолчанию отображает количество "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "символов"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "слов"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " в текущем документе. Если в документе есть другие элементы, также отображается количество ссылок, изображений, ссылок на блоки и блоков."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4x82ckk",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-4x82ckk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-j3snkg5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-j3snkg5",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-xkxxtif",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-xkxxtif",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Выделенный текст"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": при выделении фрагмента текста в редакторе строка состояния автоматически переключается на отображение статистики для выделенного фрагмента"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-i3vs91c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-i3vs91c",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-4j1ndjy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-4j1ndjy",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Множественный выбор блоков"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": при выборе нескольких блоков строка состояния показывает их сводную статистику"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-pu315y9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-pu315y9",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-vfyhyoh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-vfyhyoh",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Возврат к общей статистике"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": после снятия выделения строка состояния снова отображает общую статистику документа"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9vbx161",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-9vbx161",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Статистика в сведениях о документе"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-xatirab",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-xatirab",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Нажмите кнопку "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ справа от заголовка документа, чтобы посмотреть полную статистику в открывшемся меню."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-a7t8tcx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-a7t8tcx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Описание показателей статистики"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1uau9pl",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20261122113000-1uau9pl",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Показатель"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Описание"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "символов"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Количество символов Unicode в учитываемом тексте документа: включаются иероглифы, буквы, цифры и знаки препинания; пробелы, переносы строк и другие пробельные символы не учитываются"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "слов"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Количество слов: каждый иероглиф считается за 1 слово, а последовательность букв латиницы/кириллицы целиком считается за 1 слово"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ссылки"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Общее количество гиперссылок в текущем документе"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Изображения"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Общее количество изображений в текущем документе"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Упоминания"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Общее количество ссылок на блоки в текущем документе"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Блоки"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Общее количество блоков содержимого в текущем документе"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-efj3ix1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-efj3ix1",
+				"updated": "20261122113000"
+			}
+		}
+	]
+}

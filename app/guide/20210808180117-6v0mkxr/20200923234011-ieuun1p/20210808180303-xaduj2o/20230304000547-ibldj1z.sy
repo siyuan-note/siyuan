@@ -34,7 +34,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan provides AI editing, an AI agent, and semantic search. Before using them, configure the API providers and models required for your use case."
+					"Data": "SiYuan provides AI editing, an AI agent, and semantic search. Before using them, configure the API providers and models required for your use case. The API base URL is read-only for official provider presets. Model aggregators, local services, and custom providers allow editing the address."
 				}
 			]
 		},
@@ -110,6 +110,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "AI editing processes selected text for tasks such as continuation, summarization, translation, and polishing. Enter a one-time instruction in the top field and select Use to run it without saving it as a custom action. On desktop, Enter runs the instruction and Shift+Enter inserts a new line; on mobile, use the Use button. The separate search field filters common and saved actions. To save an instruction for reuse, choose Custom action... and save it there. On mobile, the result panel displays the AI-generated label in its header."
+				}
+			]
+		},
+		{
+			"ID": "20261123193455-ifou442",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261123193455-ifou442",
+				"updated": "20261123193455"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI Edit"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", choose the default model and reasoning effort for AI editing. The Default effort leaves the choice to the model. Changing either option in the result panel regenerates the current task with that selection."
 				}
 			]
 		},
@@ -281,7 +322,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the selection toolbar, or choose it from the block menu. The result streams into a panel where you can replace or insert it, copy it, retry, stop, or discard it. Replacement is available only for a supported selection within one block. Cross-block selections, complex sources, and sources changed while generating can still use insertion"
+									"Data": " in the selection toolbar or choose it from the block menu. Copy the result, insert it after the source, retry, or stop generation. AI editing includes source block IDs and sends nearby text as context when editing a selection. Drag the header to move the panel or drag its lower-right corner to resize it. Double-click the header to restore its default size and follow the source again. On mobile, drag the top edge of the bottom panel to adjust its height. To revise the result, choose Continue in Agent Chat. The new session includes the original request, its source text, and the result. While the source editor is open, you can insert a later reply at the original location"
 								}
 							]
 						}

@@ -1,0 +1,1199 @@
+{
+	"ID": "20261122113000-57z646l",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-57z646l",
+		"title": "Сервер Docker",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-cemvsog",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-cemvsog",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-shcwzh3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-shcwzh3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Самый простой способ запустить SiYuan на сервере — развёртывание через Docker."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-h3w7v6e",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-h3w7v6e",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-eo6l0ue",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-eo6l0ue",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-k6hwjv6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-k6hwjv6",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Имя образа "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "b3log/siyuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-zeglbx1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-zeglbx1",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-dqdcqwb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-dqdcqwb",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://hub.docker.com/r/b3log/siyuan",
+									"TextMarkTextContent": "Адрес образа"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5oqpz41",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-5oqpz41",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Структура файлов"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-d1rf5wn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-d1rf5wn",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Вся программа расположена в каталоге "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/opt/siyuan/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и в целом повторяет структуру папки resources установочного пакета Electron:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-vadyojp",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20261122113000-vadyojp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-t3x7opb",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-t3x7opb",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-4bhxxcu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-4bhxxcu",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "appearance: иконки, темы, локализации"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-p0wnrai",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-p0wnrai",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-yhb3nhv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-yhb3nhv",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "guide: справочная документация"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-pe8on34",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-pe8on34",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ug002dy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ug002dy",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "stage: интерфейс и статические ресурсы"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-eclohef",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-eclohef",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-rvvst0j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-rvvst0j",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "kernel: программа ядра"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6ksx2t9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-6ksx2t9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Точка входа"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-7q1cduh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-7q1cduh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Точка входа образа — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ENTRYPOINT [\"/opt/siyuan/entrypoint.sh\"]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", а команда по умолчанию — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "CMD [\"serve\"]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Аргументы, переданные после имени образа, заменяют команду по умолчанию, поэтому при передаче параметров ядра необходимо явно указывать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "serve"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-sbqfsev",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-sbqfsev",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если основной сервис использует порт, отличный от 6806, SiYuan также запускает обратный прокси на порту 6806 (когда он свободен), чтобы расширения браузера могли подключаться по фиксированному адресу. Если в команду "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "serve"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " добавить флаг "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=false"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", этот дополнительный обратный прокси будет отключён; значение по умолчанию — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--fixed-port=true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Основной сервис по-прежнему прослушивает порт, указанный в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (включая 6806), и сервис публикации также не затрагивается. После отключения клиенты, подключавшиеся через этот обратный прокси, должны переключиться на фактический порт основного сервиса. Чтобы вернуть обратный прокси, удалите этот параметр или задайте ему значение true и перезапустите ядро."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-l92bz58",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-l92bz58",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Перед запуском создайте каталог рабочего пространства на хосте и настройте аутентификацию. В следующем примере надёжный пароль блокировки экрана считывается из экспортированной на хосте переменной окружения "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SIYUAN_ACCESS_AUTH_CODE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "; новое рабочее пространство Docker откажется запускаться без пароля или корректной настройки "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-8q8xgxj",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Вход через OIDC"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Например, вы можете конфиденциально ввести выбранный пароль в Bash, как показано ниже. Не записывайте реальные пароли в общие файлы или историю команд; пользователи с правами просмотра окружения контейнера всё равно смогут прочитать это значение."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-40qj7gr",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20261122113000-40qj7gr",
+				"updated": "20261122113000"
+			},
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "YmFzaA==",
+			"CodeBlockCloseFence": "YGBg",
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "read -r -s -p \"Пароль блокировки: \" SIYUAN_ACCESS_AUTH_CODE\nprintf '\\n'\nexport SIYUAN_ACCESS_AUTH_CODE\n: \"${SIYUAN_ACCESS_AUTH_CODE:?Задайте непустой пароль блокировки}\"\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-52un5ie",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-52un5ie",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-sdkcme3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-sdkcme3",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-o9ez2wi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-o9ez2wi",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " задаёт путь к папке рабочего пространства, которая на хосте с помощью флага "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-v"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " монтируется внутрь контейнера"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ycxjemd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ycxjemd",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Дополнительные параметры см. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-9thjz6g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "здесь"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Ниже приведён пример команды запуска:"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 -e SIYUAN_ACCESS_AUTH_CODE b3log/siyuan serve --workspace=workspace_dir_container"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". При развёртывании через Docker с включённым сервисом публикации, помимо проброса основного порта сервера, в команду создания контейнера необходимо добавить "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-p 6808:6808"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Формат проброса портов Docker — «порт_хоста:порт_контейнера»; при изменении порта сервиса публикации нужно синхронно изменить порт контейнера, а для доступа использовать порт хоста. Указывайте фиксированный порт сервиса публикации и не задавайте 0."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8ztrm6c",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20261122113000-8ztrm6c",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-y454qln",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-y454qln",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-elxawdt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-elxawdt",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace_dir_host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": путь к папке рабочего пространства на хосте"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ham88py",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20261122113000-ham88py",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-91bueq6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-91bueq6",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace_dir_container"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": путь к папке рабочего пространства внутри контейнера (укажите таким же, как далее в "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ")"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-m6bw6jp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-m6bw6jp",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Например, создайте на хосте каталог "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/siyuan/workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", а затем выполните "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -e SIYUAN_ACCESS_AUTH_CODE -e PUID=1000 -e PGID=1000 b3log/siyuan serve --workspace=/siyuan/workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Пути на хосте и внутри контейнера могут различаться. После запуска откройте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "http://server-ip:6806"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и войдите с заданным ранее паролем; при сбое запуска проверьте журналы контейнера."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4cqw917",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-4cqw917",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Права пользователя"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9mot9r9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-9mot9r9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Скрипту точки входа требуются права на создание или повторное использование пользователя и группы, а также на рекурсивную установку владельца для "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/opt/siyuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/home/siyuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и рабочего пространства, после чего он запускает ядро через "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "su-exec"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " от имени "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "PUID:PGID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", причём оба идентификатора по умолчанию равны "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Чтобы сопоставить владельца с хостом, можно передать "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-e PUID=1000 -e PGID=1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", заменив их на соответствующие числовые ID. Не добавляйте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-u 1000:1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", иначе скрипт точки входа не сможет настроить права. Изменение владельца также затрагивает примонтированный каталог хоста."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-2n30cbi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-2n30cbi",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Скрытие порта"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-buhj1xf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-buhj1xf",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Порт 6806 можно скрыть с помощью обратного прокси NGINX. Обратите внимание на следующее:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-p5dkfnq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-p5dkfnq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-4jidfci",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-4jidfci",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-vfxbcn7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-vfxbcn7",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Настройка обратного прокси для WebSocket "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/ws"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-ce8oita",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-spd9j9r",
+							"Type": "NodeParagraph",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Обратный прокси как для обычных запросов, так и для "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/ws"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " должен сохранять исходный заголовок "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " вместе с портом — задайте в обеих секциях проксирования NGINX параметр "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "proxy_set_header Host $http_host;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Использование "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "$host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " приведёт к потере нестандартного порта (например, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "8443"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "), что может вызвать ошибку проверки источника: после входа страница застрянет на логотипе с бесконечной перезагрузкой, API будет возвращать "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "401"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " либо подключение WebSocket завершится сбоем"
+								}
+							],
+							"Properties": {
+								"id": "20261122113000-spd9j9r",
+								"updated": "20261122113000"
+							}
+						}
+					],
+					"Properties": {
+						"id": "20261122113000-ce8oita",
+						"updated": "20261122113000"
+					}
+				},
+				{
+					"ID": "20261122113000-lgadt1v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-pr1t8a9",
+							"Type": "NodeParagraph",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Задайте в обеих секциях проксирования параметр "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "proxy_set_header X-Forwarded-For $remote_addr;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", чтобы ядро получало реальный адрес клиента. Не передавайте без изменения заголовок "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "X-Forwarded-For"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", предоставленный вызывающей стороной, иначе удалённый клиент может быть ошибочно принят за локального администратора"
+								}
+							],
+							"Properties": {
+								"id": "20261122113000-pr1t8a9",
+								"updated": "20261122113000"
+							}
+						}
+					],
+					"Properties": {
+						"id": "20261122113000-lgadt1v",
+						"updated": "20261122113000"
+					}
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-nhx5h1y",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-nhx5h1y",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-hnzjw4s",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-hnzjw4s",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-r559iol",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-r559iol",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-o81nl4q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-o81nl4q",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Обязательно проверьте корректность примонтированных томов, иначе после удаления контейнера данные будут потеряны"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-822b7g9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-822b7g9",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-l5c65tp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-l5c65tp",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Не используйте переадресацию через перезапись URL (URL rewrite), так как это может нарушить аутентификацию; рекомендуется настроить обратный прокси"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ggfg75u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-ggfg75u",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ограничения"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-o9hflh0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-o9hflh0",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-npliurn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-npliurn",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-5ts3fhc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-5ts3fhc",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Подключение из мобильных приложений по-прежнему не поддерживается. Настольный клиент может подключаться в удалённом режиме — подробнее см. "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20261122113000-uoyl377",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Подключение к удалённому ядру"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-aj9s2qc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-aj9s2qc",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-nsjy7o2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-nsjy7o2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Экспорт в форматы PDF, Word и аналогичные не поддерживается"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

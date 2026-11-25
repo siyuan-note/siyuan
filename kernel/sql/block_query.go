@@ -55,7 +55,7 @@ func QueryEmptyContentEmbedBlocksInBox(boxID string) (ret []*Block) {
 	return
 }
 
-func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string) {
+func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string, err error) {
 	stmt := "SELECT id, hash FROM blocks WHERE root_id = ?"
 	rows, err := queryTx(tx, stmt, rootID)
 	if err != nil {
@@ -65,13 +65,16 @@ func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string) {
 	defer rows.Close()
 	ret = map[string]string{}
 	for rows.Next() {
-		var id, hash string
+		var id string
+		var hash sql.NullString
 		if err = rows.Scan(&id, &hash); err != nil {
 			logging.LogErrorf("query scan field failed: %s", err)
 			return
 		}
-		ret[id] = hash
+		// 保留旧库中缺少哈希的行，便于重建或删除。
+		ret[id] = hash.String
 	}
+	err = rows.Err()
 	return
 }
 

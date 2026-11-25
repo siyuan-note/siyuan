@@ -1,0 +1,1021 @@
+{
+	"ID": "20261122113000-49pabw0",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-49pabw0",
+		"title": "Импорт и экспорт",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-esf9aa9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-esf9aa9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Импорт"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-80jsnig",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-80jsnig",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gf2s6kq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-gf2s6kq",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Можно импортировать файлы или папки Markdown. При переносе данных из других программ их можно предварительно экспортировать в Markdown; для источников со специальным разделом импорта также можно воспользоваться соответствующим пунктом. Перед импортом проверьте пути к файлам ресурсов и расширенный синтаксис."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ojob1id",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ojob1id",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При импорте Markdown определения сносок вида [^note]: преобразуются в отдельные элементы нумерованного списка, а [^note] в основном тексте — в надстрочные ссылки на блоки. Нажатие на ссылку открывает определение, а обратная ссылка в определении позволяет вернуться к ссылающемуся блоку текста. Несколько абзацев внутри сноски сохраняются в одном элементе списка. Для сносок без соответствующего определения ссылки на блоки не создаются, а примеры кода и экранированный синтаксис сносок сохраняются как буквальный текст."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-4ijo8pt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-4ijo8pt",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если при импорте встречается синтаксис изображения вида "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "![foo](images/bar.png)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ (локальный относительный путь), SiYuan преобразует "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "images/bar.png"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ в"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-mg7cuep",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "ресурсов"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Однако если это "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".images/bar.png"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, преобразование не выполняется, так как файлы по путям, начинающимся с "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "."
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, относятся к скрытым файлам, и SiYuan их не обрабатывает."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-giszb8h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-giszb8h",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если необходимо распознавать элементы расширенного синтаксиса (например, надстрочный индекс "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "^foo^"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, подстрочный индекс "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~foo~"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, теги "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#foo#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ и формулы "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$foo$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ и т. п.), включите в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Редактор"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Синтаксис Markdown"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " соответствующие переключатели."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gcojo87",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-gcojo87",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-q5ibiwg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-q5ibiwg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Как на настольных, так и на мобильных устройствах в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Приложение"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " можно выполнять импорт и экспорт данных. При этом экспорт полностью копирует папку "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "рабочее пространство/data/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и упаковывает её в архив ZIP."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-8nm9ncj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-8nm9ncj",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Импорт Data"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " поддерживает только архивы Data, экспортированные описанным выше способом. Импорт копирует файлы по путям из архива в текущую папку "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "рабочее пространство/data/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " рабочего пространства:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-tvazt92",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-tvazt92",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-tql6obr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-tql6obr",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-c8mv8i2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-c8mv8i2",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "повторяющиеся файлы перезаписываются"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-exsrkh9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-exsrkh9",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-ve8blu6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ve8blu6",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "отсутствующие файлы добавляются"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-l2agjj3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-l2agjj3",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-enxop8n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-enxop8n",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "существующие файлы остаются без изменений"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-es7ouq4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-es7ouq4",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Примечание"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: будьте внимательны перед использованием, чтобы избежать безвозвратной перезаписи существующих данных."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-r5826h2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-r5826h2",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Архив Data.zip позволяет напрямую обновить текущее рабочее пространство без создания нового. Перед импортом архив анализируется; при конфликте зашифрованных блокнотов можно выбрать вариант по умолчанию «Пропустить конфликты», «Перезаписать конфликты» или отменить операцию. Перед перезагрузкой интерфейса в результатах импорта отображаются ID пропущенных блокнотов. Операцию можно отменить до подтверждения; во время выполнения подтверждённого импорта отменить его или закрыть диалоговое окно импорта нельзя."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6zdda63",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-6zdda63",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для импорта зашифрованного содержимого требуется ввести совместимый мастер-пароль. Резервные копии, созданные до смены пароля, можно прочитать с помощью совместимого предыдущего ключа без отката текущего пароля. Блокноты с разным состоянием шифрования или разными ключами данных нельзя объединить напрямую. Перезапись заменяет только файлы с совпадающими путями, сохраняет уникальные файлы в целевом расположении и не распространяет удаления; импортированные зашифрованные блокноты остаются заблокированными и требуют повторной разблокировки."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-b5au1mg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-b5au1mg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При импорте сначала проверяется выбранное содержимое, затем записываются данные; при сбое или прерывании возможен откат. Загруженный исходный архив, перезаписанные файлы и ключевые данные сохраняются в каталоге рабочего пространства conf/data-imports/; сохраняйте эти файлы восстановления до проверки импортированного содержимого и необходимой истории. При сбое восстановления запись и синхронизация приостанавливаются до успешного восстановления. Неподтверждённая предварительная проверка истекает через 30 минут и очищается при запуске или следующем импорте, при этом отменить её можно даже после истечения срока; файлы восстановления для подтверждённых пакетов сохраняются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-5ixbhhx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-5ixbhhx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": ".sy.zip"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-c28maf9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-c28maf9",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sy.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " — это собственный формат документов SiYuan. Выбрав целевой блокнот или документ в дереве документов, используйте "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Импорт"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "SiYuan .sy.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " для выбора архива. Импортированные документы сохраняют содержимое, указанные в настройках дочерние документы, файлы ресурсов и атрибуты блоков."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-s5qtepk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-s5qtepk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Экспорт"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-dqv2ag8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-dqv2ag8",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Копирование при редактировании"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-j9s9tcn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-j9s9tcn",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "После выделения содержимого используйте сочетание клавиш для копирования "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "C"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ — в буфер обмена будет скопирован стандартный текст Markdown."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-r0fzg13",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-r0fzg13",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если вам нужно скопировать содержимое в формате HTML, откройте меню "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ в правом верхнем углу вкладки редактора, выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Переключить режим"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, переключитесь в режим "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Предварительный экспорт"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ и затем выполните копирование."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-qean9cy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20261122113000-qean9cy",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Экспорт всего документа"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-15jx2ia",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-15jx2ia",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Выберите документ, нажмите на нём правой кнопкой мыши и выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Экспорт"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ или в меню "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ в правом верхнем углу вкладки редактора выберите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Экспорт"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6sei5wa",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20261122113000-6sei5wa",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"ID": "20261122113000-71ui5vz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-71ui5vz",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-gcx5vrr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-gcx5vrr",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Markdown"
+								}
+							]
+						},
+						{
+							"ID": "20261122113000-ztx3dg5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-ztx3dg5",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Настройки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Экспорт"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " параметр «Включать автонумерацию блоков заголовков при экспорте Markdown» по умолчанию отключён: при копировании и экспорте Markdown нумерация опускается без изменения документа или настроек редактора. Когда он включён, при наличии нумерации в документе вывод Markdown будет содержать номера. Копирование сразу использует эту сохранённую настройку без показа окна выбора нумерации; на другие форматы экспорта это не влияет."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-276kcvu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-276kcvu",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-usua5yf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-usua5yf",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "PDF"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-zs7tr0f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-zs7tr0f",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-2me4rh8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-2me4rh8",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "HTML"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-w3qgc3b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-w3qgc3b",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-hf4qa34",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-hf4qa34",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Word .docx"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20261122113000-1jf6tly",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20261122113000-1jf6tly",
+						"updated": "20261122113000"
+					},
+					"Children": [
+						{
+							"ID": "20261122113000-hm792nu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20261122113000-hm792nu",
+								"updated": "20261122113000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".sy.zip"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ipc52nh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ipc52nh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sy.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " сохраняет содержимое документа, файлы ресурсов и атрибуты блоков. Включать ли дочерние и связанные документы, настраивается в "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Экспорт"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " — с помощью соответствующих параметров."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-yk81a8i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-yk81a8i",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В диалоговом окне «Экспорт в изображение» отключение параметра «Экспортировать изображение заголовка» позволяет исключить изображение заголовка, сохранив изображения в основном тексте. Этот переключатель включён по умолчанию, не зависит от «Добавить заголовок документа», запоминает выбор и применяется к предпросмотру, экспортируемому файлу и кнопке «Копировать как PNG» в этом окне. Исходный документ не изменяется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-c3uxkrb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-c3uxkrb",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Для экспорта в PDF также поддерживается отдельный переключатель «Экспортировать изображение заголовка», который по умолчанию включён, запоминает выбор независимо от экспорта в изображение и не влияет на заголовок документа или изображения в основном тексте. На настольных устройствах он задаётся в окне предпросмотра PDF и сохраняется при экспорте; на мобильных устройствах — в диалоговом окне настроек печати и сохраняется при подтверждении."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-9ypj0qr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-9ypj0qr",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В предпросмотре экспорта PDF на настольных устройствах включите "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Разбивка на страницы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", а затем на панели "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Начинать заголовки с новой страницы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " — выберите уровень заголовка. При включении "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Объединить поддокументы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " заголовки дочерних документов, соответствующие выбранному уровню, будут начинаться с новой страницы, даже если предыдущий документ заканчивается заголовком. Внутри одного документа последовательные заголовки без основного текста между ними располагаются вместе."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-6mpahmk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-6mpahmk",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При каждом экспорте в PDF в окне предпросмотра на настольных устройствах или в настройках печати на мобильных устройствах можно выбрать способ экспорта «Ссылки на блоки и гиперссылки на блоки» (изначально используется глобальная настройка экспорта). Выбор варианта «Только текст анкора» сохраняет название ссылки без разворачивания содержимого целевого блока. Изменение действует только для текущего экспорта и не меняет глобальную настройку; на настольных устройствах после изменения предпросмотр обновляется."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1umeiwt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-1umeiwt",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "При экспорте в PDF на настольных устройствах в диалоге сохранения по умолчанию используется заголовок документа в качестве имени файла и тип файла PDF. Вы можете изменить имя файла и путь сохранения; при выборе существующего PDF-файла с тем же именем система запросит подтверждение перезаписи."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-12orwht",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-12orwht",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Экспорт"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " содержит ряд параметров для настройки обработки при экспорте; подробности см. во всплывающих подсказках этого раздела."
+				}
+			]
+		}
+	]
+}

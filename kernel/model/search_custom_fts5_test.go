@@ -41,7 +41,7 @@ func TestCustomBlockSearchFTS(t *testing.T) {
 	}
 	check := func(query string, types map[string]bool, want int) {
 		t.Helper()
-		cte, args := buildFTSAndHPathMatchesCTE("", query, "", "", nil, nil, buildTypeFilter(types, nil), "")
+		cte, args := buildFTSAndHPathMatchesCTE("", columnFilter()+":("+query+")", "", "", nil, nil, buildTypeFilter(types, nil), "")
 		var count int
 		if err := db.QueryRow(cte+" SELECT COUNT(*) FROM matches", args...).Scan(&count); err != nil {
 			t.Fatal(err)

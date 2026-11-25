@@ -133,6 +133,7 @@ export const openMobileAgent = (currentApp: App) => {
     ensureAgentChat(currentApp);
     closePanel();
     openDock("agent");
+    return agentChat;
 };
 
 export const hideMobileAgent = () => {
@@ -151,14 +152,6 @@ export const handleMobileAgentBack = () => {
     }
     hideMobileAgent();
     return true;
-};
-
-export const insertMobileAgentMentions = (currentApp: App, mentions: Array<{id: string; label: string}>) => {
-    if (mentions.length === 0 || isDisabledFeature("ai")) {
-        return;
-    }
-    openMobileAgent(currentApp);
-    agentChat?.insertBlockMentions(mentions);
 };
 
 export const reopenMobileAgent = () => {

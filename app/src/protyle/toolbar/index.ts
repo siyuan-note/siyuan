@@ -41,7 +41,6 @@ import {Constants} from "../../constants";
 import {
     copyPlainText,
     isNotCtrl,
-    readClipboard,
     saveExportFile,
     setStorageVal
 } from "../util/compatibility";
@@ -72,7 +71,7 @@ import {decodeInlineMemoContent, encodeInlineMemoContent} from "../util/inlineMe
 import {mathRender} from "../render/mathRender";
 import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
-import {paste, pasteAsPlainText, pasteEscaped} from "../util/paste";
+import {pasteAsPlainText, pasteEscaped, pasteFromMenu} from "../util/paste";
 import {escapeAttr, escapeHtml, escapeHtmlTextAndAttr} from "../../util/escape";
 import {resizeSide} from "../../history/resizeSide";
 import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardToolbar";
@@ -82,6 +81,8 @@ import {getRangeInlineFormats, getRangesInlineFormats, INLINE_FORMAT_TYPES} from
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {closeSubElement, SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "./subElementLifecycle";
+import {mobileEditorSearchInput, mobileEditorSheetActions, openMobileEditorSheet} from "./mobileEditorSheet";
+import {createNewFileSelectionContext, isNewFileSelectionValid} from "../../util/newFileSelection";
 import {getDefaultToolbar, getToolbarEntryId, markPluginToolbarEntries} from "./defaults";
 import {applyToolbarEntryVisibility} from "../../config/entryVisibility/runtime";
 import {refreshToolbarCatalog} from "../../config/entryVisibility/catalog";
@@ -109,6 +110,7 @@ import {
     normalizeInlineMarkRange
 } from "./inlineRangeBoundary";
 import {resolvePluginToolbar} from "../../plugin/toolbarItem";
+import {isEncryptedBox} from "../../util/pathName";
 import {FontControl, updateFontControls} from "./fontControls";
 import {
     areProtylePluginExtensionsEnabled,
@@ -174,6 +176,7 @@ export class Toolbar {
     public subElement: HTMLElement;
     public subElementCloseCB: () => void;
     public subElementResizeCB: () => void;
+    private inlineRenderDraft?: string;
     public range: Range;
     public rangePosition?: IToolbarRangePosition;
     public toolbarHeight: number;
@@ -300,6 +303,9 @@ export class Toolbar {
             return;
         }
         this.range = range;
+        const quote = this.element.querySelector<HTMLElement>('[data-type="agentQuote"]');
+        if (quote) quote.dataset.entryUnavailable = String(!protyle.block.rootID || isEncryptedBox(protyle.notebookId) ||
+            window.siyuan.config.readonly || window.siyuan.isPublish);
         updateBlockTypeButton(protyle, this.element.querySelector('[data-type="block-type"]'), range);
         applyToolbarEntryVisibility(this.element);
         this.rangePosition = undefined;
@@ -830,7 +836,7 @@ export class Toolbar {
                 focusByRange(this.range);
             }
         }
-        if (memoOldHTMLs) {
+        if (memoOldHTMLs && this.inlineRenderDraft === undefined) {
             const memoElements = newNodes.filter(item => item.nodeType !== 3 &&
                 ((item as HTMLElement).getAttribute("data-type") || "").split(" ").includes("inline-memo")) as HTMLElement[];
             const memoElement = memoElements[0];
@@ -1152,7 +1158,7 @@ export class Toolbar {
                 }
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
                 inlineElement.textContent = getInlinePlaceholder(inlineElement.getAttribute("data-type"));
-                setFontStyle(inlineElement, textObj);
+                setFontStyle(inlineElement, textObj, this.inlineRenderDraft);
                 newNodes.push(inlineElement);
                 keepZWPS = true;
             } else {
@@ -1182,7 +1188,7 @@ export class Toolbar {
                                 }
                                 textObj.color = textObj.color.split(Constants.ZWSP)[0];
                             }
-                            setFontStyle(inlineElement, textObj);
+                            setFontStyle(inlineElement, textObj, this.inlineRenderDraft);
 
                             if (type === "text" && !inlineElement.getAttribute("style")) {
                                 newNodes.push(item);
@@ -1284,7 +1290,7 @@ export class Toolbar {
                                 }
                                 textObj.color = textObj.color.split(Constants.ZWSP)[0];
                             }
-                            setFontStyle(item, textObj);
+                            setFontStyle(item, textObj, this.inlineRenderDraft);
                             if (types.includes("text") && !item.getAttribute("style")) {
                                 if (types.length === 1) {
                                     const tempText = document.createTextNode(item.textContent);
@@ -1466,11 +1472,11 @@ export class Toolbar {
             const showMenuTypes = (showMenuElement.getAttribute("data-type") || "").split(" ");
             if (type === "inline-math") {
                 mathRender(nodeElement);
-                if (!isBatch && selectText === "" && showMenuTypes.includes("inline-math")) {
+                if (!isBatch && this.inlineRenderDraft === undefined && selectText === "" && showMenuTypes.includes("inline-math")) {
                     protyle.toolbar.showRender(protyle, showMenuElement, undefined, html);
                 }
             } else if (type === "inline-memo") {
-                if (!isBatch && showMenuTypes.includes("inline-memo")) {
+                if (!isBatch && this.inlineRenderDraft === undefined && showMenuTypes.includes("inline-memo")) {
                     protyle.toolbar.showRender(protyle, showMenuElement, newNodes as Element[], html);
                 }
             } else if (type === "a") {
@@ -1495,6 +1501,34 @@ export class Toolbar {
         return newNodes;
     }
 
+    public openNewInlineRenderSheet(protyle: IProtyle, type: "inline-math" | "inline-memo", initial: string) {
+        if (protyle.disabled) return;
+        const selection = createNewFileSelectionContext(protyle, this.range);
+        if (!selection) return;
+        const title = type === "inline-math" ? window.siyuan.languages["inline-math"] : window.siyuan.languages.memo;
+        const sheet = openMobileEditorSheet(protyle, title, `<div class="b3-dialog__content editor-tool-sheet__content">
+    <textarea class="b3-text-field editor-tool-sheet__text" spellcheck="false" aria-label="${escapeAttr(title)}"></textarea>
+</div>${mobileEditorSheetActions(window.siyuan.languages.confirm)}`, {
+            range: this.range,
+            save: () => {
+                const value = type === "inline-math" ? input.value.replace(/[\r\n]+/g, "") : input.value;
+                if (!value) return;
+                if (!isNewFileSelectionValid(protyle, selection)) return false;
+                this.range = selection.range.cloneRange();
+                this.inlineRenderDraft = value;
+                try {
+                    this.setInlineMark(protyle, type, "range", {type, color: value});
+                } finally {
+                    this.inlineRenderDraft = undefined;
+                }
+            },
+        });
+        if (!sheet) return;
+        const input = sheet.dialog.element.querySelector("textarea");
+        input.value = initial;
+        sheet.dialog.focusWhenReady(() => input, {select: true, showKeyboard: true});
+    }
+
     public showRender(protyle: IProtyle, renderElement: Element, updateElements?: Element[],
                       oldHTML?: string | Map<string, string>) {
         if (!protyle.wysiwyg.element.contains(renderElement) || !hasClosestBlock(renderElement)) {
@@ -1508,8 +1542,9 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
+        const mobile = isMobile();
         // https://github.com/siyuan-note/siyuan/issues/17814
-        nodeElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+        if (!mobile) nodeElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         hideElements(["hint", "select"], protyle);
         window.siyuan.menus.menu.remove();
         const id = nodeElement.getAttribute("data-node-id");
@@ -1560,14 +1595,13 @@ export class Toolbar {
         } else if (isInlineMemo) {
             title = window.siyuan.languages.memo;
         }
-        this.subElement.style.padding = "0";
-        this.subElement.style.display = "flex";
-        this.subElement.style.flexDirection = "column";
-        if (!isMobile()) {
+        if (!mobile) {
+            this.subElement.style.padding = "0";
+            this.subElement.style.display = "flex";
+            this.subElement.style.flexDirection = "column";
             // 初始宽度由面板决定，滚动区与文本域 width:100% 跟随，拖拽缩放后由 moveResize 改写面板宽度
             this.subElement.style.width = Math.max(480, renderElement.clientWidth * 0.7) + "px";
-        }
-        this.subElement.innerHTML = `<div class="fn__flex-column"><div class="block__icons block__icons--menu fn__flex" style="border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;">
+            this.subElement.innerHTML = `<div class="fn__flex-column"><div class="block__icons block__icons--menu fn__flex" style="border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;">
     <span class="fn__flex-1 resize__move" style="line-height: 24px;">
         ${title}
     </span>
@@ -1586,6 +1620,7 @@ export class Toolbar {
 </div>
 <div class="protyle-util__scroll"><div class="fn__flex"><div class="protyle-linenumber__rows"></div><textarea ${protyle.disabled ? " readonly" : ""} spellcheck="false" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${placeholder}" style="overflow:hidden;resize:none;font-family: var(--b3-font-family-editor-code, var(--b3-font-family-code));font-weight: var(--b3-font-weight-editor-code, 400);"></textarea></div></div></div>
 <div class="resize__rd"></div><div class="resize__ld"></div><div class="resize__lt"></div><div class="resize__rt"></div><div class="resize__r"></div><div class="resize__d"></div><div class="resize__t"></div><div class="resize__l"></div>`;
+        }
         const gutter = this.subElement.querySelector(".protyle-linenumber__rows") as HTMLElement;
         const renderTextareaLineNumber = () => {
             // textarea 末尾的 \n 视觉上会占一行空行，行号需保留该空行，故不去除末尾空串
@@ -1622,10 +1657,6 @@ export class Toolbar {
         };
         const autoHeight = () => {
             renderTextareaLineNumber();
-            if (isMobile()) {
-                setPosition(this.subElement, 0, 0);
-                return;
-            }
             if (this.subElement.firstElementChild.getAttribute("data-drag") === "true") {
                 if (textElement.getBoundingClientRect().bottom > window.innerHeight) {
                     this.subElement.style.top = window.innerHeight - this.subElement.clientHeight + "px";
@@ -1647,8 +1678,8 @@ export class Toolbar {
             this.subElement.querySelector('[data-type="pin"]').setAttribute("aria-label", window.siyuan.languages.pin);
             hideElements(["util"], protyle);
         };
-        const headerElement = this.subElement.querySelector(".block__icons");
-        headerElement.addEventListener("click", (event: MouseEvent) => {
+        const headerElement = !mobile && this.subElement.querySelector(".block__icons");
+        if (headerElement) headerElement.addEventListener("click", (event: MouseEvent) => {
             const target = event.target as HTMLElement;
             const btnElement = hasClosestByClassName(target, "b3-tooltips");
             if (!btnElement) {
@@ -1730,17 +1761,22 @@ export class Toolbar {
                 });
             }, Constants.TIMEOUT_LOAD);
         };
-        const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
-        if (types.includes("NodeHTMLBlock")) {
-            textElement.value = renderElement.querySelector("protyle-html").getAttribute("data-content") || "";
-        } else if (isInlineMemo) {
-            textElement.value = decodeInlineMemoContent(renderElement.getAttribute("data-inline-memo-content") || "");
-        } else {
-            textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-content") || "");
-        }
+        const textElement = mobile ? document.createElement("textarea") :
+            this.subElement.querySelector<HTMLTextAreaElement>(".b3-text-field");
+        const readSource = () => {
+            if (types.includes("NodeHTMLBlock")) {
+                return renderElement.querySelector("protyle-html")?.getAttribute("data-content") || "";
+            }
+            if (isInlineMemo) {
+                return decodeInlineMemoContent(renderElement.getAttribute("data-inline-memo-content") || "");
+            }
+            return Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-content") || "");
+        };
+        const initialSource = readSource();
+        textElement.value = initialSource;
         const oldTextValue = textElement.value;
         let focusBeforeRender = false;
-        textElement.addEventListener("input", (event) => {
+        if (!mobile) textElement.addEventListener("input", (event) => {
             if (!renderElement.parentElement) {
                 return;
             }
@@ -1772,6 +1808,7 @@ export class Toolbar {
             event.stopPropagation();
         });
         textElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (mobile && event.key === "Escape") return;
             event.stopPropagation();
             // 阻止 ctrl+m 缩小窗口 https://github.com/siyuan-note/siyuan/issues/5541
             if (matchHotKey(window.siyuan.config.keymap.editor.insert["inline-math"], event)) {
@@ -1782,8 +1819,12 @@ export class Toolbar {
                 return;
             }
             if (event.key === "Escape" || matchHotKey("⌘↩", event)) {
-                closeRender();
-            } else if (types.includes("inline-math") && !event.altKey && !event.shiftKey && isNotCtrl(event) &&
+                if (mobile) {
+                    void mobileSheet?.dialog.requestClose("confirm");
+                } else {
+                    closeRender();
+                }
+            } else if (!mobile && types.includes("inline-math") && !event.altKey && !event.shiftKey && isNotCtrl(event) &&
                 textElement.selectionStart === textElement.selectionEnd &&
                 ((event.key === "ArrowLeft" && textElement.selectionStart === 0) ||
                     (event.key === "ArrowRight" && textElement.selectionEnd === textElement.value.length))) {
@@ -1798,8 +1839,14 @@ export class Toolbar {
                 return;
             }
         });
-        this.subElementResizeCB = renderTextareaLineNumber;
-        this.subElementCloseCB = () => {
+        const commit = () => {
+            if (mobile && types.includes("inline-math")) textElement.value = textElement.value.replace(/[\r\n]+/g, "");
+            if (mobile) {
+                if (oldTextValue === textElement.value) return;
+                if (!protyle.wysiwyg.element.contains(renderElement) || readSource() !== initialSource ||
+                    (types.includes("NodeHTMLBlock") && !renderElement.querySelector("protyle-html"))) return false;
+                nodeElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+            }
             const noChange = !renderElement.parentElement || protyle.disabled ||
                 (textElement.value && oldTextValue === textElement.value);
             let inlineLastNode: Element;
@@ -1872,11 +1919,11 @@ export class Toolbar {
                 }
             }
             // 光标定位
-            if (getSelection().rangeCount === 0 ||
+            if ((mobile && !noChange && this.range) || getSelection().rangeCount === 0 ||
                 // $$ 中间输入后再 ESC 光标无法定位
                 (getSelection().rangeCount > 0 && hasClosestByClassName(getSelection().getRangeAt(0).startContainer, "protyle-util"))
             ) {  // https://ld246.com/article/1665306093005
-                if (renderElement.tagName === "SPAN") {
+                if (renderElement.tagName === "SPAN" && this.range) {
                     if (inlineLastNode) {
                         if (inlineLastNode.parentElement) {
                             this.range.setStartAfter(inlineLastNode);
@@ -1942,13 +1989,51 @@ export class Toolbar {
                 updateTransaction(protyle, nodeElement, html);
             }
         };
-        this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
-        this.subElement.classList.remove("fn__none");
         const nodeRect = renderElement.getBoundingClientRect();
         this.element.classList.add("fn__none");
-        autoHeight();
-        if (!protyle.disabled) {
-            textElement.select();
+        let mobileSheet: ReturnType<typeof openMobileEditorSheet>;
+        if (mobile) {
+            const actions = [
+                ...(!protyle.disabled && !isInlineMemo && !types.includes("inline-math") ?
+                    [{type: "before", title: window.siyuan.languages.insertBefore, icon: "Before"},
+                        {type: "after", title: window.siyuan.languages.insertAfter, icon: "After"}] : []),
+                ...(getHostCapabilities().documentImportExport && renderElement.classList.contains("render-node") &&
+                    !types.includes("inline-math") ?
+                    [{type: "export", title: `${window.siyuan.languages.export} ${window.siyuan.languages.image}`, icon: "Download"}] : []),
+            ];
+            mobileSheet = openMobileEditorSheet(protyle, title, `<div class="b3-dialog__content editor-tool-sheet__content">
+    ${actions.length ? `<div class="block__icons">${actions.map(action =>
+        `<button type="button" class="block__icon block__icon--show" data-render-action="${action.type}" aria-label="${escapeAttr(action.title)}"><svg><use xlink:href="#icon${action.icon}"></use></svg></button>`
+    ).join("")}</div>` : ""}
+</div>${mobileEditorSheetActions(window.siyuan.languages.confirm)}`, {
+                range: this.range,
+                save: protyle.disabled ? undefined : commit,
+            });
+            if (!mobileSheet) return;
+            textElement.className = "b3-text-field editor-tool-sheet__text editor-tool-sheet__source";
+            textElement.readOnly = protyle.disabled;
+            textElement.spellcheck = false;
+            textElement.setAttribute("aria-label", title);
+            mobileSheet.dialog.element.querySelector(".editor-tool-sheet__content").append(textElement);
+            mobileSheet.dialog.element.querySelectorAll<HTMLButtonElement>("[data-render-action]").forEach(button => {
+                button.addEventListener("click", async () => {
+                    if (!mobileSheet.isCurrent() || !await mobileSheet.dialog.requestClose("confirm") ||
+                        !protyle.wysiwyg.element.contains(renderElement)) return;
+                    if (button.dataset.renderAction === "export") {
+                        exportImg();
+                    } else if (!protyle.disabled) {
+                        insertEmptyBlock(protyle, button.dataset.renderAction === "before" ? "beforebegin" : "afterend", id);
+                    }
+                });
+            });
+            if (!protyle.disabled) mobileSheet.dialog.focusWhenReady(() => textElement, {select: true, showKeyboard: true});
+        } else {
+            this.subElementResizeCB = renderTextareaLineNumber;
+            this.subElementCloseCB = commit;
+            this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
+            this.subElement.classList.remove("fn__none");
+            autoHeight();
+            if (!protyle.disabled) textElement.select();
         }
         if (areProtylePluginExtensionsEnabled(protyle)) {
             forEachPluginSubscriber("open-noneditableblock", eventBus => {
@@ -1977,11 +2062,19 @@ export class Toolbar {
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
         this.range = getEditorRange(nodeElement);
-        this.subElement.innerHTML = `<div data-id="codeLanguage" class="fn__flex-column" style="max-height:50vh">
+        const mobile = isMobile();
+        const sheet = mobile && openMobileEditorSheet(protyle, window.siyuan.languages.language,
+            `<div data-id="codeLanguage" class="b3-dialog__content editor-tool-sheet__content">
+    ${mobileEditorSearchInput()}
+    <div class="b3-list b3-list--background editor-tool-sheet__list"></div>
+</div>${mobileEditorSheetActions()}`, {range: this.range});
+        if (mobile && !sheet) return;
+        const panel = sheet ? sheet.dialog.element : this.subElement;
+        if (!sheet) panel.innerHTML = `<div data-id="codeLanguage" class="fn__flex-column" style="max-height:50vh">
     <input spellcheck="false" placeholder="${window.siyuan.languages.searchPlaceholder}" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"></div>
 </div>`;
-        const listElement = this.subElement.lastElementChild.lastElementChild as HTMLElement;
+        const listElement = panel.querySelector<HTMLElement>(".b3-list");
 
         let html = `<div data-id="clearLanguage" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
         let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
@@ -1997,17 +2090,29 @@ export class Toolbar {
         });
 
         listElement.innerHTML = html;
-        listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");
+        listElement.firstElementChild.nextElementSibling?.classList.add("b3-list-item--focus");
 
-        const inputElement = this.subElement.querySelector("input");
+        const selectLanguage = (item: Element) => {
+            if (!item) return;
+            if (sheet) {
+                sheet.choose(range => {
+                    this.range = range;
+                    this.updateLanguage(languageElements, protyle, item.textContent);
+                });
+            } else {
+                this.updateLanguage(languageElements, protyle, item.textContent);
+            }
+        };
+        const inputElement = panel.querySelector("input");
         inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (sheet && event.key === "Escape") return;
             event.stopPropagation();
             if (event.isComposing) {
                 return;
             }
             upDownHint(listElement, event);
             if (event.key === "Enter") {
-                this.updateLanguage(languageElements, protyle, this.subElement.querySelector(".b3-list-item--focus").textContent);
+                selectLanguage(listElement.querySelector(".b3-list-item--focus"));
                 event.preventDefault();
                 return;
             }
@@ -2082,7 +2187,7 @@ export class Toolbar {
                 html += `<div data-id="customLanguage" class="b3-list-item"><b>${escapeHtml(value.replace(/`| /g, "_"))}</b></div>`;
             }
             listElement.innerHTML = html;
-            listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");
+            listElement.firstElementChild.nextElementSibling?.classList.add("b3-list-item--focus");
             event.stopPropagation();
         });
         listElement.addEventListener("click", (event) => {
@@ -2091,8 +2196,13 @@ export class Toolbar {
             if (!listElement) {
                 return;
             }
-            this.updateLanguage(languageElements, protyle, listElement.textContent);
+            selectLanguage(listElement);
         });
+        this.element.classList.add("fn__none");
+        if (sheet) {
+            sheet.dialog.focusWhenReady(() => inputElement, {showKeyboard: true});
+            return;
+        }
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
         /// #if !MOBILE
@@ -2101,7 +2211,6 @@ export class Toolbar {
         /// #else
         setPosition(this.subElement, 0, 0);
         /// #endif
-        this.element.classList.add("fn__none");
         inputElement.select();
     }
 
@@ -2149,8 +2258,12 @@ export class Toolbar {
         this.range = range;
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
+        if (isMobile()) {
+            this.showMobileTemplateSheet(protyle, nodeElement, range);
+            return;
+        }
         this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="${isMobile() ? "width: 100%" : "width: 256px"}">
+<div class="fn__flex-column" style="width: 256px">
     <div class="fn__flex" style="margin: 0 8px 4px 8px">
         <input class="b3-text-field fn__flex-1"/>
         <span class="fn__space"></span>
@@ -2164,7 +2277,7 @@ export class Toolbar {
     box-shadow: 2px 0 0 0 var(--b3-theme-surface) inset, 3px 0 0 0 var(--b3-border-color) inset;
     width: 5px;
     margin-left: -2px;"></div>
-<div style="width: 520px;${isMobile() || window.outerWidth < window.outerWidth / 2 + 520 ? "display:none;" : ""}overflow: auto;"></div>
+<div style="width: 520px;${window.outerWidth < window.outerWidth / 2 + 520 ? "display:none;" : ""}overflow: auto;"></div>
 </div>`;
         const listElement = this.subElement.querySelector(".b3-list");
         resizeSide(this.subElement.querySelector(".toolbarResize"), listElement.parentElement);
@@ -2311,6 +2424,91 @@ export class Toolbar {
         genList();
     }
 
+    private showMobileTemplateSheet(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {
+        const {languages} = window.siyuan;
+        const sheet = openMobileEditorSheet(protyle, languages.template,
+            `<div class="b3-dialog__content editor-tool-sheet__content">
+    <div class="editor-tool-sheet__search">${mobileEditorSearchInput()}
+        <button type="button" class="block__icon block__icon--show" data-action="manage" aria-label="${escapeAttr(languages.templateManager)}"><svg><use xlink:href="#iconSettings"></use></svg></button>
+    </div>
+    <div class="b3-list b3-list--background editor-tool-sheet__list"></div>
+    <div class="editor-tool-sheet__preview" tabindex="0" role="region" aria-label="${escapeAttr(languages.templatePreview)}"></div>
+</div><div class="b3-dialog__action">
+    <button type="button" class="b3-button b3-button--cancel" data-action="cancel">${languages.cancel}</button>
+    <button type="button" class="b3-button b3-button--text" data-action="insert" disabled>${languages.confirm}</button>
+</div>`, {range, dispose: () => clearTemplatePreview(preview)});
+        if (!sheet) return;
+        const {element} = sheet.dialog;
+        const input = element.querySelector("input");
+        const list = element.querySelector<HTMLElement>(".editor-tool-sheet__list");
+        const preview = element.querySelector<HTMLElement>(".editor-tool-sheet__preview");
+        const insert = element.querySelector<HTMLButtonElement>('[data-action="insert"]');
+        const manage = element.querySelector<HTMLButtonElement>('[data-action="manage"]');
+        const parentID = protyle.block.parentID;
+        let selected: HTMLElement;
+        let searchID = 0;
+        const showPreview = (item: HTMLElement) => {
+            if (selected === item) return;
+            selected?.classList.remove("b3-list-item--focus");
+            selected?.removeAttribute("aria-current");
+            selected = item;
+            insert.disabled = !selected;
+            if (selected) {
+                selected.classList.add("b3-list-item--focus");
+                selected.setAttribute("aria-current", "true");
+                void previewTemplate(selected.dataset.value, preview, parentID);
+            } else {
+                clearTemplatePreview(preview);
+            }
+        };
+        const search = () => {
+            const requestID = ++searchID;
+            showPreview(undefined);
+            list.innerHTML = '<div class="ft__center"><span class="b3-loading" aria-hidden="true"></span></div>';
+            fetchPost("/api/search/searchTemplate", {k: input.value}, response => {
+                if (!sheet.isCurrent() || requestID !== searchID) return;
+                list.innerHTML = response.data.templates.map((item: {path: string; relativePath: string; content: string}) =>
+                    `<button type="button" class="b3-list-item" data-value="${escapeAttr(item.path)}" data-template-path="${escapeAttr(item.relativePath)}"><span class="b3-list-item__text">${item.content}</span></button>`
+                ).join("") || `<div class="b3-list--empty">${languages.emptyContent}</div>`;
+                showPreview(list.querySelector(".b3-list-item"));
+            });
+        };
+        const choose = () => {
+            if (!selected || !protyle.wysiwyg.element.contains(nodeElement)) return;
+            const path = selected.dataset.value;
+            sheet.choose(insertRange => {
+                this.range = insertRange;
+                hintRenderTemplate(path, protyle, nodeElement, takeTemplateHTTPConfirmation(preview, path, parentID));
+            });
+        };
+        input.addEventListener("input", (event: InputEvent) => {
+            if (!event.isComposing) search();
+        });
+        input.addEventListener("compositionend", search);
+        input.addEventListener("keydown", event => {
+            if (event.isComposing || event.keyCode === 229) return;
+            if (event.key === "Enter") {
+                event.preventDefault();
+                choose();
+            } else {
+                const item = upDownHint(list, event);
+                if (item) showPreview(item);
+            }
+        });
+        list.addEventListener("click", event => {
+            const item = (event.target as HTMLElement).closest<HTMLElement>("[data-value]");
+            if (item) showPreview(item);
+        });
+        insert.addEventListener("click", choose);
+        manage.addEventListener("click", () => {
+            const path = selected?.dataset.templatePath;
+            sheet.choose(() => openTemplateManager(parentID, undefined, path));
+        });
+        this.element.classList.add("fn__none");
+        sheet.dialog.focusWhenReady(() => input);
+        search();
+    }
+
     public showWidget(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {
         if (!protyle.wysiwyg.element.contains(nodeElement)) {
             return;
@@ -2322,31 +2520,55 @@ export class Toolbar {
         this.range = range;
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
-        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh">
+        const mobile = isMobile();
+        const sheet = mobile && openMobileEditorSheet(protyle, window.siyuan.languages.widget,
+            `<div class="b3-dialog__content editor-tool-sheet__content">
+    ${mobileEditorSearchInput()}
+    <div class="b3-list b3-list--background editor-tool-sheet__list"></div>
+</div>${mobileEditorSheetActions()}`, {range});
+        if (mobile && !sheet) return;
+        const panel = sheet ? sheet.dialog.element : this.subElement;
+        if (!sheet) panel.innerHTML = `<div class="fn__flex-column" style="max-height:50vh">
     <input spellcheck="false" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><div class="fn__flex" style="height:64px;align-items:center;justify-content:center"><span class="b3-loading" aria-hidden="true"></span></div></div>
 </div>`;
-        const listElement = this.subElement.lastElementChild.lastElementChild as HTMLElement;
-        const inputElement = this.subElement.querySelector("input");
+        const listElement = panel.querySelector<HTMLElement>(".b3-list");
+        const inputElement = panel.querySelector("input");
+        const selectWidget = (item: HTMLElement) => {
+            if (!item) return;
+            if (sheet) {
+                sheet.choose(insertRange => {
+                    this.range = insertRange;
+                    hintRenderWidget(item.dataset.content, protyle);
+                });
+            } else {
+                hintRenderWidget(item.dataset.content, protyle);
+            }
+        };
         inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (sheet && event.key === "Escape") return;
             event.stopPropagation();
             if (event.isComposing) {
                 return;
             }
             upDownHint(listElement, event);
             if (event.key === "Enter") {
-                hintRenderWidget(this.subElement.querySelector(".b3-list-item--focus").getAttribute("data-content"), protyle);
-                this.subElement.classList.add("fn__none");
+                selectWidget(listElement.querySelector(".b3-list-item--focus"));
+                if (!sheet) this.subElement.classList.add("fn__none");
                 event.preventDefault();
             } else if (event.key === "Escape") {
                 this.subElement.classList.add("fn__none");
                 focusByRange(this.range);
             }
         });
+        let searchID = 0;
         const genList = (init = false) => {
+            const requestID = ++searchID;
+            if (sheet) listElement.innerHTML = '<div class="ft__center"><span class="b3-loading" aria-hidden="true"></span></div>';
             fetchPost("/api/search/searchWidget", {
                 k: inputElement.value,
             }, (response) => {
+                if (sheet && (!sheet.isCurrent() || requestID !== searchID)) return;
                 let searchHTML = "";
                 response.data.widgets.forEach((item: {
                     path: string,
@@ -2358,8 +2580,8 @@ export class Toolbar {
     <span class="b3-list-item__meta">${escapeHtml(item.content)}</span>
 </div>`;
                 });
-                listElement.innerHTML = searchHTML;
-                if (init) {
+                listElement.innerHTML = searchHTML || (sheet ? `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>` : "");
+                if (init && !sheet) {
                     /// #if !MOBILE
                     const rangePosition = getSelectionPosition(nodeElement, range);
                     setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, this.LINE_HEIGHT);
@@ -2379,17 +2601,22 @@ export class Toolbar {
             }
             genList();
         });
-        this.subElement.lastElementChild.addEventListener("click", (event) => {
+        listElement.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             const listElement = hasClosestByClassName(target, "b3-list-item");
             if (!listElement) {
                 return;
             }
-            hintRenderWidget(listElement.dataset.content, protyle);
+            selectWidget(listElement);
         });
+        this.element.classList.add("fn__none");
+        if (sheet) {
+            sheet.dialog.focusWhenReady(() => inputElement, {showKeyboard: true});
+            genList();
+            return;
+        }
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
-        this.element.classList.add("fn__none");
         inputElement.select();
         genList(true);
     }
@@ -2476,16 +2703,10 @@ export class Toolbar {
                 this.subElement.classList.add("fn__none");
             } else if (action === "paste") {
                 focusByRange(getEditorRange(nodeElement));
-                if (document.queryCommandSupported("paste")) {
-                    document.execCommand("paste");
-                } else {
-                    try {
-                        const text = await readClipboard();
-
-                        paste(protyle, Object.assign(text, {target: nodeElement as HTMLElement}));
-                    } catch (e) {
-                        console.log(e);
-                    }
+                try {
+                    await pasteFromMenu(protyle, nodeElement as HTMLElement, event.isTrusted);
+                } catch (error) {
+                    console.log(error);
                 }
                 this.subElement.classList.add("fn__none");
             } else if (action === "select") {

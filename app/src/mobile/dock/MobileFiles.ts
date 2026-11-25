@@ -79,7 +79,10 @@ export class MobileFiles extends Model {
         pointerY: number;
         isDragging: boolean;
         ghostElement: HTMLElement;
-        startTime: number;
+        mouse: boolean;
+        armed: boolean;
+        scrollTop: number;
+        lastMotionTime: number;
         source?: IDocTreeItem;
         selectionVersion?: number;
     };
@@ -102,7 +105,7 @@ export class MobileFiles extends Model {
     <svg data-type="publish-access" class="toolbar__icon${window.siyuan.config.readonly || !window.siyuan.config.publish.enable ? " fn__none" : ""}"><use xlink:href="#iconEye"></use></svg>
     <svg data-type="sort" class="toolbar__icon${window.siyuan.config.readonly ? " fn__none" : ""}"><use xlink:href="#iconSort"></use></svg>
 </div>
-<div class="fn__flex-1"></div>
+<div class="file-tree__items fn__flex-1"></div>
 <ul class="b3-list b3-list--background fn__flex-column" style="min-height: auto;height:42px;transition: height .2s cubic-bezier(0, 0, .2, 1) 0ms">
     <li class="b3-list-item" data-type="toggle">
         <span class="b3-list-item__toggle">
@@ -368,7 +371,10 @@ export class MobileFiles extends Model {
         filesElement.addEventListener("touchstart", (event: TouchEvent) => {
             if (this.multiSelect) return;
             if (window.siyuan.config.readonly) return;
-            if (event.touches.length !== 1) return;
+            if (event.touches.length !== 1) {
+                if (this.touchDragState) this.cancelTouchDrag();
+                return;
+            }
 
             const touch = event.touches[0];
             const target = touch.target as HTMLElement;
@@ -390,15 +396,31 @@ export class MobileFiles extends Model {
                 pointerX: touch.clientX,
                 pointerY: touch.clientY,
                 ghostElement: null,
-                startTime: Date.now() - (isMousePointerTouchEvent(event) ? Constants.TIMEOUT_LONGPRESS : 0),
+                mouse: isMousePointerTouchEvent(event),
+                armed: false,
+                scrollTop: this.element.scrollTop,
+                lastMotionTime: Number.NEGATIVE_INFINITY,
             };
-            if (!isMousePointerTouchEvent(event)) {
+            if (!this.touchDragState.mouse) {
                 const state = this.touchDragState;
                 window.setTimeout(() => {
                     if (this.touchDragState !== state) {
                         return;
                     }
-                    this.startTouchDrag(state, state.startX, state.startY, true);
+                    // A scroll or recent drift during the hold owns this whole gesture.
+                    if (this.element.scrollTop !== state.scrollTop ||
+                        performance.now() - state.lastMotionTime < Constants.TIMEOUT_TOUCH_DRAG_STILLNESS) {
+                        this.touchDragState = null;
+                        return;
+                    }
+                    if (!this.docTree.getItemFromElement(state.selectedElement)) {
+                        this.touchDragState = null;
+                        return;
+                    }
+                    state.armed = true;
+                    state.startX = state.pointerX;
+                    state.startY = state.pointerY;
+                    this.signalTouchDragHold();
                 }, Constants.TIMEOUT_LONGPRESS);
             }
         }, {passive: false});
@@ -411,18 +433,33 @@ export class MobileFiles extends Model {
         filesElement.addEventListener("touchmove", (event: TouchEvent) => {
             const state = this.touchDragState;
             if (!state) return;
+            if (event.touches.length !== 1 || (!state.mouse && !event.cancelable)) {
+                this.cancelTouchDrag();
+                return;
+            }
             const touch = event.touches[0];
             if (!state.isDragging) {
-                if (Date.now() - state.startTime < Constants.TIMEOUT_LONGPRESS &&
-                    (Math.abs(touch.clientX - state.startX) > 5 || Math.abs(touch.clientY - state.startY) > 5)) {
-                    this.touchDragState = null;
+                const pastThreshold = Math.abs(touch.clientX - state.startX) >= Constants.SIZE_DRAG_THRESHOLD ||
+                    Math.abs(touch.clientY - state.startY) >= Constants.SIZE_DRAG_THRESHOLD;
+                if (state.mouse || state.armed) {
+                    if (!pastThreshold) {
+                        // Reserve the first armed movement before WebKit commits to native panning.
+                        // Keep the drag preview hidden until movement crosses the threshold.
+                        if (state.armed) event.preventDefault();
+                        return;
+                    }
+                    this.startTouchDrag(state, touch.clientX, touch.clientY);
+                } else {
+                    // Real touches can only start dragging through the stationary hold timer, never on a late move.
+                    if (pastThreshold) {
+                        this.touchDragState = null;
+                    } else if (Math.abs(touch.clientX - state.pointerX) >= 1 || Math.abs(touch.clientY - state.pointerY) >= 1) {
+                        state.pointerX = touch.clientX;
+                        state.pointerY = touch.clientY;
+                        state.lastMotionTime = performance.now();
+                    }
                     return;
                 }
-                if (Math.abs(touch.clientX - state.startX) < Constants.SIZE_DRAG_THRESHOLD &&
-                    Math.abs(touch.clientY - state.startY) < Constants.SIZE_DRAG_THRESHOLD) return;
-                this.startTouchDrag(state, touch.clientX, touch.clientY, !isMousePointerTouchEvent(event));
-                event.preventDefault();
-                event.stopPropagation();
             }
 
             if (state.isDragging) {
@@ -566,7 +603,15 @@ export class MobileFiles extends Model {
         return source;
     }
 
-    private startTouchDrag(state: MobileFiles["touchDragState"], clientX: number, clientY: number, vibrate = false) {
+    private signalTouchDragHold() {
+        if (window.webkit?.messageHandlers.vibrate) {
+            window.webkit.messageHandlers.vibrate.postMessage("");
+        } else if (navigator.vibrate) {
+            navigator.vibrate(Constants.TIMEOUT_VIBRATION_DURATION);
+        }
+    }
+
+    private startTouchDrag(state: MobileFiles["touchDragState"], clientX: number, clientY: number) {
         if (state.isDragging) {
             return;
         }
@@ -584,13 +629,6 @@ export class MobileFiles extends Model {
         document.body.append(ghostElement);
         state.ghostElement = ghostElement;
         state.selectedElement.style.opacity = "0.38";
-        if (vibrate) {
-            if (window.webkit?.messageHandlers.vibrate) {
-                window.webkit.messageHandlers.vibrate.postMessage("");
-            } else if (navigator.vibrate) {
-                navigator.vibrate(Constants.TIMEOUT_VIBRATION_DURATION);
-            }
-        }
     }
 
     private clearDragIndicators = () => {

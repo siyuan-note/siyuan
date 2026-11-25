@@ -6,7 +6,7 @@
 		"id": "20261101145217-411811d",
 		"title": "獨立 Markdown 編輯器",
 		"type": "doc",
-		"updated": "20261120092311"
+		"updated": "20261125133044"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261101145217-7be9a0a",
-				"updated": "20261106132257"
+				"updated": "20261125133044"
 			},
 			"Children": [
 				{
@@ -213,12 +213,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261101145217-1ce9e3f",
-				"updated": "20261101145217"
+				"updated": "20261125133044"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "安裝支援檔案關聯的桌面安裝套件後，可在系統的開啟方式中選擇思源。安裝只新增候選應用程式，不接管既有的預設應用程式。也可以向思源桌面程式傳入 --markdown 建立空白文件，或傳入 --markdown=\"檔案路徑.md\" 開啟檔案。在編輯器中可使用 "
+					"Data": "在 Windows 上，官網安裝套件和 Microsoft Store 版都支援 .md 和 .markdown 檔案關聯。安裝支援檔案關聯的桌面安裝套件後，可在系統的開啟方式中選擇思源。安裝只新增候選應用程式，不接管既有的預設應用程式。也可以向思源桌面程式傳入 --markdown 建立空白文件，或傳入 --markdown=\"檔案路徑.md\" 開啟檔案。在編輯器中可使用 "
 				},
 				{
 					"Type": "NodeTextMark",

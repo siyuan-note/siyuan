@@ -1,0 +1,367 @@
+{
+	"ID": "20261122113000-p07mwqn",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20261122113000-p07mwqn",
+		"title": "Секреты и переменные",
+		"type": "doc",
+		"updated": "20261122113000"
+	},
+	"Children": [
+		{
+			"ID": "20261122113000-0vg81cg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-0vg81cg",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-53fynld",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-53fynld",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Секреты и переменные предназначены для централизованного управления переиспользуемыми значениями, применяемыми в Skill, MCP-серверах, инструментах ИИ-агента и плагинах. Секреты подходят для хранения конфиденциальных данных, таких как пароли и API-токены: их значения хранятся в зашифрованном виде и не попадают в ИИ-диалоги. Переменные подходят для адресов, имён и других неконфиденциальных параметров: их значения хранятся в открытом виде и могут передаваться в ИИ-диалоги."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-1552a92",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-1552a92",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Настройка"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-03zw4le",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-03zw4le",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Секреты и переменные"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " можно добавлять, редактировать и удалять секреты или переменные. Каждая запись имеет имя и значение, а у секретов дополнительно задаются разрешённые хосты. Указывайте полное имя хоста без протокола и порта, например "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "api.example.com"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", разделяя их запятыми, пробелами или точками с запятой; сопоставление нечувствительно к регистру и не разрешает поддомены автоматически. Если список пуст, секрет не подставляется ни в один исходящий HTTP-запрос; на переменные ограничение по хостам не распространяется. Для совместимости со всеми способами подстановки рекомендуется использовать в именах латинские буквы, цифры и подчёркивания, не начиная имя с цифры."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-gncu5sd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-gncu5sd",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Способы подстановки"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ypr1gmz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ypr1gmz",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Можно использовать краткую запись "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$NAME"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " или "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "${NAME}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " или запись с пространством имён "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{secrets.NAME}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " и "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{vars.NAME}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Запись с пространством имён более однозначна и лучше подходит для общих конфигураций и Skill."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-kaxyv4k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-kaxyv4k",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Если у секрета и переменной совпадают имена, то в местах, где поддерживаются оба типа, краткая запись отдаёт приоритет секрету; запись с пространством имён позволяет указать источник явно. Если соответствующее имя не найдено, заполнитель остаётся в исходном виде, что помогает обнаружить ненастроенные параметры."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-s9vf3bu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-s9vf3bu",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Примеры использования"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-sjgrhfx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-sjgrhfx",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Например, если адрес HTTP MCP-сервера — "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "https://api.example.com"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", добавьте секрет "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "API_TOKEN"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", укажите в разрешённых хостах "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "api.example.com"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", затем добавьте переменную "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "WORKSPACE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " — после этого в заголовках можно ссылаться на них так:"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-pkuv3ms",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20261122113000-pkuv3ms",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "{\n  \"Authorization\": \"Bearer {{secrets.API_TOKEN}}\",\n  \"X-Workspace\": \"{{vars.WORKSPACE}}\"\n}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-scne119",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-scne119",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Встроенный инструмент HTTP-запросов подставляет в URL только переменные, например "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{vars.API_BASE}}/v1/items"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Секреты в HTTP-заголовках, теле запроса и заголовках HTTP MCP-сервера подставляются только в том случае, если целевой хост разрешён; иначе остаётся исходный заполнитель."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ltksqdh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ltksqdh",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP-серверы типа stdio наследуют только отмеченные пользователем переменные окружения ядра; настроенные переменные окружения могут ссылаться на секреты и переменные без ограничений списка HTTP-хостов — это фактически передаёт секрет в открытом виде данной программе и её дочерним процессам, поэтому настраивайте их только для доверенных программ. В тексте Skill и сообщениях диалога можно использовать переменные; заполнители секретов в ИИ-диалогах не раскрываются."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-ubd326u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-ubd326u",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Плагины также могут считывать или разрешать секреты и переменные через API. Перед установкой плагина проверяйте его источник и разрешения, так как плагин с доступом к секретам может получить их значения в открытом виде во время выполнения."
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-mx1uus3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261122113000-mx1uus3",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Рекомендации по безопасности"
+				}
+			]
+		},
+		{
+			"ID": "20261122113000-x6avhj5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261122113000-x6avhj5",
+				"updated": "20261122113000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Не сохраняйте пароли, токены доступа или закрытые ключи в виде переменных и не указывайте конфиденциальные значения напрямую в сообщениях диалога, тексте Skill или обычных настройках. После удаления или замены секрета проверьте конфигурации Skill, MCP-серверов и плагинов, которые его используют. Подробнее о том, как ИИ-агент использует эти настройки, см. в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20261122113000-ngzp72k",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "ИИ-агент"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

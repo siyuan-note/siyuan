@@ -40,6 +40,27 @@ export const setAVVisibleViewIDs = (blockElement: Element, viewIDs: string[]) =>
     blockElement.setAttribute(Constants.CUSTOM_SY_AV_VISIBLE_VIEWS, viewIDs.join(","));
 };
 
+export const updateAVVisibleViews = (blockElement: Element, allViewIDs: string[], oldViewIDs: string[], viewIDs: string[]) => {
+    const avID = blockElement.getAttribute("data-av-id");
+    const blockID = blockElement.getAttribute("data-node-id");
+    const operations: IOperation[] = [{action: "setAttrViewBlockVisibleViews", avID, blockID, viewIDs}];
+    const undoOperations: IOperation[] = [{action: "setAttrViewBlockVisibleViews", avID, blockID, viewIDs: oldViewIDs}];
+    const current = getAVCurrentViewID(blockElement);
+    if (oldViewIDs.includes(current) && !viewIDs.includes(current)) {
+        const index = allViewIDs.indexOf(current);
+        const visible = new Set(viewIDs);
+        const next = allViewIDs.slice(0, index).reverse().find(id => visible.has(id)) ||
+            allViewIDs.slice(index + 1).find(id => visible.has(id));
+        if (next) {
+            operations.push({action: "setAttrViewBlockView", avID, blockID, id: next});
+            undoOperations.push({action: "setAttrViewBlockView", avID, blockID, id: current});
+            blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, next);
+        }
+    }
+    setAVVisibleViewIDs(blockElement, viewIDs);
+    return {operations, undoOperations};
+};
+
 export const getAVVisibleViewIDsAfterHidingAll = (visibleViewIDs: string[], currentViewID: string) => {
     if (visibleViewIDs.length === 0) {
         return [];

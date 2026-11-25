@@ -53,6 +53,9 @@ func IsAccessCodeSessionAuthenticated(workspaceSession *util.WorkspaceSession) b
 // SetAccessCodeSession 将会话绑定到指定的锁屏密码，会话只保存密码的 HMAC 摘要。
 func SetAccessCodeSession(workspaceSession *util.WorkspaceSession, accessAuthCode string) {
 	workspaceSession.AccessAuthCodeVersion = accessAuthCodeVersion(accessAuthCode)
+	if workspaceSession.AccessAuthCodeVersion != "" && workspaceSession.AuthSessionID == "" {
+		workspaceSession.AuthSessionID = rand.Text()
+	}
 }
 
 func accessAuthCodeVersion(accessAuthCode string) string {
@@ -75,6 +78,9 @@ func IsOIDCSessionVersionCurrent(version string) bool {
 
 func applyAuthenticatedSession(c *gin.Context, workspaceSession *util.WorkspaceSession, rememberMe bool) {
 	workspaceSession.OIDCSessionVersion = oidcSessionVersion()
+	if workspaceSession.AuthSessionID == "" {
+		workspaceSession.AuthSessionID = rand.Text()
+	}
 	BindDesktopSession(c, workspaceSession, rememberMe)
 	maxAge := 0
 	if rememberMe {

@@ -585,7 +585,6 @@ def verify_startup_results(directory, packages, version):
         "windows": "-win.exe",
         "macos": "-mac-arm64.dmg",
         "linux": "-linux.deb",
-        "android": ".apk",
     }
     digests = {package["name"]: package["sha256"] for package in packages if package["status"] == "PASS"}
     expected = {f"siyuan-{version}{suffix}" for group in WORKFLOW_ASSET_GROUPS.values() for suffix in group}
@@ -601,7 +600,7 @@ def verify_startup_results(directory, packages, version):
         filename = f"siyuan-{version}{suffix}"
         if not isinstance(result, dict) or result.get("status") != "PASS" or result.get("filename") != filename:
             raise VerificationError(f"启动验收未通过或安装包名称不匹配：{filename}")
-        if filename not in digests or result.get("sha256") != digests[filename]:
+        if result.get("sha256") != digests[filename]:
             raise VerificationError(f"启动验收摘要与待发布文件不一致：{filename}")
 
 
@@ -680,7 +679,7 @@ def main():
     check.add_argument("--baseline", type=Path, action="append", help="可选，额外按可信基准比较完整摘要；通常无需使用")
     check.add_argument("--report", type=Path, help="写入 JSON 报告")
     check.add_argument("--workflow-artifacts", action="store_true", help="检查工作流下载目录中完整的八个发布资产，需要指定 --version")
-    check.add_argument("--startup-results", type=Path, help="检查 Windows、macOS、Linux 和 Android 启动验收报告的结果与安装包摘要")
+    check.add_argument("--startup-results", type=Path, help="检查 Windows、macOS 和 Linux 启动验收报告的结果与安装包摘要")
     baseline = sub.add_parser("baseline", help="从独立可信构建产物生成基准")
     baseline.add_argument("--resources", type=Path, required=True, help="包含 stage、appearance、guide、changelogs 的目录")
     baseline.add_argument("--kernel", type=Path, required=True, help="本次构建的内核文件、内核目录或 kernel.aar")

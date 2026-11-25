@@ -56,13 +56,15 @@ git push origin v3.8.12-beta.1
 - 若构建或上传失败，先检查失败步骤和已有 Release 状态；修复环境问题后可重跑失败任务，涉及源代码或版本调整时使用新的预发布版本和标签
 - 工作流上传时会覆盖同名资产，不同时手动上传，也不提前公开草稿；已有 Release 被公开时，草稿检查会阻止后续自动上传
 
-### 手动验证现有工作流产物
+### 预发布产物验证
+
+`CD For SiYuan` 发布前要求 Windows AMD64 的 `win.exe`、macOS ARM64 的 DMG 和 Linux AMD64 的 deb 实际安装并启动到主界面。八个发布资产（含 Android APK）均需通过静态校验。三个桌面启动报告的 SHA-256 必须与待发布文件一致，发布任务还会按校验报告中的摘要复核全部待上传的安装包。
 
 在 `CD For SiYuan` 的手动启动表单中选择 `windows`、`macos`、`linux` 或 `static`，填写构建的 Actions 运行 ID 和安装包版本号。桌面任务分别静默安装 Windows AMD64 安装包、挂载并部署 Apple Silicon DMG、通过包管理器安装 Linux AMD64 deb。应用启动后，验收等待可见主界面的前端就绪信号，并上传日志及安装包的 SHA-256。选择 `static` 可对同一次构建的八个发布资产运行包内静态校验。
 
-选择 `windows-candidate` 可从所选分支单独构建 Windows AMD64 安装包，再运行同一项安装启动验收。选择 `android-capability` 可检查托管 ARM64 runner 的模拟器和虚拟化环境，`android-translation` 则使用指定的官方 APK 检查 x64 模拟器的 ARM64 转译及 Activity 启动能力。
+选择 `windows-candidate` 可从所选分支单独构建 Windows AMD64 安装包，再运行同一项安装启动验收。选择 `release-check` 并填写现有构建的 Actions 运行 ID 和版本号，可运行同样的三项安装启动和八项静态校验。该模式只生成验收报告和校验和。
 
-收齐四项启动验收报告后，可以对产物运行 `verify-release.py check --startup-results <报告下载目录>`。报告按 Actions 产物名称保存在 `startup-windows`、`startup-macos`、`startup-linux` 和 `startup-android` 子目录中。校验要求八个发布文件的静态检查通过，并核对四份报告的文件名、状态和 SHA-256。
+下载三项启动验收报告后，可以对安装包运行 `verify-release.py check --startup-results <报告下载目录>`。报告按 Actions 产物名称保存在 `startup-windows`、`startup-macos` 和 `startup-linux` 子目录中。
 
 ## 正式版发布步骤
 

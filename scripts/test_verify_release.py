@@ -110,11 +110,11 @@ class WorkflowAssetsTests(unittest.TestCase):
             directory = Path(temporary)
             packages = [
                 {"name": f"siyuan-3.9.0{suffix}", "sha256": "a" * 64, "status": "PASS"}
-                for suffix in ("-linux.AppImage", "-linux.tar.gz", "-linux.rpm", "-mac.dmg")
+                for suffix in ("-linux.AppImage", "-linux.tar.gz", "-linux.rpm", "-mac.dmg", ".apk")
             ]
             for index, (target, suffix) in enumerate((
                 ("windows", "-win.exe"), ("macos", "-mac-arm64.dmg"),
-                ("linux", "-linux.deb"), ("android", ".apk"),
+                ("linux", "-linux.deb"),
             )):
                 path = directory / f"startup-{target}" / f"{target}.json"
                 path.parent.mkdir()
@@ -123,14 +123,17 @@ class WorkflowAssetsTests(unittest.TestCase):
                 packages.append({"name": name, "sha256": sha, "status": "PASS"})
                 path.write_text(json.dumps({"filename": name, "sha256": sha, "status": "PASS"}))
             release.verify_startup_results(directory, packages, "3.9.0")
-            with self.assertRaisesRegex(release.VerificationError, "siyuan-3.9.0-linux.AppImage"):
-                release.verify_startup_results(directory, packages[1:], "3.9.0")
+            for suffix in ("-linux.AppImage", ".apk"):
+                with self.subTest(missing=suffix), self.assertRaisesRegex(release.VerificationError, f"siyuan-3.9.0{suffix}"):
+                    release.verify_startup_results(directory, [
+                        package for package in packages if not package["name"].endswith(suffix)
+                    ], "3.9.0")
             path.unlink()
-            with self.assertRaisesRegex(release.VerificationError, "android"):
+            with self.assertRaisesRegex(release.VerificationError, "linux"):
                 release.verify_startup_results(directory, packages, "3.9.0")
             for fields, expected in (
                 ({"status": "SKIP"}, "启动验收未通过"),
-                ({"filename": "siyuan-3.9.0-linux.deb"}, "安装包名称不匹配"),
+                ({"filename": "siyuan-3.9.0-linux.rpm"}, "安装包名称不匹配"),
                 ({"sha256": "9" * 64}, "摘要与待发布文件不一致"),
             ):
                 with self.subTest(fields=fields):

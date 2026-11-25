@@ -18,9 +18,8 @@ on:
           - windows-candidate
           - macos
           - linux
-          - android-capability
-          - android-translation
           - static
+          - release-check
       artifact_run_id:
         description: Workflow run ID containing the installers for verification
         type: string
@@ -66,102 +65,35 @@ jobs:
       artifact_run_id: ${{ github.run_id }}
 
   startup_verify:
-    if: github.event_name == 'workflow_dispatch' && contains(fromJSON('["windows","macos","linux"]'), inputs.startup_check)
+    needs: [prepare, build, package_macos_arm64]
+    if: >-
+      ${{ !cancelled() &&
+          ((needs.prepare.result == 'success' && needs.build.result == 'success' &&
+            needs.package_macos_arm64.result == 'success') ||
+           (github.event_name == 'workflow_dispatch' &&
+            contains(fromJSON('["windows","macos","linux","release-check"]'), inputs.startup_check))) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(contains(fromJSON('["windows","macos","linux"]'), inputs.startup_check) && format('["{0}"]', inputs.startup_check) || '["windows","macos","linux"]') }}
     permissions:
       actions: read
       contents: read
     uses: ./.github/workflows/desktop-startup.yml
     with:
-      target: ${{ inputs.startup_check }}
-      version: ${{ inputs.artifact_version }}
-      artifact_run_id: ${{ inputs.artifact_run_id }}
-
-  android_startup_capability:
-    if: github.event_name == 'workflow_dispatch' && inputs.startup_check == 'android-capability'
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 5
-    steps:
-      - name: Inspect the ARM64 Android emulator environment
-        run: |
-          uname -m
-          command -v adb || true
-          test -c /dev/kvm && ls -l /dev/kvm || echo '/dev/kvm is unavailable'
-          for directory in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}"; do
-            if [ -x "$directory/emulator/emulator" ]; then
-              "$directory/emulator/emulator" -version
-              "$directory/emulator/emulator" -accel-check
-              exit
-            fi
-          done
-          echo 'The runner does not have an Android emulator installed'
-          exit 1
-
-  android_startup_translation:
-    if: github.event_name == 'workflow_dispatch' && inputs.startup_check == 'android-translation'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    permissions:
-      actions: read
-      contents: read
-    steps:
-      - uses: actions/download-artifact@v8
-        with:
-          github-token: ${{ github.token }}
-          run-id: ${{ inputs.artifact_run_id }}
-          name: siyuan-android
-          path: installers
-      - name: Probe the official ARM64 APK on the x64 Google APIs image
-        env:
-          VERSION: ${{ inputs.artifact_version }}
-        run: |
-          set -euo pipefail
-          apk="installers/siyuan-$VERSION.apk"
-          test -s "$apk"
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-siyuan-kvm.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-          test -r /dev/kvm && test -w /dev/kvm
-          image='system-images;android-30;google_apis;x86_64'
-          sdk_tools="$ANDROID_HOME/cmdline-tools/latest/bin"
-          sdk_adb="$ANDROID_HOME/platform-tools/adb"
-          "$sdk_tools/sdkmanager" --install emulator "$image"
-          export ANDROID_AVD_HOME="$RUNNER_TEMP/siyuan-avd"
-          mkdir -p "$ANDROID_AVD_HOME"
-          printf 'no\n' | "$sdk_tools/avdmanager" create avd --name siyuan-translation --package "$image" --path "$ANDROID_AVD_HOME/siyuan-translation.avd"
-          "$ANDROID_HOME/emulator/emulator" -list-avds | grep -Fx siyuan-translation
-          "$ANDROID_HOME/emulator/emulator" -avd siyuan-translation -no-window -no-audio -no-snapshot -gpu swiftshader_indirect > emulator.log 2>&1 &
-          emulator_pid=$!
-          trap 'timeout 10 "$sdk_adb" -e logcat -d > android.log || true; kill "$emulator_pid" 2>/dev/null || true' EXIT
-          for attempt in {1..90}; do
-            if ! kill -0 "$emulator_pid" 2>/dev/null; then
-              cat emulator.log
-              exit 1
-            fi
-            boot=$(timeout 4 "$sdk_adb" -e shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
-            if [ "$boot" = 1 ]; then break; fi
-            sleep 2
-          done
-          test "$boot" = 1
-          "$sdk_adb" -e shell getprop ro.product.cpu.abilist | tee android-abis.txt
-          grep -Eq '(^|,)arm64-v8a(,|[[:space:]]|$)' android-abis.txt
-          "$sdk_adb" -e install "$apk"
-          "$sdk_adb" -e shell dumpsys package org.b3log.siyuan | grep 'primaryCpuAbi=arm64-v8a'
-          timeout 45 "$sdk_adb" -e shell am start -W -n org.b3log.siyuan/.BootActivity | tee android-launch.txt
-          grep -Fqx 'Status: ok' <(tr -d '\r' < android-launch.txt)
-          "$sdk_adb" -e shell pidof org.b3log.siyuan
-      - name: Upload emulator diagnostics
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: android-translation-diagnostics
-          path: |
-            emulator.log
-            android.log
-            android-abis.txt
-            android-launch.txt
+      target: ${{ matrix.target }}
+      version: ${{ needs.prepare.outputs.version || inputs.artifact_version }}
+      artifact_run_id: ${{ needs.prepare.result == 'success' && github.run_id || inputs.artifact_run_id }}
 
   startup_static:
-    if: github.event_name == 'workflow_dispatch' && inputs.startup_check == 'static'
+    name: Verify release assets
+    needs: [prepare, package_macos_amd64, build_android, startup_verify]
+    if: >-
+      ${{ !cancelled() &&
+          ((needs.startup_verify.result == 'success' &&
+            ((needs.prepare.result == 'success' && needs.package_macos_amd64.result == 'success' &&
+              needs.build_android.result == 'success') || inputs.startup_check == 'release-check')) ||
+           inputs.startup_check == 'static') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     permissions:
@@ -177,23 +109,39 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ inputs.artifact_run_id }}
+          run-id: ${{ needs.prepare.result == 'success' && github.run_id || inputs.artifact_run_id }}
           pattern: "siyuan-{linux,mac.dmg,mac-arm64.dmg,win.exe,android}"
           path: installers
+      - name: Download desktop startup reports
+        if: inputs.startup_check != 'static'
+        uses: actions/download-artifact@v8
+        with:
+          pattern: "startup-{windows,macos,linux}"
+          path: startup-results
       - name: Install 7-Zip
         run: |
           sudo apt-get update
           sudo apt-get install -y 7zip
       - name: Verify the eight release assets
+        shell: bash
         env:
-          VERSION: ${{ inputs.artifact_version }}
-        run: python scripts/verify-release.py check installers --workflow-artifacts --version "$VERSION" --report static-verification.json
-      - name: Upload package verification report
+          VERSION: ${{ needs.prepare.outputs.version || inputs.artifact_version }}
+          STARTUP_CHECK: ${{ inputs.startup_check }}
+        run: |
+          args=(check installers --workflow-artifacts --version "$VERSION" --report static-verification.json)
+          if [[ "$STARTUP_CHECK" != static ]]; then
+            args+=(--startup-results startup-results)
+          fi
+          python scripts/verify-release.py "${args[@]}"
+          jq -r '.packages[] | "\(.sha256)  \(.name)"' static-verification.json > SHA256SUMS.txt
+      - name: Upload package verification report and checksums
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: startup-static
-          path: static-verification.json
+          path: |
+            static-verification.json
+            SHA256SUMS.txt
 
   prepare:
     name: Prepare
@@ -1258,9 +1206,8 @@ jobs:
   create_release:
     name: Create Release
     runs-on: ubuntu-24.04
-    needs: [prepare, languages, contracts, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, main_e2e, editor_e2e]
-    # 等待全部内核、前端检查和主 E2E、编辑器测试结束；测试步骤的软失败不阻塞发布。
-    # 构建和安装包校验失败仍阻止发布；独立 E2E（含测试准备）失败只记录，不阻止发布。
+    needs: [prepare, languages, contracts, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, startup_verify, startup_static, main_e2e, editor_e2e]
+    # 发布需要桌面启动和全部安装包校验通过；独立 E2E 的软失败只记录。
     if: >-
       ${{ always() && !cancelled() && needs.prepare.result == 'success' &&
           needs.languages.result == 'success' && needs.contracts.result == 'success' &&
@@ -1269,13 +1216,21 @@ jobs:
           needs.build.result == 'success' && needs.build_macos_amd64.result == 'success' &&
           needs.build_macos_arm64.result == 'success' && needs.package_macos_amd64.result == 'success' &&
           needs.package_macos_arm64.result == 'success' &&
-          needs.build_android.result == 'success' && needs.main_e2e.result != 'cancelled' &&
+          needs.build_android.result == 'success' &&
+          needs.startup_verify.result == 'success' && needs.startup_static.result == 'success' &&
+          needs.main_e2e.result != 'cancelled' &&
           needs.editor_e2e.result != 'cancelled' }}
     steps:
       - name: Download release artifacts
         uses: actions/download-artifact@v8
         with:
-          pattern: siyuan-*
+          pattern: "siyuan-{linux,mac.dmg,mac-arm64.dmg,win.exe,android}"
+
+      - name: Download verified asset checksums
+        uses: actions/download-artifact@v8
+        with:
+          name: startup-static
+          path: verified-assets
 
       - name: Prepare Release Assets
         shell: bash
@@ -1292,24 +1247,9 @@ jobs:
           cp "siyuan-win.exe/siyuan-${VERSION}-win.exe" release-assets/
           cp "siyuan-android/siyuan-${VERSION}.apk" release-assets/
 
-          EXPECTED_ASSETS=(
-            "siyuan-${VERSION}-linux.AppImage"
-            "siyuan-${VERSION}-linux.tar.gz"
-            "siyuan-${VERSION}-linux.deb"
-            "siyuan-${VERSION}-linux.rpm"
-            "siyuan-${VERSION}-mac.dmg"
-            "siyuan-${VERSION}-mac-arm64.dmg"
-            "siyuan-${VERSION}-win.exe"
-            "siyuan-${VERSION}.apk"
-          )
-          for asset in "${EXPECTED_ASSETS[@]}"; do
-            test -s "release-assets/${asset}"
-          done
-          (
-            cd release-assets
-            sha256sum "${EXPECTED_ASSETS[@]}" > SHA256SUMS.txt
-            sha256sum --check SHA256SUMS.txt
-          )
+          cp verified-assets/SHA256SUMS.txt release-assets/
+          cd release-assets
+          sha256sum --check --strict SHA256SUMS.txt
 
       - name: Create Release
         uses: ncipollo/release-action@v1

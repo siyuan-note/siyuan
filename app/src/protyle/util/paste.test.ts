@@ -484,6 +484,7 @@ describe("restricted cell selected text paste", () => {
             "../toolbar/util": {resolveLinkDest: (value: string) => value.startsWith("assets/") ? value : lute.GetLinkDest(value)},
             "../render/av/richTextValue": {getAVRichTextSafeURL},
             "./normalizeText": {removeZWJ: (value: string) => value},
+            "./queryEmbedClipboard": {neutralizePastedJSEmbedHTML: (value: string) => value},
             "./insertHTML": {insertHTML: (value: string) => inserted.push(value)},
             "../../dialog/message": {showMessage: (value: string) => messages.push(value)},
             "../../util/escape": {escapeHtml: (value: string) => value},

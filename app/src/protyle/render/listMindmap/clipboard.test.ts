@@ -407,7 +407,7 @@ test("mind map selection and clipboard preserve branches, metadata, identities a
             .includes(member.name?.getText(sourceFile)));
     const source = ["../../wysiwyg/listContext.ts", "summary.ts", "appearance.ts", "relationGeometry.ts", "model.ts", "../../util/tabsCopy.ts", "clipboard.ts",
         "fold.ts", "routing.ts", "pan.ts", "connectors.ts", "../av/richTextValue.ts", "view.ts",
-        "../../util/blockDOMClipboard.ts", "../../util/clipboardData.ts"].map(compile).join("\n") +
+        "../../util/blockDOMClipboard.ts", "../../util/clipboardData.ts", "../../util/queryEmbedClipboard.ts"].map(compile).join("\n") +
         ts.transpileModule(`class ClipboardController {${methods.map(method => method.getText(sourceFile)).join("\n")}}`,
             {compilerOptions: {target: ts.ScriptTarget.ES2021}}).outputText;
     const css = ["business/_block.scss", "business/_color.scss", "component/_svg.scss", "component/_slider.scss",

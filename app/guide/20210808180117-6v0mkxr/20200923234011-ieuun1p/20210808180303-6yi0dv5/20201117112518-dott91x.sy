@@ -787,7 +787,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ prefix, allowing dynamic determination of which blocks to embed. This is suitable for complex scenarios where SQL queries are insufficient."
+					"Data": "​ prefix, allowing dynamic determination of which blocks to embed. This is suitable for complex scenarios where SQL queries are insufficient. Pasting a JavaScript query embed into a document inserts its source as a regular code block."
 				}
 			]
 		},

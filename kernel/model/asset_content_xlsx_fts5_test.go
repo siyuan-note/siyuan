@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -265,6 +266,34 @@ func TestXlsxAssetParserMultipleSheetsAndFormats(t *testing.T) {
 		if !strings.Contains(result.Content, want) {
 			t.Fatalf("missing %q in %q", want, result.Content)
 		}
+	}
+	assertXlsxAssetTempFilesClosed(t)
+}
+
+func TestXlsxAssetIndexStopsAtTextBudget(t *testing.T) {
+	oldTemp := util.TempDir
+	util.TempDir = t.TempDir()
+	t.Cleanup(func() { util.TempDir = oldTemp })
+	workbook := excelize.NewFile()
+	defer workbook.Close()
+	const cellBytes = 16000
+	text := strings.Repeat("a", cellBytes)
+	for row := 1; row <= xlsxAssetIndexMaxBytes/(cellBytes+1)+2; row++ {
+		if err := workbook.SetCellStr("Sheet1", "A"+strconv.Itoa(row), text); err != nil {
+			t.Fatal(err)
+		}
+	}
+	path := filepath.Join(t.TempDir(), "bounded.xlsx")
+	if err := workbook.SaveAs(path); err != nil {
+		t.Fatal(err)
+	}
+	result := (&XlsxAssetParser{}).Parse(path)
+	if result == nil {
+		t.Fatal("valid workbook was rejected")
+	}
+	want := xlsxAssetIndexMaxBytes/(cellBytes+1)*(cellBytes+1) - 1
+	if len(result.Content) != want {
+		t.Fatalf("indexed %d bytes, want %d", len(result.Content), want)
 	}
 	assertXlsxAssetTempFilesClosed(t)
 }

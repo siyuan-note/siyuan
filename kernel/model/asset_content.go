@@ -757,6 +757,8 @@ func (parser *PptxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 type XlsxAssetParser struct {
 }
 
+const xlsxAssetIndexMaxBytes = 4 * 1024 * 1024
+
 func (parser *XlsxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
@@ -788,27 +790,48 @@ func (parser *XlsxAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		return
 	}
 
-	buf := bytes.Buffer{}
-	sheetMap := x.GetSheetMap()
-	for _, sheetName := range sheetMap {
-		rows, getErr := x.GetRows(sheetName)
-		if nil != getErr {
-			logging.LogErrorf("get rows from sheet [%s] failed: [%s]", sheetName, getErr)
+	var buf strings.Builder
+	for _, sheetName := range x.GetSheetList() {
+		full, err := appendXlsxSheetText(x, sheetName, &buf)
+		if err != nil {
+			logging.LogErrorf("get rows from sheet [%s] failed: [%s]", sheetName, err)
 			return
 		}
-		for _, row := range rows {
-			for _, colCell := range row {
-				buf.WriteString(colCell)
-				buf.WriteString(" ")
-			}
+		if full {
+			break
 		}
 	}
 
-	var content = normalizeNonTxtAssetContent(buf.String())
-	ret = &AssetParseResult{
-		Content: content,
+	return &AssetParseResult{Content: normalizeNonTxtAssetContent(buf.String())}
+}
+
+func appendXlsxSheetText(workbook *excelize.File, sheetName string, buf *strings.Builder) (full bool, err error) {
+	rows, err := workbook.Rows(sheetName)
+	if err != nil {
+		return false, err
 	}
-	return
+	defer func() {
+		if closeErr := rows.Close(); err == nil {
+			err = closeErr
+		}
+	}()
+	for rows.Next() {
+		row, err := rows.Columns()
+		if err != nil {
+			return false, err
+		}
+		for _, cell := range row {
+			if cell == "" {
+				continue
+			}
+			if len(cell) >= xlsxAssetIndexMaxBytes-buf.Len() {
+				return true, nil
+			}
+			buf.WriteString(cell)
+			buf.WriteByte(' ')
+		}
+	}
+	return false, rows.Error()
 }
 
 func openXlsxAssetFile(path string) (*excelize.File, error) {

@@ -285,6 +285,45 @@ func TestContractBlockPublishResponses(t *testing.T) {
 		Name:  "publish-auth-" + protectedID,
 		Value: model.PublishAuthCookieValue(protectedID, password),
 	}
+	t.Run("ContractBacklinkReaderTargetAccess", func(t *testing.T) {
+		const path = "/api/ref/getBacklink2"
+		route := contractRouteHandlers(apicontract.GetBacklink2, getBacklink2)
+		for _, test := range []struct {
+			id     string
+			cookie *http.Cookie
+			box    string
+		}{
+			{id: publicParaID, box: boxID},
+			{id: deniedParaID},
+			{id: missingID},
+			{id: protectedP},
+			{id: protectedP, cookie: publishCookie, box: boxID},
+		} {
+			body := fmt.Sprintf(`{"id":%q,"k":"","mk":"","includeBacklinks":false,"includeMentions":false}`, test.id)
+			response := postWithCookie(model.RoleReader, test.cookie, path, body, route...)
+			data, ok := response["data"].(map[string]any)
+			if response["code"] != float64(0) || !ok || data["box"] != test.box {
+				t.Fatalf("unexpected backlink response for %s: %v", test.id, response)
+			}
+		}
+	})
+
+	t.Run("ContractBlockIndexesPreserveOrderWithDuplicateIDs", func(t *testing.T) {
+		const path = "/api/block/getBlocksIndexes"
+		route := contractRouteHandlers(apicontract.GetBlocksIndexes, getBlocksIndexes)
+		baseBody := fmt.Sprintf(`{"ids":[%q,%q]}`, publicParaID, embedID)
+		batchBody := fmt.Sprintf(`{"ids":[%q,%q,%q,%q,%q]}`, publicParaID, publicParaID, deniedParaID, embedID, publicParaID)
+		base := postWithCookie(model.RoleReader, nil, path, baseBody, route...)
+		batch := postWithCookie(model.RoleReader, nil, path, batchBody, route...)
+		if got := normalize(batch, missingID); got != normalize(base, missingID) {
+			t.Fatalf("duplicate IDs changed the block indexes: %s", got)
+		}
+		data := batch["data"].(map[string]any)
+		if data[publicParaID] != float64(1) || data[embedID] != float64(2) {
+			t.Fatalf("unexpected block indexes: %v", data)
+		}
+	})
+
 	t.Run("ContractRefTextReaderRequiresBothBlocks", func(t *testing.T) {
 		const path = "/api/block/getBlockDefIDsByRefText"
 		route := contractRouteHandlers(apicontract.GetBlockDefIDsByRefText, getBlockDefIDsByRefText)

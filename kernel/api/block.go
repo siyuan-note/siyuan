@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
@@ -627,12 +628,12 @@ var getBlockIndex = contractHandler(apicontract.GetBlockIndex, func(c *gin.Conte
 })
 
 var getBlocksIndexes = contractHandler(apicontract.GetBlocksIndexes, func(c *gin.Context, request apicontract.BlocksQueryRequest) apicontract.Response[map[string]int] {
-	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, request.IDs)
+	ids := gulu.Str.RemoveDuplicatedElem(request.IDs)
+	boxID, err := holdContractBlockReadRequest(c, request.Notebook, request.ID, ids)
 	if err != nil {
 		return apicontract.Failure[map[string]int](-1, err.Error())
 	}
-	ids := filterBlockIDsByPublishAccess(c, request.IDs, boxID)
-	return apicontract.Success(model.GetBlocksIndexes(ids))
+	return apicontract.Success(model.GetBlocksIndexes(filterBlockIDsByPublishAccess(c, ids, boxID)))
 })
 
 var getDocBlocksOrders = contractHandler(apicontract.GetDocBlocksOrders, func(c *gin.Context, request apicontract.DocOrdersRequest) apicontract.Response[[]string] {

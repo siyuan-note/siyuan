@@ -5,6 +5,7 @@
 package util
 
 import (
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -15,7 +16,7 @@ import (
 func TestCaptchaChallengeSingleUse(t *testing.T) {
 	resetCaptchaChallengesForTest(t)
 
-	id := NewCaptchaChallenge("ABCD")
+	id := NewCaptchaChallenge("ABCD", "192.0.2.1", "")
 	if "" == id {
 		t.Fatal("challenge ID is empty")
 	}
@@ -31,7 +32,7 @@ func TestCaptchaChallengeSingleUse(t *testing.T) {
 func TestCaptchaChallengeWrongAnswer(t *testing.T) {
 	resetCaptchaChallengesForTest(t)
 
-	id := NewCaptchaChallenge("ABCD")
+	id := NewCaptchaChallenge("ABCD", "192.0.2.1", "")
 	if ConsumeCaptchaChallenge(id, "WXYZ") {
 		t.Fatal("wrong answer was accepted")
 	}
@@ -44,7 +45,7 @@ func TestCaptchaChallengeWrongAnswer(t *testing.T) {
 func TestCaptchaChallengeExpiry(t *testing.T) {
 	resetCaptchaChallengesForTest(t)
 
-	id := NewCaptchaChallenge("ABCD")
+	id := NewCaptchaChallenge("ABCD", "192.0.2.1", "")
 	captchaChallengeLock.Lock()
 	captchaChallenges[id].expires = time.Now().Add(-time.Second)
 	captchaChallengeLock.Unlock()
@@ -72,25 +73,43 @@ func TestCaptchaChallengeUnknownID(t *testing.T) {
 	}
 }
 
-// TestCaptchaChallengeBounded 验证挑战条数不超过上限，达到上限后仍能签发新挑战。
-func TestCaptchaChallengeBounded(t *testing.T) {
+func TestCaptchaChallengeCapacityPreservesActiveSessions(t *testing.T) {
 	resetCaptchaChallengesForTest(t)
 
-	for range captchaChallengeMaxEntries {
-		NewCaptchaChallenge("ABCD")
+	const firstIP = "192.0.2.1"
+	first := NewCaptchaChallenge("ABCD", firstIP, "")
+	for range captchaChallengeMaxPerIP - 1 {
+		if id := NewCaptchaChallenge("EFGH", firstIP, ""); id == "" {
+			t.Fatal("challenge rejected below the per-IP limit")
+		}
 	}
-	id := NewCaptchaChallenge("ABCD")
-	if "" == id {
-		t.Fatal("challenge was not issued at the entry limit")
+	if id := NewCaptchaChallenge("IJKL", firstIP, ""); id != "" {
+		t.Fatal("source exceeded its quota")
 	}
+	const secondIP = "192.0.2.2"
+	second := NewCaptchaChallenge("MNOP", secondIP, "")
+	if second == "" {
+		t.Fatal("the first source used the capacity of another source")
+	}
+
 	captchaChallengeLock.Lock()
-	count := len(captchaChallenges)
-	captchaChallengeLock.Unlock()
-	if captchaChallengeMaxEntries < count {
-		t.Fatalf("challenge entries exceeded the cap: %d", count)
+	for i := len(captchaChallenges); i < captchaChallengeMaxEntries; i++ {
+		captchaChallenges[strconv.Itoa(i)] = &captchaChallenge{expires: time.Now().Add(captchaChallengeTTL)}
+		captchaChallengesByIP[""]++
 	}
-	if !ConsumeCaptchaChallenge(id, "ABCD") {
-		t.Fatal("challenge issued at the entry limit is unusable")
+	captchaChallengeLock.Unlock()
+	if id := NewCaptchaChallenge("QRST", "192.0.2.3", ""); id != "" {
+		t.Fatal("global capacity was exceeded")
+	}
+	refreshed := NewCaptchaChallenge("UVWX", firstIP, first)
+	if refreshed == "" || ConsumeCaptchaChallenge(first, "ABCD") {
+		t.Fatal("refresh at capacity must replace only the current challenge")
+	}
+	if !ConsumeCaptchaChallenge(refreshed, "UVWX") || !ConsumeCaptchaChallenge(second, "MNOP") {
+		t.Fatal("active challenges must remain usable at capacity")
+	}
+	if id := NewCaptchaChallenge("YZAB", firstIP, ""); id == "" {
+		t.Fatal("consumption did not free capacity")
 	}
 }
 
@@ -98,13 +117,13 @@ func TestCaptchaChallengeBounded(t *testing.T) {
 func TestCaptchaChallengeSweep(t *testing.T) {
 	resetCaptchaChallengesForTest(t)
 
-	id := NewCaptchaChallenge("ABCD")
+	id := NewCaptchaChallenge("ABCD", "192.0.2.1", "")
 	captchaChallengeLock.Lock()
 	captchaChallenges[id].expires = time.Now().Add(-time.Second)
 	captchaChallengeLastSweep = time.Now().Add(-2 * captchaChallengeSweepPeriod)
 	captchaChallengeLock.Unlock()
 
-	NewCaptchaChallenge("EFGH")
+	NewCaptchaChallenge("EFGH", "192.0.2.1", "")
 	captchaChallengeLock.Lock()
 	_, exists := captchaChallenges[id]
 	captchaChallengeLock.Unlock()
@@ -117,7 +136,7 @@ func TestCaptchaChallengeSweep(t *testing.T) {
 func TestCaptchaChallengeConcurrentConsume(t *testing.T) {
 	resetCaptchaChallengesForTest(t)
 
-	id := NewCaptchaChallenge("ABCD")
+	id := NewCaptchaChallenge("ABCD", "192.0.2.1", "")
 	const consumers = 8
 	success := atomic.Int32{}
 	wg := sync.WaitGroup{}
@@ -140,6 +159,7 @@ func resetCaptchaChallengesForTest(t *testing.T) {
 	t.Helper()
 	captchaChallengeLock.Lock()
 	captchaChallenges = map[string]*captchaChallenge{}
+	captchaChallengesByIP = map[string]int{}
 	captchaChallengeLastSweep = time.Time{}
 	captchaChallengeLock.Unlock()
 }

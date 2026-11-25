@@ -152,6 +152,18 @@ func TestServeTIFFWorkspaceWithHash(t *testing.T) {
 		recorder := httptest.NewRecorder()
 		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, test.url+"?style=thumb", nil))
 		assertTIFFPreview(t, recorder)
+		if strings.HasPrefix(test.url, "/assets/") {
+			if got := recorder.Header().Get("Cache-Control"); got != "private, no-store" {
+				t.Fatalf("asset preview cache policy = %q", got)
+			}
+			request := httptest.NewRequest(http.MethodGet, test.url+"?style=thumb", nil)
+			request.Header.Set("If-None-Match", recorder.Header().Get("ETag"))
+			conditional := httptest.NewRecorder()
+			engine.ServeHTTP(conditional, request)
+			if conditional.Code != http.StatusNotModified || conditional.Header().Get("Cache-Control") != "private, no-store" {
+				t.Fatalf("conditional preview returned %d, %v", conditional.Code, conditional.Header())
+			}
+		}
 	}
 }
 

@@ -68,6 +68,7 @@ const cases = async (sources: Record<string, string>, styles: Record<string, str
         "./pictureImages": {normalizePictureImages() {}},
         "../upload/htmlLocalAssets": {getHTMLAssetSourceURL: (): undefined => undefined, resolveHTMLAssetURLs() {}},
         "./pasteSource": {extractCrossBlockPasteContext: (html: string) => ({html, nestedList: false})},
+        "./queryEmbedClipboard": load("queryEmbedClipboard"),
         "./inlineElementMarker": {stripSemanticMarkersFromRangeText: (range: Range) => range.toString()},
         "./normalizeText": {removeZWJ: (text: string) => text},
         "./insertHTML": {insertHTML: (html: string, protyle: IProtyle) => {
@@ -333,6 +334,7 @@ test("database rich text renders primary and text previews and preserves legacy 
             ["luteMarkdownSyntax", "src/protyle/render/luteMarkdownSyntax.ts"],
             ["richTextEditorLute", "src/protyle/render/av/richTextEditorLute.ts"],
             ["paste", "src/protyle/util/paste.ts"],
+            ["queryEmbedClipboard", "src/protyle/util/queryEmbedClipboard.ts"],
             ["insertPosition", "src/protyle/upload/insertPosition.ts"],
             ["runtimeCapabilities", "src/protyle/runtimeCapabilities.ts"],
         ].map(([name, path]) => [name, transpileModule(readFileSync(path, "utf8"), {

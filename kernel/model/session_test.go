@@ -681,7 +681,7 @@ func TestLoginAuthCaptchaChallengeSingleUse(t *testing.T) {
 	engine, _, clientIP := newLoginAuthTestEngine(t)
 	engine.GET("/test/challenge", func(c *gin.Context) {
 		session := util.GetSession(c)
-		util.GetWorkspaceSession(session).CaptchaID = util.NewCaptchaChallenge("ABCD")
+		util.GetWorkspaceSession(session).CaptchaID = util.NewCaptchaChallenge("ABCD", c.ClientIP(), "")
 		if err := session.Save(c); err != nil {
 			c.Status(http.StatusInternalServerError)
 			return

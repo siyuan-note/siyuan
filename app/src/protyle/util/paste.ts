@@ -77,7 +77,7 @@ import {
 } from "./wpsPresentation";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
-import {expandQueryEmbedsForClipboard} from "./queryEmbedClipboard";
+import {expandQueryEmbedsForClipboard, neutralizePastedJSEmbedHTML, neutralizePastedJSEmbeds} from "./queryEmbedClipboard";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
 import {getTextWithoutSemanticMarkers, normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
@@ -686,7 +686,7 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
 
 const insertConvertedBlockDOM = (protyle: IProtyle, dom: string, range: Range) => {
     protyle.toolbar.range = range;
-    insertHTML(dom, protyle, false, true, true);
+    insertHTML(neutralizePastedJSEmbedHTML(dom, protyle.lute), protyle, false, true, true);
     protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
         if (item.textContent === "") {
             fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
@@ -781,7 +781,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     };
     const insertAtPasteRange = (html: string, range: Range, isBlock = false, insertByCursor = false) => {
         protyle.toolbar.range = range;
-        insertHTML(html, protyle, isBlock, true, insertByCursor);
+        insertHTML(neutralizePastedJSEmbedHTML(html, protyle.lute), protyle, isBlock, true, insertByCursor);
     };
     const assetUploadOptions: IUploadInsertOptions = {
         ...uploadOptions,
@@ -1277,6 +1277,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         } else {
             tempElement.innerHTML = siyuanHTML;
         }
+        neutralizePastedJSEmbeds(tempElement, protyle.lute);
         normalizeSemanticInlineElements(tempElement);
         const preservePastedBlockStructure = shouldPreservePastedBlockStructure(tempElement.children);
         const startRangeBlockElement = hasClosestBlock(range.startContainer);

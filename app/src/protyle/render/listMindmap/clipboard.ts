@@ -1,4 +1,5 @@
 import {Constants} from "../../../constants";
+import {neutralizePastedJSEmbeds} from "../../util/queryEmbedClipboard";
 import {remapTabsDOMIDs} from "../../util/tabsCopy";
 import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode, materializeListMindmapRoot,
@@ -99,6 +100,7 @@ export const pasteMindmapBranches = (list: HTMLElement, source: HTMLElement, tar
                                      placement: ListMindmapPlacement, lute: Lute) => {
     const copy = cloneSource(list);
     const incoming = cloneSource(source);
+    neutralizePastedJSEmbeds(incoming, lute);
     // 虚拟根实体化沿用列表转换器，再统一转回目标导图的容器类型。
     retagMindmapBranch(incoming, false);
     materializeListMindmapRoot(incoming, lute);

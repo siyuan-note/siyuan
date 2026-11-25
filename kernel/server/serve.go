@@ -1169,6 +1169,9 @@ func serveAssets(ginServer *gin.Engine) {
 			context.Status(http.StatusForbidden)
 			return
 		}
+		if tiffpreview.IsPath(p) {
+			context.Header("Cache-Control", "private, no-store")
+		}
 		if model.IsEncryptedAssetPath(p) && !model.IsBoxUnlocked(util.BoxIDFromDataPath(p)) {
 			context.Status(http.StatusForbidden)
 			return

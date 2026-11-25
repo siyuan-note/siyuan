@@ -191,7 +191,6 @@ export const initWindow = async (app: App) => {
         });
     };
 
-    ipcRenderer.send(Constants.SIYUAN_EVENT);
     ipcRenderer.on(Constants.SIYUAN_EVENT, (event, cmd) => {
         applyWindowState(cmd);
         if (cmd === "focus") {
@@ -229,6 +228,7 @@ export const initWindow = async (app: App) => {
             winOnClose(close);
         }
     });
+    ipcRenderer.send(Constants.SIYUAN_EVENT);
     ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (e, ipcData: IWebSocketData) => {
         onWindowsMsg(ipcData);
     });

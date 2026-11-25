@@ -13,7 +13,8 @@
 		"startupStageLanguage": "تحميل حزمة اللغة",
 		"startupStageInterface": "تهيئة الواجهة",
 		"startupCopyFailed": "تعذر النسخ. حدد تفاصيل الخطأ وانسخها",
-		"copied": "تم النسخ"
+		"copied": "تم النسخ",
+		"close": "إغلاق"
 	},
 	"de": {
 		"startupFailed": "SiYuan konnte nicht gestartet werden",
@@ -29,7 +30,8 @@
 		"startupStageLanguage": "Sprachpaket laden",
 		"startupStageInterface": "Oberfläche initialisieren",
 		"startupCopyFailed": "Kopieren fehlgeschlagen. Fehlerdetails auswählen und kopieren",
-		"copied": "Kopiert"
+		"copied": "Kopiert",
+		"close": "Schließen"
 	},
 	"en": {
 		"startupFailed": "SiYuan failed to start",
@@ -45,7 +47,8 @@
 		"startupStageLanguage": "Loading the language pack",
 		"startupStageInterface": "Initializing the interface",
 		"startupCopyFailed": "Could not copy. Select and copy the error details",
-		"copied": "Copied"
+		"copied": "Copied",
+		"close": "Close"
 	},
 	"es": {
 		"startupFailed": "SiYuan no pudo iniciarse",
@@ -61,7 +64,8 @@
 		"startupStageLanguage": "Cargando el paquete de idioma",
 		"startupStageInterface": "Inicializando la interfaz",
 		"startupCopyFailed": "No se pudo copiar. Selecciona y copia los detalles del error",
-		"copied": "Copiado"
+		"copied": "Copiado",
+		"close": "Cerrar"
 	},
 	"fr": {
 		"startupFailed": "SiYuan n’a pas pu démarrer",
@@ -77,7 +81,8 @@
 		"startupStageLanguage": "Chargement du pack de langue",
 		"startupStageInterface": "Initialisation de l’interface",
 		"startupCopyFailed": "Échec de la copie. Sélectionnez et copiez les détails de l’erreur",
-		"copied": "Copié"
+		"copied": "Copié",
+		"close": "Fermer"
 	},
 	"he": {
 		"startupFailed": "לא ניתן להפעיל את SiYuan",
@@ -93,7 +98,8 @@
 		"startupStageLanguage": "טעינת חבילת השפה",
 		"startupStageInterface": "אתחול הממשק",
 		"startupCopyFailed": "ההעתקה נכשלה. יש לבחור את פרטי השגיאה ולהעתיק אותם",
-		"copied": "הועתק"
+		"copied": "הועתק",
+		"close": "סגור"
 	},
 	"hi": {
 		"startupFailed": "SiYuan शुरू नहीं हो सका",
@@ -109,7 +115,8 @@
 		"startupStageLanguage": "भाषा पैक लोड हो रहा है",
 		"startupStageInterface": "इंटरफ़ेस शुरू हो रहा है",
 		"startupCopyFailed": "कॉपी नहीं हो सका। त्रुटि विवरण चुनकर कॉपी करें",
-		"copied": "कॉपी किया गया"
+		"copied": "कॉपी किया गया",
+		"close": "बंद करें"
 	},
 	"id": {
 		"startupFailed": "SiYuan gagal dimulai",
@@ -125,7 +132,8 @@
 		"startupStageLanguage": "Memuat paket bahasa",
 		"startupStageInterface": "Menginisialisasi antarmuka",
 		"startupCopyFailed": "Gagal menyalin. Pilih dan salin detail kesalahan",
-		"copied": "Disalin"
+		"copied": "Disalin",
+		"close": "Tutup"
 	},
 	"it": {
 		"startupFailed": "Impossibile avviare SiYuan",
@@ -141,7 +149,8 @@
 		"startupStageLanguage": "Caricamento del pacchetto lingua",
 		"startupStageInterface": "Inizializzazione dell’interfaccia",
 		"startupCopyFailed": "Copia non riuscita. Seleziona e copia i dettagli dell’errore",
-		"copied": "Copiato"
+		"copied": "Copiato",
+		"close": "Chiudi"
 	},
 	"ja": {
 		"startupFailed": "SiYuan を起動できませんでした",
@@ -157,7 +166,8 @@
 		"startupStageLanguage": "言語パックの読み込み",
 		"startupStageInterface": "画面の初期化",
 		"startupCopyFailed": "コピーできませんでした。エラー情報を選択してコピーしてください",
-		"copied": "コピーしました"
+		"copied": "コピーしました",
+		"close": "閉じる"
 	},
 	"ko": {
 		"startupFailed": "SiYuan을 시작하지 못했습니다",
@@ -173,7 +183,8 @@
 		"startupStageLanguage": "언어 팩 불러오기",
 		"startupStageInterface": "인터페이스 초기화",
 		"startupCopyFailed": "복사하지 못했습니다. 오류 정보를 선택하여 복사하세요",
-		"copied": "복사됨"
+		"copied": "복사됨",
+		"close": "닫기"
 	},
 	"nl": {
 		"startupFailed": "SiYuan kon niet worden gestart",
@@ -189,7 +200,8 @@
 		"startupStageLanguage": "Taalpakket laden",
 		"startupStageInterface": "Interface initialiseren",
 		"startupCopyFailed": "Kopiëren mislukt. Selecteer en kopieer de foutdetails",
-		"copied": "Gekopieerd"
+		"copied": "Gekopieerd",
+		"close": "Sluiten"
 	},
 	"pl": {
 		"startupFailed": "Nie udało się uruchomić SiYuan",
@@ -205,7 +217,8 @@
 		"startupStageLanguage": "Wczytywanie pakietu językowego",
 		"startupStageInterface": "Inicjowanie interfejsu",
 		"startupCopyFailed": "Nie udało się skopiować. Zaznacz i skopiuj szczegóły błędu",
-		"copied": "Skopiowane"
+		"copied": "Skopiowane",
+		"close": "Zamknij"
 	},
 	"pt-BR": {
 		"startupFailed": "Não foi possível iniciar o SiYuan",
@@ -221,7 +234,8 @@
 		"startupStageLanguage": "Carregando o pacote de idioma",
 		"startupStageInterface": "Inicializando a interface",
 		"startupCopyFailed": "Não foi possível copiar. Selecione e copie os detalhes do erro",
-		"copied": "Copiado"
+		"copied": "Copiado",
+		"close": "Fechar"
 	},
 	"ru": {
 		"startupFailed": "Не удалось запустить SiYuan",
@@ -237,7 +251,8 @@
 		"startupStageLanguage": "Загрузка языкового пакета",
 		"startupStageInterface": "Инициализация интерфейса",
 		"startupCopyFailed": "Не удалось скопировать. Выделите и скопируйте сведения об ошибке",
-		"copied": "Скопировано"
+		"copied": "Скопировано",
+		"close": "Закрыть"
 	},
 	"sk": {
 		"startupFailed": "SiYuan sa nepodarilo spustiť",
@@ -253,7 +268,8 @@
 		"startupStageLanguage": "Načítavanie jazykového balíka",
 		"startupStageInterface": "Inicializácia rozhrania",
 		"startupCopyFailed": "Kopírovanie zlyhalo. Vyberte a skopírujte podrobnosti chyby",
-		"copied": "Skopírované"
+		"copied": "Skopírované",
+		"close": "Zavrieť"
 	},
 	"sr": {
 		"startupFailed": "SiYuan није могао да се покрене",
@@ -269,7 +285,8 @@
 		"startupStageLanguage": "Учитавање језичког пакета",
 		"startupStageInterface": "Иницијализација интерфејса",
 		"startupCopyFailed": "Копирање није успело. Изаберите и копирајте детаље грешке",
-		"copied": "Kopirano"
+		"copied": "Kopirano",
+		"close": "Zatvori"
 	},
 	"th": {
 		"startupFailed": "ไม่สามารถเริ่ม SiYuan ได้",
@@ -285,7 +302,8 @@
 		"startupStageLanguage": "กำลังโหลดชุดภาษา",
 		"startupStageInterface": "กำลังเริ่มต้นส่วนติดต่อ",
 		"startupCopyFailed": "คัดลอกไม่สำเร็จ โปรดเลือกและคัดลอกรายละเอียดข้อผิดพลาด",
-		"copied": "คัดลอกแล้ว"
+		"copied": "คัดลอกแล้ว",
+		"close": "ปิด"
 	},
 	"tr": {
 		"startupFailed": "SiYuan başlatılamadı",
@@ -301,7 +319,8 @@
 		"startupStageLanguage": "Dil paketi yükleniyor",
 		"startupStageInterface": "Arayüz başlatılıyor",
 		"startupCopyFailed": "Kopyalanamadı. Hata ayrıntılarını seçip kopyalayın",
-		"copied": "Kopyalandı"
+		"copied": "Kopyalandı",
+		"close": "Kapat"
 	},
 	"uk": {
 		"startupFailed": "Не вдалося запустити SiYuan",
@@ -317,7 +336,8 @@
 		"startupStageLanguage": "Завантаження мовного пакета",
 		"startupStageInterface": "Ініціалізація інтерфейсу",
 		"startupCopyFailed": "Не вдалося скопіювати. Виділіть і скопіюйте відомості про помилку",
-		"copied": "Скопійовано"
+		"copied": "Скопійовано",
+		"close": "Закрити"
 	},
 	"vi": {
 		"startupFailed": "Không thể khởi động SiYuan",
@@ -333,7 +353,8 @@
 		"startupStageLanguage": "Đang tải gói ngôn ngữ",
 		"startupStageInterface": "Đang khởi tạo giao diện",
 		"startupCopyFailed": "Không thể sao chép. Hãy chọn thông tin lỗi rồi sao chép",
-		"copied": "Đã sao chép"
+		"copied": "Đã sao chép",
+		"close": "Đóng"
 	},
 	"zh-CN": {
 		"startupFailed": "思源启动失败",
@@ -349,7 +370,8 @@
 		"startupStageLanguage": "加载语言包",
 		"startupStageInterface": "初始化界面",
 		"startupCopyFailed": "复制失败，请选中错误信息后复制",
-		"copied": "已复制"
+		"copied": "已复制",
+		"close": "关闭"
 	},
 	"zh-TW": {
 		"startupFailed": "思源啟動失敗",
@@ -365,6 +387,7 @@
 		"startupStageLanguage": "載入語言套件",
 		"startupStageInterface": "初始化介面",
 		"startupCopyFailed": "複製失敗，請選取錯誤資訊後複製",
-		"copied": "已複製"
+		"copied": "已複製",
+		"close": "關閉"
 	}
 }

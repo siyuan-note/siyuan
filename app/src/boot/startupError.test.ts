@@ -25,7 +25,7 @@ class ElementStub extends EventTarget {
     set innerHTML(_value: string) { assert.fail("diagnostics must be inserted as text"); }
 }
 
-const createPage = () => {
+const createPage = (close?: () => void) => {
     const document = Object.assign(new EventTarget(), {
         body: new ElementStub(), documentElement: new ElementStub("HTML"), hidden: false,
         createElement: (name: string) => new ElementStub(name.toUpperCase()),
@@ -59,7 +59,7 @@ const createPage = () => {
     });
     const previous = globalThis.window;
     globalThis.window = target as unknown as Window & typeof globalThis;
-    const startup = installStartupError(globalThis.window, "test-version");
+    const startup = installStartupError(globalThis.window, "test-version", undefined, close);
     return {target, document, startup, find, timers, selected: () => selected, reloads: () => reloads,
         dispose: () => { startup.dispose(); globalThis.window = previous; }};
 };
@@ -109,6 +109,22 @@ test("copy failures keep the diagnostic text selected for the system copy menu",
         assert.match(copy.textContent, /Select and copy/);
         assert.match(page.selected(), /failed/);
     } finally { page.dispose(); }
+});
+
+test("only native windows expose a drag region and close action in the failure view", () => {
+    let closed = 0;
+    for (const close of [undefined, () => { closed++; }]) {
+        const page = createPage(close);
+        try {
+            page.startup.fail(new Error("failed"));
+            const heading = page.find(element => element.id === "startupErrorTitle");
+            const button = page.find(element => element.tagName === "BUTTON" && element.textContent === "Close");
+            assert.equal(heading.className.includes("startup-error__drag"), Boolean(close));
+            assert.equal(Boolean(button), Boolean(close));
+            button?.dispatchEvent(new Event("click"));
+        } finally { page.dispose(); }
+    }
+    assert.equal(closed, 1);
 });
 
 test("unattributed runtime errors do not fail successful startup or remain monitored afterwards", () => {

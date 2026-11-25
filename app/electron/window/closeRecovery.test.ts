@@ -6,7 +6,7 @@ import {mockElectron, resetElectronStub} from "../fixtures/electronStub";
 import {resetRuntimeState} from "../shared/runtime";
 const assert = require("node:assert/strict");
 
-const setup = (t: any) => {
+const setup = (t: any, canSave = true) => {
     resetRuntimeState();
     resetElectronStub();
     mockElectron(t);
@@ -33,6 +33,7 @@ const setup = (t: any) => {
     const workspace = {webContentsId: 1, port: "6806", ownsKernel: true,
         browserWindow: window as unknown as BrowserWindow} as Workspace;
     installWindowCloseRecovery(window as unknown as BrowserWindow, {
+        canSave: () => canSave,
         languages: {windowCloseTimeout: "unsaved edits", cancel: "wait", confirm: "exit", exitWaitFailed: "failed"},
         scheduleTimer: (callback, ms) => { const key = {}; timers.set(key, {callback, ms}); return key; },
         cancelTimer: key => { timers.delete(key as object); },
@@ -72,6 +73,34 @@ const setup = (t: any) => {
         destroy: () => { destroyed = true; window.emit("closed"); },
     };
 };
+
+test("closing before the save handshake shuts down only an owned kernel without renderer IPC", async t => {
+    for (const ownsKernel of [true, false]) {
+        const f = setup(t, false);
+        f.workspace.ownsKernel = ownsKernel;
+        f.close();
+        if (ownsKernel) f.close(true);
+        await f.settle();
+        assert.deepEqual(f.sent, []);
+        assert.deepEqual(f.dialogs, []);
+        assert.deepEqual(f.exits, [f.workspace]);
+        assert.equal(f.kernel.length, ownsKernel ? 1 : 0);
+        if (ownsKernel) assert.equal(f.kernel[0].options.force, false);
+        assert.equal(f.timers.size, 0);
+    }
+});
+
+test("a kernel that refuses to exit during startup keeps its window and allows retry", async t => {
+    const f = setup(t, false);
+    f.fail();
+    f.close();
+    await f.settle();
+    assert.deepEqual(f.exits, []);
+    assert.equal(f.dialogs[0].message, "failed");
+    f.close();
+    await f.settle();
+    assert.equal(f.kernel.length, 2);
+});
 
 test("responsive renderers keep their own hide, save and sync flow", async t => {
     const f = setup(t);

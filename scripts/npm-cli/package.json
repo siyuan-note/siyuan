@@ -1,6 +1,6 @@
 {
   "name": "@siyuan-note/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Launcher for the SiYuan kernel CLI bundled with the desktop client",
   "keywords": [
     "siyuan",

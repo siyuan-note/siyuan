@@ -1,5 +1,5 @@
 import {Tab} from "./Tab";
-import {getInstanceById, newModelByInitData, saveLayout} from "./util";
+import {getInstanceById, newModelByInitData, resizeTopBar, saveLayout} from "./util";
 import {getAllModels, getAllTabs, getAllWnds} from "./getAll";
 import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {pdfResize} from "../asset/renderAssets";
@@ -28,24 +28,89 @@ import {Wnd} from "./Wnd";
 import {requestResponsiveDockLayout} from "./dock/responsive";
 import {cloneSearchConfig} from "../search/config";
 
+const MIN_TAB_DRAG_WIDTH = 24;
+const tabDragResizeTargets = new Set<HTMLElement>();
+let tabDragResizeObserver: ResizeObserver;
+let tabDragResizeFrame: number;
+
+const observeTabDragResize = (targets: HTMLElement[]) => {
+    if (targets.length && !tabDragResizeObserver) {
+        tabDragResizeObserver = new ResizeObserver(() => {
+            if (tabDragResizeFrame !== undefined) return;
+            tabDragResizeFrame = requestAnimationFrame(() => {
+                tabDragResizeFrame = undefined;
+                setTabPosition(true);
+            });
+        });
+    }
+    const nextTargets = new Set(targets);
+    tabDragResizeTargets.forEach(element => {
+        if (nextTargets.has(element)) return;
+        tabDragResizeObserver.unobserve(element);
+        tabDragResizeTargets.delete(element);
+    });
+    nextTargets.forEach(element => {
+        if (tabDragResizeTargets.has(element)) return;
+        tabDragResizeObserver.observe(element);
+        tabDragResizeTargets.add(element);
+    });
+};
+
 export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
     const isWindowMode = isWindow();
+    const fused = window.siyuan.config.appearance.hideToolbar;
+    const toolbarDragElement = document.getElementById("drag");
+    const toolbar = toolbarDragElement?.parentElement;
+    const gap = toolbar && !isWindowMode && document.documentElement.dataset.frontend === "desktop" &&
+        document.body.matches(".body--windows, .body--linux, .body--mac") && toolbar.querySelector<HTMLElement>(".toolbar__window-gap");
     const wndsTemp: Wnd[] = [];
     if (isWindowMode) {
         getAllWnds(window.siyuan.layout.layout, wndsTemp);
-    } else if (window.siyuan.config.appearance.hideToolbar || onlyClear) {
-        if (!window.siyuan.layout.centerLayout) {
-            return;
-        }
+    } else if ((fused || onlyClear) && window.siyuan.layout.centerLayout) {
         getAllWnds(window.siyuan.layout.centerLayout, wndsTemp);
     }
 
+    const tabDrags = gap && fused ? wndsTemp.map(item => item.headersElement.parentElement
+        .querySelector<HTMLElement>(".item--readonly .fn__flex-1")).filter(Boolean) : [];
+    observeTabDragResize(tabDrags);
+    if (gap && !tabDrags.length) gap.removeAttribute("data-tab-drag-available");
     if (wndsTemp.length === 0) {
         return;
     }
 
     const centerRect = (isWindowMode ? window.siyuan.layout.layout : window.siyuan.layout.centerLayout).element.getBoundingClientRect();
-    const toolbarDragElement = document.getElementById("drag");
+    if (!tabDrags.length) {
+        positionTabHeaders(wndsTemp, centerRect, toolbarDragElement, isWindowMode, onlyPadding);
+        return;
+    }
+
+    // 按不含兜底留白的布局测量，避免兜底区本身缩窄页签，让拖拽区无法恢复。
+    const gapWasVisible = gap.getBoundingClientRect().width > 0;
+    const scrollPositions = gapWasVisible ? wndsTemp.map(({headersElement}) => headersElement.scrollLeft) : [];
+    gap.setAttribute("data-tab-drag-available", "");
+    if (gapWasVisible && toolbar.querySelector('[data-hide="true"]')) resizeTopBar();
+    positionTabHeaders(wndsTemp, centerRect, toolbarDragElement, isWindowMode, onlyPadding);
+    const toolbarRect = toolbarDragElement.getBoundingClientRect();
+    if (tabDrags.some(element => {
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return rect.height > 0 && rect.top < toolbarRect.bottom && rect.bottom > toolbarRect.top &&
+            style.visibility === "visible" && style.getPropertyValue("-webkit-app-region") === "drag" &&
+            Math.min(rect.right, toolbarRect.right) - Math.max(rect.left, toolbarRect.left) >= MIN_TAB_DRAG_WIDTH;
+    })) return;
+
+    gap.removeAttribute("data-tab-drag-available");
+    if (gap.getBoundingClientRect().width === 0) return;
+    if (toolbar.scrollWidth > toolbar.clientWidth + 2) resizeTopBar();
+    positionTabHeaders(wndsTemp, centerRect, toolbarDragElement, isWindowMode, true);
+    scrollPositions.forEach((left, index) => {
+        const {headersElement} = wndsTemp[index];
+        if (headersElement.scrollLeft !== left) headersElement.scrollLeft = left;
+    });
+};
+
+const positionTabHeaders = (wndsTemp: Wnd[], centerRect: DOMRect, toolbarDragElement: HTMLElement, isWindowMode: boolean,
+                            onlyPadding: boolean) => {
     const toolbarDragRect = toolbarDragElement?.getBoundingClientRect() || {left: 0, right: 0};
     if (toolbarDragElement) {
         toolbarDragElement.style.setProperty("--b3-toolbar-drag-left", "8px");

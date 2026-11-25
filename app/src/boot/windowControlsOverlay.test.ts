@@ -16,6 +16,10 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     :root{--b3-ui-panel-height:42px;--b3-ui-toolbar-height:32px;--b3-toolbar-color:#555555}
     .fn__flex{display:flex}.fn__flex-1{flex:1;min-width:0}.fn__none{display:none!important}.fn__hidden{visibility:hidden!important}
     .toolbar{padding:0}body{margin:0}#tooltip{--b3-tooltips-background:black;--b3-tooltips-color:white}
+    .fixture-tab-row{height:42px;display:flex;overflow:hidden}
+    .fixture-tabs{margin:0;padding:0;display:flex;overflow:hidden;min-width:0}
+    .fixture-tabs .item--readonly{display:flex;width:100%;margin:0}
+    .fixture-tabs button{flex:0 0 24px}
     </style><div id="toolbar" class="toolbar fn__flex"><div id="captionColor" class="toolbar__item"></div><div id="drag" class="fn__flex-1"></div>
     <div class="toolbar__item" id="rightToolbarButton"></div><div class="toolbar__window-gap"></div>
     <div id="windowControls" class="fn__flex"></div></div>
@@ -30,10 +34,12 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     const controls = {} as typeof import("./windowControls");
     const tooltip = {} as typeof import("../dialog/tooltip");
     const color = {} as typeof import("../util/color");
+    const tabUtil = {} as typeof import("../layout/tabUtil");
+    let tabRows: {element: HTMLElement; headersElement: HTMLElement}[] = [];
     const dependencies = {Constants: {SIYUAN_CMD: "siyuan-cmd", LOCAL_ZOOM: "zoom", TIMEOUT_TRANSITION: 0},
         resizeTopBar: () => { resizeCalls++; }, setToolbarLeftMac() {},
         isMobile: () => false, isWindow: () => false, isTouchHoverInput: () => false, emitToPlugins() {},
-        forEachPluginSubscriber() {}, getAllWnds() {}, hideAllElements() {},
+        forEachPluginSubscriber() {}, getAllWnds(_layout: unknown, rows: typeof tabRows) { rows.push(...tabRows); }, hideAllElements() {},
         hasClosestByClassName: (element: Element, name: string) => element.closest("." + name)};
     const load = (code: string, exports: object) => new Function("exports", "require", code)(exports, (id: string) => {
         if (id === "electron") return {webFrame, ipcRenderer: {send: (channel: string, data: typeof sent[number]) => {
@@ -50,7 +56,71 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     load(sources[2], tooltip);
     const panelFullscreen = {} as typeof import("../protyle/breadcrumb/action");
     load(sources[4], panelFullscreen);
+    load(sources[5], tabUtil);
     const container = document.getElementById("windowControls");
+    const waitForPaint = () => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    const checkAdaptiveGap = async (platform: "windows" | "linux" | "mac", native = false) => {
+        document.body.className = `body--${platform} body--toolbar-hide`;
+        window.siyuan.config.system.os = platform === "mac" ? "darwin" : platform;
+        const gap = document.querySelector<HTMLElement>(".toolbar__window-gap");
+        const center = document.createElement("div");
+        center.style.cssText = "position:absolute;inset:0 0 auto";
+        center.innerHTML = `<section><div class="fixture-tab-row">
+  <ul class="fixture-tabs" style="width:100px"><li>Tab</li></ul>
+  <ul class="fixture-tabs fn__flex-1"><li class="item--readonly"><button type="button">+</button><span class="fn__flex-1"></span><button type="button">v</button></li></ul>
+</div><div class="layout-tab-container"></div></section>`;
+        document.body.append(center);
+        window.siyuan.layout.centerLayout = {element: center} as unknown as typeof window.siyuan.layout.centerLayout;
+        const headersElement = center.querySelector<HTMLElement>("ul");
+        const spacer = center.querySelector<HTMLElement>(".item--readonly .fn__flex-1");
+        tabRows = [{element: center.querySelector("section"), headersElement}];
+        const gapWidth = () => gap.getBoundingClientRect().width;
+        try {
+            tabUtil.setTabPosition();
+            check.equal(gapWidth(), 0, `${platform} uses the free space beside the new tab button`);
+            if (native) {
+                const rect = spacer.getBoundingClientRect();
+                await waitForPaint();
+                check.deepEqual(await ipcRenderer.invoke("overlay-test-hit", [
+                    {x: (rect.left + rect.right) / 2 / innerWidth, y: (rect.top + rect.bottom) / 2 / innerHeight},
+                ]), [2], "the natural tab gap moves the native window");
+            }
+            const initialWidth = spacer.getBoundingClientRect().width;
+            headersElement.style.width = `${100 + initialWidth - 20}px`;
+            await waitForPaint();
+            await waitForPaint();
+            check.ok(Math.abs(gapWidth() - 24) < 0.1, `${platform} restores the fallback for crowded tabs`);
+            const rect = gap.getBoundingClientRect();
+            if (platform === "mac") {
+                check.ok(rect.right <= document.getElementById("captionColor").getBoundingClientRect().left);
+            } else {
+                check.ok(rect.left >= document.getElementById("rightToolbarButton").getBoundingClientRect().right - 1);
+            }
+            if (native) {
+                check.deepEqual(await ipcRenderer.invoke("overlay-test-hit", [
+                    {x: (rect.left + rect.right) / 2 / innerWidth, y: (rect.top + rect.bottom) / 2 / innerHeight},
+                ]), [2], "the fallback gap moves the native window");
+            }
+            // 兜底区仍在时，现有页签拖拽区几乎没有空间；重算时按去掉兜底区的 25px 判断。
+            headersElement.style.width = `${100 + initialWidth - 25}px`;
+            tabUtil.setTabPosition(true);
+            check.equal(gapWidth(), 0, `${platform} reevaluates without subtracting the fallback itself`);
+            for (let index = 0; index < 3; index++) {
+                await waitForPaint();
+                check.equal(gapWidth(), 0, `${platform} settles without switching back`);
+            }
+            center.style.top = "60px";
+            tabUtil.setTabPosition(true);
+            check.ok(Math.abs(gapWidth() - 24) < 0.1, "a lower split row is not a native title bar target");
+            document.getElementById("drag").classList.add("fn__hidden");
+            check.equal(gapWidth(), 0, "fullscreen hides the fallback");
+            document.getElementById("drag").classList.remove("fn__hidden");
+        } finally {
+            center.remove();
+            tabRows = [];
+            tabUtil.setTabPosition(true);
+        }
+    };
     const checkPanelFullscreen = async (platform: "windows" | "linux" | "mac", native = false) => {
         document.body.className = `body--${platform} body--toolbar-hide`;
         window.siyuan.config.system.os = platform === "mac" ? "darwin" : platform;
@@ -73,7 +143,6 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
         check.ok(document.getElementById("drag").classList.contains("fn__hidden"));
         check.equal(gap.getBoundingClientRect().width, 0, `${platform} hides the drag region during panel fullscreen`);
         let testPoint: {x: number; y: number};
-        const waitForPaint = () => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
         if (native) {
             const buttonRect = button.getBoundingClientRect();
             const x = (buttonRect.left + buttonRect.right) / 2;
@@ -116,6 +185,9 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
         await checkPanelFullscreen("windows");
         await checkPanelFullscreen("linux");
         await checkPanelFullscreen("mac");
+        await checkAdaptiveGap("windows");
+        await checkAdaptiveGap("linux");
+        await checkAdaptiveGap("mac");
         return "Window controls overlay cases passed";
     }
     const api = (navigator as Navigator & {windowControlsOverlay: import("./windowControlsOverlay").IWindowControlsOverlay}).windowControlsOverlay;
@@ -258,6 +330,7 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     overlay.updateWindowControlsOverlay();
     check.ok(container.getBoundingClientRect().width > 0);
     await checkPanelFullscreen("windows", true);
+    await checkAdaptiveGap("windows", true);
     const wide = document.createElement("div");
     wide.style.cssText = "width:2000px;flex-shrink:0";
     document.getElementById("toolbar").prepend(wide);
@@ -267,11 +340,11 @@ const browserCases = async (sources: string[], css: string, nativeEnabled = true
     return "Window controls overlay cases passed";
 };
 
-test("native Windows captions reserve geometry, preserve legacy controls and keep tooltips clear", {
+test("window captions, fused tab drag regions and tooltips keep their own hit areas", {
     skip: process.platform !== "win32", timeout: 90000,
 }, async () => {
     const sources = ["src/boot/windowControlsOverlay.ts", "src/boot/windowControls.ts", "src/dialog/tooltip.ts",
-        "src/util/color.ts", "src/protyle/breadcrumb/action.ts"].map(file =>
+        "src/util/color.ts", "src/protyle/breadcrumb/action.ts", "src/layout/tabUtil.ts"].map(file =>
         transpileModule(readFileSync(file, "utf8"), {compilerOptions: {
             module: ModuleKind.CommonJS, target: ScriptTarget.ES2021,
         }}).outputText);
@@ -345,7 +418,7 @@ app.whenReady().then(async()=>{
         await promisify(execFile)("powershell.exe", ["-NoProfile", "-NonInteractive", "-File", hitTestScript,
             "-Prepare", "-AssemblyPath", hitTestAssembly], {windowsHide: true, timeout: 45000});
         const result = await promisify(execFile)(require("electron") as unknown as string, [script],
-            {env, timeout: 40000, windowsHide: true});
+            {env, timeout: 55000, windowsHide: true});
         assert.match(result.stdout, /Window controls overlay cases passed/);
     } finally {
         if (path.dirname(path.resolve(temporary)) === path.resolve(tmpdir()) &&

@@ -338,12 +338,16 @@ body.body--harmony {
 }
 
 html[data-frontend="desktop"] {
-  .body--toolbar-hide.body--windows:not(.body--fullscreen) #toolbar > #drag:not(.fn__hidden) ~ .toolbar__window-gap,
-  .body--toolbar-hide.body--linux:not(.body--fullscreen) #toolbar > #drag:not(.fn__hidden) ~ .toolbar__window-gap,
-  .body--toolbar-hide.body--mac:not(.body--fullscreen) #toolbar > #drag:not(.fn__hidden) ~ .toolbar__window-gap {
-    display: block;
-    flex: 0 0 24px;
-    align-self: stretch;
+  .body--toolbar-hide:not(.body--fullscreen) {
+    &.body--windows,
+    &.body--linux,
+    &.body--mac {
+      #toolbar > #drag:not(.fn__hidden) ~ .toolbar__window-gap:not([data-tab-drag-available]) {
+        display: block;
+        flex: 0 0 24px;
+        align-self: stretch;
+      }
+    }
   }
 
   .body--mac #toolbar > .toolbar__window-gap {

@@ -547,7 +547,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On Windows, macOS, and Linux, when tabs are merged into the top bar, drag the gap beside the window controls to move the window. The gap is hidden while a feature is in full screen and returns when you exit full screen. On HarmonyOS devices that support freeform windows, the desktop layout shares its top bar with the native window buttons. In a restored window, drag the gap to the left of the native buttons to move the window."
+					"Data": "On Windows, macOS, and Linux, when tabs are merged into the top bar, drag the space to the right of the new tab button to move the window. If that space is too narrow, a drag area appears beside the window controls. The extra drag area is hidden in full screen. On HarmonyOS devices that support freeform windows, the desktop layout shares its top bar with the native window buttons. In a restored window, drag the gap to the left of the native buttons to move the window."
 				}
 			]
 		},

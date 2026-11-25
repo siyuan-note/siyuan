@@ -580,13 +580,16 @@ export class AgentChat extends Model {
         phrases.addEventListener("click", async () => {
             const id = this.sessionId;
             const {openAgentPhrases} = await import("../../../ai/actions");
-            openAgentPhrases(phrases, instruction => {
+            openAgentPhrases(phrases, (instruction, send) => {
                 if (this.sessionId !== id || !this.composer || this.editingComposer || this.composer.isUploading() ||
-                    this.startingSessionID || this.sessionViewChanging || !this.modelOptions.length ||
-                    (this.isCurrentSessionRunning() && !this.sessionRuns.get(id))) return;
+                    this.startingSessionID || this.sessionViewChanging) return;
                 this.composer.applyPhrase(instruction);
                 this.updateSendButtonState();
-                void this.sendMessage();
+                if (send) {
+                    void this.sendMessage();
+                } else {
+                    this.composer.focus(true);
+                }
             });
         });
         this.initPermissionMenu();

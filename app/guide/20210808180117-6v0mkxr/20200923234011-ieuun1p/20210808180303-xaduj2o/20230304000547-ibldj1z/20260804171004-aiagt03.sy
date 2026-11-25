@@ -616,7 +616,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Choose Quick phrases beside the input to send a phrase with the current draft. Agent Chat and AI Edit share custom actions. Use Manage to add, edit, or delete them. In a template, {{input}} stands for the draft."
+					"Data": "Open Quick phrases beside the input and choose a phrase to combine it with your draft. Review the result before sending. On desktop, Ctrl-click a phrase (Command-click on macOS) to send it immediately. Agent Chat and AI Edit share custom actions. Use Manage to add, edit, or delete them. In a template, {{input}} stands for the draft."
 				}
 			]
 		},

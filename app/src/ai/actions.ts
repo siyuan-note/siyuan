@@ -10,7 +10,7 @@ import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {upDownHint} from "../util/upDownHint";
 import {clearAIEditorHistory, startAIEditorAction} from "./editor";
-import {isDisabledFeature} from "../protyle/util/compatibility";
+import {isDisabledFeature, isOnlyMeta} from "../protyle/util/compatibility";
 import {bindOneTimeAction} from "./oneTimeAction";
 
 interface IAIEditorAction {
@@ -297,7 +297,7 @@ const openAIActions = (actions: IAIEditorAction[], elements: HTMLElement[], prot
     /// #endif
 };
 
-export const openAgentPhrases = (target: HTMLElement, run: (instruction: string) => void) => {
+export const openAgentPhrases = (target: HTMLElement, apply: (instruction: string, send: boolean) => void) => {
     const lang = window.siyuan.languages;
     void toggleMenu({target, build: (_menu, session) => {
         fetchPost("/api/ai/editor/lsActions", {}, response => {
@@ -306,8 +306,14 @@ export const openAgentPhrases = (target: HTMLElement, run: (instruction: string)
             const saved: IAIEditorAction[] = response.data || [];
             const builtins = [lang.aiContinueWrite, lang.aiTranslate, lang.aiExtractSummary, lang.aiPolish,
                 lang.aiBrainStorm, lang.aiFixGrammarSpell];
+            const mobile = isMobile();
             [...builtins.map(action => ({name: action, action})), ...saved].forEach(item => {
-                menu.addItem({iconHTML: "", label: escapeHtml(item.name || item.action), click: () => run(item.action || item.name)});
+                menu.addItem({
+                    iconHTML: "",
+                    label: escapeHtml(item.name || item.action),
+                    accelerator: mobile ? "" : "⌘" + lang.click,
+                    click: (_element, event) => apply(item.action || item.name, !mobile && isOnlyMeta(event)),
+                });
             });
             menu.addSeparator();
             menu.addItem({iconHTML: "", label: lang.manage, submenu: [

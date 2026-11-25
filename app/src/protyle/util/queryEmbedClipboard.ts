@@ -24,7 +24,8 @@ export const neutralizePastedJSEmbeds = (root: ParentNode, lute: Lute): boolean 
     let changed = false;
     root.querySelectorAll('[data-type="NodeBlockQueryEmbed"][data-content]').forEach(element => {
         const content = Lute.UnEscapeHTMLStr(element.getAttribute("data-content"));
-        if (!content.startsWith("//!js")) {
+        // Lute 渲染查询时会移除临时光标标记。
+        if (!content.replaceAll(Lute.Caret, "").trimStart().startsWith("//!js")) {
             return;
         }
         const template = document.createElement("template");

@@ -41,10 +41,13 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
         <div class="layout-tab-bar"><div class="item" data-id="main">Main</div>
         <div class="item item--focus" data-id="mirror">Mirror</div></div></div></div></div></div>`;
     const jsSource = "//!js\n// Notes < & >";
-    const jsHTML = html.replace('data-type="NodeParagraph" class="p" refcount="1"',
-        'data-type="NodeBlockQueryEmbed" class="render-node" data-content="' + Lute.EscapeHTMLStr(jsSource) + '"');
-    for (const mode of ["copy", "cut", "mixed", "error", "target removed", "view mirror", "js embed"]) {
-        const clipboardHTML = mode === "view mirror" ? mirrorHTML : mode === "js embed" ? jsHTML : html;
+    const sqlSource = "SELECT * FROM blocks";
+    const embedSources = new Map([["js embed", jsSource], ["js embed with caret", Lute.Caret + jsSource], ["sql embed", sqlSource]]);
+    for (const mode of ["copy", "cut", "mixed", "error", "target removed", "view mirror", ...embedSources.keys()]) {
+        const source = embedSources.get(mode);
+        const clipboardHTML = mode === "view mirror" ? mirrorHTML : source ?
+            html.replace('data-type="NodeParagraph" class="p" refcount="1"',
+                'data-type="NodeBlockQueryEmbed" class="render-node" data-content="' + Lute.EscapeHTMLStr(source) + '"') : html;
         const editor = document.createElement("div");
         editor.innerHTML = clipboardHTML + '<div data-node-id="20261007000002-abcdefg" data-type="NodeParagraph" class="p">' +
             '<div contenteditable="true">Target</div></div>';
@@ -127,9 +130,12 @@ const browserCases = async (sources: Record<string, string>, lutePath: string) =
                 check.notEqual(pasted.getAttribute("data-node-id"), originalID);
                 check.equal(pasted.getAttribute("custom-sy-av-visible-views"), "mirror");
                 check.deepEqual(Array.from(pasted.querySelectorAll(".layout-tab-bar .item"), tab => tab.getAttribute("data-id")), ["mirror"]);
-            } else if (mode === "js embed") {
+            } else if (mode === "sql embed") {
+                check.equal(pastedChild.getAttribute("data-type"), "NodeBlockQueryEmbed");
+                check.equal(Lute.UnEscapeHTMLStr(pastedChild.getAttribute("data-content")), sqlSource);
+            } else if (source) {
                 check.equal(pastedChild.getAttribute("data-type"), "NodeCodeBlock");
-                check.equal(pastedChild.querySelector('[contenteditable="true"]').textContent, jsSource);
+                check.equal(pastedChild.querySelector('[contenteditable="true"]').textContent, source);
             } else if (mode === "copy") {
                 check.notEqual(pasted.getAttribute("data-node-id"), originalID);
                 check.notEqual(pastedChild.getAttribute("data-node-id"), childID);

@@ -7,14 +7,96 @@ on:
       - '*-beta*'
       - '*-rc*'
   workflow_dispatch:
+    inputs:
+      startup_check:
+        description: Release or verify an existing build
+        type: choice
+        default: release
+        options:
+          - release
+          - windows
+          - windows-candidate
+          - macos
+          - linux
+          - android-capability
+      artifact_run_id:
+        description: Workflow run ID containing the installers for verification
+        type: string
+      artifact_version:
+        description: Version of the installers for verification
+        type: string
 
 env:
   package_json: "app/package.json"
   GOMODCACHE: ${{ github.workspace }}/go/pkg/mod
 
 jobs:
+  startup_candidate_prepare:
+    if: github.event_name == 'workflow_dispatch' && inputs.startup_check == 'windows-candidate'
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.package.outputs.version }}
+      packageManager: ${{ steps.package.outputs.packageManager }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: package
+        run: |
+          echo "version=$(jq -r .version app/package.json)" >> "$GITHUB_OUTPUT"
+          echo "packageManager=$(jq -r .packageManager app/package.json)" >> "$GITHUB_OUTPUT"
+
+  startup_candidate_build:
+    needs: startup_candidate_prepare
+    uses: ./.github/workflows/desktop-build.yml
+    with:
+      config: >-
+        {"os":"windows-2025","name":"Build Windows startup candidate","kernel_path":"../app/kernel/SiYuan-Kernel.exe","gobin":"bin","build_args_prefix":"-s -w -X","build_args_suffix":"Mode=prod","electron_args":"dist","goos":"windows","goarch":"amd64","suffix":"win.exe","e2e_shards":""}
+      packageManager: ${{ needs.startup_candidate_prepare.outputs.packageManager }}
+
+  startup_candidate_verify:
+    needs: [startup_candidate_prepare, startup_candidate_build]
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/desktop-startup.yml
+    with:
+      target: windows
+      version: ${{ needs.startup_candidate_prepare.outputs.version }}
+      artifact_run_id: ${{ github.run_id }}
+
+  startup_verify:
+    if: github.event_name == 'workflow_dispatch' && contains(fromJSON('["windows","macos","linux"]'), inputs.startup_check)
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/desktop-startup.yml
+    with:
+      target: ${{ inputs.startup_check }}
+      version: ${{ inputs.artifact_version }}
+      artifact_run_id: ${{ inputs.artifact_run_id }}
+
+  android_startup_capability:
+    if: github.event_name == 'workflow_dispatch' && inputs.startup_check == 'android-capability'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    steps:
+      - name: Inspect the ARM64 Android emulator environment
+        run: |
+          uname -m
+          command -v adb || true
+          test -c /dev/kvm && ls -l /dev/kvm || echo '/dev/kvm is unavailable'
+          for directory in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}"; do
+            if [ -x "$directory/emulator/emulator" ]; then
+              "$directory/emulator/emulator" -version
+              "$directory/emulator/emulator" -accel-check
+              exit
+            fi
+          done
+          echo 'The runner does not have an Android emulator installed'
+          exit 1
+
   prepare:
     name: Prepare
+    if: github.event_name != 'workflow_dispatch' || inputs.startup_check == 'release'
     runs-on: ubuntu-24.04
     outputs:
       release_title: ${{ steps.release_info.outputs.release_title }}

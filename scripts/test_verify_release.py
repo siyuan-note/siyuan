@@ -105,6 +105,41 @@ class WorkflowAssetsTests(unittest.TestCase):
             with self.assertRaisesRegex(release.VerificationError, "siyuan-3.9.0.apk"):
                 release.collect_workflow_assets(source, destination, "3.9.0")
 
+    def test_startup_results_must_match_every_required_asset(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            packages = [
+                {"name": f"siyuan-3.9.0{suffix}", "sha256": "a" * 64, "status": "PASS"}
+                for suffix in ("-linux.AppImage", "-linux.tar.gz", "-linux.rpm", "-mac.dmg")
+            ]
+            for index, (target, suffix) in enumerate((
+                ("windows", "-win.exe"), ("macos", "-mac-arm64.dmg"),
+                ("linux", "-linux.deb"), ("android", ".apk"),
+            )):
+                path = directory / f"startup-{target}" / f"{target}.json"
+                path.parent.mkdir()
+                name = f"siyuan-3.9.0{suffix}"
+                sha = str(index) * 64
+                packages.append({"name": name, "sha256": sha, "status": "PASS"})
+                path.write_text(json.dumps({"filename": name, "sha256": sha, "status": "PASS"}))
+            release.verify_startup_results(directory, packages, "3.9.0")
+            with self.assertRaisesRegex(release.VerificationError, "siyuan-3.9.0-linux.AppImage"):
+                release.verify_startup_results(directory, packages[1:], "3.9.0")
+            path.unlink()
+            with self.assertRaisesRegex(release.VerificationError, "android"):
+                release.verify_startup_results(directory, packages, "3.9.0")
+            for fields, expected in (
+                ({"status": "SKIP"}, "启动验收未通过"),
+                ({"filename": "siyuan-3.9.0-linux.deb"}, "安装包名称不匹配"),
+                ({"sha256": "9" * 64}, "摘要与待发布文件不一致"),
+            ):
+                with self.subTest(fields=fields):
+                    result = {"filename": name, "sha256": sha, "status": "PASS"}
+                    result.update(fields)
+                    path.write_text(json.dumps(result))
+                    with self.assertRaisesRegex(release.VerificationError, expected):
+                        release.verify_startup_results(directory, packages, "3.9.0")
+
 
 class ReleaseTests(unittest.TestCase):
     def setUp(self):

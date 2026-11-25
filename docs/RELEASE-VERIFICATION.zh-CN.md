@@ -62,6 +62,8 @@ git push origin v3.8.12-beta.1
 
 选择 `windows-candidate` 可从所选分支单独构建 Windows AMD64 安装包，再运行同一项安装启动验收。选择 `android-capability` 可检查托管 ARM64 runner 的模拟器和虚拟化环境，`android-translation` 则使用指定的官方 APK 检查 x64 模拟器的 ARM64 转译及 Activity 启动能力。
 
+收齐四项启动验收报告后，可以对产物运行 `verify-release.py check --startup-results <报告下载目录>`。报告按 Actions 产物名称保存在 `startup-windows`、`startup-macos`、`startup-linux` 和 `startup-android` 子目录中。校验要求八个发布文件的静态检查通过，并核对四份报告的文件名、状态和 SHA-256。
+
 ## 正式版发布步骤
 
 除明确注明的步骤外，以下命令均在官方 Windows 构建机器的仓库根目录 `D:\88250\siyuan` 执行。

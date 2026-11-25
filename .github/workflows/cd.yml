@@ -122,24 +122,26 @@ jobs:
           sudo udevadm trigger --name-match=kvm
           test -r /dev/kvm && test -w /dev/kvm
           image='system-images;android-30;google_apis;x86_64'
-          sdkmanager "$image"
-          printf 'no\n' | avdmanager create avd --name siyuan-translation --package "$image"
+          sdk_tools="$ANDROID_HOME/cmdline-tools/latest/bin"
+          sdk_adb="$ANDROID_HOME/platform-tools/adb"
+          "$sdk_tools/sdkmanager" --install emulator "$image"
+          printf 'no\n' | "$sdk_tools/avdmanager" create avd --name siyuan-translation --package "$image"
           "$ANDROID_HOME/emulator/emulator" -avd siyuan-translation -no-window -no-audio -no-snapshot -gpu swiftshader_indirect > emulator.log 2>&1 &
           emulator_pid=$!
-          trap 'timeout 10 adb logcat -d > android.log || true; kill "$emulator_pid" 2>/dev/null || true' EXIT
-          timeout 180 adb wait-for-device
+          trap 'timeout 10 "$sdk_adb" logcat -d > android.log || true; kill "$emulator_pid" 2>/dev/null || true' EXIT
+          timeout 180 "$sdk_adb" wait-for-device
           for attempt in {1..60}; do
-            boot=$(adb shell getprop sys.boot_completed | tr -d '\r')
+            boot=$("$sdk_adb" shell getprop sys.boot_completed | tr -d '\r')
             if [ "$boot" = 1 ]; then break; fi
             sleep 2
           done
           test "$boot" = 1
-          adb shell getprop ro.product.cpu.abilist | tee android-abis.txt
+          "$sdk_adb" shell getprop ro.product.cpu.abilist | tee android-abis.txt
           grep -Eq '(^|,)arm64-v8a(,|[[:space:]]|$)' android-abis.txt
-          adb install "$apk"
-          timeout 45 adb shell am start -W -n org.b3log.siyuan/.BootActivity | tee android-launch.txt
+          "$sdk_adb" install "$apk"
+          timeout 45 "$sdk_adb" shell am start -W -n org.b3log.siyuan/.BootActivity | tee android-launch.txt
           grep -Fqx 'Status: ok' <(tr -d '\r' < android-launch.txt)
-          adb shell pidof org.b3log.siyuan
+          "$sdk_adb" shell pidof org.b3log.siyuan
       - name: Upload emulator diagnostics
         if: always()
         uses: actions/upload-artifact@v7

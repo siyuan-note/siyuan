@@ -56,6 +56,12 @@ git push origin v3.8.12-beta.1
 - 若构建或上传失败，先检查失败步骤和已有 Release 状态；修复环境问题后可重跑失败任务，涉及源代码或版本调整时使用新的预发布版本和标签
 - 工作流上传时会覆盖同名资产，不同时手动上传，也不提前公开草稿；已有 Release 被公开时，草稿检查会阻止后续自动上传
 
+### 手动验证现有工作流产物
+
+在 `CD For SiYuan` 的手动启动表单中选择 `windows`、`macos`、`linux` 或 `static`，填写构建的 Actions 运行 ID 和安装包版本号。桌面任务分别静默安装 Windows AMD64 安装包、挂载并部署 Apple Silicon DMG、通过包管理器安装 Linux AMD64 deb。应用启动后，验收等待可见主界面的前端就绪信号，并上传日志及安装包的 SHA-256。选择 `static` 可对同一次构建的八个发布资产运行包内静态校验。
+
+选择 `windows-candidate` 可从所选分支单独构建 Windows AMD64 安装包，再运行同一项安装启动验收。选择 `android-capability` 可检查托管 ARM64 runner 的模拟器和虚拟化环境，`android-translation` 则使用指定的官方 APK 检查 x64 模拟器的 ARM64 转译及 Activity 启动能力。
+
 ## 正式版发布步骤
 
 除明确注明的步骤外，以下命令均在官方 Windows 构建机器的仓库根目录 `D:\88250\siyuan` 执行。

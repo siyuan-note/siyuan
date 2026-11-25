@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "สลับ",
+	"mobileWorkspaceSwitchTitle": "สลับไปที่ “${x}” หรือไม่",
+	"mobileWorkspaceSwitchTip": "แอปจะปิดลง โปรดเปิดแอปอีกครั้งด้วยตนเอง",
 	"agentQuoteAdded": "เพิ่มข้อความอ้างอิงในแชตกับเอเจนต์แล้ว (${count} รายการ)",
 	"saveToGallery": "บันทึกลงในแกลเลอรี",
 	"bazaarUpdateDate": "วันที่อัปเดต",

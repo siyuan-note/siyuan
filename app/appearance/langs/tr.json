@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "Geç",
+	"mobileWorkspaceSwitchTitle": "“${x}” çalışma alanına geçilsin mi?",
+	"mobileWorkspaceSwitchTip": "Uygulama kapanacak. Lütfen uygulamayı kendiniz yeniden açın",
 	"agentQuoteAdded": "Aracı sohbetine alıntı eklendi (${count})",
 	"saveToGallery": "Galeriye kaydet",
 	"bazaarUpdateDate": "Güncelleme tarihi",

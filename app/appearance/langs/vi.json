@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "Chuyển",
+	"mobileWorkspaceSwitchTitle": "Chuyển sang “${x}”?",
+	"mobileWorkspaceSwitchTip": "Ứng dụng sẽ đóng. Hãy tự mở lại ứng dụng",
 	"agentQuoteAdded": "Đã thêm trích dẫn vào cuộc trò chuyện với tác nhân (${count})",
 	"saveToGallery": "Lưu vào thư viện ảnh",
 	"bazaarUpdateDate": "Ngày cập nhật",

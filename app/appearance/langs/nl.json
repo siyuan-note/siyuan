@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "Wisselen",
+	"mobileWorkspaceSwitchTitle": "Wisselen naar ‘${x}’?",
+	"mobileWorkspaceSwitchTip": "De app wordt gesloten. Open de app daarna zelf opnieuw",
 	"agentQuoteAdded": "Citaat aan agentchat toegevoegd (${count})",
 	"saveToGallery": "Opslaan in galerij",
 	"bazaarUpdateDate": "Bijgewerkt op",

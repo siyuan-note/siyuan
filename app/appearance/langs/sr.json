@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "Prebaci",
+	"mobileWorkspaceSwitchTitle": "Prebaciti se na „${x}“?",
+	"mobileWorkspaceSwitchTip": "Aplikacija će se zatvoriti. Ponovo je otvorite ručno",
 	"agentQuoteAdded": "Цитат је додат у разговор са агентом (${count})",
 	"saveToGallery": "Сачувај у галерију",
 	"bazaarUpdateDate": "Datum ažuriranja",

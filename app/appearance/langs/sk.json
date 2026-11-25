@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "Prepnúť",
+	"mobileWorkspaceSwitchTitle": "Prepnúť na „${x}“?",
+	"mobileWorkspaceSwitchTip": "Aplikácia sa zatvorí. Otvorte ju znova ručne",
 	"agentQuoteAdded": "Citát bol pridaný do chatu s agentom (${count})",
 	"saveToGallery": "Uložiť do galérie",
 	"bazaarUpdateDate": "Dátum aktualizácie",

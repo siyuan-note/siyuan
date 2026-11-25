@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "Beralih",
+	"mobileWorkspaceSwitchTitle": "Beralih ke “${x}”?",
+	"mobileWorkspaceSwitchTip": "Aplikasi akan ditutup. Silakan buka kembali secara manual",
 	"agentQuoteAdded": "Kutipan ditambahkan ke percakapan agen (${count})",
 	"saveToGallery": "Simpan ke Galeri",
 	"bazaarUpdateDate": "Tanggal Pembaruan",

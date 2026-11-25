@@ -252,7 +252,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "On mobile, switch workspaces in "
+									"Data": "On mobile, select a workspace in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -266,29 +266,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Settings"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "App"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Workspaces"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ""
+									"Data": " and confirm the switch. Reopen the app to enter the selected workspace. To open, create, or remove a workspace, tap "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Manage"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the same group"
 								}
 							]
 						}

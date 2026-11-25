@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "מעבר",
+	"mobileWorkspaceSwitchTitle": "לעבור אל ״${x}״?",
+	"mobileWorkspaceSwitchTip": "היישום ייסגר. יש לפתוח אותו מחדש באופן ידני",
 	"agentQuoteAdded": "הציטוט נוסף לצ׳אט עם הסוכן (${count})",
 	"saveToGallery": "שמירה בגלריה",
 	"bazaarUpdateDate": "תאריך עדכון",

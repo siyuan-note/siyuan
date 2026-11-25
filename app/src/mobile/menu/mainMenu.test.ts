@@ -4,7 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, transpileModule} from "typescript";
 
-test("mobile main menus omit the standalone Markdown entry even when native bridges are available", () => {
+test("native mobile menus list workspaces before navigation and omit the standalone Markdown entry", () => {
     const compiled = transpileModule(readFileSync("src/mobile/menu/mainMenu.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS},
     }).outputText;
@@ -28,9 +28,14 @@ test("mobile main menus omit the standalone Markdown entry even when native brid
                 getHostCapabilities: () => ({importExport: true}),
                 getSettingTabDefs: (): never[] => [],
                 escapeAttr: (value: string) => value,
+                canManageMobileWorkspaces: () => Object.keys(host).length > 0,
             }),
         });
         const html = exports.renderMobileMainMenuHTML();
+        assert.deepEqual([...html.matchAll(/data-menu-group="([^"]+)"/g)].slice(0, 2).map(match => match[1]),
+            ["workspaces", "navigation"]);
+        assert.equal(html.includes('class="b3-menu__group fn__none" data-menu-group="workspaces"'), !Object.keys(host).length);
+        assert.match(html, /id="menuManageWorkspaces"/);
         assert.doesNotMatch(html, /menuMarkdownEditor/);
         assert.equal(exports.getMobileMainMenuHandler("menuMarkdownEditor"), undefined);
         for (const id of ["menuTemplateManager", "menuCard", "menuCommand", "menuSafeQuit"]) {

@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "Basculer",
+	"mobileWorkspaceSwitchTitle": "Basculer vers « ${x} » ?",
+	"mobileWorkspaceSwitchTip": "L’application va se fermer. Rouvrez-la manuellement",
 	"agentQuoteAdded": "Citation ajoutée à la conversation avec l’agent (${count})",
 	"saveToGallery": "Enregistrer dans la galerie",
 	"bazaarUpdateDate": "Date de mise à jour",

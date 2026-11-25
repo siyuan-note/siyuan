@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "تبديل",
+	"mobileWorkspaceSwitchTitle": "هل تريد التبديل إلى «${x}»؟",
+	"mobileWorkspaceSwitchTip": "سيُغلق التطبيق. يُرجى فتحه مجددًا يدويًا",
 	"agentQuoteAdded": "أُضيف الاقتباس إلى محادثة الوكيل (${count})",
 	"saveToGallery": "حفظ في المعرض",
 	"bazaarUpdateDate": "تاريخ التحديث",

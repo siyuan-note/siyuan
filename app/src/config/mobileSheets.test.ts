@@ -12,7 +12,7 @@ const sourceFiles = (directory: string): string[] => readdirSync(directory, {wit
 test("settings and sync route every confirmation through the shared adapter", () => {
     const original: string[] = [];
     let adapters = 0;
-    for (const file of [...sourceFiles("src/config"), ...sourceFiles("src/sync")]) {
+    for (const file of [...sourceFiles("src/config"), ...sourceFiles("src/sync"), "src/mobile/menu/workspaceManager.ts"]) {
         const source = createSourceFile(file, readFileSync(file, "utf8"), ScriptTarget.Latest, true);
         const visit = (node: Node) => {
             if (isCallExpression(node) || isNewExpression(node)) {

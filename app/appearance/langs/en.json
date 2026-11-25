@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "Switch",
+	"mobileWorkspaceSwitchTitle": "Switch to “${x}”?",
+	"mobileWorkspaceSwitchTip": "The app will close. Please reopen it manually",
 	"agentQuoteAdded": "Quote added to Agent Chat (${count})",
 	"saveToGallery": "Save to Gallery",
 	"bazaarUpdateDate": "Update date",

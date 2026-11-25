@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "切换",
+	"mobileWorkspaceSwitchTitle": "切换到「${x}」？",
+	"mobileWorkspaceSwitchTip": "应用会关闭，请手动重新打开",
 	"agentQuoteAdded": "已引用到智能体（${count} 条）",
 	"saveToGallery": "保存到相册",
 	"bazaarUpdateDate": "更新日期",

@@ -34,6 +34,7 @@ const getAccessibilitySlot = (browser: boolean, mobile: boolean, invoke?: Invoke
             if (name === "../../constants") {
                 return {Constants: {SIYUAN_GET: "siyuan-get"}};
             }
+            if (name === "../../mobile/menu/workspaceManager") return {canManageMobileWorkspaces: () => false};
             if (name === "../../util/hostCapabilities") {
                 return {getHostCapabilities: () => ({importExport: false, workspaces: false})};
             }
@@ -217,70 +218,4 @@ test("save failures restore the previous choice and allow retry", async () => {
     assert.equal(view.input.checked, false);
     assert.equal(view.input.disabled, false);
     assert.equal(view.status.textContent, "accessibilitySupportError");
-});
-
-test("mobile workspace deletion awaits success and keeps list-only cancellation separate", async () => {
-    const source = readFileSync(resolve(process.cwd(), "src/config/tabs/appTab.ts"), "utf8");
-    const code = transpileModule(parse(source, {BROWSER: false, MOBILE: true}, false, true), {
-        compilerOptions: {module: ModuleKind.CommonJS},
-    }).outputText;
-    let slot: Slot;
-    let click: (event: unknown) => void;
-    let confirmation: {confirm: () => Promise<boolean>, cancel: () => void};
-    let complete: (response: {code: number}) => void;
-    let reads = 0;
-    const requests: Array<{url: string; path: string}> = [];
-    const current = "/temporary/current";
-    const target = "/temporary/disposable";
-    const exports: {registerAppTab?: (tab: unknown) => void} = {};
-    runInNewContext(code, {exports, process: {platform: "android"},
-        window: {siyuan: {config: {system: {workspaceDir: current, isMicrosoftStore: true}},
-            languages: {removeWorkspacePhysically: "Delete ${x}"}}},
-        require: (name: string) => {
-            if (name === "../../protyle/util/compatibility") return {isInMobileApp: () => true};
-            if (name === "../../util/hostCapabilities") return {getHostCapabilities: () => ({workspaces: true})};
-            if (name === "../../util/escape") return {escapeAttr: (value: string) => value, escapeHtml: (value: string) => value};
-            if (name === "../../dialog/confirmDialog") return {
-                confirmDialog: (options: typeof confirmation) => { confirmation = options; },
-            };
-            if (name === "../../util/fetch") return {
-                fetchPost: (url: string, data: {path: string}, callback?: (response: unknown) => void) => {
-                    if (url.endsWith("getWorkspaces")) { reads++; callback?.({data: []}); }
-                    else { requests.push({url, path: data.path}); callback?.({code: 0}); }
-                },
-                fetchSyncPost: (url: string, data: {path: string}) => {
-                    requests.push({url, path: data.path});
-                    return new Promise(resolve => { complete = resolve; });
-                },
-            };
-            return new Proxy({}, {get: () => () => ""});
-        },
-    });
-    const group = new Proxy({}, {get: (_, method) => (value: Slot) => {
-        if (method === "slot" && value.key === "workspaceList") slot = value;
-    }});
-    exports.registerAppTab({group: () => group});
-    const list = {innerHTML: ""};
-    await slot.afterMount({querySelector: () => list, addEventListener: (_: string, listener: typeof click) => { click = listener; }});
-    const remove = (path: string) => click({target: {id: "", getAttribute: () => "remove",
-        parentElement: {getAttribute: () => path}}, preventDefault() {}, stopPropagation() {}});
-    remove(target);
-    const confirm = confirmation.confirm;
-    const cancel = confirmation.cancel;
-    const failed = confirm();
-    assert.equal(reads, 1);
-    complete({code: -1});
-    assert.equal(await failed, false);
-    assert.equal(reads, 1);
-    const retry = confirm();
-    complete({code: 0});
-    assert.equal(await retry, true);
-    assert.equal(reads, 2);
-    cancel();
-    assert.equal(requests.at(-1).url, "/api/system/removeWorkspaceDir");
-    assert.equal(requests.at(-1).path, target);
-    assert.equal(requests.filter(item => item.url.endsWith("removeWorkspaceDirPhysically")).length, 2);
-    remove(current);
-    assert.equal(requests.at(-1).url, "/api/system/removeWorkspaceDir");
-    assert.equal(requests.at(-1).path, current);
 });

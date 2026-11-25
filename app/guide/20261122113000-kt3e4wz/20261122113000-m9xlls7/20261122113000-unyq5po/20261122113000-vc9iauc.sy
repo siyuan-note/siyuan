@@ -252,7 +252,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "На мобильных устройствах переключаться между рабочими пространствами можно в разделе "
+									"Data": "В мобильном приложении выберите рабочее пространство в разделе "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -266,29 +266,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Настройки"
+									"TextMarkTextContent": "Рабочие пространства"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
+									"Data": " и подтвердите переключение. Откройте приложение снова, чтобы войти в выбранное пространство. Чтобы открыть, создать или удалить рабочее пространство, нажмите "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Приложение"
+									"TextMarkTextContent": "Управлять"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Рабочее пространство"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ""
+									"Data": " в той же группе"
 								}
 							]
 						}

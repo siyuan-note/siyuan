@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "बदलें",
+	"mobileWorkspaceSwitchTitle": "क्या आप “${x}” पर जाना चाहते हैं?",
+	"mobileWorkspaceSwitchTip": "ऐप बंद हो जाएगा। कृपया इसे फिर से स्वयं खोलें",
 	"agentQuoteAdded": "एजेंट चैट में उद्धरण जोड़ा गया (${count})",
 	"saveToGallery": "गैलरी में सहेजें",
 	"bazaarUpdateDate": "अपडेट की तारीख",

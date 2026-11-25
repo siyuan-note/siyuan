@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "切り替える",
+	"mobileWorkspaceSwitchTitle": "「${x}」に切り替えますか？",
+	"mobileWorkspaceSwitchTip": "アプリが終了します。手動で開き直してください",
 	"agentQuoteAdded": "エージェントのチャットに引用を追加しました（${count} 件）",
 	"saveToGallery": "ギャラリーに保存",
 	"bazaarUpdateDate": "更新日",

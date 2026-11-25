@@ -16,7 +16,15 @@ const browserCases = async ({css, modules, languages}) => {
     const style = document.createElement("style");
     style.textContent = css;
     document.head.append(style);
-    window.siyuan = {languages, config: {readonly: false, lang: "en_US"}, storage: {collapsed: ["settings"]}};
+    const workspaceDir = "/workspaces/Current";
+    const workspaceTarget = "/workspaces/Next";
+    window.siyuan = {
+        languages,
+        config: {readonly: false, lang: "en_US", system: {workspaceDir}},
+        storage: {collapsed: ["settings"]},
+        mobile: {},
+        zIndex: 100,
+    };
     const unexpectedMarkdownOpen = () => { throw new Error("The main menu must not launch the Markdown editor"); };
     window.JSAndroid = {openMarkdownEditor: unexpectedMarkdownOpen};
     window.JSHarmony = {openMarkdownEditor: unexpectedMarkdownOpen};
@@ -24,12 +32,37 @@ const browserCases = async ({css, modules, languages}) => {
     let blurs = 0;
     let mounts = 0;
     let unmounts = 0;
+    let native = false;
+    let workspacePrompt;
+    let workspaceManager;
+    const workspaceSwitches = [];
     const dependencies = {
         Constants: {LOCAL_MOBILE_MENU_COLLAPSED: "collapsed"},
+        MOBILE_MENU_CLOSE_EVENT: "siyuan-mobile-menu-close",
+        MOBILE_PLUGIN_DOCKS_CHANGE_EVENT: "siyuan-mobile-plugin-docks-change",
         setStorageVal() {},
         isDisabledFeature: () => false,
-        isInMobileApp: () => false,
-        getHostCapabilities: () => ({importExport: true}),
+        isInMobileApp: () => native,
+        getHostCapabilities: () => ({importExport: true, workspaces: true}),
+        getCurrentEditor: () => undefined,
+        getMobilePluginDockEntries: () => [],
+        closePanel() {},
+        processSync() {},
+        afterLayoutReady() {},
+        pathPosix: () => require("node:path").posix,
+        fetchPost(url, _body, callback) {
+            check.equal(url, "/api/system/getWorkspaces");
+            callback({data: [{path: workspaceDir}, {path: workspaceTarget}]});
+        },
+        confirmDialog(options) { workspacePrompt = options; },
+        async switchWorkspace(target) { workspaceSwitches.push(target); },
+        AdaptiveDialog: class {
+            constructor(options) {
+                workspaceManager = options;
+                this.element = document.createElement("div");
+                this.element.innerHTML = options.content;
+            }
+        },
         getSettingTabDefs: () => [{id: "editor", title: "Editor", icon: "iconEdit"}],
         settingTabToMenuId: id => `menu-${id}`,
         bindSettingSaveDelegation() {},
@@ -151,6 +184,28 @@ const browserCases = async ({css, modules, languages}) => {
         }
     }
     check.ok(mounts > 0 && unmounts >= mounts);
+
+    native = true;
+    document.body.innerHTML = '<div id="menu" class="b3-menu b3-menu--fullscreen" style="width:320px"></div>';
+    const menu = document.getElementById("menu");
+    dependencies.initRightMenu({});
+    dependencies.popMenu();
+    const [workspaces, navigation] = menu.querySelectorAll("[data-menu-group]");
+    check.equal(workspaces.dataset.menuGroup, "workspaces");
+    check.equal(navigation.dataset.menuGroup, "navigation");
+    check.ok(visible(workspaces));
+    check.ok(workspaces.scrollWidth <= workspaces.clientWidth);
+    check.equal(workspaces.querySelector('[aria-current="true"]').textContent.trim(), "Current");
+    const target = workspaces.querySelector("[data-workspace-path]");
+    check.equal(target.dataset.workspacePath, workspaceTarget);
+    target.click();
+    check.equal(workspacePrompt.title, languages.mobileWorkspaceSwitchTitle.replace("${x}", "Next"));
+    check.deepEqual(workspaceSwitches, []);
+    await workspacePrompt.confirm();
+    check.deepEqual(workspaceSwitches, [workspaceTarget]);
+    workspaces.querySelector("#menuManageWorkspaces").click();
+    check.equal(workspaceManager.title, languages.workspaceList);
+    check.match(workspaceManager.content, /data-workspace-list/);
     return "Mobile main menu search cases passed";
 };
 
@@ -165,8 +220,9 @@ if (process.versions.electron && process.type === "browser") {
                 logger: sass.Logger.silent,
             }).css;
             const modules = ["util/escape.ts", "config/search/normalize.ts", "mobile/menu/searchFilter.ts",
-                "mobile/dock/mobileFilterInput.ts", "mobile/menu/mainMenuCollapse.ts", "mobile/menu/mainMenu.ts",
-                "mobile/menu/mainMenuSearch.ts"].map(compile);
+                "mobile/dock/mobileFilterInput.ts", "mobile/menu/mainMenuCollapse.ts", "mobile/menu/workspaceManager.ts",
+                "mobile/menu/workspaceMenu.ts", "mobile/menu/mainMenu.ts", "mobile/menu/mainMenuSearch.ts",
+                "mobile/menu/index.ts"].map(compile);
             const languages = JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs/en.json"), "utf8"));
             for (const theme of ["daylight", "midnight"]) {
                 await win.loadURL("data:text/html,<html><body></body></html>");
@@ -188,7 +244,7 @@ if (process.versions.electron && process.type === "browser") {
         app.exit(1);
     });
 } else {
-    test("mobile main menu search preserves dimensions, filters and keyboard lifecycle", {
+    test("mobile main menu preserves search behavior and opens workspace switching and management from the first group", {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 120000,
     }, async () => {

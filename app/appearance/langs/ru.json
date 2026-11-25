@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "Переключиться",
+	"mobileWorkspaceSwitchTitle": "Переключиться на «${x}»?",
+	"mobileWorkspaceSwitchTip": "Приложение закроется. Откройте его снова вручную",
 	"agentQuoteAdded": "Цитата добавлена в чат с агентом (${count})",
 	"saveToGallery": "Сохранить в галерею",
 	"bazaarUpdateDate": "Дата обновления",

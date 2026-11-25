@@ -1,4 +1,7 @@
 {
+	"mobileWorkspaceSwitch": "Cambiar",
+	"mobileWorkspaceSwitchTitle": "¿Cambiar a «${x}»?",
+	"mobileWorkspaceSwitchTip": "La aplicación se cerrará. Vuelve a abrirla manualmente",
 	"agentQuoteAdded": "Cita añadida al chat del agente (${count})",
 	"saveToGallery": "Guardar en la galería",
 	"bazaarUpdateDate": "Fecha de actualización",

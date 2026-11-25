@@ -12,8 +12,11 @@ import {escapeAttr, escapeHtml} from "../../util/escape";
 import {processSync} from "../../dialog/processSystem";
 import {afterLayoutReady} from "../../plugin/loader";
 import {syncMainMenuGroupCollapse, toggleMainMenuGroup} from "./mainMenuCollapse";
+import {mountMobileWorkspaceMenu} from "./workspaceMenu";
+import {confirmMobileWorkspaceSwitch, openMobileWorkspaceManager} from "./workspaceManager";
 
 let mobileMenuReturnCallback: (() => void) | undefined;
+let refreshWorkspaceMenu: (() => void) | undefined;
 
 const takeMobileMenuReturnCallback = () => {
     const callback = mobileMenuReturnCallback;
@@ -49,6 +52,7 @@ export const popMenu = () => {
     const menuElement = document.getElementById("menu");
     menuElement.style.zIndex = (++window.siyuan.zIndex).toString();
     menuElement.style.transform = "translateX(0px)";
+    refreshWorkspaceMenu?.();
 };
 
 /** 重新生成插件停靠栏条目，由 `#menuPluginDocks` 占位元素定位 */
@@ -75,6 +79,14 @@ const dispatchMobileMainMenuClick = (app: App, target: HTMLElement, search: IMai
     }
     if (target.dataset.type === "close-menu") {
         closePanel();
+        return "handled";
+    }
+    if (target.id === "menuManageWorkspaces") {
+        openMobileWorkspaceManager(refreshWorkspaceMenu);
+        return "handled";
+    }
+    if (target.dataset.workspacePath) {
+        confirmMobileWorkspaceSwitch(target.dataset.workspacePath);
         return "handled";
     }
     const settingTabDef = getSettingTabFromMenuTarget(target);
@@ -112,6 +124,11 @@ export const initRightMenu = (app: App) => {
         renderMobilePluginDockMenu(app, menuElement);
     });
     const search = createMainMenuSearch(app, menuElement);
+    refreshWorkspaceMenu = mountMobileWorkspaceMenu(menuElement, () => {
+        if (search.keywords()) {
+            search.sync();
+        }
+    });
     menuElement.addEventListener(MOBILE_MENU_CLOSE_EVENT, (event: CustomEvent<{preserveKeyboard?: boolean}>) => {
         search.reset(event.detail?.preserveKeyboard);
         const callback = takeMobileMenuReturnCallback();

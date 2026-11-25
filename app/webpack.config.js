@@ -1,4 +1,5 @@
 const path = require("path");
+const ChunkScopePlugin = require("./scripts/chunk-scope");
 const PreserveWatchAssetsPlugin = require("./scripts/preserve-watch-assets");
 const webpack = require("webpack");
 const pkg = require("./package.json");
@@ -142,6 +143,7 @@ module.exports = (env, argv) => {
         },
         plugins: [
             new PreserveWatchAssetsPlugin(),
+            new ChunkScopePlugin(),
             new webpack.DefinePlugin({
                 SIYUAN_VERSION: JSON.stringify(pkg.version),
                 NODE_ENV: JSON.stringify(argv.mode),

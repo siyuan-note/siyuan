@@ -77,6 +77,35 @@ class SevenZipTests(unittest.TestCase):
             self.assertEqual(run.call_count, 1)
 
 
+class WorkflowAssetsTests(unittest.TestCase):
+    def test_expected_files_are_collected_and_a_missing_asset_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / "artifacts"
+            destination = Path(temporary) / "release"
+            destination.mkdir()
+            names = (
+                ("siyuan-linux", "siyuan-3.9.0-linux.AppImage"),
+                ("siyuan-linux", "siyuan-3.9.0-linux.tar.gz"),
+                ("siyuan-linux", "siyuan-3.9.0-linux.deb"),
+                ("siyuan-linux", "siyuan-3.9.0-linux.rpm"),
+                ("siyuan-mac.dmg", "siyuan-3.9.0-mac.dmg"),
+                ("siyuan-mac-arm64.dmg", "siyuan-3.9.0-mac-arm64.dmg"),
+                ("siyuan-win.exe", "siyuan-3.9.0-win.exe"),
+                ("siyuan-android", "siyuan-3.9.0.apk"),
+            )
+            for group, name in names:
+                directory = source / group
+                directory.mkdir(parents=True, exist_ok=True)
+                (directory / name).write_bytes(name.encode("ascii"))
+            release.collect_workflow_assets(source, destination, "3.9.0")
+            self.assertEqual({path.name for path in destination.iterdir()}, {name for _, name in names})
+            for _, name in names:
+                self.assertEqual((destination / name).read_bytes(), name.encode("ascii"))
+            (source / names[-1][0] / names[-1][1]).write_bytes(b"")
+            with self.assertRaisesRegex(release.VerificationError, "siyuan-3.9.0.apk"):
+                release.collect_workflow_assets(source, destination, "3.9.0")
+
+
 class ReleaseTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

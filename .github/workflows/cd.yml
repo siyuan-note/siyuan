@@ -19,6 +19,8 @@ on:
           - macos
           - linux
           - android-capability
+          - android-translation
+          - static
       artifact_run_id:
         description: Workflow run ID containing the installers for verification
         type: string
@@ -93,6 +95,96 @@ jobs:
           done
           echo 'The runner does not have an Android emulator installed'
           exit 1
+
+  android_startup_translation:
+    if: github.event_name == 'workflow_dispatch' && inputs.startup_check == 'android-translation'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.artifact_run_id }}
+          name: siyuan-android
+          path: installers
+      - name: Probe the official ARM64 APK on the x64 Google APIs image
+        env:
+          VERSION: ${{ inputs.artifact_version }}
+        run: |
+          set -euo pipefail
+          apk="installers/siyuan-$VERSION.apk"
+          test -s "$apk"
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-siyuan-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          test -r /dev/kvm && test -w /dev/kvm
+          image='system-images;android-30;google_apis;x86_64'
+          sdkmanager "$image"
+          printf 'no\n' | avdmanager create avd --name siyuan-translation --package "$image"
+          "$ANDROID_HOME/emulator/emulator" -avd siyuan-translation -no-window -no-audio -no-snapshot -gpu swiftshader_indirect > emulator.log 2>&1 &
+          emulator_pid=$!
+          trap 'timeout 10 adb logcat -d > android.log || true; kill "$emulator_pid" 2>/dev/null || true' EXIT
+          timeout 180 adb wait-for-device
+          for attempt in {1..60}; do
+            boot=$(adb shell getprop sys.boot_completed | tr -d '\r')
+            if [ "$boot" = 1 ]; then break; fi
+            sleep 2
+          done
+          test "$boot" = 1
+          adb shell getprop ro.product.cpu.abilist | tee android-abis.txt
+          grep -Eq '(^|,)arm64-v8a(,|[[:space:]]|$)' android-abis.txt
+          adb install "$apk"
+          timeout 45 adb shell am start -W -n org.b3log.siyuan/.BootActivity | tee android-launch.txt
+          grep -Fqx 'Status: ok' <(tr -d '\r' < android-launch.txt)
+          adb shell pidof org.b3log.siyuan
+      - name: Upload emulator diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-translation-diagnostics
+          path: |
+            emulator.log
+            android.log
+            android-abis.txt
+            android-launch.txt
+
+  startup_static:
+    if: github.event_name == 'workflow_dispatch' && inputs.startup_check == 'static'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v8
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.artifact_run_id }}
+          pattern: "siyuan-{linux,mac.dmg,mac-arm64.dmg,win.exe,android}"
+          path: installers
+      - name: Install 7-Zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y 7zip
+      - name: Verify the eight release assets
+        env:
+          VERSION: ${{ inputs.artifact_version }}
+        run: python scripts/verify-release.py check installers --workflow-artifacts --version "$VERSION" --report static-verification.json
+      - name: Upload package verification report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: startup-static
+          path: static-verification.json
 
   prepare:
     name: Prepare

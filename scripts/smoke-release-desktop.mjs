@@ -58,7 +58,7 @@ async function findPort() {
     return port;
 }
 
-export function inspectStartup(endpoint) {
+function devToolsRequest(endpoint, method, params) {
     return new Promise((resolve, reject) => {
         const socket = new WebSocket(endpoint);
         const timer = setTimeout(() => finish(new Error("DevTools response timed out")), 2500);
@@ -70,20 +70,25 @@ export function inspectStartup(endpoint) {
         }
         socket.addEventListener("open", () => socket.send(JSON.stringify({
             id: 1,
-            method: "Runtime.evaluate",
-            params: {returnByValue: true, expression: `({
-                state: document.documentElement?.dataset.startupState,
-                visible: document.visibilityState === "visible",
-                detail: document.querySelector(".startup-error__details")?.textContent
-            })`},
+            method,
+            params,
         })), {once: true});
         socket.addEventListener("message", event => {
             const response = JSON.parse(event.data);
-            if (response.id === 1) finish(null, response.result?.result?.value);
+            if (response.id === 1) finish(response.error && new Error(response.error.message), response.result);
         });
         socket.addEventListener("error", () => finish(new Error("DevTools connection failed")), {once: true});
         socket.addEventListener("close", () => finish(new Error("DevTools connection closed")), {once: true});
     });
+}
+
+async function inspectStartup(endpoint) {
+    const result = await devToolsRequest(endpoint, "Runtime.evaluate", {returnByValue: true, expression: `({
+        state: document.documentElement?.dataset.startupState,
+        visible: document.visibilityState === "visible",
+        detail: document.querySelector(".startup-error__details")?.textContent
+    })`});
+    return result?.result?.value;
 }
 
 export async function waitForStartup({port, failure, timeout = 120000, interval = 500, inspect = inspectStartup}) {
@@ -149,11 +154,25 @@ async function main() {
     app.stderr.pipe(log, {end: false});
     const failure = () => launchError || ((app.exitCode !== null || app.signalCode !== null)
         ? new Error(`Application exited before startup: ${app.exitCode ?? app.signalCode}`) : undefined);
+    let mainPage;
     try {
-        await waitForStartup({port, failure});
+        await waitForStartup({port, failure, inspect: endpoint => {
+            mainPage = endpoint;
+            return inspectStartup(endpoint);
+        }});
         if (await digest(asset) !== sha256) throw new Error("Installer changed during startup verification");
         await writeFile(path.join(results, `${target}.json`), JSON.stringify({filename, sha256, status: "PASS"}) + "\n", {flag: "wx"});
         console.log(`Main window ready for ${filename}`);
+    } catch (error) {
+        if (mainPage) {
+            try {
+                const screenshot = await devToolsRequest(mainPage, "Page.captureScreenshot", {format: "png"});
+                await writeFile(path.join(results, "startup-failure.png"), Buffer.from(screenshot.data, "base64"));
+            } catch {
+                // 页面或进程已经退出时，保留原始启动错误和日志。
+            }
+        }
+        throw error;
     } finally {
         if (app.pid && app.exitCode === null && app.signalCode === null) {
             try {

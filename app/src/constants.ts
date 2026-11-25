@@ -389,6 +389,7 @@ export abstract class Constants {
     public static readonly TIMEOUT_TAB_SWITCH = 500;
     public static readonly TIMEOUT_SNIPPET_LOAD = 5000;
     public static readonly TIMEOUT_LONGPRESS = 460;
+    public static readonly TIMEOUT_TOUCH_DRAG_STILLNESS = 120;
     public static readonly TIMEOUT_VIBRATION_DURATION = 20;
     // 鼠标拖拽启动的短暂时间下限：平板鼠标合成 touch 拖拽文件树/画廊/列表操作等元素时，按下后需经过该时间才进拖拽，避免点击 + 号/箭头时抖动误触发 dragstart
     public static readonly TIMEOUT_MOUSE_DRAG_DELAY = 150;

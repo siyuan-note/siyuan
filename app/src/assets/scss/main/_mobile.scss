@@ -1792,6 +1792,52 @@ body.mobile-topbar--merged {
       padding: 8px 16px max(16px, var(--mobile-bottom-bar-safe-area));
     }
 
+    &.av__filter-panel {
+      .av__filter-row,
+      .av__filter-group-item {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        padding-block: 8px;
+      }
+
+      // 字段与规则菜单共用首行，条件控件和子分组使用整行宽度。
+      .av__filter-rowinner {
+        display: contents;
+      }
+
+      .av__field-wrapper {
+        grid-area: 1 / 2;
+        min-width: 0;
+      }
+
+      .av__filter-field {
+        max-width: 100%;
+      }
+
+      [data-type="moreFilter"] {
+        grid-area: 1 / 3;
+        margin: 0;
+        opacity: 1;
+      }
+
+      .av__filter-rowinner > .b3-select,
+      .av__filter-value,
+      .av__filter-date-controls,
+      .av__filter-group-children {
+        grid-column: 1 / -1;
+        min-width: 0;
+      }
+
+      .av__filter-date-controls .av__filter-value {
+        flex-basis: 100%;
+      }
+
+      .av__filter-date-config,
+      .b3-select {
+        max-width: 100%;
+      }
+    }
+
     .b3-chips {
       max-width: none !important;
       flex-shrink: 0;

@@ -2314,7 +2314,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Click the delete button on the right of a filter condition to remove it individually; use the filter menu to clear all at once"
+									"Data": ": Delete a condition from its More menu on the right. On a phone, this menu is beside the field name. To clear all conditions, use the button at the bottom of the filter panel"
 								}
 							]
 						}

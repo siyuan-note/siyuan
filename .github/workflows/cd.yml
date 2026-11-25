@@ -125,23 +125,30 @@ jobs:
           sdk_tools="$ANDROID_HOME/cmdline-tools/latest/bin"
           sdk_adb="$ANDROID_HOME/platform-tools/adb"
           "$sdk_tools/sdkmanager" --install emulator "$image"
-          printf 'no\n' | "$sdk_tools/avdmanager" create avd --name siyuan-translation --package "$image"
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/siyuan-avd"
+          mkdir -p "$ANDROID_AVD_HOME"
+          printf 'no\n' | "$sdk_tools/avdmanager" create avd --name siyuan-translation --package "$image" --path "$ANDROID_AVD_HOME/siyuan-translation.avd"
+          "$ANDROID_HOME/emulator/emulator" -list-avds | grep -Fx siyuan-translation
           "$ANDROID_HOME/emulator/emulator" -avd siyuan-translation -no-window -no-audio -no-snapshot -gpu swiftshader_indirect > emulator.log 2>&1 &
           emulator_pid=$!
-          trap 'timeout 10 "$sdk_adb" logcat -d > android.log || true; kill "$emulator_pid" 2>/dev/null || true' EXIT
-          timeout 180 "$sdk_adb" wait-for-device
-          for attempt in {1..60}; do
-            boot=$("$sdk_adb" shell getprop sys.boot_completed | tr -d '\r')
+          trap 'timeout 10 "$sdk_adb" -e logcat -d > android.log || true; kill "$emulator_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..90}; do
+            if ! kill -0 "$emulator_pid" 2>/dev/null; then
+              cat emulator.log
+              exit 1
+            fi
+            boot=$(timeout 4 "$sdk_adb" -e shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
             if [ "$boot" = 1 ]; then break; fi
             sleep 2
           done
           test "$boot" = 1
-          "$sdk_adb" shell getprop ro.product.cpu.abilist | tee android-abis.txt
+          "$sdk_adb" -e shell getprop ro.product.cpu.abilist | tee android-abis.txt
           grep -Eq '(^|,)arm64-v8a(,|[[:space:]]|$)' android-abis.txt
-          "$sdk_adb" install "$apk"
-          timeout 45 "$sdk_adb" shell am start -W -n org.b3log.siyuan/.BootActivity | tee android-launch.txt
+          "$sdk_adb" -e install "$apk"
+          "$sdk_adb" -e shell dumpsys package org.b3log.siyuan | grep 'primaryCpuAbi=arm64-v8a'
+          timeout 45 "$sdk_adb" -e shell am start -W -n org.b3log.siyuan/.BootActivity | tee android-launch.txt
           grep -Fqx 'Status: ok' <(tr -d '\r' < android-launch.txt)
-          "$sdk_adb" shell pidof org.b3log.siyuan
+          "$sdk_adb" -e shell pidof org.b3log.siyuan
       - name: Upload emulator diagnostics
         if: always()
         uses: actions/upload-artifact@v7

@@ -1065,7 +1065,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When you manually download from the cloud, SiYuan converts backslashes in legacy widget file paths to forward slashes. If an affected widget file replaces a local file at the same path, the previous copy is saved in the workspace history directory. If cloud snapshot entries map to the same path, the entry already using forward slashes takes precedence and the other copies go to history. If all conflicting entries use backslashes, the download reports the conflict and stops."
+					"Data": "When downloading from the cloud, SiYuan converts backslashes in legacy widget file paths to forward slashes. If entries in the same cloud snapshot map to the same path, the entry already using forward slashes takes precedence and the other copies go to the workspace history directory. If all conflicting paths contain backslashes, sync reports the conflict and stops. Two-way sync uses its usual conflict rules when local and cloud files share the converted path. In download-only mode, a cloud file replacing a local file at the converted path saves the previous copy to the workspace history directory."
 				}
 			]
 		},

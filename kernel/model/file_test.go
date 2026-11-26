@@ -325,12 +325,18 @@ func TestResolveDocTreeSortModeInheritance(t *testing.T) {
 		t.Fatalf("global fallback was not resolved: mode=%d, err=%v", mode, err)
 	}
 
-	files, _, err := ListDocTree(fixture.box.ID, "/", util.SortModeNameASC, false, false, 128)
+	files, total, err := ListDocTree(fixture.box.ID, "/", util.SortModeNameASC, false, false, 128)
 	if nil != err {
 		t.Fatalf("list root documents failed: %v", err)
 	}
+	if len(files) != 2 || total != 2 {
+		t.Fatalf("expected two root documents, got %d of %d", len(files), total)
+	}
 	for _, file := range files {
 		if file.ID == parentTree.ID {
+			if file.SubFileCount != 1 {
+				t.Fatalf("parent child count = %d, want 1", file.SubFileCount)
+			}
 			if nil == file.ChildrenSortMode || util.SortModeUpdatedDESC != *file.ChildrenSortMode {
 				t.Fatalf("parent declaration missing from listed file: %#v", file.ChildrenSortMode)
 			}

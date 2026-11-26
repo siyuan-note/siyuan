@@ -560,7 +560,12 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	}
 
 	start = time.Now()
-	boxLocalPath := filepath.Join(util.DataDir, box.ID)
+	directories := make(map[string]struct{})
+	for _, file := range files {
+		if file.isdir {
+			directories[strings.TrimSuffix(file.path, "/")] = struct{}{}
+		}
+	}
 	var docs []*File
 	for _, file := range files {
 		if "/" == listPath && box.ID == util.GetTreeID(file.path) {
@@ -613,8 +618,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 			}
 		}
 
-		subFolder := filepath.Join(boxLocalPath, strings.TrimSuffix(file.path, ".sy"))
-		if gulu.File.IsDir(subFolder) {
+		if _, hasSubFolder := directories[strings.TrimSuffix(file.path, ".sy")]; hasSubFolder {
 			continue
 		}
 

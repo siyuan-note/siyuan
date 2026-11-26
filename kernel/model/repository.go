@@ -3304,7 +3304,8 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 		DeviceID: confSystemSnapshot.ID, DeviceName: confSystemSnapshot.Name, DeviceOS: confSystemSnapshot.OS,
 		AESKey: confRepoSnapshot.Key, IgnoreLines: ignoreLines, Cloud: cloudRepo,
 		IgnoreRulePath: syncIgnoreRulePath, HiddenDirectoryNames: []string{".siyuan"},
-		OnCloudIndexList: newSyncCloudIndexListObserver(scope, confSyncSnapshot.Provider),
+		RepairWidgetPathsOnDownload: true,
+		OnCloudIndexList:            newSyncCloudIndexListObserver(scope, confSyncSnapshot.Provider),
 		PathFilter: func(info os.FileInfo, absPath string) (bool, error) {
 			return syncPathFilter(dataDir, info, absPath)
 		},

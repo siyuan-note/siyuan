@@ -594,7 +594,7 @@ export const createMarkdownEditor = async (options: MarkdownEditorOptions,
                 after: () => queueMicrotask(() => {
                     try {
                         if (destroyed) return;
-                        if (instance.version !== "4.0.2-alpha.11") throw new Error("Unsupported Markdown editor version");
+                        if (instance.version !== "4.0.2-alpha.12") throw new Error("Unsupported Markdown editor version");
                         if (element.id) instance.vditor.outline.element.id = `${element.id}-outline`;
                         outlineAnimation = createMarkdownPanelAnimation({
                             element: instance.vditor.outline.element,

@@ -27,6 +27,7 @@ const setup = t => {
     const dictionary = [];
     const replacements = [];
     const requests = [];
+    const editor = {spellcheck: true};
     const contents = Object.assign(new EventEmitter(), {
         id: ++contentsSequence,
         send: (channel, context) => {responses.push(context); ipc.emit(channel, {}, context);},
@@ -55,16 +56,26 @@ const setup = t => {
         Date,
         window: {
             setTimeout: globalThis.setTimeout, clearTimeout: globalThis.clearTimeout,
-            siyuan: {languages: {addToDictionary: "Add to dictionary"},
+            siyuan: {config: {editor}, languages: {addToDictionary: "Add to dictionary"},
                 menus: {menu: {element: {lastElementChild: {prepend: fragment => fragments.push(fragment)}}}}},
         },
         document: {createDocumentFragment: () => ({children: [], append(item) {this.children.push(item);}})},
     });
-    const native = (word = "ñqzxvbnmñ", suggestions = [], x = 10, y = 20) => contents.emit("context-menu", {}, {
-        x, y, misspelledWord: word, dictionarySuggestions: suggestions,
+    const native = (word = "ñqzxvbnmñ", suggestions = [], x = 10, y = 20, menuSourceType = "mouse") => contents.emit("context-menu", {}, {
+        x, y, menuSourceType, misspelledWord: word, dictionarySuggestions: suggestions,
     });
-    return {...exports, main, contents, native, ipc, requests, responses, fragments, dictionary, replacements, popups};
+    return {...exports, main, contents, native, ipc, requests, responses, fragments, dictionary, replacements, popups, editor};
 };
+
+test("disabled spell checking skips IPC and cancels an earlier request", async t => {
+    const f = setup(t);
+    const previous = f.requestSpellcheckContext(10, 20);
+    f.editor.spellcheck = false;
+    const current = f.requestSpellcheckContext(10, 20);
+    assert.equal(f.requests.length, 1);
+    assert.equal(await current, undefined);
+    assert.equal(await previous, null);
+});
 
 for (const delay of [450, 1500]) {
     test(`misspellings without suggestions retain Add to dictionary after ${delay} ms`, async t => {
@@ -158,6 +169,30 @@ test("native DIP coordinates match rounded renderer coordinates at different zoo
         assert.equal(context.y, 214);
     }
 });
+
+test("right-click coordinates at 110% zoom match the rounded interval", async t => {
+    const f = setup(t);
+    f.contents.getZoomFactor = () => 1.1;
+    const pending = f.requestSpellcheckContext(182, 94);
+    f.native("elsewhere", [], 203, 104);
+    assert.equal(f.responses.length, 0);
+    f.native("current", [], 202, 104);
+    assert.equal(f.responses.length, 1);
+    assert.equal((await pending).misspelledWord, "current");
+});
+
+for (const source of ["keyboard", "touch"]) {
+    test(`${source} context menus retain the point tolerance`, async t => {
+        const f = setup(t);
+        f.contents.getZoomFactor = () => 1.1;
+        const pending = f.requestSpellcheckContext(182, 94);
+        f.native("elsewhere", [], 202, 104, source);
+        assert.equal(f.responses.length, 0);
+        f.native("current", [], 200, 104, source);
+        assert.equal(f.responses.length, 1);
+        assert.equal((await pending).misspelledWord, "current");
+    });
+}
 
 test("missing native events time out and late responses are ignored", async t => {
     const f = setup(t);

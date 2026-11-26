@@ -23,14 +23,21 @@ const NATIVE_TEXT_CONTEXT_MENU_ROLES = new Set([
 // 两个进程的时钟可能存在毫秒级偏差，坐标和短暂的提前量用于兼容原生事件先到的情况。
 const isMatchingRequest = (contents: WebContents, context: MenuContext,
                           request: ContextMenuRequest | ISpellcheckRequest): boolean => {
-    // 原生坐标使用 DIP，渲染进程坐标使用 CSS 像素，并可能被鼠标事件取整。
     const zoom = contents.getZoomFactor();
-    const tolerance = Math.max(1, zoom);
+    const matchesCoordinate = (native: number, css?: number): boolean => {
+        if (css === undefined) {
+            return true;
+        }
+        if (context.params.menuSourceType === "mouse" && Number.isInteger(css)) {
+            // Chromium 向下取整 CSS 坐标，原生 DIP 坐标在换算区间两端各允许 1 DIP 的误差。
+            return native >= css * zoom - 1 && native <= (css + 1) * zoom + 1;
+        }
+        return Math.abs(native - css * zoom) <= Math.max(1, zoom);
+    };
     return typeof request.requestedAt === "number" && Number.isFinite(request.requestedAt) &&
         context.createdAt >= request.requestedAt - 50 &&
         context.createdAt - request.requestedAt < SPELLCHECK_CONTEXT_TIMEOUT &&
-        (request.x === undefined || Math.abs(context.params.x - request.x * zoom) <= tolerance) &&
-        (request.y === undefined || Math.abs(context.params.y - request.y * zoom) <= tolerance);
+        matchesCoordinate(context.params.x, request.x) && matchesCoordinate(context.params.y, request.y);
 };
 
 // 原生文本菜单项直接按构造选项描述，Electron 负责创建实例。

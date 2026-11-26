@@ -1,0 +1,163 @@
+{
+	"ID": "20261126135802-v44o7n2",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f50c",
+		"id": "20261126135802-v44o7n2",
+		"title": "External Connections",
+		"type": "doc",
+		"updated": "20261126135802"
+	},
+	"Children": [
+		{
+			"ID": "20261126135802-80n2gyw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-80n2gyw",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan supports connections to WorkBuddy, Doubao, and OpenAI. Once connected, you can search, read, and edit your SiYuan notes from these apps."
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-932bfxv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-932bfxv",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "WorkBuddy"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-jxqo6x8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-jxqo6x8",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The connector is available in the WorkBuddy connector marketplace. Search for “SiYuan”, add “SiYuan Official Connector”, and enter your SiYuan instance address and API token."
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-k9ugy4j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-k9ugy4j",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-workbuddy-connector",
+					"TextMarkTextContent": "siyuan-note/siyuan-workbuddy-connector"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-swz99re",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-swz99re",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Doubao"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-41racvq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-41racvq",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The plugin is available in the Doubao desktop app. In Doubao Work, open “豆包推荐” (Doubao Recommendations), then search for and add “思源笔记” (SiYuan)."
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-vnvu3gf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-vnvu3gf",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-doubao-plugin",
+					"TextMarkTextContent": "siyuan-note/siyuan-doubao-plugin"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-kqg6jbv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-kqg6jbv",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OpenAI"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-pr6124s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-pr6124s",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The plugin is not yet listed in the OpenAI marketplace. To use it with Codex in the ChatGPT desktop app, download the local installation package from GitHub and follow the repository’s instructions for manual installation."
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-qrx3dfs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-qrx3dfs",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-openai-plugin",
+					"TextMarkTextContent": "siyuan-note/siyuan-openai-plugin"
+				}
+			]
+		}
+	]
+}

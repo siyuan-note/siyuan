@@ -1,0 +1,163 @@
+{
+	"ID": "20261126135802-pext2ie",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f50c",
+		"id": "20261126135802-pext2ie",
+		"title": "外部サービスとの連携",
+		"type": "doc",
+		"updated": "20261126135802"
+	},
+	"Children": [
+		{
+			"ID": "20261126135802-z0hb0zx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-z0hb0zx",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は WorkBuddy、豆包（Doubao）、OpenAI との連携に対応しています。連携すると、各アプリから SiYuan のノートを検索、閲覧、編集できます。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-ymqtgqr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-ymqtgqr",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "WorkBuddy"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-h6kw5oc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-h6kw5oc",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コネクタは WorkBuddy のコネクタマーケットで公開されています。「SiYuan」を検索して「SiYuan Official Connector」を追加し、SiYuan インスタンスのアドレスと API トークンを入力してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-w769pzh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-w769pzh",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-workbuddy-connector",
+					"TextMarkTextContent": "siyuan-note/siyuan-workbuddy-connector"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-u1254uj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-u1254uj",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "豆包"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-5xgix4w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-5xgix4w",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プラグインは豆包のデスクトップアプリで公開されています。「豆包工作」の「豆包推荐」を開き、「思源笔记」を検索して追加してください。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-yo9gstc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-yo9gstc",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-doubao-plugin",
+					"TextMarkTextContent": "siyuan-note/siyuan-doubao-plugin"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-5o9a78o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-5o9a78o",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OpenAI"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-ppwo6ky",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-ppwo6ky",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プラグインは OpenAI のマーケットプレイスでは未公開です。ChatGPT デスクトップアプリの Codex で利用するには、GitHub からローカルインストール用のパッケージをダウンロードし、リポジトリの手順に従って手動でインストールしてください。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-i46kdb3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-i46kdb3",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-openai-plugin",
+					"TextMarkTextContent": "siyuan-note/siyuan-openai-plugin"
+				}
+			]
+		}
+	]
+}

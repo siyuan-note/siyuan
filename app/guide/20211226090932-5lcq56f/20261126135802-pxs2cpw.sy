@@ -1,0 +1,163 @@
+{
+	"ID": "20261126135802-pxs2cpw",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f50c",
+		"id": "20261126135802-pxs2cpw",
+		"title": "外部連線",
+		"type": "doc",
+		"updated": "20261126135802"
+	},
+	"Children": [
+		{
+			"ID": "20261126135802-97f9xbe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-97f9xbe",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源支援連線至 WorkBuddy、豆包和 OpenAI。連線後，可在對應的應用程式中搜尋、閱讀和編輯思源筆記。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-qaunkip",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-qaunkip",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "WorkBuddy"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-cnd7w1q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-cnd7w1q",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "WorkBuddy 連接器已上架。可在 WorkBuddy 的連接器市集中搜尋「SiYuan」，新增「SiYuan Official Connector」，接著填寫思源執行個體的網址和 API Token。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-b3qbgiz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-b3qbgiz",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-workbuddy-connector",
+					"TextMarkTextContent": "siyuan-note/siyuan-workbuddy-connector"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-mnnwd8d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-mnnwd8d",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "豆包"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-vgcglbq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-vgcglbq",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "豆包外掛已上架。可在豆包電腦版的「豆包工作」中開啟「豆包推荐」，搜尋並新增「思源笔记」外掛。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-pvks3hd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-pvks3hd",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-doubao-plugin",
+					"TextMarkTextContent": "siyuan-note/siyuan-doubao-plugin"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-ux2nyjc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-ux2nyjc",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OpenAI"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-fka1ahq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-fka1ahq",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OpenAI 外掛尚未上架。如需在 ChatGPT 桌面版的 Codex 中使用，請從 GitHub 儲存庫下載本機安裝套件，並依照儲存庫中的說明手動安裝。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-9ll76k6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-9ll76k6",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-openai-plugin",
+					"TextMarkTextContent": "siyuan-note/siyuan-openai-plugin"
+				}
+			]
+		}
+	]
+}

@@ -12,7 +12,7 @@ import (
 func TestHumanizeRelTimeMinuteMagnitude(t *testing.T) {
 	const lang = "humanize-relative-time-test"
 	oldTimeLang, hadTimeLang := TimeLangs[lang]
-	TimeLangs[lang] = map[string]any{
+	labels := map[string]any{
 		"albl": "ago",
 		"blbl": "from now",
 		"now":  "now",
@@ -33,7 +33,9 @@ func TestHumanizeRelTimeMinuteMagnitude(t *testing.T) {
 		"xy":   "%d years %s",
 		"max":  "a long while %s",
 	}
+	RegisterTimeLanguage(lang, labels)
 	t.Cleanup(func() {
+		delete(timeLanguages, lang)
 		if hadTimeLang {
 			TimeLangs[lang] = oldTimeLang
 		} else {
@@ -58,5 +60,14 @@ func TestHumanizeRelTimeMinuteMagnitude(t *testing.T) {
 				t.Fatalf("unexpected relative time: %q", actual)
 			}
 		})
+	}
+	replacement := make(map[string]any, len(labels))
+	for key, label := range labels {
+		replacement[key] = label
+	}
+	replacement["xm"] = "%d mins %s"
+	TimeLangs[lang] = replacement
+	if actual := HumanizeRelTime(start, start.Add(2*time.Minute), lang); actual != "2 mins" {
+		t.Fatalf("unexpected relative time after replacing language labels: %q", actual)
 	}
 }

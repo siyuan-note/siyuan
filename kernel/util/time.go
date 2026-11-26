@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"reflect"
 	"strings"
 	"time"
 
@@ -200,18 +201,38 @@ func humanizeDiffTime(a, b time.Time) (year, month, day, hour, min, sec int) {
 }
 
 func HumanizeRelTime(a time.Time, b time.Time, lang string) string {
-	_, magnitudes := humanizeTimeMagnitudes(lang)
+	_, magnitudes := timeLanguageMagnitudes(lang)
 	return strings.TrimSpace(humanize.CustomRelTime(a, b, "", "", magnitudes))
 }
 
 func HumanizeTime(then time.Time, lang string) string {
-	labels, magnitudes := humanizeTimeMagnitudes(lang)
+	labels, magnitudes := timeLanguageMagnitudes(lang)
 	return strings.TrimSpace(humanize.CustomRelTime(then, time.Now(), labels["albl"].(string), labels["blbl"].(string), magnitudes))
 }
 
-func humanizeTimeMagnitudes(lang string) (labels map[string]any, magnitudes []humanize.RelTimeMagnitude) {
-	labels = TimeLangs[lang]
-	magnitudes = []humanize.RelTimeMagnitude{
+type timeLanguage struct {
+	labels     map[string]any
+	magnitudes []humanize.RelTimeMagnitude
+}
+
+var timeLanguages = map[string]timeLanguage{}
+
+func RegisterTimeLanguage(lang string, labels map[string]any) {
+	TimeLangs[lang] = labels
+	timeLanguages[lang] = timeLanguage{labels: labels, magnitudes: humanizeTimeMagnitudes(labels)}
+}
+
+func timeLanguageMagnitudes(lang string) (map[string]any, []humanize.RelTimeMagnitude) {
+	labels := TimeLangs[lang]
+	cached, ok := timeLanguages[lang]
+	if ok && reflect.ValueOf(cached.labels).Pointer() == reflect.ValueOf(labels).Pointer() {
+		return labels, cached.magnitudes
+	}
+	return labels, humanizeTimeMagnitudes(labels)
+}
+
+func humanizeTimeMagnitudes(labels map[string]any) []humanize.RelTimeMagnitude {
+	return []humanize.RelTimeMagnitude{
 		{D: time.Second, Format: labels["now"].(string), DivBy: time.Second},
 		{D: 2 * time.Second, Format: labels["1s"].(string), DivBy: 1},
 		{D: time.Minute, Format: labels["xs"].(string), DivBy: time.Second},
@@ -230,5 +251,4 @@ func humanizeTimeMagnitudes(lang string) (labels map[string]any, magnitudes []hu
 		{D: humanize.LongTime, Format: labels["xy"].(string), DivBy: humanize.Year},
 		{D: math.MaxInt64, Format: labels["max"].(string), DivBy: 1},
 	}
-	return
 }

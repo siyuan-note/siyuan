@@ -639,7 +639,7 @@ func initLang() {
 		name := langName[:strings.LastIndex(langName, ".")]
 		util.Langs[name] = kernelMap
 
-		util.TimeLangs[name] = langMap["_time"].(map[string]any)
+		util.RegisterTimeLanguage(name, langMap["_time"].(map[string]any))
 		util.TaskActionLangs[name] = langMap["_taskAction"].(map[string]any)
 		util.TrayMenuLangs[name] = langMap["_trayMenu"].(map[string]any)
 		util.AttrViewLangs[name] = langMap["_attrView"].(map[string]any)

@@ -46,12 +46,12 @@ export class MobileFiles extends Model {
     private scrollElement: HTMLElement;
 
     public getSelectedItems(): {id: string, path: string, notebookId: string}[] {
-        const controller = getActiveDocTreeController(this.element.parentElement) || this.docTree;
+        const controller = getActiveDocTreeController(this.scrollElement.parentElement) || this.docTree;
         return getDocTreeActionItems(controller.getSelectedItems()).map(({id, path, notebookId}) => ({id, path, notebookId}));
     }
 
     public getSelectionElements(): NodeListOf<HTMLElement> {
-        return (getActiveDocTreeController(this.element.parentElement) || this.docTree).getSelectionElements();
+        return (getActiveDocTreeController(this.scrollElement.parentElement) || this.docTree).getSelectionElements();
     }
 
     private saveStateTimeout: number;

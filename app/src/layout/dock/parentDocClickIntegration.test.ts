@@ -69,7 +69,7 @@ const harness = (mobile: boolean, mode: 1 | 2 = 2, expanded = false) => {
     const click = loadClick(mobile, {
         window: {siyuan: {config: {fileTree: config}, menus: {menu: {remove() {}}}}},
         getDocTreeItem: () => item,
-        options: {app: {}}, Constants: {SIYUAN_APPID: "app"},
+        options: {app: {}, tab: {panelElement: {}}}, Constants: {SIYUAN_APPID: "app"},
         isNotCtrl: () => true, isPhablet: () => false, setPanelFocus() {},
         openFileById: () => calls.push("open"), openMobileFileById: () => calls.push("open"),
     });

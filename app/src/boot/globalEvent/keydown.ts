@@ -672,11 +672,12 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    if (!files.element.parentElement.classList.contains("layout__tab--active")) {
+    const panel = files.parent.panelElement;
+    if (!panel.classList.contains("layout__tab--active")) {
         return false;
     }
 
-    const controller = getActiveDocTreeController(files.element.parentElement) || files.docTree;
+    const controller = getActiveDocTreeController(panel) || files.docTree;
     const selectedItems = controller.getSelectedItems();
     const actionItems = getDocTreeActionItems(selectedItems);
     if (dispatchPluginShortcut(app, event, "fileTreeShortcut", () => captureCommandContext({

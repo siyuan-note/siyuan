@@ -88,7 +88,10 @@ const getVisibleAssetValues = (cellElements: HTMLElement[]) => {
         });
         return Array.from(assets.values());
     }
-    return genCellValueByElement("mAsset", cellElements[0]).mAsset || [];
+    const input = (cellElements as IAVCellInputElements).resolveAVCellInput?.();
+    // 行暂时卸载时，面板刷新不能再从旧的单元格元素读取附件。
+    const value = input && !input.elements[0] ? input.cells[0]?.cell.value : undefined;
+    return (value || genCellValueByElement("mAsset", cellElements[0])).mAsset || [];
 };
 
 const isAssetCellMenuCurrent = (menuElement: HTMLElement, blockElement: Element, cellElements: HTMLElement[]) => {

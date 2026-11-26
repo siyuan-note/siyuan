@@ -79,12 +79,12 @@ export class Files extends Model {
     }
 
     public getSelectedItems(): {id: string, path: string, notebookId: string}[] {
-        const controller = getActiveDocTreeController(this.element.parentElement) || this.docTree;
+        const controller = getActiveDocTreeController(this.parent.panelElement) || this.docTree;
         return getDocTreeActionItems(controller.getSelectedItems()).map(({id, path, notebookId}) => ({id, path, notebookId}));
     }
 
     public getSelectionElements(): NodeListOf<HTMLElement> {
-        return (getActiveDocTreeController(this.element.parentElement) || this.docTree).getSelectionElements();
+        return (getActiveDocTreeController(this.parent.panelElement) || this.docTree).getSelectionElements();
     }
     private actionsElement: HTMLElement;
     private pinnedDocs: PinnedDocs;

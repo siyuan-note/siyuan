@@ -24,11 +24,16 @@ const fixture = (count = 1) => {
         toggle: (key: string) => calls.push(["toggle", key]),
     };
     const keys = new Proxy({}, {get: (_target, key) => key});
-    const files = {docTree: controller, element: {parentElement: {classList: {contains: () => true}}}};
+    const panel = {classList: {contains: (name: string) => name === "layout__tab--active"}};
+    const files = {docTree: controller, parent: {panelElement: panel},
+        element: {parentElement: {classList: {contains: () => false}}}};
     let shortcut = "";
     const handle = runInNewContext(compiled + "\nfileTreeKeydown;", {
         getDockByType: () => ({data: {file: files}}),
-        getActiveDocTreeController: () => controller,
+        getActiveDocTreeController: (root: unknown) => {
+            assert.equal(root, panel);
+            return controller;
+        },
         getDocTreeActionItems,
         dispatchPluginShortcut: () => false,
         matchHotKey: (configured: string) => configured === shortcut,

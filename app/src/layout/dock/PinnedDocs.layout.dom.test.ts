@@ -10,59 +10,50 @@ const checkLayout = (markup: string, mobile: boolean) => {
     const check = require("node:assert/strict");
     document.body.innerHTML = markup;
     const panel = document.querySelector<HTMLElement>(".file-tree, [data-type='sidebar-file']");
+    const scroll = panel.querySelector<HTMLElement>("[data-file-tree-scroll]");
     const pins = panel.querySelector<HTMLElement>(".file-tree__pins");
-    const pinned = pins.querySelector<HTMLElement>(".file-tree__pins-list");
+    const pinned = pins.querySelector<HTMLElement>("[data-pin-list]");
     const files = pins.nextElementSibling as HTMLElement;
-    const closed = files.nextElementSibling as HTMLElement;
+    const closed = scroll.nextElementSibling as HTMLElement;
     closed.style.transition = "none";
     const rows = (element: HTMLElement, count: number) => {
         element.innerHTML = `<ul class="b3-list" style="display:flex;flex-direction:column">${
             Array.from({length: count}, (_, index) => `<li class="b3-list-item">Document ${index}</li>`).join("")}</ul>`;
     };
     const scrolls = (element: HTMLElement) => element.scrollHeight > element.clientHeight + 1;
+    const top = (element: HTMLElement) => element.getBoundingClientRect().top;
     const bottom = (element: HTMLElement) => element.getBoundingClientRect().bottom;
     const checkFooter = () => check.ok(Math.abs(bottom(panel) - bottom(closed)) <= 1, "closed notebooks stay at the bottom");
 
     rows(pinned, 40);
-    rows(files, 3);
-    check.ok(pins.clientHeight > files.clientHeight, "pinned documents use the space left by a short tree");
-    check.equal(scrolls(pinned), true);
-    check.equal(scrolls(files), false);
-    check.ok(Math.abs(bottom(files) - closed.getBoundingClientRect().top) <= 1, "no unused height when pins still overflow");
-    checkFooter();
-
     rows(files, 40);
-    const split = pins.clientHeight / (pins.clientHeight + files.clientHeight);
-    check.ok(split > 0.37 && split < 0.44, `both long lists share the panel (${split})`);
-    check.equal(scrolls(pinned), true);
-    check.equal(scrolls(files), true);
-    for (const element of [pinned, files]) {
-        element.scrollTop = element.scrollHeight;
-        check.ok(bottom(element.querySelector("li:last-child")) <= bottom(element) + 1, "last document is reachable");
-    }
+    check.ok(top(files) > bottom(scroll), "long pinned content moves notebooks below the viewport");
+    check.equal(scrolls(scroll), true);
+    check.equal(scrolls(pinned), false);
+    check.equal(scrolls(files), false);
+    const position = scroll.scrollTop + bottom(pinned.querySelector("li:last-child")) - bottom(scroll);
+    scroll.scrollTop = position;
+    check.ok(Math.abs(bottom(pinned.querySelector("li:last-child")) - bottom(scroll)) <= 1, "the last pin scrolls into view");
+    scroll.scrollTop = scroll.scrollHeight;
+    check.ok(bottom(files.querySelector("li:last-child")) <= bottom(scroll) + 1, "the same scrollbar reaches the last notebook row");
+    check.ok(bottom(pins.querySelector("[data-pin-heading]")) < top(scroll), "the pin heading scrolls with its rows");
 
-    const expandedHeight = files.clientHeight;
+    const expandedHeight = scroll.clientHeight;
     closed.style.height = "40%";
-    check.ok(files.clientHeight < expandedHeight, "expanding closed notebooks reduces the space above");
+    check.ok(scroll.clientHeight < expandedHeight, "expanding closed notebooks reduces the space above");
     checkFooter();
     closed.style.height = mobile ? "42px" : "30px";
 
-    rows(pinned, 1);
-    check.ok(files.clientHeight > expandedHeight, "a short pinned list lets the tree grow");
-    check.equal(scrolls(pinned), false);
-    rows(files, 3);
-    checkFooter();
-
+    scroll.scrollTop = 0;
     pinned.classList.add("fn__none");
-    check.ok(pins.clientHeight <= 50, "collapsed pins only show the heading");
-    rows(files, 40);
-    checkFooter();
+    check.ok(top(files) < bottom(scroll), "collapsing pins brings notebooks into view");
+    check.ok(pins.clientHeight <= 55, "collapsed pins only show the heading");
     pins.classList.add("fn__none");
-    check.ok(files.clientHeight > expandedHeight, "the tree gets the available height without pins");
+    check.ok(top(files) - top(scroll) <= 2, "notebooks start at the top without pins");
     checkFooter();
 };
 
-test("document panel shares available height across pinned documents and notebooks", {
+test("pinned documents and notebooks move through the same document panel viewport", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY && !process.env.SIYUAN_ELECTRON_HEADLESS,
     timeout: 30000,
 }, async () => {
@@ -70,9 +61,10 @@ test("document panel shares available height across pinned documents and noteboo
         .replace("${window.siyuan.languages.pinnedDocs}", "Pinned");
     const layouts = [false, true].map(mobile => {
         const source = readFileSync(resolve(__dirname, mobile ? "../../mobile/dock/MobileFiles.ts" : "Files.ts"), "utf8");
-        const sections = source.match(/<div class="[^"]*fn__flex-1"[^>]*><\/div>\r?\n<ul class="b3-list[\s\S]*?<\/ul>\r?\n<\/ul>/)[0]
-            .replace("${window.siyuan.languages.closeNotebook}", "Closed notebooks");
-        const content = `<div style="height:40px;flex-shrink:0"></div><div class="file-tree__pins fn__flex-column">${pinned}</div>${sections}`;
+        const sections = source.match(/<div class="fn__flex-1" data-file-tree-scroll>[\s\S]*?<\/ul>\r?\n<\/ul>/)[0]
+            .replace("${window.siyuan.languages.closeNotebook}", "Closed notebooks")
+            .replace('<div class="file-tree__items"', `<div class="file-tree__pins">${pinned}</div><div class="file-tree__items"`);
+        const content = `<div style="height:40px;flex-shrink:0"></div>${sections}`;
         const markup = mobile ? `<div class="side-panel"><div class="b3-list--mobile" style="width:340px;height:620px">
             <div class="fn__flex-column" data-type="sidebar-file">${content}</div></div></div>` :
             `<div class="file-tree fn__flex-column" style="width:220px;height:380px;min-height:0">${content}</div>`;
@@ -106,6 +98,6 @@ app.whenReady().then(async () => {
         await promisify(execFile)(require("electron") as unknown as string, args,
             {env, windowsHide: true, timeout: 25000});
     } finally {
-        rmSync(directory, {recursive: true, force: true});
+        rmSync(directory, {recursive: true, force: true, maxRetries: 10, retryDelay: 100});
     }
 });

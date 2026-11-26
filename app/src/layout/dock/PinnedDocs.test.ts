@@ -138,6 +138,7 @@ const loadPanel = (fetchCode = 0) => {
     const messages: {cmd: string, data?: unknown}[] = [];
     panel.restored = true;
     panel.docTree = {
+        scrollElement: {getBoundingClientRect: () => ({})},
         retain() {}, release() {},
         getItemFromElement: (row: {item: object}) => row?.item,
         select: (key: string, options: {toggle?: boolean} = {}) => {
@@ -238,7 +239,7 @@ function loadMobileTreeGestures(pinned = false) {
             const body = node.arguments[1].body.getText(source);
             if (body.includes("this.touchDragState") && (
                 call === "filesElement.addEventListener" && ["touchstart", "touchmove", "touchend"].includes(name) ||
-                call === "this.element.addEventListener" && name === "scroll")) {
+                call === "this.scrollElement.addEventListener" && name === "scroll")) {
                 bodies[name] = body;
             }
         }
@@ -271,7 +272,8 @@ function loadMobileTreeGestures(pinned = false) {
     const ghost = {style: {left: "", top: ""}, remove: () => { ghostRemoved += 1; }};
     let ghostRemoved = 0;
     const panel = {
-        element: {scrollTop: 0, getBoundingClientRect: () => ({}), querySelector: (): null => null},
+        element: {querySelector: (): null => null},
+        scrollElement: {scrollTop: 0, getBoundingClientRect: () => ({})},
         pinnedDocs: {element: {contains: () => pinned}},
         docTree: {release: () => {}, getItemFromElement: (element: unknown) => element},
         touchDragState: undefined as {selectedElement: unknown, isDragging: boolean, ghostElement: typeof ghost},
@@ -384,7 +386,7 @@ test("mobile tree scroll, touchend, cancellations and extra contacts invalidate 
 
     const tree = loadMobileTreeGestures();
     tree.dispatch("touchstart", 0);
-    tree.panel.element.scrollTop = 20;
+    tree.panel.scrollElement.scrollTop = 20;
     tree.fireTimer();
     assert.deepEqual(tree.starts, []);
 });
@@ -620,7 +622,7 @@ test("dropping on a notebook resolves row metadata with or without root document
         closest: (): null => null,
         getBoundingClientRect: () => ({top: 0, height: 30}), classList: {add: (name: string) => highlights.push(name)}};
     hitTest.target = {closest: () => row};
-    panel.sourceTree = {contains: () => true, getBoundingClientRect: () => ({})};
+    panel.sourceTree = {contains: () => true};
     panel.element = {contains: () => false};
     for (const id of ["", "notebook"]) {
         row.dataset.nodeId = id;
@@ -639,7 +641,6 @@ test("pinned heading highlights the whole row while root reorder keeps insertion
     const highlights: string[] = [];
     panel.sourceTree = {contains: () => false};
     panel.element = {contains: () => true};
-    panel.list = {getBoundingClientRect: () => ({})};
     panel.heading = {classList: {add: (name: string) => highlights.push(name)}};
     hitTest.target = {closest: (selector: string) => selector === "[data-pin-heading]" ? {} : null};
     panel.previewDrop(10, 0);
@@ -689,9 +690,8 @@ test("pin drop tips describe pinning and source moves, and self targets clear fe
         getBoundingClientRect: () => ({top: 0, height: 30}), classList: {add: (name: string) => highlights.push(name)},
         closest: (): Element | null => null};
     hitTest.target = {closest: () => row};
-    panel.sourceTree = {contains: () => source, getBoundingClientRect: () => ({})};
+    panel.sourceTree = {contains: () => source};
     panel.element = {contains: () => !source};
-    panel.list = {getBoundingClientRect: () => ({})};
     runtime.dragElement = {innerText: "source"};
     panel.previewDrop(10, 1);
     assert.deepEqual(tips.at(-1), ["Document", "Pin", 10, 1, "Target"]);

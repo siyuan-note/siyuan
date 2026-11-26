@@ -253,11 +253,12 @@ export const onMessage = (app: App, data: IWebSocketData) => {
 };
 
 const setPublish = () => {
-    const accessElement = window.siyuan.mobile.docks.file.element.previousElementSibling.querySelector('[data-type="publish-access"]');
+    const fileTree = window.siyuan.mobile.docks.file.element;
+    const accessElement = fileTree.closest('[data-type="sidebar-file"]').querySelector('[data-type="publish-access"]');
     if (!window.siyuan.config.publish.enable) {
         accessElement.classList.remove("block__icon--active");
         accessElement.classList.add("fn__none");
-        window.siyuan.mobile.docks.file.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
+        fileTree.querySelectorAll(".b3-list-item__icon").forEach(item => {
             item.classList.remove("fn__none");
             item.nextElementSibling.classList.add("fn__none");
         });

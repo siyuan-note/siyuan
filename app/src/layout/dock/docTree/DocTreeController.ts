@@ -8,6 +8,7 @@ import {docTreeDirectoryKey, docTreeParentID, type IDocTreeDataSource, type IDoc
 
 interface IDocTreeControllerOptions {
     element: HTMLElement;
+    scrollElement?: HTMLElement;
     roots?: IDocTreeRoot[];
     renderRow: (item: IDocTreeItem) => HTMLElement;
     source?: IDocTreeDataSource;
@@ -51,7 +52,7 @@ export const getDocTreeController = (element: Element): DocTreeController | unde
     }
 };
 
-// 一个滚动容器共享行投影和窗口，选择与展开不依赖已挂载的 DOM。
+// 控制器维护各段的行投影，选择与展开不依赖已挂载的 DOM。
 export class DocTreeController {
     public readonly model = new DocTreeModel();
     private source: IDocTreeDataSource;
@@ -108,13 +109,13 @@ export class DocTreeController {
         options.element.replaceChildren(this.list);
         controllers.set(options.element, this);
         const signal = this.events.signal;
-        options.element.addEventListener("scroll", () => {
+        this.scrollElement.addEventListener("scroll", () => {
             this.finishRowAnimation?.();
             this.scheduleRender();
         }, {passive: true, signal});
         // 真实输入取消迟到的状态恢复；程序设置 scrollTop 不应中断自己的定位。
         for (const event of ["pointerdown", "wheel"] as const) {
-            options.element.addEventListener(event, () => {
+            this.scrollElement.addEventListener(event, () => {
                 this.finishRowAnimation?.();
                 this.interaction++;
             }, {passive: true, signal});
@@ -153,7 +154,26 @@ export class DocTreeController {
             if (!this.deferRowAnimationResize?.(entries)) { this.scheduleRender(); }
         });
         this.observer.observe(options.element);
+        if (options.scrollElement) {
+            this.observer.observe(options.scrollElement);
+            // 共用内容容器的高度变化也会移动其他列表的起点。
+            this.observer.observe(options.scrollElement.firstElementChild);
+        }
         this.setRoots(options.roots || []);
+    }
+
+    public get scrollElement() { return this.options.scrollElement || this.options.element; }
+
+    private getListStart() {
+        const viewport = this.scrollElement;
+        return this.options.scrollElement ? viewport.scrollTop + this.list.getBoundingClientRect().top -
+            viewport.getBoundingClientRect().top - viewport.clientTop : 0;
+    }
+
+    private getRenderWindow() {
+        const {scrollTop, clientHeight} = this.scrollElement;
+        const localTop = scrollTop - this.getListStart();
+        return getDocTreeWindow(this.model.rowCount, localTop, clientHeight + Math.min(0, localTop), this.rowHeight);
     }
 
     public get selectionVersion() { return this.version; }
@@ -218,7 +238,7 @@ export class DocTreeController {
         } while (pending !== this.reloadTail && this.notebookReveal === reveal && !this.disposed);
         if (this.notebookReveal !== reveal) { return; }
         this.notebookReveal = undefined;
-        if (!this.disposed && reveal.interaction === this.interaction && this.options.element.clientHeight > 0) {
+        if (!this.disposed && reveal.interaction === this.interaction && this.scrollElement.clientHeight > 0) {
             await this.ensureRendered(`notebook:${reveal.notebook}`);
         }
     }
@@ -418,7 +438,7 @@ export class DocTreeController {
         const parentPosition = this.positionOf(key);
         const parentRow = this.mounted.get(key)?.element;
         const bounds = parentRow?.getBoundingClientRect();
-        const viewport = this.options.element.getBoundingClientRect();
+        const viewport = this.scrollElement.getBoundingClientRect();
         const animate = userAction && bounds && bounds.top >= viewport.top && bounds.bottom <= viewport.bottom &&
             typeof parentRow.animate === "function" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const snapshot = animate && !expanded ? Array.from(this.mounted, ([childKey, mounted]) => ({
@@ -550,7 +570,11 @@ export class DocTreeController {
         cancelAnimationFrame(this.frame);
         this.frame = 0;
         const element = this.options.element;
-        const width = element.getBoundingClientRect().width;
+        const viewport = this.options.scrollElement;
+        const getWidth = () => element.getBoundingClientRect().width - (viewport?.clientWidth || 0);
+        const width = getWidth();
+        const viewportWidth = viewport?.getBoundingClientRect().width;
+        const viewportHeight = viewport?.clientHeight;
         // 自适应列表的视口随动画区域增高，固定视口的两次测量值相同。
         group.style.height = "0px";
         const collapsedHeight = element.clientHeight;
@@ -563,9 +587,10 @@ export class DocTreeController {
         let resizeDeferred = false;
         this.deferRowAnimationResize = entries => {
             const expectedHeight = Math.min(expandedHeight, collapsedHeight + group.getBoundingClientRect().height);
-            if (Math.abs(element.getBoundingClientRect().width - width) > 1 ||
+            if (Math.abs(getWidth() - width) > 1 ||
+                (viewport && (viewport.getBoundingClientRect().width !== viewportWidth || viewport.clientHeight !== viewportHeight)) ||
                 Math.abs(element.clientHeight - expectedHeight) > 1 || entries.some(entry => {
-                    if (entry.target === element) { return false; }
+                    if (entry.target === element || entry.target === viewport || entry.target === viewport?.firstElementChild) { return false; }
                     const row = entry.target as HTMLElement;
                     const style = getComputedStyle(row);
                     const spacing = (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
@@ -879,8 +904,8 @@ export class DocTreeController {
         this.render();
         position = this.positionOf(key);
         if (position < 0) { return; }
-        const element = this.options.element;
-        const top = position * this.rowHeight;
+        const element = this.scrollElement;
+        const top = this.getListStart() + position * this.rowHeight;
         const aboveViewport = top < element.scrollTop;
         const belowViewport = top + this.rowHeight > element.scrollTop + element.clientHeight;
         if (align === "center" && element.clientHeight > 0 && (aboveViewport || belowViewport)) {
@@ -908,11 +933,14 @@ export class DocTreeController {
     }
 
     public getScrollAnchor(): IDocTreeScrollAnchor {
-        const position = Math.floor(this.options.element.scrollTop / this.rowHeight);
+        if (this.options.scrollElement && !this.list.getClientRects().length) { return undefined; }
+        const localTop = this.scrollElement.scrollTop - this.getListStart();
+        const position = Math.floor(localTop / this.rowHeight);
         const row = this.model.rowAt(position);
-        return {notebookId: row?.item?.notebookId, id: row?.item?.id,
-            occurrenceKey: row?.item?.occurrenceKey, parentKey: row?.parent?.occurrenceKey,
-            index: row?.index ?? 0, offset: this.options.element.scrollTop - position * this.rowHeight};
+        if (!row) { return undefined; }
+        return {notebookId: row.item?.notebookId, id: row.item?.id,
+            occurrenceKey: row.item?.occurrenceKey, parentKey: row.parent?.occurrenceKey,
+            index: row.index, offset: localTop - position * this.rowHeight};
     }
 
     public restoreScrollAnchor(anchor?: IDocTreeScrollAnchor) {
@@ -926,7 +954,7 @@ export class DocTreeController {
             position = child ? this.positionOf(child.occurrenceKey) : this.positionOf(anchor.parentKey) + 1 + anchor.index;
         }
         if (position >= 0) {
-            this.options.element.scrollTop = position * this.rowHeight + anchor.offset;
+            this.scrollElement.scrollTop = this.getListStart() + position * this.rowHeight + anchor.offset;
         }
     }
 
@@ -988,8 +1016,7 @@ export class DocTreeController {
             offsets.add(Math.floor(index / this.batchSize()) * this.batchSize());
             required.set(directory, offsets);
         };
-        const viewport = getDocTreeWindow(this.model.rowCount, this.options.element.scrollTop,
-            this.options.element.clientHeight, this.rowHeight);
+        const viewport = this.getRenderWindow();
         for (let position = viewport.start; position < viewport.end; position++) {
             const row = this.model.rowAt(position);
             if (row?.parent) { retain(row.parent, row.index); }
@@ -1061,8 +1088,7 @@ export class DocTreeController {
             this.restoreScrollAnchor(anchor);
         }
         // 首批数据可能远离当前视区，恢复展开和选择后补齐可见范围再替换已有行。
-        const nextViewport = getDocTreeWindow(this.model.rowCount, this.options.element.scrollTop,
-            this.options.element.clientHeight, this.rowHeight);
+        const nextViewport = this.getRenderWindow();
         const loaded = new Set<string>();
         for (let position = nextViewport.start; position < nextViewport.end; position++) {
             const row = this.model.rowAt(position);
@@ -1413,8 +1439,7 @@ export class DocTreeController {
 
     private evictPages() {
         let count = Array.from(this.pages.values()).reduce((total, page) => total + page.count, 0);
-        const viewport = getDocTreeWindow(this.model.rowCount, this.options.element.scrollTop,
-            this.options.element.clientHeight, this.rowHeight);
+        const viewport = this.getRenderWindow();
         for (const [key, page] of this.pages) {
             if (count <= 32768 && this.pages.size <= 64) {
                 break;
@@ -1530,7 +1555,7 @@ export class DocTreeController {
             this.rowHeight = rowHeight;
             this.restoreScrollAnchor(anchor);
         }
-        const viewport = getDocTreeWindow(this.model.rowCount, element.scrollTop, element.clientHeight, this.rowHeight);
+        const viewport = this.getRenderWindow();
         const positions = new Set<number>();
         for (let index = viewport.start; index < viewport.end; index++) {
             positions.add(index);

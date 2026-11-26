@@ -60,6 +60,7 @@ export class Files extends Model {
     public parent: Tab;
     public closeElement: HTMLElement;
     public docTree: DocTreeController;
+    private scrollElement: HTMLElement;
     private saveStateTimeout: number;
     private selectionProgress = createDocTreeSelectionProgress();
     private dragSelection: {version: number, items: IDocTreeItem[], key: string};
@@ -115,7 +116,7 @@ export class Files extends Model {
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="file-tree__items fn__flex-1" style="padding-top: 2px;"></div>
+<div class="fn__flex-1" data-file-tree-scroll><div><div class="file-tree__items" style="padding-top: 2px;"></div></div></div>
 <ul class="b3-list fn__flex-column" style="min-height: auto;height:30px;border-top: 1px solid var(--b3-border-color);transition: height  .2s cubic-bezier(0, 0, .2, 1) 0ms">
     <li class="b3-list-item" data-type="toggle">
         <span class="b3-list-item__toggle">
@@ -127,10 +128,12 @@ export class Files extends Model {
     <ul class="fn__none fn__flex-1"></ul>
 </ul>`;
         this.actionsElement = options.tab.panelElement.firstElementChild as HTMLElement;
-        this.element = this.actionsElement.nextElementSibling as HTMLElement;
+        this.scrollElement = this.actionsElement.nextElementSibling as HTMLElement;
+        this.element = this.scrollElement.querySelector(".file-tree__items");
         this.closeElement = options.tab.panelElement.lastElementChild as HTMLElement;
         this.docTree = new DocTreeController({
             element: this.element,
+            scrollElement: this.scrollElement,
             roots: [],
             renderRow: item => this.renderTreeRow(item),
             onSelectionChange: () => {
@@ -140,7 +143,7 @@ export class Files extends Model {
             onSelectionProgress: this.selectionProgress.update,
             onRowsRendered: () => this.refreshPublishAccessSwitch(),
         });
-        this.element.addEventListener("scroll", () => {
+        this.scrollElement.addEventListener("scroll", () => {
             window.clearTimeout(this.saveStateTimeout);
             this.saveStateTimeout = window.setTimeout(() => this.getOpenPaths(), 250);
         }, {passive: true});
@@ -148,7 +151,7 @@ export class Files extends Model {
             openFileById({app: options.app, id, action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]});
         }, false, this.parentDocClick);
         this.closeElement.addEventListener("click", (event) => {
-            setPanelFocus(this.element.parentElement);
+            setPanelFocus(options.tab.panelElement);
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.closeElement)) {
                 const type = target.getAttribute("data-type");
@@ -240,7 +243,7 @@ export class Files extends Model {
                 target = target.parentElement;
             }
             if (isFocus) {
-                setPanelFocus(this.element.parentElement);
+                setPanelFocus(options.tab.panelElement);
             }
         });
         this.element.addEventListener("mousedown", (event) => {
@@ -518,7 +521,7 @@ export class Files extends Model {
                 }
             }
             if (needFocus) {
-                setPanelFocus(this.element.parentElement);
+                setPanelFocus(options.tab.panelElement);
             }
         });
         this.element.addEventListener("dragstart", (event: DragEvent & {target: HTMLElement}) => {
@@ -580,7 +583,7 @@ export class Files extends Model {
             sourceOnlyRoot: null
         };
         let counter = 0;
-        this.element.addEventListener("scroll", () => {
+        this.scrollElement.addEventListener("scroll", () => {
             if (dragOverLastObj.refresh && !dragOverLastObj.rafId) {
                 dragOverLastObj.rafId = requestAnimationFrame(() => {
                     dragOverLastObj.rafId = null;

@@ -18,6 +18,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -1821,6 +1822,9 @@ func serveDebug(ginServer *gin.Engine) {
 	if !util.EnablePprof {
 		return
 	}
+
+	runtime.SetBlockProfileRate(int(time.Millisecond))
+	runtime.SetMutexProfileFraction(5)
 
 	ginServer.GET("/debug/pprof/", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
 	ginServer.GET("/debug/pprof/allocs", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))

@@ -2349,7 +2349,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to choose Upload, Link, Assets, Built-in, or Random. The cover is saved only after you select an image, confirm a link, or choose Random. Closing the menu or canceling a picker leaves the document unchanged and does not import an image. To reuse an existing image without uploading it again, choose Assets. Random imports a randomly selected built-in image; you can also use Random in the cover toolbar to replace an existing cover. Images may repeat. If the built-in image list is unavailable, Random uses a CSS pattern."
+					"Data": " to choose Upload, Link, Assets, Built-in, or Random. The cover is saved only after you select an image, confirm a link, or choose Random. Closing the menu or canceling a picker leaves the document unchanged and does not import an image. To reuse an existing image without uploading it again, choose Assets. On desktop, you can also drag an image from the workspace’s global assets folder or one of its subfolders onto the cover area of a document in an unencrypted notebook. Random imports a randomly selected built-in image; you can also use Random in the cover toolbar to replace an existing cover. Images may repeat. If the built-in image list is unavailable, Random uses a CSS pattern."
 				}
 			]
 		}

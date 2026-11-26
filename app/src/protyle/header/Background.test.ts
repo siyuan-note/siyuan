@@ -1,8 +1,11 @@
 import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
+import {win32} from "node:path";
 import {test} from "node:test";
 import {createSourceFile, forEachChild, isCallExpression, isMethodDeclaration, ScriptTarget, transpileModule} from "typescript";
 import {getAssetUploadSuccesses} from "../upload/uploadResult";
+import {captureUploadDocument, isUploadDocumentAvailable} from "../upload/insertPosition";
+import {hasDataTransferFiles} from "../upload/localDropFiles";
 
 test("adding a document icon opens selection without changing the document or its header", () => {
     const source = createSourceFile("Background.ts", readFileSync(__dirname + "/Background.ts", "utf8"), ScriptTarget.Latest, true);
@@ -58,20 +61,25 @@ test("adding a document icon opens selection without changing the document or it
     assert.equal(panels.length, 2, "read-only headers cannot open icon selection");
 });
 
-const createCoverHarness = (mobile: boolean, importCovers = false) => {
+const createCoverHarness = (mobile: boolean, importCovers = false, browser = false) => {
     const {parse} = require("ifdef-loader/preprocessor");
     const source = createSourceFile("Background.ts", parse(readFileSync(__dirname + "/Background.ts", "utf8"),
-        {MOBILE: mobile, BROWSER: false}), ScriptTarget.Latest, true);
+        {MOBILE: mobile, BROWSER: browser}), ScriptTarget.Latest, true);
     const methods: string[] = [];
     let listener: string;
+    let dropListener: string;
     const collect = (node: import("typescript").Node) => {
         if (isMethodDeclaration(node) && ["openBackgroundMenu", "openBuiltInPicker", "openAssetMenu", "openLinkDialog",
-            "setRandomBackground", "uploadBuiltInCover"].includes(node.name.getText(source))) {
+            "setRandomBackground", "uploadBuiltInCover", "dropCover"].includes(node.name.getText(source))) {
             methods.push(node.getText(source));
         }
-        if (isCallExpression(node) && node.expression.getText(source) === "this.element.addEventListener" &&
-            node.arguments[0].getText(source) === '"click"') {
-            listener = node.getText(source);
+        if (isCallExpression(node) && node.expression.getText(source) === "this.element.addEventListener") {
+            const event = node.arguments[0].getText(source);
+            if (event === '"click"') {
+                listener = node.getText(source);
+            } else if (event === '"drop"') {
+                dropListener = node.getText(source);
+            }
         }
         forEachChild(node, collect);
     };
@@ -85,6 +93,12 @@ const createCoverHarness = (mobile: boolean, importCovers = false) => {
     const messages: string[] = [];
     const errors: unknown[] = [];
     const randomRanges: number[][] = [];
+    const resolvedPaths: string[] = [];
+    let resolvedAsset: Promise<{code: number; data?: string}> = Promise.resolve({code: 1});
+    let droppedPath = "";
+    let localFileSystem = true;
+    let encrypted = false;
+    let uploadDisabled = false;
     let coverData: Promise<{allCovers: {file: string}[]} | null> = Promise.resolve({
         allCovers: [{file: "first.webp"}, {file: "last cover.webp"}],
     });
@@ -103,9 +117,9 @@ const createCoverHarness = (mobile: boolean, importCovers = false) => {
         popup: (position: IPosition) => positions.push(position),
         fullscreen: (position: string) => positions.push(position),
     };
-    const protyle = {element: {}, block: {rootID: "document"}, disabled: false};
+    const protyle = {element: {isConnected: true}, block: {rootID: "document"}, notebookId: "notebook", disabled: false};
     const window = {siyuan: {menus: {menu}, languages: {upload: "upload", link: "link", assets: "assets",
-        builtIn: "builtIn", random: "random", uploadError: "uploadError"}}};
+        builtIn: "builtIn", random: "random", uploadError: "uploadError"}, config: {system: {dataDir: "D:/Workspace/data"}}}};
     const toggleMenu = (options: {target: unknown; build: (value: typeof menu) => void; show: (value: typeof menu) => void}) => {
         if (anchor === options.target) {
             menu.remove();
@@ -118,8 +132,10 @@ const createCoverHarness = (mobile: boolean, importCovers = false) => {
     };
     const Background = new Function("window", "toggleMenu", "assetMenu", "openInputDialog", "openCoverPicker",
         "bindPopoverDialog", "Constants", "fetchPost", "hideElements", "fetchCoverData", "getRandom", "bgs",
-        "fetch", "uploadFiles", "getAssetUploadSuccesses", "showMessage", "console", transpileModule(
-            `class Background {${methods.join("\n")} bind(protyle) {${listener}}} return Background;`,
+        "fetch", "uploadFiles", "getAssetUploadSuccesses", "showMessage", "console", "captureUploadDocument",
+        "isUploadDocumentAvailable", "hasDataTransferFiles", "isProtyleUploadDisabled", "webUtils",
+        "getHostCapabilities", "isEncryptedBox", "originalPath", "fetchSyncPost", transpileModule(
+            `class Background {${methods.join("\n")} bind(protyle) {${listener};${dropListener}}} return Background;`,
             {compilerOptions: {target: ScriptTarget.ES2021}}).outputText)(window, toggleMenu,
         (_protyle: unknown, position: IPosition, select: (url: string) => void) => {
             assert.equal(anchor, undefined, "the source menu closes before the asset picker opens");
@@ -138,12 +154,19 @@ const createCoverHarness = (mobile: boolean, importCovers = false) => {
             files.push(...uploaded);
             uploadCallbacks.push(callback);
             uploadOptions.push(options);
-        }, getAssetUploadSuccesses, (message: string) => messages.push(message), {error: (error: unknown) => errors.push(error)});
+        }, getAssetUploadSuccesses, (message: string) => messages.push(message), {error: (error: unknown) => errors.push(error)},
+        captureUploadDocument, isUploadDocumentAvailable, hasDataTransferFiles, () => uploadDisabled,
+        {getPathForFile: () => droppedPath}, () => ({localFileSystem}), () => encrypted, () => win32,
+        (url: string, request: {path: string}) => {
+            assert.equal(url, "/api/asset/resolveAssetPath");
+            resolvedPaths.push(request.path);
+            return resolvedAsset;
+        });
     const background = new Background();
     const element = new EventTarget();
     Object.assign(element, {isEqualNode: (other: unknown) => other === element, isConnected: true,
         querySelector: () => ({click: () => uploads.push("file-picker")})});
-    Object.assign(background, {element, ial: {}, imgElement: {src: "data:image/png;base64,placeholder"},
+    Object.assign(background, {element, ial: {}, coverDropRequest: 0, imgElement: {src: "data:image/png;base64,placeholder"},
         render: (...args: unknown[]) => renders.push(args)});
     if (!importCovers) {
         background.uploadBuiltInCover = (_protyle: unknown, name: string) => uploads.push(name);
@@ -158,13 +181,95 @@ const createCoverHarness = (mobile: boolean, importCovers = false) => {
         element.dispatchEvent(event);
         return event;
     };
+    const drop = (path: string, file = new File(["cover"], "cover.png", {type: "image/png"})) => {
+        droppedPath = path;
+        const event = new Event("drop", {cancelable: true});
+        Object.assign(event, {dataTransfer: {types: ["Files"], files: [file]}, clientX: 12, clientY: 24});
+        element.dispatchEvent(event);
+        return event;
+    };
     return {background, protyle, writes, uploads, renders, items, positions, click, menu,
         asset: () => asset, link: () => link, builtIn: () => builtIn, dialog, files, uploadCallbacks, uploadOptions,
         reads, messages, errors, randomRanges, setCovers: (value: typeof coverData) => { coverData = value; },
-        setResponse: (value: typeof coverResponse) => { coverResponse = value; }};
+        setResponse: (value: typeof coverResponse) => { coverResponse = value; },
+        drop, resolvedPaths, setResolvedAsset: (value: typeof resolvedAsset) => { resolvedAsset = value; },
+        setLocalFileSystem: (value: boolean) => { localFileSystem = value; },
+        encrypt: () => { encrypted = true; }, disableUpload: () => { uploadDisabled = true; }};
 };
 
 const settleCover = () => new Promise(resolve => setImmediate(resolve));
+
+test("dropping a desktop workspace asset reuses the exact file without uploading", async () => {
+    const h = createCoverHarness(false);
+    const source = "d:/workspace/data/assets/scans/2026/my cover.png";
+    h.setResolvedAsset(Promise.resolve({code: 0, data: "D:/Workspace/data/assets/scans/2026/my cover.png"}));
+    assert.equal(h.drop(source).defaultPrevented, true);
+    await settleCover();
+    assert.deepEqual(h.resolvedPaths, ["assets/scans/2026/my cover.png"]);
+    assert.deepEqual(h.writes, [["/api/attr/setBlockAttrs", {id: "document",
+        attrs: {"title-img": 'background-image:url("assets/scans/2026/my cover.png")'}}]]);
+    assert.deepEqual(h.files, []);
+});
+
+test("cover drops keep uploading external, unresolved and encrypted-notebook images", async () => {
+    const h = createCoverHarness(false);
+    h.drop("D:/Workspace/data/assets-other/cover.png");
+    h.drop("E:/assets/cover.png");
+    h.drop("");
+    assert.deepEqual(h.resolvedPaths, []);
+    h.setResolvedAsset(Promise.resolve({code: 0, data: "D:/Workspace/data/other/assets/nested/cover.png"}));
+    h.drop("D:/Workspace/data/assets/nested/cover.png");
+    await settleCover();
+    h.encrypt();
+    h.drop("D:/Workspace/data/assets/nested/cover.png");
+    assert.deepEqual(h.resolvedPaths, ["assets/nested/cover.png"]);
+    assert.equal(h.files.length, 5);
+    assert.deepEqual(h.uploadOptions[0], {source: "drop", target: "background", position: {x: 12, y: 24}});
+    h.uploadCallbacks.at(-1)(JSON.stringify({data: {succMap: {"cover.png": "assets/cover.png?box=notebook"}}}));
+    assert.deepEqual(h.writes, [["/api/attr/setBlockAttrs", {id: "document",
+        attrs: {"title-img": 'background-image:url("assets/cover.png?box=notebook")'}}]]);
+});
+
+test("cover drop ignores unsupported files and stops when the document changes", async () => {
+    const h = createCoverHarness(false);
+    const source = "D:/Workspace/data/assets/nested/cover.png";
+    h.drop(source, new File(["text"], "file.txt", {type: "text/plain"}));
+    h.protyle.disabled = true;
+    h.drop(source);
+    h.protyle.disabled = false;
+    assert.deepEqual(h.resolvedPaths, []);
+    h.setResolvedAsset(Promise.resolve({code: 0, data: source}));
+    h.drop(source);
+    h.protyle.block.rootID = "other";
+    await settleCover();
+    assert.deepEqual(h.writes, []);
+    assert.deepEqual(h.files, []);
+    h.disableUpload();
+    h.drop(source);
+    assert.deepEqual(h.resolvedPaths, ["assets/nested/cover.png"]);
+});
+
+test("a pending workspace asset cannot replace a later cover drop", async () => {
+    const h = createCoverHarness(false);
+    const source = "D:/Workspace/data/assets/nested/cover.png";
+    h.setResolvedAsset(Promise.resolve({code: 0, data: source}));
+    h.drop(source);
+    h.drop("D:/Pictures/replacement.png");
+    h.uploadCallbacks[0](JSON.stringify({data: {succMap: {"cover.png": "assets/replacement.png"}}}));
+    await settleCover();
+    assert.equal(h.writes.length, 1);
+    assert.equal(h.background.ial["title-img"], 'background-image:url("assets/replacement.png")');
+});
+
+test("browser, mobile and remote desktop cover drops use the file upload path", () => {
+    const remote = createCoverHarness(false);
+    remote.setLocalFileSystem(false);
+    for (const h of [createCoverHarness(false, false, true), createCoverHarness(true), remote]) {
+        h.drop("D:/Workspace/data/assets/nested/cover.png");
+        assert.deepEqual(h.resolvedPaths, []);
+        assert.equal(h.files.length, 1);
+    }
+});
 
 for (const mobile of [false, true]) {
     test(`adding a cover selects a source without provisional writes (${mobile ? "mobile" : "desktop"})`, () => {

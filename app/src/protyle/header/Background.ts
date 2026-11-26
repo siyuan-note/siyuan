@@ -5,7 +5,7 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {getRandom, isMobile} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {uploadFiles} from "../upload";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {upDownHint} from "../../util/upDownHint";
 /// #if !MOBILE
@@ -25,6 +25,13 @@ import {getAssetUploadSuccesses} from "../upload/uploadResult";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {showMessage} from "../../dialog/message";
 import {transaction} from "../wysiwyg/transaction";
+import {captureUploadDocument, isUploadDocumentAvailable} from "../upload/insertPosition";
+import {isProtyleUploadDisabled} from "../runtimeCapabilities";
+/// #if !MOBILE && !BROWSER
+import {webUtils} from "electron";
+import {getHostCapabilities} from "../../util/hostCapabilities";
+import {isEncryptedBox, originalPath} from "../../util/pathName";
+/// #endif
 /// #if !MOBILE
 import {openDocTagMenu} from "./openDocTagMenu";
 /// #endif
@@ -125,6 +132,7 @@ export class Background {
     private tagsElement: HTMLElement;
     private transparentData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
     private dragOccurred = false;
+    private coverDropRequest = 0;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -172,28 +180,7 @@ export class Background {
         this.element.addEventListener("dragover", async (event) => {
             event.preventDefault();
         });
-        this.element.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
-            if (hasDataTransferFiles(event.dataTransfer.types) && event.dataTransfer.files[0]?.type.indexOf("image") !== -1) {
-                uploadFiles(protyle, [event.dataTransfer.files[0]], undefined, (responseText) => {
-                    const response = JSON.parse(responseText);
-                    const assetPath = getAssetUploadSuccesses(response.data)[0]?.path;
-                    if (!assetPath) {
-                        return;
-                    }
-                    const style = `background-image:url("${assetPath}")`;
-                    this.ial["title-img"] = style;
-                    this.render(this.ial, protyle.block.rootID);
-                    fetchPost("/api/attr/setBlockAttrs", {
-                        id: protyle.block.rootID,
-                        attrs: {"title-img": style}
-                    });
-                }, undefined, {
-                    source: "drop",
-                    target: "background",
-                    position: {x: event.clientX, y: event.clientY},
-                });
-            }
-        });
+        this.element.addEventListener("drop", (event) => { void this.dropCover(protyle, event); });
         this.imgElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
             event.preventDefault();
             if (!this.element.firstElementChild.querySelector(".protyle-icons").classList.contains("fn__none")) {
@@ -529,6 +516,58 @@ export class Background {
             document.onmousemove = (e) => onMouseMove(e as MouseEvent);
             document.onmouseup = (e) => onMouseUp(e as MouseEvent);
         });
+    }
+
+    private async dropCover(protyle: IProtyle, event: DragEvent) {
+        const transfer = event.dataTransfer;
+        if (!transfer || !hasDataTransferFiles(transfer.types) ||
+            protyle.disabled || isProtyleUploadDisabled(protyle)) {
+            return;
+        }
+        const file = transfer.files[0];
+        if (!file?.type.startsWith("image/")) {
+            return;
+        }
+        event.preventDefault();
+        const doc = captureUploadDocument(protyle);
+        const request = ++this.coverDropRequest;
+        const active = () => request === this.coverDropRequest && !protyle.disabled &&
+            this.element.isConnected && isUploadDocumentAvailable(protyle, doc);
+        const save = (assetPath: string) => {
+            if (assetPath && active()) {
+                const style = `background-image:url("${assetPath}")`;
+                this.ial["title-img"] = style;
+                this.render(this.ial, doc.rootID);
+                fetchPost("/api/attr/setBlockAttrs", {id: doc.rootID, attrs: {"title-img": style}});
+            }
+        };
+        /// #if !MOBILE && !BROWSER
+        if (getHostCapabilities().localFileSystem && !isEncryptedBox(doc.notebookID)) {
+            const filePath = webUtils.getPathForFile(file);
+            const path = originalPath();
+            if (path.isAbsolute(filePath)) {
+                const assetsDir = path.join(window.siyuan.config.system.dataDir, "assets");
+                const relative = path.relative(assetsDir, filePath);
+                const assetPath = "assets/" + relative.split(path.sep).join("/");
+                if (relative && relative !== ".." && !relative.startsWith(".." + path.sep) &&
+                    !path.isAbsolute(relative) && !/[%?#"\\\r\n]/.test(assetPath)) {
+                    // 确认可访问的资源指向拖入的文件，避免同名资源或符号链接指向其他位置。
+                    const response = await fetchSyncPost("/api/asset/resolveAssetPath", {path: assetPath}, undefined, false)
+                        .catch((): undefined => undefined);
+                    if (response?.code === 0 && typeof response.data === "string" && path.relative(filePath, response.data) === "") {
+                        save(assetPath);
+                        return;
+                    }
+                    if (!active()) {
+                        return;
+                    }
+                }
+            }
+        }
+        /// #endif
+        uploadFiles(protyle, [file], undefined, (responseText) => {
+            save(getAssetUploadSuccesses(JSON.parse(responseText).data)[0]?.path);
+        }, undefined, {source: "drop", target: "background", position: {x: event.clientX, y: event.clientY}});
     }
 
     private openBackgroundMenu(protyle: IProtyle, target: HTMLElement) {

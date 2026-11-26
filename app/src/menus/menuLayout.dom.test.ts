@@ -1035,7 +1035,7 @@ test("menus adapt to layout changes and optional whole-menu mouse scrolling", {
     const background = readFileSync(path.join(__dirname, "../protyle/header/Background.ts"), "utf8");
     const {parse} = require("ifdef-loader/preprocessor");
     for (const mobile of [false, true]) {
-        const source = createSourceFile("Background.ts", parse(background, {MOBILE: mobile}), ScriptTarget.Latest, true);
+        const source = createSourceFile("Background.ts", parse(background, {MOBILE: mobile, BROWSER: true}), ScriptTarget.Latest, true);
         let openTag: string;
         const findOpenTag = (node: import("typescript").Node) => {
             if (isMethodDeclaration(node) && node.name.getText(source) === "openTag") {

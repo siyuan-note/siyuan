@@ -40,6 +40,39 @@ func TestRemoveRefCacheByPathEvictsWholeDefinition(t *testing.T) {
 	}
 }
 
+func TestRefCacheIndexesFollowReplacedAndExpiredEntries(t *testing.T) {
+	clearRefCache()
+	t.Cleanup(clearRefCache)
+	const boxID, defID = "ordinary-notebook", "reference-target"
+	key := refCacheKey(defID, boxID)
+	oldRef := &Ref{DefBlockID: defID, BlockID: "source", Box: boxID, Path: "/old.sy"}
+	newRef := &Ref{DefBlockID: defID, BlockID: "source", Box: boxID, Path: "/new.sy"}
+	putRefCache(boxID, oldRef)
+	putRefCache(boxID, newRef)
+	removeRefCacheByPath(boxID, oldRef.Path)
+	cached, ok := defIDRefsCache.Get(key)
+	if !ok || cached.(*refCacheEntry).refs["source"] != newRef {
+		t.Fatal("invalidating the old path evicted the relocated reference")
+	}
+	removeRefCacheByPath(boxID, newRef.Path)
+	if _, ok = defIDRefsCache.Get(key); ok {
+		t.Fatal("invalidating the new path left a cache entry")
+	}
+
+	putRefCache(boxID, newRef)
+	refCacheMu.Lock()
+	cached, _ = defIDRefsCache.Get(key)
+	defIDRefsCache.Set(key, cached, time.Nanosecond)
+	time.Sleep(20 * time.Millisecond)
+	defIDRefsCache.DeleteExpired()
+	definitions := len(refCacheKeysByDefID)
+	sources := len(refCacheKeysBySource)
+	refCacheMu.Unlock()
+	if definitions != 0 || sources != 0 {
+		t.Fatalf("expiration left index entries: definitions=%d, sources=%d", definitions, sources)
+	}
+}
+
 func TestRefCachePartialPutMergesCompleteDatabaseResult(t *testing.T) {
 	const (
 		boxID        = "20260904030500-encbox1"

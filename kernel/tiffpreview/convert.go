@@ -144,8 +144,8 @@ func Convert(ctx context.Context, source []byte, thumbnail bool) (output []byte,
 		img = imaging.Rotate90(img)
 	}
 	defer clearPixels(img)
-	if thumbnail && img.Bounds().Dx() > 520 {
-		img = imaging.Resize(img, 520, 0, imaging.Lanczos)
+	if thumbnail {
+		img = imaging.Fit(img, 520, 520, imaging.Lanczos)
 		defer clearPixels(img)
 	}
 	var buffer bytes.Buffer

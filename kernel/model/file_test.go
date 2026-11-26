@@ -973,7 +973,7 @@ func TestGetHPathsByPathsUsesDocumentRoot(t *testing.T) {
 		t.Fatalf("unexpected document path: got %q, err=%v", hPath, err)
 	}
 
-	hPaths, err := GetHPathsByPaths([]string{fixture.sourcePath})
+	hPaths, err := GetHPathsByPaths([]string{fixture.sourcePath}, nil)
 	if nil != err || !reflect.DeepEqual([]string{"File operation test/Renamed"}, hPaths) {
 		t.Fatalf("unexpected document paths: got %v, err=%v", hPaths, err)
 	}

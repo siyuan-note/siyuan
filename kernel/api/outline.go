@@ -33,35 +33,19 @@ var getDocOutline = contractHandler(apicontract.GetDocOutline, func(c *gin.Conte
 	var headings []*model.Path
 	var err error
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
-	if notebook != "" && model.IsEncryptedBox(notebook) {
-		if isReadOnlyRole {
-			headings, err = model.OutlineInBoxForReader(rootID, preview, notebook)
-		} else {
-			headings, err = model.OutlineInBox(rootID, preview, notebook)
+	if isReadOnlyRole {
+		publishAccess := model.GetPublishAccess()
+		allowed := func(bt *treenode.BlockTree) bool {
+			return model.GetBlockTreePublishAccessStatus(c, publishAccess, bt) == model.PublishAccessAllowed
 		}
+		headings, err = model.OutlineForReader(rootID, preview, allowed, publishHeadingFilter(c, publishAccess))
+	} else if notebook != "" && model.IsEncryptedBox(notebook) {
+		headings, err = model.OutlineInBox(rootID, preview, notebook)
 	} else {
-		if isReadOnlyRole {
-			headings, err = model.OutlineForReader(rootID, preview)
-		} else {
-			headings, err = model.Outline(rootID, preview)
-		}
+		headings, err = model.Outline(rootID, preview)
 	}
 	if err != nil {
 		return apicontract.Failure[[]*apicontract.SearchPath](1, err.Error())
-	}
-	if isReadOnlyRole {
-		publishAccess := model.GetPublishAccess()
-		bt := treenode.GetBlockTree(rootID)
-		if bt != nil {
-			passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-			if password != "" && !model.CheckPublishAuthCookie(c, passwordID, password) {
-				headings = nil
-			}
-			publishIgnore := model.GetDisablePublishAccess(publishAccess)
-			if !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-				headings = nil
-			}
-		}
 	}
 	var paths []*apicontract.SearchPath
 	if isReadOnlyRole {
@@ -101,19 +85,31 @@ var getDocHeadingNumbers = contractHandler(apicontract.GetDocHeadingNumbers, fun
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		bt := treenode.GetBlockTree(rootID)
-		if nil == bt {
+		if model.GetBlockTreePublishAccessStatus(c, publishAccess, bt) != model.PublishAccessAllowed {
 			numbers = map[string]string{}
 		} else {
-			passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
-			if "" != password && !model.CheckPublishAuthCookie(c, passwordID, password) {
-				numbers = map[string]string{}
-			}
-			publishIgnore := model.GetDisablePublishAccess(publishAccess)
-			if !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
-				numbers = map[string]string{}
+			allowed := publishHeadingFilter(c, publishAccess)
+			for id := range numbers {
+				if !allowed(id) {
+					delete(numbers, id)
+				}
 			}
 		}
 	}
 
 	return apicontract.Success(numbers)
 })
+
+func publishHeadingFilter(c *gin.Context, access model.PublishAccess) func(string) bool {
+	blocked := make(map[string]bool)
+	for _, item := range access {
+		allowed := item.Visible
+		if item.Password != "" {
+			allowed = model.CheckPublishAuthCookie(c, item.ID, item.Password)
+		}
+		if item.Disable || !allowed {
+			blocked[item.ID] = true
+		}
+	}
+	return func(id string) bool { return !blocked[id] }
+}

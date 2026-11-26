@@ -1710,9 +1710,19 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 	return
 }
 
-func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
+func GetHPathsByPaths(paths []string, allowed func(*treenode.BlockTree) bool) (hPaths []string, err error) {
+	var requested map[string]bool
+	if allowed != nil {
+		requested = make(map[string]bool, len(paths))
+		for _, p := range paths {
+			requested[p] = true
+		}
+	}
 	pathsBoxes := getBoxesByPaths(paths)
 	for p, box := range pathsBoxes {
+		if requested != nil && !requested[p] {
+			continue
+		}
 		if nil == box {
 			logging.LogWarnf("box not found by path [%s]", p)
 			continue
@@ -1721,6 +1731,9 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 		bt := treenode.GetBlockTreeRootByPath(box.ID, p)
 		if nil == bt {
 			logging.LogWarnf("block tree not found by path [%s]", p)
+			continue
+		}
+		if allowed != nil && !allowed(bt) {
 			continue
 		}
 

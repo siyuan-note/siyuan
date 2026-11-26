@@ -294,13 +294,14 @@ var getHPathsByPaths = contractHandler(apicontract.GetHPathsByPaths, getHPathsBy
 
 func getHPathsByPathsContract(c *gin.Context, request apicontract.FileTreePathsRequest) apicontract.Response[[]string] {
 
-	pathsArg := request.Paths
-	var paths []string
-	for _, p := range pathsArg {
-		paths = append(paths, p)
+	var allowed func(*treenode.BlockTree) bool
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		allowed = func(bt *treenode.BlockTree) bool {
+			return model.CheckHierarchyPathAccessByPublishAccess(c, publishAccess, bt)
+		}
 	}
-	paths = filterFileTreePathsByPublishMetadataAccess(c, paths)
-	hPath, err := model.GetHPathsByPaths(paths)
+	hPath, err := model.GetHPathsByPaths(request.Paths, allowed)
 	if err != nil {
 		return apicontract.Failure[[]string](-1, err.Error())
 	}
@@ -407,26 +408,6 @@ func getIDsByHPathContract(c *gin.Context, request apicontract.FileTreeOptionalP
 	}
 	ids = filterFileTreeBlockIDsByPublishDiscoverability(c, ids, notebook)
 	return apicontract.Success(apicontract.NewLegacyPathIDs(ids))
-}
-
-func filterFileTreePathsByPublishMetadataAccess(c *gin.Context, paths []string) (ret []string) {
-	if !model.IsReadOnlyRoleContext(c) {
-		return paths
-	}
-
-	ids := make([]string, 0, len(paths))
-	for _, p := range paths {
-		ids = append(ids, util.GetTreeID(p))
-	}
-	blockTrees := treenode.GetBlockTrees(ids)
-	publishAccess := model.GetPublishAccess()
-	ret = make([]string, 0, len(paths))
-	for i, p := range paths {
-		if model.CheckBlockTreeMetadataAccessableByPublishAccess(c, publishAccess, blockTrees[ids[i]]) {
-			ret = append(ret, p)
-		}
-	}
-	return
 }
 
 func filterFileTreeBlockIDsByPublishDiscoverability(c *gin.Context, ids []string, boxID string) (ret []string) {

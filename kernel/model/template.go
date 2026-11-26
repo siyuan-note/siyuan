@@ -629,11 +629,23 @@ func dynamicIconTemplateFuncs(c *gin.Context) (ret template.FuncMap) {
 			ret[name] = fn
 		}
 	}
+	ret["replace"] = replaceDynamicIconText
 	if IsReadOnlyRoleContext(c) {
 		delete(ret, "getHPathByID")
 		delete(ret, "statBlock")
 	}
 	return
+}
+
+func replaceDynamicIconText(old, replacement, source string) (string, error) {
+	limit := maxDynamicIconTemplateOutputSize
+	if len(source) > limit || len(replacement) > limit {
+		return "", fmt.Errorf("dynamic icon replacement input exceeds %d bytes", limit)
+	}
+	if growth := len(replacement) - len(old); growth > 0 && strings.Count(source, old) > (limit-len(source))/growth {
+		return "", fmt.Errorf("dynamic icon replacement output exceeds %d bytes", limit)
+	}
+	return strings.ReplaceAll(source, old, replacement), nil
 }
 
 func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, err error) {

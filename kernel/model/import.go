@@ -17,6 +17,7 @@ import (
 	"image/png"
 	"io/fs"
 	"maps"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -1212,7 +1213,6 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 }
 
 // importSYAssets 将包内资源写入目标存储，并建立包内路径到目标路径的精确映射。
-// 普通笔记本也保留恒等映射，用于清除旧版加密笔记本导出包中残留的 box 查询参数。
 func importSYAssets(unzipRootPath, boxID string) (assetPathMap map[string]string, err error) {
 	assetPathMap = map[string]string{}
 	var assetsDirs []string
@@ -1287,27 +1287,50 @@ func importSYAssets(unzipRootPath, boxID string) (assetPathMap map[string]string
 		return assetPathMap, nil
 	}
 
-	dataAssets := filepath.Join(util.DataDir, "assets")
+	if len(assetsDirs) == 0 {
+		return assetPathMap, nil
+	}
+	destination := filepath.Join(util.DataDir, "assets")
+	if err = os.MkdirAll(destination, 0755); err != nil {
+		return nil, err
+	}
+	root, err := os.OpenRoot(destination)
+	if err != nil {
+		return nil, err
+	}
+	defer root.Close()
 	for _, assetsDir := range assetsDirs {
-		if err = filelock.Walk(assetsDir, func(currentPath string, d fs.DirEntry, walkErr error) error {
+		if err = filepath.WalkDir(assetsDir, func(currentPath string, d fs.DirEntry, walkErr error) error {
 			if walkErr != nil {
 				return walkErr
-			}
-			if d == nil || d.IsDir() || strings.HasSuffix(strings.ToLower(d.Name()), ".sya") {
-				return nil
 			}
 			relPath, relErr := filepath.Rel(assetsDir, currentPath)
 			if relErr != nil {
 				return relErr
 			}
-			assetPath := canonicalAssetReferencePath(path.Join("assets", filepath.ToSlash(relPath)))
-			assetPathMap[assetPath] = assetPath
+			if d.IsDir() {
+				return root.MkdirAll(relPath, 0755)
+			}
+			if !d.Type().IsRegular() {
+				return fmt.Errorf("import non-regular asset [%s]: %w", relPath, fs.ErrInvalid)
+			}
+			if strings.HasSuffix(relPath, ".sya") {
+				if assetInfo, statErr := os.Lstat(strings.TrimSuffix(currentPath, ".sya")); statErr == nil && assetInfo.Mode().IsRegular() {
+					return nil
+				}
+			}
+			targetPath, installErr := installImportedAsset(root, currentPath, relPath)
+			if installErr != nil {
+				return installErr
+			}
+			sourcePath := path.Join("assets", filepath.ToSlash(relPath))
+			targetReference := path.Join("assets", filepath.ToSlash(targetPath))
+			if targetReference != sourcePath {
+				targetReference = (&url.URL{Path: targetReference}).EscapedPath()
+			}
+			assetPathMap[sourcePath] = targetReference
 			return nil
 		}); err != nil {
-			return nil, err
-		}
-		if err = util.CopyUserFile(assetsDir, dataAssets); err != nil {
-			logging.LogErrorf("copy assets from [%s] to [%s] failed: %s", assetsDir, dataAssets, err)
 			return nil, err
 		}
 		if removeErr := os.RemoveAll(assetsDir); removeErr != nil {

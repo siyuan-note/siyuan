@@ -22,6 +22,46 @@ import (
 	"golang.org/x/image/bmp"
 )
 
+func TestImportSYAssetsKeepsExistingAssetAndAnnotation(t *testing.T) {
+	previous := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = previous })
+	source := t.TempDir()
+	existing := filepath.Join(util.DataDir, "assets", "reports", "notes.pdf")
+	incoming := filepath.Join(source, "assets", "reports", "notes.pdf")
+	writeFiles := func(filename, asset, annotation string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+			t.Fatal(err)
+		}
+		for file, content := range map[string]string{filename: asset, filename + ".sya": annotation} {
+			if err := os.WriteFile(file, []byte(content), 0600); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	writeFiles(existing, "Existing asset", "Existing annotation")
+	writeFiles(incoming, "Imported asset", "Imported annotation")
+	paths, err := importSYAssets(source, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	target := rewriteAssetReference("assets/reports/notes.pdf#page=2", assetReferenceRewriteOptions{pathMap: paths})
+	if !strings.HasPrefix(target, "assets/reports/notes-") || !strings.HasSuffix(target, ".pdf#page=2") {
+		t.Fatalf("imported link does not reference the renamed asset: %q", target)
+	}
+	imported := filepath.Join(util.DataDir, filepath.FromSlash(strings.TrimSuffix(target, "#page=2")))
+	for file, expected := range map[string]string{
+		existing: "Existing asset", existing + ".sya": "Existing annotation",
+		imported: "Imported asset", imported + ".sya": "Imported annotation",
+	} {
+		data, err := os.ReadFile(file)
+		if err != nil || string(data) != expected {
+			t.Fatalf("%s = %q, %v; want %q", file, data, err, expected)
+		}
+	}
+}
+
 func TestIsSYNotebookExport(t *testing.T) {
 	tests := []struct {
 		name          string

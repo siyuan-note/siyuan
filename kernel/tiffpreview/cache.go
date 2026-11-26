@@ -39,7 +39,7 @@ func GetOrCreate(ctx context.Context, source []byte, directory string, thumbnail
 	hash := sha256.New()
 	hash.Write([]byte("tiff-first-frame-png-v1"))
 	if thumbnail {
-		hash.Write([]byte{1})
+		hash.Write([]byte{2})
 	}
 	hash.Write(source)
 	digest := hex.EncodeToString(hash.Sum(nil))

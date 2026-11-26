@@ -446,6 +446,21 @@ func CheckBlockTreeMetadataAccessableByPublishAccess(c *gin.Context, publishAcce
 	return password == "" || CheckPublishAuthCookie(c, passwordID, password)
 }
 
+func CheckHierarchyPathAccessByPublishAccess(c *gin.Context, publishAccess PublishAccess, bt *treenode.BlockTree) bool {
+	if !CheckBlockTreeMetadataAccessableByPublishAccess(c, publishAccess, bt) {
+		return false
+	}
+	pathIDs := strings.Split(strings.TrimSuffix(bt.Path, ".sy"), "/")
+	for _, item := range publishAccess {
+		// 层级路径包含笔记本及各级文档的标题，各级密码均需核验。
+		if item.Password != "" && (item.ID == bt.BoxID || slices.Contains(pathIDs, item.ID)) &&
+			!CheckPublishAuthCookie(c, item.ID, item.Password) {
+			return false
+		}
+	}
+	return true
+}
+
 func CheckBlockTreeDiscoverableByPublishAccess(publishAccess PublishAccess, bt *treenode.BlockTree) bool {
 	if bt == nil || IsEncryptedBoxDeniedByPublishAccess(bt.BoxID) {
 		return false

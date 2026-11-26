@@ -199,31 +199,32 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 }
 
 func Outline(rootID string, preview bool) (ret []*Path, err error) {
-	return outlineInBox(rootID, preview, "", false)
+	return outlineInBox(rootID, preview, "", nil, nil)
 }
 
-// OutlineForReader 返回读者可见的大纲，不输出编辑器私有的行级备注。
-func OutlineForReader(rootID string, preview bool) (ret []*Path, err error) {
-	return outlineInBox(rootID, preview, "", true)
+func OutlineForReader(rootID string, preview bool, allowDocument func(*treenode.BlockTree) bool, allowHeading func(string) bool) (ret []*Path, err error) {
+	return outlineInBox(rootID, preview, "", allowDocument, allowHeading)
 }
 
 // OutlineInBox 与 Outline 一致，但按 boxID 路由 blocktree 查询到加密 db 或全局 db。
 func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err error) {
-	return outlineInBox(rootID, preview, boxID, false)
+	return outlineInBox(rootID, preview, boxID, nil, nil)
 }
 
-// OutlineInBoxForReader 与 OutlineInBox 一致，但按读者可见范围渲染内容。
-func OutlineInBoxForReader(rootID string, preview bool, boxID string) (ret []*Path, err error) {
-	return outlineInBox(rootID, preview, boxID, true)
-}
-
-func outlineInBox(rootID string, preview bool, boxID string, forReader bool) (ret []*Path, err error) {
+func outlineInBox(rootID string, preview bool, boxID string, allowDocument func(*treenode.BlockTree) bool, allowHeading func(string) bool) (ret []*Path, err error) {
 	confEditorSnapshot := Conf.LoadEditor()
 
 	FlushTxQueue()
 
 	ret = []*Path{}
-	tree, err := loadTreeByBlockIDInBox(rootID, boxID)
+	bt, err := lookupBlockTreeInBox(rootID, boxID, true)
+	if err != nil {
+		return
+	}
+	if allowDocument != nil && !allowDocument(bt) {
+		return nil, nil
+	}
+	tree, err := loadTreeByBlockTree(bt)
 	if err != nil {
 		return
 	}
@@ -250,7 +251,7 @@ func outlineInBox(rootID string, preview bool, boxID string, forReader bool) (re
 		}
 	}
 
-	ret = outlineWithReader(tree, forReader)
+	ret = outlineWithReader(tree, allowHeading)
 	applyOutlineHeadingNumbers(ret, headingNumbers)
 
 	storage, _ := GetOutlineStorage(rootID)
@@ -316,13 +317,16 @@ func walkChildren(b *Block, expandIDs []string) {
 	}
 }
 
-func outlineWithReader(tree *parse.Tree, forReader bool) (ret []*Path) {
+func outlineWithReader(tree *parse.Tree, allowed func(string) bool) (ret []*Path) {
 	luteEngine := NewLute()
 	var headings []*Block
 	for _, n := range collectOutlineHeadings(tree) {
 		n.Box, n.Path = tree.Box, tree.Path
 		var content string
-		if forReader {
+		if allowed != nil {
+			if n.ID != tree.Root.ID && !allowed(n.ID) {
+				continue
+			}
 			content = renderOutlineForReader(n, luteEngine)
 		} else {
 			content = renderOutline(n, luteEngine)

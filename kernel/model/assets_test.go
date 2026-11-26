@@ -9,6 +9,8 @@ import (
 	"context"
 	"encoding/base64"
 	"image"
+	"image/color"
+	"image/gif"
 	"image/png"
 	"net/http"
 	"net/http/httptest"
@@ -26,6 +28,44 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAssetImageDimensionsReadsPNGMetadataOnly(t *testing.T) {
+	var data bytes.Buffer
+	if err := png.Encode(&data, image.NewRGBA(image.Rect(0, 0, 4, 3))); err != nil {
+		t.Fatal(err)
+	}
+	metadataEnd := bytes.Index(data.Bytes(), []byte("IDAT")) - 4
+	width, height := assetImageDimensions(bytes.NewReader(data.Bytes()[:metadataEnd]), "sample.png")
+	if width != 4 || height != 3 {
+		t.Fatalf("PNG dimensions = %d x %d, want 4 x 3", width, height)
+	}
+}
+
+func TestGenerateAssetsThumbnailFitsGIFWithinBothDimensions(t *testing.T) {
+	directory := t.TempDir()
+	source := filepath.Join(directory, "sample.gif")
+	var data bytes.Buffer
+	img := image.NewPaletted(image.Rect(0, 0, 400, 800), color.Palette{color.Black, color.White})
+	if err := gif.Encode(&data, img, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(source, data.Bytes(), 0600); err != nil {
+		t.Fatal(err)
+	}
+	destination := filepath.Join(directory, "thumbnail.gif")
+	if err := GenerateAssetsThumbnail(source, destination); err != nil {
+		t.Fatal(err)
+	}
+	file, err := os.Open(destination)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	config, err := gif.DecodeConfig(file)
+	if err != nil || config.Width != 260 || config.Height != 520 {
+		t.Fatalf("GIF dimensions = %+v, error %v", config, err)
+	}
+}
 
 func TestRemoveAssetThumbnail(t *testing.T) {
 	originalDataDir, originalTempDir := util.DataDir, util.TempDir

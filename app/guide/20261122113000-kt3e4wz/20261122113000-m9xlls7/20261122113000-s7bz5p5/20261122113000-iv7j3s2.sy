@@ -6,7 +6,7 @@
 		"id": "20261122113000-iv7j3s2",
 		"title": "Иконки",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126172446"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-9ohtjjx",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-25v5m5l",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-pq58620",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-c366y8r",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -79,7 +79,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-xnvjzr3",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -111,7 +111,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "» просматривайте онлайн иконки, созданные разработчиками сообщества"
+									"Data": " просматривайте иконки, созданные разработчиками сообщества"
 								}
 							]
 						}
@@ -378,7 +378,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-pprs99u",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -397,7 +397,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-1wbev86",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -423,7 +423,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-w3chcy4",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -541,7 +541,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-m6v6tfr",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -549,7 +549,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-asp4ihv",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -582,15 +582,6 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ и "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "icon.json"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -717,7 +708,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-kw5sd2h",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -736,7 +727,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-363krlj",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -928,7 +919,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-j2xiof8",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -970,7 +961,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20261122113000-zs1umi7",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -1019,7 +1010,7 @@
 									},
 									"Properties": {
 										"id": "20261122113000-vrnn7za",
-										"updated": "20261122113000"
+										"updated": "20261126172446"
 									},
 									"Children": [
 										{
@@ -1027,7 +1018,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20261122113000-q3juodt",
-												"updated": "20261122113000"
+												"updated": "20261126172446"
 											},
 											"Children": [
 												{
@@ -1062,9 +1053,6 @@
 															"Type": "NodeCloseParen"
 														}
 													]
-												},
-												{
-													"Type": "NodeText"
 												}
 											]
 										}
@@ -1079,7 +1067,7 @@
 									},
 									"Properties": {
 										"id": "20261122113000-g466br0",
-										"updated": "20261122113000"
+										"updated": "20261126172446"
 									},
 									"Children": [
 										{
@@ -1087,7 +1075,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20261122113000-tseisaw",
-												"updated": "20261122113000"
+												"updated": "20261126172446"
 											},
 											"Children": [
 												{
@@ -1122,9 +1110,6 @@
 															"Type": "NodeCloseParen"
 														}
 													]
-												},
-												{
-													"Type": "NodeText"
 												}
 											]
 										}
@@ -1461,7 +1446,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-jkg5sjn",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1475,7 +1460,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-05wuvgj",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1490,7 +1475,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		}

@@ -5,9 +5,9 @@
 	"Properties": {
 		"icon": "2328",
 		"id": "20261122113000-448rhte",
-		"title": "Горячая клавиша",
+		"title": "Горячие клавиши",
 		"type": "doc",
-		"updated": "20261122171459"
+		"updated": "20261126195512"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-foey621",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -44,12 +44,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-ege9b8n",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+					"Data": "В разделе "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -85,12 +85,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-qj87o05",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+					"Data": "В разделе "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -3464,7 +3464,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-7bnda1l",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -3478,12 +3478,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-4xyubcy",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+					"Data": "В разделе "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -4500,7 +4500,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-v175h3e",
-				"updated": "20261122171459"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -4515,7 +4515,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-wc3cef8",
-				"updated": "20261122171459"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -4539,7 +4539,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20261122113000-9imaz0w",
-				"updated": "20261122171459"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -5491,7 +5491,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Позволяет использовать выделенный текст в качестве заголовка ссылки или якоря ссылки на блок"
+									"Data": "Позволяет использовать выделенный текст в качестве текста гиперссылки или ссылки на блок"
 								}
 							]
 						}
@@ -6663,7 +6663,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "。"
+									"Data": "."
 								}
 							]
 						}
@@ -7708,7 +7708,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+									"Data": "В разделе "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -7816,7 +7816,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+									"Data": "В разделе "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -8843,7 +8843,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "встроенные блоки"
+									"Data": "Встроенные блоки"
 								}
 							]
 						},
@@ -9318,7 +9318,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " настраивается; курсор должен находиться внутри элемента ссылки на блок"
+									"Data": " для настройки; курсор должен находиться внутри элемента ссылки на блок"
 								}
 							]
 						}
@@ -10380,7 +10380,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261122113000-bhbj9xq",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -10395,7 +10395,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-8vu6nxx",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -10411,7 +10411,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -10420,7 +10420,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261122113000-1di5wny",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -10449,12 +10449,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-yrx7za9",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Подробнее см."
+					"Data": "Подробнее см. "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -10465,7 +10465,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -10475,7 +10475,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-p04ckf6",
-				"updated": "20261122171459"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -10495,7 +10495,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20261122113000-igt3dum",
-				"updated": "20261122171459"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -10651,7 +10651,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Требуется выделить текст; по умолчанию используется статический текст якоря, нажатие в списке кандидатов "
+									"Data": "Требуется выделить текст; по умолчанию используется статический текст ссылки, нажатие в списке кандидатов "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -10687,7 +10687,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ использует динамический текст якоря"
+									"Data": "​ использует динамический текст ссылки"
 								}
 							]
 						}
@@ -10817,7 +10817,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "выделение"
+									"Data": "Выделение"
 								}
 							]
 						},
@@ -11924,10 +11924,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Редактор"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " для настройки"
 								}
 							]
 						}
@@ -12004,7 +12000,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-l7fwvwj",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -12023,7 +12019,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20261122113000-frbxxhl",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -12546,10 +12542,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Редактор"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " для настройки"
 								}
 							]
 						}
@@ -12599,10 +12591,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Редактор"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " для настройки"
 								}
 							]
 						}
@@ -12777,7 +12765,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-io72lbb",
-				"updated": "20261122171459"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -12797,7 +12785,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20261122113000-tpayh8n",
-				"updated": "20261122171459"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -13106,10 +13094,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Блок списка"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " для настройки"
 								}
 							]
 						}
@@ -19994,7 +19978,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-e7i77e4",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -20326,7 +20310,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-hpyrk3l",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -20342,7 +20326,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

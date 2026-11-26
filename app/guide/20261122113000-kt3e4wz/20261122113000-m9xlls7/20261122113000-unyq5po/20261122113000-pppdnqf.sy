@@ -6,7 +6,7 @@
 		"id": "20261122113000-pppdnqf",
 		"title": "Служба публикации",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-a5wsmox",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-m3umso0",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -252,7 +252,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-qbes7qo",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -260,12 +260,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-2aos67q",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "При включении в «"
+									"Data": "Включите "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -274,7 +274,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ (переключатель)"
+									"Data": "​"
 								}
 							]
 						}
@@ -289,7 +289,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-gzge8gb",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -297,12 +297,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-tq4cllr",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "При включении в «"
+									"Data": "Включите "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -320,7 +320,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: будет использоваться "
+									"Data": "​. Будет использоваться "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -381,7 +381,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-n6k3npo",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -410,7 +410,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-w3h5mve",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -422,7 +422,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-4iqb1xs",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -430,7 +430,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-63ura19",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -440,7 +440,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": нажмите меню «Ещё» на панели документов и выберите «Контроль доступа публикации», чтобы открыть экран настройки доступа"
+									"Data": ": нажмите меню «Ещё» на панели документов и выберите «Контроль доступа к публикации», чтобы открыть экран настройки доступа"
 								}
 							]
 						}
@@ -488,7 +488,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-16abmw7",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -496,7 +496,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-1detrcw",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -506,7 +506,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "："
+									"Data": ":"
 								}
 							]
 						},
@@ -516,7 +516,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20261122113000-ecyuoop",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -640,7 +640,7 @@
 									},
 									"Properties": {
 										"id": "20261122113000-0ew38aq",
-										"updated": "20261122113000"
+										"updated": "20261126150544"
 									},
 									"Children": [
 										{
@@ -648,12 +648,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20261122113000-w25xbi3",
-												"updated": "20261122113000"
+												"updated": "20261126150544"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "🚫 Запрещённый: доступ полностью закрыт, блокнот или документ не публикуется"
+													"Data": "🚫 Запрещён: доступ полностью закрыт, блокнот или документ не публикуется"
 												}
 											]
 										}

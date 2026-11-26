@@ -6,7 +6,7 @@
 		"id": "20261122113000-9thjz6g",
 		"title": "Параметры ядра",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-m8tsbpu",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -40,7 +40,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-nv5qn1n",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -50,7 +50,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " Через "
+					"Data": " — параметр "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -59,7 +59,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " задаётся рабочее пространство. Если не указано, последовательно используются переменная окружения "
+					"Data": " задаёт рабочее пространство. Если оно не указано, последовательно используются переменная окружения "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -95,7 +95,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": ". "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -115,7 +115,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -192,7 +192,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-ty0hm61",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -217,12 +217,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-iq8ddbm",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "При использовании ",
+					"Data": "Параметр ",
 					"Properties": {
 						"id": ""
 					}
@@ -237,7 +237,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " при указании переводит ядро в режим только для чтения; все операции записи будут запрещены.",
+					"Data": " переводит ядро в режим только для чтения; все операции записи будут запрещены.",
 					"Properties": {
 						"id": ""
 					}
@@ -340,7 +340,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-acm6imh",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -365,12 +365,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-xyyyli9",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "При использовании ",
+					"Data": "Параметр ",
 					"Properties": {
 						"id": ""
 					}
@@ -398,7 +398,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-ubwnb4q",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -423,12 +423,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-k1epz7f",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "При использовании "
+					"Data": "Параметр "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -446,7 +446,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​. Доступные на данный момент значения:"
+					"Data": "​. Доступные на данный момент значения: "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -455,7 +455,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -464,7 +464,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -473,7 +473,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -482,7 +482,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -491,7 +491,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -500,7 +500,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -509,7 +509,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -518,7 +518,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -527,7 +527,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -536,7 +536,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -545,7 +545,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -554,7 +554,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -563,7 +563,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -572,7 +572,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -581,7 +581,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -590,7 +590,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -599,7 +599,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -608,7 +608,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -617,7 +617,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -626,7 +626,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -644,7 +644,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​。"
+					"Data": "​."
 				}
 			]
 		},
@@ -654,7 +654,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-8mozgne",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -669,12 +669,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-qi5plsc",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "При использовании "
+					"Data": "Параметр "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -701,7 +701,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20261122113000-dt5pp57",
 		"title": "API ядра",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-rdloel2",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		}

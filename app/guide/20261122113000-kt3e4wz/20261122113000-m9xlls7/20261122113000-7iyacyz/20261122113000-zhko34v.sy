@@ -7,7 +7,7 @@
 		"id": "20261122113000-zhko34v",
 		"title": "Облачные сервисы",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -30,7 +30,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-62tcv48",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -73,7 +73,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-twjkl33",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -81,7 +81,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-ipb4xwz",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -89,7 +89,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20261122113000-pocthw9",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "синхронизации данных"
+									"TextMarkTextContent": "Синхронизация данных"
 								}
 							]
 						}
@@ -226,7 +226,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-ns17tna",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -240,7 +240,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​​: связано с облачными сервисами"
+					"Data": "​​: ограничения облачных сервисов см. в разделе "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -251,7 +251,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

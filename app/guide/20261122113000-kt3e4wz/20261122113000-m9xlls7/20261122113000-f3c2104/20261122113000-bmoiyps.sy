@@ -6,7 +6,7 @@
 		"id": "20261122113000-bmoiyps",
 		"title": "Синтаксис запросов",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-saligvl",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-hacv2ec",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -52,7 +52,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -112,7 +112,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-xgkpmmo",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -180,7 +180,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-09ouuwd",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -188,7 +188,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-8f4d0n8",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -202,7 +202,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、"
+									"Data": ", "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -248,7 +248,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-9pfzxtf",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -277,7 +277,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-nptqqqn",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -340,7 +340,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-niajbfy",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -348,7 +348,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-x357rki",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -362,7 +362,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、"
+									"Data": ", "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -371,7 +371,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、"
+									"Data": ", "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -390,7 +390,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20261122113000-durvv25",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -402,7 +402,7 @@
 									},
 									"Properties": {
 										"id": "20261122113000-b4qg88q",
-										"updated": "20261122113000"
+										"updated": "20261126150544"
 									},
 									"Children": [
 										{
@@ -410,12 +410,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20261122113000-30cezpd",
-												"updated": "20261122113000"
+												"updated": "20261126150544"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Все не-ASCII символы, либо"
+													"Data": "Все символы вне ASCII, либо"
 												}
 											]
 										}
@@ -571,7 +571,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-2srtbxh",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -585,7 +585,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " и подобными символами, заключите его в двойные кавычки."
+					"Data": " и подобными символами, заключите его в двойные кавычки. "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -651,7 +651,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-75i3x35",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -665,7 +665,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-v3l1xs0",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -679,7 +679,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -834,12 +834,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-roqep4b",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Английские круглые скобки "
+					"Data": "Круглые скобки "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -935,7 +935,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-oqjtswk",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -973,7 +973,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-b23tilu",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1023,7 +1023,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

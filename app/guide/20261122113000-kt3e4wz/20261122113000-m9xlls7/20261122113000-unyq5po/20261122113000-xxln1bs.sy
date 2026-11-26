@@ -6,7 +6,7 @@
 		"id": "20261122113000-xxln1bs",
 		"title": "Использование в браузере",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-mzo8ork",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -263,7 +263,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-42lwj1o",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -279,7 +279,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -289,7 +289,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-a1ucghv",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -298,7 +298,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "пароля блокировки экрана"
+					"Data": "Пароль блокировки экрана"
 				}
 			]
 		},
@@ -357,7 +357,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-i5p2y0m",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -367,7 +367,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Блокировать вместе с системой"
+					"TextMarkTextContent": "Следовать блокировке системы"
 				},
 				{
 					"Type": "NodeText",
@@ -481,7 +481,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-nyn16vl",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -495,7 +495,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-op2r18r",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -511,7 +511,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		}

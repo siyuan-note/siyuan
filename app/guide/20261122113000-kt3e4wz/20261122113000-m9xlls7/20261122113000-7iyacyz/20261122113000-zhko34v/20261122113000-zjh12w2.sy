@@ -6,7 +6,7 @@
 		"id": "20261122113000-zjh12w2",
 		"title": "Облачный хостинг ресурсов",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-ar4cnnj",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -46,7 +46,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-ax8yz0r",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-t01o1ha",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -68,7 +68,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-yljbjxn",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -87,7 +87,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Загрузить ресурсы на облачный хостинг"
+									"TextMarkTextContent": "Загрузить файлы ресурсов в облако"
 								},
 								{
 									"Type": "NodeText",
@@ -108,7 +108,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-moctrkd",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -116,7 +116,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-yh132le",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -126,7 +126,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " выберите "
+									"Data": ": выберите "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -148,7 +148,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-8jgx2l4",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -156,7 +156,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-6cqosw4",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -170,7 +170,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、"
+									"Data": ", "
 								},
 								{
 									"Type": "NodeTextMark",

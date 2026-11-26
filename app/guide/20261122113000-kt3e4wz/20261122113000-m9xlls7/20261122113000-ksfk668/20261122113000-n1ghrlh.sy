@@ -6,7 +6,7 @@
 		"id": "20261122113000-n1ghrlh",
 		"title": "Автономный редактор Markdown",
 		"type": "doc",
-		"updated": "20261125133044"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-tvp24av",
-				"updated": "20261125133044"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -66,7 +66,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-y3kuyyn",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -98,7 +98,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -245,12 +245,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-7yjkrue",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Создаётся через "
+					"Data": "В меню "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -296,7 +296,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-d4gtrww",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -310,12 +310,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-at0dmmu",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Создаётся через "
+					"Data": "Пункт "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -398,7 +398,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-nquyho3",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -458,12 +458,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-xmu7pub",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Одиночный клик по файлу переключает документ в том же окне. Через "
+					"Data": "Одиночный клик по файлу переключает документ в том же окне. Пункт "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -608,7 +608,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-866fkfo",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -654,12 +654,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-lkmtv7e",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Создаётся через "
+					"Data": "Пункт "
 				},
 				{
 					"Type": "NodeTextMark",

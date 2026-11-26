@@ -6,7 +6,7 @@
 		"id": "20261122113000-3om2jpu",
 		"title": "Семантический поиск",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -366,7 +366,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-artt630",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -404,7 +404,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20261122113000-8mio0ps",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -417,7 +417,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "20261122113000-tymtpbe/20261122113000-u3pmciy.sy\n20210808180117-6v0mkxr/**/*"
+					"Data": "20261122113000-tymtpbe/20261122113000-u3pmciy.sy\n20261122113000-tymtpbe/**/*"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -514,7 +514,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-xw5skvm",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -530,7 +530,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

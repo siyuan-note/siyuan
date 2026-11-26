@@ -6,7 +6,7 @@
 		"id": "20261122113000-0h1oeqd",
 		"title": "Закладки и теги",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -98,7 +98,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-8w86a1g",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -116,7 +116,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-6pg4wfp",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -139,7 +139,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -148,7 +148,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-r245w83",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -171,7 +171,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -262,7 +262,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-tv3ky7l",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -285,7 +285,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", после чего можно перетаскивать строки тегов, меняя их порядок на одном уровне. На мобильных устройствах удерживайте строку тега, а затем перетащите её. Пользовательский порядок сохраняется вместе с данными рабочей области. Если удалить тег из панели тегов и создать тег с тем же именем заново, он окажется после уже отсортированных тегов того же уровня. Если включён фильтр тегов, сначала очистите его перед сортировкой."
+					"Data": ", после чего можно перетаскивать строки тегов, меняя их порядок на одном уровне. На мобильных устройствах удерживайте строку тега, а затем перетащите её. Пользовательский порядок сохраняется вместе с данными рабочей области. Если удалить тег из панели тегов и создать тег с тем же именем заново, он окажется после уже отсортированных тегов того же уровня. Если включён фильтр тегов, очистите его перед сортировкой."
 				}
 			]
 		},
@@ -350,7 +350,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-hxh8fw4",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -369,7 +369,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-i8dkkrf",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -383,7 +383,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -392,7 +392,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -401,7 +401,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -410,7 +410,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -419,7 +419,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -428,7 +428,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -437,7 +437,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -446,7 +446,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -455,7 +455,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -464,7 +464,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -473,7 +473,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -482,7 +482,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -491,7 +491,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -500,7 +500,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -509,7 +509,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -518,7 +518,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、"
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -536,7 +536,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​。"
+					"Data": "​."
 				}
 			]
 		}

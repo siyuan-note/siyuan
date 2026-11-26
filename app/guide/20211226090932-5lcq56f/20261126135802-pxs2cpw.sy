@@ -7,7 +7,7 @@
 		"id": "20261126135802-pxs2cpw",
 		"title": "外部連線",
 		"type": "doc",
-		"updated": "20261126140707"
+		"updated": "20261126140921"
 	},
 	"Children": [
 		{
@@ -73,7 +73,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261126135802-mnnwd8d",
-				"updated": "20261126140707"
+				"updated": "20261126140921"
 			},
 			"Children": [
 				{
@@ -87,12 +87,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261126135802-vgcglbq",
-				"updated": "20261126135802"
+				"updated": "20261126140921"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "豆包外掛已上架。可在豆包電腦版的「豆包工作」中開啟「豆包推荐」，搜尋並新增「思源笔记」外掛。"
+					"Data": "豆包外掛已上架。可在豆包電腦版的外掛市集搜尋並新增「思源笔记」。"
 				}
 			]
 		},

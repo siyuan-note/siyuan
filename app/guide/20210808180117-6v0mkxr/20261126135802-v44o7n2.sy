@@ -7,7 +7,7 @@
 		"id": "20261126135802-v44o7n2",
 		"title": "External Connections",
 		"type": "doc",
-		"updated": "20261126140707"
+		"updated": "20261126140921"
 	},
 	"Children": [
 		{
@@ -73,7 +73,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261126135802-swz99re",
-				"updated": "20261126140707"
+				"updated": "20261126140921"
 			},
 			"Children": [
 				{
@@ -87,12 +87,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261126135802-41racvq",
-				"updated": "20261126135802"
+				"updated": "20261126140921"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The plugin is available in the Doubao desktop app. In Doubao Work, open “豆包推荐” (Doubao Recommendations), then search for and add “思源笔记” (SiYuan)."
+					"Data": "The plugin is available in the Doubao desktop app. Search for and add “思源笔记” (SiYuan) in the plugin marketplace."
 				}
 			]
 		},

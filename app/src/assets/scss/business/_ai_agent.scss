@@ -669,6 +669,11 @@
   max-height: 120px;
   overflow-y: auto;
   border-top: 1px solid var(--b3-border-color);
+
+  a {
+    color: var(--b3-theme-primary);
+    text-decoration: underline;
+  }
 }
 
 .agent-chat__confirm-effects {

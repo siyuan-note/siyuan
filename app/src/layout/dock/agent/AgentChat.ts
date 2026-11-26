@@ -14,7 +14,7 @@ import {disabledWYSIWYG} from "../../../protyle/util/disabledWYSIWYG";
 import {getAllEditor} from "../../getAll";
 import {isCapabilityEnabled, listCapabilityManifests, lookupCapability} from "./frontendCapabilities";
 import {AgentPermissionMode, AgentSession, SessionRevisionConflict, SessionStore} from "./SessionStore";
-import {genAgentConfirmActionButtons} from "./agentConfirmActions";
+import {genAgentConfirmActionButtons, renderAgentConfirmArgs} from "./agentConfirmActions";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {isInAndroid, updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
 import {getAgentLute} from "../../../protyle/render/setLute";
@@ -2519,7 +2519,6 @@ export class AgentChat extends Model {
         if (entry.id) {
             el.setAttribute("data-message-id", entry.id);
         }
-        const argsStr = JSON.stringify(entry.args, null, 2);
         const desc = (L.agentConfirmDesc || "Agent: {category} operation").replace("{category}", escapeHtml(this.toolCategory(entry.name)));
         let statusLabel = "";
         if (entry.status === "approved") {
@@ -2538,9 +2537,10 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
             '<div class="agent-chat__confirm-header"><svg class="agent-chat__confirm-icon"><use xlink:href="#iconInfo"></use></svg> ' + desc + "</div>" +
             this.renderConfirmEffects(entry.effects) +
-            '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
+            '<pre class="agent-chat__confirm-args">' + renderAgentConfirmArgs(entry.args) + "</pre>" +
             (statusLabel ? '<div class="agent-chat__confirm-actions"><span class="agent-chat__confirm-done">' + statusLabel + "</span></div>" : "") +
             "</div>";
+        bindAgentMessageEvents(el, this.app, this.host.onNavigate);
         this.messagesContainer.appendChild(el);
     }
 
@@ -4703,12 +4703,11 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--confirm";
         el.dataset.agentInteractionId = confirmID;
         el.dataset.agentInteractionType = "confirm";
-        const argsStr = JSON.stringify(args, null, 2);
         const desc = (L.agentConfirmDesc || "Agent: {category} operation").replace("{category}", escapeHtml(this.toolCategory(name)));
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
             '<div class="agent-chat__confirm-header"><svg class="agent-chat__confirm-icon"><use xlink:href="#iconInfo"></use></svg> ' + desc + "</div>" +
             this.renderConfirmEffects(effects) +
-            '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
+            '<pre class="agent-chat__confirm-args">' + renderAgentConfirmArgs(args) + "</pre>" +
             '<div class="agent-chat__confirm-actions">' +
             genAgentConfirmActionButtons(forced, {
                 reject: L.agentConfirmReject || "Reject",
@@ -4718,6 +4717,7 @@ export class AgentChat extends Model {
             }) +
             "</div>" +
             "</div>";
+        bindAgentMessageEvents(el, this.app, this.host.onNavigate);
         const sessionID = this.sessionId;
         const confirmEntryId = SessionStore.newSessionId();
         const confirmEntry: SessionEntry = {

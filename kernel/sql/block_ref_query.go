@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -283,44 +284,44 @@ func QueryBoundBlockAVIDs(blockIDs, rootIDs []string) (ret map[string][]string, 
 	return
 }
 
-func QueryRootBlockRefCount() (ret map[string]int) {
+func QueryRootBlockRefCounts(ids []string) (ret map[string]int) {
 	ret = map[string]int{}
-	if nil == db {
+	if nil == db || len(ids) == 0 {
 		return
 	}
 
-	// 全局 refs
-	rows, err := query("SELECT def_block_root_id, COUNT(DISTINCT block_id) AS ref_cnt FROM refs GROUP BY def_block_root_id")
-	if err != nil {
-		logging.LogErrorf("sql query failed: %s", err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var id string
-		var cnt int
-		if err = rows.Scan(&id, &cnt); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
+	boxIDs := append([]string{""}, GetEncryptedBoxIDs()...)
+	for batch := range slices.Chunk(gulu.Str.RemoveDuplicatedElem(ids), queryRefsByDefIDsBatchSize) {
+		args := make([]any, len(batch))
+		for i, id := range batch {
+			args[i] = id
 		}
-		ret[id] = cnt
-	}
+		stmt := "SELECT def_block_root_id, COUNT(DISTINCT block_id) FROM refs WHERE def_block_root_id IN (" +
+			strings.TrimSuffix(strings.Repeat("?,", len(batch)), ",") + ") GROUP BY def_block_root_id"
 
-	// 加密笔记本的 refs
-	for _, encBoxID := range GetEncryptedBoxIDs() {
-		encRows, encErr := queryForBox(encBoxID, "SELECT def_block_root_id, COUNT(DISTINCT block_id) AS ref_cnt FROM refs GROUP BY def_block_root_id")
-		if encErr != nil {
-			continue
-		}
-		for encRows.Next() {
-			var id string
-			var cnt int
-			if err = encRows.Scan(&id, &cnt); err != nil {
+		for _, boxID := range boxIDs {
+			rows, err := queryForBox(boxID, stmt, args...)
+			if err != nil {
+				if boxID == "" {
+					logging.LogErrorf("sql query failed: %s", err)
+					return
+				}
 				continue
 			}
-			ret[id] += cnt
+			for rows.Next() {
+				var id string
+				var count int
+				if err = rows.Scan(&id, &count); err != nil {
+					logging.LogErrorf("query scan field failed: %s", err)
+					continue
+				}
+				ret[id] += count
+			}
+			if err = rows.Err(); err != nil {
+				logging.LogErrorf("query rows failed: %s", err)
+			}
+			rows.Close()
 		}
-		encRows.Close()
 	}
 	return
 }

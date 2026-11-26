@@ -656,7 +656,11 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	}
 
 	start = time.Now()
-	refCount := sql.QueryRootBlockRefCount()
+	ids := make([]string, 0, len(docs))
+	for _, doc := range docs {
+		ids = append(ids, doc.ID)
+	}
+	refCount := sql.QueryRootBlockRefCounts(ids)
 	for _, doc := range docs {
 		if count := refCount[doc.ID]; 0 < count {
 			doc.Count = count

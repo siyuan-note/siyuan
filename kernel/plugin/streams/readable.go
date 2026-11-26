@@ -561,13 +561,18 @@ func (h *Host) newReadableStreamObject(state *readableState) *goja.Object {
 // 的事件循环线程上。
 func (h *Host) NewReadableStream(start, pull, cancel func(controller goja.Value) goja.Value, highWaterMark float64,
 	sizeAlgorithm func(goja.Value) float64) *goja.Object {
+	return h.newReadableStream(start, pull, cancel, highWaterMark, sizeAlgorithm).self
+}
+
+func (h *Host) newReadableStream(start, pull, cancel func(controller goja.Value) goja.Value, highWaterMark float64,
+	sizeAlgorithm func(goja.Value) float64) *readableState {
 	if sizeAlgorithm == nil {
 		sizeAlgorithm = defaultSizeAlgorithm
 	}
 	stream := &readableState{host: h, status: statusReadable}
-	object := h.newReadableStreamObject(stream)
+	h.newReadableStreamObject(stream)
 	setUpReadableStreamDefaultController(h, stream, orNoOp(start), orNoOp(pull), orNoOp(cancel), highWaterMark, sizeAlgorithm)
-	return object
+	return stream
 }
 
 // orNoOp 把可能为 nil 的算法函数替换为返回 undefined 的空操作，匹配规范里"算法未提供"时的默认行为：该返回值会被

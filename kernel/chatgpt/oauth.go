@@ -150,8 +150,11 @@ func (s *Service) metadata(ctx context.Context) (d discovery, err error) {
 
 func (s *Service) identityEndpoint(endpoint string) bool {
 	u, err := url.Parse(endpoint)
-	issuer, _ := url.Parse(s.issuer)
-	return err == nil && u.Scheme == issuer.Scheme && u.Host == issuer.Host && u.User == nil && u.Fragment == ""
+	if err != nil {
+		return false
+	}
+	issuer, err := url.Parse(s.issuer)
+	return err == nil && issuer != nil && u.Scheme == issuer.Scheme && u.Host == issuer.Host && u.User == nil && u.Fragment == ""
 }
 
 func (s *Service) verifyIdentity(ctx context.Context, token, clientID, nonce string, retained bool) (claims identity, err error) {

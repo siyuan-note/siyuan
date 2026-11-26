@@ -101,7 +101,7 @@ func Open(path, epoch string) (*Service, error) {
 		if s.data.Version != 1 || s.data.Clients == nil || s.data.Grants == nil {
 			return nil, ErrInvalid
 		}
-		if err = validateConfig(s.data.Config); err != nil {
+		if _, err = validateConfig(s.data.Config); err != nil {
 			return nil, err
 		}
 	}
@@ -169,24 +169,24 @@ func (s *Service) EnsureEpoch(epoch string) error {
 	return nil
 }
 
-func validateConfig(config apicontract.MCPOAuthConfig) error {
+func validateConfig(config apicontract.MCPOAuthConfig) (*url.URL, error) {
 	if !config.Enabled && config.PublicURL == "" {
-		return nil
+		return nil, nil
 	}
 	u, err := url.Parse(config.PublicURL)
 	if err != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.Path != "" || u.RawQuery != "" || u.Fragment != "" || u.Opaque != "" || u.ForceQuery || strings.ContainsAny(config.PublicURL, "?#*") {
-		return ErrInvalid
+		return nil, ErrInvalid
 	}
-	return nil
+	return u, nil
 }
 
 func (s *Service) Configure(config apicontract.MCPOAuthConfig) error {
 	config.PublicURL = strings.TrimRight(strings.TrimSpace(config.PublicURL), "/")
-	if err := validateConfig(config); err != nil {
+	u, err := validateConfig(config)
+	if err != nil {
 		return err
 	}
-	if config.PublicURL != "" {
-		u, _ := url.Parse(config.PublicURL)
+	if u != nil {
 		u.Host = strings.ToLower(u.Host)
 		if u.Port() == "443" {
 			u.Host = strings.TrimSuffix(u.Host, ":443")
@@ -373,7 +373,10 @@ func (s *Service) Consent(ticket, binding, sessionID string, approve bool) (stri
 		return "", ErrInvalid
 	}
 	delete(s.pending, hash(ticket))
-	u, _ := url.Parse(p.RedirectURI)
+	u, err := url.Parse(p.RedirectURI)
+	if err != nil {
+		return "", ErrInvalid
+	}
 	q := u.Query()
 	q.Set("state", p.State)
 	q.Set("iss", s.data.Config.PublicURL)

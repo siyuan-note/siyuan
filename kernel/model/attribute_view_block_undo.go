@@ -68,14 +68,21 @@ func (tx *Transaction) flushAttributeViewBlockDeletions() error {
 		state := &attributeViewFieldsSnapshot{avID: avID, keyID: avID, blockID: carrier, boxID: boxID,
 			changes: map[string]*attributeViewFieldChange{}, fieldTypes: map[string]map[string]av.KeyType{}}
 		for id, view := range before {
+			updated := after[id]
+			if updated == nil {
+				return fmt.Errorf("updated database [%s] is missing", id)
+			}
 			state.fieldTypes[id] = map[string]av.KeyType{}
 			for _, kv := range view.KeyValues {
-				remaining, _ := after[id].GetKeyValues(kv.Key.ID)
+				remaining, lookupErr := updated.GetKeyValues(kv.Key.ID)
+				if lookupErr != nil {
+					return lookupErr
+				}
 				if !reflect.DeepEqual(kv.Values, remaining.Values) {
 					state.fieldTypes[id][kv.Key.ID] = kv.Key.Type
 				}
 			}
-			regenAttrViewGroups(after[id])
+			regenAttrViewGroups(updated)
 		}
 		if err = tx.saveAttributeViewFieldChanges(state, before, after); err != nil {
 			return err

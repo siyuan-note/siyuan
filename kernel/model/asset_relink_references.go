@@ -35,20 +35,25 @@ type assetRelinker struct {
 
 // relinkPath 按 URL 路径解码一次，查询参数和片段不参与资源文件名匹配。
 func relinkPath(value string) (string, error) {
+	p, _, err := parseRelinkPath(value)
+	return p, err
+}
+
+func parseRelinkPath(value string) (string, *url.URL, error) {
 	u, err := url.Parse(value)
 	if err != nil || u.IsAbs() || u.Host != "" || u.Opaque != "" {
-		return "", fmt.Errorf("invalid asset path: %q", value)
+		return "", nil, fmt.Errorf("invalid asset path: %q", value)
 	}
 	p := strings.TrimPrefix(u.Path, "/")
 	if !strings.HasPrefix(p, "assets/") || path.Clean(p) != p || strings.ContainsAny(p, "\\\x00\r\n") || strings.HasSuffix(p, "/") {
-		return "", fmt.Errorf("invalid asset path: %q", value)
+		return "", nil, fmt.Errorf("invalid asset path: %q", value)
 	}
 	for segment := range strings.SplitSeq(p, "/") {
 		if strings.Contains(segment, ":") {
-			return "", fmt.Errorf("invalid asset path: %q", value)
+			return "", nil, fmt.Errorf("invalid asset path: %q", value)
 		}
 	}
-	return p, nil
+	return p, u, nil
 }
 
 func (r *assetRelinker) reference(raw, kind string, location apicontract.AssetReference) string {
@@ -59,7 +64,7 @@ func (r *assetRelinker) reference(raw, kind string, location apicontract.AssetRe
 			return raw
 		}
 	}
-	p, err := relinkPath(link)
+	p, u, err := parseRelinkPath(link)
 	if err != nil {
 		return raw
 	}
@@ -72,7 +77,6 @@ func (r *assetRelinker) reference(raw, kind string, location apicontract.AssetRe
 	}
 	location.OldPath = rule.oldPath
 	location.Type, location.Reference, location.Relinkable = kind, raw, true
-	u, _ := url.Parse(link)
 	query, queryErr := url.ParseQuery(html.UnescapeString(u.RawQuery))
 	if queryErr != nil {
 		location.Relinkable, location.Reason = false, "invalid_query"

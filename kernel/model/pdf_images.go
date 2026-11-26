@@ -64,10 +64,11 @@ type PDFImageSource struct {
 }
 
 type pdfImageDocument struct {
-	ctx      *pdfmodel.Context
-	data     []byte
-	revision string
-	boxID    string
+	ctx       *pdfmodel.Context
+	data      []byte
+	revision  string
+	boxID     string
+	sourceURL url.URL
 }
 
 // openPDFImages 只读取源文档实际引用的本地 PDF，明文只保留在当前操作内存中。
@@ -164,7 +165,7 @@ func openPDFImages(ctx context.Context, source PDFImageSource, revision string) 
 		return nil, err
 	}
 	ok = true
-	return &pdfImageDocument{ctx: pdf, data: data, revision: actualRevision, boxID: bt.BoxID}, nil
+	return &pdfImageDocument{ctx: pdf, data: data, revision: actualRevision, boxID: bt.BoxID, sourceURL: *u}, nil
 }
 
 func checkPDFImagePageTree(xref *pdfmodel.XRefTable) error {
@@ -403,7 +404,7 @@ func ExtractPDFImages(ctx context.Context, source PDFImageSource, revision, targ
 			item.Error = extractErr.Error()
 		} else {
 			item.Artifact = &artifact
-			u, _ := url.Parse(source.Path)
+			u := pdf.sourceURL
 			q := u.Query()
 			if IsEncryptedBox(pdf.boxID) {
 				q.Set("box", pdf.boxID)

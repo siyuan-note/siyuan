@@ -262,7 +262,14 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 	FlushTxQueue()
 	box := Conf.Box(boxID)
 	for _, id := range retIDs {
-		b, _ := GetBlock(id, nil)
+		b, readErr := GetBlock(id, nil)
+		if readErr != nil {
+			logging.LogWarnf("read shorthand document [%s] for tree notification failed: %s", id, readErr)
+			continue
+		}
+		if b == nil {
+			continue
+		}
 		PushCreate(box, b.Path, nil)
 	}
 	return

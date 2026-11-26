@@ -2378,7 +2378,10 @@ func DuplicateAttributeViewRow(tx *Transaction, avID, previousItemID, srcRowID, 
 	}
 	attrView.CopyCardCoverPositions(srcRowID, newRowID)
 	if attrView.HasSubItems() {
-		parents, _ := attrView.GetKeyValues(attrView.SubItems.ParentKeyID)
+		parents, lookupErr := attrView.GetKeyValues(attrView.SubItems.ParentKeyID)
+		if lookupErr != nil {
+			return lookupErr
+		}
 		parent := ""
 		if value := parents.GetValue(srcRowID); value != nil && value.Relation != nil && len(value.Relation.BlockIDs) > 0 {
 			parent = value.Relation.BlockIDs[0]
@@ -4973,16 +4976,12 @@ func updateAttributeViewColRelation(operation *Operation, contexts ...*Attribute
 			name = strings.TrimSpace(name)
 		}
 
-		destKeyValues := &av.KeyValues{
-			Key: &av.Key{
-				ID:       operation.BackRelationKeyID,
-				Name:     name,
-				Type:     av.KeyTypeRelation,
-				Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
-			},
-		}
-		addAttributeViewKey(destAv, nil, destKeyValues.Key, "")
-		destKeyValues, _ = destAv.GetKeyValues(operation.BackRelationKeyID)
+		destKeyValues := addAttributeViewKey(destAv, nil, &av.Key{
+			ID:       operation.BackRelationKeyID,
+			Name:     name,
+			Type:     av.KeyTypeRelation,
+			Relation: &av.Relation{AvID: operation.AvID, IsTwoWay: operation.IsTwoWay, BackKeyID: operation.KeyID},
+		}, "")
 
 		now := time.Now().UnixMilli()
 		// 和现有值进行关联
@@ -7920,8 +7919,9 @@ func newAttributeViewKey(keyID, keyName, keyType, keyIcon string, dateFormat av.
 	return
 }
 
-func addAttributeViewKey(attrView *av.AttributeView, currentView *av.View, key *av.Key, previousKeyID string) {
-	attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
+func addAttributeViewKey(attrView *av.AttributeView, currentView *av.View, key *av.Key, previousKeyID string) *av.KeyValues {
+	keyValues := &av.KeyValues{Key: key}
+	attrView.KeyValues = append(attrView.KeyValues, keyValues)
 
 	for _, view := range attrView.Views {
 		if nil != view.Calendar {
@@ -8013,6 +8013,7 @@ func addAttributeViewKey(attrView *av.AttributeView, currentView *av.View, key *
 			}
 		}
 	}
+	return keyValues
 }
 
 func (tx *Transaction) doUpdateAttrViewColTemplate(operation *Operation) (ret *TxErr) {
@@ -8584,7 +8585,10 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		if changeErr = attrView.SetSubItemsParents(changes); changeErr != nil {
 			return nil, changeErr
 		}
-		values, _ := attrView.GetKeyValues(keyID)
+		values, lookupErr := attrView.GetKeyValues(keyID)
+		if lookupErr != nil {
+			return nil, lookupErr
+		}
 		for _, value := range values.Values {
 			if value.BlockID == itemID {
 				val = value

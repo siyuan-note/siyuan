@@ -480,6 +480,11 @@ func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout t
 			timeout = remaining
 		}
 		networkCtx, cancelNetwork := context.WithTimeout(e.ctx, min(timeout, e.budgetDuration()))
+		req, err := http.NewRequestWithContext(networkCtx, http.MethodGet, u.String(), nil)
+		if err != nil {
+			cancelNetwork()
+			return result{Error: "invalid_target"}
+		}
 		select {
 		case networkSlots <- struct{}{}:
 		case <-networkCtx.Done():
@@ -492,7 +497,6 @@ func (e *Execution) get(scope string, u *url.URL, headers http.Header, timeout t
 			return result{Error: "execution_ended"}
 		}
 		started := time.Now()
-		req, _ := http.NewRequestWithContext(networkCtx, http.MethodGet, u.String(), nil)
 		req.Header = headers.Clone()
 		e.requestStarted()
 		resp, requestErr := e.transport.RoundTrip(req)

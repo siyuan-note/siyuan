@@ -369,7 +369,10 @@ func (tx *Transaction) restoreBoundAttributeViewHistory(tree *parse.Tree, histor
 			if graphErr != nil {
 				return graphErr
 			}
-			parents, _ := current.GetKeyValues(current.SubItems.ParentKeyID)
+			parents, graphErr := current.GetKeyValues(current.SubItems.ParentKeyID)
+			if graphErr != nil {
+				return graphErr
+			}
 			changes := map[string]string{}
 			for child, parent := range index.Parents {
 				if !slices.Contains(itemIDs, parent) || current.GetBlockValue(child) == nil {

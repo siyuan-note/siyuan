@@ -441,7 +441,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " before saving to check the current S3, WebDAV, or local filesystem draft without saving it. WebDAV checks directory creation and probe read/write access; the local filesystem checks directory read/write access. The probe is cleaned up where possible. If the test fails, follow the diagnostic and try again; your saved configuration is retained."
+					"Data": " before saving to check the current S3, WebDAV, or local filesystem draft without saving it. WebDAV checks directory creation and probe read/write access; the local filesystem checks directory read/write access. The probe is cleaned up where possible. If the test fails, follow the diagnostic and try again; your saved configuration is retained. Sync uploads also require conditional PUT on S3 and MOVE without overwriting the destination on WebDAV."
 				}
 			]
 		},

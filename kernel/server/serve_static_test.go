@@ -25,7 +25,7 @@ import (
 
 func TestServeCustomEmojiUsesInertImageContent(t *testing.T) {
 	oldDataDir := util.DataDir
-	util.DataDir = t.TempDir()
+	util.DataDir = testutil.PublicDataDir(t)
 	t.Cleanup(func() { util.DataDir = oldDataDir })
 	directory := filepath.Join(util.DataDir, "emojis")
 	if err := os.MkdirAll(directory, 0755); err != nil {

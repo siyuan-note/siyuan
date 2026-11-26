@@ -31,7 +31,7 @@ siyuan -w /path/to/workspace -f json search "关键词"
 
 1. 首次发布：在 `scripts/npm-cli/` 下手动执行 `npm login` 和 `npm publish --access public`（需有 `@siyuan-note` org 发布权限），先创建 `@siyuan-note/cli` 包页面。
 2. 打开新包的 `npmjs.com → Packages → @siyuan-note/cli → Settings → Trusted publishing`，添加 GitHub Actions publisher：Organization/user `siyuan-note`，Repository `siyuan`，Workflow filename `npm-cli-publish.yml`，Environment name `npm-publish`；Allowed actions 勾选 `npm publish`。
-3. 更新 `scripts/npm-cli/package.json` 的 `version` 至 `0.1.1`（`0.1.0` 已用于首次发布），推送 `npm-cli-v<version>` tag；也可在 Actions 里手动触发。
+3. 当前版本为 `0.1.1`（`0.1.0` 用于首次发布）。后续发版时更新 `scripts/npm-cli/package.json` 的 `version`，推送 `npm-cli-v<version>` tag；也可在 Actions 里手动触发。
 4. 发布目录为 `scripts/npm-cli/`，主库发版 tag（`v*`）不会触发此工作流。
 
 工作流要求 npm CLI >= 11.5.1、Node >= 22.14.0；新配置的 trusted publisher 必须在 2 天内完成一次成功发布，否则会过期。

@@ -7,7 +7,7 @@
 		"id": "20261126135802-pxs2cpw",
 		"title": "外部連線",
 		"type": "doc",
-		"updated": "20261126135802"
+		"updated": "20261126140707"
 	},
 	"Children": [
 		{
@@ -30,7 +30,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261126135802-qaunkip",
-				"updated": "20261126135802"
+				"updated": "20261126140707"
 			},
 			"Children": [
 				{
@@ -58,14 +58,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261126135802-b3qbgiz",
-				"updated": "20261126135802"
+				"updated": "20261126140707"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-workbuddy-connector",
-					"TextMarkTextContent": "siyuan-note/siyuan-workbuddy-connector"
+					"Type": "NodeText",
+					"Data": "GitHub repo: siyuan-note/siyuan-workbuddy-connector"
 				}
 			]
 		},
@@ -75,7 +73,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261126135802-mnnwd8d",
-				"updated": "20261126135802"
+				"updated": "20261126140707"
 			},
 			"Children": [
 				{
@@ -103,14 +101,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261126135802-pvks3hd",
-				"updated": "20261126135802"
+				"updated": "20261126140707"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-doubao-plugin",
-					"TextMarkTextContent": "siyuan-note/siyuan-doubao-plugin"
+					"Type": "NodeText",
+					"Data": "GitHub repo: siyuan-note/siyuan-doubao-plugin"
 				}
 			]
 		},
@@ -120,7 +116,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261126135802-ux2nyjc",
-				"updated": "20261126135802"
+				"updated": "20261126140707"
 			},
 			"Children": [
 				{
@@ -148,14 +144,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261126135802-9ll76k6",
-				"updated": "20261126135802"
+				"updated": "20261126140707"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/siyuan-note/siyuan-openai-plugin",
-					"TextMarkTextContent": "siyuan-note/siyuan-openai-plugin"
+					"Type": "NodeText",
+					"Data": "GitHub repo: siyuan-note/siyuan-openai-plugin"
 				}
 			]
 		}

@@ -6,7 +6,7 @@ import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {AgentSessionRuns} from "./AgentSessionRuns";
 import {AgentMessageQueue} from "./AgentMessageQueue";
-import type {AgentSession} from "./SessionStore";
+import type {AgentPermissionMode, AgentSession, SessionIndexItem} from "./SessionStore";
 
 const compiled = transpileModule(readFileSync("src/layout/dock/agent/AgentChat.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -14,14 +14,22 @@ const compiled = transpileModule(readFileSync("src/layout/dock/agent/AgentChat.t
 
 class SessionRevisionConflict extends Error {}
 
-const createChat = (load: (id: string) => Promise<AgentSession>) => {
+const Constants = {LOCAL_AGENT_PERMISSION_MODE: "local-agent-permission-mode"};
+
+const createChat = (load: (id: string) => Promise<AgentSession>, storage: Record<string, unknown> = {},
+    setPermission = async (_id: string, mode: AgentPermissionMode) => mode) => {
     const exports = {} as {AgentChat: {prototype: object}};
+    const writes: {key: string; value: unknown}[] = [];
+    let nextSession = 0;
     runInNewContext(compiled, {
         exports,
-        require: () => ({AgentRunController, Model: class {}, SessionStore: {load}, SessionRevisionConflict,
+        require: () => ({AgentRunController, Constants, Model: class {},
+            SessionStore: {load, setPermission, init: async (): Promise<SessionIndexItem[]> => [],
+                newSessionId: () => `new-${++nextSession}`},
+            setStorageVal: (key: string, value: unknown) => writes.push({key, value}), SessionRevisionConflict,
             clearAgentInteractionNotifications: () => {}}),
         window: {
-            siyuan: {languages: {}},
+            siyuan: {languages: {}, storage},
             setTimeout: (callback: () => void) => { queueMicrotask(callback); return 1; },
             clearTimeout: (): void => undefined,
         },
@@ -73,7 +81,7 @@ const createChat = (load: (id: string) => Promise<AgentSession>) => {
         "clearThinking", "observeStickTarget", "flushThinkingStep"]) {
         chat[method] = (): void => undefined;
     }
-    return {chat, attributes};
+    return {chat, attributes, storage, writes};
 };
 
 test("navigation can leave a conflicted session while other save failures still block it", async () => {
@@ -91,6 +99,64 @@ const session = (overrides: Partial<AgentSession> = {}): AgentSession => ({
     createdAt: 1,
     updatedAt: 2,
     ...overrides,
+});
+
+const createPermissionChat = (storage?: Record<string, unknown>,
+    setPermission?: (id: string, mode: AgentPermissionMode) => Promise<AgentPermissionMode>) => {
+    const fixture = createChat(async id => session({id, permissionMode: "confirm"}), storage, setPermission);
+    delete fixture.chat.applyPermissionMode;
+    Object.assign(fixture.chat, {
+        isStreaming: false,
+        permissionButton: {disabled: false, querySelector: (): null => null, setAttribute: () => {}},
+        refreshModelOptions: () => {},
+        showWelcome: () => {},
+        saveSessionBeforeNavigation: async () => {},
+    });
+    return fixture;
+};
+
+test("welcome and new sessions reuse the last approval mode selected in the menu", async () => {
+    const f = createPermissionChat();
+    await f.chat.initSessions();
+    assert.equal(f.chat.permissionMode, "confirm");
+    await f.chat.changePermissionMode("allowSession");
+    assert.deepEqual(f.writes, [{key: Constants.LOCAL_AGENT_PERMISSION_MODE, value: "allowSession"}]);
+
+    const restarted = createPermissionChat(f.storage);
+    await restarted.chat.initSessions();
+    assert.equal(restarted.chat.permissionMode, "allowSession");
+    await restarted.chat.performSwitchSession("saved");
+    assert.equal(restarted.chat.permissionMode, "confirm");
+    await restarted.chat.performCreateSession();
+    assert.equal(restarted.chat.permissionMode, "allowSession");
+    assert.deepEqual(restarted.writes, []);
+});
+
+test("session-only approval does not become the approval mode for new sessions", async () => {
+    const f = createPermissionChat({[Constants.LOCAL_AGENT_PERMISSION_MODE]: "confirm"});
+    f.chat.applyPermissionMode("allowSession");
+    await f.chat.performCreateSession();
+    assert.equal(f.chat.permissionMode, "confirm");
+    assert.deepEqual(f.writes, []);
+});
+
+test("an existing session remembers the selected mode after the kernel accepts it", async () => {
+    let confirmChange: (mode: AgentPermissionMode) => void;
+    const f = createPermissionChat({[Constants.LOCAL_AGENT_PERMISSION_MODE]: "allowSession"}, async (id, mode) => {
+        assert.equal(id, "second");
+        assert.equal(mode, "confirm");
+        return new Promise(resolve => {confirmChange = resolve;});
+    });
+    f.chat.entries = session().entries;
+    f.chat.applyPermissionMode("allowSession");
+    const changed = f.chat.changePermissionMode("confirm");
+    assert.equal(f.chat.permissionButton.disabled, true);
+    assert.deepEqual(f.writes, []);
+    confirmChange("confirm");
+    await changed;
+    assert.equal(f.chat.permissionButton.disabled, false);
+    assert.equal(f.chat.permissionMode, "confirm");
+    assert.deepEqual(f.writes, [{key: Constants.LOCAL_AGENT_PERMISSION_MODE, value: "confirm"}]);
 });
 
 test("a completed local run restores regenerate controls after the final stream event", async () => {

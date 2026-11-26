@@ -16,7 +16,7 @@ import {isCapabilityEnabled, listCapabilityManifests, lookupCapability} from "./
 import {AgentPermissionMode, AgentSession, SessionRevisionConflict, SessionStore} from "./SessionStore";
 import {genAgentConfirmActionButtons, renderAgentConfirmArgs} from "./agentConfirmActions";
 import {AgentSessionPanel} from "./AgentSessionPanel";
-import {isInAndroid, updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
+import {isInAndroid, setStorageVal, updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
 import {getAgentLute} from "../../../protyle/render/setLute";
 import {escapeAriaLabel, escapeHtml, escapeHtmlTextAndAttr} from "../../../util/escape";
 import {hideTooltip, showTooltip} from "../../../dialog/tooltip";
@@ -79,6 +79,9 @@ import {ipcRenderer} from "electron";
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
 const maxVisibleBlockIDs = 50;
+
+const getNewSessionPermissionMode = (): AgentPermissionMode =>
+    window.siyuan.storage?.[Constants.LOCAL_AGENT_PERMISSION_MODE] === "allowSession" ? "allowSession" : "confirm";
 
 // 助手回复中的块引用链接使用 siyuan: 协议，消毒时显式允许；内嵌框架一律禁止。
 const agentSanitizeOptions = {
@@ -939,25 +942,26 @@ export class AgentChat extends Model {
     }
 
     private async changePermissionMode(mode: AgentPermissionMode) {
-        if (mode === this.permissionMode) {
-            return;
-        }
         const sessionID = this.sessionId;
-        if (this.entries.length === 0) {
-            this.applyPermissionMode(mode);
-            return;
+        const updateSession = this.entries.length > 0 && mode !== this.permissionMode;
+        if (updateSession) {
+            this.permissionButton.disabled = true;
         }
-        this.permissionButton.disabled = true;
         try {
-            const persistedMode = await SessionStore.setPermission(sessionID, mode);
+            const selectedMode = updateSession ? await SessionStore.setPermission(sessionID, mode) : mode;
             if (this.sessionId === sessionID) {
-                this.applyPermissionMode(persistedMode);
+                this.applyPermissionMode(selectedMode);
+                const key = Constants.LOCAL_AGENT_PERMISSION_MODE;
+                if (window.siyuan.storage[key] !== selectedMode) {
+                    window.siyuan.storage[key] = selectedMode;
+                    setStorageVal(key, selectedMode);
+                }
             }
         } catch (e) {
             console.error("update agent session permission failed:", e);
             showMessage(window.siyuan.languages._kernel[28], 3000, "error");
         } finally {
-            if (this.sessionId === sessionID) {
+            if (updateSession) {
                 this.permissionButton.disabled = false;
             }
         }
@@ -1471,7 +1475,7 @@ export class AgentChat extends Model {
         this.pendingSessionTitle = null;
         this.entries = [];
         this.refreshModelOptions(true);
-        this.applyPermissionMode("confirm");
+        this.applyPermissionMode(getNewSessionPermissionMode());
         this.showWelcome();
         this.scrollToBottom(true);
     }
@@ -2251,7 +2255,7 @@ export class AgentChat extends Model {
         this.sessionCreatedAt = Date.now();
         this.sessionTitle = this.defaultTitle;
         this.pendingSessionTitle = null;
-        this.applyPermissionMode("confirm");
+        this.applyPermissionMode(getNewSessionPermissionMode());
         this.pendingRecoverySessionIDs.delete(deletedSessionID);
         this.sessionErrors.delete(deletedSessionID);
         this.recoveryCommitTurnIDs.delete(deletedSessionID);
@@ -2797,7 +2801,7 @@ export class AgentChat extends Model {
         this.pendingSessionTitle = null;
         this.entries = [];
         this.refreshModelOptions(true);
-        this.applyPermissionMode("confirm");
+        this.applyPermissionMode(getNewSessionPermissionMode());
         this.hasTitled = false;
         this.currentAIElement = null;
         this.currentAssistantEntryId = "";

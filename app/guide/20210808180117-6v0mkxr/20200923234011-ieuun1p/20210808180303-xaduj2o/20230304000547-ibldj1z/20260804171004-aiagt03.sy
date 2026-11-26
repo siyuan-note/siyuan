@@ -862,7 +862,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", confirm that the task scope and tools are trusted: ordinary writes will no longer be confirmed individually, while the forced confirmations above remain in effect."
+					"Data": ", confirm that the task scope and tools are trusted: ordinary writes will no longer be confirmed individually, while the forced confirmations above remain in effect. New sessions begin with the last mode selected in the approval menu next to the input. Permission granted from an approval card applies only to the current session."
 				}
 			]
 		},

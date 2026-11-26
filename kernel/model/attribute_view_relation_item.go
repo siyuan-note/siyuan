@@ -33,14 +33,6 @@ type AttributeViewRelationItemCell struct {
 	RelatedItemIDs []string
 }
 
-func attributeViewRelationItemTarget(avID, blockID, keyID string, contexts ...*AttributeViewRelationContext) (source, target *av.AttributeView, targetBlockID string, err error) {
-	var context *AttributeViewRelationContext
-	if len(contexts) > 0 {
-		context = contexts[0]
-	}
-	return attributeViewRelationItemTargetWithScope(avID, blockID, keyID, context, nil)
-}
-
 func attributeViewRelationItemTargetWithScope(avID, blockID, keyID string, context *AttributeViewRelationContext, cellContext *AttributeViewRelationCellContext) (source, target *av.AttributeView, targetBlockID string, err error) {
 	if cellContext != nil {
 		var scope *attributeViewRelationScope

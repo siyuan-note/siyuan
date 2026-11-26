@@ -1,7 +1,7 @@
 import {getAVRichTextBlockDOM, getAVRichTextLute, sanitizeAVRichTextBlockDOM, serializeAVRichTextBlockDOM} from "../render/av/richText";
 import {decodeTableCellRich, encodeTableCellRich, TABLE_CELL_RICH_ATTRIBUTE} from "./tableCellRichValue";
 import {Constants} from "../../constants";
-import {restoreInlineElementBoundaries} from "./inlineElementBoundary";
+import {normalizeInlineElementBoundaries, restoreInlineElementBoundaries} from "./inlineElementBoundary";
 import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 import {getTableVirtualizationHTML, TABLE_VIRTUAL_ID} from "./tableVirtualizationDOM";
 
@@ -205,14 +205,16 @@ const prepareTableCellRichPreviews = (cells: Element[]) => {
     });
     if (missing.size > 0) {
         const template = document.createElement("template");
-        // 单元格预览共享一次表格解析，事务、剪贴板和静态渲染使用同一套源数据协议。
-        template.innerHTML = getAVRichTextLute().SpinBlockDOM(
+        // 单元格预览直接渲染块 DOM，避免正文的管道符参与 Markdown 表格分列。
+        template.innerHTML = getAVRichTextLute().BlockDOM2RichHTML(
             `<div data-type="NodeTable" data-node-id="${Lute.NewNodeID()}"><div contenteditable="true">` +
             "<table><thead><tr>" + Array.from(missing, encoded =>
                 `<th ${TABLE_CELL_RICH_ATTRIBUTE}="${encoded}"></th>`).join("") + "</tr></thead></table></div></div>");
+        normalizeInlineElementBoundaries(template.content);
         const previews = template.content.querySelector("table").tHead.rows[0].cells;
         Array.from(missing).forEach((encoded, index) => {
-            tableCellPreviewCache.set(encoded, previews[index].innerHTML);
+            tableCellPreviewCache.set(encoded,
+                `<div class="table__cell-rich" contenteditable="false">${previews[index].innerHTML}</div>`);
         });
     }
 };

@@ -49,7 +49,7 @@ const browserCases = async (source: string) => {
     const api = new Function(...Object.keys(dependencies), source +
         "\nreturn {hintSkill, mountLiteSlashMenu, normalizeAgentTokens, expandAgentTokenSelection, deleteAgentToken, " +
         "AGENT_SKILL_SELECTOR, AGENT_QUOTE_SELECTOR, createAgentQuote, readAgentQuote, projectAgentQuotes, quotePreview, rangeMarkdown, " +
-        "Hint, isBuiltinSlashHint, bindComposerInput, applyPhrase, insertQuote};")(...Object.values(dependencies));
+        "Hint, isBuiltinSlashHint, bindComposerInput, applyPhrase, insertQuote, insertMentions};")(...Object.values(dependencies));
     const element = document.createElement("div");
     element.className = "protyle-hint fn__none";
     document.body.appendChild(element);
@@ -324,10 +324,46 @@ const browserCases = async (source: string) => {
     check.equal(api.insertQuote(fragment, composer, instance, quotes[2], false), 3);
     check.ok(draft.contains(getSelection().anchorNode));
     check.deepEqual(Array.from(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), quotes.slice(0, 3));
+
+    const first = {id: "20261126093000-abcdef0", label: "Block A"};
+    const second = {id: "20261126093000-abcdef1", label: "<Block B>"};
+    const resetDraft = () => {
+        draft.innerHTML = '<div contenteditable="true">Before After</div>';
+        return draft.firstElementChild;
+    };
+    const mentionFragment = {focus: (toEnd: boolean) => {
+        check.equal(toEnd, true);
+        const end = draft.lastElementChild.lastChild;
+        select(end, end.textContent.length);
+    }};
+    const mentionInstance = {insert: (html: string, _isBlock: boolean, useSavedRange: boolean) => {
+        const target = useSavedRange ? toolbar.range : getSelection().getRangeAt(0);
+        check.ok(target.collapsed && draft.contains(target.startContainer));
+        target.insertNode(target.createContextualFragment(html));
+    }};
+    let editable = resetDraft();
+    toolbar.range = select(editable.firstChild, 2, editable.firstChild, 7).cloneRange();
+    select(sourceAnchor, 0);
+    api.insertMentions(mentionFragment, composer, mentionInstance, [first, second]);
+    const links = Array.from(editable.querySelectorAll("[data-id]"));
+    check.deepEqual(links.map(link => [link.getAttribute("data-id"), link.textContent]),
+        [[first.id, first.label], [second.id, second.label]]);
+    check.equal(links[0].previousSibling.textContent, "Before ");
+    check.equal(links[1].nextSibling.nextSibling.textContent, "After");
+
+    editable = resetDraft();
+    select(editable.firstChild, 3);
+    api.insertMentions(mentionFragment, composer, mentionInstance, [first]);
+    check.equal(editable.querySelector("[data-id]").previousSibling.textContent, "Bef");
+
+    editable = resetDraft();
+    select(sourceAnchor, 0);
+    api.insertMentions(mentionFragment, composer, mentionInstance, [first]);
+    check.equal(editable.querySelector("[data-id]").previousSibling.textContent, "Before After");
     return "Agent skill cases passed";
 };
 
-test("mobile commands, atomic skills, inline quotes and phrase templates coexist in the composer", {
+test("mobile commands, atomic skills, inline quotes, block references and phrase templates coexist in the composer", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
@@ -343,7 +379,8 @@ test("mobile commands, atomic skills, inline quotes and phrase templates coexist
     assert.ok(handle && isObjectLiteralExpression(handle));
     const phrase = handle.properties.find(property => property.name?.getText(composer) === "applyPhrase");
     const quote = handle.properties.find(property => property.name?.getText(composer) === "insertQuote");
-    assert.ok(phrase && quote);
+    const mentions = handle.properties.find(property => property.name?.getText(composer) === "insertMentions");
+    assert.ok(phrase && quote && mentions);
     const inputBindings = mount.body.statements.filter(statement => {
         if (isVariableStatement(statement)) {
             return statement.declarationList.declarations.some(declaration =>
@@ -363,6 +400,8 @@ test("mobile commands, atomic skills, inline quotes and phrase templates coexist
         "const applyPhrase = (fragment, p, getBlockHTML, instruction) => ({" + phrase.getText(composer) + "}).applyPhrase(instruction);",
         "const insertQuote = (fragment, p, protyle, value, background) => { const wysiwyg = p.wysiwyg; return ({" +
             quote.getText(composer) + "}).insertQuote(value, background); };",
+        "const insertMentions = (fragment, p, protyle, value) => { const wysiwyg = p.wysiwyg; return ({" +
+            mentions.getText(composer) + "}).insertMentions(value); };",
         "const bindComposerInput = p => { const wysiwyg = p.wysiwyg; " + inputBindings + "};"].join("\n").replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""), {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;

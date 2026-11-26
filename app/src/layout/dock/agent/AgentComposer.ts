@@ -546,9 +546,22 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                 '<span data-type="block-ref" data-id="' + m.id + '" data-subtype="d">' +
                 escapeHtml(m.label) + "</span>" + Constants.ZWSP + " "
             ).join("");
-            if (html) {
+            if (!html) return;
+
+            const selection = getSelection();
+            const active = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+            const range = [active, p.toolbar.range].find(item => item && item.endContainer !== wysiwyg.element &&
+                wysiwyg.element.contains(item.endContainer))?.cloneRange();
+            if (!range) {
+                fragment.focus(true);
                 protyle.insert(html);
+                return;
             }
+            range.collapse(false);
+            expandAgentTokenSelection(range);
+            p.toolbar.range = range;
+            focusByRange(range);
+            protyle.insert(html, false, true);
         },
         uploadImages: (files, element) => {
             uploadFiles(p, files, element, undefined, () => {

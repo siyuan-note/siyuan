@@ -848,10 +848,10 @@ export class AgentChat extends Model {
         }});
     }
 
-    public insertBlockMentions(mentions: Array<{ id: string; label: string }>) {
-        if (this.composer && mentions.length > 0) {
-            this.composer.insertMentions(mentions);
-        }
+    public async insertBlockMentions(mentions: Array<{ id: string; label: string }>) {
+        await this.initialSession;
+        await this.sessionViewChange;
+        if (!this.destroyed) (this.editingComposer || this.composer)?.insertMentions(mentions);
     }
 
     public back(): boolean {

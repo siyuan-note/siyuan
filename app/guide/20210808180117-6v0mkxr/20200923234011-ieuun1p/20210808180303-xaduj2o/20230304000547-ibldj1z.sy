@@ -39,6 +39,47 @@
 			]
 		},
 		{
+			"ID": "20261126162137-o6y04h8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126162137-o6y04h8",
+				"updated": "20261126162137"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the Android builds for Chinese app stores, the native HarmonyOS app, and the China mainland App Store edition, AI editing and the AI agent use the official DeepSeek service with the deepseek-flash model. Enter your own DeepSeek API Key in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API Provider"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
 			"ID": "20261015225720-okoj5kh",
 			"Type": "NodeParagraph",
 			"Properties": {

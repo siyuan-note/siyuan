@@ -35,7 +35,22 @@ func ValidateAIProviderHeaders(headers map[string]string) error {
 }
 
 // newAIProviderHTTPClient 为供应商请求注入自定义头，覆盖同名默认头，并限制在配置的源站内。
-func newAIProviderHTTPClient(baseURL string, headers ...map[string]string) *http.Client {
+func newAIProviderHTTPClient(baseURL string, headers ...map[string]string) (client *http.Client) {
+	defer func() {
+		checkRedirect := client.CheckRedirect
+		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			if CurrentAIModelPolicy() != AIModelsFull {
+				return ErrAIModelPolicy
+			}
+			if checkRedirect != nil {
+				return checkRedirect(req, via)
+			}
+			if len(via) >= 10 {
+				return errors.New("stopped after 10 redirects")
+			}
+			return nil
+		}
+	}()
 	if len(headers) == 0 || len(headers[0]) == 0 {
 		return httpclient.NewUserAgentClient(nil)
 	}

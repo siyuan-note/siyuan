@@ -39,6 +39,47 @@
 			]
 		},
 		{
+			"ID": "20261126162137-m78c1vz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126162137-m78c1vz",
+				"updated": "20261126162137"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "中國大陸應用商店版 Android、HarmonyOS 原生版和中國大陸 App Store 版使用 DeepSeek 官方服務的 deepseek-flash 模型進行 AI 編輯和智慧體對話。請在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API 提供商"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 填寫自己的 DeepSeek API Key。"
+				}
+			]
+		},
+		{
 			"ID": "20261015225720-wuiykps",
 			"Type": "NodeParagraph",
 			"Properties": {

@@ -144,7 +144,7 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 			c.JSON(status, response)
 		}
 		// 渠道禁用在读取请求体前生效，路由上的身份和权限中间件仍先执行。
-		if apicontract.RequiresAI(endpoint.Definition().Path) && util.IsDisabledFeature("ai") {
+		if aiRouteUnavailable(endpoint.Definition().Path) {
 			message := util.I18nTerm(model.Conf.Lang, "agentCapabilitiesUnavailable")
 			if endpoint.Definition().Path == apicontract.AIMCPOAuthCallback.Definition().Path {
 				c.Data(403, "text/plain; charset=utf-8", []byte(message))

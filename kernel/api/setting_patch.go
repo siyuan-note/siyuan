@@ -142,7 +142,7 @@ var patchSetting = contractHandler(apicontract.PatchSetting, func(c *gin.Context
 	case "keymap":
 		response = applySettingPatch(c, patch, apicontract.SetKeymap, applyKeymapSetting)
 	case "ai":
-		if util.IsDisabledFeature("ai") {
+		if aiRouteUnavailable(apicontract.SetAI.Definition().Path) {
 			return apicontract.Failure[*apicontract.SettingPatchData](-1, util.I18nTerm(model.Conf.Lang, "agentCapabilitiesUnavailable"))
 		}
 		response = applySettingPatch(c, patch, apicontract.SetAI, applyAISetting)

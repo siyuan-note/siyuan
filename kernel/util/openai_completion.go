@@ -103,6 +103,9 @@ type OpenAICompletionStream struct {
 
 func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protocol string,
 	request openai.ChatCompletionRequest, responseInput []any) (*OpenAICompletionStream, error) {
+	if !aiCompletionAllowed(client, protocol, request.Model) {
+		return nil, ErrAIModelPolicy
+	}
 	if IsGeminiInteractionsProtocol(protocol) {
 		return createGeminiInteractionsStream(ctx, client, request)
 	}
@@ -141,6 +144,9 @@ func CreateOpenAICompletionStream(ctx context.Context, client *AIClient, protoco
 
 func CreateOpenAICompletion(ctx context.Context, client *AIClient, protocol string,
 	request openai.ChatCompletionRequest, responseInput []any) (openai.ChatCompletionResponse, error) {
+	if !aiCompletionAllowed(client, protocol, request.Model) {
+		return openai.ChatCompletionResponse{}, ErrAIModelPolicy
+	}
 	if IsGeminiInteractionsProtocol(protocol) {
 		return createGeminiInteractionCompletion(ctx, client, request)
 	}
@@ -222,6 +228,9 @@ func omitUnsupportedResponseSamplingParameter(request *openai.CreateResponseRequ
 
 func CompactOpenAIResponse(ctx context.Context, client *AIClient, request openai.ChatCompletionRequest,
 	responseInput []any) ([]json.RawMessage, *openai.ResponseUsage, error) {
+	if !aiCompletionAllowed(client, "openai-responses", request.Model) {
+		return nil, nil, ErrAIModelPolicy
+	}
 	responseRequest := openai.CompactResponseRequest{
 		Model:        request.Model,
 		Input:        responseInput,

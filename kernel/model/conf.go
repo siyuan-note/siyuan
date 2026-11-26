@@ -220,6 +220,9 @@ func (appConf *AppConf) CompareAndSetOIDC(expectedVersion string, config *conf.O
 func (conf *AppConf) SetAI(ctx context.Context, ai *conf.AI) error {
 	conf.m.Lock()
 	defer conf.m.Unlock()
+	if util.CurrentAIModelPolicy() != util.AIModelsFull {
+		return util.ErrAIModelPolicy
+	}
 	bindings := chatGPTAccountBindingIDs(ai)
 	if reflect.DeepEqual(bindings, chatGPTAccountBindingIDs(conf.AI.Load())) || util.ReadOnly {
 		conf.AI.Store(ai)
@@ -242,6 +245,23 @@ func (conf *AppConf) SetAI(ctx context.Context, ai *conf.AI) error {
 	conf.AI.Store(ai)
 	applyConfRuntime(conf)
 	recordPersistedConf(data)
+	return nil
+}
+
+func (appConf *AppConf) SetDistributionDeepSeekKey(request *conf.AI) error {
+	appConf.m.Lock()
+	defer appConf.m.Unlock()
+	if util.CurrentAIModelPolicy() != util.AIModelsDeepSeek {
+		return util.ErrAIModelPolicy
+	}
+	next, err := appConf.AI.Load().WithDistributionDeepSeekKey(request)
+	if err != nil {
+		return err
+	}
+	appConf.AI.Store(next)
+	if !util.ReadOnly {
+		appConf.saveLocked()
+	}
 	return nil
 }
 

@@ -19,6 +19,11 @@ func visibleConf(c *gin.Context) (masked *model.AppConf, isPublish bool, err err
 	if err != nil {
 		return nil, false, err
 	}
+	policy := util.CurrentAIModelPolicy()
+	masked.AI.Store(masked.AI.Load().EffectiveAI(policy))
+	if system := masked.System.Load(); system != nil {
+		system.DisabledFeatures = util.AIModelPolicyFeatures(system.DisabledFeatures, policy)
+	}
 	if !masked.Sync.Load().Enabled || (0 == masked.Sync.Load().Provider && !model.IsSubscriber()) {
 		masked.Sync.Load().Stat = model.Conf.Language(53)
 	}

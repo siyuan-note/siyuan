@@ -38,6 +38,8 @@ import {genMcpOAuthHtml, mountMcpOAuth} from "./mcpOAuthUi";
 import {registerAiWebGroup} from "./aiWeb";
 import {registerAiMemoryGroup} from "./aiMemory";
 import {getReasoningEffortOptions} from "../../../ai/reasoningEffort";
+import {isDisabledFeature} from "../../../protyle/util/compatibility";
+import {aiConfigApi} from "./aiRuntime";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -389,6 +391,20 @@ const registerAiRerankGroup = (tab: SettingTabBuilder) => {
 };
 
 export const registerAiTab = (tab: SettingTabBuilder) => {
+    if (isDisabledFeature("ai-unrestricted-providers")) {
+        const provider = window.siyuan.config.ai.providers[0];
+        if (provider) {
+            tab.group("providers", window.siyuan.languages.apiProvider).textBlock("deepSeekApiKey", {
+                title: window.siyuan.languages.apiKey,
+                desc: `${provider.displayName} · ${provider.models[0].name} · ${provider.baseURL}`,
+                mode: "input-password",
+                spellcheck: false,
+                readConfig: () => window.siyuan.config.ai.providers[0]?.apiKey || "",
+                save: (value) => aiConfigApi.patch("providers", [{...provider, apiKey: value}]),
+            });
+        }
+        return;
+    }
     registerAiProvidersGroup(tab);
     registerAiEditingGroup(tab);
     registerAiAgentGroup(tab);

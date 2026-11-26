@@ -16,7 +16,7 @@ import (
 )
 
 func aiProviderAdmission(c *gin.Context) *apicontract.Response[apicontract.Null] {
-	if model.Conf.AI.Load().HasAnyProvider() {
+	if model.Conf.LoadAI().HasAnyProvider() {
 		return nil
 	}
 	response := apicontract.Failure[apicontract.Null](-1, model.Conf.Language(193))

@@ -27,8 +27,8 @@ type HistorySelection = IDocVersionRef & {historyOp?: string};
 const genCurrentVersionItem = () => `<li class="b3-list-item history__current-version" data-type="currentVersionItem">
     <span class="b3-list-item__text">${window.siyuan.languages.currentVer}</span>
     <span class="fn__space"></span>
-    <button type="button" class="b3-button b3-button--text b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectCurrentVersion" aria-pressed="true" aria-label="${window.siyuan.languages.currentVer}">
-        <svg><use xlink:href="#iconCheck"></use></svg>
+    <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--touch ariaLabel" data-type="selectCurrentVersion" data-position="west" aria-pressed="true" aria-label="${window.siyuan.languages.currentVer}">
+        <svg aria-hidden="true"><use xlink:href="#iconCheck"></use></svg>
     </button>
 </li>`;
 
@@ -88,8 +88,8 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string, readon
     ${readonly ? "" : `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>`}
-    <button type="button" class="b3-button b3-button--text b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
-        <svg><use xlink:href="#iconUncheck"></use></svg>
+    <button type="button" class="block__icon block__icon--show block__icon--tap block__icon--touch ariaLabel" data-type="selectVersion" data-position="west" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
+        <svg aria-hidden="true"><use xlink:href="#iconUncheck"></use></svg>
     </button>
 </li>`;
         });

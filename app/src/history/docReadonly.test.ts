@@ -182,7 +182,9 @@ for (const mobile of [false, true]) {
         const view = createHistory(mobile, true);
         const html = view.file.querySelector(".b3-list--background").innerHTML;
         assert.ok(!html.includes('data-type="rollback"'));
-        assert.ok(html.includes('data-type="selectVersion"'));
+        for (const action of ["selectCurrentVersion", "selectVersion"]) {
+            assert.match(html, new RegExp(`<button type="button" class="block__icon block__icon--show block__icon--tap block__icon--touch ariaLabel" data-type="${action}"`));
+        }
         view.click("rollback");
         const target = new TestElement();
         target.setAttribute("data-type", "rollback");

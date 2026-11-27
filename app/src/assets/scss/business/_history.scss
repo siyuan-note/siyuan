@@ -558,6 +558,11 @@
     overflow: auto;
     user-select: none;
 
+    button:is([data-type="selectCurrentVersion"], [data-type="selectVersion"]):focus-visible {
+      outline: 2px solid var(--b3-theme-primary, Highlight);
+      outline-offset: -2px;
+    }
+
     .b3-list-item--hide-action > [data-type="selectVersion"][aria-pressed="true"] {
       display: flex;
     }

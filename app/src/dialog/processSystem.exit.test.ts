@@ -44,8 +44,11 @@ for (const mobile of [false, true]) {
                 }}},
             };
             const exports = {} as typeof import("./confirmDialog");
+            const scrimClasses: string[] = [];
+            const scrim = {classList: {add: (name: string) => scrimClasses.push(name)}, style: {opacity: ""}};
             class TestDialog {
-                element = {addEventListener() {}, setAttribute() {}, querySelector: () => ({focus() {}})};
+                element = {addEventListener() {}, setAttribute() {}, querySelector: (selector: string) =>
+                    selector === ".b3-dialog__scrim" ? scrim : {focus() {}}};
                 constructor({content}: {content: string}) { rendered.push(content); }
                 focusWhenReady() {}
             }
@@ -63,6 +66,8 @@ for (const mobile of [false, true]) {
             assert.equal(installs.length, 0);
             assert.equal(quits, 0);
             assert.equal(rendered.length, 1);
+            assert.deepEqual(scrimClasses, mobile ? [] : ["b3-dialog__scrim--frosted"]);
+            assert.equal(scrim.style.opacity, mobile ? "" : "1");
             assert.match(rendered[0], /id="confirmDialogConfirmBtn">Install now<\/button>/);
             assert.match(rendered[0], /id="cancelDialogConfirmBtn">Not now<\/button>/);
             if (releaseURL?.startsWith("https://")) {

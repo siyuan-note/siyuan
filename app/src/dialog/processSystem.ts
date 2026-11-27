@@ -300,6 +300,7 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                 },
                 confirmLabel: window.siyuan.languages.updateInstallNow,
                 cancelLabel: window.siyuan.languages.updateInstallLater,
+                frostedScrim: true,
             });
         } else { // 正常退出
             forceQuit();

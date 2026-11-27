@@ -22,6 +22,8 @@ export interface IConfirmDialogOptions {
     confirmLabel?: string;
     /** 取消按钮文字，默认使用「取消」 */
     cancelLabel?: string;
+    /** Use the exit progress backdrop without fading in a new scrim. Desktop only. */
+    frostedScrim?: boolean;
     mobileSheet?: MobileSheetOptions;
 }
 
@@ -88,6 +90,12 @@ export const createDesktopConfirmDialog = (options: IConfirmDialogOptions) => {
             }
         },
     });
+
+    if (options.frostedScrim) {
+        const scrim = dialog.element.querySelector<HTMLElement>(".b3-dialog__scrim");
+        scrim.classList.add("b3-dialog__scrim--frosted");
+        scrim.style.opacity = "1";
+    }
 
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;

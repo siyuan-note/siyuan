@@ -1,0 +1,172 @@
+{
+	"ID": "20261126135802-hu8m57i",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f50c",
+		"id": "20261126135802-hu8m57i",
+		"title": "Внешние подключения",
+		"type": "doc",
+		"updated": "20261126150544"
+	},
+	"Children": [
+		{
+			"ID": "20261126141053-a0d91jv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126141053-a0d91jv",
+				"updated": "20261126141053"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Обзор"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-jet4h9y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-jet4h9y",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan поддерживает подключение к WorkBuddy, Doubao и OpenAI. После подключения в этих приложениях можно искать, читать и редактировать заметки SiYuan."
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-ab14j2i",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-ab14j2i",
+				"updated": "20261126150544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "WorkBuddy"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-jr32vrt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-jr32vrt",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Коннектор доступен в каталоге коннекторов WorkBuddy. Найдите SiYuan, добавьте SiYuan Official Connector и укажите адрес своего экземпляра SiYuan и токен API."
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-qo0i7u3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-qo0i7u3",
+				"updated": "20261126150544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Репозиторий на GitHub: siyuan-note/siyuan-workbuddy-connector"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-95b3i47",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-95b3i47",
+				"updated": "20261126150544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Doubao"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-bsb6v2q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-bsb6v2q",
+				"updated": "20261126140921"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Плагин доступен в настольном приложении Doubao. В каталоге плагинов найдите «思源笔记» (SiYuan) и добавьте его."
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-einq07x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-einq07x",
+				"updated": "20261126150544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Репозиторий на GitHub: siyuan-note/siyuan-doubao-plugin"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-46ph3d1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-46ph3d1",
+				"updated": "20261126150544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OpenAI"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-0noc2qh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-0noc2qh",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Плагин пока не опубликован в каталоге OpenAI. Чтобы пользоваться им в Codex в настольном приложении ChatGPT, скачайте с GitHub пакет для локальной установки и установите его вручную по инструкции в репозитории."
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-7c2sr4d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-7c2sr4d",
+				"updated": "20261126150544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Репозиторий на GitHub: siyuan-note/siyuan-openai-plugin"
+				}
+			]
+		}
+	]
+}

@@ -6,7 +6,7 @@
 		"id": "20261122113000-tezfxb2",
 		"title": "Окна и вкладки",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -839,7 +839,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-qciggi3",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -881,7 +881,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-5gmr734",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -890,7 +890,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "Повторное нажатие на кнопку макета закрывает всплывающее окно ввода имени. В разделе "
+					"Data": " Повторное нажатие на кнопку макета закрывает всплывающее окно ввода имени. В разделе "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -990,7 +990,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-la6kdj6",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1031,7 +1031,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "）、"
+					"Data": "), "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1049,7 +1049,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

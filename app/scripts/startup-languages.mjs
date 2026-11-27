@@ -3,7 +3,7 @@ import {fileURLToPath} from "node:url";
 
 const directory = new URL("../appearance/langs/", import.meta.url);
 const target = new URL("../appearance/boot/startup-languages.json", import.meta.url);
-const keys = ["startupFailed", "startupStage", "startupReload", "startupCopy", "startupTimeout", "startupStagePage", "startupStageConfiguration", "startupStageEngine", "startupStagePlugins", "startupStageStorage", "startupStageLanguage", "startupStageInterface", "startupCopyFailed", "copied"];
+const keys = ["startupFailed", "startupStage", "startupReload", "startupCopy", "startupTimeout", "startupStagePage", "startupStageConfiguration", "startupStageEngine", "startupStagePlugins", "startupStageStorage", "startupStageLanguage", "startupStageInterface", "startupCopyFailed", "copied", "close"];
 const result = {};
 // 启动错误提示独立打包，语言文件无法读取时仍可使用当前语言。
 for (const file of readdirSync(directory).filter(file => file.endsWith(".json")).sort()) {

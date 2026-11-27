@@ -83,6 +83,18 @@ func TestPrimaryRichRejectsUnknownSourceWithoutMutation(t *testing.T) {
 	}
 }
 
+func TestParseAttributeViewPrimaryRichDropsDerivedDOMOnError(t *testing.T) {
+	data := []byte(`{"spec":15,"keyValues":[{"values":[{"type":"block","block":{"content":"Original","richBlockDOM":"discard","rich":{"spec":1,"format":"unsupported","content":"source"}}}]}]}`)
+	view, err := ParseAttributeViewData("test", data)
+	if err == nil || view == nil {
+		t.Fatalf("expected a partial result and a parsing error, got %v", err)
+	}
+	block := view.KeyValues[0].Values[0].Block
+	if block.RichBlockDOM != "" || block.Content != "Original" || block.Rich.Content != "source" {
+		t.Fatalf("unexpected partial primary key: %+v", block)
+	}
+}
+
 func TestPrimaryRichUsesDocumentTitleInlineRange(t *testing.T) {
 	for _, content := range []string{
 		`<span data-type="code">code</span>`,

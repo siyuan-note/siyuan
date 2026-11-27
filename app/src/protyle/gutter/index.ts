@@ -4125,7 +4125,6 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
     }
 }
 
-// 将选中的块以区块引用形式追加到智能体会话发送框末尾，等价于拖拽块到发送框或在框内搜索选块。
 export const addBlockToAgent = async (blockIds: string[]) => {
     const ids = blockIds.filter(Boolean);
     if (ids.length === 0) {
@@ -4147,5 +4146,5 @@ export const addBlockToAgent = async (blockIds: string[]) => {
     }));
     const {openEditorAgent} = await import("../../ai/editorAgent");
     const chat = await openEditorAgent(window.siyuan.ws.app);
-    chat?.insertBlockMentions(mentions);
+    await chat?.insertBlockMentions(mentions);
 };

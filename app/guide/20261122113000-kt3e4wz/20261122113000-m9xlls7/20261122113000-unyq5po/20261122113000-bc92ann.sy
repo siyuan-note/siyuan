@@ -6,7 +6,7 @@
 		"id": "20261122113000-bc92ann",
 		"title": "Искусственный интеллект",
 		"type": "doc",
-		"updated": "20261122172348"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -35,6 +35,47 @@
 				{
 					"Type": "NodeText",
 					"Data": "SiYuan предоставляет функции ИИ-редактирования, ИИ-агента и семантического поиска. Перед использованием этих функций необходимо настроить соответствующих поставщиков API и модели в зависимости от задач. В шаблонах официальных поставщиков базовый URL API доступен только для чтения. Для агрегаторов моделей, локальных сервисов и пользовательских поставщиков адрес можно редактировать."
+				}
+			]
+		},
+		{
+			"ID": "20261126162137-cl496mf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126162137-cl496mf",
+				"updated": "20261126162137"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "В версиях для магазинов приложений Android в материковом Китае, нативной версии HarmonyOS и версии для App Store материкового Китая ИИ-редактор и ИИ-агент используют модель deepseek-flash официального сервиса DeepSeek. Введите собственный API-ключ DeepSeek в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Настройки"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Искусственный интеллект"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Поставщик API"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},
@@ -76,7 +117,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-5lpiu6i",
-				"updated": "20261122172348"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -148,7 +189,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-43c382g",
-				"updated": "20261122172348"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -285,7 +326,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-foru211",
-						"updated": "20261122172348"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -293,12 +334,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-o11d2l1",
-								"updated": "20261122172348"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "При использовании "
+									"Data": "Используйте "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -330,7 +371,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-linos95",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -344,7 +385,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-sx4oson",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -360,7 +401,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -370,7 +411,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-dzkolf1",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -384,7 +425,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-2ewtw53",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -400,7 +441,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -409,7 +450,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261122113000-f6k3v2h",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -424,7 +465,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-r3y9mns",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -440,7 +481,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -450,7 +491,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-7wg5hhi",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -464,7 +505,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-sgiwc79",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -480,7 +521,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -490,7 +531,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-3t5gb35",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -504,7 +545,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-7ssz939",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -520,7 +561,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

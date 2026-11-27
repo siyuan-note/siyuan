@@ -441,7 +441,10 @@ func (tx *Transaction) restoreAttributeViewItems(op *Operation) error {
 		return err
 	}
 	for _, kv := range state.Keys {
-		dest, _ := current.GetKeyValues(kv.Key.ID)
+		dest, lookupErr := current.GetKeyValues(kv.Key.ID)
+		if lookupErr != nil {
+			return lookupErr
+		}
 		for _, value := range kv.Values {
 			dest.Values = append(dest.Values, value.Clone())
 		}

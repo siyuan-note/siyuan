@@ -19,7 +19,10 @@ func listGeminiInteractionModels(ctx context.Context, client *AIClient) ([]Avail
 	if err != nil {
 		return nil, err
 	}
-	parsed, _ := url.Parse(endpoint)
+	parsed, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
 	var models []AvailableModel
 	seen, cursors := map[string]bool{}, map[string]bool{}
 	cursor := ""

@@ -7,14 +7,145 @@ on:
       - '*-beta*'
       - '*-rc*'
   workflow_dispatch:
+    inputs:
+      startup_check:
+        description: Release or verify an existing build
+        type: choice
+        default: release
+        options:
+          - release
+          - windows
+          - windows-candidate
+          - macos
+          - linux
+          - static
+          - release-check
+      artifact_run_id:
+        description: Workflow run ID containing the installers for verification
+        type: string
+      artifact_version:
+        description: Version of the installers for verification
+        type: string
 
 env:
   package_json: "app/package.json"
   GOMODCACHE: ${{ github.workspace }}/go/pkg/mod
 
 jobs:
+  startup_candidate_prepare:
+    if: github.event_name == 'workflow_dispatch' && inputs.startup_check == 'windows-candidate'
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.package.outputs.version }}
+      packageManager: ${{ steps.package.outputs.packageManager }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: package
+        run: |
+          echo "version=$(jq -r .version app/package.json)" >> "$GITHUB_OUTPUT"
+          echo "packageManager=$(jq -r .packageManager app/package.json)" >> "$GITHUB_OUTPUT"
+
+  startup_candidate_build:
+    needs: startup_candidate_prepare
+    uses: ./.github/workflows/desktop-build.yml
+    with:
+      config: >-
+        {"os":"windows-2025","name":"Build Windows startup candidate","kernel_path":"../app/kernel/SiYuan-Kernel.exe","gobin":"bin","build_args_prefix":"-s -w -X","build_args_suffix":"Mode=prod","electron_args":"dist","goos":"windows","goarch":"amd64","suffix":"win.exe","e2e_shards":""}
+      packageManager: ${{ needs.startup_candidate_prepare.outputs.packageManager }}
+
+  startup_candidate_verify:
+    needs: [startup_candidate_prepare, startup_candidate_build]
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/desktop-startup.yml
+    with:
+      target: windows
+      version: ${{ needs.startup_candidate_prepare.outputs.version }}
+      artifact_run_id: ${{ github.run_id }}
+
+  startup_verify:
+    needs: [prepare, build, package_macos_arm64]
+    if: >-
+      ${{ !cancelled() &&
+          ((needs.prepare.result == 'success' && needs.build.result == 'success' &&
+            needs.package_macos_arm64.result == 'success') ||
+           (github.event_name == 'workflow_dispatch' &&
+            contains(fromJSON('["windows","macos","linux","release-check"]'), inputs.startup_check))) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(contains(fromJSON('["windows","macos","linux"]'), inputs.startup_check) && format('["{0}"]', inputs.startup_check) || '["windows","macos","linux"]') }}
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/desktop-startup.yml
+    with:
+      target: ${{ matrix.target }}
+      version: ${{ needs.prepare.outputs.version || inputs.artifact_version }}
+      artifact_run_id: ${{ needs.prepare.result == 'success' && github.run_id || inputs.artifact_run_id }}
+
+  startup_static:
+    name: Verify release assets
+    needs: [prepare, package_macos_amd64, build_android, startup_verify]
+    if: >-
+      ${{ !cancelled() &&
+          ((needs.startup_verify.result == 'success' &&
+            ((needs.prepare.result == 'success' && needs.package_macos_amd64.result == 'success' &&
+              needs.build_android.result == 'success') || inputs.startup_check == 'release-check')) ||
+           inputs.startup_check == 'static') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v8
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ needs.prepare.result == 'success' && github.run_id || inputs.artifact_run_id }}
+          pattern: "siyuan-{linux,mac.dmg,mac-arm64.dmg,win.exe,android}"
+          path: installers
+      - name: Download desktop startup reports
+        if: inputs.startup_check != 'static'
+        uses: actions/download-artifact@v8
+        with:
+          pattern: "startup-{windows,macos,linux}"
+          path: startup-results
+      - name: Install 7-Zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y 7zip
+      - name: Verify the eight release assets
+        shell: bash
+        env:
+          VERSION: ${{ needs.prepare.outputs.version || inputs.artifact_version }}
+          STARTUP_CHECK: ${{ inputs.startup_check }}
+        run: |
+          args=(check installers --workflow-artifacts --version "$VERSION" --report static-verification.json)
+          if [[ "$STARTUP_CHECK" != static ]]; then
+            args+=(--startup-results startup-results)
+          fi
+          python scripts/verify-release.py "${args[@]}"
+          jq -r '.packages[] | "\(.sha256)  \(.name)"' static-verification.json > SHA256SUMS.txt
+      - name: Upload package verification report and checksums
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: startup-static
+          path: |
+            static-verification.json
+            SHA256SUMS.txt
+
   prepare:
     name: Prepare
+    if: github.event_name != 'workflow_dispatch' || inputs.startup_check == 'release'
     runs-on: ubuntu-24.04
     outputs:
       release_title: ${{ steps.release_info.outputs.release_title }}
@@ -1075,9 +1206,8 @@ jobs:
   create_release:
     name: Create Release
     runs-on: ubuntu-24.04
-    needs: [prepare, languages, contracts, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, main_e2e, editor_e2e]
-    # 等待全部内核、前端检查和主 E2E、编辑器测试结束；测试步骤的软失败不阻塞发布。
-    # 构建和安装包校验失败仍阻止发布；独立 E2E（含测试准备）失败只记录，不阻止发布。
+    needs: [prepare, languages, contracts, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, startup_verify, startup_static, main_e2e, editor_e2e]
+    # 发布需要桌面启动和全部安装包校验通过；独立 E2E 的软失败只记录。
     if: >-
       ${{ always() && !cancelled() && needs.prepare.result == 'success' &&
           needs.languages.result == 'success' && needs.contracts.result == 'success' &&
@@ -1086,13 +1216,21 @@ jobs:
           needs.build.result == 'success' && needs.build_macos_amd64.result == 'success' &&
           needs.build_macos_arm64.result == 'success' && needs.package_macos_amd64.result == 'success' &&
           needs.package_macos_arm64.result == 'success' &&
-          needs.build_android.result == 'success' && needs.main_e2e.result != 'cancelled' &&
+          needs.build_android.result == 'success' &&
+          needs.startup_verify.result == 'success' && needs.startup_static.result == 'success' &&
+          needs.main_e2e.result != 'cancelled' &&
           needs.editor_e2e.result != 'cancelled' }}
     steps:
       - name: Download release artifacts
         uses: actions/download-artifact@v8
         with:
-          pattern: siyuan-*
+          pattern: "siyuan-{linux,mac.dmg,mac-arm64.dmg,win.exe,android}"
+
+      - name: Download verified asset checksums
+        uses: actions/download-artifact@v8
+        with:
+          name: startup-static
+          path: verified-assets
 
       - name: Prepare Release Assets
         shell: bash
@@ -1109,24 +1247,9 @@ jobs:
           cp "siyuan-win.exe/siyuan-${VERSION}-win.exe" release-assets/
           cp "siyuan-android/siyuan-${VERSION}.apk" release-assets/
 
-          EXPECTED_ASSETS=(
-            "siyuan-${VERSION}-linux.AppImage"
-            "siyuan-${VERSION}-linux.tar.gz"
-            "siyuan-${VERSION}-linux.deb"
-            "siyuan-${VERSION}-linux.rpm"
-            "siyuan-${VERSION}-mac.dmg"
-            "siyuan-${VERSION}-mac-arm64.dmg"
-            "siyuan-${VERSION}-win.exe"
-            "siyuan-${VERSION}.apk"
-          )
-          for asset in "${EXPECTED_ASSETS[@]}"; do
-            test -s "release-assets/${asset}"
-          done
-          (
-            cd release-assets
-            sha256sum "${EXPECTED_ASSETS[@]}" > SHA256SUMS.txt
-            sha256sum --check SHA256SUMS.txt
-          )
+          cp verified-assets/SHA256SUMS.txt release-assets/
+          cd release-assets
+          sha256sum --check --strict SHA256SUMS.txt
 
       - name: Create Release
         uses: ncipollo/release-action@v1

@@ -6,7 +6,7 @@
 		"id": "20261122113000-b11aeur",
 		"title": "Веб-клиппинг",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126172446"
 	},
 	"Children": [
 		{
@@ -48,7 +48,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-l0i74c7",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -140,12 +140,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-auhml9m",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "расширение SiYuan для Chrome"
+					"Data": "Расширение SiYuan для Chrome"
 				}
 			]
 		},
@@ -157,7 +157,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-l20ees1",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -171,7 +171,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-zp6ku9e",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -179,7 +179,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-8ir98ak",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -217,10 +217,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "API токен"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ""
 								}
 							]
 						}
@@ -308,7 +304,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-azoxc3g",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -322,7 +318,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-d1bryfi",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -349,7 +345,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		}

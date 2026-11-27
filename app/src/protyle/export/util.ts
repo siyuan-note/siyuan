@@ -20,6 +20,7 @@ import {copyPNGByLink, writePNGBlob} from "../../menus/util";
 import {getExportImageLayoutScale, getExportImageSize, isExportImageSizeSupported, observeExportImageLayout, updateExportImageLayout} from "./imageLayout";
 import {getExportImageFontCSS, getExportImageLocalFontCSS} from "./imageFonts";
 import {suspendAVColumnWindows} from "../render/av/columnWindow";
+import {isHandlerIALAttribute} from "../util/ialAttributes";
 
 const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
@@ -346,7 +347,7 @@ export const exportImage = (id: string, copyOnly = false) => {
         previewElement.innerHTML = sanitizeKernelHTML(response.data.content);
         previewElement.setAttribute("data-doc-type", response.data.type || "NodeDocument");
         Object.keys(response.data.attrs).forEach(key => {
-            if (getHostCapabilities().remoteKernel && !key.startsWith("custom-") && key !== "style") {
+            if (isHandlerIALAttribute(key) || (getHostCapabilities().remoteKernel && !key.startsWith("custom-") && key !== "style")) {
                 return;
             }
             previewElement.setAttribute(key, response.data.attrs[key]);

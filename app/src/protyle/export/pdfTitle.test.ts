@@ -54,6 +54,14 @@ test("PDF previews preserve localized titles and suggest safe filenames in the r
         const assignment = html.match(/^\s*document\.title\s*=.+$/m)?.[0];
         assert.ok(assignment, filename);
         assert.ok(!assignment.includes("</script>"), "localized titles cannot close the generated script");
+        const attributes = html.slice(html.indexOf('wysElement.setAttribute("data-doc-type"'),
+            html.indexOf("Protyle.setAutoDirection(previewElement"));
+        const applied = new Map<string, string>();
+        runInNewContext(attributes, {
+            data: {type: "NodeDocument", attrs: {OnMouseOver: "discard", "custom-preview": "preserved"}},
+            wysElement: {setAttribute: applied.set.bind(applied)},
+        });
+        assert.deepEqual([...applied], [["data-doc-type", "NodeDocument"], ["custom-preview", "preserved"]]);
         const dialog = html.slice(html.indexOf("            const defaultPath ="),
             html.indexOf("            const result = await ipcRenderer.invoke"));
         for (const name of ["", "Named document", "/", "标题 </script> & \"quotes\""]) {

@@ -765,12 +765,15 @@ func TestGetDocOptionallyReturnsEmbeddedDocInfo(t *testing.T) {
 }
 
 func TestFilterFileTreePublishAccess(t *testing.T) {
+	gin.SetMode(gin.TestMode)
 	previousConf := model.Conf
 	model.Conf = model.NewAppConf()
+	model.Conf.FileTree.Store(conf.NewFileTree())
 	model.Conf.Sync.Store(conf.NewSync())
 	t.Cleanup(func() { model.Conf = previousConf })
 	const (
 		boxID             = "20260725000000-boxid01"
+		otherBoxID        = "20260725000000-boxid02"
 		publicID          = "20260725000001-public1"
 		protectedID       = "20260725000002-protect"
 		hiddenID          = "20260725000003-hidden1"
@@ -804,10 +807,24 @@ func TestFilterFileTreePublishAccess(t *testing.T) {
 
 	ids := []string{publicID, protectedID, hiddenID, privateID, forbiddenID}
 	allIDs := append(slices.Clone(ids), missingID)
+	boxConf := conf.NewBoxConf()
+	boxConf.Closed, boxConf.Name = false, "Published"
+	if err := (&model.Box{ID: boxID}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	otherBoxConf := conf.NewBoxConf()
+	otherBoxConf.Closed, otherBoxConf.Name = false, "Another notebook"
+	if err := (&model.Box{ID: otherBoxID}).SaveConf(otherBoxConf); err != nil {
+		t.Fatal(err)
+	}
 	for _, id := range ids {
+		owner := boxID
+		if id == protectedID {
+			owner = otherBoxID
+		}
 		treenode.IndexBlockTree(&parse.Tree{
 			ID:    id,
-			Box:   boxID,
+			Box:   owner,
 			Path:  "/" + id + ".sy",
 			HPath: "/" + id,
 			Root:  &ast.Node{ID: id, Type: ast.NodeDocument},
@@ -826,10 +843,48 @@ func TestFilterFileTreePublishAccess(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodPost, "/", nil)
 	c.Set(model.RoleContextKey, model.RoleReader)
 
-	expectedPaths := paths[:3]
-	if filtered := filterFileTreePathsByPublishMetadataAccess(c, paths); !slices.Equal(filtered, expectedPaths) {
-		t.Fatalf("unexpected unauthenticated reader paths: %v", filtered)
+	engine := gin.New()
+	engine.Use(func(ctx *gin.Context) { ctx.Set(model.RoleContextKey, model.GetGinContextRole(c)) })
+	registerFiletreeRoutes(engine)
+	requirePaths := func(expectedIDs ...string) {
+		t.Helper()
+		payload, err := json.Marshal(map[string][]string{"paths": paths})
+		if err != nil {
+			t.Fatal(err)
+		}
+		const endpoint = "/api/filetree/getHPathsByPaths"
+		request := httptest.NewRequest(http.MethodPost, endpoint, strings.NewReader(string(payload)))
+		for _, cookie := range c.Request.Cookies() {
+			request.AddCookie(cookie)
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, request)
+		requireAPIContract(t, http.MethodPost, endpoint, recorder)
+		var result struct {
+			Code int      `json:"code"`
+			Data []string `json:"data"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || result.Code != 0 {
+			t.Fatalf("hierarchy paths request failed: %v, %s", err, recorder.Body.String())
+		}
+		expected := make([]string, 0, len(expectedIDs))
+		for _, id := range expectedIDs {
+			notebookName := "Published"
+			if id == protectedID {
+				notebookName = "Another notebook"
+			}
+			expected = append(expected, notebookName+"/"+id)
+		}
+		actual := slices.Clone(result.Data)
+		slices.Sort(actual)
+		slices.Sort(expected)
+		if !slices.Equal(actual, expected) {
+			t.Fatalf("unexpected hierarchy paths: %v, want %v", actual, expected)
+		}
 	}
+	requirePaths(publicID, hiddenID)
+	slices.Reverse(paths)
+	requirePaths(publicID, hiddenID)
 	expectedIDs := []string{publicID, protectedID}
 	if filtered := filterFileTreeBlockIDsByPublishDiscoverability(c, allIDs, boxID); !slices.Equal(filtered, expectedIDs) {
 		t.Fatalf("unexpected reader discoverable IDs: %v", filtered)
@@ -839,18 +894,18 @@ func TestFilterFileTreePublishAccess(t *testing.T) {
 		Name:  "publish-auth-" + privateID,
 		Value: model.PublishAuthCookieValue(privateID, privatePassword),
 	})
-	expectedPaths = paths[:4]
-	if filtered := filterFileTreePathsByPublishMetadataAccess(c, paths); !slices.Equal(filtered, expectedPaths) {
-		t.Fatalf("unexpected authenticated reader paths: %v", filtered)
-	}
+	requirePaths(publicID, hiddenID, privateID)
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + protectedID,
+		Value: model.PublishAuthCookieValue(protectedID, protectedPassword),
+	})
+	requirePaths(publicID, protectedID, hiddenID, privateID)
 	if filtered := filterFileTreeBlockIDsByPublishDiscoverability(c, allIDs, boxID); !slices.Equal(filtered, expectedIDs) {
 		t.Fatalf("private documents should remain undiscoverable: %v", filtered)
 	}
 
 	c.Set(model.RoleContextKey, model.RoleAdministrator)
-	if filtered := filterFileTreePathsByPublishMetadataAccess(c, paths); !slices.Equal(filtered, paths) {
-		t.Fatalf("administrator paths should remain unchanged: %v", filtered)
-	}
+	requirePaths(ids...)
 	if filtered := filterFileTreeBlockIDsByPublishDiscoverability(c, allIDs, boxID); !slices.Equal(filtered, allIDs) {
 		t.Fatalf("administrator IDs should remain unchanged: %v", filtered)
 	}

@@ -231,6 +231,7 @@ export abstract class Constants {
     public static readonly LOCAL_PINNED_DOC_TREE_STATE = "local-pinned-doc-tree-state";
     public static readonly LOCAL_DIALOGPOSITION = "local-dialogposition";
     public static readonly LOCAL_SESSION_FIRSTLOAD = "local-session-firstload";
+    public static readonly LOCAL_AGENT_PERMISSION_MODE = "local-agent-permission-mode";
     /** @deprecated 内置偏好改用 config.appearance.outlineKeepCurrentExpand，不再读取此旧键 */
     public static readonly LOCAL_OUTLINE = "local-outline";
     public static readonly LOCAL_PLUGIN_DOCKS = "local-plugin-docks";

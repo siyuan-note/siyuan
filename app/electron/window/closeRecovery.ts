@@ -15,10 +15,12 @@ type CloseRecoveryOptions = {
     requestExit?: KernelExitRequest;
     findWorkspace?: () => Workspace | undefined;
     exit?: typeof exitWorkspace;
+    canSave?: () => boolean;
 };
 
 type PendingClose = {
     quit: boolean;
+    renderer: boolean;
     timer?: unknown;
     controller: AbortController;
 };
@@ -36,6 +38,7 @@ const installWindowCloseRecovery = (window: BrowserWindow, {
     requestExit = requestKernelExit,
     findWorkspace = () => state.workspaces.find(item => item.webContentsId === window.webContents.id),
     exit = exitWorkspace,
+    canSave = () => true,
 }: CloseRecoveryOptions = {}): void => {
     let pending: PendingClose | undefined;
     const finish = (request: PendingClose) => {
@@ -48,17 +51,19 @@ const installWindowCloseRecovery = (window: BrowserWindow, {
         const {signal} = request.controller;
         try {
             if (signal.aborted || window.isDestroyed()) return;
-            // 页面仍能执行脚本时继续由界面处理隐藏、保存确认和同步，避免干扰正常的长任务。
-            const responsive = await Promise.race([
-                window.webContents.executeJavaScript("void 0").then(() => true, () => false),
-                new Promise<boolean>(resolve => { request.timer = scheduleTimer(() => resolve(false), 1000); }),
-            ]);
-            cancelTimer(request.timer);
-            if (responsive || signal.aborted || window.isDestroyed()) return;
-            const decision = await showMessage({type: "warning", title: "SiYuan",
-                message: languages.windowCloseTimeout ?? "", buttons: [languages.cancel ?? "", languages.confirm ?? ""],
-                defaultId: 0, cancelId: 0, noLink: true, signal});
-            if (decision.response !== 1 || signal.aborted || window.isDestroyed()) return;
+            if (request.renderer) {
+                // 页面仍能执行脚本时继续由界面处理隐藏、保存确认和同步。
+                const responsive = await Promise.race([
+                    window.webContents.executeJavaScript("void 0").then(() => true, () => false),
+                    new Promise<boolean>(resolve => { request.timer = scheduleTimer(() => resolve(false), 1000); }),
+                ]);
+                cancelTimer(request.timer);
+                if (responsive || signal.aborted || window.isDestroyed()) return;
+                const decision = await showMessage({type: "warning", title: "SiYuan",
+                    message: languages.windowCloseTimeout ?? "", buttons: [languages.cancel ?? "", languages.confirm ?? ""],
+                    defaultId: 0, cancelId: 0, noLink: true, signal});
+                if (decision.response !== 1 || signal.aborted || window.isDestroyed()) return;
+            }
             const workspace = findWorkspace();
             if (!workspace) return;
             request.quit = true;
@@ -95,14 +100,19 @@ const installWindowCloseRecovery = (window: BrowserWindow, {
     requests.set(window, {
         request: quit => {
             if (pending) {
-                if (quit) {
+                if (quit && pending.renderer) {
                     pending.quit = true;
                     window.webContents.send(Channel.SIYUAN_SAVE_CLOSE, true);
                 }
                 return;
             }
-            const request: PendingClose = {quit, controller: new AbortController()};
+            const renderer = canSave();
+            const request: PendingClose = {quit: quit || !renderer, renderer, controller: new AbortController()};
             pending = request;
+            if (!renderer) {
+                void recover(request);
+                return;
+            }
             // 界面保存、确认和同步可能等待较久，超时仅提供原生确认入口，不自动丢弃编辑。
             request.timer = scheduleTimer(() => { void recover(request); }, 15000);
             window.webContents.send(Channel.SIYUAN_SAVE_CLOSE, quit);

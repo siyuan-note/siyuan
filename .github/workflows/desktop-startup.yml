@@ -1,0 +1,53 @@
+name: Desktop package startup verification
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      artifact_run_id:
+        required: true
+        type: string
+
+jobs:
+  startup:
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ${{ fromJSON('{"windows":"windows-2025","linux":"ubuntu-24.04","macos":"macos-15"}')[inputs.target] }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Download packaged application
+        uses: actions/download-artifact@v8
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.artifact_run_id }}
+          name: ${{ fromJSON('{"windows":"siyuan-win.exe","linux":"siyuan-linux","macos":"siyuan-mac-arm64.dmg"}')[inputs.target] }}
+          path: installers
+      - name: Install display server
+        if: inputs.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xauth
+      - name: Install and start the packaged application
+        shell: bash
+        env:
+          TARGET: ${{ inputs.target }}
+          VERSION: ${{ inputs.version }}
+        run: node scripts/smoke-release-desktop.mjs "$TARGET" installers "$VERSION" startup-results
+      - name: Upload startup diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: startup-${{ inputs.target }}
+          path: startup-results/

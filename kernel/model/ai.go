@@ -321,7 +321,7 @@ func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, 
 }
 
 func isOpenAIAPIEnabled() bool {
-	if !Conf.AI.Load().HasAnyProvider() {
+	if !Conf.LoadAI().HasAnyProvider() {
 		util.PushMsg(Conf.Language(193), 5000)
 		return false
 	}

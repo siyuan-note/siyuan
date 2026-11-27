@@ -43,14 +43,15 @@ import {emitToPlugins} from "../../plugin/EventBusCore";
 export class MobileFiles extends Model {
     public element: HTMLElement;
     public docTree: DocTreeController;
+    private scrollElement: HTMLElement;
 
     public getSelectedItems(): {id: string, path: string, notebookId: string}[] {
-        const controller = getActiveDocTreeController(this.element.parentElement) || this.docTree;
+        const controller = getActiveDocTreeController(this.scrollElement.parentElement) || this.docTree;
         return getDocTreeActionItems(controller.getSelectedItems()).map(({id, path, notebookId}) => ({id, path, notebookId}));
     }
 
     public getSelectionElements(): NodeListOf<HTMLElement> {
-        return (getActiveDocTreeController(this.element.parentElement) || this.docTree).getSelectionElements();
+        return (getActiveDocTreeController(this.scrollElement.parentElement) || this.docTree).getSelectionElements();
     }
 
     private saveStateTimeout: number;
@@ -105,7 +106,7 @@ export class MobileFiles extends Model {
     <svg data-type="publish-access" class="toolbar__icon${window.siyuan.config.readonly || !window.siyuan.config.publish.enable ? " fn__none" : ""}"><use xlink:href="#iconEye"></use></svg>
     <svg data-type="sort" class="toolbar__icon${window.siyuan.config.readonly ? " fn__none" : ""}"><use xlink:href="#iconSort"></use></svg>
 </div>
-<div class="file-tree__items fn__flex-1"></div>
+<div class="fn__flex-1" data-file-tree-scroll><div><div class="file-tree__items"></div></div></div>
 <ul class="b3-list b3-list--background fn__flex-column" style="min-height: auto;height:42px;transition: height .2s cubic-bezier(0, 0, .2, 1) 0ms">
     <li class="b3-list-item" data-type="toggle">
         <span class="b3-list-item__toggle">
@@ -117,9 +118,10 @@ export class MobileFiles extends Model {
     <ul class="fn__none fn__flex-1"></ul>
 </ul>`;
         this.actionsElement = filesElement.firstElementChild as HTMLElement;
-        this.element = this.actionsElement.nextElementSibling as HTMLElement;
+        this.scrollElement = this.actionsElement.nextElementSibling as HTMLElement;
+        this.element = this.scrollElement.querySelector(".file-tree__items");
         this.docTree = new DocTreeController({
-            element: this.element, renderRow: item => this.renderTreeRow(item),
+            element: this.element, scrollElement: this.scrollElement, renderRow: item => this.renderTreeRow(item),
             onSelectionChange: () => {
                 if (this.docTree?.getSelectedItems().length) { this.pinnedDocs?.clearSelection(); }
                 this.updateMultiSelect();
@@ -131,14 +133,14 @@ export class MobileFiles extends Model {
                 if (this.touchDragState?.isDragging) { this.updateTouchDrop(this.touchDragState); }
             },
         });
-        this.element.addEventListener("scroll", () => {
+        this.scrollElement.addEventListener("scroll", () => {
             window.clearTimeout(this.saveStateTimeout);
             this.saveStateTimeout = window.setTimeout(() => this.getOpenPaths(), 250);
         }, {passive: true});
         this.pinnedDocs = new PinnedDocs(app, this.element, (id, notebook) => {
             openMobileFileById(app, id, [Constants.CB_GET_SCROLL], undefined, notebook);
         }, true);
-        this.closeElement = this.element.nextElementSibling as HTMLElement;
+        this.closeElement = this.scrollElement.nextElementSibling as HTMLElement;
         this.selectionElement = document.createElement("div");
         this.selectionElement.className = "protyle-util fn__none";
         this.selectionElement.style.cssText = "position:relative;margin:8px;flex-shrink:0";
@@ -398,7 +400,7 @@ export class MobileFiles extends Model {
                 ghostElement: null,
                 mouse: isMousePointerTouchEvent(event),
                 armed: false,
-                scrollTop: this.element.scrollTop,
+                scrollTop: this.scrollElement.scrollTop,
                 lastMotionTime: Number.NEGATIVE_INFINITY,
             };
             if (!this.touchDragState.mouse) {
@@ -408,7 +410,7 @@ export class MobileFiles extends Model {
                         return;
                     }
                     // A scroll or recent drift during the hold owns this whole gesture.
-                    if (this.element.scrollTop !== state.scrollTop ||
+                    if (this.scrollElement.scrollTop !== state.scrollTop ||
                         performance.now() - state.lastMotionTime < Constants.TIMEOUT_TOUCH_DRAG_STILLNESS) {
                         this.touchDragState = null;
                         return;
@@ -424,7 +426,7 @@ export class MobileFiles extends Model {
                 }, Constants.TIMEOUT_LONGPRESS);
             }
         }, {passive: false});
-        this.element.addEventListener("scroll", () => {
+        this.scrollElement.addEventListener("scroll", () => {
             if (this.touchDragState && !this.touchDragState.isDragging) {
                 this.touchDragState = null;
             }
@@ -472,7 +474,7 @@ export class MobileFiles extends Model {
                 state.ghostElement.style.top = `${touch.clientY}px`;
 
                 // 手指接近列表上下边缘时自动滚动，避免拖拽时触不到屏外目标
-                dragOverScroll({clientY: touch.clientY} as MouseEvent, this.element.getBoundingClientRect(), this.element);
+                dragOverScroll({clientY: touch.clientY} as MouseEvent, this.scrollElement.getBoundingClientRect(), this.scrollElement);
 
                 this.updateTouchDrop(state);
             }

@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -31,13 +32,22 @@ func setupBoundInstallModel(t *testing.T) {
 
 func writeBoundInstallArchive(t *testing.T, code string) (string, string) {
 	t.Helper()
+	return writeLocalInstallArchive(t, map[string]string{
+		"plugin.json":      `{"name":"sample","version":"1.0.0"}`,
+		"index.js":         code,
+		"data/lookup.json": `{"label":"static resource"}`,
+	})
+}
+
+func writeLocalInstallArchive(t *testing.T, files map[string]string) (string, string) {
+	t.Helper()
 	archivePath := filepath.Join(t.TempDir(), "package.zip")
 	file, err := os.Create(archivePath)
 	if err != nil {
 		t.Fatal(err)
 	}
 	writer := zip.NewWriter(file)
-	for name, value := range map[string]string{"plugin.json": `{"name":"sample","version":"1.0.0"}`, "index.js": code, "data/lookup.json": `{"label":"static resource"}`} {
+	for name, value := range files {
 		entry, err := writer.Create(name)
 		if err != nil {
 			t.Fatal(err)
@@ -108,6 +118,61 @@ func TestBoundInstallRejectsHashAndTargetRevisionWithoutMutation(t *testing.T) {
 		if revision, err := GetInstalledBazaarPackageRevision("plugins", "sample"); err != nil || revision != first.InstalledRevision {
 			t.Fatal("stale binding changed target")
 		}
+	}
+}
+
+func TestPluginPublishInstallRevokesRemovedFields(t *testing.T) {
+	setupBoundInstallModel(t)
+	first, _ := writeLocalInstallArchive(t, map[string]string{
+		"plugin.json": `{"name":"sample","version":"1.0.0","publish":{"data":["removed","retained"]}}`,
+	})
+	if _, err := InstallLocalBazaarPackage(first, "", false); err != nil {
+		t.Fatal(err)
+	}
+	if err := SetPluginPublishDataGrant("sample", []string{"removed", "retained"}, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := SavePluginPublishData("sample", map[string]json.RawMessage{"removed": json.RawMessage(`1`), "retained": json.RawMessage(`2`)}); err != nil {
+		t.Fatal(err)
+	}
+
+	update, _ := writeLocalInstallArchive(t, map[string]string{
+		"plugin.json": `{"name":"sample","version":"2.0.0","publish":{"data":["retained","newField"]}}`,
+	})
+	if _, err := InstallLocalBazaarPackage(update, "", true); err != nil {
+		t.Fatal(err)
+	}
+	state, err := readPluginPublishState("sample")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(state.Granted, []string{"retained"}) || len(state.Data) != 1 || string(state.Data["retained"]) != "2" {
+		t.Fatalf("unexpected persisted publish state: %+v", state)
+	}
+}
+
+func TestPluginPublishInstallPreservesPackageOnStateError(t *testing.T) {
+	setupBoundInstallModel(t)
+	first := installBoundFixture(t, "first", bazaar.MissingInstalledRevision)
+	statePath := pluginPublishStatePath("sample")
+	if err := os.MkdirAll(filepath.Dir(statePath), 0700); err != nil {
+		t.Fatal(err)
+	}
+	const invalidState = `{"version":99}`
+	if err := os.WriteFile(statePath, []byte(invalidState), 0600); err != nil {
+		t.Fatal(err)
+	}
+	update, _ := writeBoundInstallArchive(t, "second")
+	if _, err := InstallLocalBazaarPackage(update, "", true); !errors.Is(err, ErrPluginPublishInvalid) {
+		t.Fatalf("install with unreadable publish state: %v", err)
+	}
+	revision, err := GetInstalledBazaarPackageRevision("plugins", "sample")
+	if err != nil || revision != first.InstalledRevision {
+		t.Fatalf("installed package changed after state error: %s, %v", revision, err)
+	}
+	state, err := os.ReadFile(statePath)
+	if err != nil || string(state) != invalidState {
+		t.Fatalf("publish state changed after state error: %s, %v", state, err)
 	}
 }
 

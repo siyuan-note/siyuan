@@ -252,6 +252,11 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 		return nil, err
 	}
 
+	// 安装与卸载按相同顺序加锁，发布授权操作在目录替换完成后才能读到新清单。
+	if options.ReplacementLock != nil {
+		options.ReplacementLock.Lock()
+		defer options.ReplacementLock.Unlock()
+	}
 	if err = packageInstallLock.Acquire(options.context(), 1); err != nil {
 		return nil, err
 	}
@@ -311,7 +316,17 @@ func replacePackageDirectoryWithOptions(sourcePath, installPath string, update b
 			return
 		}
 	}
-	if err = renamePackageDirectory(stagingPath, installPath); err != nil {
+	if options.PrepareReplacement != nil {
+		previousPath := ""
+		if targetExists {
+			previousPath = backupPath
+		}
+		err = options.PrepareReplacement(previousPath, stagingPath)
+	}
+	if err == nil {
+		err = renamePackageDirectory(stagingPath, installPath)
+	}
+	if err != nil {
 		if targetExists {
 			if rollbackErr := renamePackageDirectory(backupPath, installPath); rollbackErr != nil {
 				preserveOperationPath = true

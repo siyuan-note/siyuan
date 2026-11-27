@@ -6,6 +6,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"image"
 	"image/color"
 	"image/png"
@@ -15,8 +16,10 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -25,6 +28,72 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/image/tiff"
 )
+
+func TestTIFFPreviewAdmissionLeavesRoomForAnotherReader(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	reader := func(name string) (*gin.Context, *httptest.ResponseRecorder) {
+		recorder := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(recorder)
+		c.Request = httptest.NewRequestWithContext(ctx, http.MethodGet, "/", nil)
+		c.Set(model.RoleContextKey, model.RoleReader)
+		c.Set(model.ClaimsContextKey, jwt.MapClaims{"sub": name})
+		return c, recorder
+	}
+	first, _ := reader("first")
+	releaseFirst := acquireTIFFPreviewSlot(first)
+	if releaseFirst == nil {
+		t.Fatal("first reader could not reserve a conversion")
+	}
+	defer releaseFirst()
+	queued := func(account string) <-chan bool {
+		result := make(chan bool, 1)
+		request, _ := reader(account)
+		go func() {
+			release := acquireTIFFPreviewSlot(request)
+			if release != nil {
+				release()
+			}
+			result <- release != nil
+		}()
+		return result
+	}
+	waitForAdmission := func(account string, expected int) {
+		t.Helper()
+		for {
+			tiffReaderAdmission.Lock()
+			count := tiffReaderAdmission.perReader[account]
+			tiffReaderAdmission.Unlock()
+			if count == expected {
+				return
+			}
+			select {
+			case <-ctx.Done():
+				t.Fatalf("reader %s has %d reservations, want %d", account, count, expected)
+			case <-time.After(time.Millisecond):
+			}
+		}
+	}
+	firstQueued := queued("first")
+	waitForAdmission("first", 2)
+	excess, rejected := reader("first")
+	if release := acquireTIFFPreviewSlot(excess); release != nil {
+		release()
+		t.Fatal("first account queued above its allowance")
+	}
+	excess.Writer.WriteHeaderNow()
+	if rejected.Code != http.StatusServiceUnavailable {
+		t.Fatalf("excess reservation returned %d", rejected.Code)
+	}
+	secondQueued := queued("second")
+	waitForAdmission("second", 1)
+	releaseFirst()
+	if !<-firstQueued || !<-secondQueued {
+		t.Fatal("admitted previews did not complete after the conversion slot became available")
+	}
+	waitForAdmission("first", 0)
+	waitForAdmission("second", 0)
+}
 
 func tiffSource(t *testing.T) []byte {
 	t.Helper()

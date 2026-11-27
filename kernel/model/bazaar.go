@@ -607,6 +607,9 @@ func installBazaarPackageContext(ctx context.Context, pkgType, repoURL, repoHash
 		}
 	}
 	options := bazaar.PackageInstallOptions{Context: ctx}
+	if pkgType == "plugins" {
+		setPluginPublishInstallOptions(packageName, &options)
+	}
 	_, err = bazaar.InstallPackageWithOptions(repoURL, repoHash, repoRef, installPath, Conf.System.Load().ID, pkgType, packageName, meta.update, options)
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(46), packageName, err)
@@ -798,6 +801,9 @@ func InstallLocalBazaarPackageWithOptions(archivePath, frontend string, overwrit
 		}
 	}
 	installOptions := bazaar.PackageInstallOptions{ExpectedInstalledRevision: options.ExpectedInstalledRevision, Context: ctx, Recheck: check}
+	if pkgType == "plugins" {
+		setPluginPublishInstallOptions(pkg.Name, &installOptions)
+	}
 	installed, err := bazaar.InstallLocalPackageWithOptions(sourcePath, installPath, pkgType, pkg.Name, result.Updated, installOptions)
 	if installed != nil {
 		result.InstalledRevision, result.PreviousRevision = installed.InstalledRevision, installed.PreviousRevision

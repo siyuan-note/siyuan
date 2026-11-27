@@ -6,7 +6,7 @@
 		"id": "20261122113000-opvetg2",
 		"title": "Виджеты",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -130,7 +130,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-4mytkaj",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -144,7 +144,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-y9s8f2d",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -159,7 +159,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		}

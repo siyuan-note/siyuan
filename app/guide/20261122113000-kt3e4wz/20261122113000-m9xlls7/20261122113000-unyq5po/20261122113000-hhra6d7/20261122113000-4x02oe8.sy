@@ -6,7 +6,7 @@
 		"id": "20261122113000-4x02oe8",
 		"title": "Типы полей",
 		"type": "doc",
-		"updated": "20261122113840"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-anzcyhh",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1338,7 +1338,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20261122113000-7zel16c",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1372,7 +1372,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-3vf6o2o",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -1588,7 +1588,7 @@
 							},
 							"Properties": {
 								"id": "20261122113000-0x4knm6",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -1596,7 +1596,7 @@
 									"Type": "NodeParagraph",
 									"Properties": {
 										"id": "20261122113000-n6x8krs",
-										"updated": "20261122113000"
+										"updated": "20261126150544"
 									},
 									"Children": [
 										{
@@ -1615,7 +1615,7 @@
 										},
 										{
 											"Type": "NodeText",
-											"Data": " обращается к времени создания/обновления блока, привязанного к строке"
+											"Data": " обращаются ко времени создания/обновления блока, привязанного к строке"
 										}
 									]
 								}
@@ -2546,7 +2546,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-ojxu1f1",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -2585,7 +2585,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-bwjthnc",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -2749,7 +2749,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-qbr03uz",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -2757,7 +2757,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-x6zaawa",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -2767,7 +2767,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "："
+									"Data": ":"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3480,7 +3480,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-q1wu558",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -3519,7 +3519,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-pkjbfio",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -3572,7 +3572,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-m23mqju",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -3580,7 +3580,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-w2ve69f",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -3590,7 +3590,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "："
+									"Data": ":"
 								}
 							]
 						},
@@ -3754,7 +3754,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-us1v796",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -3793,7 +3793,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-b5n2buj",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -3809,7 +3809,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-hsp7thg",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -3817,7 +3817,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-d1md57e",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -3827,7 +3827,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "："
+									"Data": ":"
 								}
 							]
 						},
@@ -4065,7 +4065,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-qn6rlp8",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -4104,7 +4104,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-2fpxez7",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -4194,7 +4194,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-sqc7kaa",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -4202,7 +4202,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-ikqsg1b",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -4212,7 +4212,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "："
+									"Data": ":"
 								}
 							]
 						},
@@ -4376,7 +4376,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-e2qqc0k",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -4415,7 +4415,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-wdns677",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -4505,7 +4505,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-qe9km7h",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -4513,7 +4513,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-ncaev4s",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -4523,7 +4523,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "："
+									"Data": ":"
 								}
 							]
 						},

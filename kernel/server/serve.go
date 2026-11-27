@@ -18,6 +18,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -553,12 +554,12 @@ func serveBootAppearanceAssets(ginServer *gin.Engine) {
 
 func serveEmojis(ginServer *gin.Engine) {
 	emojis := ginServer.Group("/emojis/", model.CheckAuth)
-	registerStaticFileHandlers(emojis, filepath.Join(util.DataDir, "emojis"), false, func(c *gin.Context, relativePath string) bool {
+	registerStaticFileHandlersWith(emojis, filepath.Join(util.DataDir, "emojis"), false, func(c *gin.Context, relativePath string) bool {
 		if !model.IsReadOnlyRoleContext(c) {
 			return true
 		}
 		return model.CheckEmojiAccessableByPublishAccess(c, filepath.ToSlash(relativePath), model.GetPublishAccess())
-	})
+	}, serveCustomEmojiFile)
 }
 
 func serveTemplates(ginServer *gin.Engine) {
@@ -642,6 +643,10 @@ func serveSnippets(ginServer *gin.Engine) {
 type staticFileAccessCheck func(c *gin.Context, relativePath string) bool
 
 func registerStaticFileHandlers(group *gin.RouterGroup, root string, packageScoped bool, accessCheck staticFileAccessCheck) {
+	registerStaticFileHandlersWith(group, root, packageScoped, accessCheck, serveUnmodifiedStaticFile)
+}
+
+func registerStaticFileHandlersWith(group *gin.RouterGroup, root string, packageScoped bool, accessCheck staticFileAccessCheck, serveFile func(*gin.Context, string)) {
 	handler := func(c *gin.Context) {
 		relativePath, ok := cleanStaticRelativePath(c.Param("filepath"))
 		if !ok {
@@ -655,7 +660,9 @@ func registerStaticFileHandlers(group *gin.RouterGroup, root string, packageScop
 		if c.IsAborted() {
 			return
 		}
-		serveStaticFile(c, root, relativePath, packageScoped)
+		if target := resolveStaticFile(c, root, relativePath, packageScoped); target != "" {
+			serveFile(c, target)
+		}
 	}
 	group.GET("/*filepath", handler)
 	group.HEAD("/*filepath", handler)
@@ -672,15 +679,25 @@ func cleanStaticRelativePath(requestPath string) (string, bool) {
 }
 
 func serveStaticFile(c *gin.Context, root, relativePath string, packageScoped bool) {
+	if target := resolveStaticFile(c, root, relativePath, packageScoped); target != "" {
+		serveUnmodifiedStaticFile(c, target)
+	}
+}
+
+func serveUnmodifiedStaticFile(c *gin.Context, target string) {
+	http.ServeFile(c.Writer, c.Request, target)
+}
+
+func resolveStaticFile(c *gin.Context, root, relativePath string, packageScoped bool) string {
 	rootAbsPath, err := filepath.Abs(root)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
-		return
+		return ""
 	}
 	rootRealPath, err := util.ResolveRealPath(rootAbsPath)
 	if err != nil {
 		c.Status(http.StatusNotFound)
-		return
+		return ""
 	}
 
 	targetPath := filepath.Join(rootAbsPath, relativePath)
@@ -691,7 +708,7 @@ func serveStaticFile(c *gin.Context, root, relativePath string, packageScoped bo
 		} else {
 			c.Status(http.StatusForbidden)
 		}
-		return
+		return ""
 	}
 	if targetInfo.IsDir() {
 		targetPath = filepath.Join(targetPath, "index.html")
@@ -700,7 +717,7 @@ func serveStaticFile(c *gin.Context, root, relativePath string, packageScoped bo
 	targetRealPath, err := util.ResolveRealPath(targetPath)
 	if err != nil {
 		c.Status(http.StatusNotFound)
-		return
+		return ""
 	}
 	allowedRoot := rootRealPath
 	if packageScoped && relativePath != "." {
@@ -715,20 +732,20 @@ func serveStaticFile(c *gin.Context, root, relativePath string, packageScoped bo
 	}
 	if targetRealPath != allowedRoot && !gulu.File.IsSubPath(allowedRoot, targetRealPath) {
 		c.Status(http.StatusForbidden)
-		return
+		return ""
 	}
 	if util.IsSensitivePath(targetRealPath) {
 		logging.LogErrorf("refuse to serve sensitive static file [%s]", c.Request.URL.Path)
 		c.Status(http.StatusForbidden)
-		return
+		return ""
 	}
 
 	targetInfo, err = os.Stat(targetRealPath)
 	if err != nil || !targetInfo.Mode().IsRegular() {
 		c.Status(http.StatusNotFound)
-		return
+		return ""
 	}
-	http.ServeFile(c.Writer, c.Request, targetRealPath)
+	return targetRealPath
 }
 
 func serveCustomFonts(ginServer *gin.Engine) {
@@ -1186,11 +1203,12 @@ func serveAssets(ginServer *gin.Engine) {
 		}
 
 		if shouldTranscodeTIFF(context, p) {
-			if !acquireImagePreviewSlot(context) {
+			release := acquireTIFFPreviewSlot(context)
+			if release == nil {
 				return
 			}
-			defer releaseImagePreviewSlot()
-			serveTIFFPreview(context, p)
+			defer release()
+			serveTIFFPreview(context, p, release)
 			return
 		}
 		if heif.IsPath(p) {
@@ -1243,18 +1261,25 @@ func serveAssets(ginServer *gin.Engine) {
 		if heif.IsPath(p) {
 			addHEIFVaryAccept(context)
 		}
-		if transcodeHEIF || transcodeTIFF {
+		var releaseTIFF func()
+		if transcodeTIFF {
+			releaseTIFF = acquireTIFFPreviewSlot(context)
+			if releaseTIFF == nil {
+				return
+			}
+			defer releaseTIFF()
+		} else if transcodeHEIF {
 			if !acquireImagePreviewSlot(context) {
 				return
 			}
 			defer releaseImagePreviewSlot()
 		}
 		// 加密笔记本的历史是密文（.sy/assets/AV），需先解密再输出
-		if serveEncryptedHistory(context, p) {
+		if serveEncryptedHistory(context, p, releaseTIFF) {
 			return
 		}
 		if transcodeTIFF {
-			servePlainTIFFPreview(context, p)
+			serveTIFFBytes(context, p, "", nil, releaseTIFF)
 			return
 		}
 		if transcodeHEIF {
@@ -1578,7 +1603,7 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 // 若 absPath 在已解锁的加密笔记本下，读密文→解密→按扩展名设置 Content-Type→输出，返回 true；
 // 若加密但未解锁，返回 403，返回 true，不走 ServeFile（避免返回密文）；
 // 否则返回 false，由调用方走原 http.ServeFile 路径。
-func serveEncryptedHistory(context *gin.Context, absPath string) bool {
+func serveEncryptedHistory(context *gin.Context, absPath string, releaseTIFF func()) bool {
 	boxID := model.ExtractBoxIDFromHistoryPath(absPath)
 	if boxID == "" {
 		return false // 非加密 box，走原路径
@@ -1667,7 +1692,7 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 	}
 	defer clear(plain)
 	if transcodeTIFF {
-		writeTIFFPreview(context, plain, true)
+		writeTIFFPreview(context, plain, true, releaseTIFF)
 		return true
 	}
 	if heifRequest && len(plain) > heif.MaxInputBytes {
@@ -1746,7 +1771,14 @@ func serveRepoDiff(ginServer *gin.Engine) {
 		if heif.IsPath(requestPath) {
 			addHEIFVaryAccept(context)
 		}
-		if transcodeHEIF || transcodeTIFF {
+		var releaseTIFF func()
+		if transcodeTIFF {
+			releaseTIFF = acquireTIFFPreviewSlot(context)
+			if releaseTIFF == nil {
+				return
+			}
+			defer releaseTIFF()
+		} else if transcodeHEIF {
 			if !acquireImagePreviewSlot(context) {
 				return
 			}
@@ -1784,11 +1816,11 @@ func serveRepoDiff(ginServer *gin.Engine) {
 			return
 		}
 		if encryptedBoxID != "" && tiffpreview.IsPath(p) {
-			serveTIFFBytes(context, p, encryptedBoxID, tiffDEK, transcodeTIFF)
+			serveTIFFBytes(context, p, encryptedBoxID, tiffDEK, releaseTIFF)
 			return
 		}
 		if transcodeTIFF {
-			servePlainTIFFPreview(context, p)
+			serveTIFFBytes(context, p, "", nil, releaseTIFF)
 			return
 		}
 		if transcodeHEIF {
@@ -1821,6 +1853,9 @@ func serveDebug(ginServer *gin.Engine) {
 	if !util.EnablePprof {
 		return
 	}
+
+	runtime.SetBlockProfileRate(int(time.Millisecond))
+	runtime.SetMutexProfileFraction(5)
 
 	ginServer.GET("/debug/pprof/", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))
 	ginServer.GET("/debug/pprof/allocs", model.CheckAuth, model.CheckAdminRole, gin.WrapF(pprof.Index))

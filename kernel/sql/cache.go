@@ -188,11 +188,18 @@ func removeBlockCacheKey(id, key string, entry *blockCacheEntry) {
 }
 
 var (
-	defIDRefsCache           = gcache.New(30*time.Minute, 5*time.Minute)
+	defIDRefsCache           = newRefCache()
 	refCacheMu               sync.RWMutex
 	refCacheGlobalGeneration uint64
 	refCacheGenerations      = map[string]uint64{}
+	refCacheKeysByDefID      = map[string]map[string]struct{}{}
+	refCacheKeysBySource     = map[refCacheSource]map[string]struct{}{}
 )
+
+type refCacheSource struct {
+	boxID string
+	path  string
+}
 
 type refCacheGeneration struct {
 	global uint64
@@ -200,8 +207,73 @@ type refCacheGeneration struct {
 }
 
 type refCacheEntry struct {
+	defID    string
 	refs     map[string]*Ref
+	sources  map[refCacheSource]int
 	complete bool
+}
+
+func newRefCache() *gcache.Cache {
+	ret := gcache.New(30*time.Minute, 0)
+	ret.OnEvicted(func(key string, value any) {
+		entry := value.(*refCacheEntry)
+		removeRefCacheIndexKey(refCacheKeysByDefID, entry.defID, key)
+		for source := range entry.sources {
+			removeRefCacheIndexKey(refCacheKeysBySource, source, key)
+		}
+	})
+	// 缓存删除及其索引更新共用 refCacheMu，过期清理也在锁内执行。
+	go func() {
+		for range time.Tick(5 * time.Minute) {
+			refCacheMu.Lock()
+			ret.DeleteExpired()
+			refCacheMu.Unlock()
+		}
+	}()
+	return ret
+}
+
+func addRefCacheIndexKey[K comparable](index map[K]map[string]struct{}, id K, key string) {
+	keys := index[id]
+	if keys == nil {
+		keys = map[string]struct{}{}
+		index[id] = keys
+	}
+	keys[key] = struct{}{}
+}
+
+func removeRefCacheIndexKey[K comparable](index map[K]map[string]struct{}, id K, key string) {
+	keys := index[id]
+	delete(keys, key)
+	if len(keys) == 0 {
+		delete(index, id)
+	}
+}
+
+func newRefCacheEntry(key, defID string) *refCacheEntry {
+	addRefCacheIndexKey(refCacheKeysByDefID, defID, key)
+	return &refCacheEntry{defID: defID, refs: map[string]*Ref{}, sources: map[refCacheSource]int{}}
+}
+
+func (entry *refCacheEntry) put(key string, ref *Ref) {
+	source := refCacheSource{ref.Box, ref.Path}
+	if previous := entry.refs[ref.BlockID]; previous != nil {
+		previousSource := refCacheSource{previous.Box, previous.Path}
+		if previousSource == source {
+			entry.refs[ref.BlockID] = ref
+			return
+		}
+		entry.sources[previousSource]--
+		if entry.sources[previousSource] == 0 {
+			delete(entry.sources, previousSource)
+			removeRefCacheIndexKey(refCacheKeysBySource, previousSource, key)
+		}
+	}
+	entry.refs[ref.BlockID] = ref
+	if entry.sources[source] == 0 {
+		addRefCacheIndexKey(refCacheKeysBySource, source, key)
+	}
+	entry.sources[source]++
 }
 
 // refCacheScopeBoxID 按加密边界规范化引用缓存范围：普通笔记本共享全局范围，加密笔记本保持独立范围。
@@ -304,7 +376,13 @@ func putRefCacheIfGeneration(defID, boxID string, generation refCacheGeneration,
 			maps.Copy(complete, entry.refs)
 		}
 	}
-	defIDRefsCache.SetDefault(key, &refCacheEntry{refs: complete, complete: true})
+	defIDRefsCache.Delete(key)
+	entry := newRefCacheEntry(key, defID)
+	for _, ref := range complete {
+		entry.put(key, ref)
+	}
+	entry.complete = true
+	defIDRefsCache.SetDefault(key, entry)
 }
 
 func putRefCacheLocked(boxID string, ref *Ref) {
@@ -312,13 +390,17 @@ func putRefCacheLocked(boxID string, ref *Ref) {
 		return
 	}
 	key := refCacheKey(ref.DefBlockID, boxID)
-	entry := &refCacheEntry{refs: map[string]*Ref{}}
+	var entry *refCacheEntry
 	if cached, ok := defIDRefsCache.Get(key); ok {
 		if existing, valid := cached.(*refCacheEntry); valid {
 			entry = existing
 		}
 	}
-	entry.refs[ref.BlockID] = ref
+	if entry == nil {
+		defIDRefsCache.Delete(key)
+		entry = newRefCacheEntry(key, ref.DefBlockID)
+	}
+	entry.put(key, ref)
 	entry.complete = false
 	defIDRefsCache.SetDefault(key, entry)
 }
@@ -327,11 +409,8 @@ func removeRefCacheByDefID(defID string) {
 	refCacheMu.Lock()
 	defer refCacheMu.Unlock()
 	refCacheGlobalGeneration++
-	suffix := "\x00" + defID
-	for key := range defIDRefsCache.Items() {
-		if strings.HasSuffix(key, suffix) {
-			defIDRefsCache.Delete(key)
-		}
+	for key := range refCacheKeysByDefID[defID] {
+		defIDRefsCache.Delete(key)
 	}
 }
 
@@ -339,17 +418,8 @@ func removeRefCacheByPath(boxID, path string) {
 	refCacheMu.Lock()
 	defer refCacheMu.Unlock()
 	refCacheGenerations[refCacheScopeBoxID(boxID)]++
-	for key, item := range defIDRefsCache.Items() {
-		entry, ok := item.Object.(*refCacheEntry)
-		if !ok {
-			continue
-		}
-		for _, ref := range entry.refs {
-			if nil != ref && ref.Box == boxID && ref.Path == path {
-				defIDRefsCache.Delete(key)
-				break
-			}
-		}
+	for key := range refCacheKeysBySource[refCacheSource{boxID, path}] {
+		defIDRefsCache.Delete(key)
 	}
 }
 
@@ -359,6 +429,8 @@ func clearRefCache() {
 	refCacheGlobalGeneration++
 	refCacheGenerations = map[string]uint64{}
 	defIDRefsCache.Flush()
+	clear(refCacheKeysByDefID)
+	clear(refCacheKeysBySource)
 }
 
 func getRefCacheGeneration(boxID string) refCacheGeneration {

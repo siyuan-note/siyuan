@@ -106,6 +106,40 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
         }
         editor.destroy(); element.remove();
     }
+    {
+        const element = document.createElement("div");
+        document.body.append(element);
+        const editor = await api.createMarkdownEditor({element, initialValue: "", mode: "ir", cdn, lutePath, onEdit: () => {}});
+        const surface = element.querySelector<HTMLElement>(".vditor-ir .vditor-reset");
+        const url = "https://example.com/path";
+        editor.focus();
+        await require("electron").ipcRenderer.invoke("markdown-undo-input", "[issue](");
+        const clipboardData = new DataTransfer();
+        clipboardData.setData("text/plain", url);
+        surface.dispatchEvent(new ClipboardEvent("paste", {clipboardData, bubbles: true, cancelable: true}));
+        check.equal(surface.textContent.replace(/[\u200b\r\n]/g, ""), "[issue](" + url);
+        await require("electron").ipcRenderer.invoke("markdown-undo-input", ")");
+        check.equal(editor.flush().content.trimEnd(), "[issue](" + url + ")");
+        editor.destroy(); element.remove();
+    }
+    {
+        const element = document.createElement("div");
+        document.body.append(element);
+        const editor = await api.createMarkdownEditor({element, initialValue: "[Above](https://example.com)\n\n## 2\n\nBelow\n",
+            mode: "wysiwyg", cdn, lutePath, onEdit: () => {}});
+        const surface = element.querySelector<HTMLElement>(".vditor-wysiwyg .vditor-reset");
+        editor.focus();
+        const range = document.createRange();
+        range.selectNodeContents(surface.querySelector("h2"));
+        getSelection().removeAllRanges(); getSelection().addRange(range);
+        surface.dispatchEvent(new KeyboardEvent("keydown", {key: "Backspace", bubbles: true, cancelable: true}));
+        const blocks = Array.from(surface.children);
+        check.deepEqual(blocks.map(block => block.tagName), ["P", "P", "P"]);
+        check.ok(blocks[1].contains(getSelection().anchorNode));
+        await require("electron").ipcRenderer.invoke("markdown-undo-input", "Body");
+        check.equal(editor.flush().content, "[Above](https://example.com)\n\nBody\n\nBelow\n");
+        editor.destroy(); element.remove();
+    }
     for (const mode of ["ir", "wysiwyg", "sv"] as const) {
         const element = document.createElement("div");
         element.style.height = "360px";
@@ -759,7 +793,7 @@ const browserCases = async (cdn: string, lutePath: string, imagesOrigin: string)
     return "Markdown editor DOM cases passed";
 };
 
-test("Vditor 4.0.2-alpha.11 adapter preserves content and isolates programmatic, input, composition and preview events", {
+test("Vditor 4.0.2-alpha.12 adapter preserves content and isolates programmatic, input, composition and preview events", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {

@@ -77,6 +77,73 @@ class SevenZipTests(unittest.TestCase):
             self.assertEqual(run.call_count, 1)
 
 
+class WorkflowAssetsTests(unittest.TestCase):
+    def test_expected_files_are_collected_and_a_missing_asset_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / "artifacts"
+            destination = Path(temporary) / "release"
+            destination.mkdir()
+            names = (
+                ("siyuan-linux", "siyuan-3.9.0-linux.AppImage"),
+                ("siyuan-linux", "siyuan-3.9.0-linux.tar.gz"),
+                ("siyuan-linux", "siyuan-3.9.0-linux.deb"),
+                ("siyuan-linux", "siyuan-3.9.0-linux.rpm"),
+                ("siyuan-mac.dmg", "siyuan-3.9.0-mac.dmg"),
+                ("siyuan-mac-arm64.dmg", "siyuan-3.9.0-mac-arm64.dmg"),
+                ("siyuan-win.exe", "siyuan-3.9.0-win.exe"),
+                ("siyuan-android", "siyuan-3.9.0.apk"),
+            )
+            for group, name in names:
+                directory = source / group
+                directory.mkdir(parents=True, exist_ok=True)
+                (directory / name).write_bytes(name.encode("ascii"))
+            release.collect_workflow_assets(source, destination, "3.9.0")
+            self.assertEqual({path.name for path in destination.iterdir()}, {name for _, name in names})
+            for _, name in names:
+                self.assertEqual((destination / name).read_bytes(), name.encode("ascii"))
+            (source / names[-1][0] / names[-1][1]).write_bytes(b"")
+            with self.assertRaisesRegex(release.VerificationError, "siyuan-3.9.0.apk"):
+                release.collect_workflow_assets(source, destination, "3.9.0")
+
+    def test_startup_results_must_match_every_required_asset(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            packages = [
+                {"name": f"siyuan-3.9.0{suffix}", "sha256": "a" * 64, "status": "PASS"}
+                for suffix in ("-linux.AppImage", "-linux.tar.gz", "-linux.rpm", "-mac.dmg", ".apk")
+            ]
+            for index, (target, suffix) in enumerate((
+                ("windows", "-win.exe"), ("macos", "-mac-arm64.dmg"),
+                ("linux", "-linux.deb"),
+            )):
+                path = directory / f"startup-{target}" / f"{target}.json"
+                path.parent.mkdir()
+                name = f"siyuan-3.9.0{suffix}"
+                sha = str(index) * 64
+                packages.append({"name": name, "sha256": sha, "status": "PASS"})
+                path.write_text(json.dumps({"filename": name, "sha256": sha, "status": "PASS"}))
+            release.verify_startup_results(directory, packages, "3.9.0")
+            for suffix in ("-linux.AppImage", ".apk"):
+                with self.subTest(missing=suffix), self.assertRaisesRegex(release.VerificationError, f"siyuan-3.9.0{suffix}"):
+                    release.verify_startup_results(directory, [
+                        package for package in packages if not package["name"].endswith(suffix)
+                    ], "3.9.0")
+            path.unlink()
+            with self.assertRaisesRegex(release.VerificationError, "linux"):
+                release.verify_startup_results(directory, packages, "3.9.0")
+            for fields, expected in (
+                ({"status": "SKIP"}, "启动验收未通过"),
+                ({"filename": "siyuan-3.9.0-linux.rpm"}, "安装包名称不匹配"),
+                ({"sha256": "9" * 64}, "摘要与待发布文件不一致"),
+            ):
+                with self.subTest(fields=fields):
+                    result = {"filename": name, "sha256": sha, "status": "PASS"}
+                    result.update(fields)
+                    path.write_text(json.dumps(result))
+                    with self.assertRaisesRegex(release.VerificationError, expected):
+                        release.verify_startup_results(directory, packages, "3.9.0")
+
+
 class ReleaseTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

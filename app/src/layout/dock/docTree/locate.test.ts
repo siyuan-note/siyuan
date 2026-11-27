@@ -5,7 +5,7 @@ import {createSourceFile, isClassDeclaration, ScriptTarget, transpileModule} fro
 
 const source = createSourceFile("DocTreeController.ts", readFileSync("src/layout/dock/docTree/DocTreeController.ts", "utf8"), ScriptTarget.Latest, true);
 const methods = source.statements.find(isClassDeclaration).members.filter(member =>
-    ["locate", "ensureRendered"].includes(member.name?.getText(source)));
+    ["locate", "ensureRendered", "scrollElement", "getListStart"].includes(member.name?.getText(source)));
 const Controller = new Function(transpileModule(`return class {${methods.map(method => method.getText(source)).join("\n")}}`, {
     compilerOptions: {target: ScriptTarget.ES2022},
 }).outputText)();

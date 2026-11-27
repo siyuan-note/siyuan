@@ -17,7 +17,7 @@ export const getAVPrimaryPreviewHTML = (value: IAVCellValue) => {
     }
     if (!value.block?.richBlockDOM) { return escapeHtml(value.block?.content || ""); }
     const template = document.createElement("template");
-    template.innerHTML = sanitizeKernelHTML(value.block.richBlockDOM);
+    template.innerHTML = sanitizeAVRichTextBlockDOM(sanitizeKernelHTML(value.block.richBlockDOM), true);
     const content = template.content.querySelector<HTMLElement>('[data-type="NodeParagraph"] > [contenteditable]');
     if (!content) { return escapeHtml(value.block.content || ""); }
     content.querySelectorAll(".protyle-action, .protyle-icons, .img__alt, .img__name, .protyle-attr, wbr").forEach(item => item.remove());

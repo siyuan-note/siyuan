@@ -147,7 +147,7 @@ const getFileTree = (elements?: Element[]) => {
         return undefined;
     }
     const controller = (elements?.length ? getDocTreeController(elements[0]) : undefined) ||
-        getActiveDocTreeController(model.element.parentElement) || model.docTree;
+        getActiveDocTreeController(model.parent.panelElement) || model.docTree;
     if (controller) {
         const items = controller.getSelectedItems().map(item => ({...item}));
         return {model, controller, items, selectionVersion: controller.selectionVersion, elements: [],

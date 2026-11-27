@@ -7,12 +7,32 @@ package model
 import (
 	"bytes"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"text/template"
 
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 )
+
+func TestDynamicIconReplaceRespectsByteLimit(t *testing.T) {
+	for _, test := range []struct {
+		name, old, replacement, source, expected string
+		limited                                  bool
+	}{
+		{name: "ordinary", old: " ", replacement: "-", source: "A B", expected: "A-B"},
+		{name: "exact limit", old: "a", replacement: "bc", source: strings.Repeat("a", maxDynamicIconTemplateOutputSize/2), expected: strings.Repeat("bc", maxDynamicIconTemplateOutputSize/2)},
+		{name: "over limit", old: "a", replacement: "bc", source: strings.Repeat("a", maxDynamicIconTemplateOutputSize/2+1), limited: true},
+		{name: "empty search", replacement: "-", source: "ab", expected: "-a-b-"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			result, err := replaceDynamicIconText(test.old, test.replacement, test.source)
+			if (err != nil) != test.limited || result != test.expected {
+				t.Fatalf("replacement returned %d bytes, error %v", len(result), err)
+			}
+		})
+	}
+}
 
 func testRoleContext(role Role) *gin.Context {
 	context, _ := gin.CreateTestContext(httptest.NewRecorder())

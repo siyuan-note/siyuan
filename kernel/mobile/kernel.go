@@ -367,6 +367,10 @@ func DisableFeature(feature string) {
 	util.DisableFeature(feature)
 }
 
+func SetAIModelPolicy(policy string) bool {
+	return util.SetAIModelPolicy(policy)
+}
+
 func FilepathBase(path string) string {
 	return filepath.Base(path)
 }

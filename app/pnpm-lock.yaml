@@ -291,8 +291,8 @@ importers:
         specifier: 0.12.5
         version: 0.12.5
       vditor:
-        specifier: 4.0.2-alpha.11
-        version: 4.0.2-alpha.11
+        specifier: 4.0.2-alpha.12
+        version: 4.0.2-alpha.12
       webpack:
         specifier: ^5.112.2
         version: 5.112.2(clean-css@5.3.3)(esbuild@0.28.1)(html-minifier-terser@6.1.0)(postcss@8.5.33)(sharp@0.35.5(@types/node@24.19.2))(webpack-cli@7.2.3)
@@ -3180,8 +3180,8 @@ packages:
   utila@0.4.0:
     resolution: {integrity: sha512-Z0DbgELS9/L/75wZbro8xAnT50pBVFQZ+hUEueGDU5FN51YSCYM+jdxsfCiHjwNP/4LCDD0i/graKpeBnOXKRA==}
 
-  vditor@4.0.2-alpha.11:
-    resolution: {integrity: sha512-NwZLQdGotcGnuOdagVlf+NW2JmxU77Y9/GG5uY8BRap/4UiXgzPrqFSdfsYLqh4OJbr2VrjBYMkYvWiK3L3ogQ==}
+  vditor@4.0.2-alpha.12:
+    resolution: {integrity: sha512-hmj4eNQXLVKaVcHmJqeFt54X4MJBN1fGWEwcnE5R/Gn4EexCCUzCtW/uxGHtzuuLh7C+62ew8Vc4MDdj2SiBOw==}
 
   watchpack@2.6.4:
     resolution: {integrity: sha512-5H3Tce2GfzWbcr9VnSqyak2whFaONw4BdmI5BDnMXold4qSlCFd64XaMQESRh2vkDKmdUkv6rUo17UvZ9f9nXw==}
@@ -6151,7 +6151,7 @@ snapshots:
 
   utila@0.4.0: {}
 
-  vditor@4.0.2-alpha.11:
+  vditor@4.0.2-alpha.12:
     dependencies:
       diff-match-patch: 1.0.5
 

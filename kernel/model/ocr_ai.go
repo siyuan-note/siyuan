@@ -134,7 +134,7 @@ func aiOCRAsset(ctx context.Context, path string, value conf.OCR, automatic bool
 func getOCRAIModel(value conf.OCR) (*conf.Provider, *conf.Model) {
 	confAISnapshot := Conf.LoadAI()
 
-	if util.IsDisabledFeature("ai") || confAISnapshot == nil {
+	if util.IsDisabledFeature("ai") || util.CurrentAIModelPolicy() != util.AIModelsFull || confAISnapshot == nil {
 		return nil, nil
 	}
 	if value.AIModelID == "" {
@@ -158,7 +158,7 @@ type OCRAIModel struct {
 func OCRAIModels() (result []OCRAIModel) {
 	confAISnapshot := Conf.LoadAI()
 
-	if util.IsDisabledFeature("ai") || confAISnapshot == nil {
+	if util.IsDisabledFeature("ai") || util.CurrentAIModelPolicy() != util.AIModelsFull || confAISnapshot == nil {
 		return
 	}
 	for _, provider := range confAISnapshot.Providers {

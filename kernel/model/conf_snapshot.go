@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // ConfSection 原子发布不可变配置段，复制容器时不会复制原子变量或写锁。
@@ -184,7 +185,7 @@ func (c *AppConf) LoadAI() *conf.AI {
 	if c == nil {
 		return nil
 	}
-	return c.AI.Load()
+	return c.AI.Load().EffectiveAI(util.CurrentAIModelPolicy())
 }
 
 func (c *AppConf) LoadOCR() *conf.OCR {

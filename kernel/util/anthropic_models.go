@@ -69,7 +69,10 @@ func listAnthropicModels(ctx context.Context, client *AIClient) ([]AvailableMode
 		if err != nil {
 			return nil, err
 		}
-		parsed, _ := url.Parse(endpoint)
+		parsed, err := url.Parse(endpoint)
+		if err != nil {
+			return nil, err
+		}
 		query := parsed.Query()
 		query.Set("limit", "1000")
 		if cursor != "" {

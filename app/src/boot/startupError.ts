@@ -60,7 +60,7 @@ export const guardStartup = <T>(callback: (value: T) => unknown) => (value: T) =
     return Promise.resolve().then(() => callback(value)).catch(reportStartupError);
 };
 
-export const installStartupError = (target: Window, version: string, timeout = 30000) => {
+export const installStartupError = (target: Window, version: string, timeout = 30000, closeWindow?: () => void) => {
     const document = target.document;
     let language = resolveStartupLanguage(target.navigator.languages || [target.navigator.language]);
     let stage: TStartupStage = "page";
@@ -135,9 +135,20 @@ export const installStartupError = (target: Window, version: string, timeout = 3
             copy.textContent = copied ? strings.copied : strings.startupCopyFailed;
         });
         actions.append(reload, copy);
+        const elements: HTMLElement[] = [details, reload, copy];
+        if (closeWindow) {
+            title.className += " startup-error__drag";
+            actions.className += " startup-error__actions--native";
+            const close = document.createElement("button");
+            close.type = "button";
+            close.className = "b3-button b3-button--outline startup-error__button";
+            close.textContent = strings.close;
+            close.addEventListener("click", closeWindow);
+            actions.appendChild(close);
+            elements.push(close);
+        }
         container.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.key !== "Tab") return;
-            const elements: HTMLElement[] = [details, reload, copy];
             const index = elements.indexOf(document.activeElement as HTMLElement);
             event.preventDefault();
             elements[(index + (event.shiftKey ? -1 : 1) + elements.length) % elements.length].focus();

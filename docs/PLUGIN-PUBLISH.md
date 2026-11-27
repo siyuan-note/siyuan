@@ -93,7 +93,7 @@ await this.savePublishData({
 
 In published pages, use `await this.loadPublishData()` instead of reading private settings. Provide a plugin action or regenerate after a settings change or administrator-side reload. Handle a missing snapshot before the first successful generation without failing the entire plugin or falling back to private storage.
 
-Versioned grants and snapshots live in `conf/plugin-publish/<name>.json`, separate from public files and synced plugin storage. Do not edit or expose them directly. Authorization is local to the workspace installation and is not transferred by data synchronization. Removed declaration fields are pruned when state is next accessed. Uninstall removes grants and snapshots; reinstall cannot inherit them. Unknown formats, corruption, and failed updates preserve the source and return an error. Revocation cannot recover copies already downloaded.
+Versioned grants and snapshots live in `conf/plugin-publish/<name>.json`, separate from public files and synced plugin storage. Do not edit or expose them directly. Authorization is local to the workspace installation and is not transferred by data synchronization. Marketplace updates and local package installs revoke grants and delete published values for removed fields before the replacement takes effect. If a plugin declares a removed field again, it requires a new grant and a new snapshot. Uninstall removes all grants and snapshots. Unknown or corrupt state is preserved and causes the operation to fail. Revocation cannot recover copies already downloaded.
 
 ## HTTP APIs
 

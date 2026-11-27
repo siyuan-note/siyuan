@@ -71,8 +71,8 @@ export class PinnedDocs {
     constructor(private app: App, private sourceTree: HTMLElement, private open: (id: string, notebook: string) => void,
                 private mobile = false, private parentDocClick = new ParentDocClick()) {
         this.element = document.createElement("div");
-        this.element.className = "file-tree__pins fn__flex-column fn__none";
-        this.element.innerHTML = `<ul class="b3-list b3-list--background fn__flex-column"><li class="b3-list-item" tabindex="0" role="button" data-pin-heading="true"><span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__icon"><svg><use xlink:href="#iconPin"></use></svg></span><span class="b3-list-item__text">${window.siyuan.languages.pinnedDocs}</span></li><ul class="file-tree__pins-list fn__flex-1"></ul></ul>`;
+        this.element.className = "file-tree__pins fn__none";
+        this.element.innerHTML = `<ul class="b3-list b3-list--background"><li class="b3-list-item" tabindex="0" role="button" data-pin-heading="true"><span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__icon"><svg><use xlink:href="#iconPin"></use></svg></span><span class="b3-list-item__text">${window.siyuan.languages.pinnedDocs}</span></li><ul data-pin-list></ul></ul>`;
         this.heading = this.element.firstElementChild.firstElementChild as HTMLElement;
         this.list = this.heading.nextElementSibling as HTMLElement;
         this.heading.addEventListener("keydown", event => {
@@ -84,7 +84,9 @@ export class PinnedDocs {
         });
         sourceTree.before(this.element);
         this.docTree = new DocTreeController({
-            element: this.list, renderRow: item => this.renderRow(item),
+            element: this.list,
+            scrollElement: getDocTreeController(sourceTree)?.options.scrollElement,
+            renderRow: item => this.renderRow(item),
             onSelectionChange: () => {
                 if (this.docTree.getSelectedItems().length) { getDocTreeController(this.sourceTree)?.clearSelection(); }
             },
@@ -474,7 +476,7 @@ export class PinnedDocs {
             (position === "inside" ? window.siyuan.languages.dragTipMoveChild :
                 position === "before" ? window.siyuan.languages.dragTipMoveBefore : window.siyuan.languages.dragTipMoveAfter);
         showDragTip(window.siyuan.dragTitle || "", action, x, y, name);
-        const scrollElement = source ? this.sourceTree : this.list;
+        const scrollElement = this.docTree.scrollElement;
         dragOverScroll({clientY: y} as MouseEvent, scrollElement.getBoundingClientRect(), scrollElement);
         return true;
     }

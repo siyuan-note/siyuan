@@ -6,7 +6,7 @@
 		"id": "20261122113000-ecybscs",
 		"title": "Входящие",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126172446"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-g1i4sau",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -73,7 +73,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-szk7zu3",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-8u8pew9",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -144,7 +144,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-8r99gm2",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -152,7 +152,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-2parhu4",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -163,10 +163,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "B3log Open Source"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ""
 								}
 							]
 						},
@@ -290,7 +286,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-8ca5i2b",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -298,7 +294,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-ne9197f",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -321,7 +317,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "）"
+									"Data": ")"
 								}
 							]
 						}
@@ -410,7 +406,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-gwbh92z",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -424,7 +420,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​："
+					"Data": "​:"
 				}
 			]
 		},
@@ -501,7 +497,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-tmaldy4",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -693,7 +689,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-am4tpht",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -707,7 +703,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​："
+					"Data": "​:"
 				}
 			]
 		},

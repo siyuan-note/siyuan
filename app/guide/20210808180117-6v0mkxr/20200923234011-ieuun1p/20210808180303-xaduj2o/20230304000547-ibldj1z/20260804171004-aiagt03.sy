@@ -440,7 +440,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Drag blocks from a document into the agent input to insert block references"
+									"Data": "Drag blocks from a document into the agent input to insert block references. You can also choose “Add to Agent Chat” from the block menu to insert block references at the input caret, or at the end if no caret position is available"
 								}
 							]
 						}
@@ -816,7 +816,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Local-only reads and searches usually run immediately. Operations that create, modify, move, delete or import data, or send network requests, display confirmation cards according to capability settings. The cards identify possible local writes, data egress and external charges. Online search, web fetching, the cloud inbox and online Bazaar queries send requests externally; direct web fetching and HTTP requests may also save downloads in the workspace. A cost flag means a paid service may be involved, not that every call necessarily incurs a charge. Downloading on-demand assets or preparing a snapshot before a write may also contact the sync provider and write local resources. If local writes, data egress or charges are added after confirmation, the call is stopped and must be confirmed again with the current configuration."
+					"Data": "Local-only reads and searches usually run immediately. Operations that create, modify, move, delete or import data, or send network requests, display confirmation cards according to capability settings. The cards identify possible local writes, data egress and external charges. Click a block ID in the card's arguments to open the corresponding block. Online search, web fetching, the cloud inbox and online Bazaar queries send requests externally; direct web fetching and HTTP requests may also save downloads in the workspace. A cost flag means a paid service may be involved, not that every call necessarily incurs a charge. Downloading on-demand assets or preparing a snapshot before a write may also contact the sync provider and write local resources. If local writes, data egress or charges are added after confirmation, the call is stopped and must be confirmed again with the current configuration."
 				}
 			]
 		},
@@ -862,7 +862,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", confirm that the task scope and tools are trusted: ordinary writes will no longer be confirmed individually, while the forced confirmations above remain in effect."
+					"Data": ", confirm that the task scope and tools are trusted: ordinary writes will no longer be confirmed individually, while the forced confirmations above remain in effect. New sessions begin with the last mode selected in the approval menu next to the input. Permission granted from an approval card applies only to the current session."
 				}
 			]
 		},

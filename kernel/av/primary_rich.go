@@ -214,6 +214,16 @@ func (database *AttributeView) NormalizePrimaryRich() error {
 	return nil
 }
 
+func (database *AttributeView) DiscardPrimaryRichDOM() (changed bool) {
+	database.VisitPersistedValues(func(value *Value) {
+		if value.Block != nil && value.Block.RichBlockDOM != "" {
+			value.Block.RichBlockDOM = ""
+			changed = true
+		}
+	})
+	return
+}
+
 func (database *AttributeView) suspendPrimaryRichDOM() func() {
 	type binding struct {
 		value *ValueBlock

@@ -47,11 +47,15 @@ type pluginPublishState struct {
 }
 
 func pluginPublishDeclaration(name string) (PluginPublishDeclaration, error) {
+	return readPluginPublishDeclaration(util.DataDir, "plugins/"+name+"/plugin.json", name)
+}
+
+func readPluginPublishDeclaration(rootPath, manifestPath, name string) (PluginPublishDeclaration, error) {
 	ret := PluginPublishDeclaration{Resources: []string{}, Data: []string{}}
 	if !bazaar.IsValidPackageName(name) {
 		return ret, ErrPluginPublishDenied
 	}
-	file, err := util.OpenPublishFile(util.DataDir, "plugins/"+name+"/plugin.json")
+	file, err := util.OpenPublishFile(rootPath, manifestPath)
 	if err != nil {
 		return ret, err
 	}
@@ -240,10 +244,15 @@ func reconcilePluginPublishState(name string, declaration PluginPublishDeclarati
 	if err != nil {
 		return state, err
 	}
+	err = restrictPluginPublishState(name, &state, declaration.Data)
+	return state, err
+}
+
+func restrictPluginPublishState(name string, state *pluginPublishState, fields []string) error {
 	changed := false
 	granted := make([]string, 0, len(state.Granted))
 	for _, field := range state.Granted {
-		if slices.Contains(declaration.Data, field) {
+		if slices.Contains(fields, field) {
 			granted = append(granted, field)
 		} else {
 			changed = true
@@ -252,9 +261,37 @@ func reconcilePluginPublishState(name string, declaration PluginPublishDeclarati
 	}
 	state.Granted = granted
 	if changed {
-		err = writePluginPublishState(name, state)
+		return writePluginPublishState(name, *state)
 	}
-	return state, err
+	return nil
+}
+
+func setPluginPublishInstallOptions(name string, options *bazaar.PackageInstallOptions) {
+	options.ReplacementLock = &pluginPublishLock
+	options.PrepareReplacement = func(previousPath, stagingPath string) error {
+		state, err := readPluginPublishState(name)
+		if err != nil || len(state.Granted) == 0 {
+			return err
+		}
+		next, err := readPluginPublishDeclaration(stagingPath, "plugin.json", name)
+		if err != nil && !errors.Is(err, ErrPluginPublishInvalid) {
+			return err
+		}
+		var fields []string
+		if err == nil && len(next.Data) > 0 && previousPath != "" {
+			// 已安装清单也限定授权范围，包括升级应用前尚未清理的授权。
+			previous, err := readPluginPublishDeclaration(previousPath, "plugin.json", name)
+			if err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, ErrPluginPublishInvalid) {
+				return err
+			}
+			if err == nil {
+				fields = slices.DeleteFunc(next.Data, func(field string) bool {
+					return !slices.Contains(previous.Data, field)
+				})
+			}
+		}
+		return restrictPluginPublishState(name, &state, fields)
+	}
 }
 
 func GetPluginPublishInfo(name string) (PluginPublishInfo, error) {

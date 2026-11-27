@@ -5,24 +5,73 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/tiffpreview"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+var tiffReaderAdmission = struct {
+	sync.Mutex
+	total     int
+	perReader map[string]int
+}{perReader: make(map[string]int)}
+
+func acquireTIFFPreviewSlot(c *gin.Context) func() {
+	if model.GetGinContextRole(c) != model.RoleReader {
+		if acquireImagePreviewSlot(c) {
+			return sync.OnceFunc(releaseImagePreviewSlot)
+		}
+		return nil
+	}
+	value, _ := c.Get(model.ClaimsContextKey)
+	claims, _ := value.(jwt.MapClaims)
+	reader, _ := claims.GetSubject()
+
+	tiffReaderAdmission.Lock()
+	if tiffReaderAdmission.total >= 8 || tiffReaderAdmission.perReader[reader] >= 2 {
+		tiffReaderAdmission.Unlock()
+		c.Status(http.StatusServiceUnavailable)
+		return nil
+	}
+	tiffReaderAdmission.total++
+	tiffReaderAdmission.perReader[reader]++
+	tiffReaderAdmission.Unlock()
+
+	releaseReader := func() {
+		tiffReaderAdmission.Lock()
+		defer tiffReaderAdmission.Unlock()
+		tiffReaderAdmission.total--
+		if tiffReaderAdmission.perReader[reader]--; tiffReaderAdmission.perReader[reader] == 0 {
+			delete(tiffReaderAdmission.perReader, reader)
+		}
+	}
+	if !acquireImagePreviewSlot(c) {
+		releaseReader()
+		return nil
+	}
+	return sync.OnceFunc(func() {
+		releaseImagePreviewSlot()
+		releaseReader()
+	})
+}
 
 func shouldTranscodeTIFF(c *gin.Context, path string) bool {
 	return tiffpreview.IsPath(path) && !strings.EqualFold(c.Query("download"), "true")
 }
 
 // serveTIFFPreview 在资源鉴权后读取首帧，加密笔记本持有操作租约和读锁直至输出结束。
-func serveTIFFPreview(c *gin.Context, path string) {
+func serveTIFFPreview(c *gin.Context, path string, release func()) {
 	boxID := util.BoxIDFromDataPath(path)
 	encrypted := boxID != "" && model.IsEncryptedBox(boxID)
 	var dek []byte
@@ -46,11 +95,11 @@ func serveTIFFPreview(c *gin.Context, path string) {
 	if !encrypted {
 		boxID = ""
 	}
-	serveTIFFBytes(c, path, boxID, dek, true)
+	serveTIFFBytes(c, path, boxID, dek, release)
 }
 
 // serveTIFFBytes 读取 TIFF 原件，按请求输出预览或原件；调用方持有加密笔记本的租约和读锁。
-func serveTIFFBytes(c *gin.Context, path, boxID string, dek []byte, preview bool) {
+func serveTIFFBytes(c *gin.Context, path, boxID string, dek []byte, releasePreview func()) {
 	encrypted := boxID != ""
 	limit := int64(tiffpreview.MaxInputBytes)
 	if encrypted {
@@ -58,7 +107,7 @@ func serveTIFFBytes(c *gin.Context, path, boxID string, dek []byte, preview bool
 	}
 	var source []byte
 	var err error
-	if preview {
+	if releasePreview != nil {
 		source, err = tiffpreview.ReadFileLimited(path, limit)
 	} else {
 		source, err = os.ReadFile(path)
@@ -77,21 +126,18 @@ func serveTIFFBytes(c *gin.Context, path, boxID string, dek []byte, preview bool
 		source = decrypted
 		defer clear(source)
 	}
-	if preview {
-		writeTIFFPreview(c, source, encrypted)
+	if releasePreview != nil {
+		writeTIFFPreview(c, source, encrypted, releasePreview)
 		return
 	}
 	secureAssetContentHeaders(c, path, path)
 	c.Data(http.StatusOK, "image/tiff", source)
 }
 
-// servePlainTIFFPreview 处理普通历史文件或快照预览。
-func servePlainTIFFPreview(c *gin.Context, path string) {
-	serveTIFFBytes(c, path, "", nil, true)
-}
-
-func writeTIFFPreview(c *gin.Context, source []byte, encrypted bool) {
-	result, err := tiffpreview.GetOrCreate(c.Request.Context(), source,
+func writeTIFFPreview(c *gin.Context, source []byte, encrypted bool, release func()) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 12*time.Second)
+	defer cancel()
+	result, err := tiffpreview.GetOrCreate(ctx, source,
 		filepath.Join(util.TempDir, "assets-cache", "tiff"), c.Query("style") == "thumb", encrypted)
 	if err != nil {
 		tiffPreviewError(c, err)
@@ -110,7 +156,19 @@ func writeTIFFPreview(c *gin.Context, source []byte, encrypted bool) {
 		}
 	}
 	if result.Path != "" {
-		http.ServeFile(c.Writer, c.Request, result.Path)
+		file, err := os.Open(result.Path)
+		if err != nil {
+			tiffPreviewError(c, err)
+			return
+		}
+		defer file.Close()
+		info, err := file.Stat()
+		if err != nil {
+			tiffPreviewError(c, err)
+			return
+		}
+		release()
+		http.ServeContent(c.Writer, c.Request, info.Name(), info.ModTime(), file)
 		return
 	}
 	c.Data(http.StatusOK, "image/png", result.Data)
@@ -123,6 +181,8 @@ func tiffPreviewError(c *gin.Context, err error) {
 	status := http.StatusUnprocessableEntity
 	if errors.Is(err, tiffpreview.ErrInputTooLarge) || errors.Is(err, tiffpreview.ErrImageTooLarge) {
 		status = http.StatusRequestEntityTooLarge
+	} else if errors.Is(err, context.DeadlineExceeded) {
+		status = http.StatusGatewayTimeout
 	} else if os.IsNotExist(err) {
 		status = http.StatusNotFound
 	}

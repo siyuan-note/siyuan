@@ -6,7 +6,7 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import * as selectionState from "./selectionState";
 import * as assetUploadTarget from "./assetUploadTarget";
-import {updateAVCachedCellValue} from "./cellValue";
+import {getStoredCellValueByElement, updateAVCachedCellValue} from "./cellValue";
 import * as uploadResult from "../../upload/uploadResult";
 import * as viewType from "./viewType";
 import * as insertPosition from "../../upload/insertPosition";
@@ -15,11 +15,17 @@ import * as image from "../../../util/image";
 import * as imageURL from "../../../util/imageURL";
 import * as host from "./host";
 import * as panelTarget from "./panelTarget";
+import {DOMFixture, type DOMElement} from "./testDOM";
+import type {IAVCellInputElements} from "./cell";
+
+const compile = (file: string) => ts.transpileModule(readFileSync(path.join(__dirname, file), "utf8"), {
+    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
+}).outputText;
+const assetSource = compile("asset.ts");
+const cellSource = compile("cell.ts");
 
 const pathNames = {} as typeof import("../../../util/pathName");
-runInNewContext(ts.transpileModule(readFileSync(path.join(__dirname, "../../../util/pathName.ts"), "utf8"), {
-    compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
-}).outputText, {
+runInNewContext(compile("../../../util/pathName.ts"), {
     exports: pathNames,
     require: (name: string) => name === "path" ? path : {},
 });
@@ -83,9 +89,7 @@ const createHarness = (layout = "table", assetContent = "original.png") => {
         },
     };
     const module = {exports: {}};
-    runInNewContext(ts.transpileModule(readFileSync(path.join(__dirname, "asset.ts"), "utf8"), {
-        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022},
-    }).outputText, {
+    runInNewContext(assetSource, {
         module, exports: module.exports, require: (name: string) => mocks[name] || {},
         document: {body: {contains: () => true}, querySelector: () => panelOpen ? panel : null},
         window: {siyuan: {languages: {}}},
@@ -180,4 +184,87 @@ describe("database asset menu", () => {
         assert.equal(html.includes(' onerror="'), false);
         assert.match(html, /src="assets\/poc\.png\?x=1&quot; onerror=&quot;/);
     });
+
+    for (const ownerClass of ["protyle-db-row", "protyle-db-attr"]) {
+        it(`continues removing attachments after the field is rendered again in ${ownerClass}`, () => {
+            const document = new DOMFixture();
+            const owner = document.createElement("div");
+            owner.className = ownerClass;
+            owner.innerHTML = '<div class="custom-attr"></div>';
+            document.body.append(owner);
+            const fieldOwner = owner.firstElementChild;
+            const closest = fieldOwner.closest.bind(fieldOwner);
+            fieldOwner.closest = selector => selector.split(",").map(part => closest(part.trim())).find(Boolean) || null;
+            const panel = document.createElement("div");
+            panel.className = "av__panel";
+            panel.innerHTML = '<div class="b3-menu"></div>';
+            document.body.append(panel);
+            const menu = panel.firstElementChild;
+            const paths = ["assets/first.png", "assets/second.png", "assets/third.png"];
+            let value = {id: "value", type: "mAsset", mAsset: paths.map(content => ({type: "image", name: "", content}))};
+            const render = (rowID = "row") => {
+                owner.firstElementChild.innerHTML = `<div data-av-id="database" data-node-id="carrier" data-attribute-id="${rowID}" data-av-type="table">
+<div class="custom-attr__avvalue" data-row-id="${rowID}" data-col-id="assets" data-id="value" data-type="mAsset"></div></div>`;
+                const block = owner.firstElementChild.firstElementChild;
+                const field = block.firstElementChild;
+                field.dataset.cellValue = encodeURIComponent(JSON.stringify(value));
+                return {block: block as unknown as HTMLElement, field: field as unknown as HTMLElement};
+            };
+            const {block, field} = render();
+            const updates: Array<{before: string[]; after: string[]}> = [];
+            const mocks: Record<string, unknown> = {
+                "./host": {...host, canEditAVHost: () => true},
+                "./cellEditor": {getAVCellEditorOwner: () => fieldOwner},
+                "./cellValue": {getStoredCellValueByElement},
+                "./viewType": viewType,
+                "./panelTarget": panelTarget,
+                "./virtualScroll": {getAVData: (): undefined => undefined},
+                "./col": {getColId: (element: HTMLElement) => element.dataset.colId},
+                "./row": {getFieldIdByCellElement: (element: HTMLElement) => element.dataset.rowId},
+                "./batchValue": {getAVBatchEditMode: () => "replace"},
+                "./cellPanelPosition": {setAVCellPanelPosition() {}},
+                "../../../constants": {Constants: {CUSTOM_SY_AV_VIEW: "custom-sy-av-view", TIMEOUT_LOAD: 0}},
+                "../../../util/escape": escape,
+                "../../../util/image": image,
+                "../../../util/imageURL": imageURL,
+                "dayjs": () => ({format: () => "20261126000000"}),
+                "../../wysiwyg/transaction": {transaction: (_protyle: unknown, ops: IOperation[], undo: IOperation[]) => {
+                    const updated = ops[0].data as typeof value;
+                    updates.push({before: Array.from((undo[0].data as typeof value).mAsset, asset => asset.content),
+                        after: Array.from(updated.mAsset, asset => asset.content)});
+                    value = updated;
+                }},
+            };
+            const load = <T>(source: string) => {
+                const exports = {} as T;
+                runInNewContext(source, {exports, require: (name: string) => mocks[name] || {}, document,
+                    window: {siyuan: {languages: {}}}, setTimeout: () => {}});
+                return exports;
+            };
+            const cell = load<typeof import("./cell")>(cellSource);
+            mocks["./cell"] = {...cell, updateAttrViewCellInOtherElements: () => {}};
+            const asset = load<typeof import("./asset")>(assetSource);
+            const protyle = {block: {rootID: "document"}} as IProtyle;
+            const cellElements: IAVCellInputElements = [field];
+            cell.captureAVCellInput(protyle, block, cellElements);
+            panelTarget.setAVCellPanelTarget(panel as unknown as HTMLElement, block, cellElements);
+            menu.innerHTML = asset.getAssetHTML(cellElements);
+            const visible = () => Array.from(menu.querySelectorAll("button[data-index]"), (item: DOMElement) => item.dataset.content);
+            const removeFirst = () => asset.updateAssetCell({protyle, blockElement: block, cellElements,
+                menuElement: menu as unknown as HTMLElement, removeIndex: 0});
+            removeFirst();
+            assert.deepEqual(visible(), paths.slice(1));
+            const replacement = render().field;
+            assert.equal(field.isConnected, false);
+            removeFirst();
+            assert.equal(cellElements[0], replacement);
+            assert.deepEqual(visible(), paths.slice(2));
+            render("other-row");
+            removeFirst();
+            assert.deepEqual(updates, [
+                {before: paths, after: paths.slice(1)},
+                {before: paths.slice(1), after: paths.slice(2)},
+            ]);
+        });
+    }
 });

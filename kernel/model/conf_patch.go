@@ -136,6 +136,9 @@ func ConfSectionPatchJSON(namespace string, patch []byte) ([]byte, error) {
 	if nil == Conf {
 		return patch, nil
 	}
+	if namespace == "ai" {
+		return MergeConfSectionJSON(Conf.LoadAI(), patch)
+	}
 	spec, ok := SectionSpecByNamespace(namespace)
 	if !ok {
 		return nil, fmt.Errorf("unsupported configuration section: %s", namespace)

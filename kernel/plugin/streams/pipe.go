@@ -351,17 +351,15 @@ func readableStreamTee(h *Host, source *readableState) (branch1, branch2 *goja.O
 		return cancelPromise.value(rt)
 	}
 
-	branch1Obj := h.NewReadableStream(nil, func(goja.Value) goja.Value { pullAlgorithm(); return nil },
+	branch1State := h.newReadableStream(nil, func(goja.Value) goja.Value { pullAlgorithm(); return nil },
 		cancel1Algorithm, 1, nil)
-	branch1State, _ := readableStateOf(branch1Obj)
 	branch1Controller = branch1State.controller
 
-	branch2Obj := h.NewReadableStream(nil, func(goja.Value) goja.Value { pullAlgorithm(); return nil },
+	branch2State := h.newReadableStream(nil, func(goja.Value) goja.Value { pullAlgorithm(); return nil },
 		cancel2Algorithm, 1, nil)
-	branch2State, _ := readableStateOf(branch2Obj)
 	branch2Controller = branch2State.controller
 
-	return branch1Obj, branch2Obj
+	return branch1State.self, branch2State.self
 }
 
 // newReadableStreamAsyncIterator 对应 4.3.9 节的 Readable Stream Asynchronous Iterator：返回一个带 next()/

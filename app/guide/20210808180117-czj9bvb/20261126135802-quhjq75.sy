@@ -1,0 +1,172 @@
+{
+	"ID": "20261126135802-quhjq75",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f50c",
+		"id": "20261126135802-quhjq75",
+		"title": "外部连接",
+		"type": "doc",
+		"updated": "20261126141053"
+	},
+	"Children": [
+		{
+			"ID": "20261126141053-z45zsym",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126141053-z45zsym",
+				"updated": "20261126141053"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-upstlpk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-upstlpk",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源支持连接 WorkBuddy、豆包和 OpenAI。连接后，可在相应的应用中搜索、阅读和编辑思源笔记。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-sddtxvt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-sddtxvt",
+				"updated": "20261126140707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "WorkBuddy"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-ki6s2u5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-ki6s2u5",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "WorkBuddy 连接器已上架。可在 WorkBuddy 的连接器市场搜索「思源笔记」，添加「思源笔记官方连接器」，然后填写思源实例地址和 API Token。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-aj23vqm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-aj23vqm",
+				"updated": "20261126140707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "GitHub repo: siyuan-note/siyuan-workbuddy-connector"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-d4wd5kg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-d4wd5kg",
+				"updated": "20261126140921"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "豆包"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-ueoq9zz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-ueoq9zz",
+				"updated": "20261126140921"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "豆包插件已上架。可在豆包电脑版的插件市场搜索并添加「思源笔记」。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-bsi0erf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-bsi0erf",
+				"updated": "20261126140707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "GitHub repo: siyuan-note/siyuan-doubao-plugin"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-m45ekdi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261126135802-m45ekdi",
+				"updated": "20261126140707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OpenAI"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-yi98le1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-yi98le1",
+				"updated": "20261126135802"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OpenAI 插件暂未上架。如需在 ChatGPT 桌面端的 Codex 中使用，请从 GitHub 仓库下载本地安装包，并按仓库说明手动安装。"
+				}
+			]
+		},
+		{
+			"ID": "20261126135802-v5gkhjb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126135802-v5gkhjb",
+				"updated": "20261126140707"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "GitHub repo: siyuan-note/siyuan-openai-plugin"
+				}
+			]
+		}
+	]
+}

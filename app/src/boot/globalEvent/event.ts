@@ -200,8 +200,7 @@ export const initWindowEvent = (app: App) => {
         }
         let scrollElement;
         if (scrollTarget && scrollTarget.classList.contains("sy__file")) {
-            scrollElement = (event.target as Element).closest(".file-tree__pins-list") ||
-                scrollTarget.querySelector(".file-tree__items");
+            scrollElement = scrollTarget.querySelector("[data-file-tree-scroll]");
         } else if (scrollTarget && scrollTarget.classList.contains("protyle")) {
             scrollElement = scrollTarget.querySelector(".protyle-content");
         }

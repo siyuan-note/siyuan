@@ -128,6 +128,12 @@ func applyAISetting(c *gin.Context, request apicontract.SetAIRequest) (ret apico
 		ret = apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
 		return
 	}
+	if util.CurrentAIModelPolicy() == util.AIModelsDeepSeek {
+		if err = model.Conf.SetDistributionDeepSeekKey(ai); err != nil {
+			return apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
+		}
+		return apicontract.Success(settingAIPayload(model.Conf.LoadAI()))
+	}
 	if ai.MCP != nil {
 		for _, server := range ai.MCP.Servers {
 			if err = mcpclient.ValidateMCPServerEnvironment(server); err != nil {

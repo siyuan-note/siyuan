@@ -23,3 +23,20 @@ updates:
       interval: weekly
     target-branch: dev
     open-pull-requests-limit: 5
+  - package-ecosystem: gomod
+    directory: /kernel
+    schedule:
+      interval: weekly
+    target-branch: dev
+    open-pull-requests-limit: 5
+    groups:
+      go-x:
+        patterns:
+          - "golang.org/x/*"
+      google:
+        patterns:
+          - "google.golang.org/*"
+    ignore:
+      # 由维护者 fork 提供，replace 指向 88250/*，不跟随上游版本
+      - dependency-name: "github.com/mattn/go-sqlite3"
+      - dependency-name: "github.com/pdfcpu/pdfcpu"

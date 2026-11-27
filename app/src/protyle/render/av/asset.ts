@@ -88,16 +88,20 @@ const getVisibleAssetValues = (cellElements: HTMLElement[]) => {
         });
         return Array.from(assets.values());
     }
-    return genCellValueByElement("mAsset", cellElements[0]).mAsset || [];
+    const input = (cellElements as IAVCellInputElements).resolveAVCellInput?.();
+    // 行暂时卸载时，面板刷新不能再从旧的单元格元素读取附件。
+    const value = input && !input.elements[0] ? input.cells[0]?.cell.value : undefined;
+    return (value || genCellValueByElement("mAsset", cellElements[0])).mAsset || [];
 };
 
 const isAssetCellMenuCurrent = (menuElement: HTMLElement, blockElement: Element, cellElements: HTMLElement[]) => {
     const panelElement = menuElement?.closest(".av__panel");
-    if (!menuElement?.isConnected || !panelElement?.isConnected ||
-        !isAVCellPanelForBlock(panelElement, blockElement)) return false;
+    if (!menuElement?.isConnected || !panelElement?.isConnected) return false;
     const panelCells = getAVCellPanelElements(panelElement) as IAVCellInputElements;
     const resolveInput = (cellElements as IAVCellInputElements).resolveAVCellInput;
-    return panelCells === cellElements || !!resolveInput && panelCells?.resolveAVCellInput === resolveInput;
+    return resolveInput ?
+        panelCells?.resolveAVCellInput === resolveInput && !!resolveInput() :
+        panelCells === cellElements && isAVCellPanelForBlock(panelElement, blockElement);
 };
 
 export const getAssetHTML = (cellElements: HTMLElement[]) => {
@@ -170,7 +174,8 @@ export const updateAssetCell = (options: {
     const resolveInput = (options.cellElements as IAVCellInputElements).resolveAVCellInput;
     const inputTarget = resolveInput?.();
     if (resolveInput && !inputTarget) return;
-    const viewType = options.blockElement.getAttribute("data-av-type") as TAVView;
+    const blockElement = inputTarget?.blockElement || options.blockElement;
+    const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     const colId = options.targets?.[0]?.colID || getColId(options.cellElements[0], viewType);
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
@@ -195,12 +200,12 @@ export const updateAssetCell = (options: {
     options.cellElements.forEach((item, elementIndex) => {
         const target = inputTarget?.cells[elementIndex] || options.targets?.[elementIndex];
         const rowID = target?.rowID || getFieldIdByCellElement(item, viewType);
-        const data = target && getAVData(options.blockElement as HTMLElement);
+        const data = target && getAVData(blockElement as HTMLElement);
         const selectedCell = inputTarget?.cells[elementIndex] || (data && resolveAVSelectedCell(data, target));
         if (target && data && selectedCell?.column.type !== "mAsset") {
             return;
         }
-        item = inputTarget?.cells.length ? inputTarget.elements[elementIndex] : resolveAssetCellElement(options.blockElement, item, target || {
+        item = inputTarget ? inputTarget.elements[elementIndex] : resolveAssetCellElement(blockElement, item, target || {
             rowID, colID: getColId(item, viewType), groupID: "",
         }, viewType);
         if (!item && !selectedCell) {
@@ -210,7 +215,7 @@ export const updateAssetCell = (options: {
             options.cellElements[elementIndex] = item;
         }
         const renderedValue: IAVCellValue = selectedCell ? JSON.parse(JSON.stringify(selectedCell.cell.value)) :
-            genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
+            inputTarget?.values[elementIndex] || genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
         const cellValue = selectedCell || batchMode === "replace" ? renderedValue : getAVBatchSourceValue(item, renderedValue);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
         if (batchMode === "add" && options.addValue?.length > 0) {
@@ -245,7 +250,7 @@ export const updateAssetCell = (options: {
         } else {
             cellValue.mAsset = mAssetValue;
         }
-        const avID = options.blockElement.getAttribute("data-av-id");
+        const avID = blockElement.getAttribute("data-av-id");
         cellDoOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,
@@ -266,8 +271,8 @@ export const updateAssetCell = (options: {
             updateAttrViewCellAnimation(item, cellValue);
         }
         updateAttrViewCellInOtherElements(options.protyle, avID, rowID, colId, cellValue, item);
-        if (inputTarget) {
-            options.cellElements[elementIndex].dataset.cellValue = encodeURIComponent(JSON.stringify(cellValue));
+        if (inputTarget && item) {
+            item.dataset.cellValue = encodeURIComponent(JSON.stringify(cellValue));
         }
     });
     if (cellDoOperations.length === 0) {
@@ -276,29 +281,29 @@ export const updateAssetCell = (options: {
     }
     cellDoOperations.push({
         action: "doUpdateUpdated",
-        id: options.blockElement.getAttribute("data-node-id"),
+        id: blockElement.getAttribute("data-node-id"),
         data: dayjs().format("YYYYMMDDHHmmss"),
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);
     const menuElement = typeof options.menuElement === "undefined" ?
         document.querySelector<HTMLElement>(".av__panel > .b3-menu") :
         options.menuElement?.isConnected ? options.menuElement : null;
-    if (isAssetCellMenuCurrent(menuElement, options.blockElement, options.cellElements) &&
-        (inputTarget || options.cellElements.every(item => options.blockElement.contains(item)))) {
+    if (isAssetCellMenuCurrent(menuElement, blockElement, options.cellElements) &&
+        (inputTarget || options.cellElements.every(item => blockElement.contains(item)))) {
         menuElement.innerHTML = getAssetHTML(options.cellElements);
         bindAssetEvent({
             protyle: options.protyle,
             menuElement,
             cellElements: options.cellElements,
-            blockElement: options.blockElement
+            blockElement
         });
         const anchor = options.cellElements[0].classList.contains("custom-attr__avvalue") ? options.cellElements[0] :
-            options.blockElement.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`);
+            blockElement.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`);
         if (!anchor) return;
         const cellRect = anchor.getBoundingClientRect();
         setAVCellPanelPosition(menuElement, cellRect);
         setTimeout(() => {
-            if (!isAssetCellMenuCurrent(menuElement, options.blockElement, options.cellElements)) return;
+            if (!isAssetCellMenuCurrent(menuElement, blockElement, options.cellElements)) return;
             setAVCellPanelPosition(menuElement, cellRect);
         }, Constants.TIMEOUT_LOAD);  // 等待图片加载
     }

@@ -39,6 +39,47 @@
 			]
 		},
 		{
+			"ID": "20261126162137-cmt6a8x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126162137-cmt6a8x",
+				"updated": "20261126162137"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "中国本土のアプリストア向け Android 版、HarmonyOS ネイティブ版、中国本土 App Store 版では、AI 編集と AI エージェントに DeepSeek 公式サービスの deepseek-flash モデルを使用します。 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API プロバイダー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でご自身の DeepSeek API キーを入力してください。"
+				}
+			]
+		},
+		{
 			"ID": "20261015225720-y3mi68c",
 			"Type": "NodeParagraph",
 			"Properties": {

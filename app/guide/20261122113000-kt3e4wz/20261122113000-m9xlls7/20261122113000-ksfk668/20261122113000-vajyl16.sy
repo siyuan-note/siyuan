@@ -8,7 +8,7 @@
 		"title": "Элементы форматирования",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126172446"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-z51j6df",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -32,7 +32,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-65khumy",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -505,7 +505,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-obqy3ll",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -513,16 +513,13 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-olh9dkt",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "inline-math",
 									"TextMarkInlineMathContent": "a^2 + b^2 = \\color{red}c^2"
-								},
-								{
-									"Type": "NodeText"
 								}
 							]
 						}
@@ -872,12 +869,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-v2zdab7",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+					"Data": "В разделе "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -913,7 +910,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " нажать соответствующую кнопку для раздельного управления цветом, цветом текста и цветом фона."
+					"Data": " нажмите соответствующую кнопку для раздельного управления цветом, цветом текста и цветом фона."
 				}
 			]
 		},
@@ -1296,12 +1293,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-7trnvzt",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Нумерованный, маркированный и список задач"
+					"Data": "Нумерованный и маркированный списки и список задач"
 				}
 			]
 		},
@@ -2125,7 +2122,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-vxvix12",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -2139,12 +2136,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-h6g7tye",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Определение и описание преобразования списков см. в разделе"
+					"Data": "Определение и описание преобразования списков см. в разделе "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2155,7 +2152,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -2382,7 +2379,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261122113000-ty90b78",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -2397,12 +2394,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-2m7bkxa",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Нижнее меню узла предоставляет действия удаления, копирования, вырезания и вставки. Вставка добавляет дочерний узел, "
+					"Data": "Нижнее меню узла предоставляет действия удаления, копирования, вырезания и вставки. Вставка добавляет дочерний узел; через меню "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2415,7 +2412,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "сохраняя возможность вставки как узла того же уровня. Наведите курсор или нажмите "
+					"Data": "можно вставить узел того же уровня. Наведите курсор или нажмите "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2835,7 +2832,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261122113000-v6zphfw",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -2924,12 +2921,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-ipy0m7o",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "При использовании "
+					"Data": "Выберите "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2947,7 +2944,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", чтобы выбрать для каждой линии связи сплошную, короткий пунктир, длинный пунктир или точечную линию."
+					"Data": ", чтобы задать для каждой линии связи сплошную, короткую пунктирную, длинную пунктирную или точечную линию."
 				}
 			]
 		},
@@ -4826,7 +4823,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-9ml5yoi",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -4999,7 +4996,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-1xb8uta",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5022,18 +5019,18 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, они эквивалентны. После выбора включается"
+					"Data": "​, они эквивалентны. После выбора включается подсветка синтаксиса "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20261122113000-9f33l0j",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "шаблон SiYuan"
+					"TextMarkTextContent": "шаблона SiYuan"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " подсветка синтаксиса; при экспорте в шаблон этот блок кода преобразуется в обычный текст абзаца."
+					"Data": "; при экспорте в шаблон этот блок кода преобразуется в обычный текст абзаца."
 				}
 			]
 		},
@@ -5292,7 +5289,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-3z122af",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5315,7 +5312,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-zmdq3z5",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5331,7 +5328,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -5364,7 +5361,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-4t18ess",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5378,7 +5375,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-gbz8jwb",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5410,7 +5407,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -5419,7 +5416,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -5428,12 +5425,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-w3ixu6p",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Диапазон поиска ключевых слов можно настроить в разделе "
+					"Data": "В разделе "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -5595,7 +5592,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-8ejfxr9",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5680,7 +5677,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-39x4k2w",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5695,7 +5692,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -5705,7 +5702,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-iefj4bx",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5758,7 +5755,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-d6xn1lc",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5773,7 +5770,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -5783,7 +5780,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-ip6ac1s",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5836,7 +5833,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-oiiw3qw",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5851,7 +5848,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -5861,7 +5858,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-v2heyr3",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5907,7 +5904,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-ghxw83u",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5922,7 +5919,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -5932,7 +5929,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-xdezi6f",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5978,7 +5975,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-ui6ey15",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5993,7 +5990,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -6003,7 +6000,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-yu0761l",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6044,7 +6041,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-gtzxlrq",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6059,7 +6056,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -6069,7 +6066,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-9b3u4tu",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6115,7 +6112,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-2qrhotd",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6130,7 +6127,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -6140,7 +6137,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-036yjfo",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6181,7 +6178,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-alv7a75",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6196,7 +6193,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -6206,7 +6203,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-t7ce8g6",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6248,7 +6245,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-4606zpd",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6281,7 +6278,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -6291,7 +6288,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-66cl6a6",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6332,7 +6329,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-ranu7hn",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6348,7 +6345,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -6533,7 +6530,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-bb8ywin",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6548,7 +6545,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -6655,7 +6652,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-7tl81j0",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6708,7 +6705,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-fl9ujzx",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6723,7 +6720,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -6733,7 +6730,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-q3x2qvf",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6786,7 +6783,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-zgfh8x5",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6801,7 +6798,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -6811,7 +6808,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-uwewq1a",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6857,7 +6854,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-0ja2pkn",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6872,7 +6869,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

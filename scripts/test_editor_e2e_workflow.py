@@ -183,7 +183,9 @@ class EditorWorkflowTests(unittest.TestCase):
 
     def test_release_waits_for_all_checks_with_existing_failure_rules(self):
         release = job("create_release")
-        self.assertIn("needs: [prepare, languages, contracts, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, main_e2e, editor_e2e]", release)
+        dependencies = re.search(r"(?m)^    needs: \[(.+)\]$", release).group(1).split(", ")
+        self.assertLess(release.index("sha256sum --check --strict SHA256SUMS.txt"),
+                        release.index("      - name: Create Release"))
         expression = re.search(r"if: >-\s*\$\{\{(.*?)\}\}", release, re.S).group(1)
         expression = expression.replace("always()", "True").replace("!cancelled()", "not cancelled")
         expression = expression.replace("&&", " and ")
@@ -192,8 +194,10 @@ class EditorWorkflowTests(unittest.TestCase):
         expression = compile(expression, "release condition", "eval")
         states = ["success", "failure", "skipped", "cancelled"]
         hard = ["prepare", "languages", "contracts", "kernel-tests-linux", "kernel-tests-windows", "frontend-tests", "build",
-                "build_macos_amd64", "build_macos_arm64", "package_macos_amd64", "package_macos_arm64", "build_android"]
+                "build_macos_amd64", "build_macos_arm64", "package_macos_amd64", "package_macos_arm64", "build_android",
+                "startup_verify", "startup_static"]
         soft = ["main_e2e", "editor_e2e"]
+        self.assertCountEqual(dependencies, hard + soft)
         baseline = dict.fromkeys(hard + soft, "success")
         # Cross-product of both independent test results and every hard prerequisite failure.
         for main, editor, cancelled in itertools.product(states, states, [False, True]):
@@ -375,7 +379,7 @@ class EditorWorkflowTests(unittest.TestCase):
         self.assertIn("name: siyuan-${{ fromJSON(inputs.config).suffix }}", package)
         self.assertIn("if-no-files-found: error", package)
         # Test artifacts may be downloaded for summaries, but release package names stay unchanged.
-        self.assertIn("pattern: siyuan-*", job("create_release"))
+        self.assertIn('pattern: "siyuan-{linux,mac.dmg,mac-arm64.dmg,win.exe,android}"', job("create_release"))
         self.assertNotIn("name: siyuan-", DESKTOP.split("- name: Upload raw macOS runtime", 1)[1].split("      - ", 1)[0])
 
     def test_serial_packaging_does_not_propagate_independent_failure(self):

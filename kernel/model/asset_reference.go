@@ -301,7 +301,9 @@ func rewriteAttributeViewDataAssetReferences(data []byte, options assetReference
 	if err := gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
 		return nil, err
 	}
-	if !rewriteAttributeViewAssetReferences(attrView, options) {
+	changed := rewriteAttributeViewAssetReferences(attrView, options)
+	// 主键预览由富文本源派生，归档只保存存储源。
+	if !attrView.DiscardPrimaryRichDOM() && !changed {
 		return data, nil
 	}
 	if util.UseSingleLineSave.Load() {

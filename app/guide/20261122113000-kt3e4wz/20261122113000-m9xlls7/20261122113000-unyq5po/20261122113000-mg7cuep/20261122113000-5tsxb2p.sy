@@ -6,7 +6,7 @@
 		"id": "20261122113000-5tsxb2p",
 		"title": "Поиск по содержимому файлов ресурсов",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -47,7 +47,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-l4pry50",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-mghad2c",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -67,7 +67,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-tagw9g7",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -81,7 +81,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -90,7 +90,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -99,7 +99,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -108,7 +108,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -117,7 +117,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -126,7 +126,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -135,7 +135,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -144,7 +144,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -153,7 +153,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -162,7 +162,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -171,7 +171,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -180,7 +180,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -189,7 +189,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -198,7 +198,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -207,7 +207,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -216,7 +216,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -225,7 +225,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -234,7 +234,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -243,7 +243,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -252,7 +252,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -261,7 +261,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -270,7 +270,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -279,7 +279,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -288,7 +288,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -297,7 +297,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -306,7 +306,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -315,7 +315,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -324,7 +324,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -333,7 +333,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -342,7 +342,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -351,7 +351,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -360,7 +360,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -369,7 +369,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -378,7 +378,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​）"
+									"Data": "​)"
 								}
 							]
 						}
@@ -539,7 +539,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-1ufssvu",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -553,7 +553,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​​："
+					"Data": "​​:"
 				}
 			]
 		},

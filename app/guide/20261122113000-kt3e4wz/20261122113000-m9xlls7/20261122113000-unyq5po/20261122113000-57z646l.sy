@@ -6,7 +6,7 @@
 		"id": "20261122113000-57z646l",
 		"title": "Сервер Docker",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126172446"
 	},
 	"Children": [
 		{
@@ -305,7 +305,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-6ksx2t9",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -323,7 +323,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-7q1cduh",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -355,7 +355,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -535,7 +535,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-ycxjemd",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -551,7 +551,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". Ниже приведён пример команды запуска:"
+					"Data": ". Ниже приведён пример команды запуска: "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -724,7 +724,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-4cqw917",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -738,7 +738,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-9mot9r9",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -752,7 +752,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1108,7 +1108,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-ggfg75u",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -1123,7 +1123,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-o9hflh0",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -1135,7 +1135,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-npliurn",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -1143,7 +1143,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-5ts3fhc",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -1156,10 +1156,6 @@
 									"TextMarkBlockRefID": "20261122113000-uoyl377",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "Подключение к удалённому ядру"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ""
 								}
 							]
 						}

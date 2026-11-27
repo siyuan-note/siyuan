@@ -78,6 +78,8 @@ func TestReaderBookmarkAndOutlineWithoutInlineMemo(t *testing.T) {
 		docID       = "20261122000001-docbmk1"
 		headingID   = "20261122000002-hdgbmk1"
 		blockID     = "20261122000003-blkbmk1"
+		hiddenID    = "20261122000004-hdgbmk2"
+		hiddenText  = "RESTRICTED_HEADING_MARKER"
 		headingText = "HEADING_TEXT_MARKER"
 		visibleText = "BOOKMARK_BODY_MARKER"
 		memoLabel   = "annotated label"
@@ -104,11 +106,14 @@ func TestReaderBookmarkAndOutlineWithoutInlineMemo(t *testing.T) {
 	heading := &ast.Node{Type: ast.NodeHeading, ID: headingID, HeadingLevel: 1}
 	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(headingText)})
 	heading.AppendChild(inlineMemo())
+	hiddenHeading := &ast.Node{Type: ast.NodeHeading, ID: hiddenID, HeadingLevel: 2}
+	hiddenHeading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(hiddenText)})
 	paragraph := treenode.NewParagraph(blockID)
 	paragraph.SetIALAttr("bookmark", "label")
 	paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(visibleText)})
 	paragraph.AppendChild(inlineMemo())
 	tree.Root.AppendChild(heading)
+	tree.Root.AppendChild(hiddenHeading)
 	tree.Root.AppendChild(paragraph)
 	if _, err := filesys.WriteTree(tree); err != nil {
 		t.Fatalf("write tree: %v", err)
@@ -117,7 +122,7 @@ func TestReaderBookmarkAndOutlineWithoutInlineMemo(t *testing.T) {
 	sql.IndexTreeQueue(tree)
 	sql.FlushQueue()
 
-	if err := model.SetPublishAccess(model.PublishAccess{{ID: docID, Visible: true}}); err != nil {
+	if err := model.SetPublishAccess(model.PublishAccess{{ID: docID, Visible: true}, {ID: hiddenID, Disable: true}}); err != nil {
 		t.Fatalf("set publish access: %v", err)
 	}
 
@@ -195,6 +200,9 @@ func TestReaderBookmarkAndOutlineWithoutInlineMemo(t *testing.T) {
 
 	outlineRequest := fmt.Sprintf(`{"id":%q}`, docID)
 	readerOutline := post(model.RoleReader, "/api/outline/getDocOutline", outlineRequest, getDocOutline)
+	if strings.Contains(readerOutline, hiddenText) || strings.Contains(readerOutline, hiddenID) {
+		t.Fatalf("reader outline includes a disabled heading: %s", readerOutline)
+	}
 	if strings.Contains(readerOutline, memoCanary) {
 		t.Fatalf("reader outline leaked inline memo content: %s", readerOutline)
 	}
@@ -202,7 +210,20 @@ func TestReaderBookmarkAndOutlineWithoutInlineMemo(t *testing.T) {
 		t.Fatalf("reader outline dropped visible text: %s", content)
 	}
 	adminOutline := post(model.RoleAdministrator, "/api/outline/getDocOutline", outlineRequest, getDocOutline)
+	if !strings.Contains(adminOutline, hiddenText) || !strings.Contains(adminOutline, hiddenID) {
+		t.Fatalf("administrator outline is missing the configured heading: %s", adminOutline)
+	}
 	if !strings.Contains(adminOutline, memoCanary) {
 		t.Fatalf("administrator outline must keep inline memo content: %s", adminOutline)
+	}
+
+	model.Conf.Editor.Load().HeadingNumber = true
+	readerNumbers := post(model.RoleReader, "/api/outline/getDocHeadingNumbers", outlineRequest, getDocHeadingNumbers)
+	if !strings.Contains(readerNumbers, headingID) || strings.Contains(readerNumbers, hiddenID) {
+		t.Fatalf("reader heading numbers did not match visible headings: %s", readerNumbers)
+	}
+	adminNumbers := post(model.RoleAdministrator, "/api/outline/getDocHeadingNumbers", outlineRequest, getDocHeadingNumbers)
+	if !strings.Contains(adminNumbers, headingID) || !strings.Contains(adminNumbers, hiddenID) {
+		t.Fatalf("administrator heading numbers did not include both headings: %s", adminNumbers)
 	}
 }

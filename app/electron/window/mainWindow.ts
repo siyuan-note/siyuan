@@ -363,17 +363,14 @@ const installCloseBehavior = (currentWindow: BrowserWindow, kernelTarget: Kernel
 }): void => {
     installNavigationPolicy(currentWindow, "app", kernelTarget);
     currentWindow.on("close", (event: ElectronEvent) => {
+        event.preventDefault();
         if (kernelTarget.mode === "remote" && (getWindowPathname(currentWindow) !== APP_PAGE ||
             !isWindowInitialized(currentWindow.webContents.id))) {
-            event.preventDefault();
             exitWorkspace(runtime.state.workspaces.find((item: Workspace) =>
                 item.webContentsId === currentWindow.webContents.id));
             return;
         }
-        if (currentWindow && !currentWindow.isDestroyed()) {
-            requestWindowClose(currentWindow, false);
-        }
-        event.preventDefault();
+        requestWindowClose(currentWindow, false);
     });
 };
 
@@ -451,7 +448,19 @@ const createMainWindow = ({
         installCloseBehavior(currentWindow, launch.kernelTarget, {
             installNavigationPolicy, getWindowPathname, exitWorkspace,
         });
-        installWindowCloseRecovery(currentWindow, {scheduleTimer, cancelTimer});
+        // 每个页面注册保存监听后才握手，重新加载期间由主进程接管关闭。
+        let canSaveOnClose = false;
+        currentWindow.webContents.ipc.on(Channel.SIYUAN_EVENT, event => {
+            if (event.sender === currentWindow.webContents && event.senderFrame === event.sender.mainFrame) {
+                canSaveOnClose = true;
+            }
+        });
+        currentWindow.webContents.on("did-navigate", () => {
+            canSaveOnClose = false;
+        });
+        installWindowCloseRecovery(currentWindow, {
+            scheduleTimer, cancelTimer, canSave: () => canSaveOnClose, exit: exitWorkspace,
+        });
         // 窗口进入账本后即可清除这次启动记录。
         addWorkspace({
             browserWindow: currentWindow,

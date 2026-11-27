@@ -6,7 +6,7 @@
 		"id": "20261122113000-9p4zt5b",
 		"title": "Резервное копирование данных",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126172446"
 	},
 	"Children": [
 		{
@@ -55,7 +55,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-u71zttg",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-jozitev",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -86,7 +86,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-hxsxba4",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -94,7 +94,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-ebbg4yb",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -102,11 +102,11 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20261122113000-k065dzo",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "инициализации ключа репозитория данных"
+									"TextMarkTextContent": "Инициализируйте ключ репозитория данных"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " если всё в порядке, резервное копирование уже настроено"
+									"Data": " — если всё прошло успешно, резервное копирование настроено"
 								}
 							]
 						}
@@ -180,7 +180,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-ae7ht3q",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -188,7 +188,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-u9oyx3c",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -198,7 +198,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Пометить снимок"
+									"TextMarkTextContent": "Помеченные снимки"
 								},
 								{
 									"Type": "NodeText",
@@ -224,7 +224,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-x5in3os",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -232,7 +232,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-txtlceg",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -246,16 +246,12 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、"
+									"Data": ", "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Облачный снимок"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ""
 								}
 							]
 						}
@@ -272,7 +268,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-48l5kun",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -280,7 +276,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-qzm63ca",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -293,10 +289,6 @@
 									"TextMarkBlockRefID": "20261122113000-h9jdyuc",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "откат снимка данных"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ""
 								}
 							]
 						}
@@ -309,7 +301,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-a51xn0y",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -325,7 +317,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

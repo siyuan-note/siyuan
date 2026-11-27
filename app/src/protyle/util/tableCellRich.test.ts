@@ -29,9 +29,10 @@ const browserCases = async (source: string) => {
     const lute = api.getAVRichTextLute();
     let renders = 0;
     const spin = lute.SpinBlockDOM;
-    lute.SpinBlockDOM = (html: string) => {
+    const render = lute.BlockDOM2RichHTML;
+    lute.BlockDOM2RichHTML = (html: string) => {
         renders++;
-        return spin(html);
+        return render(html);
     };
     const fixture = document.createElement("div");
     fixture.innerHTML = '<div data-type="NodeTable" data-node-id="20261020120000-table01" custom-sy-table-rich="1">' +
@@ -41,6 +42,7 @@ const browserCases = async (source: string) => {
     const table = fixture.firstElementChild;
     const cells = Array.from(table.querySelectorAll<HTMLTableCellElement>("th, td"));
     const sources = cells.map((_cell, index) => `Cell ${index}: **bold** \\| 文本 🧪\n\nSecond paragraph ${index}`);
+    sources[24] = "`" + "a".repeat(40) + "`";
     sources[25] = "- first\n- second\n\n```js\nconst value = 1;\n```";
     sources[26] = "![image](assets/example.png)\n\n((20261020120000-ref0001 'reference'))";
     sources[27] = "";
@@ -67,6 +69,7 @@ const browserCases = async (source: string) => {
     check.doesNotMatch(oldHTML, /Temporary editor UI|table__cell-editor/);
     check.match(oldHTML, /<ul>|<pre><code/);
     check.match(oldHTML, /assets\/example.png/);
+    check.ok(restored.querySelector('[data-type="code"][data-inline-wrap]'));
     Array.from(restored.querySelectorAll("th, td")).forEach((cell, index) => {
         check.equal(api.decodeTableCellRich(cell.getAttribute("data-sy-table-cell-rich")).content, sources[index]);
         check.equal(cell.getAttribute("contenteditable"), "false");
@@ -155,6 +158,17 @@ const browserCases = async (source: string) => {
     check.doesNotMatch(restored.innerHTML, /untrusted|other/);
     check.throws(() => api.cleanTableCellRichHTML(duplicateHTML.replace(encoded, "invalid!")));
     check.equal(renders, previousRenders + 1, "invalid batch sources fail before conversion");
+
+    const regex = "/[a|b]/";
+    const regexSource = api.encodeTableCellRich(regex);
+    const regexHTML = `<table><tbody><tr><td data-sy-table-cell-rich="${regexSource}"></td>` +
+        `<td data-sy-table-cell-rich="${encoded}"></td></tr></tbody></table>`;
+    restored.innerHTML = api.cleanTableCellRichHTML(regexHTML);
+    const [regexCell, formattedCell] = restored.querySelectorAll("td");
+    check.equal(regexCell.getAttribute("data-sy-table-cell-rich"), regexSource);
+    check.equal(regexCell.querySelector(".table__cell-rich p").textContent, regex);
+    check.equal(formattedCell.querySelector('.table__cell-rich [data-type="strong"]').textContent, "duplicate");
+    check.equal(api.cleanTableCellRichHTML(restored.innerHTML), restored.innerHTML);
     fixture.remove();
     return "Table cell rich snapshot cases passed";
 };

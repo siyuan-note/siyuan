@@ -441,7 +441,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " before saving to check the current S3, WebDAV, or local filesystem draft without saving it. WebDAV checks directory creation and probe read/write access; the local filesystem checks directory read/write access. The probe is cleaned up where possible. If the test fails, follow the diagnostic and try again; your saved configuration is retained."
+					"Data": " before saving to check the current S3, WebDAV, or local filesystem draft without saving it. WebDAV checks directory creation and probe read/write access; the local filesystem checks directory read/write access. The probe is cleaned up where possible. If the test fails, follow the diagnostic and try again; your saved configuration is retained. Sync uploads also require conditional PUT on S3 and MOVE without overwriting the destination on WebDAV."
 				}
 			]
 		},
@@ -1052,6 +1052,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261126185000-c2e9d5b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261126185000-c2e9d5b",
+				"updated": "20261126185000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When downloading from the cloud, if a path with backslashes maps to an existing forward-slash path in the same snapshot, SiYuan keeps the forward-slash version and saves the other copies in the workspace history directory. For supported legacy widget paths, SiYuan also converts backslashes when there is only one version. If several legacy widget paths map to the same path and none uses forward slashes, sync reports the conflict and stops. Two-way sync uses its usual conflict rules for local and cloud files at the same path. In download-only mode, when a cloud file affected by path repair replaces a local file, the previous copy goes to the workspace history directory."
 				}
 			]
 		},

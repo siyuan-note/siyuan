@@ -9,6 +9,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"image"
+	"io"
 	"io/fs"
 	"mime"
 	"net/http"
@@ -50,6 +52,14 @@ func GetAssetImgSizeInBox(assetPath, boxID string) (width, height int) {
 		// 计算布局尺寸不触发资源下载，展示图片或完整导出时再补齐内容。
 		return
 	}
+	if !heif.IsPath(assetPath) && !IsEncryptedAssetPath(absPath) {
+		file, err := os.Open(absPath)
+		if err != nil {
+			return 0, 0
+		}
+		defer file.Close()
+		return assetImageDimensions(file, assetPath)
+	}
 	data, err := readAssetBytesInBox(boxID, assetPath, false)
 	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", assetPath, err)
@@ -64,15 +74,17 @@ func GetAssetImgSizeInBox(assetPath, boxID string) (width, height int) {
 		return
 	}
 
-	img, err := imaging.Decode(bytes.NewReader(data))
+	return assetImageDimensions(bytes.NewReader(data), assetPath)
+}
+
+func assetImageDimensions(reader io.Reader, assetPath string) (width, height int) {
+	config, _, err := image.DecodeConfig(reader)
 	if err != nil {
 		logging.LogErrorf("open asset image [%s] failed: %s", assetPath, err)
 		return
 	}
 
-	width = img.Bounds().Dx()
-	height = img.Bounds().Dy()
-	return
+	return config.Width, config.Height
 }
 
 // ReadAssetBytesInBox 读取指定 box 内的资源文件字节。若 box 为加密笔记本则自动解密返回明文。
@@ -252,25 +264,37 @@ func NeedGenerateAssetsThumbnail(sourceImgPath string) bool {
 
 func GenerateAssetsThumbnail(sourceImgPath, resizedImgPath string) (err error) {
 	start := time.Now()
-	img, err := imaging.Open(sourceImgPath)
+	file, err := os.Open(sourceImgPath)
 	if err != nil {
-		return
+		return err
 	}
+	defer file.Close()
 
-	// 获取原图宽高
-	originalWidth := img.Bounds().Dx()
-	originalHeight := img.Bounds().Dy()
-
-	// 固定最大宽度为 520，计算缩放比例
-	maxWidth := 520
-	scale := float64(maxWidth) / float64(originalWidth)
-
-	// 按比例计算新的宽高
-	newWidth := maxWidth
-	newHeight := int(float64(originalHeight) * scale)
-
-	// 缩放图片
-	resizedImg := imaging.Resize(img, newWidth, newHeight, imaging.Lanczos)
+	const maxThumbnailInputBytes = 64 * 1024 * 1024
+	const maxThumbnailSourcePixels = 12_500_000
+	info, err := file.Stat()
+	if err != nil {
+		return err
+	}
+	if info.Size() > maxThumbnailInputBytes {
+		return fmt.Errorf("thumbnail source exceeds %d bytes", maxThumbnailInputBytes)
+	}
+	source := io.NewSectionReader(file, 0, info.Size())
+	config, _, err := image.DecodeConfig(source)
+	if err != nil {
+		return err
+	}
+	if config.Width < 1 || config.Height < 1 || config.Width > maxThumbnailSourcePixels/config.Height {
+		return errors.New("thumbnail source exceeds the image dimension limit")
+	}
+	if _, err = source.Seek(0, io.SeekStart); err != nil {
+		return err
+	}
+	img, err := imaging.Decode(source)
+	if err != nil {
+		return err
+	}
+	resizedImg := imaging.Fit(img, 520, 520, imaging.Lanczos)
 
 	// 保存缩放后的图片
 	err = os.MkdirAll(filepath.Dir(resizedImgPath), 0755)

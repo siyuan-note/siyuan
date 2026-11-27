@@ -8,7 +8,7 @@ import {createResponseHeaderFilter} from "../remote/sessionHeaders";
 import {state as runtimeState, resetRuntimeState, SYSTEM_SHUTDOWN_NONE, configureRuntime, paths as runtimePaths} from "../shared/runtime";
 import type * as electron from "electron";
 import type {App, BrowserWindow as ElectronBrowserWindow, BrowserWindowConstructorOptions, Display, IpcMain, Screen, Session} from "electron";
-import type {BootWindow, KernelTarget} from "../shared/types";
+import type {BootWindow, KernelTarget, Workspace} from "../shared/types";
 import type * as nodeFs from "node:fs";
 const assert = require("node:assert/strict");
 const path = require("node:path");
@@ -31,13 +31,14 @@ const mainWindowSetup = (t: any, {remote = false} = {}) => {
 
         webContents!: EventEmitter & {
             id: number;
+            ipc: EventEmitter;
             send: (...args: unknown[]) => void;
             session: {webRequest: {onBeforeSendHeaders(): void; onHeadersReceived(): void}};
         };
 
         constructor(readonly options: BrowserWindowConstructorOptions = {}) {
             super();
-            this.webContents = Object.assign(new EventEmitter(), {id: ++windowId,
+            this.webContents = Object.assign(new EventEmitter(), {id: ++windowId, ipc: new EventEmitter(),
                 send: (...args) => { this.messages = [...(this.messages || []), args]; },
                 session: {webRequest: {onBeforeSendHeaders() {}, onHeadersReceived() {}}}});
         }
@@ -104,6 +105,7 @@ const mainWindowSetup = (t: any, {remote = false} = {}) => {
         },
         initializedWindowIds: {get: () => runtimeState.windows.initialized},
     });
+    const closedWorkspaces: Workspace[] = [];
     const initMainWindow = createMainWindow({
         platform: {
             process: processStub as unknown as Pick<NodeJS.Process, "platform" | "argv">,
@@ -131,12 +133,14 @@ const mainWindowSetup = (t: any, {remote = false} = {}) => {
         },
         workspace: {
             rememberWindowKernelTarget: context.rememberWindowKernelTarget,
-            exitWorkspace: () => {},
+            exitWorkspace: workspace => {
+                if (workspace) closedWorkspaces.push(workspace);
+            },
             getWorkspaceStartupKey: context.getWorkspaceStartupKey,
             isOpenAsHidden: () => context.isOpenAsHidden(),
         },
     });
-    return {context: Object.assign(context, {initMainWindow}), ipcMain, timers, Window, electronStub};
+    return {context: Object.assign(context, {initMainWindow}), ipcMain, timers, Window, electronStub, closedWorkspaces};
 };
 
 test("main windows close their own boot windows in either frontend readiness order", (t) => {
@@ -215,6 +219,7 @@ test("main close, tray quit and application quit share the recovery timer", (t: 
     const window = context.workspaces[0].browserWindow;
     Object.assign(window.webContents, {isDestroyed: () => false,
         getURL: () => "https://127.0.0.1:6806/stage/build/app/"});
+    window.webContents.ipc.emit("siyuan-event", {sender: window.webContents});
     ipcMain.emit("siyuan-ready-to-show", {sender: window.webContents});
     let prevented = false;
     window.emit("close", {preventDefault: () => { prevented = true; }});
@@ -240,6 +245,35 @@ test("main close, tray quit and application quit share the recovery timer", (t: 
     assert.deepEqual(window.messages.at(-1), ["siyuan-save-close", true]);
     window.destroy();
     assert.equal(timers.size, 0);
+});
+
+test("only a committed main-frame navigation switches closing back to kernel exit", async t => {
+    const {context, closedWorkspaces, electronStub} = mainWindowSetup(t);
+    context.initMainWindow(6806);
+    const workspace = context.workspaces[0];
+    const window = workspace.browserWindow;
+    const contents = window.webContents;
+    contents.ipc.emit("siyuan-event", {sender: contents});
+    contents.emit("did-start-navigation", {isMainFrame: true, isSameDocument: false});
+    window.emit("close", {preventDefault() {}});
+    assert.deepEqual(window.messages, [["siyuan-save-close", false]]);
+    const {finishWindowCloseOnHide} = require("./closeRecovery") as typeof import("./closeRecovery");
+    finishWindowCloseOnHide(window);
+
+    contents.emit("did-navigate");
+    contents.ipc.emit("siyuan-event", {sender: contents, senderFrame: {}});
+    const exits: string[] = [];
+    electronStub.net = {fetch: async (url: string, request: RequestInit) => {
+        exits.push(url);
+        assert.equal(JSON.parse(request.body as string).force, false);
+        return {json: async () => ({code: 0})};
+    }};
+    window.emit("close", {preventDefault() {}});
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(window.messages, [["siyuan-save-close", false]]);
+    assert.deepEqual(exits, ["https://127.0.0.1:6806/api/system/exit"]);
+    assert.deepEqual(closedWorkspaces, [workspace]);
+    window.destroy();
 });
 
 test("closing to the tray or hiding allows another close immediately after relaunch", (t: any) => {
@@ -274,6 +308,7 @@ test("closing to the tray or hiding allows another close immediately after relau
         });
 
         const event = {sender: window.webContents};
+        window.webContents.ipc.emit("siyuan-event", event);
         ipcMain.emit("siyuan-ready-to-show", event);
         assert.equal(window.shown, true);
         const close = () => window.emit("close", {preventDefault() {}});

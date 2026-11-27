@@ -35,6 +35,10 @@ export const requestSpellcheckContext = (x: number, y: number) => {
     if (pendingSpellcheckRequest) {
         window.clearTimeout(pendingSpellcheckRequest.timeout);
         pendingSpellcheckRequest.resolve(null);
+        pendingSpellcheckRequest = undefined;
+    }
+    if (!window.siyuan.config.editor.spellcheck) {
+        return Promise.resolve(undefined);
     }
     return new Promise<ISpellcheckContext | null | undefined>((resolve) => {
         const requestId = ++requestSequence;

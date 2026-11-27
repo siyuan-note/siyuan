@@ -7,7 +7,7 @@
 		"id": "20261122113000-ksfk668",
 		"title": "Редактор",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -278,7 +278,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-cofugyx",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -333,7 +333,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-xlmcdl6",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -347,7 +347,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -394,7 +394,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-gmse5nz",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -449,7 +449,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261122113000-3cn6f5o",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -506,7 +506,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-3qkfls3",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -538,7 +538,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", отредактируйте пользовательскую схему и выберите "
+					"Data": ", отредактируйте пользовательскую схему и выберите категорию "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -556,7 +556,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " категорию, чтобы скрыть в списке кандидатов "
+					"Data": ", чтобы скрыть в списке кандидатов "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -565,7 +565,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",

@@ -435,12 +435,8 @@ export const writeClipboardData = async (data: IClipboardWriteData, options: ICl
     const fallbackToPlainText = options.fallbackToPlainText !== false;
     try {
         if (isInAndroid()) {
-            if (textSiyuan) {
-                window.JSAndroid.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
-                return {status: "rich"};
-            }
-            if (textHTML) {
-                window.JSAndroid.writeHTMLClipboard(textPlain, textHTML);
+            if (textHTML || textSiyuan) {
+                window.JSAndroid.writeHTMLClipboard(textPlain, buildWebClipboardHTML(textHTML, textSiyuan));
                 return {status: "rich"};
             }
             window.JSAndroid.writeClipboard(textPlain);

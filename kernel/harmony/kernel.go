@@ -211,6 +211,11 @@ func DisableFeature(feature *C.char) {
 	util.DisableFeature(C.GoString(feature))
 }
 
+//export SetAIModelPolicy
+func SetAIModelPolicy(policy *C.char) {
+	util.SetAIModelPolicy(C.GoString(policy))
+}
+
 //export FilepathBase
 func FilepathBase(path *C.char) *C.char {
 	return C.CString(filepath.Base(C.GoString(path)))

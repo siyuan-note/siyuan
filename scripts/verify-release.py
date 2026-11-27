@@ -28,6 +28,13 @@ SIDECARS = (".blockmap", ".yml", ".yaml", ".release-baseline.json")
 KERNEL_NAMES = {"siyuan-kernel", "siyuan-kernel.exe", "libgojni.so", "libkernel.so"}
 VERSION = r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z.-]+)?"
 PACKAGE_VERSION = re.compile(r"^siyuan-(\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)(?:\.[0-9A-Za-z]+)*)?)(?=[-.])", re.I)
+WORKFLOW_ASSET_GROUPS = {
+    "siyuan-linux": ("-linux.AppImage", "-linux.tar.gz", "-linux.deb", "-linux.rpm"),
+    "siyuan-mac.dmg": ("-mac.dmg",),
+    "siyuan-mac-arm64.dmg": ("-mac-arm64.dmg",),
+    "siyuan-win.exe": ("-win.exe",),
+    "siyuan-android": (".apk",),
+}
 
 
 class VerificationError(Exception):
@@ -551,8 +558,53 @@ def verify_package(package, baselines=None, sevenzip=None, version=None):
                                 + "\n".join(errors[:30]))
 
 
+def collect_workflow_assets(source, destination, version):
+    if not version or not re.fullmatch(VERSION, version):
+        raise VerificationError("校验工作流产物需要有效的 --version")
+    for artifact, suffixes in WORKFLOW_ASSET_GROUPS.items():
+        for suffix in suffixes:
+            filename = f"siyuan-{version}{suffix}"
+            package = source / artifact / filename
+            if not package.is_file() or not package.stat().st_size:
+                raise VerificationError(f"安装包缺失或为空：{artifact}/{filename}")
+            shutil.copyfile(package, destination / filename)
+
+
 def verify(args):
     folder = (args.directory or desktop_folder()).resolve()
+    if getattr(args, "workflow_artifacts", False):
+        with tempfile.TemporaryDirectory(prefix="siyuan-workflow-assets-") as temporary:
+            destination = Path(temporary)
+            collect_workflow_assets(folder, destination, args.version)
+            return verify_directory(args, destination, folder)
+    return verify_directory(args, folder, folder)
+
+
+def verify_startup_results(directory, packages, version):
+    suffixes = {
+        "windows": "-win.exe",
+        "macos": "-mac-arm64.dmg",
+        "linux": "-linux.deb",
+    }
+    digests = {package["name"]: package["sha256"] for package in packages if package["status"] == "PASS"}
+    expected = {f"siyuan-{version}{suffix}" for group in WORKFLOW_ASSET_GROUPS.values() for suffix in group}
+    if digests.keys() != expected:
+        raise VerificationError(f"需要八个发布资产通过静态检查，缺少 {sorted(expected - digests.keys())}，"
+                                f"多出 {sorted(digests.keys() - expected)}")
+    for target, suffix in suffixes.items():
+        path = directory / f"startup-{target}" / f"{target}.json"
+        try:
+            result = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as error:
+            raise VerificationError(f"无法读取 {target} 的启动验收报告：{error}") from error
+        filename = f"siyuan-{version}{suffix}"
+        if not isinstance(result, dict) or result.get("status") != "PASS" or result.get("filename") != filename:
+            raise VerificationError(f"启动验收未通过或安装包名称不匹配：{filename}")
+        if result.get("sha256") != digests[filename]:
+            raise VerificationError(f"启动验收摘要与待发布文件不一致：{filename}")
+
+
+def verify_directory(args, folder, source):
     if not folder.is_dir():
         raise VerificationError(f"安装包目录不存在：{folder}")
     if args.report:
@@ -584,7 +636,7 @@ def verify(args):
         raise VerificationError(f"无效版本号：{version}")
     baselines = load_baselines(paths, version)
     print(f"预期发布版本：{version}；{'基准对比' if baselines else '直接检查安装包'}")
-    report = {"version": version, "directory": str(folder), "unknown": unknown, "packages": []}
+    report = {"version": version, "directory": str(source), "unknown": unknown, "packages": []}
     failed = bool(unknown)
     for name in unknown:
         print(f"[FAIL] 未识别文件或目录：{name}")
@@ -602,6 +654,14 @@ def verify(args):
             failed = True
             print(f"[FAIL] {package.name}：{error}")
         report["packages"].append(entry)
+    startup_results = getattr(args, "startup_results", None)
+    if startup_results and not failed:
+        try:
+            verify_startup_results(startup_results, report["packages"], version)
+        except VerificationError as error:
+            report["startup_error"] = str(error)
+            print(f"[FAIL] {error}")
+            failed = True
     if args.report:
         args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"校验完成：{len(packages)} 个安装包，{'未通过' if failed else '全部通过'}")
@@ -618,6 +678,8 @@ def main():
     check.add_argument("directory", nargs="?", type=Path)
     check.add_argument("--baseline", type=Path, action="append", help="可选，额外按可信基准比较完整摘要；通常无需使用")
     check.add_argument("--report", type=Path, help="写入 JSON 报告")
+    check.add_argument("--workflow-artifacts", action="store_true", help="检查工作流下载目录中完整的八个发布资产，需要指定 --version")
+    check.add_argument("--startup-results", type=Path, help="检查 Windows、macOS 和 Linux 启动验收报告的结果与安装包摘要")
     baseline = sub.add_parser("baseline", help="从独立可信构建产物生成基准")
     baseline.add_argument("--resources", type=Path, required=True, help="包含 stage、appearance、guide、changelogs 的目录")
     baseline.add_argument("--kernel", type=Path, required=True, help="本次构建的内核文件、内核目录或 kernel.aar")

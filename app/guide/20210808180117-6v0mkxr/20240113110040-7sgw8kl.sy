@@ -890,12 +890,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260317195658-3rqfzal",
-				"updated": "20260317195658"
+				"updated": "20261127094542"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Once the above steps are completed, SiYuan will send a notification every 45 seconds to help ensure it remains active in the background."
+					"Data": "If asset downloads on Android are set to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Download on demand"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", switch to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Download all"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and wait for the file to download. Once the file is on the device, fully close and reopen SiYuan. Once the above steps are completed, SiYuan will send a notification every 45 seconds to help ensure it remains active in the background."
 				}
 			]
 		},

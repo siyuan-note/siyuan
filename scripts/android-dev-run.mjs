@@ -310,8 +310,9 @@ if (!existsSync(apkDir)) {
   fail(`APK output directory not found: ${apkDir}. Run the Gradle build first without using --skip-gradle`);
 }
 let apk = null;
+const apkNamePattern = new RegExp(`^siyuan-.+-${flavor}-debug-.*\\.apk$`);
 for (const name of readdirSync(apkDir)) {
-  if (/^siyuan-.+-official-debug-.*\.apk$/.test(name)) {
+  if (apkNamePattern.test(name)) {
     const candidate = path.join(apkDir, name);
     if (!apk || statSync(candidate).mtimeMs > statSync(apk).mtimeMs) {
       apk = candidate;

@@ -23,6 +23,48 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestServeCustomEmojiUsesInertImageContent(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = testutil.PublicDataDir(t)
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+	directory := filepath.Join(util.DataDir, "emojis")
+	if err := os.MkdirAll(directory, 0755); err != nil {
+		t.Fatal(err)
+	}
+	fixtures := map[string]string{
+		"sample.SVG": `<svg xmlns="http://www.w3.org/2000/svg"><title>Sample</title><script type="application/json">{}</script></svg>`,
+		"notes.html": "<p>Notes</p>",
+	}
+	for name, contents := range fixtures {
+		if err := os.WriteFile(filepath.Join(directory, name), []byte(contents), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator) })
+	serveEmojis(engine)
+	for _, method := range []string{http.MethodGet, http.MethodHead} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(method, "/emojis/sample.SVG", nil))
+		if recorder.Code != http.StatusOK || recorder.Header().Get("X-Content-Type-Options") != "nosniff" ||
+			recorder.Header().Get("Content-Type") != "image/svg+xml" ||
+			!strings.HasPrefix(recorder.Header().Get("Content-Security-Policy"), "sandbox;") {
+			t.Fatalf("%s SVG response: %d, %v", method, recorder.Code, recorder.Header())
+		}
+		if method == http.MethodGet && (!strings.Contains(recorder.Body.String(), "<title>Sample</title>") ||
+			strings.Contains(recorder.Body.String(), "<script")) {
+			t.Fatalf("unexpected SVG response: %s", recorder.Body.String())
+		}
+	}
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/emojis/notes.html", nil))
+	if recorder.Code != http.StatusOK || recorder.Header().Get("Content-Type") != "application/octet-stream" ||
+		!strings.HasPrefix(recorder.Header().Get("Content-Disposition"), "attachment") {
+		t.Fatalf("unexpected non-image response: %d, %v", recorder.Code, recorder.Header())
+	}
+}
+
 func TestCleanStaticRelativePath(t *testing.T) {
 	if relativePath, ok := cleanStaticRelativePath("/package/index.js"); !ok ||
 		filepath.ToSlash(relativePath) != "package/index.js" {

@@ -87,6 +87,39 @@ describe("Harmony clipboard bridge", () => {
     });
 });
 
+describe("Android clipboard bridge", () => {
+    it("keeps internal block HTML in the HTML representation of a single item", async () => {
+        const data = {
+            textPlain: "Note",
+            textHTML: "<p>Note</p>",
+            textSiyuan: '<div data-type="NodeParagraph">Note</div>',
+        };
+        let plain = "";
+        let html = "";
+        const module = {exports: {}};
+        runInNewContext(source, {
+            module, exports: module.exports, console,
+            require: (id: string) => id === "./clipboardData" ? clipboardData : {},
+            window: {
+                siyuan: {config: {system: {container: "android"}}},
+                JSAndroid: {
+                    writeHTMLClipboard: (text: string, value: string) => { plain = text; html = value; },
+                    writeSiYuanHTMLClipboard: () => { throw new Error("Internal HTML must not be a separate clipboard item"); },
+                    readClipboard: () => plain,
+                    readHTMLClipboard: () => html,
+                },
+            },
+        });
+        const api = module.exports as typeof import("./compatibility");
+        assert.equal((await api.writeClipboardData(data)).status, "rich");
+        assert.equal(plain, data.textPlain);
+        const read = await api.readClipboard();
+        assert.equal(read.textPlain, data.textPlain);
+        assert.equal(read.textHTML, data.textHTML);
+        assert.equal(read.siyuanHTML, data.textSiyuan);
+    });
+});
+
 const createPlainTextHarness = (writeText: ((text: string) => Promise<void>) | undefined, execCommand: () => boolean) => {
     const textElement = {value: "", style: {}, focus() {}, select() {}};
     const attached = new Set<unknown>();

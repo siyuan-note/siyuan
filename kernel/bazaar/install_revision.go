@@ -16,6 +16,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -33,6 +34,8 @@ type PackageInstallOptions struct {
 	BeforeReplace             func() error
 	Context                   context.Context
 	Recheck                   func() error
+	ReplacementLock           sync.Locker
+	PrepareReplacement        func(previousPath, stagingPath string) error
 }
 
 func (options PackageInstallOptions) context() context.Context {

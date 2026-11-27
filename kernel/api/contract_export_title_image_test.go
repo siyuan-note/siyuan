@@ -73,6 +73,9 @@ func TestAPIContractExportTitleImage(t *testing.T) {
 	tree.Root.ID = docID
 	tree.Root.SetIALAttr("id", docID)
 	tree.Root.SetIALAttr("title", "Title images")
+	tree.Root.SetIALAttr("custom-preview", "preserved")
+	tree.Root.SetIALAttr("onmouseover", "discard")
+	tree.Root.SetIALAttr("OnFocus", "discard")
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering && n.IsBlock() && n.Type != ast.NodeDocument {
 			n.ID = ast.NewNodeID()
@@ -118,6 +121,14 @@ func TestAPIContractExportTitleImage(t *testing.T) {
 				var data apicontract.ExportPreviewHTMLData
 				if err := json.Unmarshal(raw, &data); err != nil || code != 0 {
 					t.Fatalf("preview failed: %d %s %s %v", code, message, raw, err)
+				}
+				if data.Attrs["custom-preview"] != "preserved" || data.Type != "NodeDocument" {
+					t.Fatalf("preview metadata missing: %s", raw)
+				}
+				for name := range data.Attrs {
+					if strings.HasPrefix(strings.ToLower(name), "on") {
+						t.Fatalf("unexpected preview attribute %q", name)
+					}
 				}
 				wantCover := 1
 				if hasCover && !entry.exclude {

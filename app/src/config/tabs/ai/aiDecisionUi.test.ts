@@ -371,7 +371,9 @@ test("decision switch and providers share search keywords while retaining the sw
     const definitions = new Map<string, any>();
     runInNewContext(code, {exports,
         window: {siyuan: {languages: new Proxy({}, {get: (_target, key) => String(key)})}},
-        require: () => new Proxy({}, {get: () => (): unknown[] => []})});
+        require: (path: string) => path === "../../../protyle/util/compatibility"
+            ? {isDisabledFeature: () => false}
+            : new Proxy({}, {get: () => (): unknown[] => []})});
     exports.registerAiTab({group: () => new Proxy({}, {get: (_target, method) => (id: string | {key: string}, spec: any) => {
         if (method === "switch") { definitions.set(String(id), spec); }
         if (method === "slot") { definitions.set((id as {key: string}).key, id); }

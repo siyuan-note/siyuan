@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20261122113000-lef3tmo",
-		"title": "подключение стороннего облачного хранилища",
+		"title": "Подключение стороннего облачного хранилища",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -333,7 +333,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-cm93qei",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -347,7 +347,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-f6257n7",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -388,7 +388,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " — здесь можно выбрать и настроить хранилище. На данный момент поддерживаются:"
+					"Data": " можно выбрать и настроить хранилище. На данный момент поддерживаются:"
 				}
 			]
 		},
@@ -398,7 +398,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-4nyexmi",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -410,7 +410,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-nwyoghc",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -418,7 +418,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-ql0b3l3",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -438,7 +438,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、"
+									"Data": ", "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -448,7 +448,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、"
+									"Data": ", "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -543,7 +543,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-o61ze2j",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -558,7 +558,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

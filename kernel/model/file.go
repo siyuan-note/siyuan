@@ -70,7 +70,15 @@ type File struct {
 	FlashcardCount    int `json:"flashcardCount"`
 }
 
-func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret *File) {
+func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) *File {
+	ret := newDocTreeFile(fileInfo, ial)
+	if ret != nil {
+		box.hydrateDocTreeFile(ret)
+	}
+	return ret
+}
+
+func newDocTreeFile(fileInfo *FileInfo, ial map[string]string) (ret *File) {
 	// 文档路径以根块 ID 命名，使用路径 ID 避免异常文档属性导致越界或返回错误的文档 ID。
 	pathID := util.GetTreeID(fileInfo.path)
 	if !ast.IsNodeIDPattern(pathID) {
@@ -86,13 +94,6 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret.Size = uint64(fileInfo.size)
 	ret.Name = ial["title"]
 	ret.TitleEmpty = ial[NodeAttrTitleEmpty] == "true"
-	if metadata, err := treenode.GetDocumentMetadata(box.ID, pathID); err == nil {
-		ret.TitleFormat = metadata.Title.Format
-		ret.TitleRevision = metadata.SourceRevision
-		if metadata.Title.Format == "plain" {
-			ret.TitleRevision = treenode.DocumentRevision(metadata.Title)
-		}
-	}
 	if icon, ok := util.FilterIconValue(ial["icon"]); ok {
 		ret.Icon = icon
 	}
@@ -104,8 +105,6 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret.ChildrenSortMode = docSortModeFromIAL(ial)
 	t, _ := time.ParseInLocation("20060102150405", ret.ID[:14], time.Local)
 	ret.CTime = t.Unix()
-	ret.HCtime = t.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(t, Conf.Lang)
-	ret.HSize = humanize.BytesCustomCeil(ret.Size, 2)
 
 	mTime := t
 	if updated := ial["updated"]; "" != updated {
@@ -115,8 +114,27 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	}
 
 	ret.Mtime = mTime.Unix()
-	ret.HMtime = mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang)
 	return
+}
+
+func (box *Box) hydrateDocTreeFile(file *File) {
+	if metadata, err := treenode.GetDocumentMetadata(box.ID, file.ID); err == nil {
+		file.TitleFormat = metadata.Title.Format
+		file.TitleRevision = metadata.SourceRevision
+		if metadata.Title.Format == "plain" {
+			file.TitleRevision = treenode.DocumentRevision(metadata.Title)
+		}
+	}
+	created, updated := time.Unix(file.CTime, 0), time.Unix(file.Mtime, 0)
+	if zeroTime := (time.Time{}); file.CTime == zeroTime.Unix() {
+		created = zeroTime
+		if file.Mtime == file.CTime {
+			updated = zeroTime
+		}
+	}
+	file.HCtime = created.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(created, Conf.Lang)
+	file.HMtime = updated.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(updated, Conf.Lang)
+	file.HSize = humanize.BytesCustomCeil(file.Size, 2)
 }
 
 const DocSortModeAttr = "custom-sy-subdoc-sort-mode"
@@ -560,7 +578,13 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	}
 
 	start = time.Now()
-	boxLocalPath := filepath.Join(util.DataDir, box.ID)
+	sortBySubDocCount := sortMode == util.SortModeSubDocCountASC || sortMode == util.SortModeSubDocCountDESC
+	directories := make(map[string]struct{})
+	for _, file := range files {
+		if file.isdir {
+			directories[strings.TrimSuffix(file.path, "/")] = struct{}{}
+		}
+	}
 	var docs []*File
 	for _, file := range files {
 		if "/" == listPath && box.ID == util.GetTreeID(file.path) {
@@ -581,7 +605,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 					continue
 				}
 
-				doc := box.docFromFileInfo(parentDocFile, ial)
+				doc := newDocTreeFile(parentDocFile, ial)
 				if nil == doc {
 					continue
 				}
@@ -589,7 +613,9 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				if specTooNew && "" == doc.Name {
 					doc.TitleEmpty = true
 				}
-				doc.SubFileCount, _ = visibleDocCount(box.ID, file.path, box.docIAL, nil)
+				if sortBySubDocCount {
+					doc.SubFileCount, _ = visibleDocCount(box.ID, file.path, box.docIAL, nil)
+				}
 
 				if flashcard {
 					rootID := util.GetTreeID(parentDocPath)
@@ -613,8 +639,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 			}
 		}
 
-		subFolder := filepath.Join(boxLocalPath, strings.TrimSuffix(file.path, ".sy"))
-		if gulu.File.IsDir(subFolder) {
+		if _, hasSubFolder := directories[strings.TrimSuffix(file.path, ".sy")]; hasSubFolder {
 			continue
 		}
 
@@ -623,7 +648,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				continue
 			}
 
-			doc := box.docFromFileInfo(file, ial)
+			doc := newDocTreeFile(file, ial)
 			if nil == doc {
 				continue
 			}
@@ -651,34 +676,48 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 		logging.LogWarnf("list doc tree [%s] build docs [%d] elapsed [%dms]", listPath, len(docs), elapsed)
 	}
 
-	start = time.Now()
-	refCount := sql.QueryRootBlockRefCount()
-	for _, doc := range docs {
-		if count := refCount[doc.ID]; 0 < count {
-			doc.Count = count
-		}
-	}
-	elapsed = time.Since(start).Milliseconds()
-	if 500 < elapsed {
-		logging.LogWarnf("query root block ref count elapsed [%dms]", elapsed)
+	sortByRefCount := sortMode == util.SortModeRefCountASC || sortMode == util.SortModeRefCountDESC
+	if sortByRefCount {
+		fillDocTreeRefCounts(docs)
 	}
 
 	start = time.Now()
 	box.fillSort(&docs)
 	sortDocTreeFiles(docs, sortMode)
-	ret = append(ret, docs...)
-
-	totals = len(ret)
-	if maxListCount < len(ret) {
-		ret = ret[:maxListCount]
-	}
-	ret = ret[:]
-
+	totals = len(docs)
+	ret = append(ret, docs[:min(maxListCount, totals)]...)
 	elapsed = time.Since(start).Milliseconds()
 	if 200 < elapsed {
 		logging.LogInfof("sort docs elapsed [%dms]", elapsed)
 	}
+	if !sortByRefCount {
+		fillDocTreeRefCounts(ret)
+	}
+	for _, doc := range ret {
+		box.hydrateDocTreeFile(doc)
+		if !sortBySubDocCount {
+			dir := strings.TrimSuffix(doc.Path, ".sy")
+			if _, hasChildren := directories[dir]; hasChildren {
+				doc.SubFileCount, _ = visibleDocCount(box.ID, dir+"/", box.docIAL, nil)
+			}
+		}
+	}
 	return
+}
+
+func fillDocTreeRefCounts(docs []*File) {
+	start := time.Now()
+	ids := make([]string, 0, len(docs))
+	for _, doc := range docs {
+		ids = append(ids, doc.ID)
+	}
+	refCount := sql.QueryRootBlockRefCounts(ids)
+	for _, doc := range docs {
+		doc.Count = refCount[doc.ID]
+	}
+	if elapsed := time.Since(start).Milliseconds(); 500 < elapsed {
+		logging.LogWarnf("query root block ref count elapsed [%dms]", elapsed)
+	}
 }
 
 func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight, includeDocInfo bool, publishDocAccess, publishRefAccess func(string, string) bool) (
@@ -1671,9 +1710,19 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 	return
 }
 
-func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
+func GetHPathsByPaths(paths []string, allowed func(*treenode.BlockTree) bool) (hPaths []string, err error) {
+	var requested map[string]bool
+	if allowed != nil {
+		requested = make(map[string]bool, len(paths))
+		for _, p := range paths {
+			requested[p] = true
+		}
+	}
 	pathsBoxes := getBoxesByPaths(paths)
 	for p, box := range pathsBoxes {
+		if requested != nil && !requested[p] {
+			continue
+		}
 		if nil == box {
 			logging.LogWarnf("box not found by path [%s]", p)
 			continue
@@ -1682,6 +1731,9 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 		bt := treenode.GetBlockTreeRootByPath(box.ID, p)
 		if nil == bt {
 			logging.LogWarnf("block tree not found by path [%s]", p)
+			continue
+		}
+		if allowed != nil && !allowed(bt) {
 			continue
 		}
 
@@ -2817,11 +2869,6 @@ func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
 	PerformTransactions(&[]*Transaction{transaction})
 	transaction.WaitForCommit()
 	return
-}
-
-func normalizeDocTitle(title string) string {
-	title = strings.ReplaceAll(title, "/", "")
-	return normalizeTitleText(title)
 }
 
 func normalizeTitleText(title string) string {

@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     countDocVersionDifferences,
+    findPreviousHistoryTime,
     type IDocVersionDifference,
     type IDocVersionRef,
     matchesDocVersionDiffFilter,
@@ -49,5 +50,30 @@ describe("document version difference filters", () => {
             removed: 1,
             modified: 3,
         });
+    });
+});
+
+describe("findPreviousHistoryTime", () => {
+    const pages = [["90", "80"], ["70", "60"], ["50", "40"], ["30", "20"], ["10"]];
+    const readPage = async (page: number) => ({histories: pages[page - 1], pageCount: pages.length});
+
+    it("chooses the nearest older record across pages or filtered-out times", async () => {
+        for (const [selected, older] of [["95", "90"], ["90", "80"], ["80", "70"], ["65", "60"],
+            ["55", "50"], ["40", "30"], ["20", "10"]]) {
+            assert.equal(await findPreviousHistoryTime(selected, readPage, () => true), older);
+        }
+    });
+
+    it("does not invent an older version for the oldest time or an empty history", async () => {
+        assert.equal(await findPreviousHistoryTime("10", readPage, () => true), undefined);
+        assert.equal(await findPreviousHistoryTime("10", async () => ({histories: [], pageCount: 0}), () => true), undefined);
+    });
+
+    it("ignores a response after another history selection supersedes it", async () => {
+        let current = true;
+        assert.equal(await findPreviousHistoryTime("90", async (page) => {
+            current = false;
+            return readPage(page);
+        }, () => current), undefined);
     });
 });

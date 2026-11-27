@@ -91,23 +91,7 @@ const syncDocVersionScroll = (source: HTMLElement, target: HTMLElement) => {
     target.scrollTop = sourceMax > 0 ? source.scrollTop / sourceMax * targetMax : 0;
 };
 
-export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef: IDocVersionRef) => {
-    let [leftRef, rightRef] = orderDocVersionRefs(firstRef, secondRef);
-    let editors: Protyle[] = [];
-    let diff: IDocVersionDiff;
-    let differenceIndex = -1;
-    let filter: DocVersionDiffFilter = "all";
-    let visibleDifferences: IDocVersionDifference[] = [];
-    let requestId = 0;
-    let isDestroyed = false;
-    let isSyncingScroll = false;
-    let removeScrollListeners = () => {
-        // 初次渲染前没有需要移除的监听器。
-    };
-
-    const dialog = new AdaptiveDialog({
-        title: window.siyuan.languages.compare,
-        content: `<div class="history__doc-compare fn__flex-column">
+const diffHTML = (embedded = false) => `<div class="history__doc-compare fn__flex-column">
     <div class="history__action">
         <div class="block__icons">
             <span class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="diffPrevious" aria-label="${window.siyuan.languages.previousDifference}">
@@ -119,7 +103,11 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
             <span class="history__diff-count ft__on-surface">0/0</span>
             <div class="history__compare-legend fn__none"></div>
             <span class="fn__flex-1"></span>
-            <span class="block__icon block__icon--show b3-tooltips b3-tooltips__w" data-type="diffSwap" aria-label="${window.siyuan.languages.switchDirect}">
+            ${embedded ? `<label class="history__compare-collapse fn__none">
+                <input class="b3-switch" type="checkbox" data-type="diffCollapse">
+                ${window.siyuan.languages.historyCollapseUnchanged}
+            </label>` : ""}
+            <span class="block__icon block__icon--show b3-tooltips b3-tooltips__w${embedded ? " fn__none" : ""}" data-type="diffSwap" aria-label="${window.siyuan.languages.switchDirect}">
                 <svg><use xlink:href="#iconScrollHoriz"></use></svg>
             </span>
         </div>
@@ -139,21 +127,26 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
             </div>
         </div>
     </div>
-</div>`,
-        width: isMobile() ? "100vw" : "90vw",
-        height: isMobile() ? "100dvh" : "80vh",
-        containerClassName: "b3-dialog__container--theme history__doc-compare-dialog",
-        destroyCallback() {
-            isDestroyed = true;
-            requestId++;
-            removeScrollListeners();
-            editors.forEach((editor) => editor.destroy());
-            editors = [];
-        }
-    });
-    dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORYCOMPARE);
+</div>`;
 
-    const rootElement = dialog.element.querySelector(".history__doc-compare") as HTMLElement;
+export const mountDocVersionDiff = (app: App, host: HTMLElement, embedded = false) => {
+    let leftRef: IDocVersionRef;
+    let rightRef: IDocVersionRef;
+    let editors: Protyle[] = [];
+    let diff: IDocVersionDiff;
+    let differenceIndex = -1;
+    let filter: DocVersionDiffFilter = "all";
+    let visibleDifferences: IDocVersionDifference[] = [];
+    let requestId = 0;
+    let isDestroyed = false;
+    let isSyncingScroll = false;
+    let removeScrollListeners = () => {
+        // 初次渲染前没有需要移除的监听器。
+    };
+
+    host.innerHTML = diffHTML(embedded);
+    const rootElement = host.firstElementChild as HTMLElement;
+    const collapseElement = rootElement.querySelector<HTMLInputElement>('[data-type="diffCollapse"]');
     const editorsElement = rootElement.querySelector(".history__compare-editors") as HTMLElement;
     const countElement = rootElement.querySelector(".history__diff-count") as HTMLElement;
     const legendElement = rootElement.querySelector(".history__compare-legend") as HTMLElement;
@@ -184,16 +177,65 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
             `<button class="b3-button b3-button--outline" data-type="diffRetry">${window.siyuan.languages.retry}</button>` : ""}`;
     };
 
-    const renderLoading = () => {
+    const clearCollapse = () => {
+        rootElement.querySelectorAll(".history__compare-fold").forEach((item) => item.remove());
+        rootElement.querySelectorAll(".history__compare-folded").forEach((item) => item.classList.remove("history__compare-folded"));
+    };
+
+    const applyCollapse = () => {
+        clearCollapse();
+        if (!collapseElement?.checked || !diff || diff.large || diff.fallback) {
+            return;
+        }
+        const changed = new Set(diff.differences.map((item) => item.id));
+        editors.forEach((editor) => {
+            const blocks = Array.from(editor.protyle.wysiwyg.element.children);
+            let group: Element[] = [];
+            const fold = () => {
+                if (!group.length) {
+                    return;
+                }
+                const toggle = document.createElement("button");
+                toggle.type = "button";
+                toggle.className = "b3-button b3-button--text history__compare-fold";
+                toggle.setAttribute("contenteditable", "false");
+                toggle.textContent = `› ${window.siyuan.languages.historyExpandUnchanged} (${group.length})`;
+                const folded = group;
+                toggle.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    folded.forEach((item) => item.classList.remove("history__compare-folded"));
+                    toggle.remove();
+                });
+                group[0].before(toggle);
+                group.forEach((item) => item.classList.add("history__compare-folded"));
+                group = [];
+            };
+            blocks.forEach((block) => {
+                const id = block.getAttribute("data-node-id");
+                if (!id || changed.has(id) || block.hasAttribute("data-history-diff") ||
+                    Array.from(block.querySelectorAll("[data-node-id], [data-history-diff]")).some((item) =>
+                        item.hasAttribute("data-history-diff") || changed.has(item.getAttribute("data-node-id")))) {
+                    fold();
+                } else {
+                    group.push(block);
+                }
+            });
+            fold();
+        });
+    };
+
+    const reset = (message = "") => {
         destroyEditors();
         diff = undefined;
         visibleDifferences = [];
         differenceIndex = -1;
         renderCount();
         legendElement.classList.add("fn__none");
-        setMessage();
+        setMessage(message);
+        collapseElement?.parentElement.classList.add("fn__none");
+        rootElement.querySelector(".history__compare-scroll").classList.toggle("fn__none", !!message || !leftRef);
         panels.forEach((panel, index) => {
-            panel.querySelector(".history__compare-label").textContent = index === 0 ? leftRef.label : rightRef.label;
+            panel.querySelector(".history__compare-label").textContent = (index === 0 ? leftRef : rightRef)?.label || "";
             panel.querySelector(".protyle-title__input").textContent = "";
             panel.querySelector(".history__compare-content").innerHTML =
                 '<div class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></div>';
@@ -352,6 +394,8 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
             renderCount();
             return;
         }
+        collapseElement?.parentElement.classList.remove("fn__none");
+        applyCollapse();
         setupScrollSync();
         renderFilters();
         applyFilter();
@@ -360,7 +404,7 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
 
     const loadDiff = async () => {
         const currentRequestId = ++requestId;
-        renderLoading();
+        reset();
         try {
             const response = await fetchSyncPost("/api/history/diffDocVersions", {
                 left: {
@@ -420,18 +464,46 @@ export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef
             loadDiff();
         }
     });
-    dialog.element.addEventListener("historyKeydown", (event: CustomEvent<string>) => {
-        let handled = false;
-        if (event.detail === "ArrowUp") {
-            handled = focusDifference(-1);
-        } else if (event.detail === "ArrowDown") {
-            handled = focusDifference(1);
+    collapseElement?.addEventListener("change", applyCollapse);
+    return {
+        focusDifference,
+        clear(message = "") {
+            requestId++;
+            leftRef = rightRef = undefined;
+            reset(message);
+        },
+        compare(first: IDocVersionRef, second: IDocVersionRef) {
+            [leftRef, rightRef] = orderDocVersionRefs(first, second);
+            void loadDiff();
+        },
+        destroy() {
+            isDestroyed = true;
+            requestId++;
+            destroyEditors();
+            rootElement.remove();
         }
-        if (handled) {
+    };
+};
+
+export const showDocVersionDiff = (app: App, firstRef: IDocVersionRef, secondRef: IDocVersionRef) => {
+    const dialog = new AdaptiveDialog({
+        title: window.siyuan.languages.compare,
+        content: '<div class="history__doc-compare"></div>',
+        width: isMobile() ? "100vw" : "90vw",
+        height: isMobile() ? "100dvh" : "80vh",
+        containerClassName: "b3-dialog__container--theme history__doc-compare-dialog",
+        destroyCallback() {
+            view?.destroy();
+        }
+    });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORYCOMPARE);
+    const view = mountDocVersionDiff(app, dialog.element.querySelector(".history__doc-compare"));
+    dialog.element.addEventListener("historyKeydown", (event: CustomEvent<string>) => {
+        const step = event.detail === "ArrowUp" ? -1 : event.detail === "ArrowDown" ? 1 : 0;
+        if (step && view.focusDifference(step)) {
             event.preventDefault();
         }
     });
-
-    loadDiff();
+    view.compare(firstRef, secondRef);
     (document.activeElement as HTMLElement)?.blur();
 };

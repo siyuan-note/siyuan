@@ -2,6 +2,8 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 import {test} from "node:test";
+import {setImmediate as nextTurn} from "node:timers/promises";
+import {findPreviousHistoryTime, type IDocVersionRef} from "./docDiffCore";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
@@ -84,7 +86,7 @@ class TestElement {
     public nodes = new Map<string, TestElement>();
     public row = false;
     public repoRow: TestElement;
-    public classList = {add: noop, remove: noop, contains: (name: string) => this.row && name === "b3-list-item"};
+    public classList = {add: noop, remove: noop, toggle: noop, contains: (name: string) => this.row && name === "b3-list-item"};
 
     querySelector(selector: string): TestElement {
         if (!this.nodes.has(selector)) {
@@ -94,6 +96,8 @@ class TestElement {
     }
 
     querySelectorAll(): TestElement[] { return []; }
+    hasAttribute(name: string) { return this.attributes.has(name); }
+    contains() { return true; }
     getAttribute(name: string) { return this.attributes.get(name) ?? null; }
     setAttribute(name: string, value: string) { this.attributes.set(name, value); }
     removeAttribute(name: string) { this.attributes.delete(name); }
@@ -110,49 +114,60 @@ const createHistory = (mobile: boolean, readonly: boolean) => {
     next.nextElementSibling = new TestElement();
     next.nextElementSibling.nextElementSibling = new TestElement();
     file.querySelector(".b3-select").setAttribute("value", "all");
-    const requests: {url: string, callback: (response: unknown) => void}[] = [];
+    const requests: {url: string, body: unknown, callback: (response: unknown) => void}[] = [];
     let confirmations = 0;
     let repoRollbacks = 0;
     let comparisons = 0;
+    const diffPairs: IDocVersionRef[][] = [];
+    const diffMessages: string[] = [];
     const snapshots = {reset: noop, load: noop, select: noop};
     const module = loadModule("history/doc.ts", mobile, {
         "../dialog/adaptiveDialog": {AdaptiveDialog: class {element = root;}},
         "../dialog/confirmDialog": {confirmDialog: () => { confirmations++; }},
         "../protyle": {Protyle: class {protyle = {options: {history: {}}};}},
         "../protyle/util/onGet": {disabledProtyle: noop, onGet: noop},
-        "../util/fetch": {fetchPost: (url: string, _body: unknown, callback: (response: unknown) => void) =>
-            requests.push({url, callback})},
+        "../util/fetch": {
+            fetchPost: (url: string, body: unknown, callback: (response: unknown) => void) => requests.push({url, body, callback}),
+            fetchSyncPost: (url: string, body: unknown) => new Promise((callback) => requests.push({url, body, callback})),
+        },
         "../util/functions": {isMobile: () => mobile},
         "../util/escape": {escapeHtml: String},
         "../constants": {Constants: {LOCAL_HISTORY: "history"}},
         "./docSnapshots": {getDocHistorySnapshots: () => snapshots, DocHistorySnapshots: class {select = noop;}},
-        "./docDiff": {showDocVersionDiff: () => { comparisons++; }},
+        "./docDiff": {
+            showDocVersionDiff: () => { comparisons++; },
+            mountDocVersionDiff: () => ({
+                clear: (message?: string) => { if (message) { diffMessages.push(message); } },
+                compare: (...pair: IDocVersionRef[]) => diffPairs.push(pair),
+            }),
+        },
+        "./docDiffCore": {findPreviousHistoryTime},
         "./repoFile": {rollbackRepoFile: () => { repoRollbacks++; }},
         "./notebookDialogs": {trackNotebookHistoryDialog: noop},
         "./resizeSide": {resizeSide: noop},
         dayjs: () => ({format: () => "date"}),
     }, {window: {siyuan: {config: {readonly: false}, storage: {history: {}}, languages: {
-        pageCountAndHistoryCount: "${x} ${y}", rollbackConfirm: "${name} ${time}"}}},
-        CustomEvent: class {constructor(public type: string) {}}}) as typeof import("./doc");
+        pageCountAndHistoryCount: "${x} ${y}", rollbackConfirm: "${name} ${time}", historyNoPrevious: "No earlier version"}}},
+        Event, CustomEvent: class {constructor(public type: string) {}}}) as typeof import("./doc");
     module.openDocHistory({app: {} as Parameters<typeof module.openDocHistory>[0]["app"],
         id: "doc", notebookId: "notebook", pathString: "Document", readonly});
     requests.shift().callback({data: {histories: ["1"], pageCount: 1, totalCount: 1}});
-    const click = (type: string, row = false) => {
+    const click = (type: string, row = false, time = "1") => {
         const target = new TestElement();
         target.row = row;
         target.setAttribute("data-type", type);
-        target.setAttribute("data-created", "1");
+        target.setAttribute("data-created", time);
         target.parentElement = new TestElement();
         target.parentElement.setAttribute("data-created", "1");
         root.listeners.get("click")({target, stopPropagation: noop, preventDefault: noop});
         return target;
     };
-    return {file, requests, click, root, confirmations: () => confirmations,
+    return {file, requests, click, root, diffPairs, diffMessages, confirmations: () => confirmations,
         repoRollbacks: () => repoRollbacks, comparisons: () => comparisons};
 };
 
 for (const mobile of [false, true]) {
-    test(`viewing locked history preserves preview and comparison while blocking both rollback paths (${mobile ? "mobile" : "desktop"})`, () => {
+    test(`viewing locked history preserves preview and comparison while blocking both rollback paths (${mobile ? "mobile" : "desktop"})`, async () => {
         const view = createHistory(mobile, true);
         const html = view.file.querySelector(".b3-list--background").innerHTML;
         assert.ok(!html.includes('data-type="rollback"'));
@@ -169,10 +184,12 @@ for (const mobile of [false, true]) {
         view.click("", true);
         const history = view.requests.shift();
         assert.equal(history.url, "/api/history/getHistoryItems");
-        history.callback({data: {items: [{path: "history/doc.sy", title: "Document"}]}});
+        history.callback({code: 0, data: {items: [{path: "history/doc.sy", title: "Document"}]}});
+        await nextTurn();
         const preview = view.requests.shift();
         assert.equal(preview.url, "/api/history/getDocHistoryContent");
-        preview.callback({data: {content: "Historical content", isLargeDoc: true}});
+        preview.callback({code: 0, data: {content: "Historical content", isLargeDoc: true}});
+        await nextTurn();
         assert.equal((view.file.querySelector('.history__text[data-type="mdPanel"]') as TestElement & {value: string}).value,
             "Historical content");
         view.click("selectVersion");
@@ -204,4 +221,51 @@ test("snapshot file list permits viewing and comparison without rollback", () =>
     assert.ok(!list.innerHTML.includes('data-type="rollback"'));
     module.renderRepoFileList(files, list, false, true);
     assert.ok(list.innerHTML.includes('data-type="rollback"'));
+});
+
+test("inline history diff uses the preceding unfiltered time without opening manual comparison", async () => {
+    const view = createHistory(false, false);
+    view.click("historyPreviewDiff");
+    view.click("", true, "50");
+    const selected = view.requests.shift();
+    selected.callback({code: 0, data: {items: [{path: "new.sy"}]}});
+    await nextTurn();
+    const olderTimes = view.requests.shift();
+    assert.equal(olderTimes.url, "/api/history/searchHistory");
+    assert.equal((olderTimes.body as {op: string}).op, "all");
+    olderTimes.callback({code: 0, data: {histories: ["60", "50", "40"], pageCount: 1}});
+    await nextTurn();
+    const older = view.requests.shift();
+    assert.equal((older.body as {created: string}).created, "40");
+    older.callback({code: 0, data: {items: [{path: "old.sy"}]}});
+    await nextTurn();
+    assert.equal(view.diffPairs.length, 1);
+    assert.equal(view.diffPairs[0][0].path, "old.sy");
+    assert.equal(view.diffPairs[0][1].path, "new.sy");
+    assert.equal(view.comparisons(), 0);
+
+    view.click("", true, "10");
+    view.requests.shift().callback({code: 0, data: {items: [{path: "oldest.sy"}]}});
+    await nextTurn();
+    view.requests.shift().callback({code: 0, data: {histories: ["50", "40", "10"], pageCount: 1}});
+    await nextTurn();
+    assert.deepEqual(view.diffMessages, ["No earlier version"]);
+    assert.equal(view.diffPairs.length, 1);
+});
+
+test("switching to original invalidates an in-flight difference request", async () => {
+    const view = createHistory(false, false);
+    view.click("historyPreviewDiff");
+    view.click("", true, "50");
+    const stale = view.requests.shift();
+    view.click("historyPreviewOriginal");
+    view.requests.shift().callback({code: 0, data: {items: [{path: "selected.sy", title: "Original"}]}});
+    await nextTurn();
+    const original = view.requests.shift();
+    assert.equal(original.url, "/api/history/getDocHistoryContent");
+    original.callback({code: 0, data: {content: "Original", isLargeDoc: true}});
+    stale.callback({code: 0, data: {items: [{path: "stale.sy"}]}});
+    await nextTurn();
+    assert.equal(view.diffPairs.length, 0);
+    assert.equal(view.requests.length, 0);
 });

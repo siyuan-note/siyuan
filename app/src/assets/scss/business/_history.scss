@@ -644,6 +644,50 @@
     }
   }
 
+  &__file-preview {
+    min-width: 0;
+
+    [data-type^="historyPreview"][aria-pressed="true"] {
+      background-color: var(--b3-theme-primary-lightest);
+      color: var(--b3-theme-primary);
+    }
+  }
+
+  &__file-diff {
+    min-height: 0;
+
+    .history__compare-editors {
+      min-width: 440px;
+    }
+
+    .history__compare-panel {
+      min-width: 220px;
+    }
+
+    .block__icons {
+      flex-wrap: wrap;
+    }
+  }
+
+  &__compare-collapse {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 8px;
+    white-space: nowrap;
+  }
+
+  &__compare-fold.b3-button {
+    display: block;
+    margin: 4px auto;
+    white-space: normal;
+    color: var(--b3-theme-on-surface);
+  }
+
+  &__compare-folded {
+    display: none;
+  }
+
   &__doc-compare {
     height: 100%;
     min-height: 0;

@@ -48,6 +48,9 @@ const fixture = (count = 1) => {
         hasClosestByClassName: () => false,
         deleteDocTreeItems: (selected: typeof items) => calls.push(["delete", selected]),
         openFileById: (options: {id: string}) => calls.push(["open", options.id]),
+        openCardByScope: (_app: object, ...scope: unknown[]) => calls.push(["card", ...scope]),
+        getDisplayName: (name: string) => name,
+        getNotebookName: (id: string) => `Notebook ${id}`,
         execByCommand: (options: {command: string, fileLiElements: Element[]}) => calls.push(["command", options]),
     }) as (_app: object, event: KeyboardEvent) => boolean;
     return {
@@ -86,4 +89,17 @@ test("virtual tree native shortcuts capture logical selection without selection 
     const options = f.calls[0][1] as {command: string, fileLiElements: Element[]};
     assert.equal(options.command, "move");
     assert.equal(options.fileLiElements.length, 0);
+});
+
+test("virtual tree flashcard shortcuts open v2 scopes from logical document and notebook metadata", () => {
+    const document = fixture(10000);
+    document.shortcut("spaceRepetition");
+    assert.equal(document.press("r"), true);
+    assert.deepEqual(document.calls, [["card", "doc", "0", "0", true]]);
+
+    const notebook = fixture();
+    notebook.items[0].kind = "notebook";
+    notebook.shortcut("spaceRepetition");
+    assert.equal(notebook.press("r"), true);
+    assert.deepEqual(notebook.calls, [["card", "notebook", "box", "Notebook box", true]]);
 });

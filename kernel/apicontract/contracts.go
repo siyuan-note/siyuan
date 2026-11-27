@@ -82,6 +82,15 @@ type ResponseOptions struct {
 
 var definitions []Definition
 
+var CreateQuickFlashcardSources = define[CreateQuickFlashcardSourcesRequest, QuickFlashcardSourcesData](
+	"createQuickFlashcardSources", "/api/flashcard/createQuickSources", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+var SetFlashcardEditLater = define[SetFlashcardEditLaterRequest, FlashcardEditLaterData](
+	"setFlashcardEditLater", "/api/flashcard/setCardEditLater", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+
+var QueryFlashcards = define[QueryFlashcardsRequest, QueryFlashcardsData](
+	"queryFlashcards", "/api/flashcard/queryCards", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
 // MCP OAuth 协议入口返回标准 OAuth JSON 或授权页面，不使用内核结果信封。
 var MCPOAuthResource = define[EmptyRequest, BinaryContent]("mcpOAuthResource", "/.well-known/oauth-protected-resource/mcp", PublicAccess, NoBody, mcpOAuthContentOptions(), "GET")
 var MCPOAuthResourceRoot = define[EmptyRequest, BinaryContent]("mcpOAuthResourceRoot", "/.well-known/oauth-protected-resource", PublicAccess, NoBody, mcpOAuthContentOptions(), "GET")
@@ -2101,6 +2110,122 @@ var ClearHistory = define[TransactionClearHistoryRequest, Null]("clearHistory", 
 var BroadcastWebSocket = define[EmptyRequest, Null]("broadcast", "/ws/broadcast", AuthenticatedAccess|AdminAccess, NoBody, RawWebSocketOptions(), "GET")
 var BroadcastSubscribe = define[EmptyRequest, Null]("broadcastSubscribe", "/es/broadcast/subscribe", AuthenticatedAccess|AdminAccess, NoBody, RawSSEOptions(), "GET")
 
+var AnkiConnect = define[AnkiConnectRequest, AnkiConnectResponse]("ankiConnect", "/api/flashcard/ankiConnect", PublicAccess, JSONBody, ResponseOptions{Output: DirectJSONOutput}, "POST")
+
+// ActivateFlashcardMigration 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ActivateFlashcardMigration = define[FlashcardV2ActivateFlashcardMigrationRequest, FlashcardV2LegacyActivationResult]("activateFlashcardMigration", "/api/flashcard/activateMigration", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// CreateAdvancedFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var CreateAdvancedFlashcardSource = define[FlashcardV2AdvancedSourceRequest, FlashcardV2AdvancedSourceResult]("createAdvancedFlashcardSource", "/api/flashcard/createAdvancedSource", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// CreateBasicFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var CreateBasicFlashcardSource = define[FlashcardV2BasicSourceRequest, FlashcardV2BasicSourceResult]("createBasicFlashcardSource", "/api/flashcard/createBasicSource", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// DeleteInvalidFlashcardSources 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var DeleteInvalidFlashcardSources = define[FlashcardV2DeleteInvalidSourcesRequest, FlashcardV2DeleteInvalidSourcesResult]("deleteInvalidFlashcardSources", "/api/flashcard/deleteInvalidSources", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// DeleteFlashcardReviewSet 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var DeleteFlashcardReviewSet = define[FlashcardV2DeleteFlashcardReviewSetRequest, FlashcardV2EntityMutationResult]("deleteFlashcardReviewSet", "/api/flashcard/deleteReviewSet", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// FinishFlashcardSession 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var FinishFlashcardSession = define[FlashcardV2FinishSessionRequest, FlashcardV2StudySession]("finishFlashcardSession", "/api/flashcard/finishSession", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardHistory 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardHistory = define[FlashcardV2GetFlashcardHistoryRequest, FlashcardV2HistoryData]("getFlashcardHistory", "/api/flashcard/getCardHistory", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardEntity 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardEntity = define[FlashcardV2GetFlashcardEntityRequest, FlashcardV2EntityData]("getFlashcardEntity", "/api/flashcard/getEntity", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardMigrationStatus 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardMigrationStatus = define[EmptyRequest, FlashcardV2LegacyMigrationStatus]("getFlashcardMigrationStatus", "/api/flashcard/getMigrationStatus", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// GetFlashcardRenderModel 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardRenderModel = define[FlashcardV2GetFlashcardRenderModelRequest, FlashcardV2CardRenderModel]("getFlashcardRenderModel", "/api/flashcard/getRenderModel", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardSessionQueue 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardSessionQueue = define[FlashcardV2GetFlashcardSessionQueueRequest, FlashcardV2QueueData]("getFlashcardSessionQueue", "/api/flashcard/getSessionQueue", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardSourceHistory 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardSourceHistory = define[FlashcardV2SourceHistoryRequest, FlashcardV2SourceHistoryData]("getFlashcardSourceHistory", "/api/flashcard/getSourceHistory", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardStatistics 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardStatistics = define[FlashcardV2StatisticsRequest, FlashcardV2StatisticsResult]("getFlashcardStatistics", "/api/flashcard/getStatistics", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// GetFlashcardStudyPolicy 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var GetFlashcardStudyPolicy = define[FlashcardV2GetFlashcardStudyPolicyRequest, FlashcardV2EntityData]("getFlashcardStudyPolicy", "/api/flashcard/getStudyPolicy", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ImportAnkiFlashcardPackage 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ImportAnkiFlashcardPackage = define[FlashcardV2AnkiUploadRequest, FlashcardV2AnkiImportReport]("importAnkiFlashcardPackage", "/api/flashcard/importAnkiPackage", AuthenticatedAccess|AdminAccess|WritableAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// InspectInvalidFlashcardSources 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var InspectInvalidFlashcardSources = define[EmptyRequest, FlashcardV2InvalidSourcesReport]("inspectInvalidFlashcardSources", "/api/flashcard/inspectInvalidSources", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// ListFlashcardConflicts 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ListFlashcardConflicts = define[FlashcardV2ListFlashcardConflictsRequest, []FlashcardV2EntityConflictGroup]("listFlashcardConflicts", "/api/flashcard/listConflicts", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ListFlashcardEntities 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ListFlashcardEntities = define[FlashcardV2ListFlashcardEntitiesRequest, FlashcardV2EntityPage]("listFlashcardEntities", "/api/flashcard/listEntities", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ManageFlashcards 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ManageFlashcards = define[FlashcardV2CardManagementRequest, FlashcardV2CardManagementResult]("manageFlashcards", "/api/flashcard/manageCards", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ManageFlashcardSourceLifecycle 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ManageFlashcardSourceLifecycle = define[FlashcardV2SourceLifecycleRequest, FlashcardV2SourceLifecycleResult]("manageFlashcardSourceLifecycle", "/api/flashcard/manageSourceLifecycle", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// MutateFlashcardEntities 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var MutateFlashcardEntities = define[FlashcardV2MutateFlashcardEntitiesRequest, FlashcardV2EntityMutationResult]("mutateFlashcardEntities", "/api/flashcard/mutateEntities", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// PreviewAnkiFlashcardPackage 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var PreviewAnkiFlashcardPackage = define[FlashcardV2AnkiUploadRequest, FlashcardV2AnkiPackagePreview]("previewAnkiFlashcardPackage", "/api/flashcard/previewAnkiPackage", AuthenticatedAccess|AdminAccess, MultipartBody, ResponseOptions{}, "POST")
+
+// PreviewFlashcardMigration 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var PreviewFlashcardMigration = define[EmptyRequest, FlashcardV2LegacyFlashcardMigrationPreview]("previewFlashcardMigration", "/api/flashcard/previewMigration", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// PreviewFlashcardReviewSet 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var PreviewFlashcardReviewSet = define[FlashcardV2PreviewFlashcardReviewSetRequest, FlashcardV2ReviewSetCardPage]("previewFlashcardReviewSet", "/api/flashcard/previewReviewSet", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ReconcileFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ReconcileFlashcardSource = define[FlashcardV2ReconcileFlashcardSourceRequest, FlashcardV2ReconcileResult]("reconcileFlashcardSource", "/api/flashcard/reconcileSource", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ResolveFlashcardConflict 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ResolveFlashcardConflict = define[FlashcardV2ConflictResolutionRequest, FlashcardV2EntityRevision]("resolveFlashcardConflict", "/api/flashcard/resolveConflict", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// RestoreFlashcardSourceHistory 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var RestoreFlashcardSourceHistory = define[FlashcardV2RestoreSourceHistoryRequest, FlashcardV2EntityRevision]("restoreFlashcardSourceHistory", "/api/flashcard/restoreSourceHistory", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// ReviewFlashcard 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var ReviewFlashcard = define[FlashcardV2ReviewRequest, FlashcardV2ReviewResult]("reviewFlashcard", "/api/flashcard/reviewCard", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// SaveFlashcardStudyPolicy 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var SaveFlashcardStudyPolicy = define[FlashcardV2SaveStudyPolicyRequest, FlashcardV2EntityRevision]("saveFlashcardStudyPolicy", "/api/flashcard/saveStudyPolicy", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// SaveFlashcardTag 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var SaveFlashcardTag = define[FlashcardV2SaveTagRequest, FlashcardV2EntityRevision]("saveFlashcardTag", "/api/flashcard/saveTag", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// SetFlashcardReviewSetMemberships 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var SetFlashcardReviewSetMemberships = define[FlashcardV2SetReviewSetMembershipsRequest, FlashcardV2SetReviewSetMembershipsResult]("setFlashcardReviewSetMemberships", "/api/flashcard/setReviewSetMemberships", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// SetFlashcardTagAssignments 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var SetFlashcardTagAssignments = define[FlashcardV2SetTagAssignmentsRequest, FlashcardV2SetTagAssignmentsResult]("setFlashcardTagAssignments", "/api/flashcard/setTagAssignments", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// StartFlashcardSession 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var StartFlashcardSession = define[FlashcardV2StudyQueueRequest, FlashcardV2StudyQueueResult]("startFlashcardSession", "/api/flashcard/startSession", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// SummarizeFlashcardReviewSets 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var SummarizeFlashcardReviewSets = define[FlashcardV2SummarizeFlashcardReviewSetsRequest, FlashcardV2SummariesData]("summarizeFlashcardReviewSets", "/api/flashcard/summarizeReviewSets", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// UndoFlashcardReview 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var UndoFlashcardReview = define[FlashcardV2ReviewUndoRequest, FlashcardV2ReviewUndoResult]("undoFlashcardReview", "/api/flashcard/undoReview", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// UpdateAdvancedFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var UpdateAdvancedFlashcardSource = define[FlashcardV2AdvancedSourceUpdateRequest, FlashcardV2AdvancedSourceResult]("updateAdvancedFlashcardSource", "/api/flashcard/updateAdvancedSource", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// UpdateBasicFlashcardDirection 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var UpdateBasicFlashcardDirection = define[FlashcardV2BasicDirectionRequest, FlashcardV2BasicSourceResult]("updateBasicFlashcardDirection", "/api/flashcard/updateBasicDirection", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
+// UpdateFlashcardSessionCard 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+var UpdateFlashcardSessionCard = define[FlashcardV2SessionCardUpdateRequest, FlashcardV2SessionCard]("updateFlashcardSessionCard", "/api/flashcard/updateSessionCard", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
+
 // 记忆接口仅面向工作空间管理员；写入需要可写空间，读取不依赖模型配置。
 var AIMemoryList = define[AIMemoryListRequest, AIMemoryListData]("listAIMemory", "/api/ai/memory/list", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var AIMemoryGet = define[AIMemoryGetRequest, AIMemoryGetData]("getAIMemory", "/api/ai/memory/get", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
@@ -2133,3 +2258,26 @@ var AIMemoryCancel = define[AIMemoryTaskRequest, EmptyRequest]("cancelAIMemory",
 // 可用模型使用受支持协议时，efforts 为 none、low、medium、high、xhigh、max；默认空字符串不列入其中。
 // 未选择模型、模型不可用或协议不支持时返回空数组；这些选项不保证供应商接受每个值，实际请求由协议适配器处理。
 var AIMemoryCapabilities = define[EmptyRequest, AIMemoryCapabilitiesData]("capabilitiesAIMemory", "/api/ai/memory/capabilities", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
+
+// PreviewAdvancedFlashcardSource 只读构造内置静态题型模型及普通块快照，不打开闪卡存储或迁移旧数据。
+// 来源必须存在于开放的非加密笔记本；不支持动态干扰项和插件，最多 1000 个块和变体。
+// 模型 ID 仅供草稿渲染，未保存卡片、排期、历史或会话；失败返回 code=-1 和空 data。
+var PreviewAdvancedFlashcardSource = define[FlashcardV2AdvancedPreviewRequest, FlashcardV2AdvancedPreviewData](
+	"previewAdvancedFlashcardSource", "/api/flashcard/previewAdvancedSource", AuthenticatedAccess|AdminAccess,
+	StructJSONBody, ResponseOptions{}, "POST")
+
+// ReorderAdvancedFlashcardSource 仅接受内置有序卡源的完整 StepID 排列，保留主引用、步骤身份和卡片状态。
+// 卡源及现存卡片的顺序数据在单一批次更新，不增删卡片、不改变排期和历史；不激活旧数据迁移。
+// 需当前修订、内容指纹与稳定操作 ID；初次执行前检查正文快照变化，并非跨文件系统原子 CAS。
+// 已成功的原操作可在当前权限仍允许时重放，同操作 ID 的不同顺序、修订或时间被拒绝。
+// 来源必须可访问；关闭及加密笔记本被拒绝。失败返回 code=-1 和空 data。
+var ReorderAdvancedFlashcardSource = define[FlashcardV2ReorderAdvancedSourceRequest, FlashcardV2ReorderAdvancedSourceResult](
+	"reorderAdvancedFlashcardSource", "/api/flashcard/reorderAdvancedSource", AuthenticatedAccess|AdminAccess|WritableAccess,
+	StructJSONBody, ResponseOptions{}, "POST")
+
+// GetOrderedFlashcardSourceDetails 读取同一源修订及引用的普通块快照，不写正文、不创建卡片、不主动迁移旧数据。
+// 仅支持内置有序卡源；关闭、加密、缺失或读取期间变化的来源被拒绝。返回内容指纹供初次排序提交前检查。
+// DOMs 仅供离线提取文本摘要，不应直接挂载或执行。读取会打开既有卡片存储，失败 code=-1。
+var GetOrderedFlashcardSourceDetails = define[FlashcardV2OrderedSourceDetailsRequest, FlashcardV2OrderedSourceDetails](
+	"getOrderedFlashcardSourceDetails", "/api/flashcard/getOrderedSourceDetails", AuthenticatedAccess|AdminAccess,
+	StructJSONBody, ResponseOptions{}, "POST")

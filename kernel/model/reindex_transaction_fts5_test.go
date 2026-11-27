@@ -16,6 +16,7 @@ import (
 
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -34,6 +35,12 @@ func TestFullReindexTransactionBoundary(t *testing.T) {
 	}
 	fixture := setupStructureTransactionTest(t)
 	setupFoldTransactionDatabase(t, fixture)
+	system := conf.NewSystem()
+	system.ID = "reindex-test"
+	Conf.System.Store(system)
+	Conf.Flashcard.Store(conf.NewFlashcard())
+	util.TempDir = t.TempDir()
+	t.Cleanup(closeFlashcardV2Store)
 	util.HistoryDir = filepath.Join(t.TempDir(), "history")
 	cache.PutDocIALInBox(fixture.sourcePath, fixture.box.ID, map[string]string{"test": "before-rebuild"})
 	filename := filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath)

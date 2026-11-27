@@ -859,6 +859,7 @@ func closeKernel(ctx context.Context, force, setCurrentWorkspace bool, execInsta
 		}
 	}
 	diagnostic.Stage("close databases")
+	closeFlashcardV2Store()
 	sql.CloseDatabase()
 	diagnostic.Stage("close push queue")
 	closePushQueue()

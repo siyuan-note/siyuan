@@ -131,9 +131,7 @@ const coverage: Record<string, Record<string, number>> = {
         "openInputDialog": 1
     },
     "card/makeCard.ts": {
-        "AdaptiveDialog": 1,
-        "confirmDialog": 1,
-        "openInputDialog": 1
+        "AdaptiveDialog": 1
     },
     "card/openCard.ts": {
         "openInputDialog": 1,

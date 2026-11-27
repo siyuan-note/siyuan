@@ -31,7 +31,7 @@ import {showMessage} from "../dialog/message";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 import {togglePinDock} from "./dockLayout";
 import {escapeAttr, escapeHtml} from "../util/escape";
-import {viewCards} from "../card/viewCards";
+import {openFlashcardV2Management} from "../card/flashcardV2";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -330,7 +330,7 @@ export const mainMenu = async (app: App, rect: DOMRect, openOnly = false, target
                                 iconHTML: "",
                                 label: window.siyuan.languages.manage,
                                 click: () => {
-                                    viewCards(app, "", window.siyuan.languages.all, "");
+                                    openFlashcardV2Management();
                                 }
                             }],
                         }).element);

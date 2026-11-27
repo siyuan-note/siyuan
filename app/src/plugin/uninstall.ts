@@ -12,6 +12,7 @@ import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
 import {unregisterCapability} from "../layout/dock/agent/frontendCapabilities";
+import {unregisterFlashcardV2PluginTypes} from "../card/flashcardV2Plugin";
 import {cancelAssetUploadsByPlugin} from "../protyle/upload/pluginEvent";
 import {removeBreadcrumbButtons} from "./breadcrumbButton";
 import {refreshDockCatalog} from "../config/entryVisibility/catalog";
@@ -118,6 +119,7 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
         plugin.agentCapabilities.forEach((capability) => runCleanup(plugin, "agent capability", () =>
             unregisterCapability(capability.id, capability.generation)));
     });
+    runCleanup(plugin, "flashcard type", () => unregisterFlashcardV2PluginTypes(plugin.name));
     /// #if !MOBILE
     // 移除状态栏元素。
     runCleanup(plugin, "status bar", () => {

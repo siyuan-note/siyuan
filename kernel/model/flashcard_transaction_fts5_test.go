@@ -164,7 +164,7 @@ func TestFlashcardSourceRecoveryPreservesPreviousFormat(t *testing.T) {
 	if err := recoverDocumentSources(); err != nil {
 		t.Fatal(err)
 	}
-	LoadFlashcards()
+	loadLegacyFlashcards()
 	if Decks[deck.ID] == nil || Decks[deck.ID].CountCards() != 0 {
 		t.Fatal("recovery did not restore the previous deck representation")
 	}

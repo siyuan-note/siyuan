@@ -2871,7 +2871,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if needReloadFlashcard {
-		LoadFlashcards()
+		// 同步合并已经完成，但生命周期标记要到本函数末尾才清除，此处不能再次等待自身。
+		loadFlashcards(false)
 	}
 
 	var changedOCRAssets map[string]bool

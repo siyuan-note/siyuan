@@ -1,0 +1,225 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+package model
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"time"
+
+	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+// InspectInvalidFlashcardV2Sources 独立核验源文件，不把可重建索引中的缺失作为删除依据。
+func InspectInvalidFlashcardV2Sources(ctx context.Context) (flashcardv2.InvalidSourcesReport, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return flashcardv2.InvalidSourcesReport{}, err
+	}
+	return store.InspectInvalidSources(ctx, resolveFlashcardBlockPresence)
+}
+
+// DeleteInvalidFlashcardV2Sources 串行处理同步和编辑事务，并在删除前重新核验文件。
+func DeleteInvalidFlashcardV2Sources(ctx context.Context, request flashcardv2.DeleteInvalidSourcesRequest) (flashcardv2.DeleteInvalidSourcesResult, error) {
+	syncLock.Lock()
+	defer syncLock.Unlock()
+	FlushTxQueue()
+	flushLock.Lock()
+	defer flushLock.Unlock()
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.DeleteInvalidSourcesResult{}, err
+	}
+	request.ChangedAt = time.Now().UnixMilli()
+	return store.DeleteInvalidSources(ctx, request, resolveFlashcardBlockPresence)
+}
+
+type flashcardFileStamp struct {
+	Size     int64
+	Modified int64
+	Mode     fs.FileMode
+}
+
+type flashcardCleanupSnapshot struct {
+	files       map[string]flashcardFileStamp
+	closedBoxes map[string]bool
+	incomplete  bool
+}
+
+// flashcardCleanupInventory 同时记录目录，检测扫描期间发生的新增、移动和恢复。
+func flashcardCleanupInventory(ctx context.Context, dataDir string, isEncrypted func(string) bool) (flashcardCleanupSnapshot, error) {
+	ret := flashcardCleanupSnapshot{files: map[string]flashcardFileStamp{}, closedBoxes: map[string]bool{}}
+	entries, err := os.ReadDir(dataDir)
+	if err != nil {
+		return ret, err
+	}
+	for _, entry := range entries {
+		if err = ctx.Err(); err != nil {
+			return ret, err
+		}
+		boxID := entry.Name()
+		if !ast.IsNodeIDPattern(boxID) {
+			continue
+		}
+		if !entry.IsDir() || entry.Type()&os.ModeSymlink != 0 {
+			return ret, errors.New("unsupported notebook path")
+		}
+		boxPath := filepath.Join(dataDir, boxID)
+		confDir := filepath.Join(boxPath, ".siyuan")
+		confPath := filepath.Join(confDir, "conf.json")
+		if info, statErr := os.Lstat(confDir); statErr != nil || !info.IsDir() {
+			ret.incomplete = true
+			continue
+		}
+		if info, statErr := os.Lstat(confPath); statErr != nil || !info.Mode().IsRegular() {
+			ret.incomplete = true
+			continue
+		}
+		data, readErr := filelock.ReadFile(confPath)
+		var box *conf.BoxConf
+		if readErr != nil || json.Unmarshal(data, &box) != nil || box == nil {
+			ret.incomplete = true
+			continue
+		}
+		if box.Encrypted {
+			continue
+		}
+		// 运行时也会把无法核实身份的笔记本视为加密，以禁止读取内容。
+		if box.BoxCrypt != nil || isEncrypted(boxID) {
+			ret.incomplete = true
+			continue
+		}
+		ret.closedBoxes[boxID] = box.Closed
+		err = filepath.WalkDir(boxPath, func(path string, d fs.DirEntry, walkErr error) error {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+			if walkErr != nil {
+				return walkErr
+			}
+			if d.Type()&os.ModeSymlink != 0 {
+				return errors.New("unsupported notebook symbolic link")
+			}
+			if !d.IsDir() && !strings.HasSuffix(d.Name(), ".sy") && d.Name() != "conf.json" {
+				return nil
+			}
+			// Windows 的目录枚举可能返回缓存的修改时间，扫描前后都要重新读取路径元数据。
+			info, err := os.Lstat(path)
+			if err != nil {
+				return err
+			}
+			if info.Mode()&os.ModeSymlink != 0 {
+				return errors.New("unsupported notebook symbolic link")
+			}
+			ret.files[path] = flashcardFileStamp{Size: info.Size(), Modified: info.ModTime().UnixNano(), Mode: info.Mode()}
+			return nil
+		})
+		if err != nil {
+			return ret, err
+		}
+	}
+	return ret, nil
+}
+
+type flashcardCleanupNode struct {
+	ID         string
+	Type       string
+	Spec       string
+	Properties map[string]string
+	Children   []flashcardCleanupNode
+}
+
+func resolveFlashcardBlockPresence(ctx context.Context, blockIDs []string) (map[string]flashcardv2.BlockPresence, error) {
+	return scanFlashcardBlockPresence(ctx, util.DataDir, blockIDs, IsEncryptedBox)
+}
+
+// scanFlashcardBlockPresence 只读普通笔记本，包括关闭的笔记本；任何不完整扫描都保留未找到的引用。
+func scanFlashcardBlockPresence(ctx context.Context, dataDir string, blockIDs []string,
+	isEncrypted func(string) bool) (map[string]flashcardv2.BlockPresence, error) {
+	ret := map[string]flashcardv2.BlockPresence{}
+	if len(blockIDs) == 0 {
+		return ret, nil
+	}
+	for _, id := range blockIDs {
+		ret[id] = flashcardv2.BlockUnknown
+	}
+	before, err := flashcardCleanupInventory(ctx, dataDir, isEncrypted)
+	if err != nil {
+		return ret, err
+	}
+	complete := !before.incomplete
+	for path, stamp := range before.files {
+		if err = ctx.Err(); err != nil {
+			return ret, err
+		}
+		if stamp.Mode.IsDir() || !strings.HasSuffix(path, ".sy") {
+			continue
+		}
+		rel, relErr := filepath.Rel(dataDir, path)
+		if relErr != nil {
+			return ret, relErr
+		}
+		boxID, _, _ := strings.Cut(rel, string(filepath.Separator))
+		data, readErr := filelock.ReadFile(path)
+		var root flashcardCleanupNode
+		if readErr != nil || json.Unmarshal(data, &root) != nil || root.Type != "NodeDocument" ||
+			root.ID != strings.TrimSuffix(filepath.Base(path), ".sy") {
+			complete = false
+			continue
+		}
+		switch root.Spec {
+		case "", "1", "2", "3", treenode.TableCellRichDocumentSpec, "5", treenode.DocumentTitleSpec, treenode.RichDocumentTitleSpec:
+		default:
+			complete = false
+			continue
+		}
+		var visit func(flashcardCleanupNode)
+		visit = func(node flashcardCleanupNode) {
+			if node.Type == "" {
+				complete = false
+			}
+			// 同时保留兼容格式的属性 ID，宁可少清理，也不因旧格式差异误删。
+			for _, id := range []string{node.ID, node.Properties["id"]} {
+				if _, wanted := ret[id]; wanted {
+					if before.closedBoxes[boxID] {
+						ret[id] = flashcardv2.BlockClosed
+					} else if ret[id] != flashcardv2.BlockClosed {
+						ret[id] = flashcardv2.BlockPresent
+					}
+				}
+			}
+			for _, child := range node.Children {
+				visit(child)
+			}
+		}
+		visit(root)
+	}
+	after, err := flashcardCleanupInventory(ctx, dataDir, isEncrypted)
+	if err != nil {
+		return ret, err
+	}
+	if !reflect.DeepEqual(before, after) {
+		return ret, errors.New("notebook files changed during flashcard inspection")
+	}
+	if complete {
+		for id, state := range ret {
+			if state == flashcardv2.BlockUnknown {
+				ret[id] = flashcardv2.BlockMissing
+			}
+		}
+	}
+	return ret, nil
+}

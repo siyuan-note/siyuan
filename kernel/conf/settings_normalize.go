@@ -245,6 +245,9 @@ func NormalizeFlashcard(flashcard *Flashcard) (*Flashcard, string) {
 	if flashcard == nil {
 		flashcard = defaults
 	}
+	if flashcard.OpenMode < 0 || flashcard.OpenMode > 3 {
+		flashcard.OpenMode = defaults.OpenMode
+	}
 	if flashcard.ReviewMode < 0 || flashcard.ReviewMode > 2 {
 		flashcard.ReviewMode = defaults.ReviewMode
 	}

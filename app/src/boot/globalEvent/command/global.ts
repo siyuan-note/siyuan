@@ -474,7 +474,7 @@ export const globalCommand = (command: string, app: App, range?: Range, openOnly
             newFile(app);
             return true;
         case "riffCard":
-            openCard(app, openOnly);
+            openCard(app, false, openOnly);
             return true;
         case "selectOpen1":
             selectOpenTab();

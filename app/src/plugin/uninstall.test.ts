@@ -33,6 +33,10 @@ for (const mode of ["settings", "main", "document", "mobile"]) {
             Constants: {}, isSettingsWindow: () => mode === "settings", isWindow: () => ["settings", "document"].includes(mode),
             getAllModels: () => ({custom: [] as unknown[]}), getAllEditor: (): unknown[] => [],
             unregisterPluginCommands() {}, cancelAssetUploadsByPlugin() {}, releaseTrackedRangesByPlugin() {},
+            unregisterFlashcardV2PluginTypes: (name: string) => {
+                assert.equal(name, plugin.name);
+                cleaned.push("flashcard types");
+            },
             removeBreadcrumbButtons() {}, destroyEventBus: () => cleaned.push("event bus"),
             refreshDockCatalog: () => updates.push("dock catalog"),
             applyTopBarEntryVisibility: () => updates.push("top bar catalog"),
@@ -57,7 +61,7 @@ for (const mode of ["settings", "main", "document", "mobile"]) {
         }});
         teardown.destroyPlugin(app, plugin, false);
         assert.deepEqual(errors, []);
-        assert.deepEqual(cleaned, ["color picker", "date picker", "kernel", "event bus", "icons", "style"]);
+        assert.deepEqual(cleaned, ["color picker", "date picker", "kernel", "event bus", "flashcard types", "icons", "style"]);
         assert.throws(() => getDatePickerOwner(plugin), /live Plugin/);
         assert.equal(app.plugins.length, 0);
         assert.deepEqual(updates, mode === "settings" ? [] : mode === "mobile" ? ["dock catalog"] :

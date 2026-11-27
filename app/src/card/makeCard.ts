@@ -1,215 +1,129 @@
-import {openInputDialog} from "../dialog/inputDialog";
-import {confirmDialog} from "../dialog/confirmDialog";
 import {AdaptiveDialog} from "../dialog/adaptiveDialog";
-import {fetchPost} from "../util/fetch";
-import {isMobile} from "../util/functions";
-import {hideMessage, showMessage} from "../dialog/message";
-import {hideElements} from "../protyle/ui/hideElements";
-import {viewCards} from "./viewCards";
+import {showMessage} from "../dialog/message";
 import {Constants} from "../constants";
-import {escapeAttr, escapeHtml} from "../util/escape";
-import {transaction} from "../protyle/wysiwyg/transaction";
 import type {App} from "../index";
+import {hideElements} from "../protyle/ui/hideElements";
+import {fetchPost} from "../util/fetch";
+import {genUUID} from "../util/genID";
+import {isMobile} from "../util/functions";
+import {transaction} from "../protyle/wysiwyg/transaction";
+import {
+    openFlashcardV2AdvancedSource,
+    openFlashcardV2AnkiPreview,
+    openFlashcardV2BasicSource,
+    openFlashcardV2Management,
+    openFlashcardV2Presets,
+    openFlashcardV2ReviewSets,
+    openFlashcardV2Statistics
+} from "./flashcardV2";
 
-export const genCardItem = (item: ICardPackage) => {
-    return `<li data-id="${escapeAttr(item.id)}" data-name="${escapeAttr(item.name)}" class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}">
-<span class="b3-list-item__text">
-    <span>${escapeHtml(item.name)}</span>
-    <span class="b3-list-item__meta">${escapeHtml(String(item.size))}</span>
-</span>
-<span data-type="rename" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.rename}">
-    <svg><use xlink:href="#iconEdit"></use></svg>
-</span>
-<span data-type="delete" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
-    <svg><use xlink:href="#iconTrashcan"></use></svg>
-</span>
-<span data-type="view" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.cardPreview}">
-    <svg><use xlink:href="#iconEye"></use></svg>
-</span>
-<span data-type="remove" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.removeDeck}">
-    <svg><use xlink:href="#iconMin"></use></svg>
-</span>
-<span data-type="add" style="display: flex" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.addDeck}">
-    <svg><use xlink:href="#iconAdd"></use></svg>
-</span>
-<span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${escapeHtml(String(item.updated))}</span>
-</li>`;
+export const createQuickSources = (blockIDs: string[], callback?: () => void) => {
+    if (blockIDs.length === 0) {
+        return;
+    }
+    fetchPost("/api/flashcard/getMigrationStatus", {}, (statusResponse) => {
+        if (statusResponse.data.state === "Legacy") {
+            fetchPost("/api/riff/getRiffCardsByBlockIDs", {blockIDs}, (response) => {
+                const remove = (response.data.blocks as IBlock[]).every((block) => block.riffCard);
+                transaction(undefined, [{
+                    action: remove ? "removeFlashcards" : "addFlashcards",
+                    deckID: Constants.QUICK_DECK_ID,
+                    blockIDs,
+                }], undefined, {callback: () => {
+                    showMessage(remove ? window.siyuan.languages.quickMakeCardCanceled :
+                        window.siyuan.languages.quickMakeCardCompleted);
+                    callback?.();
+                }});
+            });
+            return;
+        }
+        fetchPost("/api/flashcard/createQuickSources", {
+            operationID: genUUID(),
+            blockIDs,
+            createdAt: Date.now(),
+            toggle: true,
+        }, (response) => {
+            showMessage(response.data.cardIDs.length === 0 ? window.siyuan.languages.quickMakeCardEmpty :
+                response.data.action === "removed" ? window.siyuan.languages.quickMakeCardCanceled :
+                window.siyuan.languages.quickMakeCardCompleted);
+            callback?.();
+        });
+    });
 };
+
+const actionHTML = (type: string, icon: string, label: string) => `<li data-type="${type}" class="b3-list-item b3-list-item--narrow">
+<svg class="b3-list-item__graphic"><use xlink:href="#${icon}"></use></svg>
+<span class="b3-list-item__text">${label}</span>
+</li>`;
 
 export const makeCard = (app: App, ids: string[]) => {
-    window.siyuan.dialogs.find(item => {
-        if (item.element.getAttribute("data-key") === Constants.DIALOG_MAKECARD) {
-            hideElements(["dialog"]);
-            return true;
-        }
-    });
-    fetchPost("/api/riff/getRiffDecks", {}, (response) => {
-        let html = "";
-        response.data.forEach((item: ICardPackage) => {
-            html += genCardItem(item);
-        });
-        const dialog = new AdaptiveDialog({
-            positionId: Constants.DIALOG_MAKECARD,
-            width: isMobile() ? "92vw" : "50vw",
-            height: "70vh",
-            title: window.siyuan.languages.riffCard,
-            content: `<div class="b3-dialog__content fn__flex-column" style="box-sizing: border-box;height: 100%">
-    <div class="fn__flex">
-        <input class="b3-text-field fn__flex-1">
-        <span class="fn__space"></span>
-        <span data-type="create" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.createDeck}">
-            <svg><use xlink:href="#iconAdd"></use></svg>
-        </span>
-        <span class="fn__space"></span>
-        <span data-type="viewall" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.cardPreview}">
-            <svg><use xlink:href="#iconEye"></use></svg>
-        </span>
-    </div>
-    <div class="fn__hr"></div>
-    <ul class="b3-list b3-list--background fn__flex-1">${html}</ul>
+    const existing = window.siyuan.dialogs.find((item) =>
+        item.element.getAttribute("data-key") === Constants.DIALOG_MAKECARD);
+    if (existing) {
+        hideElements(["dialog"]);
+        return;
+    }
+    const sourceActions = ids.length === 0 ? "" : [
+        actionHTML("quick", "iconRiffCard", window.siyuan.languages.quickMakeCard),
+        ids.length > 1 ? actionHTML("basic", "iconBoth", window.siyuan.languages.flashcardQA) : "",
+        actionHTML("advanced", "iconSettings", window.siyuan.languages.configGroupAdvanced),
+    ].join("");
+    const dialog = new AdaptiveDialog({
+        positionId: Constants.DIALOG_MAKECARD,
+        width: isMobile() ? "92vw" : "480px",
+        title: window.siyuan.languages.riffCard,
+        content: `<div class="b3-dialog__content">
+<ul class="b3-list b3-list--background">
+${sourceActions}
+${actionHTML("reviewSets", "iconDatabase", window.siyuan.languages.flashcardReviewSet)}
+${actionHTML("presets", "iconSettings", window.siyuan.languages.flashcardPreset)}
+${actionHTML("management", "iconList", window.siyuan.languages.manage)}
+${actionHTML("statistics", "iconGraph", window.siyuan.languages.flashcardStatistics)}
+${actionHTML("anki", "iconUpload", "Anki")}
+</ul>
 </div>`,
-        });
-        dialog.element.setAttribute("data-key", Constants.DIALOG_MAKECARD);
-        dialog.element.addEventListener("click", (event) => {
-            let target = event.target as HTMLElement;
-            while (target && target !== dialog.element) {
-                const type = target.getAttribute("data-type");
-                if (type === "create") {
-                    let msgId = "";
-                    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-                    if (inputElement.value) {
-                        if (msgId) {
-                            hideMessage(msgId);
-                        }
-                        fetchPost("/api/riff/createRiffDeck", {name: inputElement.value}, (response) => {
-                            dialog.element.querySelector(".b3-list").insertAdjacentHTML("afterbegin", genCardItem(response.data));
-                            inputElement.value = "";
-                        });
-                    } else {
-                        msgId = showMessage(window.siyuan.languages._kernel[142]);
-                        inputElement.focus();
-                    }
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "add") {
-                    fetchPost("/api/riff/addRiffCards", {
-                        deckID: target.parentElement.getAttribute("data-id"),
-                        blockIDs: ids
-                    }, (addResponse) => {
-                        target.parentElement.outerHTML = genCardItem(addResponse.data);
-                    });
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "remove") {
-                    fetchPost("/api/riff/removeRiffCards", {
-                        deckID: target.parentElement.getAttribute("data-id"),
-                        blockIDs: ids
-                    }, (removeResponse) => {
-                        target.parentElement.outerHTML = genCardItem(removeResponse.data);
-                    });
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "delete") {
-                    confirmDialog({
-                        title: window.siyuan.languages.deleteOpConfirm,
-                        text: `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(target.parentElement.getAttribute("data-name"))}</b>?`,
-                        confirm: () => {
-                            fetchPost("/api/riff/removeRiffDeck", {
-                                deckID: target.parentElement.getAttribute("data-id"),
-                            }, () => {
-                                target.parentElement.remove();
-                            });
-                        },
-                        isDelete: true,
-                    });
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "view") {
-                    viewCards(app, target.parentElement.getAttribute("data-id"), target.parentElement.getAttribute("data-name"), "", (removeResponse) => {
-                        target.parentElement.outerHTML = genCardItem(removeResponse.data);
-                    });
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "viewall") {
-                    viewCards(app, "", window.siyuan.languages.all, "");
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "rename") {
-                    openInputDialog({
-                        title: window.siyuan.languages.rename,
-                        value: target.parentElement.getAttribute("data-name"),
-                        onConfirm: (value, renameDialog) => {
-                            fetchPost("/api/riff/renameRiffDeck", {
-                                name: value,
-                                deckID: target.parentElement.getAttribute("data-id"),
-                            }, () => {
-                                target.parentElement.querySelector(".b3-list-item__text span").textContent = value;
-                                target.parentElement.setAttribute("data-name", value);
-                            });
-                            renameDialog.destroy();
-                        },
-                    });
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                }
-                target = target.parentElement;
-            }
-        });
+    });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_MAKECARD);
+    dialog.element.addEventListener("click", (event) => {
+        const target = (event.target as HTMLElement).closest<HTMLElement>("[data-type]");
+        const type = target?.dataset.type;
+        if (!type) {
+            return;
+        }
+        if (type === "quick") {
+            createQuickSources(ids, () => dialog.destroy());
+        } else if (type === "basic") {
+            dialog.destroy();
+            openFlashcardV2BasicSource(ids);
+        } else if (type === "advanced") {
+            dialog.destroy();
+            openFlashcardV2AdvancedSource(ids);
+        } else if (type === "reviewSets") {
+            dialog.destroy();
+            openFlashcardV2ReviewSets(app);
+        } else if (type === "presets") {
+            dialog.destroy();
+            openFlashcardV2Presets();
+        } else if (type === "management") {
+            dialog.destroy();
+            openFlashcardV2Management();
+        } else if (type === "statistics") {
+            dialog.destroy();
+            openFlashcardV2Statistics();
+        } else if (type === "anki") {
+            dialog.destroy();
+            openFlashcardV2AnkiPreview();
+        }
     });
 };
 
-export const quickMakeCard = (protyle: IProtyle, nodeElement: Element[]) => {
-    let isRemove = true;
-    const ids: string[] = [];
-    nodeElement.forEach(item => {
-        if (item.getAttribute("data-type") === "NodeThematicBreak") {
-            return;
-        }
+export const quickMakeCard = (_protyle: IProtyle, nodeElements: Element[]) => {
+    const blockIDs: string[] = [];
+    nodeElements.forEach((item) => {
         item.classList.remove("protyle-wysiwyg--select");
-        if ((item.getAttribute(Constants.CUSTOM_RIFF_DECKS) || "").indexOf(Constants.QUICK_DECK_ID) === -1) {
-            isRemove = false;
+        if (item.getAttribute("data-type") !== "NodeThematicBreak") {
+            blockIDs.push(item.getAttribute("data-node-id"));
         }
     });
-    nodeElement.forEach(item => {
-        if (item.getAttribute("data-type") === "NodeThematicBreak") {
-            return;
-        }
-        if (isRemove) {
-            if ((item.getAttribute(Constants.CUSTOM_RIFF_DECKS) || "").indexOf(Constants.QUICK_DECK_ID) > -1) {
-                ids.push(item.getAttribute("data-node-id"));
-            }
-        } else {
-            if ((item.getAttribute(Constants.CUSTOM_RIFF_DECKS) || "").indexOf(Constants.QUICK_DECK_ID) === -1) {
-                ids.push(item.getAttribute("data-node-id"));
-            }
-        }
-    });
-    if (isRemove) {
-        transaction(protyle, [{
-            action: "removeFlashcards",
-            deckID: Constants.QUICK_DECK_ID,
-            blockIDs: ids
-        }], [{
-            action: "addFlashcards",
-            deckID: Constants.QUICK_DECK_ID,
-            blockIDs: ids
-        }]);
-    } else {
-        transaction(protyle, [{
-            action: "addFlashcards",
-            deckID: Constants.QUICK_DECK_ID,
-            blockIDs: ids
-        }], [{
-            action: "removeFlashcards",
-            deckID: Constants.QUICK_DECK_ID,
-            blockIDs: ids
-        }]);
-    }
+    createQuickSources(blockIDs);
 };

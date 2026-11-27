@@ -5,6 +5,7 @@ import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGrou
 const element = (...classes: string[]) => {
     const values = new Set(classes);
     return {
+        closest: (): Element | null => null,
         classList: {
             add: (...names: string[]) => names.forEach(name => values.add(name)),
             remove: (...names: string[]) => names.forEach(name => values.delete(name)),
@@ -16,6 +17,33 @@ const element = (...classes: string[]) => {
 const items = (...children: HTMLElement[]) => Object.assign(element(), {children});
 
 describe("menu groups", () => {
+    it("collapses leading placeholders only at levels without visible icons", () => {
+        const root = element("b3-menu--compact-icons");
+        const icon = element("b3-menu__icon");
+        const placeholder = element("b3-menu__icon", "b3-menu__icon--placeholder");
+        const submenuArrow = element("b3-menu__icon", "b3-menu__icon--small");
+        const item = (...children: HTMLElement[]) => Object.assign(element("b3-menu__item"), {children});
+        const submenu = Object.assign(items(item(placeholder)), {closest: () => root});
+        const withIcon = item(icon);
+        const top = Object.assign(items(item(placeholder, submenuArrow, submenu), withIcon), {closest: () => root});
+        const className = "b3-menu__items--no-leading-icons";
+        updateMenuItemGroupClasses(top);
+        updateMenuItemGroupClasses(submenu);
+        assert.equal(top.classList.contains(className), false);
+        assert.equal(submenu.classList.contains(className), true);
+
+        withIcon.classList.add("fn__none");
+        updateMenuItemGroupClasses(top);
+        assert.equal(top.classList.contains(className), true);
+        withIcon.classList.remove("fn__none");
+        updateMenuItemGroupClasses(top);
+        assert.equal(top.classList.contains(className), false);
+
+        const other = items(item(placeholder));
+        updateMenuItemGroupClasses(other);
+        assert.equal(other.classList.contains(className), false);
+    });
+
     it("does not write unchanged classes when regrouping menus or inline control containers", () => {
         for (const container of [items(element()), items(element("b3-menu__item"), element("b3-menu__separator"),
             element("b3-menu__item"), element("b3-menu__item", "fn__none"))]) {

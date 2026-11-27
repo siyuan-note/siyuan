@@ -27,6 +27,10 @@ import {normalizeStoragePath} from "../util/pathName";
 import {Kernel} from "./kernel";
 import {IAgentCapabilityEffects, registerCapability} from "../layout/dock/agent/frontendCapabilities";
 import {
+    type IFlashcardV2PluginRegistration,
+    registerFlashcardV2PluginType
+} from "../card/flashcardV2Plugin";
+import {
     addBreadcrumbButton as addPluginBreadcrumbButton,
     removeBreadcrumbButton as removePluginBreadcrumbButton,
 } from "./breadcrumbButton";
@@ -181,6 +185,10 @@ export class Plugin {
 
     public async updateCards(options: ICardData) {
         return options;
+    }
+
+    public registerFlashcardType(options: IFlashcardV2PluginRegistration) {
+        return registerFlashcardV2PluginType(this.name, options);
     }
 
     public onLayoutReady(): Promise<void> | void {

@@ -7,6 +7,7 @@ import {
     hasFlashcardAnswer,
     hideFlashcardAnswer,
     revealFlashcardAfterUnfold,
+    shouldShowFlashcardRatingsImmediately,
     showFlashcardAnswer
 } from "./flashcardMode";
 
@@ -32,6 +33,13 @@ const createFlashcardConfig = (overrides: Partial<FlashcardCreationConfig> = {})
 });
 
 describe("flashcardMode", () => {
+    it("shows ratings immediately only when a block card has no answer to reveal", () => {
+        assert.equal(shouldShowFlashcardRatingsImmediately(false, false, false), true);
+        assert.equal(shouldShowFlashcardRatingsImmediately(true, false, false), false);
+        assert.equal(shouldShowFlashcardRatingsImmediately(false, true, false), false);
+        assert.equal(shouldShowFlashcardRatingsImmediately(false, false, true), false);
+    });
+
     it("ignores ordinary lists in document flashcards", () => {
         const element = {
             querySelector(selector: string) {
@@ -43,7 +51,8 @@ describe("flashcardMode", () => {
     });
 
     it("detects list flashcard answers instead of leaf list cards", () => {
-        const answerSelector = ".list[custom-riff-decks] .li > .list, .li[custom-riff-decks] > .list";
+        const answerSelector = ".list[custom-riff-decks] .li > .list, .li[custom-riff-decks] > .list, " +
+            "[data-flashcard-block-card] > .list .li > .list, [data-flashcard-block-card] > .li > .list";
         const answerElement = {
             querySelector(selector: string) {
                 return selector === answerSelector ? {} : null;
@@ -61,10 +70,14 @@ describe("flashcardMode", () => {
 
     it("detects structural flashcard answers", () => {
         const selectors: Array<[keyof FlashcardCreationConfig, string]> = [
-            ["superBlock", ":scope > .sb[custom-riff-decks] > div:nth-of-type(n+2):not(.protyle-attr)"],
-            ["blockquote", ":scope > .bq[custom-riff-decks] > [data-node-id] ~ [data-node-id]"],
-            ["callout", ":scope > .callout[custom-riff-decks] > .callout-content > [data-node-id]"],
-            ["heading", ":scope > div[data-type=\"NodeHeading\"][custom-riff-decks] ~ div"],
+            ["superBlock", ":scope > .sb[custom-riff-decks] > div:nth-of-type(n+2):not(.protyle-attr), " +
+                ":scope > [data-flashcard-block-card] > .sb > div:nth-of-type(n+2):not(.protyle-attr)"],
+            ["blockquote", ":scope > .bq[custom-riff-decks] > [data-node-id] ~ [data-node-id], " +
+                ":scope > [data-flashcard-block-card] > .bq > [data-node-id] ~ [data-node-id]"],
+            ["callout", ":scope > .callout[custom-riff-decks] > .callout-content > [data-node-id], " +
+                ":scope > [data-flashcard-block-card] > .callout > .callout-content > [data-node-id]"],
+            ["heading", ":scope > div[data-type=\"NodeHeading\"][custom-riff-decks] ~ div, " +
+                ":scope > [data-flashcard-block-card] > div[data-type=\"NodeHeading\"] ~ div"],
         ];
 
         selectors.forEach(([key, answerSelector]) => {

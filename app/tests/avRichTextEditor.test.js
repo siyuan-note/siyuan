@@ -490,6 +490,7 @@ const checkMobileSafeArea = async (safeTop, width, height) => {
             Object.assign(event, {touches: [point], changedTouches: [point]});
             grip.dispatchEvent(event);
         }
+        await Promise.all(panel.getAnimations().map(animation => animation.finished));
         const confirm = dialog.element.querySelector(".b3-button");
         const rect = panel.getBoundingClientRect();
         const label = `${frontend}/${platform}, safe area ${safeTop}px, viewport ${innerWidth}x${innerHeight}`;

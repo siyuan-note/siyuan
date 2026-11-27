@@ -48,9 +48,9 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
         "../../layout/dock/util": {openOutline: record("outline"), openBacklink: record("backlinks"), openGraph: record("graphView")},
         "../../util/pathName": {getDocDisplayName: (name: string, empty: boolean) => empty ? globals.window.siyuan.languages._kernel[16] : name, isEncryptedBox: () => encrypted, pathPosix: () => posix,
             getNotebookName: () => "Notebook", getDisplayName: (value: string) => value.replace(/\.sy$/, ""), useShell: record("folder")},
-        "../../card/makeCard": {makeCard: record("makeCard"), quickMakeCard: record("quickMakeCard")},
-        "../../card/openCard": {openCardByData: record("spaceRepetition")},
-        "../../card/viewCards": {viewCards: record("manage")},
+        "../../card/makeCard": {makeCard: record("makeCard"), createQuickSources: record("quickMakeCard")},
+        "../../card/openCard": {openCardByScope: record("spaceRepetition")},
+        "../../card/flashcardV2": {openFlashcardV2ManagementByRoots: record("manage")},
         "../../plugin/EventBus": {emitOpenMenu: (event: typeof events[number]) => {
             events.push(event); menu.append({id: "plugin"}); menu.append({id: "separator_pluginBottom", type: "separator"});
         }},
@@ -181,18 +181,22 @@ test("copy document uses persisted numbering without an additional prompt", asyn
     }
 });
 
-test("graph flashcards keep response data and use document IDs with reversible operations", async () => {
+test("graph flashcards use the selected document for review, management, and quick sources", async () => {
     const menu = setup();
     menu.open();
     const cardItems = menu.items.find(item => item.id === "riffCard").submenu as IMenu[];
     await cardItems.find(item => item.id === "spaceRepetition").click(null, null);
-    assert.equal(menu.calls.find(call => call.name === "spaceRepetition").args[1], menu.cardData);
+    assert.deepEqual(menu.calls.find(call => call.name === "spaceRepetition").args,
+        [menu.options.app, "doc", menu.options.id, "Document"]);
     await cardItems.find(item => item.id === "manage").click(null, null);
-    assert.equal(menu.calls.find(call => call.name === "manage").args[2], "Notebook/Document");
+    assert.equal(JSON.stringify(menu.calls.find(call => call.name === "manage").args),
+        JSON.stringify([[menu.options.id], "Document"]));
     await cardItems.find(item => item.id === "quickMakeCard").click(null, null);
-    const transaction = menu.calls.find(call => call.name === "transaction");
-    assert.equal(JSON.stringify(transaction.args[1]), JSON.stringify([{action: "addFlashcards", deckID: "quick", blockIDs: [menu.options.id]}]));
-    assert.equal(JSON.stringify(transaction.args[2]), JSON.stringify([{action: "removeFlashcards", deckID: "quick", blockIDs: [menu.options.id]}]));
+    assert.equal(JSON.stringify(menu.calls.find(call => call.name === "quickMakeCard").args),
+        JSON.stringify([[menu.options.id]]));
+    await cardItems.find(item => item.id === "removeCard").click(null, null);
+    assert.equal(JSON.stringify(menu.calls.filter(call => call.name === "manage")[1].args[0]),
+        JSON.stringify([menu.options.id]));
 });
 
 for (const mobile of [false, true]) {

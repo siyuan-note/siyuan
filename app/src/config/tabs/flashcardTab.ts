@@ -1,4 +1,6 @@
 import type {SettingTabBuilder} from "../setting/builder";
+import {isBrowser, isMobile} from "../../util/functions";
+import {resolveFlashcardOpenMode} from "../../card/flashcardOpenMode";
 
 /** 闪卡 Tab：各组注册实现（由 setting/tabs.ts 调用） */
 const registerFlashcardCreationGroup = (tab: SettingTabBuilder) => {
@@ -32,6 +34,19 @@ const registerFlashcardCreationGroup = (tab: SettingTabBuilder) => {
 
 const registerFlashcardReviewGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("review", window.siyuan.languages.configGroupReview);
+
+    if (!isMobile()) {
+        group.select("flashcard.openMode", {
+            title: window.siyuan.languages.flashcardOpenMode,
+            readConfig: () => resolveFlashcardOpenMode(window.siyuan.config.flashcard.openMode, false, isBrowser()),
+            options: [
+                {value: 0, label: window.siyuan.languages.flashcardOpenDialog},
+                {value: 1, label: window.siyuan.languages.openInNewTab},
+                {value: 2, label: window.siyuan.languages.insertRight},
+                ...(!isBrowser() ? [{value: 3, label: window.siyuan.languages.openByNewWindow}] : []),
+            ],
+        });
+    }
 
     group.select("flashcard.reviewMode", {
         title: window.siyuan.languages.reviewMode,
@@ -73,17 +88,29 @@ const registerFlashcardReviewGroup = (tab: SettingTabBuilder) => {
     });
 };
 
-const registerFlashcardOthersGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("others", window.siyuan.languages.configGroupOthers);
-
-    group.switch("flashcard.deck", {
-        title: window.siyuan.languages.flashcardDeck,
-        desc: window.siyuan.languages.flashcardDeckTip,
+const registerAnkiConnectGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("ankiConnect", window.siyuan.languages.ankiConnect);
+    group.switch("flashcard.ankiConnectEnabled", {
+        title: window.siyuan.languages.ankiConnect,
+        desc: window.siyuan.languages.ankiConnectTip.replace("${url}", `${window.location.origin}/api/flashcard/ankiConnect`),
+    });
+    group.switch("flashcard.ankiConnectLocalWithoutKey", {
+        title: window.siyuan.languages.ankiConnectLocalWithoutKey,
+        desc: window.siyuan.languages.ankiConnectLocalWithoutKeyTip,
+    });
+    group.select("flashcard.ankiConnectNotebook", {
+        title: window.siyuan.languages.targetNotebook,
+        desc: window.siyuan.languages.ankiConnectNotebookTip,
+        options: [
+            {value: "", label: window.siyuan.languages.select},
+            ...(window.siyuan.notebooks || []).filter((notebook) => !notebook.closed && !notebook.encrypted)
+                .map((notebook) => ({value: notebook.id, label: notebook.name})),
+        ],
     });
 };
 
 export const registerFlashcardTab = (tab: SettingTabBuilder) => {
     registerFlashcardCreationGroup(tab);
     registerFlashcardReviewGroup(tab);
-    registerFlashcardOthersGroup(tab);
+    registerAnkiConnectGroup(tab);
 };

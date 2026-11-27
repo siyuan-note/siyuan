@@ -53,6 +53,7 @@ const runCases = async sources => {
         resizeTopBar() {}, saveLayout() {},
         unregisterPluginCommands() {}, cancelAssetUploadsByPlugin() {}, releaseTrackedRangesByPlugin() {},
         removeBreadcrumbButtons() {}, unregisterCapability() {},
+        unregisterFlashcardV2PluginTypes() {},
         registerPluginCommand() { throw new Error("settings registered a command"); },
         sendGlobalShortcut() { throw new Error("settings changed global shortcuts"); },
         updatePluginKeymap() { throw new Error("settings changed keymaps"); },

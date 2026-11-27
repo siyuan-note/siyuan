@@ -1,5 +1,23 @@
 {
   "classes": {
+    "card__v2-choice-question": {
+      "reason": "选择题题干沿用编辑器内容样式，保留该类名供主题单独定制题干，不添加重复的内置控件样式",
+      "references": [
+        "src/card/flashcardV2Render.ts"
+      ]
+    },
+    "card__v2-multi-line-question": {
+      "reason": "多行卡题干沿用编辑器内容样式，保留该类名供主题区分题干和答案区域",
+      "references": [
+        "src/card/flashcardV2Render.ts"
+      ]
+    },
+    "card__v2-preview": {
+      "reason": "预览复用闪卡会话布局，保留该根类名供主题区分预览与正式复习，工具栏和导航使用已有独立样式",
+      "references": [
+        "src/card/flashcardV2Session.ts"
+      ]
+    },
     "agent-chat__body--error": {
       "reason": "存量类名，已记录字面量使用位置；不能仅凭内置样式缺失排除其行为或外部主题用途，保留现有接口",
       "references": [
@@ -904,6 +922,13 @@
       "text": "Disallowed !important (declaration-no-important)",
       "source": "font-size: 0 !important;",
       "reason": "现有控件、编辑器及主题覆盖的级联规则；未证明可无损移除，禁止新增同类例外"
+    },
+    {
+      "file": "src/assets/scss/business/_card.scss",
+      "rule": "declaration-no-important",
+      "text": "Disallowed !important (declaration-no-important)",
+      "source": "font-size: 0 !important;",
+      "reason": "闪卡图片遮罩引用可能包含带内联字号的源块，card__v2-occlusion 必须隐藏源文本并只显示遮罩图像，保留其字体级联优先级"
     },
     {
       "file": "src/assets/scss/business/_config.scss",

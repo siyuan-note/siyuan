@@ -34,6 +34,7 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
     }[]}}[] = [];
     const fileTree = {parentDocTitleClickMode: 1, sort: 0};
     const created: unknown[][] = [];
+    const flashcards: unknown[][] = [];
     const menuAttributes = new Map<string, string>();
     const menu = {element: {setAttribute: (name: string, value: string) => menuAttributes.set(name, value)},
         remove: () => { items.length = 0; }, append: (item: IMenu) => { if (!item.ignore) { items.push(item); } }};
@@ -73,6 +74,9 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
                     deleteDocTreeItems: (items: unknown[]) => treeDeletions.push(items)},
                 "../layout/tabUtil": {getDockByType: (): undefined => undefined},
                 "../layout/dock/docTree/DocTreeController": {getDocTreeController: () => controller},
+                "../card/openCard": {openCardByScope: (_app: object, ...scope: unknown[]) => flashcards.push(["study", ...scope])},
+                "../card/flashcardV2": {openFlashcardV2ManagementByRoots: (...scope: unknown[]) => flashcards.push(["manage", ...scope])},
+                "../mobile/util/closePanel": {closePanel() {}},
                 "../layout/dock/docTree/rowData": {getDocTreeItem: (element: Element) => controller?.getItemFromElement?.(element)},
                 "./navigationSelection": navigationSelection,
                 "../history/doc": {openDocHistory: (options: typeof histories[number]) => histories.push(options)},
@@ -106,7 +110,7 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
         assert.ok(item, id);
         return item.click(null, null);
     };
-    return {exports, open, click, options, items, requests, renames, histories, databases, confirmations, icons, deletions, treeDeletions, moves, events, created, menuAttributes, fileTree};
+    return {exports, open, click, options, items, requests, renames, histories, databases, confirmations, icons, deletions, treeDeletions, moves, events, created, menuAttributes, flashcards, fileTree};
 };
 
 for (const mobile of [false, true]) {
@@ -247,6 +251,17 @@ test("mobile notebook icon menu uses the API position and internal anchor", () =
 });
 
 for (const mobile of [false, true]) {
+    test(`document menu keeps flashcard v2 study and management scopes without a mounted tree row (${mobile ? "mobile" : "desktop"})`, () => {
+        const {open, items, flashcards} = setup(mobile);
+        open();
+        const cardItems = items.find(item => item.id === "riffCard").submenu as IMenu[];
+        cardItems.find(item => item.id === "spaceRepetition").click(null, null);
+        cardItems.find(item => item.id === "manage").click(null, null);
+        assert.equal(JSON.stringify(flashcards), JSON.stringify([
+            ["study", "doc", "doc", "Document"], ["manage", ["doc"], "Document"],
+        ]));
+    });
+
     test(`complete document menu uses explicit document targets without a tree row (${mobile ? "mobile" : "desktop"})`, () => {
         const {open, click, items, moves, deletions, databases, histories, events, options} = setup(mobile);
         open();

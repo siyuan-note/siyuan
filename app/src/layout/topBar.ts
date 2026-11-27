@@ -200,7 +200,7 @@ ${isInMobileApp() ? `<div id="barExit" data-topbar-entry="barExit" class="ft__er
                 event.stopPropagation();
                 break;
             } else if (targetId === "barRiffCard") {
-                openCard(app);
+                openCard(app, true);
                 event.stopPropagation();
                 break;
             } else if (targetId === "barSync") {

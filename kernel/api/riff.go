@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"strconv"
@@ -19,6 +20,15 @@ var getRiffCardsByBlockIDs = contractHandler(apicontract.GetRiffCardsByBlockIDs,
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return apicontract.Failure[apicontract.RiffBlocksData](-1, err.Error())
 	}
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.RiffBlocksData](err)
+	} else if active {
+		blocks, err := model.GetLegacyFlashcardV2BlocksByIDs(c.Request.Context(), blockIDs)
+		if err != nil {
+			return apicontract.Failure[apicontract.RiffBlocksData](-1, err.Error())
+		}
+		return apicontract.Success(apicontract.RiffBlocksData{Blocks: searchBlockContracts(blocks)})
+	}
 	return apicontract.Success(apicontract.RiffBlocksData{Blocks: searchBlockContracts(model.GetFlashcardsByBlockIDs(blockIDs))})
 })
 
@@ -27,6 +37,15 @@ var batchSetRiffCardsDueTime = contractHandler(apicontract.BatchSetRiffCardsDueT
 	for _, due := range request.CardDues {
 		cardDues = append(cardDues, &model.SetFlashcardDueTime{ID: due.ID, Due: due.Due})
 	}
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
+	} else if active {
+		err := model.SetLegacyFlashcardV2DueTimes(c.Request.Context(), cardDues)
+		if err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
+		return apicontract.Success(apicontract.Null{})
+	}
 	if err := model.SetFlashcardsDueTime(cardDues); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
@@ -34,6 +53,15 @@ var batchSetRiffCardsDueTime = contractHandler(apicontract.BatchSetRiffCardsDueT
 })
 
 var resetRiffCards = contractHandler(apicontract.ResetRiffCards, func(c *gin.Context, request apicontract.ResetRiffCardsRequest) apicontract.Response[apicontract.Null] {
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
+	} else if active {
+		err := model.ResetLegacyFlashcardV2Cards(c.Request.Context(), request.Type, request.ID, request.DeckID, riffBlockIDs(request.BlockIDs))
+		if err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
+		return apicontract.Success(apicontract.Null{})
+	}
 	if err := model.ResetFlashcards(request.Type, request.ID, request.DeckID, riffBlockIDs(request.BlockIDs)); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
@@ -48,6 +76,15 @@ var getNotebookRiffCards = contractHandler(apicontract.GetNotebookRiffCards, fun
 	if err != nil {
 		return apicontract.Failure[apicontract.RiffCardsData](-1, err.Error())
 	}
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.RiffCardsData](err)
+	} else if active {
+		blocks, total, pageCount, err := model.GetLegacyNotebookFlashcardV2Blocks(c.Request.Context(), request.ID, page, pageSize)
+		if err != nil {
+			return apicontract.Failure[apicontract.RiffCardsData](-1, err.Error())
+		}
+		return apicontract.Success(riffCardsData(blocks, total, pageCount))
+	}
 	blocks, total, pageCount := model.GetNotebookFlashcards(request.ID, page, pageSize)
 	return apicontract.Success(riffCardsData(blocks, total, pageCount))
 })
@@ -60,6 +97,15 @@ var getTreeRiffCards = contractHandler(apicontract.GetTreeRiffCards, func(c *gin
 	if err != nil {
 		return apicontract.Failure[apicontract.RiffCardsData](-1, err.Error())
 	}
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.RiffCardsData](err)
+	} else if active {
+		blocks, total, pageCount, err := model.GetLegacyTreeFlashcardV2Blocks(c.Request.Context(), request.ID, page, pageSize)
+		if err != nil {
+			return apicontract.Failure[apicontract.RiffCardsData](-1, err.Error())
+		}
+		return apicontract.Success(riffCardsData(blocks, total, pageCount))
+	}
 	blocks, total, pageCount := model.GetTreeFlashcards(request.ID, page, pageSize)
 	return apicontract.Success(riffCardsData(blocks, total, pageCount))
 })
@@ -69,11 +115,33 @@ var getRiffCards = contractHandler(apicontract.GetRiffCards, func(c *gin.Context
 	if err != nil {
 		return apicontract.Failure[apicontract.RiffCardsData](-1, err.Error())
 	}
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.RiffCardsData](err)
+	} else if active {
+		blocks, total, pageCount, err := model.GetLegacyFlashcardV2Blocks(c.Request.Context(), request.ID, nil, page, pageSize)
+		if err != nil {
+			return apicontract.Failure[apicontract.RiffCardsData](-1, err.Error())
+		}
+		return apicontract.Success(riffCardsData(blocks, total, pageCount))
+	}
 	blocks, total, pageCount := model.GetDeckFlashcards(request.ID, page, pageSize)
 	return apicontract.Success(riffCardsData(blocks, total, pageCount))
 })
 
 var reviewRiffCard = contractHandler(apicontract.ReviewRiffCard, func(c *gin.Context, request apicontract.ReviewRiffCardRequest) apicontract.Response[apicontract.Null] {
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
+	} else if active {
+		durationMS := int64(0)
+		if request.DurationMS >= 0 {
+			durationMS = int64(request.DurationMS)
+		}
+		err := model.ReviewLegacyFlashcardV2Card(c.Request.Context(), request.DeckID, request.CardID, riff.Rating(int(request.Rating)), durationMS)
+		if err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
+		return apicontract.Success(apicontract.Null{})
+	}
 	if err := model.ReviewFlashcard(request.DeckID, request.CardID, riff.Rating(int(request.Rating)), request.IDs()); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
@@ -81,6 +149,15 @@ var reviewRiffCard = contractHandler(apicontract.ReviewRiffCard, func(c *gin.Con
 })
 
 var skipReviewRiffCard = contractHandler(apicontract.SkipReviewRiffCard, func(c *gin.Context, request apicontract.RiffCardRequest) apicontract.Response[apicontract.Null] {
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
+	} else if active {
+		err := model.SkipLegacyFlashcardV2Card(c.Request.Context(), request.DeckID, request.CardID)
+		if err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
+		return apicontract.Success(apicontract.Null{})
+	}
 	if err := model.SkipReviewFlashcard(request.DeckID, request.CardID); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
@@ -88,6 +165,15 @@ var skipReviewRiffCard = contractHandler(apicontract.SkipReviewRiffCard, func(c 
 })
 
 var getNotebookRiffDueCards = contractHandler(apicontract.GetNotebookRiffDueCards, func(c *gin.Context, request apicontract.RiffNotebookDueCardsRequest) apicontract.Response[apicontract.RiffDueCardsData] {
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.RiffDueCardsData](err)
+	} else if active {
+		cards, count, newCount, oldCount, err := model.GetLegacyNotebookFlashcardV2DueCards(c.Request.Context(), request.Notebook, request.IDs())
+		if err != nil {
+			return apicontract.Failure[apicontract.RiffDueCardsData](-1, err.Error())
+		}
+		return apicontract.Success(riffDueCardsData(cards, count, newCount, oldCount))
+	}
 	cards, count, newCount, oldCount, err := model.GetNotebookDueFlashcards(request.Notebook, request.IDs())
 	if err != nil {
 		return apicontract.Failure[apicontract.RiffDueCardsData](-1, err.Error())
@@ -96,6 +182,15 @@ var getNotebookRiffDueCards = contractHandler(apicontract.GetNotebookRiffDueCard
 })
 
 var getTreeRiffDueCards = contractHandler(apicontract.GetTreeRiffDueCards, func(c *gin.Context, request apicontract.RiffTreeDueCardsRequest) apicontract.Response[apicontract.RiffDueCardsData] {
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.RiffDueCardsData](err)
+	} else if active {
+		cards, count, newCount, oldCount, err := model.GetLegacyTreeFlashcardV2DueCards(c.Request.Context(), request.RootID, request.IDs())
+		if err != nil {
+			return apicontract.Failure[apicontract.RiffDueCardsData](-1, err.Error())
+		}
+		return apicontract.Success(riffDueCardsData(cards, count, newCount, oldCount))
+	}
 	cards, count, newCount, oldCount, err := model.GetTreeDueFlashcards(request.RootID, request.IDs())
 	if err != nil {
 		return apicontract.Failure[apicontract.RiffDueCardsData](-1, err.Error())
@@ -104,6 +199,15 @@ var getTreeRiffDueCards = contractHandler(apicontract.GetTreeRiffDueCards, func(
 })
 
 var getRiffDueCards = contractHandler(apicontract.GetRiffDueCards, func(c *gin.Context, request apicontract.RiffDueCardsRequest) apicontract.Response[apicontract.RiffDueCardsData] {
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.RiffDueCardsData](err)
+	} else if active {
+		cards, count, newCount, oldCount, err := model.GetLegacyFlashcardV2DueCards(c.Request.Context(), request.DeckID, request.IDs(), nil)
+		if err != nil {
+			return apicontract.Failure[apicontract.RiffDueCardsData](-1, err.Error())
+		}
+		return apicontract.Success(riffDueCardsData(cards, count, newCount, oldCount))
+	}
 	cards, count, newCount, oldCount, err := model.GetDueFlashcards(request.DeckID, request.IDs())
 	if err != nil {
 		return apicontract.Failure[apicontract.RiffDueCardsData](-1, err.Error())
@@ -115,6 +219,15 @@ var removeRiffCards = contractHandler(apicontract.RemoveRiffCards, func(c *gin.C
 	blockIDs := riffBlockIDs(request.BlockIDs)
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
+	}
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[*apicontract.RiffDeck](err)
+	} else if active {
+		deck, err := model.RemoveLegacyFlashcardV2Cards(c.Request.Context(), request.DeckID, blockIDs)
+		if err != nil {
+			return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
+		}
+		return apicontract.Success(legacyFlashcardV2DeckDataPointer(deck))
 	}
 	if err := performRiffCardsTransaction("removeFlashcards", request.DeckID, blockIDs); err != nil {
 		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
@@ -129,6 +242,15 @@ var addRiffCards = contractHandler(apicontract.AddRiffCards, func(c *gin.Context
 	blockIDs := riffBlockIDs(request.BlockIDs)
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
+	}
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[*apicontract.RiffDeck](err)
+	} else if active {
+		deck, err := model.AddLegacyFlashcardV2Cards(c.Request.Context(), request.DeckID, blockIDs)
+		if err != nil {
+			return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
+		}
+		return apicontract.Success(legacyFlashcardV2DeckData(deck))
 	}
 	if err := performRiffCardsTransaction("addFlashcards", request.DeckID, blockIDs); err != nil {
 		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
@@ -145,6 +267,15 @@ func performRiffCardsTransaction(action, deckID string, blockIDs []string) error
 }
 
 var renameRiffDeck = contractHandler(apicontract.RenameRiffDeck, func(c *gin.Context, request apicontract.RenameRiffDeckRequest) apicontract.Response[apicontract.Null] {
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
+	} else if active {
+		err := model.RenameLegacyFlashcardV2ReviewSet(c.Request.Context(), request.DeckID, request.Name)
+		if err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
+		return apicontract.Success(apicontract.Null{})
+	}
 	if err := model.RenameDeck(request.DeckID, request.Name); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
@@ -155,6 +286,15 @@ var removeRiffDeck = contractHandler(apicontract.RemoveRiffDeck, func(c *gin.Con
 	if err := util.ValidateID(request.DeckID); err != nil {
 		return apicontract.FailureFrom[apicontract.Null](err)
 	}
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[apicontract.Null](err)
+	} else if active {
+		err := model.RemoveLegacyFlashcardV2ReviewSet(c.Request.Context(), request.DeckID)
+		if err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
+		return apicontract.Success(apicontract.Null{})
+	}
 	if err := model.RemoveDeck(request.DeckID); err != nil {
 		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
@@ -162,6 +302,15 @@ var removeRiffDeck = contractHandler(apicontract.RemoveRiffDeck, func(c *gin.Con
 })
 
 var createRiffDeck = contractHandler(apicontract.CreateRiffDeck, func(c *gin.Context, request apicontract.CreateRiffDeckRequest) apicontract.Response[*apicontract.RiffDeck] {
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[*apicontract.RiffDeck](err)
+	} else if active {
+		deck, err := model.CreateLegacyFlashcardV2ReviewSet(c.Request.Context(), "", request.Name)
+		if err != nil {
+			return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
+		}
+		return apicontract.Success(legacyFlashcardV2DeckData(deck))
+	}
 	deck, err := model.CreateDeck(request.Name)
 	if err != nil {
 		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
@@ -170,6 +319,15 @@ var createRiffDeck = contractHandler(apicontract.CreateRiffDeck, func(c *gin.Con
 })
 
 var getRiffDecks = contractHandler(apicontract.GetRiffDecks, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.RiffDeck] {
+	if active, err := useFlashcardV2RiffAdapter(c); err != nil {
+		return apicontract.FailureFrom[[]*apicontract.RiffDeck](err)
+	} else if active {
+		decks, err := model.GetLegacyFlashcardV2ReviewSets(c.Request.Context())
+		if err != nil {
+			return apicontract.Failure[[]*apicontract.RiffDeck](-1, err.Error())
+		}
+		return apicontract.Success(legacyFlashcardV2DecksData(decks))
+	}
 	decks := model.GetDecks()
 	data := make([]*apicontract.RiffDeck, 0, len(decks))
 	for _, deck := range decks {
@@ -214,4 +372,37 @@ func riffDueCardsData(cards []*model.Flashcard, count, newCount, oldCount int) a
 		}
 	}
 	return apicontract.RiffDueCardsData{Cards: values, UnreviewedCount: count, UnreviewedNewCardCount: newCount, UnreviewedOldCardCount: oldCount}
+}
+
+func useFlashcardV2RiffAdapter(c *gin.Context) (bool, error) {
+	active, err := model.UseFlashcardV2Compatibility(c.Request.Context())
+	if err != nil {
+		return false, err
+	}
+	if active {
+		c.Header("Deprecation", "true")
+		c.Header("X-SiYuan-Replacement", "/api/flashcard")
+	}
+	return active, nil
+}
+
+func legacyFlashcardV2DeckData(deck flashcardv2.LegacyReviewSetInfo) *apicontract.RiffDeck {
+	return &apicontract.RiffDeck{ID: deck.DeckID, Name: deck.Name, Size: deck.Size,
+		Created: time.UnixMilli(deck.CreatedAt).Format("2006-01-02 15:04:05"),
+		Updated: time.UnixMilli(deck.UpdatedAt).Format("2006-01-02 15:04:05")}
+}
+
+func legacyFlashcardV2DeckDataPointer(deck *flashcardv2.LegacyReviewSetInfo) *apicontract.RiffDeck {
+	if deck == nil {
+		return nil
+	}
+	return legacyFlashcardV2DeckData(*deck)
+}
+
+func legacyFlashcardV2DecksData(decks []flashcardv2.LegacyReviewSetInfo) []*apicontract.RiffDeck {
+	data := make([]*apicontract.RiffDeck, 0, len(decks))
+	for _, deck := range decks {
+		data = append(data, legacyFlashcardV2DeckData(deck))
+	}
+	return data
 }

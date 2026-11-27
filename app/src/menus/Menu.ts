@@ -568,11 +568,11 @@ export class Menu {
         (this.element.firstElementChild.querySelector(".b3-menu__label") as HTMLElement).innerHTML =
             window.siyuan.languages.back;
         this.element.lastElementChild.innerHTML = "";
-        this.element.lastElementChild.classList.remove("b3-menu__items--menu", "b3-menu__items--inner-scroll");
+        this.element.lastElementChild.classList.remove("b3-menu__items--menu", "b3-menu__items--inner-scroll", "b3-menu__items--no-leading-icons");
         this.element.lastElementChild.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全
         this.element.classList.add("fn__none");
         setPopoverMenuOpen(this.element, false);
-        this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet", "b3-menu--expanded");
+        this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen", "b3-menu--sheet", "b3-menu--expanded", "b3-menu--compact-icons");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
         this.element.removeAttribute("data-from");    // 标识菜单入口
@@ -904,7 +904,9 @@ export class MenuItem {
             if (typeof options.iconHTML === "string") {
                 html = options.iconHTML + html;
             } else {
-                html = `<svg class="b3-menu__icon ${options.iconClass || ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
+                const iconClass = options.iconClass ? ` ${options.iconClass}` : "";
+                const placeholder = options.icon || options.iconClass ? "" : " b3-menu__icon--placeholder";
+                html = `<svg class="b3-menu__icon${iconClass}${placeholder}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
             }
             if (options.accelerator) {
                 html += `<span class="b3-menu__accelerator b3-menu__accelerator--hotkey">${updateHotkeyTip(options.accelerator)}</span>`;

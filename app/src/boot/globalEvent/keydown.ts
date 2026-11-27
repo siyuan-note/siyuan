@@ -53,7 +53,7 @@ import {Backlink} from "../../layout/dock/Backlink";
 import {setZoom} from "../../layout/topBar";
 /// #endif
 import {openHistory} from "../../history/history";
-import {openCard, openCardByData} from "../../card/openCard";
+import {openCard, openCardByScope} from "../../card/openCard";
 import {lockScreen} from "../../dialog/processSystem";
 import {isWindow} from "../../util/functions";
 import {reloadProtyle} from "../../protyle/util/reload";
@@ -64,8 +64,7 @@ import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/
 import {mainMenu} from "../../menus/mainMenu";
 import {Search} from "../../search";
 import {Custom} from "../../layout/dock/Custom";
-import {transaction} from "../../protyle/wysiwyg/transaction";
-import {quickMakeCard} from "../../card/makeCard";
+import {createQuickSources, quickMakeCard} from "../../card/makeCard";
 import {getContentByInlineHTML} from "../../protyle/wysiwyg/keydown";
 import {searchKeydown} from "./searchKeydown";
 import {historyKeydown} from "../../history/keydown";
@@ -244,9 +243,8 @@ const documentKeydown = (app: App, event: KeyboardEvent, protyle: IProtyle, rang
     }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition, event) &&
         !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
-        fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-            openCardByData(app, response.data, "doc", protyle.block.rootID, getDocDisplayName(protyle.title?.getText() ?? "", !protyle.title?.getText().trim()), true);
-        });
+        openCardByScope(app, "doc", protyle.block.rootID,
+            getDocDisplayName(protyle.title?.getText() ?? "", !protyle.title?.getText().trim()), true);
         event.preventDefault();
         return true;
     }
@@ -701,13 +699,9 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition, event) && !window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
         if (isFile) {
             const id = selectedItems[0].id;
-            fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
-                openCardByData(app, response.data, "doc", id, getDisplayName(selectedItems[0].name, false, true), true);
-            });
+            openCardByScope(app, "doc", id, getDisplayName(selectedItems[0].name, false, true), true);
         } else {
-            fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
-                openCardByData(app, response.data, "notebook", notebookId, getNotebookName(notebookId), true);
-            });
+            openCardByScope(app, "notebook", notebookId, getNotebookName(notebookId), true);
         }
         event.preventDefault();
         return true;
@@ -715,11 +709,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard, event) && !isEncryptedBox(notebookId)) {
         if (ids.length > 0) {
-            transaction(undefined, [{
-                action: "addFlashcards",
-                deckID: Constants.QUICK_DECK_ID,
-                blockIDs: ids,
-            }]);
+            createQuickSources(ids);
         }
         event.preventDefault();
         return true;
@@ -1462,7 +1452,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.riffCard, event)) {
-        openCard(app, true);
+        openCard(app, false, true);
         if (document.activeElement && !window.siyuan.dialogs.some(item =>
             item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD)) {
             (document.activeElement as HTMLElement).blur();

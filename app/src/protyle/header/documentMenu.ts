@@ -1,6 +1,6 @@
 import type {DocInfo} from "../../types/api";
 import type {App} from "../../index";
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchSyncPost} from "../../util/fetch";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, openFileWechatNotify,} from "../../menus/commonMenuItem";
 import {deleteFile} from "../../editor/deleteFile";
@@ -12,10 +12,10 @@ import * as path from "path";
 import {openMobileFileById} from "../../mobile/editor";
 /// #endif
 import {Constants} from "../../constants";
-import {openCardByData} from "../../card/openCard";
-import {viewCards} from "../../card/viewCards";
+import {openCardByScope} from "../../card/openCard";
+import {openFlashcardV2ManagementByRoots} from "../../card/flashcardV2";
 import {getDocDisplayName, getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../../util/pathName";
-import {makeCard, quickMakeCard} from "../../card/makeCard";
+import {createQuickSources, makeCard} from "../../card/makeCard";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import dayjs from "dayjs";
 import {popSearch} from "../../mobile/menu/search";
@@ -32,7 +32,6 @@ import {buildWebClipboardHTML} from "../util/clipboardData";
 import {exportImage} from "../export/util";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getLute} from "../render/setLute";
-import {transaction} from "../wysiwyg/transaction";
 
 export const openDocumentMenu = (options: {
     app: App,
@@ -223,7 +222,6 @@ export const openDocumentMenu = (options: {
                 }
             }).element);
         }
-        const isCardMade = (docInfo.ial[Constants.CUSTOM_RIFF_DECKS] || "").includes(Constants.QUICK_DECK_ID);
         if (!isEncryptedBox(notebookId)) {
             const riffCardMenu: IMenu[] = [{
                 id: "spaceRepetition",
@@ -231,59 +229,38 @@ export const openDocumentMenu = (options: {
                 label: window.siyuan.languages.spaceRepetition,
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
-                    fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
-                        openCardByData(app, response.data, "doc", id);
-                    });
+                    openCardByScope(app, "doc", id, docInfo.name);
                 }
             }, {
                 id: "manage",
                 iconHTML: "",
                 label: window.siyuan.languages.manage,
                 click: () => {
-                    fetchPost("/api/filetree/getHPathByID", {
-                        id
-                    }, (response) => {
-                        viewCards(app, id, pathPosix().join(getNotebookName(notebookId), response.data), "Tree");
-                    });
+                    openFlashcardV2ManagementByRoots([id], docInfo.name);
                 }
             }, {
-                id: isCardMade ? "removeCard" : "quickMakeCard",
+                id: "quickMakeCard",
                 iconHTML: "",
-                label: isCardMade ? window.siyuan.languages.removeCard : window.siyuan.languages.quickMakeCard,
+                label: window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
                 click: () => {
-                    if (!protyle) {
-                        const remove = (docInfo.ial[Constants.CUSTOM_RIFF_DECKS] || "").includes(Constants.QUICK_DECK_ID);
-                        transaction(undefined, [{
-                            action: remove ? "removeFlashcards" : "addFlashcards",
-                            deckID: Constants.QUICK_DECK_ID,
-                            blockIDs: [id],
-                        }], [{
-                            action: remove ? "addFlashcards" : "removeFlashcards",
-                            deckID: Constants.QUICK_DECK_ID,
-                            blockIDs: [id],
-                        }]);
-                        return;
-                    }
-                    let titleElement = protyle.title?.element;
-                    if (!titleElement) {
-                        titleElement = document.createElement("div");
-                        titleElement.setAttribute("data-node-id", id);
-                        titleElement.setAttribute(Constants.CUSTOM_RIFF_DECKS, docInfo.ial[Constants.CUSTOM_RIFF_DECKS]);
-                    }
-                    quickMakeCard(protyle, [titleElement]);
+                    createQuickSources([id]);
+                }
+            }, {
+                id: "removeCard",
+                iconHTML: "",
+                label: window.siyuan.languages.removeCard,
+                click: () => {
+                    openFlashcardV2ManagementByRoots([id], window.siyuan.languages.removeCard);
+                }
+            }, {
+                id: "addToDeck",
+                iconHTML: "",
+                label: window.siyuan.languages.flashcardCardSource,
+                click: () => {
+                    makeCard(app, [id]);
                 }
             }];
-            if (window.siyuan.config.flashcard.deck) {
-                riffCardMenu.push({
-                    id: "addToDeck",
-                    iconHTML: "",
-                    label: window.siyuan.languages.addToDeck,
-                    click: () => {
-                        makeCard(app, [id]);
-                    }
-                });
-            }
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "riffCard",
                 label: window.siyuan.languages.riffCard,

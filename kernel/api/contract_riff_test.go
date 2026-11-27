@@ -12,11 +12,13 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -159,7 +161,11 @@ func TestAPIContractRiffDeckLifecycle(t *testing.T) {
 	if code != 0 || string(data) != "null" || model.Decks[deck.ID].Name != " renamed " {
 		t.Fatalf("deck rename changed: %d %s %s", code, msg, data)
 	}
-	model.LoadFlashcards()
+	loaded, err := riff.LoadDeck(filepath.Join(util.DataDir, "storage", "riff"), deck.ID, model.Conf.LoadFlashcard().RequestRetention, model.Conf.LoadFlashcard().MaximumInterval, model.Conf.LoadFlashcard().Weights)
+	if err != nil {
+		t.Fatal(err)
+	}
+	model.Decks = map[string]*riff.Deck{deck.ID: loaded}
 	code, msg, data = riffContractRequest(t, "getRiffDecks", getRiffDecks, "")
 	var decks []apicontract.RiffDeck
 	if err := json.Unmarshal(data, &decks); err != nil || code != 0 || len(decks) != 1 || decks[0].ID != deck.ID || decks[0].Name != " renamed " {
@@ -223,5 +229,67 @@ func TestAPIContractRiffInvalidBodies(t *testing.T) {
 		if code != -1 || !strings.Contains(msg, "the request body is empty or truncated (EOF)") || string(data) != "null" {
 			t.Fatalf("%s parse error changed: %d %s %s", entry.name, code, msg, data)
 		}
+	}
+}
+
+func TestAPIContractRiffV2AdapterFailure(t *testing.T) {
+	previousConf, previousData, previousTemp := model.Conf, util.DataDir, util.TempDir
+	model.Conf, util.DataDir, util.TempDir = model.NewAppConf(), t.TempDir(), t.TempDir()
+	system := conf.NewSystem()
+	system.ID = "test-device"
+	model.Conf.System.Store(system)
+	t.Cleanup(func() { model.Conf, util.DataDir, util.TempDir = previousConf, previousData, previousTemp })
+	root := flashcardv2.V2Root(util.DataDir)
+	if err := os.MkdirAll(root, 0700); err != nil {
+		t.Fatal(err)
+	}
+	manifestPath := filepath.Join(root, "manifest.json")
+	if err := os.WriteFile(manifestPath, []byte(`{"formatVersion":999}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range []struct {
+		name    string
+		handler gin.HandlerFunc
+		body    string
+	}{
+		{"getRiffDecks", getRiffDecks, ""},
+		{"createRiffDeck", createRiffDeck, `{"name":"deck"}`},
+		{"removeRiffDeck", removeRiffDeck, `{"deckID":"20260101000000-aaaaaaa"}`},
+	} {
+		t.Run(entry.name, func(t *testing.T) {
+			code, msg, data := riffContractRequest(t, entry.name, entry.handler, entry.body)
+			if code != -1 || !strings.Contains(msg, "flashcard manifest") || string(data) != "null" {
+				t.Fatalf("adapter failure changed: %d %s %s", code, msg, data)
+			}
+		})
+	}
+	if data, err := os.ReadFile(manifestPath); err != nil || string(data) != `{"formatVersion":999}` {
+		t.Fatalf("unsupported manifest was changed: %s (%v)", data, err)
+	}
+}
+
+func TestAPIContractRiffV2DeckSerialization(t *testing.T) {
+	created := time.Date(2026, 9, 1, 10, 0, 0, 0, time.Local)
+	updated := created.Add(time.Hour)
+	for _, decks := range [][]flashcardv2.LegacyReviewSetInfo{nil, {}, {{DeckID: "deck", Name: "name", Size: 2, CreatedAt: created.UnixMilli(), UpdatedAt: updated.UnixMilli()}}} {
+		data := legacyFlashcardV2DecksData(decks)
+		payload, err := json.Marshal(apicontract.Success(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		recorder := httptest.NewRecorder()
+		recorder.Header().Set("Content-Type", "application/json")
+		recorder.Write(payload)
+		requireAPIContract(t, "POST", "/api/riff/getRiffDecks", recorder)
+		if len(decks) == 0 {
+			if data == nil || len(data) != 0 {
+				t.Fatal("empty V2 deck list must not be null")
+			}
+		} else if got := data[0]; got.ID != "deck" || got.Name != "name" || got.Size != 2 || got.Created != "2026-09-01 10:00:00" || got.Updated != "2026-09-01 11:00:00" {
+			t.Fatalf("V2 deck fields changed: %+v", got)
+		}
+	}
+	if legacyFlashcardV2DeckDataPointer(nil) != nil {
+		t.Fatal("missing V2 deck must remain null")
 	}
 }

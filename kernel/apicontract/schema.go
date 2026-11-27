@@ -97,6 +97,30 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[FlashcardV2JSON]() {
+		return b.schema(reflect.TypeFor[JSONValue](), input)
+	}
+	if t == reflect.TypeFor[FlashcardV2SourceHistoryData]() {
+		list, err := b.schema(reflect.TypeFor[FlashcardV2SourceHistoryList](), input)
+		if err != nil {
+			return nil, err
+		}
+		version, err := b.schema(reflect.TypeFor[FlashcardV2SourceHistoryVersion](), input)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{list, version}}, nil
+	}
+	if t == reflect.TypeFor[AnkiConnectResponse]() {
+		return b.ankiConnectResponseSchema()
+	}
+	if t == reflect.TypeFor[AnkiConnectNoteInfoResult]() {
+		info, err := b.schema(reflect.TypeFor[AnkiConnectNoteInfo](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{info, object(map[string]*Schema{})}}, nil
+	}
 	if schema, err := transactionPayloadSchema(b, t, input); schema != nil || err != nil {
 		return schema, err
 	}
@@ -175,6 +199,20 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 			return nil, err
 		}
 		return &Schema{AnyOf: []*Schema{{Type: "array", Items: value}, {Type: "object", AdditionalProperties: value}}}, nil
+	}
+	if t == reflect.TypeFor[AnkiConnectNotes]() || t == reflect.TypeFor[*AnkiConnectNotes]() {
+		note, err := b.schema(reflect.TypeFor[AnkiConnectNote](), input)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{{Type: "array", Items: note}, {Type: "array", Items: &Schema{Type: "integer"}}}}, nil
+	}
+	if t == reflect.TypeFor[AnkiConnectActions]() || t == reflect.TypeFor[*AnkiConnectActions]() {
+		request, err := b.schema(reflect.TypeFor[AnkiConnectRequest](), input)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{{Type: "array", Items: request}, {Type: "array", Items: &Schema{Type: "string"}}}}, nil
 	}
 	if t == reflect.TypeFor[PluginRPCBatchRequest]() {
 		call, err := b.schema(reflect.TypeFor[PluginRPCRequestFields](), true)
@@ -334,6 +372,9 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 			{Type: "array", Items: ref}, {Type: "object", AdditionalProperties: ref},
 		}}
 		return ref, nil
+	}
+	if t == reflect.TypeFor[FlashcardQueryExpression]() {
+		return b.schema(reflect.TypeFor[FlashcardQueryExpressionFields](), input)
 	}
 	if t == reflect.TypeFor[Base64Bytes]() {
 		if input {

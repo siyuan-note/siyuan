@@ -3,7 +3,7 @@ import {createMobileSecondaryEditorCloseGuard, registerMobileSecondaryEditor} fr
 import {openInputDialog} from "../dialog/inputDialog";
 import {toggleMenu} from "../menus/menuToggle";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {fetchDueCardsSync} from "./fetchDueCards";
+import {fetchDueCards, fetchDueCardsSync} from "./fetchDueCards";
 import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
@@ -40,8 +40,12 @@ import {
     showFlashcardAnswer
 } from "./flashcardMode";
 import {setFold} from "../protyle/util/blockFold";
+import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
+import {openFlashcardV2ReviewPicker} from "./flashcardV2";
+import {flashcardV2LocationQuery} from "./flashcardV2Query";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {appendRemoteQuery} from "../util/hostCapabilities";
+import {setFlashcardLocateBlockID} from "./flashcardLocate";
 import {runCardAction} from "./pendingAction";
 
 const genCardCount = (cardsData: ICardData, allIndex = 0) => {
@@ -72,7 +76,6 @@ export const genCardHTML = (options: {
     id: string,
     cardType: TCardType,
     cardsData: ICardData,
-    isTab: boolean
 }) => {
     let iconsHTML: string;
     /// #if MOBILE
@@ -85,9 +88,9 @@ export const genCardHTML = (options: {
 </div>`;
     /// #else
     iconsHTML = `<div class="block__icons">
-        ${options.isTab ? '<div class="fn__flex-1"></div>' : `<div class="block__logo block__logo--icon">
+        <div class="block__logo block__logo--icon">
             <svg class="block__logoicon"><use xlink:href="#iconRiffCard"></use></svg>${window.siyuan.languages.riffCard}
-        </div>`}
+        </div>
         <span class="fn__flex-1 resize__move" style="min-height: 100%"></span>
         <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.cards.length === 0 ? " fn__none" : " fn__flex"}">${genCardCount(options.cardsData)}</span></div>
         <div class="fn__space"></div>
@@ -102,8 +105,8 @@ export const genCardHTML = (options: {
         <div data-type="more" class="${options.cardsData.cards.length === 0 ? "fn__none " : ""}b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.more}">
             <svg><use xlink:href="#iconMore"></use></svg>
         </div>
-        <div class="fn__space${options.isTab ? " fn__none" : ""}"></div>
-        <div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show${options.isTab ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openBy}">
+        <div class="fn__space"></div>
+        <div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.openBy}">
             <svg><use xlink:href="#iconOpen"></use></svg>
         </div>
     </div>`;
@@ -194,6 +197,7 @@ const showRatingActions = (actionElements: NodeListOf<Element>, currentCard: ICa
 };
 
 const getEditor = async (id: string, protyle: IProtyle, element: Element, currentCard: ICard) => {
+    setFlashcardLocateBlockID(element, id);
     const revealState = getFlashcardRevealState(protyle);
     const generation = beginFlashcardLoad(revealState);
     const actionElements = element.querySelectorAll(".card__action");
@@ -278,6 +282,7 @@ export const bindCardEvent = async (options: {
             options.element.querySelector('[data-type="fullscreen"]'));
     }
     let index = 0;
+    let cardShownAt = performance.now();
     if (typeof options.index === "number") {
         index = options.index;
     }
@@ -330,6 +335,7 @@ export const bindCardEvent = async (options: {
         } else {
             allDone(countElement, editor, actionElements);
         }
+        cardShownAt = performance.now();
         index = nextIndex;
         options.cardsData = nextData;
         pendingAdvance = undefined;
@@ -372,7 +378,9 @@ export const bindCardEvent = async (options: {
             options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
         }
         if (options.cardsData.cards.length > 0) {
-            await nextCard({countElement, editor, actionElements, index, cardsData: options.cardsData});
+            if (await nextCard({countElement, editor, actionElements, index, cardsData: options.cardsData})) {
+                cardShownAt = performance.now();
+            }
         } else {
             allDone(countElement, editor, actionElements);
         }
@@ -585,6 +593,11 @@ export const bindCardEvent = async (options: {
             /// #if !MOBILE
             const sticktabElement = hasClosestByAttribute(target, "data-type", "sticktab");
             if (sticktabElement) {
+                const tabData = () => ({
+                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                    id: docId,
+                    title: options.title,
+                });
                 toggleMenu({
                     target: sticktabElement,
                     build: (_menu, session) => {
@@ -599,13 +612,7 @@ export const bindCardEvent = async (options: {
                                     custom: {
                                         icon: "iconRiffCard",
                                         title: window.siyuan.languages.spaceRepetition,
-                                        data: {
-                                            cardsData: options.cardsData,
-                                            index,
-                                            cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                                            id: docId,
-                                            title: options.title
-                                        },
+                                        data: tabData(),
                                         id: "siyuan-card"
                                     },
                                 });
@@ -623,13 +630,7 @@ export const bindCardEvent = async (options: {
                                     custom: {
                                         icon: "iconRiffCard",
                                         title: window.siyuan.languages.spaceRepetition,
-                                        data: {
-                                            cardsData: options.cardsData,
-                                            index,
-                                            cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                                            id: docId,
-                                            title: options.title
-                                        },
+                                        data: tabData(),
                                         id: "siyuan-card"
                                     },
                                 });
@@ -649,13 +650,7 @@ export const bindCardEvent = async (options: {
                                     "children": {
                                         "instance": "Custom",
                                         "customModelType": "siyuan-card",
-                                        "customModelData": {
-                                            "cardsData": options.cardsData,
-                                            "index": index,
-                                            "cardType": filterElement.getAttribute("data-cardtype"),
-                                            "id": docId,
-                                            "title": options.title
-                                        }
+                                        "customModelData": tabData()
                                     }
                                 }];
                                 const url = new URL("/stage/build/app/window.html", window.location.origin);
@@ -677,7 +672,7 @@ export const bindCardEvent = async (options: {
 
                     },
                 });
-            event.stopPropagation();
+                event.stopPropagation();
                 event.preventDefault();
                 return;
             }
@@ -828,6 +823,7 @@ export const bindCardEvent = async (options: {
                     deckID: currentCard.deckID,
                     cardID: currentCard.cardID,
                     rating: parseInt(type),
+                    durationMS: type === "-3" ? 0 : Math.max(0, Math.round(performance.now() - cardShownAt)),
                     reviewedCards: options.cardsData.cards
                 });
                 if (reviewed.code !== 0 || !editor.protyle.element.isConnected) return;
@@ -848,12 +844,50 @@ const emitEvent = (card: ICard, type: string) => {
     });
 };
 
-export const openCard = (app: App, openOnly = false) => {
+export const openCard = (app: App, selectReviewSet = false, openOnly = false) => {
     if (window.siyuan.config.readonly) {
         return;
     }
-    fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
-        openCardByData(app, cardsResponse.data, "all", undefined, undefined, openOnly);
+    if (openOnly && window.siyuan.dialogs.some((item) =>
+        item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD ||
+        item.element.hasAttribute("data-flashcard-v2-review"))) {
+        return;
+    }
+    fetchPost("/api/flashcard/getMigrationStatus", {}, (statusResponse) => {
+        if (statusResponse.data.state === "Legacy") {
+            fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
+                openCardByData(app, cardsResponse.data, "all", undefined, undefined, openOnly);
+            });
+            return;
+        }
+        if (selectReviewSet) {
+            openFlashcardV2ReviewPicker(app);
+        } else {
+            openFlashcardV2ReviewSession(app, "", window.siyuan.languages.riffCard, {reviewMode: "normal"});
+        }
+    });
+};
+
+export const openCardByScope = (app: App, cardType: "doc" | "notebook", id: string, title: string, openOnly = false) => {
+    if (window.siyuan.config.readonly) {
+        return;
+    }
+    if (openOnly && window.siyuan.dialogs.some((item) =>
+        item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD ||
+        item.element.hasAttribute("data-flashcard-v2-review"))) {
+        return;
+    }
+    fetchPost("/api/flashcard/getMigrationStatus", {}, (statusResponse) => {
+        if (statusResponse.data.state === "Legacy") {
+            fetchDueCards(cardType, id, undefined, (cardsResponse) => {
+                openCardByData(app, cardsResponse.data, cardType, id, title, openOnly);
+            });
+            return;
+        }
+        openFlashcardV2ReviewSession(app, "", title, {
+            reviewMode: "normal",
+            query: flashcardV2LocationQuery(cardType === "doc" ? "rootID" : "notebookID", id),
+        });
     });
 };
 
@@ -885,7 +919,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         },
         hideCloseIcon: true,
         positionId: Constants.DIALOG_OPENCARD,
-        content: genCardHTML({id, cardType, cardsData, isTab: false}),
+        content: genCardHTML({id, cardType, cardsData}),
         width: isMobile() ? "100vw" : "80vw",
         height: isMobile() ? "100dvh" : "70vh",
         destroyCallback() {
@@ -964,6 +998,10 @@ const nextCard = async (options: {
 };
 
 const allDone = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>) => {
+    const cardElement = hasClosestByAttribute(countElement, "data-key", Constants.DIALOG_OPENCARD);
+    if (cardElement) {
+        setFlashcardLocateBlockID(cardElement);
+    }
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
@@ -977,6 +1015,10 @@ const allDone = (countElement: Element, editor: Protyle, actionElements: NodeLis
 };
 
 const newRound = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, unreviewedCount: number) => {
+    const cardElement = hasClosestByAttribute(countElement, "data-key", Constants.DIALOG_OPENCARD);
+    if (cardElement) {
+        setFlashcardLocateBlockID(cardElement);
+    }
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;

@@ -11,7 +11,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
-func TestFlashcardReloadInvalidatesReviewState(t *testing.T) {
+func TestFlashcardLegacyReloadInvalidatesReviewState(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	Conf.Flashcard.Store(conf.NewFlashcard())
 	previousDecks, previousReviews, previousSkipped := Decks, reviewCardCache, skipCardCache
@@ -32,7 +32,7 @@ func TestFlashcardReloadInvalidatesReviewState(t *testing.T) {
 		t.Fatal(err)
 	}
 	reps := deck.GetCard(cardID).GetReps()
-	LoadFlashcards()
+	loadLegacyFlashcards()
 	if len(reviewCardCache) != 0 || len(skipCardCache) != 0 {
 		t.Fatal("deck reload retained undo or skip state from the old generation")
 	}

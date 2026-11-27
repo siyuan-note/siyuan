@@ -5,6 +5,7 @@
 package model
 
 import (
+	"context"
 	"errors"
 	"math"
 	"os"
@@ -23,6 +24,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -30,7 +32,22 @@ import (
 
 // ValidateFlashcardBlockIDs 只允许普通笔记本中可确认存在的块进入全局闪卡存储。
 func ValidateFlashcardBlockIDs(blockIDs []string) error {
-	return validateFlashcardBlockIDs(blockIDs, treenode.GetBlockTree, IsEncryptedBox)
+	for _, blockID := range blockIDs {
+		blockTree := treenode.GetBlockTreeInExactBox(blockID, "")
+		if blockTree != nil && !IsEncryptedBox(blockTree.BoxID) {
+			continue
+		}
+		for _, boxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if treenode.GetBlockTreeInExactBox(blockID, boxID) != nil {
+				return errors.New(Conf.Language(313))
+			}
+		}
+		if blockTree != nil && IsEncryptedBox(blockTree.BoxID) {
+			return errors.New(Conf.Language(313))
+		}
+		return errors.New(Conf.Language(180))
+	}
+	return nil
 }
 
 func validateFlashcardBlockIDs(blockIDs []string, getBlockTree func(string) *treenode.BlockTree, isEncryptedBox func(string) bool) error {
@@ -956,6 +973,14 @@ func (tx *Transaction) doRemoveFlashcards(operation *Operation) (ret *TxErr) {
 	if err := ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
 	}
+	if active, err := UseFlashcardV2Compatibility(context.Background()); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+	} else if active {
+		if _, err = RemoveLegacyFlashcardV2Cards(context.Background(), deckID, blockIDs); err != nil {
+			return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+		}
+		return nil
+	}
 
 	if err := tx.removeBlocksDeckAttr(blockIDs, deckID); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: deckID}
@@ -1076,6 +1101,14 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 	if err := ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
 	}
+	if active, err := UseFlashcardV2Compatibility(context.Background()); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+	} else if active {
+		if _, err = AddLegacyFlashcardV2Cards(context.Background(), deckID, blockIDs); err != nil {
+			return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+		}
+		return nil
+	}
 
 	foundDeck := false
 	for _, deck := range Decks {
@@ -1171,6 +1204,33 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 }
 
 func LoadFlashcards() {
+	loadFlashcards(true)
+}
+
+func loadFlashcards(waitForStorageSync bool) {
+	status, err := autoMigrateLegacyFlashcards(context.Background(), waitForStorageSync)
+	if err == nil && status.State == flashcardv2.MigrationStateActive {
+		Decks = map[string]*riff.Deck{}
+		return
+	}
+	if err != nil {
+		logging.LogErrorf("auto migrate flashcards failed: %s", err)
+	}
+	if isFlashcardV2AuthorityState(status.State) ||
+		(status.State == "" && flashcardV2ManifestExists()) {
+		// 已经生成新版权威记录后不得回退到旧存储继续写入，否则会形成两套分叉数据。
+		Decks = map[string]*riff.Deck{}
+		return
+	}
+	loadLegacyFlashcards()
+}
+
+func flashcardV2ManifestExists() bool {
+	_, err := os.Stat(filepath.Join(flashcardv2.V2Root(util.DataDir), "manifest.json"))
+	return err == nil
+}
+
+func loadLegacyFlashcards() {
 	confFlashcardSnapshot := Conf.LoadFlashcard()
 
 	riffSavePath := getRiffDir()
@@ -1258,7 +1318,7 @@ func RemoveDeck(deckID string) (err error) {
 		IncSyncIfNeeded(cardsPath)
 	}
 
-	LoadFlashcards()
+	loadLegacyFlashcards()
 	return
 }
 

@@ -191,6 +191,7 @@ test("image gallery handles source scopes, copy feedback, Live Photos, and mobil
             const single=Array.from(singleGallery.images, item=>item.getAttribute("src"));
             singleGallery.destroy();
             window.checkMobileImagePreview = async (width) => {
+                await wait(() => innerWidth === width);
                 const sidebar = document.createElement("div");
                 sidebar.id = "sidebar";
                 document.body.append(sidebar);

@@ -130,6 +130,14 @@ func TestNormalizeSettingsRestoreDocPosition(t *testing.T) {
 }
 
 func TestNormalizeSettingsFlashcard(t *testing.T) {
+	for _, entry := range []struct{ input, want int }{{-1, 0}, {0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 0}} {
+		flashcard := NewFlashcard()
+		flashcard.OpenMode = entry.input
+		flashcard, warning := NormalizeFlashcard(flashcard)
+		if flashcard.OpenMode != entry.want || warning != "" {
+			t.Fatalf("unexpected flashcard open mode for %d: %+v, %s", entry.input, flashcard, warning)
+		}
+	}
 	for _, weight := range []string{"bad", "NaN", "+Inf"} {
 		weights := strings.Split(DefaultFSRSWeights(), ",")
 		weights[0] = weight

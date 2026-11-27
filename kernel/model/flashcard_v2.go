@@ -1,0 +1,1464 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+package model
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"html"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/siyuan-note/logging"
+	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
+	kernelsql "github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+var (
+	flashcardV2StoreMu sync.Mutex
+	flashcardV2Store   *flashcardv2.Store
+)
+
+const flashcardV2SnapshotBatchDelta = 256
+
+// LegacyFlashcardMigrationPreview 是不会把候选权威记录全部复制到 HTTP 响应中的迁移摘要。
+type LegacyFlashcardMigrationPreview struct {
+	MigrationID  string                              `json:"migrationID"`
+	RecordDigest string                              `json:"recordDigest"`
+	InputFiles   []flashcardv2.LegacyFileFingerprint `json:"inputFiles"`
+	Report       flashcardv2.LegacyMigrationReport   `json:"report"`
+}
+
+// FlashcardV2CardSearchResult 为管理列表补充不含完整块 DOM 的卡源摘要。
+type FlashcardV2CardSearchResult struct {
+	flashcardv2.CardSearchResult
+	SourceBlockID string `json:"sourceBlockID,omitempty"`
+	SourceTitle   string `json:"sourceTitle,omitempty"`
+}
+
+// PreviewFlashcardV2AnkiPackage 只读分析 Anki 卡包结构和模板兼容性。
+func PreviewFlashcardV2AnkiPackage(ctx context.Context, packagePath string) (flashcardv2.AnkiPackagePreview, error) {
+	return flashcardv2.PreviewAnkiPackage(ctx, packagePath)
+}
+
+func openFlashcardV2Store(ctx context.Context) (*flashcardv2.Store, error) {
+	flashcardV2StoreMu.Lock()
+	defer flashcardV2StoreMu.Unlock()
+	if flashcardV2Store != nil && !flashcardV2Store.IsClosed() {
+		return flashcardV2Store, nil
+	}
+	flashcardV2Store = nil
+	store, err := flashcardv2.OpenStore(ctx, flashcardv2.V2Root(util.DataDir),
+		flashcardv2.ProjectionPath(util.TempDir), Conf.LoadSystem().ID, nil)
+	if err != nil {
+		return nil, err
+	}
+	status, err := store.LegacyMigrationStatus(ctx)
+	if err == nil && status.State == flashcardv2.MigrationStateActive {
+		status, err = store.CheckLegacyDivergence(ctx, getRiffDir())
+	}
+	if err == nil && status.State == flashcardv2.MigrationStateActive {
+		_, err = store.UpgradeBlockFlashcardMode(ctx)
+	}
+	if err != nil {
+		_ = store.Close()
+		return nil, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
+		_ = store.Close()
+		return nil, err
+	}
+	flashcardV2Store = store
+	return store, nil
+}
+
+func refreshFlashcardV2Store() {
+	flashcardV2StoreMu.Lock()
+	store := flashcardV2Store
+	flashcardV2StoreMu.Unlock()
+	if store == nil {
+		return
+	}
+	ctx := context.Background()
+	if err := store.Refresh(ctx); err != nil {
+		forgetFlashcardV2Store(store)
+		logging.LogErrorf("refresh flashcard v2 store failed: %s", err)
+		return
+	}
+	if err := refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
+		logging.LogErrorf("refresh flashcard v2 block metadata failed: %s", err)
+		return
+	}
+	status, err := store.LegacyMigrationStatus(ctx)
+	if err == nil && status.State == flashcardv2.MigrationStateActive {
+		_, err = store.CheckLegacyDivergence(ctx, getRiffDir())
+	}
+	if err != nil {
+		logging.LogErrorf("check legacy flashcard divergence failed: %s", err)
+	}
+}
+
+func forgetFlashcardV2Store(store *flashcardv2.Store) {
+	flashcardV2StoreMu.Lock()
+	defer flashcardV2StoreMu.Unlock()
+	if flashcardV2Store == store {
+		flashcardV2Store = nil
+	}
+}
+
+func refreshFlashcardV2BlockMetadata(ctx context.Context, store *flashcardv2.Store,
+	reconcile bool) error {
+	blockIDs, err := store.Projection().RequiredBlockMetadataIDs(ctx)
+	if err != nil {
+		return err
+	}
+	dependencies, err := store.Projection().SourceBlockDependencies(ctx)
+	if err != nil {
+		return err
+	}
+	allBlockIDs := append([]string(nil), blockIDs...)
+	seenBlockIDs := make(map[string]struct{}, len(blockIDs))
+	for _, blockID := range blockIDs {
+		seenBlockIDs[blockID] = struct{}{}
+	}
+	for _, dependency := range dependencies {
+		for _, blockID := range dependency.BlockIDs {
+			if _, found := seenBlockIDs[blockID]; found {
+				continue
+			}
+			seenBlockIDs[blockID] = struct{}{}
+			allBlockIDs = append(allBlockIDs, blockID)
+		}
+	}
+	const chunkSize = 500
+	blockTrees := make(map[string]*treenode.BlockTree, len(allBlockIDs))
+	for offset := 0; offset < len(allBlockIDs); offset += chunkSize {
+		end := min(offset+chunkSize, len(allBlockIDs))
+		for blockID, blockTree := range treenode.GetBlockTrees(allBlockIDs[offset:end]) {
+			if blockTree == nil || IsEncryptedBox(blockTree.BoxID) {
+				continue
+			}
+			blockTrees[blockID] = blockTree
+		}
+	}
+	metadata := make([]flashcardv2.BlockMetadata, 0, len(blockIDs))
+	blockContents := make(map[string]string, len(blockTrees))
+	contentBlockIDs := make([]string, 0, len(blockTrees))
+	for blockID := range blockTrees {
+		contentBlockIDs = append(contentBlockIDs, blockID)
+	}
+	for _, block := range kernelsql.GetBlocks(contentBlockIDs) {
+		if block != nil {
+			blockContents[block.ID] = block.Content
+		}
+	}
+	for _, blockID := range blockIDs {
+		if blockTree := blockTrees[blockID]; blockTree != nil {
+			metadata = append(metadata, flashcardv2.BlockMetadata{BlockID: blockTree.ID,
+				NotebookID: blockTree.BoxID, RootID: blockTree.RootID, Path: blockTree.Path, HPath: blockTree.HPath,
+				Content: blockContents[blockID]})
+		}
+	}
+	availability := make(map[string]bool, len(dependencies))
+	for _, dependency := range dependencies {
+		available := true
+		for _, blockID := range dependency.BlockIDs {
+			if blockTrees[blockID] == nil {
+				available = false
+				break
+			}
+		}
+		availability[dependency.SourceID] = available
+	}
+	if err = store.Projection().ReplaceBlockMetadataAndSourceAvailability(ctx, metadata, availability); err != nil {
+		return err
+	}
+	if !reconcile {
+		return nil
+	}
+	return reconcileFlashcardV2SourceAvailability(ctx, store, dependencies, blockTrees)
+}
+
+func reconcileFlashcardV2SourceAvailability(ctx context.Context, store *flashcardv2.Store,
+	dependencies []flashcardv2.SourceBlockDependency, blockTrees map[string]*treenode.BlockTree) error {
+	for _, dependency := range dependencies {
+		missing := false
+		for _, blockID := range dependency.BlockIDs {
+			if blockTrees[blockID] == nil {
+				missing = true
+				break
+			}
+		}
+		revision, found, err := store.Projection().CurrentEntity(ctx, flashcardv2.EntityCardSource,
+			dependency.SourceID)
+		if err != nil {
+			return err
+		}
+		if !found || revision.Deleted {
+			continue
+		}
+		var source flashcardv2.CardSource
+		if err = json.Unmarshal(revision.Payload, &source); err != nil {
+			return err
+		}
+		desiredStatus := "active"
+		if missing {
+			desiredStatus = "orphaned"
+		}
+		if source.Status == "deleted" || source.Status == desiredStatus {
+			continue
+		}
+		source.Status = desiredStatus
+		updatedAt := revision.UpdatedAt + 1
+		payload, err := json.Marshal(source)
+		if err != nil {
+			return err
+		}
+		operationID := flashcardv2.DeterministicID("source-availability", source.ID, revision.RevisionID,
+			desiredStatus)
+		mutation, err := store.MutateEntities(ctx, operationID, []flashcardv2.EntityMutation{{
+			EntityType: flashcardv2.EntityCardSource, EntityID: source.ID,
+			ExpectedRevisionID: revision.RevisionID, UpdatedAt: updatedAt, Payload: payload,
+		}})
+		if err != nil {
+			if errors.Is(err, flashcardv2.ErrRevisionConflict) {
+				continue
+			}
+			return err
+		}
+		if len(mutation.Revisions) != 1 {
+			return errors.New("flashcard source availability mutation is incomplete")
+		}
+		reconcileOperationID := flashcardv2.DeterministicID("source-availability-cards", source.ID,
+			mutation.Revisions[0].RevisionID)
+		if _, err = store.ReconcileSourceCards(ctx, reconcileOperationID, source.ID, updatedAt+1); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func closeFlashcardV2Store() {
+	flashcardV2StoreMu.Lock()
+	store := flashcardV2Store
+	flashcardV2Store = nil
+	flashcardV2StoreMu.Unlock()
+	if store != nil {
+		if _, _, err := store.CreateSnapshotIfNeeded(context.Background(), flashcardV2SnapshotBatchDelta); err != nil {
+			logging.LogErrorf("create flashcard v2 snapshot failed: %s", err)
+		}
+		if err := store.Close(); err != nil {
+			logging.LogErrorf("close flashcard v2 store failed: %s", err)
+		}
+	}
+}
+
+// GetFlashcardV2MigrationStatus 返回只读迁移状态，不存在 v2 目录时不会创建同步文件。
+func GetFlashcardV2MigrationStatus(ctx context.Context) (flashcardv2.LegacyMigrationStatus, error) {
+	flashcardV2StoreMu.Lock()
+	store := flashcardV2Store
+	flashcardV2StoreMu.Unlock()
+	if store == nil {
+		if _, err := os.Stat(filepath.Join(flashcardv2.V2Root(util.DataDir), "manifest.json")); os.IsNotExist(err) {
+			return flashcardv2.LegacyMigrationStatus{State: flashcardv2.MigrationStateLegacy}, nil
+		}
+		var err error
+		if store, err = openFlashcardV2Store(ctx); err != nil {
+			return flashcardv2.LegacyMigrationStatus{}, err
+		}
+	}
+	return store.LegacyMigrationStatus(ctx)
+}
+
+// PreviewLegacyFlashcardMigration 读取旧存储并生成确定性、无副作用的迁移摘要。
+func PreviewLegacyFlashcardMigration(ctx context.Context) (LegacyFlashcardMigrationPreview, error) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+	waitForSyncingStorages()
+	plan, err := flashcardv2.PrepareLegacyMigration(ctx, getRiffDir(), legacyFlashcardMigrationOptions())
+	if err != nil {
+		return LegacyFlashcardMigrationPreview{}, err
+	}
+	return LegacyFlashcardMigrationPreview{
+		MigrationID: plan.MigrationID, RecordDigest: plan.RecordDigest,
+		InputFiles: append([]flashcardv2.LegacyFileFingerprint(nil), plan.InputFiles...), Report: plan.Report,
+	}, nil
+}
+
+// ActivateLegacyFlashcardMigration 重新生成并核对预览，然后才写入 v2 权威记录和激活事件。
+func ActivateLegacyFlashcardMigration(ctx context.Context, migrationID,
+	recordDigest string) (flashcardv2.LegacyActivationResult, error) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+	waitForSyncingStorages()
+	plan, err := flashcardv2.PrepareLegacyMigration(ctx, getRiffDir(), legacyFlashcardMigrationOptions())
+	if err != nil {
+		return flashcardv2.LegacyActivationResult{}, err
+	}
+	if plan.MigrationID != migrationID || plan.RecordDigest != recordDigest {
+		return flashcardv2.LegacyActivationResult{}, errors.New("legacy flashcard migration preview is stale")
+	}
+	store, err := openFlashcardV2Store(ctx)
+	if err != nil {
+		return flashcardv2.LegacyActivationResult{}, err
+	}
+	return store.ActivateLegacyMigration(ctx, getRiffDir(), plan)
+}
+
+// autoMigrateLegacyFlashcards 自动完成首次迁移或衔接同步后出现的旧格式增量。
+func autoMigrateLegacyFlashcards(ctx context.Context, waitForStorageSync bool) (flashcardv2.LegacyMigrationStatus, error) {
+	deckLock.Lock()
+	defer deckLock.Unlock()
+	if waitForStorageSync {
+		waitForSyncingStorages()
+	}
+	store, err := openFlashcardV2Store(ctx)
+	if err != nil {
+		return flashcardv2.LegacyMigrationStatus{}, err
+	}
+	status, statusErr := store.LegacyMigrationStatus(ctx)
+	if statusErr != nil {
+		return flashcardv2.LegacyMigrationStatus{}, statusErr
+	}
+	if err = store.Refresh(ctx); err != nil {
+		forgetFlashcardV2Store(store)
+		return status, err
+	}
+	status, err = store.LegacyMigrationStatus(ctx)
+	if err != nil {
+		return flashcardv2.LegacyMigrationStatus{}, err
+	}
+	if status.State == flashcardv2.MigrationStateActive {
+		status, err = store.CheckLegacyDivergence(ctx, getRiffDir())
+		if err != nil || status.State == flashcardv2.MigrationStateActive {
+			return status, err
+		}
+	}
+	plan, err := flashcardv2.PrepareLegacyMigration(ctx, getRiffDir(), legacyFlashcardMigrationOptions())
+	if err != nil {
+		return status, err
+	}
+	if !plan.Report.Complete {
+		return status, errors.New("legacy flashcard migration has unresolved records")
+	}
+	result, err := store.ActivateLegacyMigration(ctx, getRiffDir(), plan)
+	if err != nil {
+		return status, err
+	}
+	if _, _, snapshotErr := store.CreateSnapshotIfNeeded(ctx, flashcardV2SnapshotBatchDelta); snapshotErr != nil {
+		logging.LogWarnf("create flashcard v2 migration snapshot failed: %s", snapshotErr)
+	}
+	return result.Status, nil
+}
+
+func legacyFlashcardMigrationOptions() flashcardv2.LegacyMigrationOptions {
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+	return flashcardv2.LegacyMigrationOptions{
+		RequestRetention:   confFlashcardSnapshot.RequestRetention,
+		MaximumInterval:    confFlashcardSnapshot.MaximumInterval,
+		Weights:            flashcardV2Weights(confFlashcardSnapshot.Weights),
+		NewLimit:           confFlashcardSnapshot.NewCardLimit,
+		ReviewLimit:        confFlashcardSnapshot.ReviewCardLimit,
+		BuryNewSiblings:    true,
+		BuryReviewSiblings: true,
+		LeechThreshold:     8,
+		LeechAction:        "tag",
+		PresetName:         "Default",
+		EmptyDeckID:        builtinDeckID,
+		EmptyDeckName:      "Built-in Deck",
+		ResolveBlock: func(_ context.Context, blockID string) (flashcardv2.LegacyBlockInfo, error) {
+			blockTree := treenode.GetBlockTree(blockID)
+			if blockTree == nil {
+				return flashcardv2.LegacyBlockInfo{}, nil
+			}
+			return flashcardv2.LegacyBlockInfo{Exists: true, Encrypted: IsEncryptedBox(blockTree.BoxID)}, nil
+		},
+	}
+}
+
+func flashcardV2Weights(weights string) []float64 {
+	ret := make([]float64, 0, 19)
+	for value := range strings.SplitSeq(weights, ",") {
+		weight, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+		if err != nil {
+			return nil
+		}
+		ret = append(ret, weight)
+	}
+	return ret
+}
+
+func requireFlashcardV2Store(ctx context.Context, writable bool) (*flashcardv2.Store, error) {
+	store, err := openFlashcardV2Store(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !writable {
+		return store, nil
+	}
+	status, err := store.LegacyMigrationStatus(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if status.State != flashcardv2.MigrationStateActive {
+		if status.State == flashcardv2.MigrationStateLegacyDiverged {
+			return nil, errors.New("legacy flashcard data diverged after v2 activation")
+		}
+		return nil, errors.New("flashcard v2 migration is not active")
+	}
+	return store, nil
+}
+
+// MutateFlashcardV2Entities 校验内容隔离边界后写入版本化实体。
+func MutateFlashcardV2Entities(ctx context.Context, operationID string,
+	mutations []flashcardv2.EntityMutation) (flashcardv2.EntityMutationResult, error) {
+	if err := validateFlashcardV2Mutations(mutations); err != nil {
+		return flashcardv2.EntityMutationResult{}, err
+	}
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.EntityMutationResult{}, err
+	}
+	return store.MutateEntities(ctx, operationID, mutations)
+}
+
+func validateFlashcardV2Mutations(mutations []flashcardv2.EntityMutation) error {
+	for _, mutation := range mutations {
+		if err := validateFlashcardV2EntityBoundary(mutation.EntityType, mutation.Deleted, mutation.Payload); err != nil {
+			return err
+		}
+		switch mutation.EntityType {
+		case flashcardv2.EntityCard, flashcardv2.EntityReviewState, flashcardv2.EntityReviewSetMembership,
+			flashcardv2.EntityTagAssignment, flashcardv2.EntityStudySession, flashcardv2.EntitySessionCard,
+			flashcardv2.EntityLegacyCardAlias:
+			return fmt.Errorf("flashcard entity type [%s] must use its dedicated API", mutation.EntityType)
+		}
+		if !mutation.Deleted && mutation.EntityType == flashcardv2.EntityStudyPolicy {
+			return errors.New("flashcard study policies must use the dedicated save API")
+		}
+	}
+	return nil
+}
+
+func validateFlashcardV2EntityBoundary(entityType flashcardv2.EntityType, deleted bool,
+	payload json.RawMessage) error {
+	if deleted {
+		return nil
+	}
+	switch entityType {
+	case flashcardv2.EntityCardSourceRef:
+		var ref flashcardv2.CardSourceRef
+		if err := json.Unmarshal(payload, &ref); err != nil {
+			return err
+		}
+		if ref.EntityType == "block" {
+			return ValidateFlashcardBlockIDs([]string{ref.EntityID})
+		}
+	case flashcardv2.EntityCardSource:
+		var source flashcardv2.CardSource
+		if err := json.Unmarshal(payload, &source); err != nil {
+			return err
+		}
+		if source.SourceType == "choice" {
+			var config flashcardv2.ChoiceGenerationConfig
+			if err := json.Unmarshal(source.GenerationConfig, &config); err != nil {
+				return err
+			}
+			return validateFlashcardV2QueryBoundary(config.DistractorQuery)
+		}
+	case flashcardv2.EntityReviewSet:
+		var reviewSet flashcardv2.ReviewSet
+		if err := json.Unmarshal(payload, &reviewSet); err != nil {
+			return err
+		}
+		if len(reviewSet.QueryAST) != 0 {
+			query, err := flashcardv2.ParseQueryAST(reviewSet.QueryAST)
+			if err != nil {
+				return err
+			}
+			return validateFlashcardV2QueryBoundary(&query)
+		}
+	case flashcardv2.EntityStudyPolicy:
+		var policy flashcardv2.StudyPolicy
+		if err := json.Unmarshal(payload, &policy); err != nil {
+			return err
+		}
+		return validateFlashcardV2StudyPolicyScope(policy.ScopeType, policy.ScopeID)
+	case flashcardv2.EntityStudySession:
+		var session flashcardv2.StudySession
+		if err := json.Unmarshal(payload, &session); err != nil {
+			return err
+		}
+		if len(session.QueryAST) != 0 {
+			query, err := flashcardv2.ParseQueryAST(session.QueryAST)
+			if err != nil {
+				return err
+			}
+			return validateFlashcardV2QueryBoundary(&query)
+		}
+	}
+	return nil
+}
+
+func validateFlashcardV2QueryBoundary(query *flashcardv2.QueryAST) error {
+	if query == nil {
+		return nil
+	}
+	if err := query.Validate(); err != nil {
+		return err
+	}
+	var validateExpression func(flashcardv2.QueryExpression) error
+	validateExpression = func(expression flashcardv2.QueryExpression) error {
+		if expression.Operator == flashcardv2.QueryPredicate {
+			ids, err := flashcardV2QueryLocationIDs(expression)
+			if err != nil {
+				return err
+			}
+			switch expression.Field {
+			case "blockID", "rootID":
+				if err = ValidateFlashcardBlockIDs(ids); err != nil {
+					return err
+				}
+			case "notebookID":
+				for _, notebookID := range ids {
+					if Conf.Box(notebookID) == nil {
+						return fmt.Errorf("flashcard notebook [%s] was not found", notebookID)
+					}
+					if IsEncryptedBox(notebookID) {
+						return errors.New(Conf.Language(313))
+					}
+				}
+			}
+		}
+		for _, child := range expression.Children {
+			if err := validateExpression(child); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	return validateExpression(query.Root)
+}
+
+func flashcardV2QueryLocationIDs(expression flashcardv2.QueryExpression) ([]string, error) {
+	if expression.Field != "blockID" && expression.Field != "rootID" && expression.Field != "notebookID" {
+		return nil, nil
+	}
+	if expression.Comparator == flashcardv2.QueryIn || expression.Comparator == flashcardv2.QueryNotIn {
+		var ids []string
+		if err := json.Unmarshal(expression.Value, &ids); err != nil || len(ids) == 0 {
+			return nil, errors.New("flashcard location query requires string identities")
+		}
+		return ids, nil
+	}
+	var id string
+	if err := json.Unmarshal(expression.Value, &id); err != nil || strings.TrimSpace(id) == "" {
+		return nil, errors.New("flashcard location query requires a string identity")
+	}
+	return []string{id}, nil
+}
+
+func validateFlashcardV2StudyPolicyScope(scopeType, scopeID string) error {
+	if scopeType == "notebook" {
+		if Conf.Box(scopeID) == nil {
+			return fmt.Errorf("flashcard notebook [%s] was not found", scopeID)
+		}
+		if IsEncryptedBox(scopeID) {
+			return errors.New(Conf.Language(313))
+		}
+		return nil
+	}
+	if scopeType != "document" {
+		return errors.New("flashcard study policy scope type is invalid")
+	}
+	if err := ValidateFlashcardBlockIDs([]string{scopeID}); err != nil {
+		return err
+	}
+	blockTree := treenode.GetBlockTree(scopeID)
+	if blockTree == nil || blockTree.RootID != scopeID {
+		return errors.New("flashcard document study policy scope must be a document block")
+	}
+	return nil
+}
+
+// GetFlashcardV2Entity 返回当前实体修订。
+func GetFlashcardV2Entity(ctx context.Context, entityType flashcardv2.EntityType,
+	entityID string) (flashcardv2.EntityRevision, bool, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return flashcardv2.EntityRevision{}, false, err
+	}
+	return store.Projection().CurrentEntity(ctx, entityType, entityID)
+}
+
+// ListFlashcardV2Entities 分页返回模板、复习集、预设、标签等当前实体。
+func ListFlashcardV2Entities(ctx context.Context, entityType flashcardv2.EntityType,
+	options flashcardv2.EntityListOptions) (flashcardv2.EntityPage, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return flashcardv2.EntityPage{}, err
+	}
+	return store.Projection().ListEntities(ctx, entityType, options)
+}
+
+// QueryFlashcardV2Cards 使用同一结构化 AST 查询管理范围。
+func QueryFlashcardV2Cards(ctx context.Context, query *flashcardv2.QueryAST,
+	options flashcardv2.CardSearchOptions) ([]FlashcardV2CardSearchResult, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return nil, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
+		return nil, err
+	}
+	results, err := store.Projection().SearchCards(ctx, query, options)
+	if err != nil {
+		return nil, err
+	}
+	if err = validateFlashcardV2SearchResults(ctx, store, results); err != nil {
+		return nil, err
+	}
+	return decorateFlashcardV2SearchResults(ctx, store, results)
+}
+
+func decorateFlashcardV2SearchResults(ctx context.Context, store *flashcardv2.Store,
+	results []flashcardv2.CardSearchResult) ([]FlashcardV2CardSearchResult, error) {
+	ret := make([]FlashcardV2CardSearchResult, len(results))
+	sourceBlocks := map[string]string{}
+	blockIDs := make([]string, 0)
+	seenBlocks := map[string]struct{}{}
+	for index, result := range results {
+		ret[index].CardSearchResult = result
+		if _, found := sourceBlocks[result.Card.SourceID]; found {
+			continue
+		}
+		sourceRevision, found, err := store.Projection().CurrentEntity(ctx, flashcardv2.EntityCardSource,
+			result.Card.SourceID)
+		if err != nil {
+			return nil, err
+		}
+		if !found || sourceRevision.Deleted {
+			return nil, flashcardv2.ErrEntityNotFound
+		}
+		var source flashcardv2.CardSource
+		if err = json.Unmarshal(sourceRevision.Payload, &source); err != nil {
+			return nil, err
+		}
+		references, err := store.Projection().CardSourceReferences(ctx, result.Card.SourceID)
+		if err != nil {
+			return nil, err
+		}
+		for _, reference := range references {
+			if reference.ID != source.PrimaryRefID || reference.EntityType != "block" {
+				continue
+			}
+			sourceBlocks[result.Card.SourceID] = reference.EntityID
+			if _, blockFound := seenBlocks[reference.EntityID]; !blockFound {
+				seenBlocks[reference.EntityID] = struct{}{}
+				blockIDs = append(blockIDs, reference.EntityID)
+			}
+			break
+		}
+	}
+	titles := map[string]string{}
+	for _, block := range kernelsql.GetBlocks(blockIDs) {
+		if block != nil {
+			titles[block.ID] = truncateFlashcardV2Title(block.Content, 160)
+		}
+	}
+	for index := range ret {
+		ret[index].SourceBlockID = sourceBlocks[ret[index].Card.SourceID]
+		ret[index].SourceTitle = titles[ret[index].SourceBlockID]
+	}
+	return ret, nil
+}
+
+func truncateFlashcardV2Title(value string, limit int) string {
+	value = strings.TrimSpace(value)
+	runes := []rune(value)
+	if len(runes) <= limit {
+		return value
+	}
+	return string(runes[:limit]) + "..."
+}
+
+// PreviewFlashcardV2ReviewSet 返回动态查询、手动纳入和排除合并后的卡片 ID。
+func PreviewFlashcardV2ReviewSet(ctx context.Context, reviewSetID string,
+	query *flashcardv2.QueryAST, options flashcardv2.CardSearchOptions) (flashcardv2.ReviewSetCardPage, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return flashcardv2.ReviewSetCardPage{}, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
+		return flashcardv2.ReviewSetCardPage{}, err
+	}
+	page, err := store.Projection().ReviewSetCardPageWithQuery(ctx, reviewSetID, query, options)
+	if err != nil {
+		return flashcardv2.ReviewSetCardPage{}, err
+	}
+	if !options.IncludeInactive {
+		err = validateFlashcardV2CardIDs(ctx, store, page.CardIDs)
+	}
+	if err != nil {
+		return flashcardv2.ReviewSetCardPage{}, err
+	}
+	return page, nil
+}
+
+// SummarizeFlashcardV2ReviewSets 返回复习集列表的成员数量和当前到期数量。
+func SummarizeFlashcardV2ReviewSets(ctx context.Context, reviewSetIDs []string,
+	now int64) (map[string]flashcardv2.ReviewSetSummary, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return nil, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
+		return nil, err
+	}
+	return store.Projection().ReviewSetSummaries(ctx, reviewSetIDs, now)
+}
+
+// ReconcileFlashcardV2Source 根据稳定变体键协调卡源生成的全部卡片。
+func ReconcileFlashcardV2Source(ctx context.Context, operationID, sourceID string,
+	updatedAt int64) (flashcardv2.ReconcileResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.ReconcileResult{}, err
+	}
+	if err = validateFlashcardV2Source(ctx, store, sourceID); err != nil {
+		return flashcardv2.ReconcileResult{}, err
+	}
+	return store.ReconcileSourceCards(ctx, operationID, sourceID, updatedAt)
+}
+
+// flashcardV2CreationMetadata 为新卡源解析普通块位置，不依赖已有闪卡的位置投影。
+func flashcardV2CreationMetadata(blockIDs []string) []flashcardv2.BlockMetadata {
+	ret := make([]flashcardv2.BlockMetadata, 0, len(blockIDs))
+	for _, blockTree := range treenode.GetBlockTrees(blockIDs) {
+		ret = append(ret, flashcardv2.BlockMetadata{BlockID: blockTree.ID, NotebookID: blockTree.BoxID,
+			RootID: blockTree.RootID, Path: blockTree.Path, HPath: blockTree.HPath})
+	}
+	return ret
+}
+
+// CreateFlashcardV2BasicSource 由有序普通块创建正向、反向或双向卡源。
+func CreateFlashcardV2BasicSource(ctx context.Context,
+	request flashcardv2.BasicSourceRequest) (flashcardv2.BasicSourceResult, error) {
+	if err := ValidateFlashcardBlockIDs(request.BlockIDs); err != nil {
+		return flashcardv2.BasicSourceResult{}, err
+	}
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.BasicSourceResult{}, err
+	}
+	request.BlockMetadata = flashcardV2CreationMetadata(request.BlockIDs)
+	return store.CreateBasicSource(ctx, request)
+}
+
+// CreateFlashcardV2QuickSources 为每个普通块创建独立的默认单块快速卡。
+func CreateFlashcardV2QuickSources(ctx context.Context,
+	request flashcardv2.QuickSourceRequest) (flashcardv2.QuickSourceResult, error) {
+	if err := ValidateFlashcardBlockIDs(request.BlockIDs); err != nil {
+		return flashcardv2.QuickSourceResult{}, err
+	}
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.QuickSourceResult{}, err
+	}
+	if strings.TrimSpace(request.OperationID) == "" || len(request.BlockIDs) == 0 || request.CreatedAt <= 0 {
+		return flashcardv2.QuickSourceResult{}, errors.New("quick flashcard operation, blocks and time are required")
+	}
+	empty, err := emptyQuickFlashcardBlocks(request.BlockIDs)
+	if err != nil {
+		return flashcardv2.QuickSourceResult{}, err
+	}
+	request.BlockIDs, err = store.FilterQuickSourceBlocks(ctx, request.BlockIDs, empty, request.Toggle)
+	if err != nil {
+		return flashcardv2.QuickSourceResult{}, err
+	}
+	if len(request.BlockIDs) == 0 {
+		return flashcardv2.QuickSourceResult{SourceIDs: []string{}, CardIDs: []string{},
+			Action: flashcardv2.QuickSourceActionCreated}, nil
+	}
+	request.BlockMetadata = flashcardV2CreationMetadata(request.BlockIDs)
+	if request.Toggle {
+		return store.ToggleQuickSources(ctx, request)
+	}
+	return store.CreateQuickSources(ctx, request)
+}
+
+// ManageFlashcardV2SourceLifecycle 软删除或恢复卡源，并保留卡片排期和历史。
+func ManageFlashcardV2SourceLifecycle(ctx context.Context,
+	request flashcardv2.SourceLifecycleRequest) (flashcardv2.SourceLifecycleResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.SourceLifecycleResult{}, err
+	}
+	if request.Action == flashcardv2.SourceActionRestore {
+		if err = validateFlashcardV2Source(ctx, store, request.SourceID); err != nil {
+			return flashcardv2.SourceLifecycleResult{}, err
+		}
+	}
+	return store.ManageSourceLifecycle(ctx, request)
+}
+
+// ListFlashcardV2Conflicts 返回需要用户选择内容分支的未解决冲突。
+func ListFlashcardV2Conflicts(ctx context.Context, limit int) ([]flashcardv2.EntityConflictGroup, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return nil, err
+	}
+	return store.Projection().ListEntityConflicts(ctx, limit)
+}
+
+// ResolveFlashcardV2Conflict 以用户选择的分支生成覆盖全部并发父修订的合并修订。
+func ResolveFlashcardV2Conflict(ctx context.Context,
+	request flashcardv2.ConflictResolutionRequest) (flashcardv2.EntityRevision, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.EntityRevision{}, err
+	}
+	request.ValidateSelected = func(revision flashcardv2.EntityRevision) error {
+		return validateFlashcardV2EntityBoundary(revision.EntityType, revision.Deleted, revision.Payload)
+	}
+	return store.ResolveEntityConflict(ctx, request)
+}
+
+// CreateFlashcardV2AdvancedSource 由有序普通块创建分组挖空或有序多空卡源。
+func CreateFlashcardV2AdvancedSource(ctx context.Context,
+	request flashcardv2.AdvancedSourceRequest) (flashcardv2.AdvancedSourceResult, error) {
+	if err := validateFlashcardV2AdvancedSourceInput(request.BlockIDs, request.InlineOcclusions, request.Mode,
+		request.ImageConfig, request.DistractorQuery); err != nil {
+		return flashcardv2.AdvancedSourceResult{}, err
+	}
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.AdvancedSourceResult{}, err
+	}
+	request.BlockMetadata = flashcardV2CreationMetadata(request.BlockIDs)
+	return store.CreateAdvancedSource(ctx, request)
+}
+
+// UpdateFlashcardV2AdvancedSource 原子更新内置高级卡源并保留稳定卡的排期和历史。
+func UpdateFlashcardV2AdvancedSource(ctx context.Context,
+	request flashcardv2.AdvancedSourceUpdateRequest) (flashcardv2.AdvancedSourceResult, error) {
+	if err := validateFlashcardV2AdvancedSourceInput(request.BlockIDs, request.InlineOcclusions, request.Mode,
+		request.ImageConfig, request.DistractorQuery); err != nil {
+		return flashcardv2.AdvancedSourceResult{}, err
+	}
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.AdvancedSourceResult{}, err
+	}
+	return store.UpdateAdvancedSource(ctx, request)
+}
+
+func validateFlashcardV2AdvancedSourceInput(blockIDs []string,
+	inlineOcclusions []flashcardv2.AdvancedInlineOcclusion, mode string,
+	imageConfig *flashcardv2.ImageOcclusionConfig, distractorQuery *flashcardv2.QueryAST) error {
+	if err := ValidateFlashcardBlockIDs(blockIDs); err != nil {
+		return err
+	}
+	if err := validateFlashcardV2QueryBoundary(distractorQuery); err != nil {
+		return err
+	}
+	return validateFlashcardV2AdvancedSourceDOM(blockIDs, inlineOcclusions, mode, imageConfig, GetBlockDOM)
+}
+
+func validateFlashcardV2AdvancedSourceDOM(blockIDs []string, inlineOcclusions []flashcardv2.AdvancedInlineOcclusion,
+	mode string, imageConfig *flashcardv2.ImageOcclusionConfig, getDOM func(string) string) error {
+	for _, occlusion := range inlineOcclusions {
+		dom := getDOM(occlusion.BlockID)
+		attribute := `data-occlusion-id="` + html.EscapeString(occlusion.ID) + `"`
+		if dom == "" || !strings.Contains(dom, attribute) {
+			return fmt.Errorf("flashcard inline occlusion [%s] was not found in block [%s]", occlusion.ID,
+				occlusion.BlockID)
+		}
+	}
+	if mode == flashcardv2.AdvancedModeImageOcclusion && imageConfig != nil && len(blockIDs) == 1 {
+		dom := getDOM(blockIDs[0])
+		assetID := imageConfig.AssetID
+		if dom == "" || (!strings.Contains(dom, assetID) && !strings.Contains(dom, html.EscapeString(assetID))) {
+			return errors.New("image occlusion asset does not belong to the source block")
+		}
+	}
+	return nil
+}
+
+// UpdateFlashcardV2BasicDirection 切换普通问答卡源的生成方向。
+func UpdateFlashcardV2BasicDirection(ctx context.Context,
+	request flashcardv2.BasicDirectionRequest) (flashcardv2.BasicSourceResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.BasicSourceResult{}, err
+	}
+	if err = validateFlashcardV2Source(ctx, store, request.SourceID); err != nil {
+		return flashcardv2.BasicSourceResult{}, err
+	}
+	return store.UpdateBasicSourceDirection(ctx, request)
+}
+
+func validateFlashcardV2Source(ctx context.Context, store *flashcardv2.Store, sourceID string) error {
+	revision, found, err := store.Projection().CurrentEntity(ctx, flashcardv2.EntityCardSource, sourceID)
+	if err != nil || !found || revision.Deleted {
+		if err != nil {
+			return err
+		}
+		return flashcardv2.ErrEntityNotFound
+	}
+	var source flashcardv2.CardSource
+	if err = json.Unmarshal(revision.Payload, &source); err != nil {
+		return err
+	}
+	references, err := store.Projection().CardSourceReferences(ctx, source.ID)
+	if err != nil {
+		return err
+	}
+	primaryFound := false
+	blockIDs := make([]string, 0, len(references))
+	for _, reference := range references {
+		if reference.ID == source.PrimaryRefID {
+			primaryFound = true
+		}
+		if reference.EntityType == "block" {
+			blockIDs = append(blockIDs, reference.EntityID)
+		}
+	}
+	if !primaryFound {
+		return errors.New("flashcard source primary reference was not found")
+	}
+	if source.Status == "orphaned" {
+		return nil
+	}
+	return ValidateFlashcardBlockIDs(blockIDs)
+}
+
+// StartFlashcardV2Session 启动复习集或临时查询会话。
+func StartFlashcardV2Session(ctx context.Context,
+	request flashcardv2.StudyQueueRequest) (flashcardv2.StudyQueueResult, error) {
+	if err := validateFlashcardV2QueryBoundary(request.Query); err != nil {
+		return flashcardv2.StudyQueueResult{}, err
+	}
+	confFlashcardSnapshot := Conf.LoadFlashcard()
+	request = applyFlashcardV2SessionDefaults(request, confFlashcardSnapshot.NewCardLimit, confFlashcardSnapshot.ReviewCardLimit)
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.StudyQueueResult{}, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, true); err != nil {
+		return flashcardv2.StudyQueueResult{}, err
+	}
+	request.ValidateCardIDs = func(validationContext context.Context, cardIDs []string) error {
+		return validateFlashcardV2CardIDs(validationContext, store, cardIDs)
+	}
+	request.ValidateBlockIDs = ValidateFlashcardBlockIDs
+	return store.StartStudySession(ctx, request)
+}
+
+// applyFlashcardV2SessionDefaults 让未指定复习集的调用方沿用工作区每日上限。
+func applyFlashcardV2SessionDefaults(request flashcardv2.StudyQueueRequest, newLimit,
+	reviewLimit int) flashcardv2.StudyQueueRequest {
+	if request.ReviewSetID != "" {
+		return request
+	}
+	if request.NewLimit == 0 {
+		request.NewLimit = newLimit
+	}
+	if request.ReviewLimit == 0 {
+		request.ReviewLimit = reviewLimit
+	}
+	return request
+}
+
+// GetFlashcardV2SessionQueue 返回会话成员的当前状态及本次复习产生的学习回队时间。
+func GetFlashcardV2SessionQueue(ctx context.Context, sessionID string,
+	dayOptions ...flashcardv2.StudyDayOptions) ([]flashcardv2.SessionQueueCard, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return nil, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
+		return nil, err
+	}
+	options := flashcardv2.StudyDayOptions{}
+	if len(dayOptions) != 0 {
+		options = dayOptions[0]
+	}
+	if options.Now == 0 {
+		options.Now = time.Now().UnixMilli()
+	}
+	queue, err := store.Projection().SessionQueueAt(ctx, sessionID, options)
+	if err != nil {
+		return nil, err
+	}
+	cardIDs := make([]string, 0, len(queue))
+	for index := range queue {
+		if queue[index].Card.GenerationStatus == flashcardv2.GenerationActive {
+			cardIDs = append(cardIDs, queue[index].Card.ID)
+		}
+	}
+	if err = validateFlashcardV2CardIDs(ctx, store, cardIDs); err != nil {
+		return nil, err
+	}
+	return queue, nil
+}
+
+// ReviewFlashcardV2Card 提交一次正式或强化复习。
+func ReviewFlashcardV2Card(ctx context.Context,
+	request flashcardv2.ReviewRequest) (flashcardv2.ReviewResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.ReviewResult{}, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, true); err != nil {
+		return flashcardv2.ReviewResult{}, err
+	}
+	if err = validateFlashcardV2Card(ctx, store, request.CardID); err != nil {
+		return flashcardv2.ReviewResult{}, err
+	}
+	return store.ReviewCard(ctx, request)
+}
+
+// UndoFlashcardV2Review 追加补偿记录并恢复一次复习产生的当前状态。
+func UndoFlashcardV2Review(ctx context.Context,
+	request flashcardv2.ReviewUndoRequest) (flashcardv2.ReviewUndoResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.ReviewUndoResult{}, err
+	}
+	if err = validateFlashcardV2Card(ctx, store, request.CardID); err != nil {
+		return flashcardv2.ReviewUndoResult{}, err
+	}
+	return store.UndoReview(ctx, request)
+}
+
+// ManageFlashcardV2Cards 批量执行带审计记录的单卡管理操作。
+func ManageFlashcardV2Cards(ctx context.Context,
+	request flashcardv2.CardManagementRequest) (flashcardv2.CardManagementResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.CardManagementResult{}, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, true); err != nil {
+		return flashcardv2.CardManagementResult{}, err
+	}
+	for _, cardID := range request.CardIDs {
+		if err = validateFlashcardV2Card(ctx, store, cardID); err != nil {
+			return flashcardv2.CardManagementResult{}, err
+		}
+	}
+	return store.ManageCards(ctx, request)
+}
+
+// SetFlashcardV2CardEditLater 校验卡片内容隔离边界后保存编辑待办。
+func SetFlashcardV2CardEditLater(ctx context.Context,
+	request flashcardv2.SetCardEditLaterRequest) (flashcardv2.CardEditLaterResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.CardEditLaterResult{}, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, true); err != nil {
+		return flashcardv2.CardEditLaterResult{}, err
+	}
+	if err = validateFlashcardV2Card(ctx, store, request.CardID); err != nil {
+		return flashcardv2.CardEditLaterResult{}, err
+	}
+	return store.SetCardEditLater(ctx, request)
+}
+
+// SetFlashcardV2TagAssignments 原子替换一组卡源或卡片的独立闪卡标签。
+func SetFlashcardV2TagAssignments(ctx context.Context,
+	request flashcardv2.SetTagAssignmentsRequest) (flashcardv2.SetTagAssignmentsResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.SetTagAssignmentsResult{}, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, true); err != nil {
+		return flashcardv2.SetTagAssignmentsResult{}, err
+	}
+	if request.TargetType == "card" {
+		if err = validateFlashcardV2CardIDs(ctx, store, request.TargetIDs); err != nil {
+			return flashcardv2.SetTagAssignmentsResult{}, err
+		}
+	} else if request.TargetType == "source" {
+		for _, sourceID := range request.TargetIDs {
+			if err = validateFlashcardV2Source(ctx, store, sourceID); err != nil {
+				return flashcardv2.SetTagAssignmentsResult{}, err
+			}
+		}
+	}
+	return store.SetTagAssignments(ctx, request)
+}
+
+// SetFlashcardV2ReviewSetMemberships 原子设置复习集的手动纳入或排除关系。
+func SetFlashcardV2ReviewSetMemberships(ctx context.Context,
+	request flashcardv2.SetReviewSetMembershipsRequest) (flashcardv2.SetReviewSetMembershipsResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.SetReviewSetMembershipsResult{}, err
+	}
+	if err = validateFlashcardV2CardIDs(ctx, store, request.CardIDs); err != nil {
+		return flashcardv2.SetReviewSetMembershipsResult{}, err
+	}
+	return store.SetReviewSetMemberships(ctx, request)
+}
+
+// SaveFlashcardV2Tag 创建、重命名或移动独立闪卡标签。
+func SaveFlashcardV2Tag(ctx context.Context,
+	request flashcardv2.SaveTagRequest) (flashcardv2.EntityRevision, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.EntityRevision{}, err
+	}
+	return store.SaveTag(ctx, request)
+}
+
+// GetFlashcardV2StudyPolicy 按文档或笔记本范围返回当前策略。
+func GetFlashcardV2StudyPolicy(ctx context.Context, scopeType,
+	scopeID string) (flashcardv2.EntityRevision, bool, error) {
+	if err := validateFlashcardV2StudyPolicyScope(scopeType, scopeID); err != nil {
+		return flashcardv2.EntityRevision{}, false, err
+	}
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return flashcardv2.EntityRevision{}, false, err
+	}
+	return store.Projection().StudyPolicyRevision(ctx, scopeType, scopeID)
+}
+
+// SaveFlashcardV2StudyPolicy 创建或更新文档、笔记本范围学习策略。
+func SaveFlashcardV2StudyPolicy(ctx context.Context,
+	request flashcardv2.SaveStudyPolicyRequest) (flashcardv2.EntityRevision, error) {
+	if err := validateFlashcardV2StudyPolicyScope(request.ScopeType, request.ScopeID); err != nil {
+		return flashcardv2.EntityRevision{}, err
+	}
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.EntityRevision{}, err
+	}
+	return store.SaveStudyPolicy(ctx, request)
+}
+
+func validateFlashcardV2Card(ctx context.Context, store *flashcardv2.Store, cardID string) error {
+	cardRevision, found, err := store.Projection().CurrentEntity(ctx, flashcardv2.EntityCard, cardID)
+	if err != nil || !found || cardRevision.Deleted {
+		if err != nil {
+			return err
+		}
+		return flashcardv2.ErrEntityNotFound
+	}
+	var card flashcardv2.Card
+	if err = json.Unmarshal(cardRevision.Payload, &card); err != nil {
+		return err
+	}
+	if card.GenerationStatus != flashcardv2.GenerationActive {
+		return nil
+	}
+	return validateFlashcardV2Source(ctx, store, card.SourceID)
+}
+
+func validateFlashcardV2CardIDs(ctx context.Context, store *flashcardv2.Store, cardIDs []string) error {
+	validatedSources := map[string]struct{}{}
+	for _, cardID := range cardIDs {
+		cardRevision, found, err := store.Projection().CurrentEntity(ctx, flashcardv2.EntityCard, cardID)
+		if err != nil || !found || cardRevision.Deleted {
+			if err != nil {
+				return err
+			}
+			return flashcardv2.ErrEntityNotFound
+		}
+		var card flashcardv2.Card
+		if err = json.Unmarshal(cardRevision.Payload, &card); err != nil {
+			return err
+		}
+		if card.GenerationStatus != flashcardv2.GenerationActive {
+			continue
+		}
+		if _, validated := validatedSources[card.SourceID]; validated {
+			continue
+		}
+		if err = validateFlashcardV2Source(ctx, store, card.SourceID); err != nil {
+			return err
+		}
+		validatedSources[card.SourceID] = struct{}{}
+	}
+	return nil
+}
+
+func validateFlashcardV2SearchResults(ctx context.Context, store *flashcardv2.Store,
+	results []flashcardv2.CardSearchResult) error {
+	cardIDs := make([]string, 0, len(results))
+	for index := range results {
+		if results[index].Card.GenerationStatus == flashcardv2.GenerationActive {
+			cardIDs = append(cardIDs, results[index].Card.ID)
+		}
+	}
+	return validateFlashcardV2CardIDs(ctx, store, cardIDs)
+}
+
+// UpdateFlashcardV2SessionCard 更新会话跳过或展示状态。
+func UpdateFlashcardV2SessionCard(ctx context.Context,
+	request flashcardv2.SessionCardUpdateRequest) (flashcardv2.SessionCard, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.SessionCard{}, err
+	}
+	if err = validateFlashcardV2Card(ctx, store, request.CardID); err != nil {
+		return flashcardv2.SessionCard{}, err
+	}
+	return store.UpdateSessionCard(ctx, request)
+}
+
+// FinishFlashcardV2Session 完成或放弃会话。
+func FinishFlashcardV2Session(ctx context.Context,
+	request flashcardv2.FinishSessionRequest) (flashcardv2.StudySession, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.StudySession{}, err
+	}
+	return store.FinishStudySession(ctx, request)
+}
+
+// GetFlashcardV2History 返回单卡完整评分与管理历史。
+func GetFlashcardV2History(ctx context.Context, cardID string, limit, offset int) ([]flashcardv2.Event, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return nil, err
+	}
+	if err = validateFlashcardV2Card(ctx, store, cardID); err != nil {
+		return nil, err
+	}
+	return store.Projection().CardHistory(ctx, cardID, limit, offset)
+}
+
+// GetFlashcardV2SourceHistory 返回卡源配置修订，正文仍由文档历史管理。
+func GetFlashcardV2SourceHistory(ctx context.Context, sourceID string, limit, offset int) ([]flashcardv2.EntityRevision, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return nil, err
+	}
+	return store.Projection().SourceHistory(ctx, sourceID, limit, offset)
+}
+
+// FlashcardV2SourceHistoryVersion 为历史引用补充当前可访问的文档位置，缺失正文不伪装成历史正文。
+type FlashcardV2SourceHistoryVersion struct {
+	flashcardv2.SourceHistoryVersion
+	// 以当前存在且可访问的块 ID 为键；缺失块不产生条目，位置不表示历史文档快照。
+	Documents map[string]FlashcardV2HistoryDocument `json:"documents"`
+}
+
+// FlashcardV2HistoryDocument 描述当前文档的位置，不包含历史正文或图片。
+type FlashcardV2HistoryDocument struct {
+	RootID     string `json:"rootID"`
+	NotebookID string `json:"notebookID"`
+	// 当前文档的可读路径，用于从配置历史定位文档历史。
+	Title string `json:"title"`
+}
+
+// GetFlashcardV2SourceHistoryVersion 读取历史配置及其引用，允许查看已缺失块的引用。
+// 对仍存在的块补充当前文档位置，遇到加密笔记本目标返回错误，不暴露其位置元数据。
+func GetFlashcardV2SourceHistoryVersion(ctx context.Context, sourceID, revisionID string) (FlashcardV2SourceHistoryVersion, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return FlashcardV2SourceHistoryVersion{}, err
+	}
+	version, err := store.Projection().SourceHistoryVersion(ctx, sourceID, revisionID)
+	if err != nil {
+		return FlashcardV2SourceHistoryVersion{}, err
+	}
+	result := FlashcardV2SourceHistoryVersion{SourceHistoryVersion: version, Documents: map[string]FlashcardV2HistoryDocument{}}
+	for _, ref := range version.References {
+		if ref.EntityType == "block" {
+			if bt := treenode.GetBlockTree(ref.EntityID); bt != nil {
+				if IsEncryptedBox(bt.BoxID) {
+					return FlashcardV2SourceHistoryVersion{}, errors.New(Conf.Language(393))
+				}
+				result.Documents[ref.EntityID] = FlashcardV2HistoryDocument{RootID: bt.RootID, NotebookID: bt.BoxID, Title: bt.HPath}
+			}
+		}
+	}
+	return result, nil
+}
+
+// RestoreFlashcardV2SourceHistory 校验历史内容引用后原子恢复配置，不回退文档或复习进度。
+// 恢复前要求引用块当前存在且不属于加密笔记本，并确认历史挖空标记和遮挡图片仍属于对应块。
+// 正文、标记或图片关系缺失时先恢复关联文档；校验失败不应用配置恢复，也不修改保留的历史。
+func RestoreFlashcardV2SourceHistory(ctx context.Context, request flashcardv2.RestoreSourceHistoryRequest) (flashcardv2.EntityRevision, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.EntityRevision{}, err
+	}
+	request.ValidateVersion = func(version flashcardv2.SourceHistoryVersion) error {
+		if err := validateFlashcardV2EntityBoundary(flashcardv2.EntityCardSource, false, version.Revision.Payload); err != nil {
+			return err
+		}
+		for _, ref := range version.References {
+			if ref.EntityType == "block" {
+				if err := ValidateFlashcardBlockIDs([]string{ref.EntityID}); err != nil {
+					return err
+				}
+			}
+		}
+		var source flashcardv2.CardSource
+		if err := json.Unmarshal(version.Revision.Payload, &source); err != nil {
+			return err
+		}
+		if err := validateFlashcardV2HistoricalOcclusions(source, version.References, GetBlockDOM); err != nil {
+			return err
+		}
+		if source.SourceType == "image-occlusion" {
+			var config flashcardv2.ImageOcclusionConfig
+			if err := json.Unmarshal(source.GenerationConfig, &config); err != nil {
+				return err
+			}
+			for _, ref := range version.References {
+				if ref.ID == source.PrimaryRefID {
+					return validateFlashcardV2AdvancedSourceInput([]string{ref.EntityID}, nil,
+						flashcardv2.AdvancedModeImageOcclusion, &config, nil)
+				}
+			}
+		}
+		return nil
+	}
+	return store.RestoreSourceHistory(ctx, request)
+}
+
+// validateFlashcardV2HistoricalOcclusions 确认历史挖空仍有对应块或行级标记，避免恢复后遮挡错误内容。
+func validateFlashcardV2HistoricalOcclusions(source flashcardv2.CardSource, references []flashcardv2.CardSourceRef,
+	getDOM func(string) string) error {
+	var ids []string
+	switch source.SourceType {
+	case "cloze":
+		var config flashcardv2.ClozeGenerationConfig
+		if err := json.Unmarshal(source.GenerationConfig, &config); err != nil {
+			return err
+		}
+		for _, occlusion := range config.Occlusions {
+			ids = append(ids, occlusion.ID)
+		}
+	case "ordered":
+		var config flashcardv2.OrderedGenerationConfig
+		if err := json.Unmarshal(source.GenerationConfig, &config); err != nil {
+			return err
+		}
+		for _, step := range config.Steps {
+			ids = append(ids, step.OcclusionIDs...)
+		}
+	default:
+		return nil
+	}
+	wholeBlocks := map[string]bool{}
+	var inlineBlocks []string
+	for _, ref := range references {
+		if ref.EntityType != "block" {
+			continue
+		}
+		if strings.HasPrefix(ref.Role, "occlusion:") {
+			wholeBlocks[strings.TrimPrefix(ref.Role, "occlusion:")] = true
+		} else {
+			inlineBlocks = append(inlineBlocks, getDOM(ref.EntityID))
+		}
+	}
+	for _, id := range ids {
+		if wholeBlocks[id] {
+			continue
+		}
+		found := false
+		attribute := `data-occlusion-id="` + html.EscapeString(id) + `"`
+		for _, dom := range inlineBlocks {
+			if strings.Contains(dom, attribute) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("flashcard inline occlusion [%s] was not found; restore the source document first", id)
+		}
+	}
+	return nil
+}
+
+// GetFlashcardV2Statistics 返回全局、复习集、查询或指定卡片范围的统计。
+func GetFlashcardV2Statistics(ctx context.Context,
+	request flashcardv2.StatisticsRequest) (flashcardv2.StatisticsResult, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return flashcardv2.StatisticsResult{}, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
+		return flashcardv2.StatisticsResult{}, err
+	}
+	results, err := flashcardV2StatisticsScope(ctx, store, request)
+	if err != nil {
+		return flashcardv2.StatisticsResult{}, err
+	}
+	if err = validateFlashcardV2SearchResults(ctx, store, results); err != nil {
+		return flashcardv2.StatisticsResult{}, err
+	}
+	return store.Projection().Statistics(ctx, request)
+}
+
+func flashcardV2StatisticsScope(ctx context.Context, store *flashcardv2.Store,
+	request flashcardv2.StatisticsRequest) ([]flashcardv2.CardSearchResult, error) {
+	options := flashcardv2.CardSearchOptions{Now: request.Now, IncludeInactive: true, IncludeSuspended: true,
+		IncludeBuried: true, IncludePaused: true}
+	results, err := store.Projection().SearchCards(ctx, request.Query, options)
+	if err != nil {
+		return nil, err
+	}
+	requested := map[string]struct{}{}
+	if request.ReviewSetID != "" {
+		cardIDs, setErr := store.Projection().ReviewSetCardIDs(ctx, request.ReviewSetID, options)
+		if setErr != nil {
+			return nil, setErr
+		}
+		for _, cardID := range cardIDs {
+			requested[cardID] = struct{}{}
+		}
+	} else if len(request.CardIDs) != 0 {
+		for _, cardID := range request.CardIDs {
+			requested[cardID] = struct{}{}
+		}
+	} else {
+		return results, nil
+	}
+	filtered := results[:0]
+	for _, result := range results {
+		if _, included := requested[result.Card.ID]; included {
+			filtered = append(filtered, result)
+		}
+	}
+	return filtered, nil
+}
+
+// DeleteFlashcardV2ReviewSet 删除复习集及其静态成员关系，但保留共享卡片和历史。
+func DeleteFlashcardV2ReviewSet(ctx context.Context, operationID, reviewSetID, expectedRevisionID string,
+	deletedAt int64) (flashcardv2.EntityMutationResult, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.EntityMutationResult{}, err
+	}
+	return store.DeleteReviewSet(ctx, operationID, reviewSetID, expectedRevisionID, deletedAt)
+}
+
+// GetFlashcardV2RenderModel 返回卡片声明式渲染所需的模板和内容引用。
+func GetFlashcardV2RenderModel(ctx context.Context, cardID string) (flashcardv2.CardRenderModel, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return flashcardv2.CardRenderModel{}, err
+	}
+	if err = validateFlashcardV2Card(ctx, store, cardID); err != nil {
+		return flashcardv2.CardRenderModel{}, err
+	}
+	return store.Projection().CardRenderModel(ctx, cardID)
+}

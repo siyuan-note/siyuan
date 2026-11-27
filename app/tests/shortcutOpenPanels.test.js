@@ -170,7 +170,7 @@ test("Ctrl+E and Alt+0 keep their dialogs open through the actual global keydown
         const cardSource = sourceFile("card/openCard.ts");
         const card = prefix(cardSource, arrow(cardSource, "openCardByData"), "let lastRange", {window, Constants});
         const openCard = evaluate(`exports.openCard = ${arrow(cardSource, "openCard").getText(cardSource)};`, {
-            window, fetchPost: (_url, _data, callback) => callback({data: {}}),
+            window, Constants, fetchPost: (_url, _data, callback) => callback({data: {state: "Legacy"}}),
             openCardByData: (...args) => pending.push(card(...args)),
         }).openCard;
         const handler = evaluate(`exports.subject = function(event) {${branch.getText(source)}};`, {

@@ -146,7 +146,7 @@ const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false)
             event.preventDefault();
             return true;
         },
-        window: {siyuan: {config: {keymap: {general: bindings, editor: {general: bindings}}}}},
+        window: {siyuan: {languages: {untitled: "Untitled"}, config: {keymap: {general: bindings, editor: {general: bindings}}}}},
         hasClosestByClassName: () => false,
         isOnlyMeta: () => false,
         matchHotKey: (binding: string, event: {key: string}) => binding === event.key,
@@ -159,7 +159,13 @@ const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false)
             contexts.push(context);
         },
         isEncryptedBox: () => false,
-        fetchPost: () => calls.push("spaceRepetition"),
+        getDocDisplayName: (name: string, empty: boolean) => empty ? "Untitled" : name,
+        openCardByScope: (_app: unknown, scope: string, id: string, title: string) => {
+            assert.equal(scope, "doc");
+            assert.equal(id, protyle.block.rootID);
+            assert.equal(title, "Untitled");
+            calls.push("spaceRepetition");
+        },
         zoomOut: () => calls.push("exitFocus"),
         openBacklink: () => calls.push("backlinks"),
         openGraph: () => calls.push("graphView"),
@@ -448,8 +454,12 @@ test("document shortcuts use summary titles and document-specific empty labels",
                 matchHotKey: (binding: string, event: {key: string}) => binding === event.key,
                 isEncryptedBox: () => false,
                 getDocDisplayName: (name: string, empty: boolean) => empty ? emptyTitle : name,
-                fetchPost: (_url: string, _data: unknown, callback: (value: unknown) => void) => callback({data: {}}),
-                openCardByData: (_app: unknown, _data: unknown, _type: string, _id: string, name: string) => calls.push(name),
+                openCardByScope: (_app: unknown, scope: string, id: string, name: string, openOnly: boolean) => {
+                    assert.equal(scope, "doc");
+                    assert.equal(id, "doc");
+                    assert.equal(openOnly, true);
+                    calls.push(name);
+                },
                 openBacklink: (options: {title: string}) => calls.push(options.title),
                 openGraph: (options: {title: string}) => calls.push(options.title),
                 openOutline: (options: {title: string}) => calls.push(options.title),

@@ -672,6 +672,30 @@ export type AddAttributeViewBlocksRequestInput = { "avID": string; "blockID"?: s
 
 export type AddAttributeViewKeyRequestInput = { "avID": string; "blockID"?: string | null; "keyID": string; "keyIcon": string; "keyName": string; "keyType": string; "previousKeyID": string; };
 
+export type AnkiConnectAddDetail = { "canAdd": boolean; "error": string | null; };
+
+export type AnkiConnectDuplicateScopeOptionsInput = { "checkAllModels"?: boolean; "checkChildren"?: boolean; "deckName"?: string; };
+
+export type AnkiConnectFieldInfo = { "order": number; "value": string; };
+
+export type AnkiConnectMediaInput = { "data"?: string; "fields": Array<string>; "filename": string; "path"?: string; "skipHash"?: string; "url"?: string; };
+
+export type AnkiConnectNoteInfo = { "cards": Array<number> | null; "fields": Record<string, AnkiConnectFieldInfo> | null; "modelName": string; "noteId": number; "tags": Array<string> | null; };
+
+export type AnkiConnectNoteInput = { "audio"?: Array<AnkiConnectMediaInput>; "deckName"?: string; "fields"?: Record<string, string>; "id"?: number; "modelName"?: string; "options"?: AnkiConnectNoteOptionsInput | null; "picture"?: Array<AnkiConnectMediaInput>; "tags"?: Array<string>; "video"?: Array<AnkiConnectMediaInput>; };
+
+export type AnkiConnectNoteOptionsInput = { "allowDuplicate"?: boolean; "duplicateScope"?: string; "duplicateScopeOptions"?: AnkiConnectDuplicateScopeOptionsInput | null; };
+
+export type AnkiConnectParamsInput = { "actions"?: Array<AnkiConnectRequestInput> | Array<string> | null; "data"?: string; "deck"?: string; "filename"?: string; "modelName"?: string; "note"?: AnkiConnectNoteInput | null; "notes"?: Array<AnkiConnectNoteInput> | Array<number>; "path"?: string; "query"?: string; "scopes"?: Array<string>; "skipHash"?: string; "url"?: string; };
+
+export type AnkiConnectReflection = { "actions"?: Array<string> | null; "scopes": Array<string> | null; };
+
+export type AnkiConnectRequestInput = { "action": string; "key"?: string; "params"?: AnkiConnectParamsInput | null; "version"?: number | null; };
+
+export type AnkiConnectResponse = AnkiConnectResult | { "error": null; "result": AnkiConnectResult; } | { "error": string; "result": null; };
+
+export type AnkiConnectResult = null | number | string | Array<AnkiConnectResponse> | Array<string> | null | Array<boolean> | null | Array<number | null> | null | Array<AnkiConnectNoteInfo | (Record<string, never> & { "cards"?: never; "fields"?: never; "modelName"?: never; "noteId"?: never; "tags"?: never; })> | null | Array<AnkiConnectAddDetail> | null | Record<string, number> | null | AnkiConnectReflection;
+
 export type AppendAttributeViewDetachedBlocksWithValuesRequestInput = { "avID": string; "blocksValues": Array<Array<AVValueInput | null> | null>; };
 
 export type AppendBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
@@ -1032,6 +1056,8 @@ export type CreateNotebookData = { "notebook": Notebook | null; };
 
 export type CreateNotebookRequestInput = { "name": string; };
 
+export type CreateQuickFlashcardSourcesRequestInput = { "blockIDs": Array<string>; "createdAt": number; "defaultPresetID"?: string | null; "operationID": string; "toggle"?: boolean | null; };
+
 export type CreateRiffDeckRequestInput = { "name": string; };
 
 export type CreateSnapshotData = { "created": boolean; "id": string; };
@@ -1371,6 +1397,254 @@ export type FindAssetReferencesRequestInput = { "path"?: string; "paths"?: Array
 export type FindReplaceRequestInput = { "groupBy"?: number | null; "ids": Array<string>; "k": string; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "r": string; "replaceTypes"?: Record<string, boolean> | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
 
 export type FinishLivePhotoPreviewRequestInput = { "file": Blob; "id": string; };
+
+export type FlashcardCard = { "createdAt": number; "editLater"?: FlashcardEditLater; "flag": number; "generationStatus": string; "id": string; "presetOverrideID"?: string; "priorityOverride"?: string; "sourceID": string; "templateID": string; "updatedAt": number; "variantData"?: JSONValue; "variantKey": string; };
+
+export type FlashcardEditLater = { "note": string; "updatedAt": number; };
+
+export type FlashcardEditLaterData = { "cardID": string; "editLater": FlashcardEditLater | null; "revisionID": string; };
+
+export type FlashcardQueryExpressionFieldsInput = { "children"?: Array<FlashcardQueryExpressionFieldsInput> | null; "comparator"?: string | null; "field"?: string | null; "operator": string; "value"?: JSONValue | null; };
+
+export type FlashcardQueryInput = { "root": FlashcardQueryExpressionFieldsInput; "version": number; };
+
+export type FlashcardReviewState = { "buriedReason"?: string; "buriedUntil"?: number; "cardID": string; "difficulty": number; "due": number; "elapsedDays": number; "lapses": number; "lastReview"?: number; "reps": number; "scheduledDays": number; "stability": number; "state": string; "stateRevisionID": string; "suspended": boolean; };
+
+export type FlashcardSearchOptionsInput = { "groupBySource"?: boolean | null; "includeBuried"?: boolean | null; "includeConflicts"?: boolean | null; "includeInactive"?: boolean | null; "includePaused"?: boolean | null; "includeSuspended"?: boolean | null; "limit"?: number | null; "now"?: number | null; "offset"?: number | null; "returnCards"?: boolean | null; };
+
+export type FlashcardSearchResult = { "card": FlashcardCard; "cardTagIDs": Array<string> | null; "defaultPresetID": string; "effectivePresetID": string; "effectivePriority": string; "effectiveTagIDs": Array<string> | null; "inheritedPriority": string; "reviewState": FlashcardReviewState; "sourceAvailable": boolean; "sourceBlockID"?: string; "sourceNotebookID"?: string; "sourcePath"?: string; "sourcePriority": string; "sourceRootID"?: string; "sourceStatus": string; "sourceTagIDs": Array<string> | null; "sourceTitle"?: string; "sourceType": string; };
+
+export type FlashcardV2ActivateFlashcardMigrationRequestInput = { "migrationID"?: string | null; "recordDigest"?: string | null; };
+
+export type FlashcardV2AdvancedClozeGroupInput = { "blockIDs"?: Array<string> | null; "displayOrder"?: number | null; "id"?: string | null; "occlusionIDs"?: Array<string> | null; };
+
+export type FlashcardV2AdvancedInlineOcclusionInput = { "blockID"?: string | null; "displayOrder"?: number | null; "id"?: string | null; };
+
+export type FlashcardV2AdvancedPreviewData = { "doms": Record<string, string> | null; "models": Array<FlashcardV2CardRenderModel> | null; };
+
+export type FlashcardV2AdvancedPreviewRequestInput = { "blockIDs": Array<string>; "clozeGroups"?: Array<FlashcardV2AdvancedClozeGroupInput>; "correctOptionIndexes"?: Array<number>; "distractorQuery"?: FlashcardV2QueryASTInput | null; "dynamicDistractors"?: number; "imageConfig"?: FlashcardV2ImageOcclusionConfigInput | null; "inlineOcclusions"?: Array<FlashcardV2AdvancedInlineOcclusionInput>; "mode": string; "randomizeOptions"?: boolean; "sourceID": string; "typedConfig"?: FlashcardV2TypedAnswerConfigInput | null; };
+
+export type FlashcardV2AdvancedSourceRequestInput = { "blockIDs"?: Array<string> | null; "clozeGroups"?: Array<FlashcardV2AdvancedClozeGroupInput> | null; "correctOptionIndexes"?: Array<number> | null; "createdAt"?: number | null; "defaultPresetID"?: string | null; "distractorQuery"?: FlashcardV2QueryASTInput | null; "dynamicDistractors"?: number | null; "imageConfig"?: FlashcardV2ImageOcclusionConfigInput | null; "inlineOcclusions"?: Array<FlashcardV2AdvancedInlineOcclusionInput> | null; "mode"?: string | null; "operationID"?: string | null; "randomizeOptions"?: boolean | null; "reviewSetIDs"?: Array<string> | null; "sourceID"?: string | null; "typedConfig"?: FlashcardV2TypedAnswerConfigInput | null; };
+
+export type FlashcardV2AdvancedSourceResult = { "cards": FlashcardV2ReconcileResult; "memberships": Array<string> | null; "sourceRevision": FlashcardV2EntityRevision; };
+
+export type FlashcardV2AdvancedSourceUpdateRequestInput = { "blockIDs"?: Array<string> | null; "clozeGroups"?: Array<FlashcardV2AdvancedClozeGroupInput> | null; "correctOptionIndexes"?: Array<number> | null; "distractorQuery"?: FlashcardV2QueryASTInput | null; "dynamicDistractors"?: number | null; "expectedRevisionID"?: string | null; "imageConfig"?: FlashcardV2ImageOcclusionConfigInput | null; "inlineOcclusions"?: Array<FlashcardV2AdvancedInlineOcclusionInput> | null; "mode"?: string | null; "operationID"?: string | null; "randomizeOptions"?: boolean | null; "sourceID"?: string | null; "typedConfig"?: FlashcardV2TypedAnswerConfigInput | null; "updatedAt"?: number | null; };
+
+export type FlashcardV2AnkiDeckPreview = { "cardCount": number; "id": number; "name": string; };
+
+export type FlashcardV2AnkiFieldPreview = { "name": string; "ord": number; };
+
+export type FlashcardV2AnkiImportReport = { "cards": number; "collectionID": string; "media": number; "notes": number; "packageDigest": string; "retiredSources": number; "reviewEvents": number; "reviewSets": number; "tags": number; "updatedSources": number; };
+
+export type FlashcardV2AnkiNoteTypePreview = { "conversion": string; "fields": Array<FlashcardV2AnkiFieldPreview> | null; "id": number; "kind": string; "name": string; "noteCount": number; "templates": Array<FlashcardV2AnkiTemplatePreview> | null; };
+
+export type FlashcardV2AnkiPackagePreview = { "cardCount": number; "collectionCrt": number; "collectionEntry": string; "collectionID": string; "decks": Array<FlashcardV2AnkiDeckPreview> | null; "mediaCount": number; "noteCount": number; "noteTypes": Array<FlashcardV2AnkiNoteTypePreview> | null; "packageDigest": string; "reviewCount": number; "schemaVersion": number; "unsupported": Array<string> | null; };
+
+export type FlashcardV2AnkiTemplatePreview = { "conversion": string; "hasScript": boolean; "name": string; "ord": number; "usesTypeAnswer": boolean; };
+
+export type FlashcardV2AnkiUploadRequestInput = { "file"?: Blob; "notebookID"?: string; "operationID"?: string; };
+
+export type FlashcardV2BasicDirectionRequestInput = { "direction"?: string | null; "expectedRevision"?: string | null; "operationID"?: string | null; "sourceID"?: string | null; "updatedAt"?: number | null; };
+
+export type FlashcardV2BasicSourceRequestInput = { "blockIDs"?: Array<string> | null; "createdAt"?: number | null; "defaultPresetID"?: string | null; "direction"?: string | null; "operationID"?: string | null; "reviewSetIDs"?: Array<string> | null; "sourceID"?: string | null; };
+
+export type FlashcardV2BasicSourceResult = { "cards": FlashcardV2ReconcileResult; "memberships": Array<string> | null; "sourceRevision": FlashcardV2EntityRevision; };
+
+export type FlashcardV2Card = { "createdAt": number; "editLater"?: FlashcardV2CardEditLater; "flag": number; "generationStatus": "active" | "disabledByTemplate" | "orphaned" | "deleted"; "id": string; "presetOverrideID"?: string; "priorityOverride"?: string; "sourceID": string; "templateID": string; "updatedAt": number; "variantData"?: JSONValue; "variantKey": string; };
+
+export type FlashcardV2CardEditLater = { "note": string; "updatedAt": number; };
+
+export type FlashcardV2CardManagementRequestInput = { "action"?: string | null; "buriedUntil"?: number | null; "cardIDs"?: Array<string> | null; "changedAt"?: number | null; "due"?: number | null; "expectedCardRevisions"?: Record<string, string> | null; "expectedStateRevisions"?: Record<string, string> | null; "flag"?: number | null; "operationID"?: string | null; "presetID"?: string | null; "priority"?: string | null; "reason"?: string | null; };
+
+export type FlashcardV2CardManagementResult = { "batch": FlashcardV2OperationBatch; "cards": Record<string, FlashcardV2Card> | null; "events": Array<FlashcardV2Event> | null; "states": Record<string, FlashcardV2ReviewState> | null; };
+
+export type FlashcardV2CardRenderModel = { "card": FlashcardV2Card; "references": Array<FlashcardV2CardSourceRef> | null; "reviewState": FlashcardV2ReviewState; "schema": FlashcardV2CardSchema; "source": FlashcardV2CardSource; "template": FlashcardV2CardTemplate; };
+
+export type FlashcardV2CardSchema = { "builtinType"?: string; "createdAt": number; "fields": Array<FlashcardV2CardSchemaField> | null; "id": string; "name": string; "templateIDs": Array<string> | null; "updatedAt": number; };
+
+export type FlashcardV2CardSchemaField = { "id": string; "name": string; "required": boolean; "sort": number; "type": string; };
+
+export type FlashcardV2CardSearchOptionsInput = { "groupBySource"?: boolean | null; "includeBuried"?: boolean | null; "includeConflicts"?: boolean | null; "includeInactive"?: boolean | null; "includePaused"?: boolean | null; "includeSuspended"?: boolean | null; "limit"?: number | null; "now"?: number | null; "offset"?: number | null; "returnCards"?: boolean | null; };
+
+export type FlashcardV2CardSearchResult = { "card": FlashcardV2Card; "cardTagIDs": Array<string> | null; "defaultPresetID": string; "effectivePresetID": string; "effectivePriority": string; "effectiveTagIDs": Array<string> | null; "inheritedPriority": string; "reviewState": FlashcardV2ReviewState; "sourceAvailable": boolean; "sourceNotebookID"?: string; "sourcePath"?: string; "sourcePriority": string; "sourceRootID"?: string; "sourceStatus": string; "sourceTagIDs": Array<string> | null; "sourceType": string; };
+
+export type FlashcardV2CardSource = { "defaultPresetID"?: string; "disabledTemplateIDs"?: Array<string>; "generationConfig": JSONValue; "id": string; "pluginData"?: JSONValue; "pluginDataVersion"?: number; "pluginNamespace"?: string; "primaryRefID": string; "priority"?: string; "schemaID": string; "sourceType": string; "status": string; };
+
+export type FlashcardV2CardSourceRef = { "entityID": string; "entityType": string; "fieldID"?: string; "id": string; "required": boolean; "role": string; "sort": number; "sourceID": string; };
+
+export type FlashcardV2CardTemplate = { "answerMode": string; "backSpec": JSONValue; "contextPolicy"?: JSONValue; "enabled": boolean; "frontSpec": JSONValue; "generationRule": JSONValue; "id": string; "name": string; "schemaID": string; "style"?: string; };
+
+export type FlashcardV2Change = { "event"?: FlashcardV2Event; "kind": string; "revision"?: FlashcardV2EntityRevision; };
+
+export type FlashcardV2ConflictResolutionRequestInput = { "entityID"?: string | null; "entityType"?: string | null; "operationID"?: string | null; "resolvedAt"?: number | null; "selectedRevisionID"?: string | null; };
+
+export type FlashcardV2DeleteFlashcardReviewSetRequestInput = { "deletedAt"?: number | null; "expectedRevisionID"?: string | null; "operationID"?: string | null; "reviewSetID"?: string | null; };
+
+export type FlashcardV2DeleteInvalidSourcesRequestInput = { "changedAt"?: number | null; "operationID"?: string | null; "sources"?: Array<FlashcardV2InvalidSourceInput> | null; };
+
+export type FlashcardV2DeleteInvalidSourcesResult = { "deleted": Array<string> | null; "skipped": Array<string> | null; };
+
+export type FlashcardV2EntityConflictGroup = { "detectedAt": number; "entityID": string; "entityType": string; "revisions": Array<FlashcardV2EntityRevision> | null; "selectedRevisionID": string; };
+
+export type FlashcardV2EntityData = { "found": boolean; "revision": FlashcardV2EntityRevision; };
+
+export type FlashcardV2EntityListOptionsInput = { "includeDeleted"?: boolean | null; "limit"?: number | null; "offset"?: number | null; };
+
+export type FlashcardV2EntityMutationInput = { "deleted"?: boolean | null; "entityID"?: string | null; "entityType"?: string | null; "expectedRevisionID"?: string | null; "payload"?: JSONValue | null; "requireAbsent"?: boolean | null; "updatedAt"?: number | null; };
+
+export type FlashcardV2EntityMutationResult = { "batch": FlashcardV2OperationBatch; "revisions": Array<FlashcardV2EntityRevision> | null; };
+
+export type FlashcardV2EntityPage = { "entities": Array<FlashcardV2EntityRevision> | null; "total": number; };
+
+export type FlashcardV2EntityRevision = { "deleted": boolean; "entityID": string; "entityType": string; "parentRevisionIDs"?: Array<string>; "payload": JSONValue; "revisionID": string; "updatedAt": number; };
+
+export type FlashcardV2Event = { "entityID"?: string; "eventID": string; "eventType": string; "occurredAt": number; "payload": JSONValue; };
+
+export type FlashcardV2FinishSessionRequestInput = { "endedAt"?: number | null; "operationID"?: string | null; "sessionID"?: string | null; "status"?: string | null; };
+
+export type FlashcardV2GetFlashcardEntityRequestInput = { "entityID"?: string | null; "entityType"?: string | null; };
+
+export type FlashcardV2GetFlashcardHistoryRequestInput = { "cardID"?: string | null; "limit"?: number | null; "offset"?: number | null; };
+
+export type FlashcardV2GetFlashcardRenderModelRequestInput = { "cardID"?: string | null; };
+
+export type FlashcardV2GetFlashcardSessionQueueRequestInput = { "now"?: number | null; "reviewDayEnd"?: number | null; "reviewDayStart"?: number | null; "sessionID"?: string | null; };
+
+export type FlashcardV2GetFlashcardStudyPolicyRequestInput = { "scopeID"?: string | null; "scopeType"?: string | null; };
+
+export type FlashcardV2HistoryData = { "events": Array<FlashcardV2Event> | null; };
+
+export type FlashcardV2HistoryDocument = { "notebookID": string; "rootID": string; "title": string; };
+
+export type FlashcardV2ImageOcclusionConfigInput = { "assetID"?: string | null; "frontMode"?: string | null; "groups"?: Array<FlashcardV2ImageOcclusionGroupInput> | null; "shapes"?: Array<FlashcardV2ImageOcclusionShapeInput> | null; };
+
+export type FlashcardV2ImageOcclusionGroupInput = { "displayOrder"?: number | null; "id"?: string | null; "shapeIDs"?: Array<string> | null; };
+
+export type FlashcardV2ImageOcclusionPointInput = { "x"?: number | null; "y"?: number | null; };
+
+export type FlashcardV2ImageOcclusionShapeInput = { "height"?: number | null; "id"?: string | null; "points"?: Array<FlashcardV2ImageOcclusionPointInput> | null; "type"?: string | null; "width"?: number | null; "x"?: number | null; "y"?: number | null; };
+
+export type FlashcardV2InvalidSource = { "blockIDs": Array<string> | null; "cardCount": number; "reason": "closed" | "missing" | "unknown"; "revisionID": string; "sourceID": string; };
+
+export type FlashcardV2InvalidSourceInput = { "blockIDs"?: Array<string> | null; "cardCount"?: number | null; "reason"?: "closed" | "missing" | "unknown"; "revisionID"?: string | null; "sourceID"?: string | null; };
+
+export type FlashcardV2InvalidSourcesReport = { "sources": Array<FlashcardV2InvalidSource> | null; };
+
+export type FlashcardV2LegacyActivationResult = { "activationBatch": FlashcardV2OperationBatch; "preparedBatch": FlashcardV2OperationBatch; "status": FlashcardV2LegacyMigrationStatus; };
+
+export type FlashcardV2LegacyFileFingerprint = { "path": string; "sha256": string; "size": number; };
+
+export type FlashcardV2LegacyFlashcardMigrationPreview = { "inputFiles": Array<FlashcardV2LegacyFileFingerprint> | null; "migrationID": string; "recordDigest": string; "report": FlashcardV2LegacyMigrationReport; };
+
+export type FlashcardV2LegacyMigrationReport = { "ArchivedCards": number; "Complete": boolean; "InvalidCards": number; "LegacyCards": number; "LegacyDecks": number; "MergedCards": number; "MigratedCards": number; "MigratedSources": number; "OrphanedSources": number; "ReviewEvents": number; "ReviewSets": number; "SkippedEncryptedCards": number; "SkippedEncryptedLogs": number; "UnmappedLogs": number; };
+
+export type FlashcardV2LegacyMigrationStatus = { "activated"?: FlashcardV2Event; "diverged"?: FlashcardV2Event; "migrationID"?: string; "prepared"?: FlashcardV2Event; "state": string; };
+
+export type FlashcardV2ListFlashcardConflictsRequestInput = { "limit"?: number | null; };
+
+export type FlashcardV2ListFlashcardEntitiesRequestInput = { "entityType"?: string | null; "options"?: FlashcardV2EntityListOptionsInput | null; };
+
+export type FlashcardV2MutateFlashcardEntitiesRequestInput = { "mutations"?: Array<FlashcardV2EntityMutationInput> | null; "operationID"?: string | null; };
+
+export type FlashcardV2OperationBatch = { "batchID": string; "changes": Array<FlashcardV2Change> | null; "checksum": string; "deviceID": string; "formatVersion": number; "operationDigest": string; "operationID": string; "recordedAt": number; "sequence": number; "writerID": string; };
+
+export type FlashcardV2OrderedSourceDetails = { "contentFingerprint": string; "doms": Record<string, string> | null; "references": Array<FlashcardV2CardSourceRef> | null; "sourceRevision": FlashcardV2EntityRevision; };
+
+export type FlashcardV2OrderedSourceDetailsRequestInput = { "sourceID": string; };
+
+export type FlashcardV2PreviewFlashcardReviewSetRequestInput = { "options"?: FlashcardV2CardSearchOptionsInput | null; "query"?: FlashcardV2QueryASTInput | null; "reviewSetID"?: string | null; };
+
+export type FlashcardV2QueryASTInput = { "root"?: FlashcardV2QueryExpressionInput | null; "version"?: number | null; };
+
+export type FlashcardV2QueryExpressionInput = { "children"?: Array<FlashcardV2QueryExpressionInput> | null; "comparator"?: string | null; "field"?: string | null; "operator"?: string | null; "value"?: JSONValue | null; };
+
+export type FlashcardV2QueueData = { "cards": Array<FlashcardV2SessionQueueCard> | null; };
+
+export type FlashcardV2ReconcileFlashcardSourceRequestInput = { "operationID"?: string | null; "sourceID"?: string | null; "updatedAt"?: number | null; };
+
+export type FlashcardV2ReconcileResult = { "batch"?: FlashcardV2OperationBatch; "created": Array<string> | null; "unchanged": Array<string> | null; "updated": Array<string> | null; };
+
+export type FlashcardV2ReorderAdvancedSourceRequestInput = { "contentFingerprint": string; "expectedRevisionID": string; "operationID": string; "orderedStepIDs": Array<string>; "sourceID": string; "updatedAt": number; };
+
+export type FlashcardV2ReorderAdvancedSourceResult = { "batch": FlashcardV2OperationBatch; "sourceRevision": FlashcardV2EntityRevision; "updatedCardIDs": Array<string> | null; };
+
+export type FlashcardV2RestoreSourceHistoryRequestInput = { "expectedRevisionID"?: string | null; "operationID"?: string | null; "revisionID"?: string | null; "sourceID"?: string | null; "updatedAt"?: number | null; };
+
+export type FlashcardV2ReviewRequestInput = { "answerResult"?: JSONValue | null; "buryUntil"?: number | null; "cardID"?: string | null; "durationMS"?: number | null; "operationID"?: string | null; "rating"?: string | null; "reviewDayEnd"?: number | null; "reviewDayStart"?: number | null; "reviewMode"?: string | null; "reviewSetID"?: string | null; "reviewedAt"?: number | null; "sessionID"?: string | null; "stateRevisionID"?: string | null; };
+
+export type FlashcardV2ReviewResult = { "afterState"?: FlashcardV2ReviewStateSnapshot; "batch": FlashcardV2OperationBatch; "beforeState": FlashcardV2ReviewStateSnapshot; "buriedSiblingIDs": Array<string> | null; "event": FlashcardV2Event; "leechTagged": boolean; "presetRevisionID": string; "schedulerVersion": string; "sessionCard"?: FlashcardV2SessionCard; "skippedSessionCardIDs": Array<string> | null; };
+
+export type FlashcardV2ReviewSetCardPage = { "cardIDs": Array<string> | null; "cards"?: Array<FlashcardV2CardSearchResult>; "total": number; };
+
+export type FlashcardV2ReviewSetMembership = { "cardID": string; "id": string; "mode": string; "reviewSetID": string; };
+
+export type FlashcardV2ReviewSetSummary = { "cards": number; "due": number; "excluded": number; "included": number; "reviewSetID": string; };
+
+export type FlashcardV2ReviewState = { "buriedReason"?: string; "buriedUntil"?: number; "cardID": string; "difficulty": number; "due": number; "elapsedDays": number; "lapses": number; "lastReview"?: number; "reps": number; "scheduledDays": number; "stability": number; "state": string; "stateRevisionID": string; "suspended": boolean; };
+
+export type FlashcardV2ReviewStateSnapshot = { "buriedReason"?: string; "buriedUntil"?: number; "difficulty": number; "due": number; "elapsedDays": number; "lapses": number; "lastReview"?: number; "reps": number; "scheduledDays": number; "stability": number; "state": string; "stateRevisionID": string; "suspended": boolean; };
+
+export type FlashcardV2ReviewUndoRequestInput = { "cardID"?: string | null; "operationID"?: string | null; "reviewEventID"?: string | null; "undoneAt"?: number | null; };
+
+export type FlashcardV2ReviewUndoResult = { "batch": FlashcardV2OperationBatch; "cardID": string; "event": FlashcardV2Event; "leechTagRemoved": boolean; "restoredSessionCardIDs": Array<string> | null; "restoredSiblingIDs": Array<string> | null; "restoredState"?: FlashcardV2ReviewStateSnapshot; "reviewEventID": string; "sessionCard"?: FlashcardV2SessionCard; };
+
+export type FlashcardV2SaveStudyPolicyRequestInput = { "defaultPresetID"?: string | null; "expectedRevisionID"?: string | null; "operationID"?: string | null; "priority"?: string | null; "scopeID"?: string | null; "scopeType"?: string | null; "targetDate"?: number | null; "updatedAt"?: number | null; };
+
+export type FlashcardV2SaveTagRequestInput = { "expectedRevisionID"?: string | null; "name"?: string | null; "operationID"?: string | null; "parentID"?: string | null; "tagID"?: string | null; "updatedAt"?: number | null; };
+
+export type FlashcardV2SessionCard = { "cardID": string; "dynamicOptions"?: Array<FlashcardV2SessionChoiceOption>; "id": string; "optionOrder"?: Array<string>; "sessionID": string; "skipReason"?: string; "sort": number; "stateRevisionID"?: string; "status": "queued" | "shown" | "reviewed" | "skipped"; "stepResults"?: JSONValue; };
+
+export type FlashcardV2SessionCardUpdateRequestInput = { "cardID"?: string | null; "operationID"?: string | null; "sessionID"?: string | null; "skipReason"?: string | null; "status"?: string | null; "updatedAt"?: number | null; };
+
+export type FlashcardV2SessionChoiceOption = { "entityID": string; "entityType": string; "id": string; };
+
+export type FlashcardV2SessionQueueCard = { "card": FlashcardV2Card; "repeatDue"?: number; "reviewState": FlashcardV2ReviewState; "sessionCard": FlashcardV2SessionCard; };
+
+export type FlashcardV2SetReviewSetMembershipsRequestInput = { "cardIDs"?: Array<string> | null; "changedAt"?: number | null; "mode"?: string | null; "operationID"?: string | null; "reviewSetID"?: string | null; };
+
+export type FlashcardV2SetReviewSetMembershipsResult = { "batch": FlashcardV2OperationBatch; "clearedCardIDs": Array<string> | null; "memberships": Record<string, FlashcardV2ReviewSetMembership> | null; };
+
+export type FlashcardV2SetTagAssignmentsRequestInput = { "changedAt"?: number | null; "operationID"?: string | null; "tagIDs"?: Array<string> | null; "targetIDs"?: Array<string> | null; "targetType"?: string | null; };
+
+export type FlashcardV2SetTagAssignmentsResult = { "assignments": Record<string, Array<string> | null> | null; "batch": FlashcardV2OperationBatch; };
+
+export type FlashcardV2SourceHistoryList = { "versions": Array<FlashcardV2EntityRevision> | null; };
+
+export type FlashcardV2SourceHistoryRequestInput = { "limit"?: number | null; "offset"?: number | null; "revisionID"?: string | null; "sourceID"?: string | null; };
+
+export type FlashcardV2SourceHistoryVersion = { "documents": Record<string, FlashcardV2HistoryDocument> | null; "modes": Array<string> | null; "references": Array<FlashcardV2CardSourceRef> | null; "revision": FlashcardV2EntityRevision; };
+
+export type FlashcardV2SourceLifecycleRequestInput = { "action"?: string | null; "changedAt"?: number | null; "expectedRevision"?: string | null; "operationID"?: string | null; "sourceID"?: string | null; };
+
+export type FlashcardV2SourceLifecycleResult = { "batch"?: FlashcardV2OperationBatch; "sourceRevision": FlashcardV2EntityRevision; };
+
+export type FlashcardV2StatisticsDistributionPoint = { "count": number; "label": string; "max": number | null; "min": number; };
+
+export type FlashcardV2StatisticsDuePoint = { "cards": number; "start": number; };
+
+export type FlashcardV2StatisticsHistory = { "accuracy": number; "averageDurationMS"?: number; "correct": number; "durationKnown": number; "durationTotalMS": number; "durationUnknown": number; "lapses": number; "ratings": Record<string, number> | null; "retentionReviews": number; "reviews": number; "trueRetention": number; "uniqueCards": number; };
+
+export type FlashcardV2StatisticsHourPoint = { "correct": number; "hour": number; "retention": number; "reviews": number; };
+
+export type FlashcardV2StatisticsOverview = { "buried": number; "currentCards": number; "deletedCards": number; "generationStatuses": Record<string, number> | null; "leeches": number; "paused": number; "reviewStates": Record<string, number> | null; "suspended": number; };
+
+export type FlashcardV2StatisticsRequestInput = { "bucket"?: string | null; "cardIDs"?: Array<string> | null; "from"?: number | null; "futureDays"?: number | null; "now"?: number | null; "query"?: FlashcardV2QueryASTInput | null; "reviewSetID"?: string | null; "timezoneOffsetMinutes"?: number | null; "to"?: number | null; };
+
+export type FlashcardV2StatisticsResult = { "byHour": Array<FlashcardV2StatisticsHourPoint> | null; "difficultyDistribution": Array<FlashcardV2StatisticsDistributionPoint> | null; "from": number; "futureDue": Array<FlashcardV2StatisticsDuePoint> | null; "history": FlashcardV2StatisticsHistory; "intervalDistribution": Array<FlashcardV2StatisticsDistributionPoint> | null; "overdue": number; "overview": FlashcardV2StatisticsOverview; "retrievabilityDistribution": Array<FlashcardV2StatisticsDistributionPoint> | null; "scope": string; "series": Array<FlashcardV2StatisticsTimePoint> | null; "stabilityDistribution": Array<FlashcardV2StatisticsDistributionPoint> | null; "to": number; };
+
+export type FlashcardV2StatisticsTimePoint = { "correct": number; "durationKnown": number; "durationTotalMS": number; "reviews": number; "start": number; "uniqueCards": number; };
+
+export type FlashcardV2StudyQueueRequestInput = { "cardIDs"?: Array<string> | null; "includeBuried"?: boolean | null; "includePaused"?: boolean | null; "includeSuspended"?: boolean | null; "newLimit"?: number | null; "now"?: number | null; "operationID"?: string | null; "query"?: FlashcardV2QueryASTInput | null; "reviewDayEnd"?: number | null; "reviewDayStart"?: number | null; "reviewLimit"?: number | null; "reviewMode"?: string | null; "reviewSetID"?: string | null; "reviewSetIDs"?: Array<string> | null; "seed"?: string | null; "sessionID"?: string | null; };
+
+export type FlashcardV2StudyQueueResult = { "batch": FlashcardV2OperationBatch; "session": FlashcardV2StudySession; "sessionCards": Array<FlashcardV2SessionCard> | null; };
+
+export type FlashcardV2StudySession = { "cardIDs"?: Array<string>; "endedAt"?: number; "id": string; "includeBuried": boolean; "includePaused": boolean; "includeSuspended": boolean; "newLimit": number; "queryAST"?: JSONValue; "reviewDayEnd"?: number; "reviewDayStart"?: number; "reviewLimit": number; "reviewMode": string; "reviewSetID"?: string; "reviewSetIDs"?: Array<string>; "seed": string; "selectionDigest": string; "startedAt": number; "status": string; };
+
+export type FlashcardV2SummariesData = { "summaries": Record<string, FlashcardV2ReviewSetSummary> | null; };
+
+export type FlashcardV2SummarizeFlashcardReviewSetsRequestInput = { "now"?: number | null; "reviewSetIDs"?: Array<string> | null; };
+
+export type FlashcardV2TypedAnswerConfigInput = { "caseSensitive"?: boolean | null; "collapseWhitespace"?: boolean | null; "fuzzyMaxDistance"?: number | null; "fuzzyMaxRatio"?: number | null; "ignoreDiacritics"?: boolean | null; "trimWhitespace"?: boolean | null; };
 
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
@@ -1878,6 +2152,12 @@ export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": stri
 
 export type PutFileRequestInput = { "app"?: string; "file"?: Blob; "isDir"?: string; "modTime"?: string; "path"?: string; };
 
+export type QueryFlashcardsData = { "cards": Array<FlashcardSearchResult>; };
+
+export type QueryFlashcardsRequestInput = { "options"?: FlashcardSearchOptionsInput | null; "query"?: FlashcardQueryInput | null; };
+
+export type QuickFlashcardSourcesData = { "action": "created" | "removed"; "cardIDs": Array<string>; "sourceIDs": Array<string>; };
+
 export type ReadDirectoryRequestInput = { "path": string; };
 
 export type RecentDoc = { "closedAt"?: number; "icon"?: string; "openAt"?: number; "rootID": string; "title"?: string; "viewedAt"?: number; };
@@ -2008,7 +2288,7 @@ export type RestorePluginSnapshotData = { "backupID": string; };
 
 export type RestorePluginSnapshotRequestInput = { "id": string; "name": string; };
 
-export type ReviewRiffCardRequestInput = { "cardID": string; "deckID": string; "rating": number; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
+export type ReviewRiffCardRequestInput = { "cardID": string; "deckID": string; "durationMS"?: number | null; "rating": number; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
 
 export type RichClipboardAssetInput = { "box"?: string; "index": number; "path": string; };
 
@@ -2164,7 +2444,9 @@ export type SetExportRequestInput = { "addTitle"?: boolean | null; "blockEmbedMo
 
 export type SetFiletreeRequestInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "closeWindowOnLastTabClosed"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "docTreeBatchSize"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "recentDocsSort"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "restoreDocPosition"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
 
-export type SetFlashcardRequestInput = { "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
+export type SetFlashcardEditLaterRequestInput = { "cardID": string; "changedAt": number; "enabled": boolean; "expectedRevisionID"?: string; "note"?: string; "operationID": string; };
+
+export type SetFlashcardRequestInput = { "ankiConnectEnabled"?: boolean | null; "ankiConnectLocalWithoutKey"?: boolean | null; "ankiConnectNotebook"?: string | null; "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "openMode"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
 
 export type SetGraphConfRequestInput = { "conf": GraphConfigurationFieldsInput; "type": string; };
 
@@ -2330,9 +2612,9 @@ export type SettingFileTree = { "allowCreateDeeper": boolean; "alwaysSelectOpene
 
 export type SettingFileTreeInput = { "allowCreateDeeper"?: boolean | null; "alwaysSelectOpenedFile"?: boolean | null; "boxDocEnabled"?: boolean | null; "closeTabOnDoubleClick"?: boolean | null; "closeTabsOnStart"?: boolean | null; "closeWindowOnLastTabClosed"?: boolean | null; "createDocAtTop"?: boolean | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "docIconClickMode"?: number | null; "docTreeBatchSize"?: number | null; "largeFileWarningSize"?: number | null; "maxListCount"?: number | null; "maxOpenTabCount"?: number | null; "noSplitScreenWhenOpenTab"?: boolean | null; "openFilesUseCurrentTab"?: boolean | null; "parentDocTitleClickMode"?: number | null; "recentDocsMaxListCount"?: number | null; "recentDocsSort"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "removeDocWithoutConfirm"?: boolean | null; "restoreDocPosition"?: boolean | null; "shorthandSaveBox"?: string | null; "shorthandSavePath"?: string | null; "sort"?: number | null; "tabStartupMode"?: number | null; "useSVGDefaultIcon"?: boolean | null; "useSingleLineSave"?: boolean | null; };
 
-export type SettingFlashcard = { "blockquote": boolean; "callout": boolean; "deck": boolean; "heading": boolean; "list": boolean; "mark": boolean; "maximumInterval": number; "newCardLimit": number; "requestRetention": number; "reviewCardLimit": number; "reviewMode": number; "superBlock": boolean; "weights": string; };
+export type SettingFlashcard = { "ankiConnectEnabled": boolean; "ankiConnectLocalWithoutKey": boolean; "ankiConnectNotebook": string; "blockquote": boolean; "callout": boolean; "deck": boolean; "heading": boolean; "list": boolean; "mark": boolean; "maximumInterval": number; "newCardLimit": number; "openMode": number; "requestRetention": number; "reviewCardLimit": number; "reviewMode": number; "superBlock": boolean; "weights": string; };
 
-export type SettingFlashcardInput = { "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
+export type SettingFlashcardInput = { "ankiConnectEnabled"?: boolean | null; "ankiConnectLocalWithoutKey"?: boolean | null; "ankiConnectNotebook"?: string | null; "blockquote"?: boolean | null; "callout"?: boolean | null; "deck"?: boolean | null; "heading"?: boolean | null; "list"?: boolean | null; "mark"?: boolean | null; "maximumInterval"?: number | null; "newCardLimit"?: number | null; "openMode"?: number | null; "requestRetention"?: number | null; "reviewCardLimit"?: number | null; "reviewMode"?: number | null; "superBlock"?: boolean | null; "weights"?: string | null; };
 
 export type SettingGetSectionRequestInput = { "namespace": string; };
 
@@ -6355,6 +6637,453 @@ export interface APIPOSTRoutes {
         request: FileTreePathsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/activateMigration": {
+        request: FlashcardV2ActivateFlashcardMigrationRequestInput;
+        response: { "code": 0; "data": FlashcardV2LegacyActivationResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/flashcard/ankiConnect": {
+        request: AnkiConnectRequestInput;
+        response: AnkiConnectResponse | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["public"];
+        output: "directJSON";
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/createAdvancedSource": {
+        request: FlashcardV2AdvancedSourceRequestInput;
+        response: { "code": 0; "data": FlashcardV2AdvancedSourceResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/createBasicSource": {
+        request: FlashcardV2BasicSourceRequestInput;
+        response: { "code": 0; "data": FlashcardV2BasicSourceResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/flashcard/createQuickSources": {
+        request: CreateQuickFlashcardSourcesRequestInput;
+        response: { "code": 0; "data": QuickFlashcardSourcesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/deleteInvalidSources": {
+        request: FlashcardV2DeleteInvalidSourcesRequestInput;
+        response: { "code": 0; "data": FlashcardV2DeleteInvalidSourcesResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/deleteReviewSet": {
+        request: FlashcardV2DeleteFlashcardReviewSetRequestInput;
+        response: { "code": 0; "data": FlashcardV2EntityMutationResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/finishSession": {
+        request: FlashcardV2FinishSessionRequestInput;
+        response: { "code": 0; "data": FlashcardV2StudySession; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/getCardHistory": {
+        request: FlashcardV2GetFlashcardHistoryRequestInput;
+        response: { "code": 0; "data": FlashcardV2HistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/getEntity": {
+        request: FlashcardV2GetFlashcardEntityRequestInput;
+        response: { "code": 0; "data": FlashcardV2EntityData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/getMigrationStatus": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": FlashcardV2LegacyMigrationStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 读取同一源修订及引用的普通块快照，不写正文、不创建卡片、不主动迁移旧数据。
+     * 仅支持内置有序卡源；关闭、加密、缺失或读取期间变化的来源被拒绝。返回内容指纹供初次排序提交前检查。
+     * DOMs 仅供离线提取文本摘要，不应直接挂载或执行。读取会打开既有卡片存储，失败 code=-1。
+     */
+    "/api/flashcard/getOrderedSourceDetails": {
+        request: FlashcardV2OrderedSourceDetailsRequestInput;
+        response: { "code": 0; "data": FlashcardV2OrderedSourceDetails; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/getRenderModel": {
+        request: FlashcardV2GetFlashcardRenderModelRequestInput;
+        response: { "code": 0; "data": FlashcardV2CardRenderModel; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/getSessionQueue": {
+        request: FlashcardV2GetFlashcardSessionQueueRequestInput;
+        response: { "code": 0; "data": FlashcardV2QueueData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/getSourceHistory": {
+        request: FlashcardV2SourceHistoryRequestInput;
+        response: { "code": 0; "data": (FlashcardV2SourceHistoryList & { "documents"?: never; "modes"?: never; "references"?: never; "revision"?: never; }) | (FlashcardV2SourceHistoryVersion & { "versions"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/getStatistics": {
+        request: FlashcardV2StatisticsRequestInput;
+        response: { "code": 0; "data": FlashcardV2StatisticsResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/getStudyPolicy": {
+        request: FlashcardV2GetFlashcardStudyPolicyRequestInput;
+        response: { "code": 0; "data": FlashcardV2EntityData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/importAnkiPackage": {
+        request: FlashcardV2AnkiUploadRequestInput;
+        response: { "code": 0; "data": FlashcardV2AnkiImportReport; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/inspectInvalidSources": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": FlashcardV2InvalidSourcesReport; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/listConflicts": {
+        request: FlashcardV2ListFlashcardConflictsRequestInput;
+        response: { "code": 0; "data": Array<FlashcardV2EntityConflictGroup> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/listEntities": {
+        request: FlashcardV2ListFlashcardEntitiesRequestInput;
+        response: { "code": 0; "data": FlashcardV2EntityPage; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/manageCards": {
+        request: FlashcardV2CardManagementRequestInput;
+        response: { "code": 0; "data": FlashcardV2CardManagementResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/manageSourceLifecycle": {
+        request: FlashcardV2SourceLifecycleRequestInput;
+        response: { "code": 0; "data": FlashcardV2SourceLifecycleResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/mutateEntities": {
+        request: FlashcardV2MutateFlashcardEntitiesRequestInput;
+        response: { "code": 0; "data": FlashcardV2EntityMutationResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 只读构造内置静态题型模型及普通块快照，不打开闪卡存储或迁移旧数据。
+     * 来源必须存在于开放的非加密笔记本；不支持动态干扰项和插件，最多 1000 个块和变体。
+     * 模型 ID 仅供草稿渲染，未保存卡片、排期、历史或会话；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/previewAdvancedSource": {
+        request: FlashcardV2AdvancedPreviewRequestInput;
+        response: { "code": 0; "data": FlashcardV2AdvancedPreviewData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/previewAnkiPackage": {
+        request: FlashcardV2AnkiUploadRequestInput;
+        response: { "code": 0; "data": FlashcardV2AnkiPackagePreview; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/previewMigration": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": FlashcardV2LegacyFlashcardMigrationPreview; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/previewReviewSet": {
+        request: FlashcardV2PreviewFlashcardReviewSetRequestInput;
+        response: { "code": 0; "data": FlashcardV2ReviewSetCardPage; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    "/api/flashcard/queryCards": {
+        request: QueryFlashcardsRequestInput;
+        response: { "code": 0; "data": QueryFlashcardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/reconcileSource": {
+        request: FlashcardV2ReconcileFlashcardSourceRequestInput;
+        response: { "code": 0; "data": FlashcardV2ReconcileResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 仅接受内置有序卡源的完整 StepID 排列，保留主引用、步骤身份和卡片状态。
+     * 卡源及现存卡片的顺序数据在单一批次更新，不增删卡片、不改变排期和历史；不激活旧数据迁移。
+     * 需当前修订、内容指纹与稳定操作 ID；初次执行前检查正文快照变化，并非跨文件系统原子 CAS。
+     * 已成功的原操作可在当前权限仍允许时重放，同操作 ID 的不同顺序、修订或时间被拒绝。
+     * 来源必须可访问；关闭及加密笔记本被拒绝。失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/reorderAdvancedSource": {
+        request: FlashcardV2ReorderAdvancedSourceRequestInput;
+        response: { "code": 0; "data": FlashcardV2ReorderAdvancedSourceResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/resolveConflict": {
+        request: FlashcardV2ConflictResolutionRequestInput;
+        response: { "code": 0; "data": FlashcardV2EntityRevision; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/restoreSourceHistory": {
+        request: FlashcardV2RestoreSourceHistoryRequestInput;
+        response: { "code": 0; "data": FlashcardV2EntityRevision; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/reviewCard": {
+        request: FlashcardV2ReviewRequestInput;
+        response: { "code": 0; "data": FlashcardV2ReviewResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/saveStudyPolicy": {
+        request: FlashcardV2SaveStudyPolicyRequestInput;
+        response: { "code": 0; "data": FlashcardV2EntityRevision; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/saveTag": {
+        request: FlashcardV2SaveTagRequestInput;
+        response: { "code": 0; "data": FlashcardV2EntityRevision; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    "/api/flashcard/setCardEditLater": {
+        request: SetFlashcardEditLaterRequestInput;
+        response: { "code": 0; "data": FlashcardEditLaterData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/setReviewSetMemberships": {
+        request: FlashcardV2SetReviewSetMembershipsRequestInput;
+        response: { "code": 0; "data": FlashcardV2SetReviewSetMembershipsResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/setTagAssignments": {
+        request: FlashcardV2SetTagAssignmentsRequestInput;
+        response: { "code": 0; "data": FlashcardV2SetTagAssignmentsResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/startSession": {
+        request: FlashcardV2StudyQueueRequestInput;
+        response: { "code": 0; "data": FlashcardV2StudyQueueResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/summarizeReviewSets": {
+        request: FlashcardV2SummarizeFlashcardReviewSetsRequestInput;
+        response: { "code": 0; "data": FlashcardV2SummariesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/undoReview": {
+        request: FlashcardV2ReviewUndoRequestInput;
+        response: { "code": 0; "data": FlashcardV2ReviewUndoResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/updateAdvancedSource": {
+        request: FlashcardV2AdvancedSourceUpdateRequestInput;
+        response: { "code": 0; "data": FlashcardV2AdvancedSourceResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/updateBasicDirection": {
+        request: FlashcardV2BasicDirectionRequestInput;
+        response: { "code": 0; "data": FlashcardV2BasicSourceResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
+        authorization?: readonly ["authenticated","admin","writable"];
+    };
+    /**
+     * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     */
+    "/api/flashcard/updateSessionCard": {
+        request: FlashcardV2SessionCardUpdateRequestInput;
+        response: { "code": 0; "data": FlashcardV2SessionCard; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };

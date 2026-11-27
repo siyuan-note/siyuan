@@ -11,6 +11,12 @@
 	},
 	"Children": [
 		{
+			"ID": "20260918120000-fcouten",
+			"Type": "NodeParagraph",
+			"Properties": {"id": "20260918120000-fcouten"},
+			"Children": [{"Type": "NodeText", "Data": "During review, toggle the outline with the toolbar button or your outline shortcut (Alt+2 on Windows and Control+2 on macOS by default). Click a visible heading to scroll within the card; other headings open at their source location in a separate editor window. Close that window to return to review. Hidden or masked headings use numbered placeholders to avoid revealing answers. The outline follows the current card, and modified shortcuts do not submit ratings."}]
+		},
+		{
 			"ID": "20260614194307-9kjmef3",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -1096,11 +1102,109 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Card decks are not recommended; this feature has been deprecated and may cause issues that cannot be resolved"
+									"Data": "Decks organize cards for review. Choosing Follow deck rules clears manual inclusion or exclusion and uses the deck filters; without filters, the cards leave that deck. Cards, schedules and review history are preserved. If no decks are available when choosing a deck, create and save one, then select it and confirm adding the cards. A card can belong to multiple decks while sharing its review schedule and history. Deleting a deck does not delete its cards or review history. In card management, selection applies only to the current page. Refreshing keeps selected cards that remain on the page; changing the page or filter clears the selection. Choose a batch action from the grouped menu, then click Confirm to apply it. For actions that need configuration, click Next, configure the action, and then confirm. Resetting requires an additional confirmation. Suspending a card excludes it from reviews until you resume it manually. Suspending cards from the same source applies to all cards generated from that source, not just those visible in the current list. Batch actions apply only to selected cards on the current page. Burying postpones a card until the next day; unburying removes that postponement. These actions do not delete the note or review history. Resetting during review requires confirmation. Suspending all cards from a source first shows the number of affected cards for confirmation. The display-mode setting controls how the next review opens; it does not move an active session to another window or tab. Conflict comparisons highlight differences in recognized fields only. A missing field is distinct from an empty value or zero. Expand JSON to inspect the complete version; no highlighting does not mean the versions are identical. Draft preview in the advanced card editor shows static cards without saving them or changing scheduling or history. Plugins, dynamic distractors, and new inline cloze marks not yet saved in the text are not supported; the button explains this limitation. Draft preview omits surrounding context and uses a read-only snapshot of open, unencrypted source notebooks. For ordered cards, choose Reorder steps from the card menu in management, read the step contents, move them up or down, then save. Expand a step to see its complete text. Cancel discards the unsaved order. Card identities, scheduling and history are preserved. Unidentifiable contents cannot be reordered. If the source or text changes, reload before saving; reload discards unsaved ordering. View template in the card menu shows the template name, answer mode, template and source enablement, declared types and namespace, and complete saved configuration. This is read-only: no template, script or style is executed. Declarations do not verify the author or whether a plugin is available"
 								}
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-gruu00a",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20261001005456-gruu00a",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AnkiConnect"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20261001005456-hzobcva",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-hzobcva",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable the interface in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Flashcards"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AnkiConnect"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and select an opened ordinary notebook for card fields. Decks created by clients become review sets. Encrypted notebooks are not supported."
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-dakkkkg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-dakkkkg",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In a client such as Aictionary, set the full API URL to http://127.0.0.1:6806/api/flashcard/ankiConnect, replacing the host and port as needed. Basic uses Front and Back; Basic (and reversed card), Cloze, and imported Anki models with retained templates are also available."
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-r3pmj4p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-r3pmj4p",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Requests require the SiYuan API Token in key, the Authorization header, or the token URL parameter. Allow local access without a key is an independent opt-in for trusted local native clients, even with an access authorization code configured. Browser cross-origin requests and remote clients still require authentication."
+				}
+			]
+		},
+		{
+			"ID": "20261001005456-xfxhk7b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261001005456-xfxhk7b",
+				"updated": "20261001005456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Supported operations include model and deck queries, deck creation, duplicate checks, individual and batch note creation, note queries, field updates, and media storage. Updates preserve existing card identities and review history. HTML is converted to SiYuan blocks with scripts and custom styles removed. Media accepts Base64 data or HTTP URLs; local file paths, AnkiWeb synchronization, and Anki review control are not supported. Note searches support text, fields, deck, note, tag, nid, and boolean combinations."
 				}
 			]
 		}

@@ -59,6 +59,31 @@ func TestRiffReviewedCardsCompatibility(t *testing.T) {
 	}
 }
 
+func TestRiffContractReviewDurationCompatibility(t *testing.T) {
+	for _, entry := range []struct {
+		suffix string
+		want   float64
+	}{
+		{``, 0},
+		{`,"durationMS":null`, 0},
+		{`,"durationMS":false`, 0},
+		{`,"durationMS":"123"`, 0},
+		{`,"durationMS":{}`, 0},
+		{`,"durationMS":-1`, 0},
+		{`,"durationMS":123.9`, 123.9},
+	} {
+		request, err := ReviewRiffCard.Decode(strings.NewReader(`{"deckID":"deck","cardID":"card","rating":2` + entry.suffix + `}`))
+		if err != nil || request.DurationMS != entry.want {
+			t.Fatalf("review duration changed for %s: %+v, %v", entry.suffix, request, err)
+		}
+	}
+	for _, body := range []string{`{"deckID":"deck","cardID":"card","durationMS":123}`, `{"deckID":"deck","cardID":"card","rating":null,"durationMS":123}`} {
+		if _, err := ReviewRiffCard.Decode(strings.NewReader(body)); err == nil {
+			t.Fatalf("invalid review accepted: %s", body)
+		}
+	}
+}
+
 func TestRiffRequestCompatibility(t *testing.T) {
 	for _, suffix := range []string{``, `,"blockIDs":null`, `,"blockIDs":[]`} {
 		request, err := ResetRiffCards.Decode(strings.NewReader(`{"type":" deck ","id":" id ","deckID":" deck "` + suffix + `}`))

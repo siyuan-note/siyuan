@@ -92,7 +92,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
         "mobile/util/closePanel": {}, "mobile/menu/search": {}, "util/newFile": {}, "editor/deleteFile": {},
         "editor/util": {}, "layout/tabUtil": {getDockByType: (): undefined => undefined}, "layout/dock/Files": {},
         "layout/dock/docTree/DocTreeController": {getDocTreeController: () => { treeAccess++; throw new Error("Live tree access"); }},
-        "card/openCard": {}, "card/viewCards": {}, "history/doc": {}, "card/makeCard": {},
+        "card/openCard": {}, "card/flashcardV2": {}, "history/doc": {}, "card/makeCard": {},
         "protyle/wysiwyg/transaction": {}, "protyle/export/exportMd": {},
         "util/fileTreeSort": {}, "util/hostCapabilities": {getHostCapabilities: () => ({documentImportExport: false})},
         "emoji": {openEmojiPanel: (...args: unknown[]) => icons.push(args), unicode2Emoji: () => '<img src="data:,">'},

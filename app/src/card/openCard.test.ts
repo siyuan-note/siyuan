@@ -36,6 +36,7 @@ test("flashcard review opens the mobile drawer at full height with a close guard
 });
 
 const createReview = async () => {
+    let now = 100;
     const requests: Array<{url: string, payload: Record<string, unknown>, callback: (response: unknown) => void, resolve: () => void}> = [];
     const menuItems = new Map<string, IMenu>();
     const removals: Array<{resolve: () => void, reject: (error: Error) => void}> = [];
@@ -70,7 +71,7 @@ const createReview = async () => {
     const exports: Record<string, unknown> = {};
     runInNewContext(transpileModule(readFileSync(__dirname + "/openCard.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText, {exports, require: (specifier: string) => {
+    }).outputText, {exports, performance: {now: () => now}, require: (specifier: string) => {
         if (specifier.endsWith("menuToggle")) return menuToggle;
         if (specifier === "./flashcardMode") return {...flashcardMode, hasFlashcardAnswer: () => true};
         if (specifier === "./fetchDueCards") return loadModule("src/card/fetchDueCards.ts", {
@@ -84,7 +85,7 @@ const createReview = async () => {
     await bind({app: {plugins: []} as unknown as Parameters<typeof bind>[0]["app"], element: element as unknown as Element,
         cardsData: {cards: [card]} as unknown as ICardData, cardType: "all"});
     const press = (detail: string) => click({detail, target: {}, preventDefault: () => {}, stopPropagation: () => {}});
-    return {requests, actions, press, menuItems, removals,
+    return {requests, actions, press, menuItems, removals, setTime: (value: number) => { now = value; },
         more: () => click({detail: 0, target: {type: "more", closest: (): null => null, setAttribute() {},
             getBoundingClientRect: () => ({})}, preventDefault: () => {}, stopPropagation: () => {}}),
         confirmDue: () => confirmDue("7", {element: {querySelector: () => ({})}}),
@@ -112,6 +113,19 @@ test("loading flashcards ignore reveal, rating, skip and previous keys before re
     assert.equal(h.requests.filter(request => request.url.endsWith("reviewRiffCard")).length, 0);
     h.press(" ");
     assert.equal(h.requests.filter(request => request.url.endsWith("reviewRiffCard")).length, 1);
+});
+
+test("legacy review submits elapsed time while skips submit zero", async () => {
+    const h = await createReview();
+    await h.complete();
+    h.setTime(1350);
+    h.press(" ");
+    h.press("3");
+    assert.equal(h.requests.at(-1).url, "/api/riff/reviewRiffCard");
+    assert.equal(h.requests.at(-1).payload.durationMS, 1250);
+    h.press("0");
+    assert.equal(h.requests.at(-1).url, "/api/riff/skipReviewRiffCard");
+    assert.equal(h.requests.at(-1).payload.durationMS, 0);
 });
 
 test("reset review synchronizes the rebuilt card ID before rating, skipping or setting due time", async () => {

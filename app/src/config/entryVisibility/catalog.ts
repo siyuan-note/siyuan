@@ -159,7 +159,7 @@ const docTreeCommon = (multi = false) => [
         node("manage", lang("manage")),
         node("quickMakeCard", lang("quickMakeCard")),
         node("removeCard", lang("removeCard")),
-        node("addToDeck", lang("addToDeck")),
+        node("addToDeck", lang("flashcardCardSource")),
     ]),
     node("openBy", lang("openBy"), true, openChildren()),
     node("export", lang("export"), true, multi ? [
@@ -374,7 +374,7 @@ const gutterMultiple = () => [
     separator("separator_quickMakeCard"),
     node("quickMakeCard", lang("quickMakeCard"), false),
     node("removeCard", lang("removeCard"), false),
-    node("addToDeck", lang("addToDeck"), false),
+    node("addToDeck", lang("flashcardCardSource"), false),
 ];
 
 const gutterSingle = () => [
@@ -513,7 +513,7 @@ const gutterSingle = () => [
     node("wechatReminder", lang("wechatReminder"), false),
     node("quickMakeCard", lang("quickMakeCard"), false),
     node("removeCard", lang("removeCard"), false),
-    node("addToDeck", lang("addToDeck"), false),
+    node("addToDeck", lang("flashcardCardSource"), false),
     separator("separator_5"),
     node("updateAndCreatedAt", () => `${window.siyuan.languages.modifiedAt} / ${window.siyuan.languages.createdAt}`, false),
 ];
@@ -880,7 +880,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("manage", lang("manage"), false),
                 node("quickMakeCard", lang("quickMakeCard"), false),
                 node("removeCard", lang("removeCard"), false),
-                node("addToDeck", lang("addToDeck"), false),
+                node("addToDeck", lang("flashcardCardSource"), false),
             ]),
             node("search", lang("search")),
             node("transferBlockRef", lang("transferBlockRef")),

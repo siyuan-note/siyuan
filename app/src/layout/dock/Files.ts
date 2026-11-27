@@ -226,6 +226,7 @@ export class Files extends Model {
                     isFocus = false;
                     break;
                 } else if (type === "focus") {
+                    isFocus = false;
                     selectOpenTab();
                     event.preventDefault();
                     break;

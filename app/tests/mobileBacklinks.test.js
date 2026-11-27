@@ -68,11 +68,11 @@ const runCases = async (sources) => {
                 this.protyle = {app, element, notebookId: options.notebookId, block: {rootID: options.blockId}, options,
                     wysiwyg: {element: element.firstElementChild, flushPendingInput: async () => {}}};
             }
-            destroy() {load("mobile/util/secondaryEditors").unregisterMobileSecondaryEditor(this); this.destroyed = true;}
             async flushPendingTransactions() {
                 await this.protyle.wysiwyg.flushPendingInput();
                 await load("protyle/util/transactionQueue").waitForPendingTransactions(this.protyle);
             }
+            destroy() {load("mobile/util/secondaryEditors").unregisterMobileSecondaryEditor(this); this.destroyed = true;}
         }},
         "menus/Menu": {MenuItem: class {}},
         "protyle/render/searchMarkRender": {isSupportCSSHL: () => true, searchMarkRender: noop},

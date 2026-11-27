@@ -5,6 +5,7 @@
 package apicontract
 
 import (
+	"encoding/json"
 	"io"
 	"reflect"
 )
@@ -102,7 +103,8 @@ type RiffCardRequest struct {
 
 type ReviewRiffCardRequest struct {
 	RiffCardRequest
-	Rating float64 `json:"rating"`
+	Rating     float64 `json:"rating"`
+	DurationMS float64 `json:"durationMS" api:"optional,nullable"`
 	RiffReviewedCards
 }
 
@@ -162,6 +164,22 @@ func decodeRiffCards(reader io.Reader, path string) (request RiffCardsRequest, e
 }
 
 func init() {
+	ReviewRiffCard.decodeRequest = func(reader io.Reader) (request ReviewRiffCardRequest, err error) {
+		fields, err := blockRequestFields(reader, ReviewRiffCard.Definition().Path)
+		if err != nil {
+			return request, err
+		}
+		duration := fields["durationMS"]
+		delete(fields, "durationMS")
+		if err = decodeRequestFields(reflect.ValueOf(&request).Elem(), fields); err != nil {
+			return request, err
+		}
+		var value float64
+		if json.Unmarshal(duration, &value) == nil && value >= 0 {
+			request.DurationMS = value
+		}
+		return request, nil
+	}
 	for _, endpoint := range []*Endpoint[RiffCardsRequest, RiffCardsData]{&GetRiffCards, &GetTreeRiffCards, &GetNotebookRiffCards} {
 		endpoint.decodeRequest = func(reader io.Reader) (RiffCardsRequest, error) {
 			return decodeRiffCards(reader, endpoint.Definition().Path)

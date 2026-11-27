@@ -530,3 +530,29 @@ func importedNotebookContracts(boxes []*model.Box) []*apicontract.Notebook {
 	}
 	return result
 }
+
+func saveImportUpload(c *gin.Context) (form *multipart.Form, writePath string, cleanup func(), err error) {
+	form, err = c.MultipartForm()
+	if err != nil {
+		if c.Request.MultipartForm != nil {
+			_ = c.Request.MultipartForm.RemoveAll()
+		}
+		return
+	}
+	files := form.File["file"]
+	if len(files) == 0 {
+		_ = form.RemoveAll()
+		return form, "", nil, errors.New("no file found")
+	}
+	var cleanupFile func()
+	writePath, cleanupFile, err = saveImportUploadFile(c, files[0])
+	if err != nil {
+		_ = form.RemoveAll()
+		return
+	}
+	cleanup = func() {
+		cleanupFile()
+		_ = form.RemoveAll()
+	}
+	return
+}

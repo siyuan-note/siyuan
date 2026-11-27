@@ -1,0 +1,158 @@
+// SiYuan - https://github.com/siyuan-note/siyuan
+// Copyright (c) 2020-present, b3log.org
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+package flashcard
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"testing"
+)
+
+func TestEntityConflictCanBeListedAndResolvedBySelectedBranch(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	sourceID := "conflict-resolution-source"
+	applyGenerationEntities(t, ctx, store, "conflict-resolution-setup", 100,
+		testGenerationSchema("conflict-resolution-schema", []string{"conflict-resolution-template"}),
+		testGenerationTemplate("conflict-resolution-template", "conflict-resolution-schema", GenerationStatic,
+			"forward", true),
+		testGenerationSource(sourceID, "conflict-resolution-schema", "qa", json.RawMessage(`{}`)))
+	root, found, err := store.Projection().CurrentEntity(ctx, EntityCardSource, sourceID)
+	if err != nil || !found {
+		t.Fatalf("source root was not found: found=%v err=%v", found, err)
+	}
+	var source CardSource
+	if err = decodeStrictJSON(root.Payload, &source); err != nil {
+		t.Fatal(err)
+	}
+	source.Priority = "exam"
+	first, err := NewOperationEntityRevision("conflict-resolution-first", EntityCardSource, sourceID,
+		[]string{root.RevisionID}, 200, false, source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	source.Priority = "learning"
+	second, err := NewOperationEntityRevision("conflict-resolution-second", EntityCardSource, sourceID,
+		[]string{root.RevisionID}, 201, false, source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = store.Apply(ctx, "conflict-resolution-first",
+		[]Change{{Kind: RecordEntityRevision, Revision: &first}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = store.Apply(ctx, "conflict-resolution-second",
+		[]Change{{Kind: RecordEntityRevision, Revision: &second}}); err != nil {
+		t.Fatal(err)
+	}
+	groups, err := store.Projection().ListEntityConflicts(ctx, 10)
+	if err != nil || len(groups) != 1 || len(groups[0].Revisions) != 2 {
+		t.Fatalf("unexpected conflict groups: groups=%+v err=%v", groups, err)
+	}
+	request := ConflictResolutionRequest{OperationID: "conflict-resolution-merge", EntityType: EntityCardSource,
+		EntityID: sourceID, SelectedRevision: first.RevisionID, ResolvedAt: 300}
+	merged, err := store.ResolveEntityConflict(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if retried, retryErr := store.ResolveEntityConflict(ctx, request); retryErr != nil ||
+		retried.RevisionID != merged.RevisionID {
+		t.Fatalf("conflict resolution retry failed: revision=%+v err=%v", retried, retryErr)
+	}
+	changedSelection := request
+	changedSelection.SelectedRevision = second.RevisionID
+	if _, retryErr := store.ResolveEntityConflict(ctx, changedSelection); !errors.Is(retryErr, ErrOperationConflict) {
+		t.Fatalf("conflict resolution retry accepted another branch: %v", retryErr)
+	}
+	current, found, err := store.Projection().CurrentEntity(ctx, EntityCardSource, sourceID)
+	if err != nil || !found || current.RevisionID != merged.RevisionID {
+		t.Fatalf("merged source was not selected: current=%+v found=%v err=%v", current, found, err)
+	}
+	if err = decodeStrictJSON(current.Payload, &source); err != nil || source.Priority != "exam" {
+		t.Fatalf("selected branch payload was not preserved: source=%+v err=%v", source, err)
+	}
+	if conflicts, countErr := store.Projection().ConflictCount(ctx); countErr != nil || conflicts != 0 {
+		t.Fatalf("resolved conflict remained open: count=%d err=%v", conflicts, countErr)
+	}
+}
+
+func TestReviewStateConflictResolutionRewritesStateRevisionID(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	const (
+		schemaID   = "conflict-review-state-schema"
+		templateID = "conflict-review-state-template"
+		sourceID   = "conflict-review-state-source"
+	)
+	preset := testSchedulerPreset("conflict-review-state-preset", false, false)
+	source := testGenerationSource(sourceID, schemaID, "qa", json.RawMessage(`{}`))
+	source.DefaultPresetID = preset.ID
+	applyGenerationEntities(t, ctx, store, "conflict-review-state-setup", 100,
+		testGenerationSchema(schemaID, []string{templateID}),
+		testGenerationTemplate(templateID, schemaID, GenerationStatic, "forward", true), source, preset)
+	if _, err := store.ReconcileSourceCards(ctx, "conflict-review-state-reconcile", sourceID, 101); err != nil {
+		t.Fatal(err)
+	}
+	cardID := GeneratedCardID(sourceID, templateID, "forward")
+	root, found, err := store.Projection().CurrentEntity(ctx, EntityReviewState, cardID)
+	if err != nil || !found {
+		t.Fatalf("review state root was not found: found=%v err=%v", found, err)
+	}
+	var state ReviewState
+	if err = decodeStrictJSON(root.Payload, &state); err != nil {
+		t.Fatal(err)
+	}
+	state.Due = 200
+	state.StateRevisionID = OperationRevisionID("conflict-review-state-first", EntityReviewState, cardID)
+	first, err := NewOperationEntityRevision("conflict-review-state-first", EntityReviewState, cardID,
+		[]string{root.RevisionID}, 200, false, state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	state.Due = 201
+	state.StateRevisionID = OperationRevisionID("conflict-review-state-second", EntityReviewState, cardID)
+	second, err := NewOperationEntityRevision("conflict-review-state-second", EntityReviewState, cardID,
+		[]string{root.RevisionID}, 201, false, state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, branch := range []struct {
+		operationID string
+		revision    EntityRevision
+	}{
+		{operationID: "conflict-review-state-first", revision: first},
+		{operationID: "conflict-review-state-second", revision: second},
+	} {
+		if _, err = store.Apply(ctx, branch.operationID,
+			[]Change{{Kind: RecordEntityRevision, Revision: &branch.revision}}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	request := ConflictResolutionRequest{OperationID: "conflict-review-state-merge", EntityType: EntityReviewState,
+		EntityID: cardID, SelectedRevision: first.RevisionID, ResolvedAt: 300}
+	merged, err := store.ResolveEntityConflict(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var mergedState ReviewState
+	if err = decodeStrictJSON(merged.Payload, &mergedState); err != nil {
+		t.Fatal(err)
+	}
+	if mergedState.Due != 200 || mergedState.StateRevisionID != merged.RevisionID {
+		t.Fatalf("merged review state did not preserve the branch with its new revision identity: %+v", mergedState)
+	}
+	retry, err := store.ResolveEntityConflict(ctx, request)
+	if err != nil || retry.RevisionID != merged.RevisionID {
+		t.Fatalf("review state conflict resolution retry failed: revision=%+v err=%v", retry, err)
+	}
+	changedSelection := request
+	changedSelection.SelectedRevision = second.RevisionID
+	if _, err = store.ResolveEntityConflict(ctx, changedSelection); !errors.Is(err, ErrOperationConflict) {
+		t.Fatalf("review state conflict retry accepted another branch: %v", err)
+	}
+}

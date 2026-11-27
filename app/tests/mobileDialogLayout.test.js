@@ -43,14 +43,16 @@ const runCases = async appDirectory => {
         return exports;
     };
     const {AdaptiveDialog} = load("dialog/adaptiveDialog");
-    const expandWithGrip = dialog => {
-        const grip = dialog.element.querySelector(".mobile-bottom-sheet > .b3-menu__title--root");
+    const expandWithGrip = async dialog => {
+        const sheet = dialog.element.querySelector(".mobile-bottom-sheet");
+        const grip = sheet.querySelector(":scope > .b3-menu__title--root");
         for (const [type, y] of [["touchstart", 100], ["touchmove", 40], ["touchend", 40]]) {
             const point = {identifier: 1, clientX: 100, clientY: y};
             const event = new Event(type, {bubbles: true, cancelable: true});
             Object.assign(event, {touches: [point], changedTouches: [point]});
             grip.dispatchEvent(event);
         }
+        await Promise.all(sheet.getAnimations().map(animation => animation.finished));
     };
     window.shortViewportDialogModule = {AdaptiveDialog};
     const dialog = new AdaptiveDialog({title: "Text",
@@ -71,8 +73,7 @@ const runCases = async appDirectory => {
     const content = dialog.element.querySelector(".b3-dialog__content");
     content.scrollTop = 500;
     assert.equal(confirm.getBoundingClientRect().top, before.top);
-    expandWithGrip(dialog);
-    await wait();
+    await expandWithGrip(dialog);
     assert.ok(Math.abs(actions.getBoundingClientRect().bottom - panel.getBoundingClientRect().bottom) < 1);
     dialog.destroy();
     await wait();
@@ -143,8 +144,7 @@ const runCases = async appDirectory => {
     assert.equal(sheet.element.querySelector(".b3-dialog__close"), null);
     assert.equal(sheet.element.querySelector(".b3-dialog__action"), null);
     assert.ok(Math.abs(sheet.element.querySelector("[role=dialog]").getBoundingClientRect().height - innerHeight / 2) < 1);
-    expandWithGrip(sheet);
-    await wait();
+    await expandWithGrip(sheet);
     assert.ok(Math.abs(sheet.element.querySelector("[role=dialog]").getBoundingClientRect().height - innerHeight) < 1);
     sheet.destroy();
     await wait();
@@ -255,7 +255,7 @@ const runCases = async appDirectory => {
             const panel = nativeSheet.element.querySelector(".mobile-sheet-panel");
             const footer = panel.querySelector(".b3-dialog__action");
             for (const mode of ["standard", "expanded"]) {
-                if (mode === "expanded") expandWithGrip(nativeSheet);
+                if (mode === "expanded") await expandWithGrip(nativeSheet);
                 for (const inset of [0, 24, 32, 15.75, 0]) {
                     document.documentElement.style.setProperty("--android-navigation-bar-height", `${inset}px`);
                     const box = panel.getBoundingClientRect();

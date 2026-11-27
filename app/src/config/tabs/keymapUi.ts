@@ -472,7 +472,9 @@ const bindKeymapList = (root: HTMLElement) => {
         } else if (type === "remove") {
             keys.splice(index, 1);
             saveRow(row, keys);
-            row.querySelector<HTMLButtonElement>('[data-type="add"]').focus();
+            if (event.detail === 0) {
+                row.querySelector<HTMLButtonElement>('[data-type="add"]').focus();
+            }
         } else if (type === "add") {
             const recorder = document.createElement("span");
             recorder.className = "config-keymap__key config-keymap__record";
@@ -524,14 +526,8 @@ const bindKeymapList = (root: HTMLElement) => {
         cancelRecording();
         keys.push(hotkey);
         saveRow(row, keys);
-        if (!restoreFocusAfterSave) {
-            return;
-        }
-        const addButton = row.querySelector<HTMLButtonElement>('[data-type="add"]');
-        addButton.focus();
-        if (addButton.ownerDocument.activeElement === addButton) {
-            addButton.setAttribute("data-keymap-tooltip-dismissed", "");
-            addButton.addEventListener("blur", () => addButton.removeAttribute("data-keymap-tooltip-dismissed"), {once: true});
+        if (restoreFocusAfterSave) {
+            row.querySelector<HTMLButtonElement>('[data-type="add"]').focus();
         }
     }, true);
     keymapListElement.addEventListener("keyup", (event: KeyboardEvent) => {

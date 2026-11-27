@@ -730,8 +730,9 @@
       background: transparent;
       cursor: pointer;
 
-      &[data-keymap-tooltip-dismissed]:not(:hover)::after {
-        content: none;
+      &[data-type="add"]:focus-within:not(:hover)::after {
+        opacity: 0;
+        transform: translateY(50%) scale(.8);
       }
 
       &--active {

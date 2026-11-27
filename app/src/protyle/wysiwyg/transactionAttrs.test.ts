@@ -11,7 +11,9 @@ const declaration = source.statements.find(statement => isVariableStatement(stat
     statement.declarationList.declarations.some(item => item.name.getText(source) === "syncBlockAttrs"));
 const attribute = "custom-sy-list-mindmap";
 const metadataAttribute = "custom-sy-list-mindmap-data";
-const context = {Constants: {CUSTOM_SY_LIST_MINDMAP: attribute, CUSTOM_SY_LIST_MINDMAP_DATA: metadataAttribute},
+const viewportHeight = "custom-sy-table-viewport-height";
+const context = {Constants: {CUSTOM_SY_LIST_MINDMAP: attribute, CUSTOM_SY_LIST_MINDMAP_DATA: metadataAttribute,
+    CUSTOM_SY_TABLE_VIEWPORT_HEIGHT: viewportHeight},
     sync: undefined as any};
 runInNewContext(transpileModule(declaration.getText(source) + "\nglobalThis.sync = syncBlockAttrs;", {
     compilerOptions: {target: ScriptTarget.ES2021},
@@ -62,6 +64,24 @@ test("unrelated attribute transactions preserve the mind map view", () => {
     assert.equal(attrs.get(attribute), "1");
     assert.equal(attrs.get("style"), "color: red");
     assert.equal(attrs.get("fold"), "1");
+});
+
+test("table viewport resize, undo and redo synchronize without replacing content", () => {
+    const copies = [new Map([["custom-pinthead", "true"]]), new Map([["custom-pinthead", "true"]])];
+    const root = {querySelectorAll: (selector: string) => {
+        assert.equal(selector, '[data-node-id="table-id"]');
+        return copies.map(attrs => ({
+            setAttribute: (name: string, value: string) => attrs.set(name, value),
+            removeAttribute: (name: string) => attrs.delete(name),
+        }));
+    }};
+    for (const height of ["240px", "", "240px", "160px"]) {
+        context.sync(root, {action: "setAttrs", id: "table-id", data: JSON.stringify({[viewportHeight]: height})});
+        for (const attrs of copies) {
+            assert.equal(attrs.get(viewportHeight), height || undefined);
+            assert.equal(attrs.get("custom-pinthead"), "true");
+        }
+    }
 });
 
 test("kernel metadata cleanup and undo synchronize across editor copies", () => {

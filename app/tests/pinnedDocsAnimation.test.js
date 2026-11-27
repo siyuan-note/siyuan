@@ -51,6 +51,13 @@ const browserCases = async (sources, css, markup) => {
         return {controller, element, scrollElement};
     };
     const groupOf = element => element.querySelector("[data-tree-animation]");
+    const waitForTransitionCleanup = async (element, message) => {
+        const deadline = performance.now() + 2000;
+        while (groupOf(element) && performance.now() < deadline) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
+        check.equal(groupOf(element), null, message);
+    };
     for (const count of [3, 20, 10000]) {
         const {controller, element} = await make(count);
         for (const expanded of [true, false]) {
@@ -68,8 +75,7 @@ const browserCases = async (sources, css, markup) => {
                 check.ok(element.querySelectorAll("[data-tree-key]").length < 60, "animation preserves virtualization");
             }
             animation.finish();
-            await settle();
-            check.equal(groupOf(element), null);
+            await waitForTransitionCleanup(element, "finished animation must remove the transition group");
             check.equal(controller.isExpanded("pin:p"), expanded);
             if (expanded) {
                 const parent = controller.getMountedElement("pin:p");
@@ -99,8 +105,7 @@ const browserCases = async (sources, css, markup) => {
             scrollElement.dispatchEvent(new Event("wheel"));
         }
         if (change === "destroy") controller.destroy();
-        await settle();
-        check.equal(groupOf(element), null, `${change} must end the transition`);
+        await waitForTransitionCleanup(element, `${change} must end the transition`);
         if (change !== "destroy") controller.destroy();
     }
 

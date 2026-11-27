@@ -1485,7 +1485,7 @@ func DeleteFlashcardV2ReviewSet(ctx context.Context, operationID, reviewSetID, e
 }
 
 // GetFlashcardV2RenderModel 返回卡片声明式渲染所需的模板和内容引用。
-func GetFlashcardV2RenderModel(ctx context.Context, cardID string) (flashcardv2.CardRenderModel, error) {
+func GetFlashcardV2RenderModel(ctx context.Context, cardID string, includeRatingIntervals bool) (flashcardv2.CardRenderModel, error) {
 	store, err := requireFlashcardV2Store(ctx, false)
 	if err != nil {
 		return flashcardv2.CardRenderModel{}, err
@@ -1493,5 +1493,19 @@ func GetFlashcardV2RenderModel(ctx context.Context, cardID string) (flashcardv2.
 	if err = validateFlashcardV2Card(ctx, store, cardID); err != nil {
 		return flashcardv2.CardRenderModel{}, err
 	}
-	return store.Projection().CardRenderModel(ctx, cardID)
+	renderModel, err := store.Projection().CardRenderModel(ctx, cardID)
+	if err != nil || !includeRatingIntervals {
+		return renderModel, err
+	}
+	now := time.Now()
+	dues, err := store.PreviewReviewDues(ctx, cardID, now.UnixMilli())
+	if err != nil {
+		logging.LogWarnf("preview flashcard rating intervals failed: %s", err)
+		return renderModel, nil
+	}
+	renderModel.RatingIntervals = make(map[flashcardv2.ReviewRating]string, len(dues))
+	for rating, due := range dues {
+		renderModel.RatingIntervals[rating] = util.HumanizeDiffTime(time.UnixMilli(due).UTC(), now.UTC(), Conf.Lang)
+	}
+	return renderModel, nil
 }

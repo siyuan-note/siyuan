@@ -50,3 +50,36 @@ func TestQuickFlashcardSourcesContract(t *testing.T) {
 		}
 	}
 }
+
+func TestFlashcardRenderRatingIntervalsContract(t *testing.T) {
+	for _, body := range []string{`{"cardID":"card"}`, `{"cardID":"card","includeRatingIntervals":true}`} {
+		request, err := GetFlashcardRenderModel.Decode(strings.NewReader(body))
+		if err != nil || request.CardID != "card" || request.IncludeRatingIntervals != strings.Contains(body, "true") {
+			t.Fatalf("invalid render request: %+v, %v", request, err)
+		}
+	}
+	bundle, err := BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	intervalSchema := bundle.Definitions["FlashcardV2CardRenderModel"].Properties["ratingIntervals"]
+	for _, intervals := range []map[string]string{nil, {"again": "1 min", "hard": "5 min", "good": "10 min", "easy": "4 days"}} {
+		payload, err := json.Marshal(FlashcardV2CardRenderModel{RatingIntervals: intervals})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var fields map[string]any
+		if err = json.Unmarshal(payload, &fields); err != nil {
+			t.Fatal(err)
+		}
+		value, present := fields["ratingIntervals"]
+		if present != (intervals != nil) {
+			t.Fatalf("unexpected rating interval presence: %s", payload)
+		}
+		if present {
+			if err = bundle.validate(intervalSchema, value, "$.ratingIntervals"); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+}

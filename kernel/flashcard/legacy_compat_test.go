@@ -72,6 +72,35 @@ func TestLegacyCompatibilityUsesReviewSetsAndPreservesSharedCards(t *testing.T) 
 	}
 }
 
+func TestRatingDuePreviewMatchesNormalReviewWithoutChangingState(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	now := int64(1786431600000)
+	setupLegacyCompatibilityBuiltins(t, ctx, store, now)
+	created, err := store.CreateQuickSources(ctx, QuickSourceRequest{
+		OperationID: "preview-source", BlockIDs: []string{"block"}, CreatedAt: now,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cardID, reviewedAt := created.CardIDs[0], now+1000
+	dues, err := store.PreviewReviewDues(ctx, cardID, reviewedAt)
+	if err != nil || len(dues) != 4 {
+		t.Fatalf("expected four preview times: %v, %v", dues, err)
+	}
+	for _, due := range dues {
+		if due <= reviewedAt {
+			t.Fatalf("previewed an interval ending before the review: %v", dues)
+		}
+	}
+	result, err := store.ReviewCard(ctx, ReviewRequest{OperationID: "preview-review", CardID: cardID,
+		Rating: ReviewGood, ReviewedAt: reviewedAt, ReviewMode: "normal"})
+	if err != nil || result.AfterState == nil || result.BeforeState.Reps != 0 || result.AfterState.Due != dues[ReviewGood] {
+		t.Fatalf("submitted rating did not match unchanged preview state: %+v, %v", result, err)
+	}
+}
+
 func TestLegacyCompatibilityReaddingDeletedGenerationResetsState(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)

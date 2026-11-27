@@ -102,6 +102,7 @@ interface ITypedAnswerGenerationConfig extends IFlashcardV2AnswerCheckConfig {
 }
 
 export interface IFlashcardV2RenderModel {
+    ratingIntervals?: Record<string, string>;
     card: {
         id: string;
         sourceID?: string;

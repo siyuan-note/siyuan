@@ -12,12 +12,13 @@ import (
 
 // CardRenderModel 提供声明式渲染所需的卡片、模板、卡型和有序内容引用。
 type CardRenderModel struct {
-	Card        Card            `json:"card"`
-	ReviewState ReviewState     `json:"reviewState"`
-	Source      CardSource      `json:"source"`
-	References  []CardSourceRef `json:"references"`
-	Template    CardTemplate    `json:"template"`
-	Schema      CardSchema      `json:"schema"`
+	Card            Card                    `json:"card"`
+	ReviewState     ReviewState             `json:"reviewState"`
+	Source          CardSource              `json:"source"`
+	References      []CardSourceRef         `json:"references"`
+	Template        CardTemplate            `json:"template"`
+	Schema          CardSchema              `json:"schema"`
+	RatingIntervals map[ReviewRating]string `json:"ratingIntervals,omitempty"`
 }
 
 // CardRenderModel 返回一张卡片的完整声明式渲染模型，不读取或复制块内容。

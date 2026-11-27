@@ -204,12 +204,13 @@ type FlashcardV2CardManagementResult struct {
 }
 
 type FlashcardV2CardRenderModel struct {
-	Card        FlashcardV2Card            `json:"card" api:"optional,nullable"`
-	ReviewState FlashcardV2ReviewState     `json:"reviewState" api:"optional,nullable"`
-	Source      FlashcardV2CardSource      `json:"source" api:"optional,nullable"`
-	References  []FlashcardV2CardSourceRef `json:"references" api:"optional,nullable"`
-	Template    FlashcardV2CardTemplate    `json:"template" api:"optional,nullable"`
-	Schema      FlashcardV2CardSchema      `json:"schema" api:"optional,nullable"`
+	Card            FlashcardV2Card            `json:"card" api:"optional,nullable"`
+	ReviewState     FlashcardV2ReviewState     `json:"reviewState" api:"optional,nullable"`
+	Source          FlashcardV2CardSource      `json:"source" api:"optional,nullable"`
+	References      []FlashcardV2CardSourceRef `json:"references" api:"optional,nullable"`
+	Template        FlashcardV2CardTemplate    `json:"template" api:"optional,nullable"`
+	Schema          FlashcardV2CardSchema      `json:"schema" api:"optional,nullable"`
+	RatingIntervals map[string]string          `json:"ratingIntervals,omitempty" api:"optional,nonnullable"`
 }
 
 type FlashcardV2CardSchema struct {
@@ -943,7 +944,8 @@ type FlashcardV2GetFlashcardHistoryRequest struct {
 }
 
 type FlashcardV2GetFlashcardRenderModelRequest struct {
-	CardID string `json:"cardID" api:"optional,nullable"`
+	CardID                 string `json:"cardID" api:"optional,nullable"`
+	IncludeRatingIntervals bool   `json:"includeRatingIntervals,omitempty" api:"optional,nullable"`
 }
 
 type FlashcardV2GetFlashcardSessionQueueRequest struct {

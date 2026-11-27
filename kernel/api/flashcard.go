@@ -136,7 +136,8 @@ type deleteFlashcardReviewSetRequest struct {
 }
 
 type getFlashcardRenderModelRequest struct {
-	CardID string `json:"cardID"`
+	CardID                 string `json:"cardID"`
+	IncludeRatingIntervals bool   `json:"includeRatingIntervals,omitempty"`
 }
 
 type getFlashcardStudyPolicyRequest struct {
@@ -610,7 +611,7 @@ var getFlashcardRenderModel = contractHandler(apicontract.GetFlashcardRenderMode
 	if err != nil {
 		return apicontract.Failure[apicontract.FlashcardV2CardRenderModel](-1, err.Error())
 	}
-	result, err := model.GetFlashcardV2RenderModel(c.Request.Context(), request.CardID)
+	result, err := model.GetFlashcardV2RenderModel(c.Request.Context(), request.CardID, request.IncludeRatingIntervals)
 	if err != nil {
 		return apicontract.Failure[apicontract.FlashcardV2CardRenderModel](-1, err.Error())
 	}

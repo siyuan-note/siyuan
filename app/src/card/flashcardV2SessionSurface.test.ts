@@ -97,6 +97,20 @@ test("review displays the breadcrumb in the toolbar and filters source, answer a
     assert.equal(path.textContent, "Notebook / Topic");
 });
 
+test("review exposes flag and skip in the toolbar and keeps rating intervals with their buttons", () => {
+    const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
+    const markup = source.slice(source.indexOf("const sessionContent ="), source.indexOf("const renderFlashcardV2Card ="));
+    const html = runInNewContext(`${markup}\nsessionContent();`, {
+        window: {siyuan: {languages: {flashcardFlag: "Flag", skip: "Skip"}}},
+    }) as string;
+    const toolbar = html.slice(html.indexOf("data-flashcard-toolbar"), html.indexOf("data-flashcard-outline"));
+    assert.match(toolbar, /<button data-type="flag"[^>]*aria-label="Flag" aria-haspopup="menu"/);
+    assert.match(toolbar, /<button data-type="skip"[^>]*aria-label="Skip"/);
+    for (const rating of ["again", "hard", "good", "easy"]) {
+        assert.match(html, new RegExp(`<button data-rating="${rating}"[^\\n]*data-rating-interval[^\\n]*</button>`));
+    }
+});
+
 test("waiting text stays outside the empty-state icon rule and actions share one row", () => {
     const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
     const snippet = source.slice(source.indexOf("const showWaiting ="),

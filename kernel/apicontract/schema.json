@@ -32486,6 +32486,12 @@
         "card": {
           "$ref": "#/$defs/FlashcardV2Card"
         },
+        "ratingIntervals": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "references": {
           "anyOf": [
             {
@@ -33541,6 +33547,16 @@
           "anyOf": [
             {
               "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includeRatingIntervals": {
+          "anyOf": [
+            {
+              "type": "boolean"
             },
             {
               "type": "null"

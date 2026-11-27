@@ -208,7 +208,7 @@ test("draft renderer consumes its snapshot without model, block, context, or ses
         window: {siyuan: {config: {flashcard: {}}}},
         performance, structuredClone,
     };
-    runInNewContext(transpileModule(`${body}\nrenderFlashcardV2Card(dialog, current, () => true, done, unavailable, true, draft);`, {
+    runInNewContext(transpileModule(`${body}\nrenderFlashcardV2Card(dialog, current, () => true, done, unavailable, {preview: true, draft});`, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText, state);
     await new Promise(resolve => setImmediate(resolve));

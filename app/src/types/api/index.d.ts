@@ -1458,7 +1458,7 @@ export type FlashcardV2CardManagementRequestInput = { "action"?: string | null; 
 
 export type FlashcardV2CardManagementResult = { "batch": FlashcardV2OperationBatch; "cards": Record<string, FlashcardV2Card> | null; "events": Array<FlashcardV2Event> | null; "states": Record<string, FlashcardV2ReviewState> | null; };
 
-export type FlashcardV2CardRenderModel = { "card": FlashcardV2Card; "references": Array<FlashcardV2CardSourceRef> | null; "reviewState": FlashcardV2ReviewState; "schema": FlashcardV2CardSchema; "source": FlashcardV2CardSource; "template": FlashcardV2CardTemplate; };
+export type FlashcardV2CardRenderModel = { "card": FlashcardV2Card; "ratingIntervals"?: Record<string, string>; "references": Array<FlashcardV2CardSourceRef> | null; "reviewState": FlashcardV2ReviewState; "schema": FlashcardV2CardSchema; "source": FlashcardV2CardSource; "template": FlashcardV2CardTemplate; };
 
 export type FlashcardV2CardSchema = { "builtinType"?: string; "createdAt": number; "fields": Array<FlashcardV2CardSchemaField> | null; "id": string; "name": string; "templateIDs": Array<string> | null; "updatedAt": number; };
 
@@ -1506,7 +1506,7 @@ export type FlashcardV2GetFlashcardEntityRequestInput = { "entityID"?: string | 
 
 export type FlashcardV2GetFlashcardHistoryRequestInput = { "cardID"?: string | null; "limit"?: number | null; "offset"?: number | null; };
 
-export type FlashcardV2GetFlashcardRenderModelRequestInput = { "cardID"?: string | null; };
+export type FlashcardV2GetFlashcardRenderModelRequestInput = { "cardID"?: string | null; "includeRatingIntervals"?: boolean | null; };
 
 export type FlashcardV2GetFlashcardSessionQueueRequestInput = { "now"?: number | null; "reviewDayEnd"?: number | null; "reviewDayStart"?: number | null; "sessionID"?: string | null; };
 
@@ -6763,6 +6763,8 @@ export interface APIPOSTRoutes {
     };
     /**
      * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     * GetFlashcardRenderModel returns a card's rendering data. Request includeRatingIntervals to include localized
+     * estimates for normal review ratings when the scheduler state is available. This does not submit a review.
      */
     "/api/flashcard/getRenderModel": {
         request: FlashcardV2GetFlashcardRenderModelRequestInput;

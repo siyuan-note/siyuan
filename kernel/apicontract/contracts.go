@@ -2142,6 +2142,8 @@ var GetFlashcardEntity = define[FlashcardV2GetFlashcardEntityRequest, FlashcardV
 var GetFlashcardMigrationStatus = define[EmptyRequest, FlashcardV2LegacyMigrationStatus]("getFlashcardMigrationStatus", "/api/flashcard/getMigrationStatus", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 
 // GetFlashcardRenderModel 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+// GetFlashcardRenderModel returns a card's rendering data. Request includeRatingIntervals to include localized
+// estimates for normal review ratings when the scheduler state is available. This does not submit a review.
 var GetFlashcardRenderModel = define[FlashcardV2GetFlashcardRenderModelRequest, FlashcardV2CardRenderModel]("getFlashcardRenderModel", "/api/flashcard/getRenderModel", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
 // GetFlashcardSessionQueue 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。

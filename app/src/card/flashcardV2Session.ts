@@ -53,7 +53,7 @@ import {
 import {setFlashcardLocateBlockID} from "./flashcardLocate";
 import {createFlashcardOutline} from "./flashcardOutline";
 import {matchHotKey} from "../protyle/util/hotKey";
-import {flashcardV2FlagMenuItems} from "./flashcardV2Flag";
+import {flashcardV2FlagColors, flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
 import {openFlashcardReviewTab} from "./openFlashcardReviewTab";
 import {deferFlashcardV2QueueCard, flashcardV2QueueProgress, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
@@ -419,9 +419,9 @@ const setActionsVisible = (dialog: IFlashcardSessionSurface, revealed: boolean) 
 const setReviewActionsEnabled = (dialog: IFlashcardSessionSurface, enabled: boolean) => {
     const contentElement = dialog.element.querySelector(".card__block");
     contentElement?.setAttribute("aria-busy", enabled ? "false" : "true");
-    dialog.element.querySelectorAll<HTMLButtonElement>("[data-type=show], [data-type=study-later], [data-rating]").forEach((button) => {
-        button.disabled = !enabled;
-    });
+    dialog.element.querySelectorAll<HTMLButtonElement>(
+        "[data-type=show], [data-type=study-later], [data-type=skip], [data-type=flag], [data-rating]")
+        .forEach(button => { button.disabled = !enabled; });
 };
 
 const setUndoVisible = (dialog: IFlashcardSessionSurface, visible: boolean) => {
@@ -525,9 +525,11 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
 <div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
     <span data-flashcard-count class="fn__flex-shrink ft__on-surface"></span>
     <span data-flashcard-path class="card__v2-session-path ft__on-surface"></span>
+    <button data-type="flag" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.flashcardFlag}" aria-haspopup="menu" disabled><svg><use xlink:href="#iconBookmark"></use></svg></button>
     <button data-type="toggle-outline" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.outline}" aria-expanded="false"><svg><use xlink:href="#iconOutline"></use></svg></button>
     <button data-type="read-aloud" class="block__icon ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
     <button data-type="edit-source" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
+    <button data-type="skip" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.skip}" disabled><svg><use xlink:href="#iconForward"></use></svg></button>
     <button data-type="more" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
     <button data-type="undo-review" class="block__icon ariaLabel fn__none" aria-label="${window.siyuan.languages.undo}"><svg><use xlink:href="#iconUndo"></use></svg></button>
 </div>
@@ -547,16 +549,15 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
     <button data-type="show" class="b3-button b3-button--text" disabled><div class="card__icon">👀</div>${window.siyuan.languages.cardShowAnswer}</button>
     <span class="fn__space"></span>
     <button data-type="study-later" class="b3-button b3-button--cancel ariaLabel" aria-label="${window.siyuan.languages.flashcardStudyLaterTip}" disabled><div class="card__icon">💤</div>${window.siyuan.languages.flashcardStudyLater}</button>
-    <button data-type="skip" class="fn__none">${window.siyuan.languages.skip}</button>
 </div>
 <div data-flashcard-action="ratings" class="fn__flex card__action card__v2-session-actions fn__none">
-    <button data-rating="again" class="b3-button b3-button--error" disabled><div class="card__icon">🙈</div>${window.siyuan.languages.cardRatingAgain}</button>
+    <button data-rating="again" class="b3-button b3-button--error" disabled><div class="card__icon">🙈</div>${window.siyuan.languages.cardRatingAgain}<span class="fn__block" data-rating-interval></span></button>
     <span class="fn__space"></span>
-    <button data-rating="hard" class="b3-button b3-button--warning" disabled><div class="card__icon">😬</div>${window.siyuan.languages.cardRatingHard}</button>
+    <button data-rating="hard" class="b3-button b3-button--warning" disabled><div class="card__icon">😬</div>${window.siyuan.languages.cardRatingHard}<span class="fn__block" data-rating-interval></span></button>
     <span class="fn__space"></span>
-    <button data-rating="good" class="b3-button b3-button--info" disabled><div class="card__icon">😊</div>${window.siyuan.languages.cardRatingGood}</button>
+    <button data-rating="good" class="b3-button b3-button--info" disabled><div class="card__icon">😊</div>${window.siyuan.languages.cardRatingGood}<span class="fn__block" data-rating-interval></span></button>
     <span class="fn__space"></span>
-    <button data-rating="easy" class="b3-button b3-button--success" disabled><div class="card__icon">🌈</div>${window.siyuan.languages.cardRatingEasy}</button>
+    <button data-rating="easy" class="b3-button b3-button--success" disabled><div class="card__icon">🌈</div>${window.siyuan.languages.cardRatingEasy}<span class="fn__block" data-rating-interval></span></button>
 </div>
 <div data-flashcard-action="finish" class="fn__flex card__action card__v2-session-actions fn__none">
     <button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
@@ -566,8 +567,11 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
 const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
     current: Pick<IFlashcardV2SessionQueueCard["sessionCard"], "cardID" | "optionOrder" | "dynamicOptions">,
     isCurrent: () => boolean, callback: (rendered: IFlashcardV2RenderedCard) => void,
-    unavailable: () => void, preview = false,
-    draft?: {model: IFlashcardV2RenderModel, doms: Record<string, string>}) => {
+    unavailable: () => void, {preview, includeRatingIntervals, draft}: {
+        preview?: boolean;
+        includeRatingIntervals?: boolean;
+        draft?: {model: IFlashcardV2RenderModel, doms: Record<string, string>};
+    } = {}) => {
     const contentElement = dialog.element.querySelector(".card__block") as HTMLElement;
     const contextElement = dialog.element.querySelector("[data-flashcard-context]") as HTMLElement;
     const pathElement = dialog.element.querySelector<HTMLElement>("[data-flashcard-path]");
@@ -612,6 +616,10 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
             (answerElement.querySelector(".protyle-wysiwyg") as HTMLElement).innerHTML = "";
             contentElement.className = "card__block fn__flex-1 card__v2-session-content";
             setActionsVisible(dialog, false);
+            dialog.element.querySelectorAll<HTMLButtonElement>("button[data-rating]").forEach(button => {
+                button.querySelector("[data-rating-interval]").textContent =
+                    model.ratingIntervals?.[button.dataset.rating] ?? "";
+            });
             let frontReferences = selectReferences(references, model.template.frontSpec);
             if (frontReferences.length === 0) {
                 frontReferences = references.slice(0, 1);
@@ -743,7 +751,7 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
         return;
     }
     let modelLoaded = false;
-    void fetchPost("/api/flashcard/getRenderModel", {cardID: current.cardID}, (response) => {
+    void fetchPost("/api/flashcard/getRenderModel", {cardID: current.cardID, includeRatingIntervals}, (response) => {
         modelLoaded = true;
         renderModel(readFlashcardV2RenderModel(response.data));
     }).then(() => {
@@ -754,10 +762,11 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
 };
 
 const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2SessionQueueCard[], index: number,
+    includeRatingIntervals: boolean,
     isCurrent: () => boolean, callback: (rendered: IFlashcardV2RenderedCard) => void,
     unavailable: () => void) => {
     dialog.element.querySelector("[data-flashcard-count]").textContent = flashcardV2QueueProgress(queue);
-    renderFlashcardV2Card(dialog, queue[index].sessionCard, isCurrent, callback, unavailable);
+    renderFlashcardV2Card(dialog, queue[index].sessionCard, isCurrent, callback, unavailable, {includeRatingIntervals});
 };
 
 // 预览仅加载渲染模型和块内容，不打开复习会话，也不发送评分或会话事件。
@@ -822,7 +831,7 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0,
             dialog.element.querySelector("[data-flashcard-front]").textContent = window.siyuan.languages.flashcardLoadFailed;
             show.classList.add("fn__none");
             retry.classList.remove("fn__none");
-        }, true, draft ? {model: draft.models[index], doms: draft.doms} : undefined);
+        }, {preview: true, draft: draft ? {model: draft.models[index], doms: draft.doms} : undefined});
     };
     dialog.element.addEventListener("click", (event) => {
         const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-type]");
@@ -1080,6 +1089,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 index,
                 queueLength: queue.length,
             });
+            const flagIcon = dialog.element.querySelector<SVGElement>('[data-type="flag"] svg');
             const acceptRendered = (rendered: IFlashcardV2RenderedCard) => {
                 playbackController?.cancel();
                 shownAt = rendered.shownAt;
@@ -1092,6 +1102,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 outline.update(sourceBlockID);
                 playbackController = rendered.playbackController;
                 currentModel = rendered.model;
+                queue[index].card.flag = rendered.model.card.flag ?? queue[index].card.flag;
+                flagIcon.style.color = flashcardV2FlagColors[queue[index].card.flag] || "";
                 pluginEdit = rendered.pluginEdit;
                 answerResult = undefined;
                 renderPending = false;
@@ -1125,7 +1137,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 currentModel = undefined;
                 pluginEdit = undefined;
                 answerResult = undefined;
-                renderSessionCard(dialog, queue, index,
+                renderSessionCard(dialog, queue, index, options.reviewMode === "normal",
                     () => !sessionFinished && generation === renderGeneration, acceptRendered, () => {
                         if (requestPending || sessionFinished || generation !== renderGeneration) {
                             return;
@@ -1389,11 +1401,36 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 }, (response) => {
                     managed = true;
                     updateManagedQueueCards(response.data);
+                    flagIcon.style.color = flashcardV2FlagColors[queue[index]?.card.flag] || "";
                     requestPending = false;
-                }).then(() => {
+                }).catch(error => console.error("Flashcard management failed", error)).finally(() => {
                     if (!managed) {
                         requestPending = false;
                     }
+                });
+            };
+            const currentFlagItems = (current: IFlashcardV2SessionQueueCard) =>
+                flashcardV2FlagMenuItems(current.card.flag,
+                    [...flagDefinitions].map(([flag, name]) => ({flag, name})), (flag) => {
+                        if (canUseReviewActions() && queue[index].card.id === current.card.id) {
+                            manageWithoutSkipping([current.card.id], "setFlag", {flag});
+                        }
+                    });
+            const openCurrentFlagMenu = (button: HTMLElement) => {
+                const current = queue[index];
+                toggleMenu({
+                    target: button,
+                    build: (_menu, session) => {
+                        const menu = new Menu();
+                        menu.element.classList.add("b3-menu--compact-icons");
+                        currentFlagItems(current).forEach(item => menu.addItem(item));
+                        if (isMobile()) {
+                            session.show(() => menu.fullscreen());
+                        } else {
+                            const rect = button.getBoundingClientRect();
+                            session.show(() => menu.open({x: rect.left, y: rect.bottom}));
+                        }
+                    },
                 });
             };
             const queryCurrentCardTags = (targetType: "source" | "card") => {
@@ -1559,9 +1596,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                             id: "flashcardV2SetFlag",
                             icon: "iconBookmark",
                             label: window.siyuan.languages.flashcardFlag,
-                            submenu: flashcardV2FlagMenuItems(current.card.flag,
-                                [...flagDefinitions].map(([flag, name]) => ({flag, name})), (flag) =>
-                                    manageWithoutSkipping([current.card.id], "setFlag", {flag})),
+                            submenu: currentFlagItems(current),
                         });
                         menu.addItem({
                             id: "flashcardV2CardTags",
@@ -1824,6 +1859,11 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     openCurrentManagementMenu(more);
                     return;
                 }
+                const flag = target.closest<HTMLElement>('[data-type="flag"]');
+                if (flag && canUseReviewActions()) {
+                    openCurrentFlagMenu(flag);
+                    return;
+                }
                 if (target.closest('[data-type="edit-source"]') && sourceBlockID && !requestPending) {
                     if (pluginEdit) {
                         requestPending = true;
@@ -1853,7 +1893,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     }
                     return;
                 }
-                if (target.closest('[data-type="skip"]') && !requestPending && index < queue.length) {
+                if (target.closest('[data-type="skip"]') && canUseReviewActions()) {
                     requestPending = true;
                     let skipped = false;
                     void fetchPost("/api/flashcard/updateSessionCard", {
@@ -1870,7 +1910,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         setUndoVisible(dialog, false);
                         requestPending = false;
                         nextCard();
-                    }).then(() => {
+                    }).catch(error => console.error("Flashcard skip failed", error)).finally(() => {
                         if (!skipped) {
                             requestPending = false;
                         }

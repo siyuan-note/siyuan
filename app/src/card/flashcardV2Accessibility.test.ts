@@ -7,7 +7,7 @@ import {ScriptTarget, transpileModule} from "typescript";
 const source = readFileSync("src/card/flashcardV2.ts", "utf8");
 const escapeAttr = (value: string) => value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
-test("flag trigger is a named native menu button available on row keyboard focus", () => {
+test("the leading flag is a named native menu button visible on mouse and touch layouts", () => {
     const line = source.split("\n").find(item => item.includes('data-type="flag" data-menu="true"'));
     const html = runInNewContext("`" + line + "`", {
         result: {card: {flag: 2}}, flagDefinitions: [], escapeAttr,
@@ -17,9 +17,13 @@ test("flag trigger is a named native menu button available on row keyboard focus
     assert.match(html, /^<button type="button" data-type="flag"/);
     assert.match(html, /aria-haspopup="menu"/);
     assert.match(html, /aria-label="Flag - Study &quot;later&quot;"/);
+    assert.match(html, /block__icon--show block__icon--touch/);
     assert.match(html, /<\/button>/);
+    const leading = source.slice(source.indexOf('<span class="card__v2-managed-leading">'), source.indexOf('<span class="card__v2-managed-main">'));
+    assert.ok(leading.includes(line));
+    assert.doesNotMatch(leading, /iconRiffCard/);
     const css = readFileSync("src/assets/scss/business/_card.scss", "utf8");
-    assert.match(css, /\.card__v2-managed-card:focus-within > \[data-type="flag"\]\s*\{\s*display: flex;/);
+    assert.match(css, /\.card__v2-managed-leading > button:focus-visible,/);
     assert.match(css, /\.card__v2-managed-card > button:focus-visible\s*\{\s*outline: 2px solid var\(--b3-theme-primary\)/);
 });
 

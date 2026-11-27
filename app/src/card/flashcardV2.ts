@@ -1008,7 +1008,7 @@ const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
     return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card${result.card.editLater ? " card__v2-managed-card--edit-later" : ""}" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
 <span class="card__v2-managed-leading">
 <input data-type="selectCard" aria-label="${escapeAttr(title)}" type="checkbox"${selectedCardIDs.has(result.card.id) ? " checked" : ""}>
-<svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg>
+<button type="button" data-type="flag" data-menu="true" aria-haspopup="menu" class="block__icon block__icon--show block__icon--touch ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.flashcardFlag)} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></button>
 </span>
 <span class="card__v2-managed-main">
 <button data-type="preview" class="card__v2-managed-title" aria-label="${escapeAttr(`${window.siyuan.languages.flashcardPreview} - ${title}`)}">${escapeHtml(title)}</button>
@@ -1023,7 +1023,6 @@ ${result.sourceType === "qa" ? `<span data-type="direction" class="fn__none b3-l
 <span data-type="suspend" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${result.reviewState.suspended ? window.siyuan.languages.flashcardResumeReview : window.siyuan.languages.flashcardSuspendUntilResumed}"><svg><use xlink:href="#icon${result.reviewState.suspended ? "Play" : "Pause"}"></use></svg></span>
 <span data-type="bury" class="fn__none"></span>
 <span data-type="due" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.setDueTime}"><svg><use xlink:href="#iconCalendar"></use></svg></span>
-<button type="button" data-type="flag" data-menu="true" aria-haspopup="menu" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${escapeAttr(window.siyuan.languages.flashcardFlag)} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></button>
 <span data-type="history" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewHistory}"><svg><use xlink:href="#iconHistory"></use></svg></span>
 <span data-type="sourceHistory" class="fn__none" aria-label="${window.siyuan.languages.flashcardSourceHistory}"></span>
 ${reviewSetID ? `<span data-type="exclude" class="fn__none b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconClose"></use></svg></span>` : '<span data-type="membership" class="fn__none"></span>'}

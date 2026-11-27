@@ -1117,6 +1117,10 @@
     > input {
       margin-inline-end: 4px;
     }
+
+    > button {
+      margin-inline-end: 4px;
+    }
   }
 
   &__v2-managed-main {
@@ -1351,10 +1355,7 @@
   }
 }
 
-.card__v2-managed-card:focus-within > [data-type="flag"] {
-  display: flex;
-}
-
+.card__v2-managed-leading > button:focus-visible,
 .card__v2-managed-card > button:focus-visible {
   outline: 2px solid var(--b3-theme-primary);
   outline-offset: -2px;

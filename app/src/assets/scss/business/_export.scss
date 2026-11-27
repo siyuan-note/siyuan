@@ -54,6 +54,7 @@
     [data-node-id].table[custom-pinthead="true"] {
       > div:first-child {
         overflow: visible;
+        height: auto;
         max-height: none;
       }
     }

@@ -1877,18 +1877,13 @@ export class TableControl {
             "--b3-table-frame-height", "--b3-table-frame-clip"].forEach(name => action.style.removeProperty(name));
     }
 
-    private renderTableViewportHeights() {
-        this.viewportResizeHandle.classList.add("fn__none");
-        this.viewportResizeTable = undefined;
-        this.wysiwygElement.querySelectorAll<HTMLElement>('[data-type="NodeTable"][custom-pinthead="true"], ' +
-            `[data-type="NodeTable"][${Constants.CUSTOM_SY_TABLE_VIEWPORT_HEIGHT}]`).forEach(applyTableViewportHeight);
-    }
-
     private renderPinnedTableFrames() {
         const actions = new Set<HTMLElement>();
         const resizeTargets = new Set<HTMLElement>();
         this.wysiwygElement.querySelectorAll<HTMLTableElement>(
             '[data-type="NodeTable"][custom-pinthead="true"] > div:first-child > table').forEach(table => {
+            const viewport = table.parentElement;
+            applyTableViewportHeight(viewport.parentElement, viewport);
             if (table.closest(".protyle-custom, .mindmap-view__preview-block")) {
                 return;
             }
@@ -1896,7 +1891,6 @@ export class TableControl {
             if (!action?.classList.contains("protyle-action__table")) {
                 return;
             }
-            const viewport = table.parentElement;
             actions.add(action);
             resizeTargets.add(table);
             resizeTargets.add(viewport);
@@ -1965,8 +1959,9 @@ export class TableControl {
             return;
         }
         const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
-        const viewportRect = intersectRects(table.parentElement.getBoundingClientRect(), contentRect);
-        if (viewportRect.width <= 0 || viewportRect.height <= 0) {
+        const bounds = table.parentElement.getBoundingClientRect();
+        const viewportRect = intersectRects(bounds, contentRect);
+        if (viewportRect.width <= 0 || viewportRect.height <= 0 || viewportRect.bottom < bounds.bottom) {
             return;
         }
         this.viewportResizeTable = table;
@@ -1976,7 +1971,8 @@ export class TableControl {
     }
 
     private render() {
-        this.renderTableViewportHeights();
+        this.viewportResizeHandle.classList.add("fn__none");
+        this.viewportResizeTable = undefined;
         this.renderPinnedTableFrames();
         if (this.dimensionDragging || this.dimensionHoverTimer === undefined) {
             this.renderDimensionGuide();

@@ -23,6 +23,7 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         ".protyle-table-control__width-guide,.protyle-table-control__selection{position:fixed}";
     document.head.append(fixtureStyle);
     const transactions: {before: string, after: string}[] = [];
+    const attributeTransactions: {operations: IOperation[], undo: IOperation[]}[] = [];
     const clipboard: {textPlain: string, textHTML?: string, textSiyuan?: string}[] = [];
     const pasted: {target: HTMLTableCellElement, textPlain: string}[] = [];
     const items: IMenu[] = [];
@@ -82,9 +83,14 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         }},
         "src/util/functions.ts": {isMobile: () => mobile},
         "src/util/escape.ts": {escapeAttr: (text: string) => text, escapeHtmlTextAndAttr: (text: string) => text},
-        "src/protyle/wysiwyg/transaction.ts": {updateTransaction: (_protyle: object, node: HTMLElement, before: string) => {
-            transactions.push({before, after: node.outerHTML});
-        }},
+        "src/protyle/wysiwyg/transaction.ts": {
+            updateTransaction: (_protyle: object, node: HTMLElement, before: string) => {
+                transactions.push({before, after: node.outerHTML});
+            },
+            transaction: (_protyle: object, operations: IOperation[], undo: IOperation[]) => {
+                attributeTransactions.push({operations, undo});
+            },
+        },
         "src/protyle/util/selection.ts": {getEditorRange, getUndoFocusContext: () => ({}), focusByWbr: (node: HTMLElement) => {
             node.querySelector("wbr")?.remove();
         }},
@@ -1663,10 +1669,18 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
     for (const touch of [false, true]) {
         mobile = touch;
         const f = fixture();
+        const viewportStyle = document.createElement("style");
+        viewportStyle.textContent = layoutStyles[`${touch ? "mobile" : "base"}/${touch ? "midnight" : "daylight"}`];
+        document.head.append(viewportStyle);
         const node = f.table.closest("[data-node-id]");
         const scroller = f.table.parentElement;
+        const tbody = f.table.tBodies[0];
+        tbody.append(...Array.from({length: 8}, () => tbody.rows[0].cloneNode(true)));
         node.setAttribute("custom-pinthead", "true");
-        node.setAttribute("custom-sy-table-viewport-height", "120px");
+        const heightAttribute = "custom-sy-table-viewport-height";
+        f.render();
+        check.equal(getComputedStyle(scroller).maxHeight, window.innerHeight / 2 + "px");
+        node.setAttribute(heightAttribute, "120px");
         f.render();
         if (touch) {
             f.core.startTouchSelection(f.cell(1, 0));
@@ -1679,32 +1693,44 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         f.render();
         const handle = f.touch(".protyle-table-control__viewport-height");
         check.ok(handle && !handle.classList.contains("fn__none"), `${touch} exposes the viewport height handle`);
-        check.equal(scroller.style.height, "120px");
-        check.equal(scroller.style.maxHeight, "120px");
+        check.equal(scroller.offsetHeight, 120);
+        check.equal(getComputedStyle(scroller).maxHeight, "120px");
+        scroller.scrollTop = 25;
         const rect = handle.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
         const y = rect.top + rect.height / 2;
-        const startHeight = scroller.getBoundingClientRect().height;
-        const count = transactions.length;
+        const startHeight = scroller.offsetHeight;
+        const count = attributeTransactions.length;
         pointer(handle, "pointerdown", x, y, 91);
         pointer(document, "pointermove", x, y + 60, 91);
-        check.equal(scroller.style.height, `${Math.round(startHeight + 60)}px`);
+        f.render();
+        check.equal(Math.round(scroller.getBoundingClientRect().height), Math.round(startHeight + 60),
+            "rendering keeps the viewport drag preview visible");
         pointer(document, "pointerup", x, y + 60, 91);
         const storedHeight = `${Math.round(startHeight + 60)}px`;
-        check.equal(node.getAttribute("custom-sy-table-viewport-height"), storedHeight, `${touch} persists the height`);
-        check.equal(transactions.length, count + 1, `${touch} commits one viewport resize transaction`);
-        scroller.style.removeProperty("height");
-        scroller.style.removeProperty("max-height");
+        check.equal(node.getAttribute(heightAttribute), storedHeight, `${touch} persists the height`);
+        check.equal(attributeTransactions.length, count + 1, `${touch} commits one viewport resize transaction`);
+        const resize = attributeTransactions.at(-1);
+        check.deepEqual(resize.operations, [{action: "setAttrs", id: node.getAttribute("data-node-id"),
+            data: JSON.stringify({[heightAttribute]: storedHeight})}]);
+        check.deepEqual(resize.undo, [{action: "setAttrs", id: node.getAttribute("data-node-id"),
+            data: JSON.stringify({[heightAttribute]: "120px"})}]);
+        check.equal(scroller.scrollTop, 25, "resizing preserves the current internal scroll position");
+        const cell = f.cell(1, 0);
+        node.removeAttribute(heightAttribute);
         f.render();
-        check.equal(scroller.style.height, storedHeight, `${touch} restores inline layout from the block attribute`);
-        check.equal(scroller.style.maxHeight, storedHeight);
+        check.equal(getComputedStyle(scroller).maxHeight, window.innerHeight / 2 + "px");
+        node.setAttribute(heightAttribute, storedHeight);
+        f.render();
+        check.equal(getComputedStyle(scroller).maxHeight, storedHeight);
+        check.equal(f.cell(1, 0), cell);
+        check.equal(scroller.scrollTop, 25);
         node.removeAttribute("custom-pinthead");
         f.render();
-        check.equal(scroller.style.height, "", `${touch} unpinning releases the fixed height`);
-        check.equal(scroller.style.maxHeight, "");
+        check.equal(getComputedStyle(scroller).maxHeight, "none", `${touch} unpinning releases the fixed height`);
         node.setAttribute("custom-pinthead", "true");
         f.render();
-        check.equal(scroller.style.height, storedHeight, `${touch} reuses the height when pinned again`);
+        check.equal(getComputedStyle(scroller).maxHeight, storedHeight, `${touch} reuses the height when pinned again`);
         for (const cancel of ["pointercancel", "Escape"]) {
             f.render();
             check.equal(handle.classList.contains("fn__none"), false);
@@ -1718,11 +1744,17 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
             } else {
                 pointer(document, "pointercancel", currentX, currentY + 40, 92);
             }
-            check.equal(scroller.style.height, storedHeight, `${touch} ${cancel} restores the committed height`);
-            check.equal(node.getAttribute("custom-sy-table-viewport-height"), storedHeight);
-            check.equal(transactions.length, count + 1, `${touch} ${cancel} creates no transaction`);
+            check.equal(getComputedStyle(scroller).maxHeight, storedHeight, `${touch} ${cancel} restores the committed height`);
+            check.equal(node.getAttribute(heightAttribute), storedHeight);
+            check.equal(attributeTransactions.length, count + 1, `${touch} ${cancel} creates no transaction`);
+        }
+        if (!touch) {
+            f.root.classList.add("export-img");
+            check.equal(getComputedStyle(scroller).maxHeight, "none");
+            check.ok(scroller.offsetHeight > Number.parseInt(storedHeight), "export expands the complete table");
         }
         f.dispose();
+        viewportStyle.remove();
     }
     realStyle.remove();
     const layoutStyle = document.createElement("style");

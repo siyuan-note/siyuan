@@ -378,7 +378,7 @@ const bindKeymapList = (root: HTMLElement) => {
         searchKeymapElement.dataset.keymap = "";
         resetKeymapList(keymapListElement);
     });
-    let recording: { row: HTMLElement; element: HTMLElement } | undefined;
+    let recording: {row: HTMLElement, element: HTMLElement, restoreFocusAfterSave: boolean} | undefined;
     const outsideRecording = (event: PointerEvent) => {
         if (recording && event.target !== recording.element &&
             !(event.target as HTMLElement).closest(".config-keymap__controls")) {
@@ -481,7 +481,7 @@ const bindKeymapList = (root: HTMLElement) => {
             recorder.textContent = window.siyuan.languages.keymapRecording;
             recorder.setAttribute("aria-label", window.siyuan.languages.keymapRecording);
             row.querySelector(".config-keymap__bindings").append(recorder);
-            recording = {row, element: recorder};
+            recording = {row, element: recorder, restoreFocusAfterSave: event.detail === 0};
             document.addEventListener("pointerdown", outsideRecording, true);
             row.querySelector('[data-type="add"]').classList.add("config-keymap__action--active");
             sendUnregisterGlobalShortcut(window.siyuan.ws.app);
@@ -505,7 +505,7 @@ const bindKeymapList = (root: HTMLElement) => {
         if (!hotkey || ["⌘", "⇧", "⌥", "⌃"].includes(hotkey.at(-1))) {
             return;
         }
-        const {row, element} = recording;
+        const {row, element, restoreFocusAfterSave} = recording;
         const path = row.dataset.key.split(Constants.ZWSP);
         if (isDisallowedTextInputHotkey(hotkey) || isReservedKeymap(hotkey, path) ||
             !matchHotKey(hotkey, event) ||
@@ -518,9 +518,15 @@ const bindKeymapList = (root: HTMLElement) => {
         if (keys.some(key => matchHotKey(key, event))) {
             return;
         }
+        if (!restoreFocusAfterSave) {
+            element.blur();
+        }
         cancelRecording();
         keys.push(hotkey);
         saveRow(row, keys);
+        if (!restoreFocusAfterSave) {
+            return;
+        }
         const addButton = row.querySelector<HTMLButtonElement>('[data-type="add"]');
         addButton.focus();
         if (addButton.ownerDocument.activeElement === addButton) {

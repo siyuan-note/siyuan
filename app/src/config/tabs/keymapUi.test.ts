@@ -5,56 +5,87 @@ import {runInNewContext} from "node:vm";
 import {createSourceFile, forEachChild, isCallExpression, isClassDeclaration, isMethodDeclaration, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {CALLOUT_PRESETS} from "../../protyle/wysiwyg/calloutType";
 
-test("finishing shortcut recording restores focus and dismisses only the focus tooltip until blur", () => {
+test("finishing shortcut recording clears pointer focus and returns keyboard focus without a tooltip", () => {
     const source = createSourceFile("keymapUi.ts", readFileSync("src/config/tabs/keymapUi.ts", "utf8"), ScriptTarget.ES2022, true);
-    let listenerSource: string;
+    const listeners: string[] = [];
     const visit = (node: import("typescript").Node) => {
         if (isCallExpression(node) && node.expression.getText(source) === "keymapListElement.addEventListener" &&
-            node.arguments[0]?.getText(source) === '"keydown"') {
-            listenerSource = node.getText(source);
+            ['"click"', '"keydown"'].includes(node.arguments[0]?.getText(source))) {
+            listeners.push(node.getText(source));
         }
         forEachChild(node, visit);
     };
     visit(source);
-    assert.ok(listenerSource);
-    const code = transpileModule(listenerSource, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
+    assert.equal(listeners.length, 2);
+    const code = transpileModule(listeners.join(";\n"), {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
     const styles = readFileSync("src/assets/scss/business/_config.scss", "utf8");
     assert.match(styles, /&\[data-keymap-tooltip-dismissed\]:not\(:hover\)::after\s*\{\s*content:\s*none;/);
     const attributes = new Map<string, string>();
     const ownerDocument: {activeElement?: unknown} = {};
     const addButton = Object.assign(new EventTarget(), {
         ownerDocument,
+        dataset: {type: "add"},
+        classList: {add() {}},
+        closest: (): null => null,
         setAttribute: (name: string, value: string) => attributes.set(name, value),
         removeAttribute: (name: string) => attributes.delete(name),
         focus: () => { ownerDocument.activeElement = addButton; },
     });
-    const row = {dataset: {key: "general|test"}, querySelector: () => addButton};
-    const recorder = {};
-    let keydown: (event: unknown) => void;
+    const recorder = {
+        setAttribute() {},
+        focus: () => { ownerDocument.activeElement = recorder; },
+        blur: () => { ownerDocument.activeElement = undefined; },
+    };
+    const bindings = {append() {}};
+    const row = {dataset: {key: "general|test"}, querySelector: (selector: string) =>
+        selector === ".config-keymap__bindings" ? bindings : addButton};
+    const target = {closest: (selector: string) => selector === "[data-type]" ? addButton :
+        selector === ".config-keymap__row" ? row : null};
+    const handlers = new Map<string, (event: unknown) => void>();
     const canceled: (boolean | undefined)[] = [];
     const saved: string[][] = [];
     const context = {
-        keymapListElement: {addEventListener: (_type: string, listener: typeof keydown) => { keydown = listener; }},
-        recording: {row, element: recorder},
+        keymapListElement: {addEventListener: (type: string, listener: (event: unknown) => void) => handlers.set(type, listener)},
+        document: {createElement: () => recorder, addEventListener() {}},
+        window: {siyuan: {languages: {keymapRecording: "Recording"}, ws: {app: {}}}},
+        outsideRecording() {},
+        sendUnregisterGlobalShortcut() {},
+        recording: undefined as {row: unknown, element: unknown, restoreFocusAfterSave: boolean} | undefined,
         Constants: {ZWSP: "|"},
         getKeymapString: () => "F10",
         isDisallowedTextInputHotkey: () => false, isReservedKeymap: () => false, matchHotKey: () => true, isMac: () => false,
         getRowBindings: (): string[] => [],
-        cancelRecording: (restoreFocus?: boolean) => { canceled.push(restoreFocus); context.recording = undefined; },
+        cancelRecording: (restoreFocus?: boolean) => {
+            if (context.recording) {
+                canceled.push(restoreFocus);
+                context.recording = undefined;
+                if (restoreFocus) {
+                    addButton.focus();
+                }
+            }
+        },
         saveRow: (_row: unknown, keys: string[]) => saved.push(keys),
     };
     runInNewContext(code, context);
-    const press = (key: string) => keydown({key, target: recorder, preventDefault() {}, stopImmediatePropagation() {}});
+    const activate = (detail: number) => handlers.get("click")({detail, target, preventDefault() {}, stopPropagation() {}});
+    const press = (key: string) => handlers.get("keydown")({key, target: recorder, preventDefault() {}, stopImmediatePropagation() {}});
+    activate(1);
+    assert.equal(ownerDocument.activeElement, recorder);
     press("F10");
-    assert.deepEqual(saved, [["F10"]]);
+    assert.equal(ownerDocument.activeElement, undefined);
+    assert.equal(attributes.has("data-keymap-tooltip-dismissed"), false);
+    activate(0);
+    press("F10");
+    assert.deepEqual(saved, [["F10"], ["F10"]]);
     assert.equal(ownerDocument.activeElement, addButton);
     assert.equal(attributes.get("data-keymap-tooltip-dismissed"), "");
     addButton.dispatchEvent(new Event("blur"));
     assert.equal(attributes.has("data-keymap-tooltip-dismissed"), false);
-    context.recording = {row, element: recorder};
+    activate(0);
     press("Escape");
-    assert.deepEqual(canceled, [undefined, true]);
-    assert.equal(saved.length, 1);
+    assert.deepEqual(canceled, [undefined, undefined, true]);
+    assert.equal(saved.length, 2);
+    assert.equal(ownerDocument.activeElement, addButton);
     assert.equal(attributes.has("data-keymap-tooltip-dismissed"), false);
 });
 

@@ -774,8 +774,10 @@ ${getIconScript(servePath)}
         const wysElement = previewElement.querySelector(".protyle-wysiwyg");
         wysElement.setAttribute("data-doc-type", data.type || "NodeDocument");
         Object.keys(data.attrs).forEach(key => {
-            wysElement.setAttribute(key, data.attrs[key]);
-        })
+            if (!key.toLowerCase().startsWith("on")) {
+                wysElement.setAttribute(key, data.attrs[key]);
+            }
+        });
         Protyle.setAutoDirection(previewElement, ${!!window.siyuan.config.editor.autoDirection});
         Protyle.observeTableCorners(previewElement);
         await Protyle.renderExportJSEmbeds(wysElement, {

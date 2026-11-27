@@ -540,9 +540,9 @@ func isHandlerAttrName(name string) bool {
 	return strings.HasPrefix(strings.ToLower(name), "on")
 }
 
-// filterHandlerIALAttrs 返回移除事件处理器属性后的 IAL 副本。
+// FilterHandlerIALAttrs 返回移除事件处理器属性后的 IAL 副本。
 // 历史数据、.sy.zip 导入和外部 Markdown 可能已经带有这类属性名，输出边界需要再次过滤。
-func filterHandlerIALAttrs(ial map[string]string) map[string]string {
+func FilterHandlerIALAttrs(ial map[string]string) map[string]string {
 	if 0 == len(ial) {
 		return ial
 	}
@@ -619,7 +619,7 @@ func normalizeIconValue(value string) string {
 
 func blockAttrsOperation(oldAttrs map[string]string, node *ast.Node) *Operation {
 	// 推送的 new 由前端直接写入块元素，事件处理器属性名在推送前过滤，覆盖 .sy 导入与历史数据中已存在的属性
-	newAttrs := filterHandlerIALAttrs(parse.IAL2Map(node.KramdownIAL))
+	newAttrs := FilterHandlerIALAttrs(parse.IAL2Map(node.KramdownIAL))
 	data := map[string]any{"old": oldAttrs, "new": newAttrs}
 	if "" != node.AttributeViewType {
 		data["data-av-type"] = node.AttributeViewType

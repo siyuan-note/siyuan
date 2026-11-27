@@ -28,7 +28,7 @@ test("high-density export layout preserves output limits and falls back for unsu
     assert.equal(getExportImageLayoutScale({width: 4097, height: 4096}, 1, true), 1);
 });
 
-const browserCases = async (layoutSource: string, fontSource: string, exportSource: string, mobile: boolean, pixelRatio: number) => {
+const browserCases = async (layoutSource: string, fontSource: string, exportSource: string, ialSource: string, mobile: boolean, pixelRatio: number) => {
     const check = require("node:assert/strict");
     const layout: {
         updateExportImageLayout: typeof updateExportImageLayout,
@@ -122,6 +122,7 @@ size-adjust: 85%;
     const dependencies: Record<string, unknown> = {
         "./imageLayout": layout,
         "./imageFonts": fonts,
+        "../util/ialAttributes": new Function("exports", `${ialSource}; return exports;`)({}),
         "../render/av/columnWindow": {suspendAVColumnWindows: (element: HTMLElement) => {
             check.equal(element, dialog.element.querySelector(".protyle-wysiwyg"));
             check.equal(suspendedColumns.has(element), false);
@@ -134,7 +135,7 @@ size-adjust: 85%;
             if (url === "/api/export/exportPreviewHTML") {
                 previewRequest = data;
                 callback({data: {content: (data.excludeTitleImage ? "" : titleImageContent) + content,
-                    attrs: {}, type: "NodeDocument", name: "image"}});
+                    attrs: {OnMouseOver: "discard", "custom-preview": "preserved"}, type: "NodeDocument", name: "image"}});
             } else {
                 check.equal(url, "/api/export/exportAsFile");
                 rememberBlob(data.file);
@@ -148,7 +149,10 @@ size-adjust: 85%;
                 this.file = data.file;
             }
         }},
-        "./jsEmbed": {renderExportJSEmbeds: async () => {}},
+        "./jsEmbed": {renderExportJSEmbeds: async (element: HTMLElement) => {
+            check.equal(element.hasAttribute("onmouseover"), false);
+            check.equal(element.getAttribute("custom-preview"), "preserved");
+        }},
         "../util/addScript": {addScript: async () => {}},
         "../../util/functions": {isMobile: () => mobile},
         "../../constants": {Constants: {LOCAL_EXPORTIMG: "image", DIALOG_EXPORTIMAGE: "image", TIMEOUT_LOAD: 0}},
@@ -412,16 +416,17 @@ const prepareBrowserAssets = () => {
     const layoutSource = compile("imageLayout.ts");
     const fontSource = compile("imageFonts.ts");
     const exportSource = compile("util.ts");
+    const ialSource = compile("../util/ialAttributes.ts");
     const libraries = ["html-to-image.min.js", "modern-screenshot.min.js"].map(file =>
         readFileSync(path.resolve("stage/protyle/js", file), "utf8"));
     const mobileCSS = sass.compileString('@use "main/mobile";', {
         loadPaths: [path.resolve("src/assets/scss")], logger: sass.Logger.silent,
     }).css;
-    return {css, mobileCSS, layoutSource, fontSource, exportSource, libraries};
+    return {css, mobileCSS, layoutSource, fontSource, exportSource, ialSource, libraries};
 };
 
 const runBrowserCase = async (mobile: boolean, pixelRatio: number, {
-    css, mobileCSS, layoutSource, fontSource, exportSource, libraries,
+    css, mobileCSS, layoutSource, fontSource, exportSource, ialSource, libraries,
 }: ReturnType<typeof prepareBrowserAssets>) => {
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-export-image-"));
     const script = path.join(temporary, "run.cjs");
@@ -453,7 +458,7 @@ ${libraries.map(source => `new Function("module", "exports", ${JSON.stringify(so
                 phase = "export cases " + mobile;
                 console.log(await win.webContents.executeJavaScript(
                     "const __name = value => value; (" + ${JSON.stringify(browserCases.toString())} + ")(" +
-                    ${JSON.stringify(JSON.stringify(layoutSource) + "," + JSON.stringify(fontSource) + "," + JSON.stringify(exportSource))} + "," + mobile + "," + pixelRatio + ")"));
+                    ${JSON.stringify([layoutSource, fontSource, exportSource, ialSource].map(source => JSON.stringify(source)).join(","))} + "," + mobile + "," + pixelRatio + ")"));
             } catch (error) {
                 console.error(phase, error);
                 throw error;

@@ -33,7 +33,7 @@ func TestFilterHandlerIALAttrs(t *testing.T) {
 		"OnClick":     "window.xssFired=true",
 		"custom-foo":  "bar",
 	}
-	filtered := filterHandlerIALAttrs(ial)
+	filtered := FilterHandlerIALAttrs(ial)
 	if 2 != len(filtered) || "20260101000000-abcdefg" != filtered["id"] || "bar" != filtered["custom-foo"] {
 		t.Fatalf("unexpected filtered IAL: %v", filtered)
 	}

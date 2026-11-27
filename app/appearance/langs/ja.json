@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "暗号化されていないノートブックを検査します。欠落が確認されたカードソースのみ削除できます。",
 	"agentQuickPhraseSendTip": "${key} を押しながらクリックして送信",
 	"mobileWorkspaceSwitch": "切り替える",
 	"mobileWorkspaceSwitchTitle": "「${x}」に切り替えますか？",

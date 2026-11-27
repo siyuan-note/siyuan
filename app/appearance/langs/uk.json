@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "Перевіряються незашифровані записники. Видалити можна лише джерела, відсутність яких підтверджено.",
 	"agentQuickPhraseSendTip": "Утримуйте ${key} і клацніть, щоб надіслати",
 	"mobileWorkspaceSwitch": "Перемкнутися",
 	"mobileWorkspaceSwitchTitle": "Перемкнутися на «${x}»?",

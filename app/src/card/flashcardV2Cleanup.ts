@@ -35,7 +35,7 @@ export const openFlashcardV2Cleanup = (onChanged: () => void) => {
         },
         destroyCallback: notifyChanged,
         content: `<div class="b3-dialog__content card__v2-panel">
-<div class="ft__secondary">${lang.flashcardCleanupTip}</div>
+<div class="ft__on-surface">${lang.flashcardCleanupScanTip}</div>
 <div class="card__v2-panel-toolbar">
 <label class="card__v2-checkbox"><input data-select-all type="checkbox" disabled><span>${lang.selectAll}</span></label>
 <span class="fn__space"></span><span data-summary class="fn__flex-1"></span>
@@ -75,11 +75,17 @@ export const openFlashcardV2Cleanup = (onChanged: () => void) => {
             await fetchPost("/api/flashcard/inspectInvalidSources", {}, (response) => {
                 if (closed) { return; }
                 sources = response.data.sources;
-                list.innerHTML = sources.map((source) => `<li class="b3-list-item">
-${source.reason === "missing" ? `<input type="checkbox" data-id="${escapeAttr(source.sourceID)}" aria-label="${escapeAttr(source.sourceID)}" class="b3-list-item__graphic">` : ""}
-<div class="fn__flex-1"><div>${source.reason === "missing" ? lang.flashcardCleanupMissing : source.reason === "closed" ? lang.flashcardCleanupClosed : lang.flashcardCleanupUnknown}</div>
-<details><summary>${lang.flashcardCardSource}</summary><div class="ft__breakword">${escapeHtml(source.sourceID)}<br>${source.blockIDs.map(id => escapeHtml(id)).join("<br>")}</div></details></div>
-<span class="b3-list-item__meta">${lang.riffCard} ${source.cardCount}</span></li>`).join("") || `<li class="b3-list-item">${lang.emptyContent}</li>`;
+                list.innerHTML = sources.map((source) => {
+                    const reason = source.reason === "missing" ? lang.flashcardCleanupMissing :
+                        source.reason === "closed" ? lang.flashcardCleanupClosed : lang.flashcardCleanupUnknown;
+                    return `<li class="b3-list-item card__v2-cleanup-row">
+<span class="card__v2-cleanup-selection">${source.reason === "missing" ? `<input type="checkbox" data-id="${escapeAttr(source.sourceID)}" aria-label="${escapeAttr(source.sourceID)}">` : ""}</span>
+<details class="card__v2-cleanup-details">
+<summary aria-label="${escapeAttr(`${lang.flashcardCardSource} - ${reason}`)}"><svg class="b3-list-item__arrow" aria-hidden="true"><use xlink:href="#iconRight"></use></svg><span>${reason}</span></summary>
+<div class="card__v2-cleanup-ids ft__breakword"><div class="ft__on-surface">${lang.flashcardCardSource}</div>${escapeHtml(source.sourceID)}<br>${source.blockIDs.map(id => escapeHtml(id)).join("<br>")}</div>
+</details>
+<span class="b3-list-item__meta">${lang.riffCard} ${source.cardCount}</span></li>`;
+                }).join("") || `<li class="b3-list-item">${lang.emptyContent}</li>`;
                 succeeded = true;
             }, undefined, undefined, undefined, 30000);
         } catch (error) {

@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "ตรวจสอบเฉพาะสมุดบันทึกที่ไม่ได้เข้ารหัส ลบได้เฉพาะแหล่งที่มาที่ยืนยันแล้วว่าสูญหาย",
 	"agentQuickPhraseSendTip": "กด ${key} ค้างไว้แล้วคลิกเพื่อส่ง",
 	"mobileWorkspaceSwitch": "สลับ",
 	"mobileWorkspaceSwitchTitle": "สลับไปที่ “${x}” หรือไม่",

@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "Skanowane są niezaszyfrowane notatniki. Usunąć można tylko źródła, których brak potwierdzono.",
 	"agentQuickPhraseSendTip": "Przytrzymaj ${key} i kliknij, aby wysłać",
 	"mobileWorkspaceSwitch": "Przełącz",
 	"mobileWorkspaceSwitchTitle": "Przełączyć na „${x}”?",

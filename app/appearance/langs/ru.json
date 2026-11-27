@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "Проверяются незашифрованные блокноты. Удалить можно только источники, отсутствие которых подтверждено.",
 	"agentQuickPhraseSendTip": "Удерживайте ${key} и щёлкните, чтобы отправить",
 	"mobileWorkspaceSwitch": "Переключиться",
 	"mobileWorkspaceSwitchTitle": "Переключиться на «${x}»?",

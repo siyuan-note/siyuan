@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "يُفحص فقط ما لم يُشفّر من دفاتر الملاحظات. يمكن حذف المصادر التي تأكد فقدانها فقط.",
 	"agentQuickPhraseSendTip": "اضغط باستمرار على ${key} وانقر للإرسال",
 	"mobileWorkspaceSwitch": "تبديل",
 	"mobileWorkspaceSwitchTitle": "هل تريد التبديل إلى «${x}»؟",

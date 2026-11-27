@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "נסרקות מחברות שאינן מוצפנות. אפשר למחוק רק מקורות שחסרונם אושר.",
 	"agentQuickPhraseSendTip": "לחצו תוך כדי החזקת ${key} כדי לשלוח",
 	"mobileWorkspaceSwitch": "מעבר",
 	"mobileWorkspaceSwitchTitle": "לעבור אל ״${x}״?",

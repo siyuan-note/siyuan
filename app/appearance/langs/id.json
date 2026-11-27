@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "Pemindaian mencakup buku catatan yang tidak terenkripsi. Hanya sumber yang dipastikan hilang yang dapat dihapus.",
 	"agentQuickPhraseSendTip": "Tahan ${key} lalu klik untuk mengirim",
 	"mobileWorkspaceSwitch": "Beralih",
 	"mobileWorkspaceSwitchTitle": "Beralih ke “${x}”?",

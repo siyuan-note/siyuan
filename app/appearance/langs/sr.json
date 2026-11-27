@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "Проверавају се нешифроване бележнице. Могу се обрисати само извори за које је потврђено да недостају.",
 	"agentQuickPhraseSendTip": "Држите ${key} и кликните да пошаљете",
 	"mobileWorkspaceSwitch": "Prebaci",
 	"mobileWorkspaceSwitchTitle": "Prebaciti se na „${x}“?",

@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "Chỉ quét sổ tay không mã hóa. Chỉ có thể xóa nguồn đã được xác nhận là bị thiếu.",
 	"flashcardStatisticsScopeTip": "Khoảng ngày chỉ áp dụng cho lịch sử ôn tập. Trạng thái và phân bố thẻ được tính tại thời điểm hiện tại, còn các lượt ôn sắp tới được tính trong 30 ngày kể từ hôm nay",
 	"flashcardDirectionSettings": "Chiều hỏi đáp",
 	"flashcardRestoreSource": "Khôi phục nguồn thẻ",

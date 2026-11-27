@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "Seuls les carnets non chiffrés sont analysés. Seules les sources dont l’absence est confirmée peuvent être supprimées.",
 	"agentQuickPhraseSendTip": "Maintenez ${key} et cliquez pour envoyer",
 	"mobileWorkspaceSwitch": "Basculer",
 	"mobileWorkspaceSwitchTitle": "Basculer vers « ${x} » ?",

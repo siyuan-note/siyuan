@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "Scans unencrypted notebooks. Only confirmed missing sources can be deleted.",
 	"agentQuickPhraseSendTip": "Hold ${key} and click to send",
 	"mobileWorkspaceSwitch": "Switch",
 	"mobileWorkspaceSwitchTitle": "Switch to “${x}”?",

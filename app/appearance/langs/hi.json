@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "केवल बिना एन्क्रिप्शन वाली नोटबुक जाँची जाती हैं। केवल वे स्रोत हटाए जा सकते हैं जिनका गायब होना सुनिश्चित है।",
 	"agentQuickPhraseSendTip": "भेजने के लिए ${key} दबाए रखें और क्लिक करें",
 	"mobileWorkspaceSwitch": "बदलें",
 	"mobileWorkspaceSwitchTitle": "क्या आप “${x}” पर जाना चाहते हैं?",

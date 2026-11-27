@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "Geprüft werden unverschlüsselte Notizbücher. Nur nachweislich fehlende Quellen lassen sich löschen.",
 	"agentQuickPhraseSendTip": "Zum Senden ${key} gedrückt halten und klicken",
 	"mobileWorkspaceSwitch": "Wechseln",
 	"mobileWorkspaceSwitchTitle": "Zu „${x}“ wechseln?",

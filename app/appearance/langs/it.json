@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "Vengono esaminati i quaderni non crittografati. Si possono eliminare solo le fonti di cui è confermata l’assenza.",
 	"agentQuickPhraseSendTip": "Tieni premuto ${key} e fai clic per inviare",
 	"mobileWorkspaceSwitch": "Passa",
 	"mobileWorkspaceSwitchTitle": "Passare a «${x}»?",

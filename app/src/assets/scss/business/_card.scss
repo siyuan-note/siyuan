@@ -1021,6 +1021,66 @@
     margin: 0;
   }
 
+  &__v2-cleanup {
+    &-row {
+      align-items: flex-start;
+      gap: 8px;
+
+      > .b3-list-item__meta {
+        margin: 0;
+      }
+    }
+
+    &-selection {
+      display: flex;
+      align-items: center;
+      min-block-size: var(--b3-ui-list-height, 28px);
+      flex: 0 0 16px;
+    }
+
+    &-details {
+      flex: 1;
+      min-width: 0;
+
+      > summary {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        list-style: none;
+        cursor: pointer;
+
+        &::-webkit-details-marker {
+          display: none;
+        }
+      }
+
+      &[open] > summary > .b3-list-item__arrow {
+        transform: rotate(90deg);
+      }
+    }
+
+    &-ids {
+      margin-inline-start: 18px;
+    }
+  }
+
+  &__v2-flag-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+
+    > .b3-button,
+    > .b3-text-field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    > .b3-button {
+      justify-content: flex-start;
+    }
+  }
+
   &__v2-managed-card {
     position: relative;
     min-height: 34px;

@@ -1,4 +1,5 @@
 {
+	"flashcardCleanupScanTip": "A verificação abrange cadernos não criptografados. Só é possível excluir fontes cuja ausência foi confirmada.",
 	"agentQuickPhraseSendTip": "Mantenha ${key} pressionada e clique para enviar",
 	"mobileWorkspaceSwitch": "Alternar",
 	"mobileWorkspaceSwitchTitle": "Alternar para “${x}”?",

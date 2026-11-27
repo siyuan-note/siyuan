@@ -1742,15 +1742,55 @@ const openFlashcardV2FlagDefinitions = (
         width: isMobile() ? "92vw" : "480px",
         content: `<div class="b3-dialog__content card__v2-form card__v2-form--grid">${Array.from({length: 7}, (_, index) => {
             const flag = index + 1;
-            return `<label class="b3-label"><div class="b3-label__text"${flashcardFlagStyle(flag)}>● ${flag}</div><input data-flag="${flag}" class="b3-text-field fn__block" maxlength="100" value="${escapeAttr(byFlag.get(flag)?.payload.name || "")}"></label>`;
+            const name = byFlag.get(flag)?.payload.name || "";
+            const label = `${window.siyuan.languages.flashcardFlag} - ${flag}`;
+            return `<div class="card__v2-flag-row">
+<span aria-hidden="true"${flashcardFlagStyle(flag)}>●</span>
+<button type="button" class="b3-button b3-button--text" aria-label="${escapeAttr(name ? `${label} - ${name}` : label)}"><span class="fn__ellipsis">${escapeHtml(name || String(flag))}</span></button>
+<input data-flag="${flag}" class="b3-text-field fn__none" aria-label="${escapeAttr(label)}" placeholder="${flag}" maxlength="100" value="${escapeAttr(name)}">
+</div>`;
         }).join("")}</div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
+    });
+    const inputs = dialog.element.querySelectorAll<HTMLInputElement>("[data-flag]");
+    inputs.forEach((input) => {
+        const editButton = input.previousElementSibling as HTMLButtonElement;
+        const nameElement = editButton.firstElementChild;
+        let previousName = input.value;
+        editButton.addEventListener("click", () => {
+            previousName = input.value;
+            editButton.classList.add("fn__none");
+            input.classList.remove("fn__none");
+            input.focus();
+            input.select();
+        });
+        const finishEditing = () => {
+            input.value = input.value.trim();
+            nameElement.textContent = input.value || input.placeholder;
+            const label = input.getAttribute("aria-label");
+            editButton.setAttribute("aria-label", input.value ? `${label} - ${input.value}` : label);
+            input.classList.add("fn__none");
+            editButton.classList.remove("fn__none");
+        };
+        input.addEventListener("blur", finishEditing);
+        input.addEventListener("keydown", (event) => {
+            if (event.isComposing || (event.key !== "Enter" && event.key !== "Escape")) {
+                return;
+            }
+            if (event.key === "Escape") {
+                input.value = previousName;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            finishEditing();
+            editButton.focus();
+        });
     });
     const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
     buttons[0].addEventListener("click", () => dialog.destroy());
     buttons[1].addEventListener("click", () => {
         const updatedAt = Date.now();
         const mutations: Array<Record<string, unknown>> = [];
-        dialog.element.querySelectorAll<HTMLInputElement>("[data-flag]").forEach((input) => {
+        inputs.forEach((input) => {
             const flag = Number(input.dataset.flag);
             const name = input.value.trim();
             const current = byFlag.get(flag);

@@ -31,8 +31,9 @@ const harness = () => {
         addEventListener() {},
     };
     const requests: Array<{url: string, payload: {operationID: string}, timeout: number, finish: (data?: unknown, reject?: boolean) => Promise<void>}> = [];
-    let options: {beforeClose: () => boolean, destroyCallback: () => void};
+    let options: {content: string, beforeClose: () => boolean, destroyCallback: () => void};
     let confirm: () => Promise<void>;
+    let confirmText = "";
     let changes = 0;
     let uuid = 0;
     const forms = {};
@@ -51,7 +52,10 @@ const harness = () => {
                 constructor(value: typeof options) { options = value; }
             }}; }
             if (name.endsWith("confirmDialog")) {
-                return {confirmDialog: (options: {confirm: () => Promise<void>}) => { confirm = options.confirm; }};
+                return {confirmDialog: (options: {text: string, confirm: () => Promise<void>}) => {
+                    confirmText = options.text;
+                    confirm = options.confirm;
+                }};
             }
             if (name.endsWith("escape")) { return {escapeHtml: (s: string) => s.replace(/</g, "&lt;"), escapeAttr: (s: string) => s}; }
             return {fetchPost: (url: string, payload: {operationID: string}, callback: (response: {data: unknown}) => void, _error?: unknown, _fail?: unknown, _headers?: unknown, timeout?: number) =>
@@ -65,22 +69,30 @@ const harness = () => {
     });
     exports.openFlashcardV2Cleanup(() => { changes++; });
     return {requests, controls, html: () => html, inputs: () => inputs, changes: () => changes,
+        content: () => options.content, confirmText: () => confirmText,
         close: () => options.beforeClose(), destroy: () => options.destroyCallback(), confirm: () => confirm()};
 };
 
 const source = (reason = "missing", revisionID = "r1") => ({sourceID: "source", revisionID,
     blockIDs: ["block"], cardCount: 2, reason});
 
-test("cleanup labels reasons and counts, collapses IDs and never fetches content", async () => {
+test("cleanup shows a concise tip and discloses IDs under the status using the shared icon", async () => {
     const ui = harness();
     await ui.requests[0].finish({sources: [source(), {...source("closed"), sourceID: "closed"},
         {...source("unknown"), sourceID: "unknown"}]});
     assert.equal(ui.inputs().length, 1);
-    assert.match(ui.html(), /<details><summary>flashcardCardSource/);
+    assert.match(ui.content(), /<div class="ft__on-surface">flashcardCleanupScanTip<\/div>/);
+    assert.doesNotMatch(ui.content(), /flashcardCleanupTip/);
+    assert.match(ui.html(), /<details class="card__v2-cleanup-details">\s*<summary aria-label="flashcardCardSource - flashcardCleanupMissing">/);
+    assert.match(ui.html(), /<use xlink:href="#iconRight"><\/use>/);
+    assert.doesNotMatch(ui.html(), /<details[^>]* open/);
     assert.match(ui.html(), /flashcardCleanupMissing/);
     assert.match(ui.html(), /riffCard 2/);
     assert.equal(ui.requests.length, 1);
     assert.equal(ui.requests[0].url, "/api/flashcard/inspectInvalidSources");
+    ui.inputs()[0].checked = true;
+    ui.controls.get("delete").click();
+    assert.match(ui.confirmText(), /^flashcardCleanupTip<br>/);
 });
 
 test("failed scans retain results and selection, release controls and show a retryable error", async () => {

@@ -36,6 +36,7 @@ import {DocumentTitleEditor} from "./documentTitleEditor";
 import {renderDocumentTitlePreview} from "./documentTitlePreview";
 import type {DocumentTitleEditorValue} from "./documentTitleEditor";
 import {waitForPendingTransactions} from "../util/transactionQueue";
+import {hideElements} from "../ui/hideElements";
 /// #if MOBILE
 import {updateMobileDocumentTitle} from "../../mobile/util/mobileDocumentTitle";
 import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
@@ -92,7 +93,6 @@ export class Title {
                 this.rename(protyle);
             });
             this.editElement.addEventListener("click", () => {
-                protyle.toolbar?.element.classList.add("fn__none");
                 void this.openEditor().catch(error => console.error(error));
             });
             this.editElement.addEventListener("input", (event: InputEvent) => {
@@ -520,6 +520,11 @@ export class Title {
             }
             this.cancelPendingInput();
             const host = document.createElement("div");
+            host.addEventListener("click", event => {
+                if (this.editElement?.contains(event.target as Node)) {
+                    this.clearBodySelection();
+                }
+            }, true);
             this.plainEditElement = this.editElement;
             const selection = getSelection();
             const range = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
@@ -568,7 +573,18 @@ export class Title {
     }
 
     public async openEditor(isValid?: () => boolean) {
+        this.clearBodySelection();
         return this.openEditorWithSelection(isValid);
+    }
+
+    private clearBodySelection() {
+        const protyle = this.protyle;
+        if (protyle.toolbar?.isMultiSelectMode()) {
+            protyle.toolbar.closeMultiSelectMode();
+        }
+        if (protyle.wysiwyg?.element) {
+            hideElements(["select", "toolbar"], protyle);
+        }
     }
 
     private async openEditorWithSelection(isValid?: () => boolean, selectAll = false) {

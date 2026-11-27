@@ -117,6 +117,21 @@ const fixture = (text = "\u200b\n", collapsed = false, inside = true) => {
         hideKeyboard: () => { keyboardHidden = true; }, focusCount: () => focusCount, blurCount: () => blurCount};
 };
 
+test("tapping a document title during body multi-selection leaves the native title click available", () => {
+    const f = fixture("title", true);
+    const title = Object.assign(f.element, {
+        closest: (selector: string) => selector.includes(".protyle-title__input") ? f.element : null,
+    });
+    f.editor.protyle.toolbar.showMultiSelectMode();
+    f.startBlankTouch(title);
+    const previousBlurCount = f.blurCount();
+    f.exports.handleTouchEnd({target: title, timeStamp: 1100, changedTouches: [{clientX: 100, clientY: 100}],
+        stopImmediatePropagation: () => assert.fail("title taps must propagate"),
+        preventDefault: () => assert.fail("title taps must generate a click")});
+    assert.equal(f.selection.rangeCount, 1);
+    assert.equal(f.blurCount(), previousBlurCount);
+});
+
 test("video resize handles own the touch gesture without blurring playback or entering block selection", () => {
     for (const finish of ["handleTouchUp", "handleTouchCancel"]) {
         const f = fixture("", true);

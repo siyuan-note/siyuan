@@ -2229,8 +2229,7 @@ export class Toolbar {
             protyle.gutter.renderMenu(protyle, protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select"));
             window.siyuan.menus.menu.fullscreen();
         }, () => {
-            this.subElement.classList.add("fn__none");
-            this.subElement.innerHTML = "";
+            this.closeMultiSelectMode();
             hideElements(["select"], protyle);
         }, () => {
             window.getSelection()?.removeAllRanges();
@@ -2775,6 +2774,11 @@ export class Toolbar {
             !!this.subElement.querySelector('[data-type="exitMultiSelectMode"]');
         /// #endif
         return result;
+    }
+
+    public closeMultiSelectMode() {
+        this.subElement.classList.add("fn__none");
+        this.subElement.replaceChildren();
     }
 
     private genItem(protyle: IProtyle, menuItem: IMenuItem) {

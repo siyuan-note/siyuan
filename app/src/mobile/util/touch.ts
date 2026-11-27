@@ -267,6 +267,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
     if (Math.abs(clientX - event.changedTouches[0].clientX) < Constants.SIZE_DRAG_THRESHOLD &&
         Math.abs(clientY - event.changedTouches[0].clientY) < Constants.SIZE_DRAG_THRESHOLD) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
+            if (target.closest(".protyle-title__input, #toolbarName, #toolbarNameReadonly")) {
+                return;
+            }
             if (longPressTriggered) {
                 event.stopImmediatePropagation();
                 event.preventDefault();

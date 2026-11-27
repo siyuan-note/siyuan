@@ -93,7 +93,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " again to exit and clear all marks."
+					"Data": " again to exit and clear all marks. Clicking the document title also exits block selection and clears any marked body blocks."
 				}
 			]
 		},

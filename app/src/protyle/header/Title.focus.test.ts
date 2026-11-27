@@ -7,9 +7,14 @@ import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
-const browserCases = async (source: string) => {
+const browserCases = async (source: string, hideSource: string, selectionSource: string) => {
     const check: typeof assert = require("node:assert/strict");
-    Object.assign(window, {siyuan: {mobile: {}, config: {editor: {autoDirection: false}, readonly: false}}});
+    Object.assign(window, {siyuan: {mobile: {}, languages: {gutterTip2: "Document", _kernel: {16: "Title"}},
+        config: {editor: {autoDirection: false}, readonly: false}}});
+    const selectionModule = {} as typeof import("../wysiwyg/blockSelection");
+    new Function("exports", selectionSource)(selectionModule);
+    const ui = {} as typeof import("../ui/hideElements");
+    new Function("exports", "require", hideSource)(ui, (name: string) => name === "../wysiwyg/blockSelection" ? selectionModule : {});
     const focusByRange = (range: Range) => {
         const selection = getSelection()!;
         selection.removeAllRanges();
@@ -17,7 +22,7 @@ const browserCases = async (source: string) => {
     };
     for (const mobile of [false, true]) {
         for (const mode of ["default", "empty", "late-unlock", "slow-new", "other-focus", "body-click", "body-input",
-            "hidden", "switched", "destroyed", "readonly", "history", "existing"]) {
+            "hidden", "switched", "destroyed", "readonly", "history", "existing", "body-selection"]) {
             let accept: (response: unknown) => void;
             const container = document.createElement("div");
             container.innerHTML = '<div class="protyle-title"><div class="protyle-title__input" contenteditable="true"></div>' +
@@ -26,13 +31,15 @@ const browserCases = async (source: string) => {
             document.body.append(container, other);
             const body = container.querySelector<HTMLElement>(".body")!;
             body.focus();
-            const exports = {} as {Title: {prototype: any}};
+            const exports = {} as typeof import("./Title");
             const noop = () => {};
             new Function("exports", "require", source)(exports, (name: string) => {
                 if (name === "dayjs") return {__esModule: true,
                     default: () => ({toDate: () => new Date(Date.now() - (["existing", "slow-new"].includes(mode) ? 10000 : 0))})};
                 if (name === "../../constants") return {Constants: {CUSTOM_SY_TITLE_EMPTY: "custom-sy-title-empty", CB_GET_OPENNEW: "open-new"}};
                 if (name === "../util/normalizeText") return {nbsp2space: (value: string) => value};
+                if (name === "../util/compatibility") return {isMac: () => false};
+                if (name === "../ui/hideElements") return ui;
                 if (name === "../../util/fetch") return {fetchSyncPost: () => new Promise(resolve => { accept = resolve; })};
                 if (name === "../render/autoDirection") return {setTitleAutoDirection: noop};
                 if (name === "../util/selectionOffsets") return {focusByRange, getSelectionOffset: () => ({start: 0, end: 0})};
@@ -48,6 +55,7 @@ const browserCases = async (source: string) => {
                         editable.textContent = value.text;
                         this.wysiwyg.appendChild(editable);
                         host.appendChild(this.wysiwyg);
+                        host.addEventListener("click", event => event.stopPropagation());
                         onEditable(editable);
                     }
                     focus() { this.wysiwyg.focus(); }
@@ -62,8 +70,42 @@ const browserCases = async (source: string) => {
             });
             const protyle = {element: container, block: {rootID: "20261031000000-abcdefg", action: mode === "slow-new" ? ["open-new"] : []}, notebookId: "notebook",
                 options: {render: {}, history: mode === "history" ? {created: "history"} : undefined},
-                disabled: mode === "late-unlock" || mode === "readonly", wysiwyg: {renderCustom: noop}};
+                disabled: mode === "late-unlock" || mode === "readonly", wysiwyg: {element: body, renderCustom: noop}};
             title.protyle = protyle;
+            if (mode === "body-selection") {
+                let multiSelect = mobile;
+                const toolbar = {element: document.createElement("div"), isMultiSelectMode: () => multiSelect,
+                    closeMultiSelectMode: () => { multiSelect = false; }};
+                Object.assign(protyle, {toolbar});
+                const clickedTitle = new exports.Title(protyle as unknown as IProtyle);
+                container.firstElementChild.replaceWith(clickedTitle.element);
+                const block = document.createElement("div");
+                body.append(block);
+                const markBlock = () => {
+                    block.classList.add("protyle-wysiwyg--select", "protyle-wysiwyg--select-mode");
+                    block.setAttribute("select-start", "0");
+                };
+                markBlock();
+                clickedTitle.editElement.click();
+                check.equal(block.className, "", "clicking the plain title clears both block selection states");
+                check.equal(block.hasAttribute("select-start"), false);
+                check.equal(multiSelect, false);
+                accept({code: 0, data: {text: "Title", empty: false}});
+                await clickedTitle.refresh();
+                markBlock();
+                const caret = document.createRange();
+                caret.setStart(clickedTitle.editElement.firstChild, 2);
+                caret.collapse(true);
+                focusByRange(caret);
+                clickedTitle.editElement.click();
+                check.equal(block.className, "", "clicking the rich title clears the body selection");
+                check.equal(getSelection().anchorNode, clickedTitle.editElement.firstChild);
+                check.equal(getSelection().anchorOffset, 2);
+                container.remove();
+                other.remove();
+                getSelection().removeAllRanges();
+                continue;
+            }
             const text = mode === "empty" ? "" : "Template default title";
             title.render(protyle, {data: {id: protyle.block.rootID, ial: {title: text}, refCount: 0}});
             check.equal(title.editElement.contentEditable, "false", "plain title remains protected while its source loads");
@@ -98,16 +140,17 @@ const browserCases = async (source: string) => {
     return "New document title focus cases passed";
 };
 
-test("new document titles select editable text after source loading without stealing later focus", {
+test("new titles focus after source loading and title clicks clear only the body's block selection", {
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 30000,
 }, async () => {
-    const source = transpileModule(readFileSync(join(__dirname, "Title.ts"), "utf8"), {
-        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
-    }).outputText;
+    const sources = ["Title.ts", "../ui/hideElements.ts", "../wysiwyg/blockSelection.ts"].map(file =>
+        transpileModule(readFileSync(join(__dirname, file), "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText);
     const temporary = mkdtempSync(join(tmpdir(), "siyuan-title-focus-test-"));
     const script = join(temporary, "run.cjs");
-    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + JSON.stringify(source) + ")";
+    const code = "const __name = value => value; (" + browserCases.toString() + ")(" + sources.map(source => JSON.stringify(source)).join(",") + ")";
     writeFileSync(script, `const {app, BrowserWindow} = require("electron");
 app.setPath("userData", ${JSON.stringify(join(temporary, "profile"))});
 app.commandLine.appendSwitch("disable-gpu");

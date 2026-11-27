@@ -150,7 +150,7 @@ test("normal editor enabling cannot unlock the plain title while its full source
     const moduleExports: {Title?: {prototype: any}} = {};
     runInNewContext(compile("Title.ts"), {exports: moduleExports, window,
         clearTimeout: (id: number) => timers.delete(id), getSelection: () => ({rangeCount: 0}),
-        document: {createElement: () => ({})}, require: (name: string) => {
+        document: {createElement: () => ({addEventListener: noop})}, require: (name: string) => {
             if (name === "../../util/fetch") return {fetchSyncPost: (url: string) =>
                 new Promise(resolve => requests.push({url, resolve}))};
             if (name === "../../editor/rename") return {validateName: () => true};

@@ -197,6 +197,9 @@ export const restoreAVCellSelection = (blockElement: HTMLElement) => {
         return;
     }
     const active = selection.input || selection.anchor;
+    const bottomRight = selection.cells.reduce<IAVSelectedCell | undefined>((corner, cell) =>
+        !corner || cell.rowIndex > corner.rowIndex ||
+        (cell.rowIndex === corner.rowIndex && cell.colIndex > corner.colIndex) ? cell : corner, undefined);
     const selectedKeys = new Set(selection.cells.map(item => `${item.groupID}:${item.rowID}:${item.colID}`));
     blockElement.querySelectorAll<HTMLElement>(".av__cell--active, .av__cell--select").forEach(item => {
         item.classList.remove("av__cell--active", "av__cell--select");
@@ -213,8 +216,8 @@ export const restoreAVCellSelection = (blockElement: HTMLElement) => {
             cellElement.dataset.colId === active.colID) {
             cellElement.classList.add("av__cell--select");
         }
-        if (groupID === selection.focus.groupID && rowElement.dataset.id === selection.focus.rowID &&
-            cellElement.dataset.colId === selection.focus.colID &&
+        if (bottomRight && groupID === bottomRight.groupID && rowElement.dataset.id === bottomRight.rowID &&
+            cellElement.dataset.colId === bottomRight.colID &&
             !isAVReadonlyType(cellElement.dataset.dtype)) {
             cellElement.insertAdjacentHTML("beforeend",
                 `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);

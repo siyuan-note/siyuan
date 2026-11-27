@@ -171,7 +171,6 @@ import {openViewMenu} from "../render/av/view";
 import {checkFold, checkReferenceFold} from "../../util/noRelyPCFunction";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {
-    addDragFill,
     dragFillCellsValue,
     getAVCellData,
     getAVSelectedCellData,
@@ -181,7 +180,7 @@ import {
     getTypeByCellElement,
     updateCellsValue
 } from "../render/av/cell";
-import {getAVSelectedCells, getAVSelectionRoot} from "../render/av/selectionState";
+import {getAVSelectedCells, getAVSelectionRoot, restoreAVCellSelection} from "../render/av/selectionState";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {escapeAttr, escapeHtml} from "../../util/escape";
@@ -2000,7 +1999,7 @@ export class WYSIWYG {
                         (stableOriginCells.length > 0 ? selectAVDragFillRange(nodeElement, stableOriginCells, lastCellElement) :
                             selectAVCellRange(nodeElement, lastCellElement))) {
                         dragFillCellsValue(protyle, nodeElement, originData, originCellIds);
-                        addDragFill(lastCellElement);
+                        restoreAVCellSelection(nodeElement);
                     }
                     return false;
                 };
@@ -2016,7 +2015,6 @@ export class WYSIWYG {
                     return;
                 }
                 let moveSelectCellElement: HTMLElement;
-                let lastCellElement: HTMLElement;
                 let hasMoved = false;
                 const isDrag = (current: MouseEvent) => Math.abs(current.clientX - event.clientX) >= Constants.SIZE_DRAG_THRESHOLD ||
                     Math.abs(current.clientY - event.clientY) >= Constants.SIZE_DRAG_THRESHOLD;
@@ -2048,7 +2046,6 @@ export class WYSIWYG {
                     }
                     if (tempCellElement && tempCellElement.dataset.id) {
                         selectAVCellRange(nodeElement, tempCellElement);
-                        lastCellElement = tempCellElement;
                         moveSelectCellElement = tempCellElement;
                     }
                 };
@@ -2063,7 +2060,6 @@ export class WYSIWYG {
                     if (hasMoved || isDrag(upEvent)) {
                         selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
                         focusBlock(nodeElement);
-                        addDragFill(lastCellElement || avCellElement);
                         this.preventClick = true;
                     }
                     return false;

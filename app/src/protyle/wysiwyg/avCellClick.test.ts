@@ -29,6 +29,7 @@ assert.ok(avClick);
 const rowSource = ts.createSourceFile("row.ts", readFileSync("src/protyle/render/av/row.ts", "utf8"), ts.ScriptTarget.Latest, true);
 const selectionSource = ts.createSourceFile("selection.ts", readFileSync("src/protyle/util/selection.ts", "utf8"), ts.ScriptTarget.Latest, true);
 const keydownSource = ts.createSourceFile("keydown.ts", readFileSync("src/protyle/render/av/keydown.ts", "utf8"), ts.ScriptTarget.Latest, true);
+const avSelectionSource = ts.createSourceFile("selectionState.ts", readFileSync("src/protyle/render/av/selectionState.ts", "utf8"), ts.ScriptTarget.Latest, true);
 const declaration = (file: ts.SourceFile, name: string) => {
     const statement = file.statements.find(node => ts.isVariableStatement(node) &&
         node.declarationList.declarations.some(item => item.name.getText(file) === name));
@@ -42,8 +43,8 @@ const checkClicks = (code: string, mobile: boolean) => {
 <div class="av__scroll"><div class="av__body" data-group-id=""><div class="av__row av__row--header"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>
 <div class="av__row" data-id="row"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>
 <div class="av__cell" data-id="empty" data-col-id="empty" data-dtype="text"><span class="av__celltext"></span></div>
-<div class="av__cell" data-id="filled" data-dtype="text"><span class="av__celltext">value</span></div>
-<div class="av__cell" data-id="select" data-dtype="select"><span class="av__celltext"></span></div>
+<div class="av__cell" data-id="filled" data-col-id="filled" data-dtype="text"><span class="av__celltext">value</span></div>
+<div class="av__cell" data-id="select" data-col-id="select" data-dtype="select"><span class="av__celltext"></span></div>
 <div class="av__cell" data-id="rich" data-col-id="rich" data-dtype="text"><div class="av__celltext av__celltext--rich"><p><strong>formatted</strong><a href="https://example.com">link</a></p></div></div>
 </div><div class="av__row av__row--footer"><div class="av__firstcol" aria-hidden="true"><svg></svg></div></div></div></div>
 <div class="av__cursor" contenteditable="true">&#8203;</div></div><div class="p"><span>ordinary text</span></div></div>`;
@@ -53,18 +54,40 @@ const checkClicks = (code: string, mobile: boolean) => {
     const navigated: string[] = [];
     const selected: HTMLElement[] = [];
     let keyboardSelection: {cells: HTMLElement[], focus: {groupID: string, rowID: string, colID: string}};
-    let filled = 0;
+    let anchorCell: HTMLElement;
+    let focusCell: HTMLElement;
     const closest = (target: Node, name: string) =>
         (target?.nodeType === Node.TEXT_NODE ? target.parentElement : target as Element)?.closest("." + name);
     const clear = () => {
         selected.length = 0;
+        anchorCell = undefined;
+        focusCell = undefined;
         element.querySelectorAll(".av__cell--select, .av__cell--active").forEach(cell =>
             cell.classList.remove("av__cell--select", "av__cell--active"));
+        element.querySelectorAll(".av__drag-fill").forEach(handle => handle.remove());
+    };
+    const point = (cell: HTMLElement) => {
+        const row = cell.closest<HTMLElement>(".av__row[data-id]");
+        return {groupID: "", rowID: row.dataset.id, colID: cell.dataset.colId,
+            rowIndex: Array.from(row.parentElement.querySelectorAll(".av__row[data-id]")).indexOf(row),
+            colIndex: Array.from(row.querySelectorAll(".av__cell")).indexOf(cell)};
+    };
+    const selectedRange = () => {
+        if (!anchorCell || !focusCell) {
+            return;
+        }
+        const anchor = point(anchorCell);
+        const focus = point(focusCell);
+        const cells = Array.from(block.querySelectorAll<HTMLElement>(".av__cell")).map(point).filter(cell =>
+            cell.rowIndex >= Math.min(anchor.rowIndex, focus.rowIndex) && cell.rowIndex <= Math.max(anchor.rowIndex, focus.rowIndex) &&
+            cell.colIndex >= Math.min(anchor.colIndex, focus.colIndex) && cell.colIndex <= Math.max(anchor.colIndex, focus.colIndex));
+        return {anchor, focus, cells};
     };
     const protyle = {element, contentElement: element, wysiwyg: {element}, toolbar: {isMultiSelectMode: () => false}};
     const menu = document.createElement("div");
     menu.className = "fn__none";
-    window.siyuan = {menus: {menu: {element: menu}}, config: {keymap: {editor: {general: {}}}}} as any;
+    window.siyuan = {menus: {menu: {element: menu}}, config: {keymap: {editor: {general: {}}}},
+        languages: {dragFill: "Drag to fill"}} as any;
     const closestAV = (target: Element) => closest(target, "av");
     const dependencies = {
         Constants: {SIZE_DRAG_THRESHOLD: 5, KEYCODELIST: {32: " "}},
@@ -81,16 +104,23 @@ const checkClicks = (code: string, mobile: boolean) => {
         isTableLikeView: (type: string) => type === "table" || type === "list",
         setAVCellAnchor: (_block: HTMLElement, cell: HTMLElement) => {
             selected.push(cell);
-            cell.classList.add("av__cell--select");
+            anchorCell = focusCell = cell;
+            harness.restore(_block);
             return true;
         },
         selectAVCellRange: (_block: HTMLElement, cell: HTMLElement) => {
             selected.push(cell);
-            cell.classList.add("av__cell--active");
+            focusCell = cell;
+            harness.restore(_block);
         },
-        addDragFill() { filled++; }, resetAVRowSelect() {}, updateHeader() {}, clearAVItemSelectionState() {},
+        addDragFill(cell: HTMLElement) {
+            if (!cell.querySelector(".av__drag-fill")) {
+                cell.insertAdjacentHTML("beforeend", '<div class="av__drag-fill"></div>');
+            }
+        },
+        resetAVRowSelect() {}, updateHeader() {}, clearAVItemSelectionState() {}, isAVReadonlyType: () => false,
         getAvBodyData: () => ({rows: [{id: "row"}]}),
-        getAVCellSelection: () => keyboardSelection, getAVItemSelection() {}, getAVSelectedItems: (): never[] => [],
+        getAVCellSelection: () => keyboardSelection || selectedRange(), getAVItemSelection() {}, getAVSelectedItems: (): never[] => [],
         openAVRangeInput: (_protyle: unknown, _block: HTMLElement, open: (cell: HTMLElement) => void) => {
             open(keyboardSelection.cells[0]);
             return true;
@@ -162,7 +192,22 @@ const checkClicks = (code: string, mobile: boolean) => {
         send("mouseup", end, 110);
         send("click", block);
         check(opened.length === previous && selected.includes(start) && selected.includes(end), `${view}: dragging selects without editing`);
-        check(filled > 0, `${view}: drag selection retains the fill handle`);
+        check(end.querySelector(".av__drag-fill"), `${view}: drag selection retains the fill handle`);
+        const nextRow = row.cloneNode(true) as HTMLElement;
+        nextRow.dataset.id = "next";
+        row.after(nextRow);
+        clear();
+        const bottomRight = nextRow.querySelector<HTMLElement>('[data-col-id="rich"]');
+        send("mousedown", bottomRight);
+        send("mousemove", start, 110);
+        send("mouseup", start, 110);
+        send("click", block);
+        const handles = block.querySelectorAll(".av__drag-fill");
+        check(handles.length === 1 && handles[0].parentElement === bottomRight,
+            `${view}: a selection dragged upward and left keeps a single fill handle at the bottom right`);
+        check(focusCell === start, `${view}: the selection focus stays at the pointer endpoint`);
+        nextRow.remove();
+        clear();
         send("mousedown", start);
         send("mouseup", start, 110);
         send("click", start, 110);
@@ -243,11 +288,13 @@ for (const mobile of [false, true]) {
         const code = ts.transpileModule(parse(`${declaration(selectionSource, "focusBlock")}
 ${declaration(rowSource, "selectRow")}
 ${declaration(keydownSource, "avKeydown")}
+${declaration(avSelectionSource, "restoreAVCellSelection")}
 ${avClick.getText(action).replace(/^export /, "")}
 class Harness {
     down = ${handlers.get("mousedown").getText(source)};
     click(event) { ${preventClick.getText(source)} return avClick(protyle, event); }
     selectRows = selectRow;
+    restore = restoreAVCellSelection;
     key(event) { return avKeydown(event, hasClosestBlock(getSelection().anchorNode), protyle, () => false); }
 }
 return new Harness();`, {MOBILE: mobile}, false, true), {compilerOptions: {target: ts.ScriptTarget.ES2022}}).outputText;

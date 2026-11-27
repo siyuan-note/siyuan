@@ -102,15 +102,19 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
                 await tree.update();
                 await waitForPaint();
                 const firstCount = panel.querySelectorAll("li").length;
-                row("Project").querySelector<HTMLElement>(".b3-list-item__toggle").click();
-                const collapsed = !row("Project/A");
+                const toggle = row("Project").querySelector<HTMLElement>(".b3-list-item__toggle");
+                let clickedInsidePanel = false;
+                shell.addEventListener("click", event => { clickedInsidePanel = panel.contains(event.target as Node); }, {once: true});
+                toggle.click();
+                const collapsed = !row("Project/A") && !toggle.querySelector(".b3-list-item__arrow--open");
                 input.value = "Project/B";
                 tree.filter();
                 const filtered = !!row("Project/B") && !panel.querySelector('[draggable="true"]');
                 input.value = "";
                 tree.filter();
                 const restored = !row("Project/A");
-                row("Project").querySelector<HTMLElement>(".b3-list-item__toggle").click();
+                toggle.click();
+                const expanded = !!row("Project/A") && !!toggle.querySelector(".b3-list-item__arrow--open");
                 panel.scrollTop = panel.scrollHeight;
                 await waitForPaint();
                 const last = !!row("Tag 0999");
@@ -127,13 +131,14 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
                             end: {x: destination.x + destination.width / 2, y: destination.y + destination.height / 4}};
                     },
                     indicator: () => panel.querySelector("li.dragover__top")?.getAttribute("data-label"),
+                    dragging: () => panel.classList.contains("tag-tree--dragging"),
                     async snapshot() {
                         await tree.update();
                         const order = Array.from(panel.querySelectorAll("li[data-label]")).slice(0, 3).map(item => item.getAttribute("data-label"));
                         window.siyuan.config.readonly = true;
                         await tree.update();
                         const readOnly = !panel.querySelector('[draggable="true"]');
-                        return {full, firstCount, collapsed, filtered, restored, last, lastCount, activated, requests, order,
+                        return {full, firstCount, collapsed, clickedInsidePanel, expanded, filtered, restored, last, lastCount, activated, requests, order,
                             readOnly, checkedSort, leadingCheck};
                     }
                 }});
@@ -160,12 +165,14 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
                             await driver.sendCommand("Input.dispatchMouseEvent", {type: "mouseMoved", ...end, button: "left", buttons: 1});
                         }
                         const indicator = await win.webContents.executeJavaScript("tagTest.indicator() || ''");
+                        const dragging = await win.webContents.executeJavaScript("tagTest.dragging()");
                         if (mobile) {
                             await driver.sendCommand("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []});
                         } else {
                             await driver.sendCommand("Input.dispatchMouseEvent", {type: "mouseReleased", ...end, button: "left", clickCount: 1});
                         }
-                        return indicator;
+                        const settled = !await win.webContents.executeJavaScript("tagTest.dragging()");
+                        return {indicator, dragging, settled};
                     };
                     const crossGroup = await drag("Project");
                     const sibling = await drag("Project/A");
@@ -175,14 +182,15 @@ test("tag panels virtualize the complete tree and reorder only siblings", {timeo
             });
             const report = JSON.parse(result.trim());
             assert.equal(report.full, true);
-            assert.equal(report.collapsed && report.filtered && report.restored, true);
+            assert.equal(report.collapsed && report.clickedInsidePanel && report.expanded, true);
+            assert.equal(report.filtered && report.restored, true);
             assert.equal(report.last, true);
             assert.ok(report.firstCount < 35 && report.lastCount < 35);
             assert.deepEqual(report.activated, ["Project/A"]);
             assert.deepEqual(report.requests, [{label: "Project/B", target: "Project/A", position: "before"}]);
             assert.deepEqual(report.order, ["Project", "Project/B", "Project/A"]);
-            assert.equal(report.crossGroup, "");
-            assert.equal(report.sibling, "Project/A");
+            assert.deepEqual(report.crossGroup, {indicator: "", dragging: true, settled: true});
+            assert.deepEqual(report.sibling, {indicator: "Project/A", dragging: true, settled: true});
             assert.equal(report.readOnly, true);
             assert.deepEqual(report.checkedSort, ["Custom Sorting"]);
             assert.equal(report.leadingCheck, false);

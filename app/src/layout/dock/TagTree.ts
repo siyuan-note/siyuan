@@ -259,15 +259,15 @@ export class TagTree {
             '<span class="b3-list-item__action" data-tag-menu><svg><use xlink:href="#iconMore"></use></svg></span>';
         const count = item.count ? '<span class="counter">' + item.count + "</span>" : "";
         const text = '<span class="b3-list-item__text ariaLabel" data-position="parentE">' + escapeHtml(item.name) + "</span>";
-        const arrowClass = "b3-list-item__arrow" + (open ? " b3-list-item__arrow--open" : "");
         const html = '<span class="b3-list-item__toggle' + (expandable ? " b3-list-item__toggle--hl" : " fn__hidden") + '">' +
-            '<svg class="' + arrowClass + '"><use xlink:href="#iconRight"></use></svg></span>' +
+            '<svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>' +
             '<svg class="b3-list-item__graphic"><use xlink:href="#iconTag"></use></svg>' +
             text + getTreeItemTailHTML(count, menu, mobile);
         if (this.markup.get(node) !== html) {
             node.innerHTML = html;
             this.markup.set(node, html);
         }
+        node.querySelector(".b3-list-item__arrow").classList.toggle("b3-list-item__arrow--open", open);
         node.style.setProperty("--file-tree-depth", String(item.depth));
         node.classList.toggle("b3-list-item--focus", this.selected === label);
         node.classList.toggle("dragover__top", this.drop?.label === label && this.drop.position === "before");
@@ -342,6 +342,7 @@ export class TagTree {
             return;
         }
         this.drag = {source: this.byLabel.get(node.dataset.label), x: event.clientX, y: event.clientY};
+        this.options.element.classList.add("tag-tree--dragging");
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("application/x-siyuan-tag", node.dataset.label);
         window.getSelection()?.removeAllRanges();
@@ -448,6 +449,7 @@ export class TagTree {
         }
         this.drag.ghost?.remove();
         this.drag = undefined;
+        this.options.element.classList.remove("tag-tree--dragging");
         this.drop = undefined;
         cancelAnimationFrame(this.dragFrame);
         this.dragFrame = 0;

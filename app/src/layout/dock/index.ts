@@ -686,8 +686,8 @@ export class Dock {
 
     public hideDock(reset = false, preferredSize?: number) {
         this.clearDockHoverTimeout();
-        // 原生拖拽会触发指针离开事件，文档树作为拖拽来源时仍需保持可见以完成放置。
-        if (!reset && this.layout.element.querySelector(".sy__file--disablehover")) {
+        // 原生拖拽会触发指针离开事件，拖拽来源所在面板需保持可见以完成放置。
+        if (!reset && this.layout.element.querySelector(".sy__file--disablehover, .tag-tree--dragging")) {
             return;
         }
         const barVisible = this.position !== "Bottom" && this.elements[0].parentElement.classList.contains("dock--float");

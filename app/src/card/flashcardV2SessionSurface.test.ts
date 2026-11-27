@@ -104,8 +104,8 @@ test("review exposes flag and skip in the toolbar and keeps rating intervals wit
         window: {siyuan: {languages: {flashcardFlag: "Flag", skip: "Skip"}}},
     }) as string;
     const toolbar = html.slice(html.indexOf("data-flashcard-toolbar"), html.indexOf("data-flashcard-outline"));
-    assert.match(toolbar, /<button data-type="flag"[^>]*aria-label="Flag" aria-haspopup="menu"/);
-    assert.match(toolbar, /<button data-type="skip"[^>]*aria-label="Skip"/);
+    assert.match(toolbar, /<button data-type="flag"[^>]*block__icon--show[^>]*aria-label="Flag" aria-haspopup="menu"/);
+    assert.match(toolbar, /<button data-type="skip"[^>]*block__icon--show[^>]*aria-label="Skip"/);
     for (const rating of ["again", "hard", "good", "easy"]) {
         assert.match(html, new RegExp(`<button data-rating="${rating}"[^\\n]*data-rating-interval[^\\n]*</button>`));
     }

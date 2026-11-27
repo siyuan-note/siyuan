@@ -6,7 +6,7 @@
 		"id": "20261122113000-m3widce",
 		"title": "Поделиться документом в сообществе",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-m5fz37b",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-fgst8ir",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -99,7 +99,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-w80kj3n",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -107,7 +107,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-h9rg3en",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -121,7 +121,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ -> "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",

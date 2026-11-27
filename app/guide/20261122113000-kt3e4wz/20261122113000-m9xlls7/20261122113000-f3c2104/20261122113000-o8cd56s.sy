@@ -6,7 +6,7 @@
 		"id": "20261122113000-o8cd56s",
 		"title": "Фильтр по типу",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126172446"
 	},
 	"Children": [
 		{
@@ -67,7 +67,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-7olpox5",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -91,7 +91,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-oq4b4yk",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -103,7 +103,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-ey7200j",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -111,7 +111,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-r9lja74",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -125,23 +125,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ Блок документа (только в названии документа"
+									"Data": "​ Блок документа (поиск только по названию, "
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Поиск"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", не"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "Поиск"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "включая содержимое документа)"
+									"Data": "без содержимого документа)"
 								}
 							]
 						}
@@ -156,7 +144,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-u6fw6vb",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -164,7 +152,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-t7jqf8j",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -178,23 +166,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ Блок заголовка (только в названии заголовка"
+									"Data": "​ Блок заголовка (поиск только по тексту заголовка, "
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Поиск"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", не"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "Поиск"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "блоки под заголовком)"
+									"Data": "без блоков под ним)"
 								}
 							]
 						}
@@ -209,7 +185,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-6np1hdu",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -217,7 +193,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-614lu7a",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -235,35 +211,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Список"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "блок (включая нумерованные"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "Список"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "блоки, "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "Маркированный список"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "блоки и списки "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "Список"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "задач)"
+									"Data": "Блок списка (включая нумерованные и маркированные списки, а также списки задач)"
 								}
 							]
 						}
@@ -278,7 +226,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-gpfih7b",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -286,7 +234,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-sqwu2ct",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -304,11 +252,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Элемент списка"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "Блок "
+									"Data": "Блок элемента списка"
 								}
 							]
 						}
@@ -549,7 +493,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-9qdedya",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -557,7 +501,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-61b4ic5",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -575,11 +519,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Таблица"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "Блок "
+									"Data": "Блок таблицы"
 								}
 							]
 						}

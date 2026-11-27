@@ -7,7 +7,7 @@
 		"id": "20261122113000-pq1n4xn",
 		"title": "Ресурсы сообщества",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -673,7 +673,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-f9ubmac",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -688,7 +688,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-eg33kl0",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -730,7 +730,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-wx2udqx",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -738,14 +738,14 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-3hawvcj",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://ld246.com/article/1658109483457",
-									"TextMarkTextContent": "Мой рабочий процесс с Daily Note"
+									"TextMarkTextContent": "Как я работаю с Ежедневными Заметками"
 								}
 							]
 						}

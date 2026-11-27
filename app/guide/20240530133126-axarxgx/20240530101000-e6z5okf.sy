@@ -637,12 +637,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260317195514-6utuus1",
-				"updated": "20260317195514"
+				"updated": "20261127094542"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "上記の手順が完了すると、SiYuanは45秒ごとに通知を送信し、バックグラウンドでの動作を維持できるようになります。"
+					"Data": "Android 端末でリソースファイルのダウンロードが "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "必要時にダウンロード"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " に設定されている場合は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "すべてダウンロード"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " に切り替え、ファイルのダウンロードが完了するまで待ちます。端末にファイルが保存されたら、SiYuan を完全に終了してから開き直してください。上記の手順が完了すると、SiYuanは45秒ごとに通知を送信し、バックグラウンドでの動作を維持できるようになります。"
 				}
 			]
 		},

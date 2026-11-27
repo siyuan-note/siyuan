@@ -6,7 +6,7 @@
 		"id": "20261122113000-grd1b2k",
 		"title": "Игнорирование индексации",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-m1v8jab",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -82,7 +82,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20261122113000-y350zvm",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -94,7 +94,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "20261122113000-tymtpbe/20261122113000-u3pmciy.sy\n20210808180117-6v0mkxr/**/*\n"
+					"Data": "20261122113000-tymtpbe/20261122113000-u3pmciy.sy\n20261122113000-tymtpbe/**/*\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

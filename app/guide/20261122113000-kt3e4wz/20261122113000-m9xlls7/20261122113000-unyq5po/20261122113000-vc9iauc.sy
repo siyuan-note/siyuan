@@ -6,7 +6,7 @@
 		"id": "20261122113000-vc9iauc",
 		"title": "Рабочее пространство",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126172446"
 	},
 	"Children": [
 		{
@@ -125,7 +125,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-fg5pmzm",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -140,7 +140,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-v0tw6xi",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -152,7 +152,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-tdx4owp",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -174,7 +174,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-7pr0ali",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -221,10 +221,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "--port=12345"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ""
 								}
 							]
 						}

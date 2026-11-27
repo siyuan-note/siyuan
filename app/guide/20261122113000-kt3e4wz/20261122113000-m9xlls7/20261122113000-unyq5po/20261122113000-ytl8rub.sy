@@ -6,7 +6,7 @@
 		"id": "20261122113000-ytl8rub",
 		"title": "Интерфейс командной строки",
 		"type": "doc",
-		"updated": "20261122171459"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -423,7 +423,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-3vvw3b2",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -798,7 +798,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20261122113000-3jseb9s",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -810,7 +810,7 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20261122113000-qrmgvhp",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -824,7 +824,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", чтобы избежать работы не с теми данными."
+							"Data": ", чтобы избежать работы не с теми данными. "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -842,7 +842,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " выбирает рабочее пространство по "
+							"Data": " выбирает рабочее пространство согласно разделу "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -875,7 +875,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "。"
+							"Data": ". Для пробного запуска изменений используйте "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -884,7 +884,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " для пробного запуска изменений (успешный пробный запуск не гарантирует прохождение всех проверок при реальном выполнении)."
+							"Data": " (успешный пробный запуск не гарантирует прохождение всех проверок при реальном выполнении)."
 						}
 					]
 				}
@@ -1125,7 +1125,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-2db61gt",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1140,7 +1140,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-wtuckjp",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1152,7 +1152,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-a21rvwb",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -1160,7 +1160,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-kxjsv9y",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -1183,7 +1183,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​、"
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1316,7 +1316,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-5ueo1w1",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1331,7 +1331,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-t3xztti",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1345,7 +1345,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-lv3htpw",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1364,7 +1364,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " поддерживает вывод JSON с помощью "
+					"Data": " поддерживают вывод JSON с помощью "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1448,7 +1448,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-9f7ucm1",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1462,12 +1462,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-17luoe3",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Создаётся через "
+					"Data": "С помощью "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1476,7 +1476,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ + "
+					"Data": "​ и "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1485,7 +1485,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ массово записывать записи в ежедневник; с помощью "
+					"Data": "​ можно массово добавлять записи в дневник; с помощью "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1494,7 +1494,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ массово задавать иконки и теги документов."
+					"Data": "​ — массово задавать значки и теги документов."
 				}
 			]
 		},
@@ -1542,7 +1542,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-xwqeifp",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1556,7 +1556,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-x3krk3p",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1574,7 +1574,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " для создания контрольной точки снимка."
+					"Data": " для создания снимка. "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1601,7 +1601,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1610,7 +1610,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -4597,7 +4597,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-a64p4yg",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -4611,12 +4611,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-pph4sfs",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Поддерживает фильтрацию по блокноту, пути и типу блока, а также различные методы поиска и сортировки."
+					"Data": "Поддерживает фильтрацию по блокноту, пути и типу блока, а также различные методы поиска и сортировки. "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -5691,7 +5691,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-f9dkdik",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5705,7 +5705,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-rtlxlrm",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -5719,7 +5719,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " задаёт выходной файл."
+					"Data": " задаёт выходной файл. "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -5748,7 +5748,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -6693,7 +6693,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-dsqjwms",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6727,7 +6727,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20261122113000-bistpma",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -6744,7 +6744,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Command"
+											"Data": "Команда"
 										}
 									]
 								},
@@ -6754,7 +6754,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Arguments"
+											"Data": "Параметр"
 										}
 									]
 								},
@@ -6764,7 +6764,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Description"
+											"Data": "Описание"
 										}
 									]
 								}
@@ -7056,7 +7056,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-6j7yg7c",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -7460,7 +7460,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-8n9hr71",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -7474,7 +7474,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​："
+					"Data": "​:"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -7510,7 +7510,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-nh2svs2",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -7524,7 +7524,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​："
+					"Data": "​:"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -7606,12 +7606,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-9p0w3bf",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "снимков данных"
+					"Data": "Снимки данных"
 				}
 			]
 		},
@@ -8400,7 +8400,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-j0agz3s",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -8684,7 +8684,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-6co0xja",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -8698,7 +8698,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​："
+					"Data": "​:"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -9368,12 +9368,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-l44j86r",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ресурсов"
+					"Data": "Ресурсы"
 				}
 			]
 		},

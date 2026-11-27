@@ -6,7 +6,7 @@
 		"id": "20261122113000-vh19a42",
 		"title": "Служба MCP",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126150544"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-bgly84j",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-ep7wcg6",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -140,7 +140,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -227,7 +227,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-aem0jgq",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -269,7 +269,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-jcx7b37",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -296,7 +296,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},

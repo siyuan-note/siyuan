@@ -6,7 +6,7 @@
 		"id": "20261122113000-369mcst",
 		"title": "Цитирование блоков контента",
 		"type": "doc",
-		"updated": "20261122171459"
+		"updated": "20261126195512"
 	},
 	"Children": [
 		{
@@ -274,7 +274,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-1ttga9q",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -388,7 +388,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-s4vm82x",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -400,7 +400,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-5i2joug",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -408,7 +408,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-b23c0cb",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -432,7 +432,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Обратные ссылки"
+									"Data": "обратных ссылок"
 								},
 								{
 									"Type": "NodeText",
@@ -451,7 +451,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-f7ofg9q",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -459,7 +459,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-abd00jz",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -471,19 +471,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": отображение в виде текстового списка для текущего "
+									"Data": ": обратные ссылки на текущий "
 								},
 								{
 									"Type": "NodeText",
-									"Data": "блоками контента"
+									"Data": "блок контента"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "Обратные ссылки"
+									"Data": " в виде текстового списка"
 								}
 							]
 						}
@@ -567,12 +563,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-pvaomg1",
-				"updated": "20261122171459"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Текст якоря"
+					"Data": "Текст ссылки на блок"
 				}
 			]
 		},
@@ -581,12 +577,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-dziavco",
-				"updated": "20261122113000"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Текст якоря — это текст, отображаемый при рендеринге ссылки; он бывает статическим и динамическим:"
+					"Data": "У ссылки на блок может быть статический или динамический текст:"
 				}
 			]
 		},
@@ -596,7 +592,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-xchweed",
-				"updated": "20261122113000"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -608,7 +604,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-j6w5p3p",
-						"updated": "20261122113000"
+						"updated": "20261126195512"
 					},
 					"Children": [
 						{
@@ -616,12 +612,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-u7fuj9r",
-								"updated": "20261122113000"
+								"updated": "20261126195512"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Статический текст якоря: не меняется при изменении исходного блока"
+									"Data": "Статический текст ссылки: не меняется при изменении исходного блока"
 								}
 							]
 						}
@@ -636,7 +632,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-a9gy403",
-						"updated": "20261122113000"
+						"updated": "20261126195512"
 					},
 					"Children": [
 						{
@@ -644,12 +640,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-l7jhm5i",
-								"updated": "20261122113000"
+								"updated": "20261127094542"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Динамический текст якоря: обновляется вместе с исходным блоком; максимальную длину можно задать в "
+									"Data": "Динамический текст ссылки: обновляется вместе с исходным блоком; максимальную длину можно задать в "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -672,7 +668,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Максимальная длина динамического текста якоря ссылки блока"
+									"TextMarkTextContent": "Двусторонние ссылки"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Максимальная длина динамического текста ссылки на блок"
 								},
 								{
 									"Type": "NodeText",
@@ -698,12 +703,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-eqyu3lx",
-				"updated": "20261122113000"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Изменить текст якоря можно следующими способами:"
+					"Data": "Изменить текст ссылки можно следующими способами:"
 				}
 			]
 		},
@@ -713,7 +718,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-po061o9",
-				"updated": "20261122113000"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -725,7 +730,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-7rn788x",
-						"updated": "20261122113000"
+						"updated": "20261126195512"
 					},
 					"Children": [
 						{
@@ -733,7 +738,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-bfyxm4l",
-								"updated": "20261122113000"
+								"updated": "20261127094542"
 							},
 							"Children": [
 								{
@@ -742,15 +747,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Ссылки"
+									"Data": "ссылки"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " и измените текст — это сделает текст якоря "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "Ссылки"
+									"Data": " и измените текст — это сделает текст ссылки "
 								},
 								{
 									"Type": "NodeText",
@@ -769,7 +770,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-ar7yafp",
-						"updated": "20261122113000"
+						"updated": "20261126195512"
 					},
 					"Children": [
 						{
@@ -777,7 +778,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-anlbxd6",
-								"updated": "20261122113000"
+								"updated": "20261126195512"
 							},
 							"Children": [
 								{
@@ -786,11 +787,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Ссылки"
+									"Data": "ссылки"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " и измените текст якоря в контекстном меню — он также станет статическим"
+									"Data": " и измените текст ссылки в контекстном меню — он также станет статическим"
 								}
 							]
 						}
@@ -805,7 +806,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-yzidehm",
-						"updated": "20261122113000"
+						"updated": "20261126195512"
 					},
 					"Children": [
 						{
@@ -813,7 +814,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-ectfade",
-								"updated": "20261122113000"
+								"updated": "20261126195512"
 							},
 							"Children": [
 								{
@@ -822,11 +823,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Ссылки"
+									"Data": "ссылки"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " и очистите текст якоря в меню — тогда будет использоваться динамический текст якоря"
+									"Data": " и очистите текст ссылки в меню — тогда будет использоваться динамический текст ссылки"
 								}
 							]
 						}
@@ -839,12 +840,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-ypti56w",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "В "
+					"Data": "После ввода "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -853,7 +854,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ В списке результатов поиска:"
+					"Data": "​ в списке результатов поиска:"
 				}
 			]
 		},
@@ -863,7 +864,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-gw83gdp",
-				"updated": "20261122171459"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -875,7 +876,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-bkwqlwz",
-						"updated": "20261122171459"
+						"updated": "20261126195512"
 					},
 					"Children": [
 						{
@@ -883,7 +884,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-zlueogl",
-								"updated": "20261122171459"
+								"updated": "20261126195512"
 							},
 							"Children": [
 								{
@@ -906,7 +907,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ использует динамический текст якоря"
+									"Data": "​ использует динамический текст ссылки"
 								}
 							]
 						}
@@ -921,7 +922,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-fr8b4qy",
-						"updated": "20261122171459"
+						"updated": "20261126195512"
 					},
 					"Children": [
 						{
@@ -929,12 +930,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-dmmguek",
-								"updated": "20261122171459"
+								"updated": "20261126195512"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Удерживайте "
+									"Data": "Нажатие "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -970,7 +971,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ использует статический текст якоря"
+									"Data": "​ использует статический текст ссылки"
 								}
 							]
 						}
@@ -984,7 +985,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-rluut83",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -998,7 +999,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-jrro521",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1021,6 +1022,15 @@
 				},
 				{
 					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Двусторонние ссылки"
+				},
+				{
+					"Type": "NodeText",
 					"Data": " включите "
 				},
 				{
@@ -1040,7 +1050,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-ci5f100",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -1052,7 +1062,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-e9rdhlo",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -1060,7 +1070,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-pwth63x",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -1074,7 +1084,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ Поиск среди "
+									"Data": "​​ поиск выполняется среди "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1082,10 +1092,6 @@
 									"TextMarkBlockRefID": "20261122113000-heqg3qd",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "всех типов блоков"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " для поиска"
 								}
 							]
 						}
@@ -1100,7 +1106,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-p4o1rnh",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -1108,7 +1114,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-gliyun8",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -1122,7 +1128,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ Поиск только среди "
+									"Data": "​ поиск выполняется только среди "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1143,7 +1149,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-ovrjzx4",
-				"updated": "20261122113000"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -1157,7 +1163,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-6gxpiep",
-				"updated": "20261122113000"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -1176,11 +1182,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "((id \"текст якоря\"))"
+					"TextMarkTextContent": "((id \"текст ссылки\"))"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -1190,7 +1196,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-r32ynnb",
-				"updated": "20261122113000"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -1202,7 +1208,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-7l07kxe",
-						"updated": "20261122113000"
+						"updated": "20261126195512"
 					},
 					"Children": [
 						{
@@ -1210,12 +1216,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-uk15ba4",
-								"updated": "20261122113000"
+								"updated": "20261126195512"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "При использовании "
+									"Data": "В "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1224,7 +1230,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " оборачивает статический текст якоря"
+									"Data": " заключают статический текст ссылки"
 								}
 							]
 						}
@@ -1239,7 +1245,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-mypo3qd",
-						"updated": "20261122113000"
+						"updated": "20261126195512"
 					},
 					"Children": [
 						{
@@ -1247,12 +1253,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-3ngsupi",
-								"updated": "20261122113000"
+								"updated": "20261126195512"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "При использовании "
+									"Data": "В "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1261,7 +1267,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " оборачивает динамический текст якоря (перезаписывается при перестроении индекса)"
+									"Data": " заключают динамический текст ссылки (он перезаписывается при перестроении индекса)"
 								}
 							]
 						}
@@ -1274,16 +1280,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-omi00ft",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Прямое использование синтаксиса в основном применяется для создания через внешние инструменты или API"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "Ссылки"
+					"Data": "Этот синтаксис применяется в основном для создания ссылок через внешние инструменты или API"
 				},
 				{
 					"Type": "NodeText",
@@ -1296,11 +1298,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ для вызова"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "Ссылки"
+					"Data": "​ для вызова "
 				},
 				{
 					"Type": "NodeText",
@@ -1308,11 +1306,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "Ссылки"
+					"Data": " ссылок"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		}

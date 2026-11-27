@@ -6,7 +6,7 @@
 		"id": "20261122113000-asl0p10",
 		"title": "Встроенные блоки контента",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126172446"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-6z5d8u6",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261122113000-tcd7jmw",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -58,7 +58,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-906w1go",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -101,7 +101,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -126,7 +126,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-adkrj1z",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -141,7 +141,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-at5ulvy",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -153,7 +153,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-izjjocl",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -161,29 +161,25 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-lulrgzo",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Запрос блоков типа "
+									"Data": "Запрос элементов списка, содержащих в тексте "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "блоками контента"
+									"TextMarkTextContent": "блок"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, содержащих в тексте "
+									"Data": "​"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Элемент списка"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "："
+									"Data": ":"
 								}
 							]
 						},
@@ -225,7 +221,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-bhjb4mf",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -233,17 +229,17 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-teuqwdo",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Запрос блоков заголовков, содержащих одновременно "
+									"Data": "Запрос абзацев, в которых встречаются подстроки "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "блоками контента"
+									"TextMarkTextContent": "блок"
 								},
 								{
 									"Type": "NodeText",
@@ -252,19 +248,15 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "Ссылки"
+									"TextMarkTextContent": "ссылка"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ "
+									"Data": "​"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "Блок абзаца"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "："
+									"Data": ":"
 								}
 							]
 						},
@@ -274,7 +266,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20261122113000-1g4z3ke",
-								"updated": "20261122113000"
+								"updated": "20261126170250"
 							},
 							"Children": [
 								{
@@ -287,7 +279,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%блок%' AND content LIKE '%ссылк%' AND type = 'p' }}\n"
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%блок%' AND content LIKE '%ссылка%' AND type = 'p' }}\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -306,7 +298,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-hx68geg",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -314,7 +306,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-eltpdma",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -324,7 +316,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "блоками контента"
+									"TextMarkTextContent": "блок"
 								},
 								{
 									"Type": "NodeText",
@@ -333,7 +325,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "Встраивание"
+									"TextMarkTextContent": "встраив"
 								},
 								{
 									"Type": "NodeText",
@@ -345,7 +337,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " записей:"
+									"Data": " записи:"
 								}
 							]
 						},
@@ -441,7 +433,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-q9kb1wy",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -455,12 +447,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-e0kuiey",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Запрос блоков, содержащих тег "
+					"Data": "Запрос абзацев, содержащих тег "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -478,15 +470,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, содержащих в тексте "
+					"Data": "​"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "Блок абзаца"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "："
+					"Data": ":"
 				}
 			]
 		},
@@ -522,7 +510,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-kypgtld",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -536,7 +524,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-jmstmlv",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -545,7 +533,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "блоками контента"
+					"Data": "блоков контента"
 				},
 				{
 					"Type": "NodeText",
@@ -585,7 +573,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-fjwhmip",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -599,7 +587,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-j2kv1jk",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -608,15 +596,11 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "Элемент списка"
+					"Data": ", "
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "здесь"
+					"Data": "здесь "
 				},
 				{
 					"Type": "NodeText",
@@ -673,7 +657,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261122113000-0d2tc9w",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -720,12 +704,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-mss0iq3",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Выберите триггер "
+					"Data": "Выберите "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1132,7 +1116,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-ke9icek",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1146,7 +1130,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-45lxz6c",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1160,7 +1144,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "（"
+					"Data": " ("
 				},
 				{
 					"Type": "NodeTextMark",

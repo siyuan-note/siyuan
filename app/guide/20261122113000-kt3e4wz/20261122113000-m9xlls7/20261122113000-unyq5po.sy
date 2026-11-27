@@ -7,7 +7,7 @@
 		"id": "20261122113000-unyq5po",
 		"title": "Общие операции",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126195512"
 	},
 	"Children": [
 		{
@@ -168,7 +168,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-auzk35k",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -176,7 +176,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20261122113000-maoruzg",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "плагинами"
+					"TextMarkTextContent": "Плагины"
 				}
 			]
 		},
@@ -185,7 +185,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-eqi2dq3",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -193,7 +193,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20261122113000-mg7cuep",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "ресурсов"
+					"TextMarkTextContent": "Ресурсы"
 				}
 			]
 		},
@@ -287,7 +287,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-xyeh4g2",
-				"updated": "20261122113000"
+				"updated": "20261126195512"
 			},
 			"Children": [
 				{
@@ -295,7 +295,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20261122113000-l7t5898",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "Флеш-карты"
+					"TextMarkTextContent": "Флеш-карточки"
 				}
 			]
 		},
@@ -321,7 +321,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-nd8nlpk",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -329,7 +329,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20261122113000-448rhte",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "Горячая клавиша"
+					"TextMarkTextContent": "Горячие клавиши"
 				}
 			]
 		},

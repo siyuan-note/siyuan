@@ -6,7 +6,7 @@
 		"id": "20261122113000-36a05no",
 		"title": "История данных",
 		"type": "doc",
-		"updated": "20261122113000"
+		"updated": "20261126172446"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-5omrosc",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -128,7 +128,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-1y2fg9m",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -144,7 +144,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -154,7 +154,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-lz910jw",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -169,7 +169,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-hylmrfa",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-4n5gewk",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -196,7 +196,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-gron3r9",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -204,7 +204,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-oukhyml",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -241,7 +241,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Интервал создания истории"
+									"TextMarkTextContent": "Интервал генерации истории"
 								},
 								{
 									"Type": "NodeText",
@@ -520,7 +520,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-aby2ab7",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -535,7 +535,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20261122113000-2hzywdw",
-				"updated": "20261122113000"
+				"updated": "20261126172446"
 			},
 			"Children": [
 				{
@@ -620,7 +620,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-1tymfnh",
-						"updated": "20261122113000"
+						"updated": "20261126172446"
 					},
 					"Children": [
 						{
@@ -628,7 +628,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-435lmnn",
-								"updated": "20261122113000"
+								"updated": "20261126172446"
 							},
 							"Children": [
 								{
@@ -639,10 +639,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "Рабочее_пространство/history/"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ""
 								}
 							]
 						}
@@ -670,7 +666,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-6hdj7yl",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -684,7 +680,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-51gizzo",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -700,7 +696,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "."
 				}
 			]
 		},
@@ -1158,12 +1154,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261122113000-n08nhqf",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "снимков данных"
+					"Data": "Снимки данных"
 				}
 			]
 		},
@@ -1595,7 +1591,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-5i1tbmv",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1609,7 +1605,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261122113000-0g0hxuk",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1641,7 +1637,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": ", "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1650,7 +1646,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". Переключатель "
+					"Data": ". Кнопки "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1664,11 +1660,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Пометить снимок"
+					"TextMarkTextContent": "Помеченные снимки"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " вверху используется для смены категории снимков. В списке отображаются время создания, примечание и метка снимка для удобного сравнения."
+					"Data": " вверху служат для смены категории снимков. В списке отображаются время создания, примечание и метка снимка для удобного сравнения."
 				}
 			]
 		},
@@ -1706,7 +1702,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-5x0yqrx",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1723,7 +1719,7 @@
 			},
 			"Properties": {
 				"id": "20261122113000-11jfh47",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
@@ -1737,7 +1733,7 @@
 					},
 					"Properties": {
 						"id": "20261122113000-e56hvud",
-						"updated": "20261122113000"
+						"updated": "20261126150544"
 					},
 					"Children": [
 						{
@@ -1745,7 +1741,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-h1dsgil",
-								"updated": "20261122113000"
+								"updated": "20261126150544"
 							},
 							"Children": [
 								{
@@ -1755,7 +1751,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Пометить снимок"
+									"TextMarkTextContent": "Помеченные снимки"
 								},
 								{
 									"Type": "NodeText",
@@ -1931,12 +1927,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-h9jdyuc",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "откат снимка данных"
+					"Data": "Откат снимка данных"
 				}
 			]
 		},
@@ -2329,12 +2325,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20261122113000-0bkxtqb",
-				"updated": "20261122113000"
+				"updated": "20261126150544"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "игнорируемые файлы"
+					"Data": "Игнорируемые файлы"
 				}
 			]
 		},

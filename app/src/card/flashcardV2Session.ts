@@ -526,12 +526,12 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
     <span data-flashcard-count class="fn__flex-shrink ft__on-surface"></span>
     <span data-flashcard-path class="card__v2-session-path ft__on-surface"></span>
     <button data-type="flag" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.flashcardFlag}" aria-haspopup="menu" disabled><svg><use xlink:href="#iconBookmark"></use></svg></button>
-    <button data-type="toggle-outline" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.outline}" aria-expanded="false"><svg><use xlink:href="#iconOutline"></use></svg></button>
-    <button data-type="read-aloud" class="block__icon ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
-    <button data-type="edit-source" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
+    <button data-type="toggle-outline" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.outline}" aria-expanded="false"><svg><use xlink:href="#iconOutline"></use></svg></button>
+    <button data-type="read-aloud" class="block__icon block__icon--show ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
+    <button data-type="edit-source" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
     <button data-type="skip" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.skip}" disabled><svg><use xlink:href="#iconForward"></use></svg></button>
-    <button data-type="more" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
-    <button data-type="undo-review" class="block__icon ariaLabel fn__none" aria-label="${window.siyuan.languages.undo}"><svg><use xlink:href="#iconUndo"></use></svg></button>
+    <button data-type="more" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
+    <button data-type="undo-review" class="block__icon block__icon--show ariaLabel fn__none" aria-label="${window.siyuan.languages.undo}"><svg><use xlink:href="#iconUndo"></use></svg></button>
 </div>
 <div class="fn__flex fn__flex-1 card__v2-session-body">
 <nav data-flashcard-outline class="card__v2-session-outline fn__none" aria-label="${window.siyuan.languages.outline}"></nav>

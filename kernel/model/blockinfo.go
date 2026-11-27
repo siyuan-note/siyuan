@@ -5,6 +5,7 @@
 package model
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -61,7 +62,18 @@ func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 		return
 	}
 	ret = getDocInfoByTree(blockID, tree)
+	if !IsEncryptedBox(tree.Box) {
+		if ids := FlashcardSourceBlockIDs(context.Background(), []string{ret.RootID}); ids != nil {
+			setDocFlashcardSourceMarker(ret, len(ids) > 0)
+		}
+	}
 	return
+}
+
+func setDocFlashcardSourceMarker(info *BlockInfo, active bool) {
+	if value := flashcardSourceMarker(active, info.IAL[NodeAttrRiffDecks] != ""); value != "" {
+		info.IAL[nodeAttrFlashcardSource] = value
+	}
 }
 
 func getDocInfoByTree(blockID string, tree *parse.Tree) (ret *BlockInfo) {

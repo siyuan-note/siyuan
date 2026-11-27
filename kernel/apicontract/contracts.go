@@ -82,6 +82,8 @@ type ResponseOptions struct {
 
 var definitions []Definition
 
+// CreateQuickFlashcardSources toggles or creates quick flashcards. When available, markedBlockIDs lists the requested
+// blocks with an active flashcard source after the operation, including any active sources outside the quick toggle.
 var CreateQuickFlashcardSources = define[CreateQuickFlashcardSourcesRequest, QuickFlashcardSourcesData](
 	"createQuickFlashcardSources", "/api/flashcard/createQuickSources", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
 

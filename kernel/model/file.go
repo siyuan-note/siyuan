@@ -5,6 +5,7 @@
 package model
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -1063,6 +1064,33 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 
 	luteEngine.RenderOptions.NodeIndexStart = index
 	timing.Stage("render")
+	if publishRefAccess == nil && !IsEncryptedBox(boxID) {
+		blocks, blockIDs := map[string]*ast.Node{}, make([]string, 0, blockCount)
+		if docInfo != nil {
+			blockIDs = append(blockIDs, docInfo.RootID)
+		}
+		ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && n.IsBlock() && n.ID != "" {
+				blocks[n.ID] = n
+				blockIDs = append(blockIDs, n.ID)
+			}
+			return ast.WalkContinue
+		})
+		if ids := FlashcardSourceBlockIDs(context.Background(), blockIDs); ids != nil {
+			active := make(map[string]bool, len(ids))
+			for _, id := range ids {
+				active[id] = true
+			}
+			for id, block := range blocks {
+				if value := flashcardSourceMarker(active[id], block.IALAttr(NodeAttrRiffDecks) != ""); value != "" {
+					block.SetIALAttr(nodeAttrFlashcardSource, value)
+				}
+			}
+			if docInfo != nil {
+				setDocFlashcardSourceMarker(docInfo, active[docInfo.RootID])
+			}
+		}
+	}
 	if publishRefAccess != nil {
 		clearPublishDOMMemos(subTree.Root)
 	}

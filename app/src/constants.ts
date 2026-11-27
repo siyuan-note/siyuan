@@ -93,6 +93,7 @@ export abstract class Constants {
     // custom
     public static readonly CUSTOM_REMINDER_WECHAT: string = "custom-reminder-wechat";
     public static readonly CUSTOM_RIFF_DECKS: string = "custom-riff-decks";
+    public static readonly DATA_FLASHCARD_SOURCE = "data-flashcard-source";
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
     public static readonly CUSTOM_SY_AI_SOURCE: string = "custom-sy-ai-source";
     public static readonly CUSTOM_SY_EMBED_BREADCRUMB_PARENT_PATH: string = "custom-sy-embed-breadcrumb-parent-path";

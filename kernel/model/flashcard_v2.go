@@ -30,6 +30,39 @@ var (
 )
 
 const flashcardV2SnapshotBatchDelta = 256
+const nodeAttrFlashcardSource = "data-flashcard-source"
+
+func FlashcardSourceBlockIDs(ctx context.Context, blockIDs []string) []string {
+	flashcardV2StoreMu.Lock()
+	store := flashcardV2Store
+	flashcardV2StoreMu.Unlock()
+	if store == nil {
+		return nil
+	}
+	status, err := store.LegacyMigrationStatus(ctx)
+	if err == nil && status.State != flashcardv2.MigrationStateActive {
+		return nil
+	}
+	if err == nil {
+		var ids []string
+		ids, err = store.Projection().ActiveSourceBlockIDs(ctx, blockIDs)
+		if err == nil {
+			return ids
+		}
+	}
+	logging.LogWarnf("query flashcard source markers failed: %s", err)
+	return nil
+}
+
+func flashcardSourceMarker(active, legacy bool) string {
+	if active {
+		return "true"
+	}
+	if legacy {
+		return "false"
+	}
+	return ""
+}
 
 // LegacyFlashcardMigrationPreview 是不会把候选权威记录全部复制到 HTTP 响应中的迁移摘要。
 type LegacyFlashcardMigrationPreview struct {

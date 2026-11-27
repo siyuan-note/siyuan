@@ -1469,6 +1469,7 @@ func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess PublishAccess,
 	if info == nil {
 		return
 	}
+	delete(ret.IAL, nodeAttrFlashcardSource)
 
 	// 反链块 ID 逐个按发布访问过滤，避免读者据此获知禁止发布、密码保护文档中的引用块
 	ret.RefIDs = FilterRefIDsByPublishAccess(c, publishAccess, ret.RefIDs)

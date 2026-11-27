@@ -50,9 +50,12 @@ app.whenReady().then(async () => {
                     "const animation = title.getAnimations()[0]; animation.pause(); animation.currentTime = 0;})()");
                 assert.deepEqual(await pixel(point.x + 30, point.y + 60), [0, 128, 255], "rich title must not cover the add-card animation");
                 await win.webContents.executeJavaScript(
-                    "document.querySelector('.protyle-title').style.animation = ''; document.querySelector('.protyle-title').removeAttribute('custom-riff-decks');");
+                    "(() => {const title = document.querySelector('.protyle-title'); title.style.animation = ''; title.dataset.flashcardSource = 'false';})()");
                 const shade = background === "#ffffff" ? 255 : 32;
-                assert.deepEqual(await pixel(point.x + 1, point.y + 60), [shade, shade, shade], "removing a card clears the marker");
+                assert.deepEqual(await pixel(point.x + 1, point.y + 60), [shade, shade, shade], "removing a migrated card clears the marker");
+                await win.webContents.executeJavaScript(
+                    "(() => {const title = document.querySelector('.protyle-title'); title.removeAttribute('custom-riff-decks'); title.dataset.flashcardSource = 'true';})()");
+                assert.deepEqual(await pixel(point.x + 1, point.y + 60), [0, 128, 255], "a new card shows its source marker");
             }
         }
         console.log("Document flashcard rendering passed");

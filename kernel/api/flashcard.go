@@ -246,9 +246,13 @@ var createQuickFlashcardSources = contractHandler(apicontract.CreateQuickFlashca
 	if err != nil {
 		return apicontract.Failure[apicontract.QuickFlashcardSourcesData](-1, err.Error())
 	}
-	return apicontract.Success(apicontract.QuickFlashcardSourcesData{
+	data := apicontract.QuickFlashcardSourcesData{
 		SourceIDs: result.SourceIDs, CardIDs: result.CardIDs, Action: result.Action,
-	})
+	}
+	if ids := model.FlashcardSourceBlockIDs(c.Request.Context(), request.BlockIDs); ids != nil {
+		data.MarkedBlockIDs = &ids
+	}
+	return apicontract.Success(data)
 })
 
 var manageFlashcardSourceLifecycle = contractHandler(apicontract.ManageFlashcardSourceLifecycle, func(c *gin.Context, input apicontract.FlashcardV2SourceLifecycleRequest) apicontract.Response[apicontract.FlashcardV2SourceLifecycleResult] {

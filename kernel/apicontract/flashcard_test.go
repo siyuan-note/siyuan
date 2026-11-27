@@ -41,7 +41,8 @@ func TestQuickFlashcardSourcesContract(t *testing.T) {
 	}
 	for _, data := range []QuickFlashcardSourcesData{
 		{SourceIDs: []string{}, CardIDs: []string{}, Action: "created"},
-		{SourceIDs: []string{"source"}, CardIDs: []string{"card"}, Action: "removed"},
+		{SourceIDs: []string{"source"}, CardIDs: []string{"card"}, Action: "created", MarkedBlockIDs: &[]string{"block"}},
+		{SourceIDs: []string{"source"}, CardIDs: []string{"card"}, Action: "removed", MarkedBlockIDs: &[]string{}},
 	} {
 		payload, _ := json.Marshal(Success(data))
 		if err = bundle.ValidateResponse("POST", "/api/flashcard/createQuickSources", payload); err != nil {

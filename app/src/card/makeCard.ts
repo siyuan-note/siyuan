@@ -43,6 +43,21 @@ export const createQuickSources = (blockIDs: string[], callback?: () => void) =>
             createdAt: Date.now(),
             toggle: true,
         }, (response) => {
+            if (response.data.markedBlockIDs) {
+                const marked = new Set(response.data.markedBlockIDs);
+                for (const id of blockIDs) {
+                    const block = `[data-node-id="${CSS.escape(id)}"]`;
+                    document.querySelectorAll(`.protyle-title${block}, .protyle-wysiwyg ${block}`).forEach(element => {
+                        if (marked.has(id)) {
+                            element.setAttribute(Constants.DATA_FLASHCARD_SOURCE, "true");
+                        } else if (element.hasAttribute(Constants.CUSTOM_RIFF_DECKS)) {
+                            element.setAttribute(Constants.DATA_FLASHCARD_SOURCE, "false");
+                        } else {
+                            element.removeAttribute(Constants.DATA_FLASHCARD_SOURCE);
+                        }
+                    });
+                }
+            }
             showMessage(response.data.cardIDs.length === 0 ? window.siyuan.languages.quickMakeCardEmpty :
                 response.data.action === "removed" ? window.siyuan.languages.quickMakeCardCanceled :
                 window.siyuan.languages.quickMakeCardCompleted);

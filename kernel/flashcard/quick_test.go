@@ -78,6 +78,10 @@ func TestToggleQuickSourcesRemovesAllActiveAndOtherwiseCreatesMissing(t *testing
 	if err != nil || created.Action != QuickSourceActionCreated {
 		t.Fatalf("quick toggle did not create a missing source: result=%+v err=%v", created, err)
 	}
+	marked, err := store.Projection().ActiveSourceBlockIDs(ctx, []string{"block-a", "block-b", "block-a"})
+	if err != nil || len(marked) != 1 || marked[0] != "block-a" {
+		t.Fatalf("unexpected source markers after creation: ids=%v err=%v", marked, err)
+	}
 	if _, err = store.ManageCards(ctx, CardManagementRequest{OperationID: "quick-toggle-due",
 		CardIDs: created.CardIDs, Action: CardActionSetDue, ChangedAt: now + 2, Due: now + 86400000}); err != nil {
 		t.Fatal(err)
@@ -86,6 +90,10 @@ func TestToggleQuickSourcesRemovesAllActiveAndOtherwiseCreatesMissing(t *testing
 		BlockIDs: []string{"block-a"}, CreatedAt: now + 3, Toggle: true})
 	if err != nil || removed.Action != QuickSourceActionRemoved {
 		t.Fatalf("quick toggle did not remove an active source: result=%+v err=%v", removed, err)
+	}
+	marked, err = store.Projection().ActiveSourceBlockIDs(ctx, []string{"block-a", "block-b"})
+	if err != nil || len(marked) != 0 {
+		t.Fatalf("unexpected source markers after removal: ids=%v err=%v", marked, err)
 	}
 	sourceRevision, found, err := store.Projection().CurrentEntity(ctx, EntityCardSource, created.SourceIDs[0])
 	if err != nil || !found {
@@ -99,6 +107,10 @@ func TestToggleQuickSourcesRemovesAllActiveAndOtherwiseCreatesMissing(t *testing
 		BlockIDs: []string{"block-a", "block-b"}, CreatedAt: now + 4, Toggle: true})
 	if err != nil || restored.Action != QuickSourceActionCreated || len(restored.CardIDs) != 2 {
 		t.Fatalf("mixed quick toggle did not restore and create sources: result=%+v err=%v", restored, err)
+	}
+	marked, err = store.Projection().ActiveSourceBlockIDs(ctx, []string{"block-a", "block-b"})
+	if err != nil || len(marked) != 2 {
+		t.Fatalf("unexpected source markers after restoration: ids=%v err=%v", marked, err)
 	}
 	assertReviewStateForTest(t, ctx, store, created.CardIDs[0], now+86400000, 0)
 }

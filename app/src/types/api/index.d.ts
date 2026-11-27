@@ -2156,7 +2156,7 @@ export type QueryFlashcardsData = { "cards": Array<FlashcardSearchResult>; };
 
 export type QueryFlashcardsRequestInput = { "options"?: FlashcardSearchOptionsInput | null; "query"?: FlashcardQueryInput | null; };
 
-export type QuickFlashcardSourcesData = { "action": "created" | "removed"; "cardIDs": Array<string>; "sourceIDs": Array<string>; };
+export type QuickFlashcardSourcesData = { "action": "created" | "removed"; "cardIDs": Array<string>; "markedBlockIDs"?: Array<string>; "sourceIDs": Array<string>; };
 
 export type ReadDirectoryRequestInput = { "path": string; };
 
@@ -6678,6 +6678,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin","writable"];
     };
+    /**
+     * toggles or creates quick flashcards. When available, markedBlockIDs lists the requested
+     * blocks with an active flashcard source after the operation, including any active sources outside the quick toggle.
+     */
     "/api/flashcard/createQuickSources": {
         request: CreateQuickFlashcardSourcesRequestInput;
         response: { "code": 0; "data": QuickFlashcardSourcesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

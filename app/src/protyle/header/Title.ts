@@ -716,9 +716,14 @@ export class Title {
             return false;
         }
         this.element.setAttribute("data-node-id", protyle.block.rootID);
-        if (response.data.ial[Constants.CUSTOM_RIFF_DECKS]) {
-            this.element.setAttribute(Constants.CUSTOM_RIFF_DECKS, response.data.ial[Constants.CUSTOM_RIFF_DECKS]);
-        }
+        [Constants.CUSTOM_RIFF_DECKS, Constants.DATA_FLASHCARD_SOURCE].forEach((attribute) => {
+            const value = response.data.ial[attribute];
+            if (value) {
+                this.element.setAttribute(attribute, value);
+            } else {
+                this.element.removeAttribute(attribute);
+            }
+        });
         protyle.background?.render(response.data.ial, protyle.block.rootID);
         protyle.wysiwyg.renderCustom(response.data.ial);
         this.element.setAttribute("data-render", "true");

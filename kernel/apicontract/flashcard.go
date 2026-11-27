@@ -18,9 +18,10 @@ type CreateQuickFlashcardSourcesRequest struct {
 }
 
 type QuickFlashcardSourcesData struct {
-	SourceIDs []string `json:"sourceIDs" api:"nonnullable"`
-	CardIDs   []string `json:"cardIDs" api:"nonnullable"`
-	Action    string   `json:"action" api:"enum=created|removed"`
+	SourceIDs      []string  `json:"sourceIDs" api:"nonnullable"`
+	CardIDs        []string  `json:"cardIDs" api:"nonnullable"`
+	Action         string    `json:"action" api:"enum=created|removed"`
+	MarkedBlockIDs *[]string `json:"markedBlockIDs,omitempty" api:"optional,nonnullable"`
 }
 
 // SetFlashcardEditLaterRequest 设置或完成单张卡片的编辑待办。

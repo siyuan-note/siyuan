@@ -46639,6 +46639,12 @@
             "type": "string"
           }
         },
+        "markedBlockIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "sourceIDs": {
           "type": "array",
           "items": {

@@ -229,7 +229,7 @@ const loadFlashcardV2DOMs = (model: IFlashcardV2RenderModel, references: IFlashc
             const sourceElement = [...template.content.querySelectorAll<HTMLElement>("[data-node-id]")]
                 .find((element) => element.dataset.nodeId === blockID);
             if (sourceElement && shouldLoadFlashcardV2HeadingChildren(
-                sourceElement.getAttribute("data-type"), sourceElement.getAttribute("fold"))) {
+                sourceElement.getAttribute("data-type"), sourceElement.getAttribute("fold"), window.siyuan.config.flashcard.heading)) {
                 headingRequest = fetchPost("/api/block/getHeadingChildrenDOM", {
                     id: blockID,
                     removeFoldAttr: true,

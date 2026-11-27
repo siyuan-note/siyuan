@@ -54,10 +54,12 @@ describe("flashcardV2State", () => {
         assert.equal(canUseFlashcardV2ReviewActions({...ready, index: 1}), false);
     });
 
-    it("loads expanded DOM only for folded headings", () => {
-        assert.equal(shouldLoadFlashcardV2HeadingChildren("NodeHeading", "1"), true);
-        assert.equal(shouldLoadFlashcardV2HeadingChildren("NodeHeading", null), false);
-        assert.equal(shouldLoadFlashcardV2HeadingChildren("NodeParagraph", "1"), false);
+    it("loads heading answers with heading block carding enabled, regardless of folding", () => {
+        assert.equal(shouldLoadFlashcardV2HeadingChildren("NodeHeading", "1", true), true);
+        assert.equal(shouldLoadFlashcardV2HeadingChildren("NodeHeading", null, true), true);
+        assert.equal(shouldLoadFlashcardV2HeadingChildren("NodeHeading", "1", false), true);
+        assert.equal(shouldLoadFlashcardV2HeadingChildren("NodeHeading", null, false), false);
+        assert.equal(shouldLoadFlashcardV2HeadingChildren("NodeParagraph", "1", true), false);
     });
 
     it("keeps the legacy and current review shortcut aliases aligned", () => {

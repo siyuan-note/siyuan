@@ -59,8 +59,8 @@ export const getFlashcardV2ConfirmedQueueStatuses = (
     return statuses;
 };
 
-export const shouldLoadFlashcardV2HeadingChildren = (nodeType: string | null, fold: string | null) => {
-    return nodeType === "NodeHeading" && fold === "1";
+export const shouldLoadFlashcardV2HeadingChildren = (nodeType: string | null, fold: string | null, heading: boolean) => {
+    return nodeType === "NodeHeading" && (heading || fold === "1");
 };
 
 export const getFlashcardV2ReviewShortcutAction = (shortcut: string,

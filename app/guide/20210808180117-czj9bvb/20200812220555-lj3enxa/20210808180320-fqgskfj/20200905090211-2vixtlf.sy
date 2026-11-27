@@ -2047,7 +2047,34 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "固定标题行后，在桌面端将鼠标移到表格上，或在移动端点按单元格，然后拖动表格可见区域底部中央的手柄来设置最大高度。表格实际高度以内容所需高度为限。最大高度随表格保存，重新固定标题行时会恢复。调整高度支持撤销和重做。"
+					"Data": "在块菜单中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "表格块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "高度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可以按像素设置最大高度。也可以在桌面端将鼠标移到表格上，或在移动端点按单元格，再拖动表格可见区域底部中央的手柄。高度设置随表格保存，固定或取消固定标题行后仍然生效。在高度对话框中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "默认"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可清除自定义高度。普通表格随内容展开，固定标题行的表格使用默认滚动高度。调整高度支持撤销和重做。"
 				}
 			]
 		},

@@ -2034,7 +2034,34 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "固定標題列後，在桌面端將滑鼠移到表格上，或在行動端輕觸儲存格，然後拖曳表格可見區域底部中央的控點來設定最大高度。表格的實際高度以內容所需的高度為限。最大高度會隨表格儲存，重新固定標題列時會恢復。調整高度支援復原和重做。"
+					"Data": "在區塊選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "表格區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "高度"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可以用像素設定最大高度。也可以在桌面端將滑鼠移到表格上，或在行動端輕觸儲存格，再拖曳表格可見區域底部中央的控點。高度設定會隨表格儲存，固定或取消固定標題列後仍會生效。在高度對話框中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "預設"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可清除自訂高度。一般表格會隨內容展開，固定標題列的表格會使用預設捲動高度。調整高度支援復原和重做。"
 				}
 			]
 		},

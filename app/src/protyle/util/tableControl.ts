@@ -59,7 +59,7 @@ import {finishTableCellEditing} from "./tableCellRichContext";
 import {buildBlockDOMClipboardRichData} from "./blockDOMClipboard";
 import {showMessage} from "../../dialog/message";
 import {getTableRowBoundary, getTableRowOpeningHTML, startTableRowResize} from "./tableRowHeight";
-import {applyTableViewportHeight, startTableViewportResize} from "./tableViewportHeight";
+import {applyTableHeight, openTableHeight, startTableHeightResize} from "./tableHeight";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -132,8 +132,11 @@ interface ITableDimensionBoundary {
     table: HTMLTableElement;
     row?: HTMLTableRowElement;
     column?: number;
-    viewport?: boolean;
+    tableHeight?: boolean;
 }
+
+const scrollableTableSelector = '[data-type="NodeTable"][custom-pinthead="true"], ' +
+    `[data-type="NodeTable"][${Constants.CUSTOM_SY_TABLE_HEIGHT}]`;
 
 const getCell = (target: EventTarget | Node) => {
     const element = target instanceof Element ? target : (target as Node)?.parentElement;
@@ -368,10 +371,10 @@ export class TableControl {
     private dragCleanup?: () => void;
     private columnResizeCleanup?: () => void;
     private rowResizeCleanup?: () => void;
-    private viewportResizeCleanup?: () => void;
+    private tableHeightResizeCleanup?: () => void;
     private rowResizeHandle: HTMLButtonElement;
-    private viewportResizeHandle: HTMLButtonElement;
-    private viewportResizeTable?: HTMLTableElement;
+    private tableHeightResizeHandle: HTMLButtonElement;
+    private tableHeightResizeTable?: HTMLTableElement;
     private rowBoundary?: {cell: HTMLTableCellElement, row: HTMLTableRowElement};
     private dimensionBoundary?: ITableDimensionBoundary;
     private dimensionPointer?: {x: number, y: number};
@@ -418,13 +421,11 @@ export class TableControl {
         this.rowResizeHandle.className = "protyle-table-control__handle protyle-table-control__height fn__none";
         this.rowResizeHandle.setAttribute("aria-label", window.siyuan.languages.height);
         this.element.append(this.rowResizeHandle);
-        this.viewportResizeHandle = document.createElement("button");
-        this.viewportResizeHandle.type = "button";
-        this.viewportResizeHandle.className = "protyle-table-control__handle protyle-table-control__height " +
-            "protyle-table-control__viewport-height fn__none";
-        this.viewportResizeHandle.setAttribute("aria-label", window.siyuan.languages.height);
-        this.viewportResizeHandle.innerHTML = '<svg><use xlink:href="#iconDrag"></use></svg>';
-        this.element.append(this.viewportResizeHandle);
+        this.tableHeightResizeHandle = document.createElement("button");
+        this.tableHeightResizeHandle.type = "button";
+        this.tableHeightResizeHandle.className = "protyle-table-control__table-height fn__none";
+        this.tableHeightResizeHandle.setAttribute("aria-label", window.siyuan.languages.height);
+        this.element.append(this.tableHeightResizeHandle);
         this.dimensionGuide = document.createElement("div");
         this.dimensionGuide.className = "protyle-table-control__height-guide fn__none";
         this.element.append(this.dimensionGuide);
@@ -435,11 +436,16 @@ export class TableControl {
                 this.startRowResize(event, this.rowBoundary.cell, this.rowBoundary.row);
             }
         });
-        this.viewportResizeHandle.addEventListener("pointerdown", event => {
-            if (this.viewportResizeTable && event.button === 0) {
+        this.tableHeightResizeHandle.addEventListener("pointerdown", event => {
+            if (this.tableHeightResizeTable && event.button === 0) {
                 event.preventDefault();
                 event.stopPropagation();
-                this.startViewportResize(event, this.viewportResizeTable);
+                this.startTableHeightResize(event, this.tableHeightResizeTable);
+            }
+        });
+        this.tableHeightResizeHandle.addEventListener("click", event => {
+            if (event.detail === 0 && this.tableHeightResizeTable) {
+                openTableHeight(this.protyle, this.tableHeightResizeTable.parentElement.parentElement);
             }
         });
         protyle.element.append(this.element);
@@ -519,15 +525,22 @@ export class TableControl {
             if (mutations.some(mutation => controlTables.some(table => table.contains(mutation.target)))) {
                 render = true;
             }
-            const pinnedTableSelector = '[data-type="NodeTable"][custom-pinthead="true"]';
+            mutations.forEach(mutation => {
+                if (mutation.attributeName === Constants.CUSTOM_SY_TABLE_HEIGHT && mutation.target instanceof HTMLElement) {
+                    const scroller = mutation.target.querySelector<HTMLTableElement>(":scope > div:first-child > table")?.parentElement;
+                    if (scroller) {
+                        applyTableHeight(mutation.target, scroller);
+                    }
+                }
+            });
             if (mutations.some(mutation => mutation.type === "attributes" ?
                 mutation.attributeName === Constants.TABLE_PINNED_COLUMN_ACTIVE ||
-                mutation.attributeName === Constants.CUSTOM_SY_TABLE_VIEWPORT_HEIGHT ||
+                mutation.attributeName === Constants.CUSTOM_SY_TABLE_HEIGHT ||
                 mutation.attributeName === "custom-pinthead" || mutation.attributeName === "style" &&
                 mutation.target instanceof Element && mutation.target.contains(this.protyle.element) :
-                (mutation.target instanceof Element && !!mutation.target.closest(pinnedTableSelector)) ||
+                (mutation.target instanceof Element && !!mutation.target.closest(scrollableTableSelector)) ||
                 [...mutation.addedNodes, ...mutation.removedNodes].some(node => node instanceof Element &&
-                    (node.matches(pinnedTableSelector) || !!node.querySelector(pinnedTableSelector))))) {
+                    (node.matches(scrollableTableSelector) || !!node.querySelector(scrollableTableSelector))))) {
                 render = true;
             }
             if (render) {
@@ -536,7 +549,7 @@ export class TableControl {
         });
         this.observer.observe(this.wysiwygElement, {
             attributeFilter: ["custom-pinthead", "style", Constants.TABLE_PINNED_COLUMN_ACTIVE,
-                Constants.CUSTOM_SY_TABLE_VIEWPORT_HEIGHT],
+                Constants.CUSTOM_SY_TABLE_HEIGHT],
             attributes: true,
             childList: true,
             characterData: true,
@@ -562,7 +575,7 @@ export class TableControl {
     public destroy() {
         this.clearDimensionFeedback();
         this.rowResizeCleanup?.();
-        this.viewportResizeCleanup?.();
+        this.tableHeightResizeCleanup?.();
         this.touch?.destroy();
         this.dragCleanup?.();
         this.columnResizeCleanup?.();
@@ -580,7 +593,7 @@ export class TableControl {
 
     public clear() {
         this.rowResizeCleanup?.();
-        this.viewportResizeCleanup?.();
+        this.tableHeightResizeCleanup?.();
         this.rowBoundary = undefined;
         this.touch?.reset();
         this.dragCleanup?.();
@@ -687,7 +700,7 @@ export class TableControl {
         }
     }
 
-    private startViewportResize(event: PointerEvent, table: HTMLTableElement) {
+    private startTableHeightResize(event: PointerEvent, table: HTMLTableElement) {
         const cell = [this.hoverCell, this.caretCell, this.selection?.activeCell].find(item =>
             item?.isConnected && item.closest("table") === table) || table.querySelector("th, td");
         if (!cell) {
@@ -695,21 +708,21 @@ export class TableControl {
         }
         this.rowResizeCleanup?.();
         this.columnResizeCleanup?.();
-        this.viewportResizeCleanup = startTableViewportResize(this.protyle, cell, table, event, (height, x, y) => {
-            this.showDimensionFeedback({table, viewport: true}, height, x, y);
+        this.tableHeightResizeCleanup = startTableHeightResize(this.protyle, cell, table, event, (height, x, y) => {
+            this.showDimensionFeedback({table, tableHeight: true}, height, x, y);
             this.scheduleRender();
         }, () => {
-            this.viewportResizeCleanup = undefined;
-            this.viewportResizeTable = undefined;
+            this.tableHeightResizeCleanup = undefined;
+            this.tableHeightResizeTable = undefined;
             this.clearDimensionFeedback();
             this.scheduleRender();
         });
-        if (this.viewportResizeCleanup) {
+        if (this.tableHeightResizeCleanup) {
             this.clearCellSelection();
             if (this.touch) {
                 this.blurTouchEditor();
             }
-            this.showDimensionFeedback({table, viewport: true},
+            this.showDimensionFeedback({table, tableHeight: true},
                 Math.round(table.parentElement.getBoundingClientRect().height), event.clientX, event.clientY);
         }
     }
@@ -886,7 +899,7 @@ export class TableControl {
         // 控件容器位于事件冒泡路径上，在这里兜底执行相同的边缘检测
         this.element.addEventListener("pointermove", event => this.handleTablePointerMove(event, true), {signal});
         this.wysiwygElement.addEventListener("pointerleave", event => {
-            if (!this.rowResizeCleanup && !this.viewportResizeCleanup && !this.element.contains(event.relatedTarget as Node)) {
+            if (!this.rowResizeCleanup && !this.tableHeightResizeCleanup && !this.element.contains(event.relatedTarget as Node)) {
                 this.hoverDimensionBoundary();
                 this.rowBoundary = undefined;
                 this.rowResizeHandle.classList.add("fn__none");
@@ -1593,8 +1606,8 @@ export class TableControl {
             this.protyle.element.closest(".fn__none, [inert]")) {
             return;
         }
-        if (boundary.viewport) {
-            const edge = this.getTableViewportResizeEdge(boundary.table);
+        if (boundary.tableHeight) {
+            const edge = this.getTableHeightResizeEdge(boundary.table);
             if (!edge) {
                 return;
             }
@@ -1634,7 +1647,7 @@ export class TableControl {
         this.dimensionDragging = true;
         this.dimensionBoundary = boundary;
         if (!this.touch) {
-            [this.rowHandle, this.columnHandle, this.cellHandle, this.rowResizeHandle, this.viewportResizeHandle,
+            [this.rowHandle, this.columnHandle, this.cellHandle, this.rowResizeHandle, this.tableHeightResizeHandle,
                 this.addRowButton, this.addColumnButton, this.addBothButton].forEach(item => item.classList.add("fn__none"));
         }
         this.renderDimensionGuide();
@@ -1658,7 +1671,7 @@ export class TableControl {
         return intersectRects(tableRect, wrapperRect, contentRect);
     }
 
-    private getTableViewportResizeEdge(table: HTMLTableElement) {
+    private getTableHeightResizeEdge(table: HTMLTableElement) {
         const wrapperRect = table.parentElement.getBoundingClientRect();
         const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
         const visibleTable = intersectRects(table.getBoundingClientRect(), wrapperRect, contentRect);
@@ -1668,7 +1681,20 @@ export class TableControl {
     }
 
     private getTableAddRowEdge(table: HTMLTableElement) {
-        return Math.max(table.getBoundingClientRect().bottom, table.parentElement.getBoundingClientRect().bottom);
+        const scroller = table.parentElement;
+        const scrollerBottom = scroller.getBoundingClientRect().bottom;
+        return scroller.parentElement.matches(scrollableTableSelector) ? scrollerBottom :
+            Math.max(table.getBoundingClientRect().bottom, scrollerBottom);
+    }
+
+    private getTableAddColumnControlEdge(table: HTMLTableElement, tableRight: number, visibleRight: number,
+                                         contentRight: number) {
+        const scroller = table.parentElement;
+        if (scroller.parentElement.matches(scrollableTableSelector) && scroller.scrollHeight > scroller.clientHeight) {
+            const scrollerRight = scroller.getBoundingClientRect().right;
+            return getTableAddColumnEdge(scrollerRight, scrollerRight, contentRight);
+        }
+        return getTableAddColumnEdge(tableRight, visibleRight, contentRight);
     }
 
     private getTableGridViewportRect(table: HTMLTableElement, gridRect = getTableGridRect(table)) {
@@ -1733,7 +1759,7 @@ export class TableControl {
             }
             const gridRect = getTableGridRect(table);
             const viewportRect = this.getTableGridViewportRect(table, gridRect);
-            const addColumnEdge = getTableAddColumnEdge(gridRect.right, viewportRect.right, contentRect.right);
+            const addColumnEdge = this.getTableAddColumnControlEdge(table, gridRect.right, viewportRect.right, contentRect.right);
             const addRowEdge = this.getTableAddRowEdge(table);
             const columnControlVisible = viewportRect.width > 0 && viewportRect.height > 0 &&
                 addColumnEdge >= viewportRect.left;
@@ -1844,7 +1870,7 @@ export class TableControl {
         const tableViewportRect = this.getTableViewportRect(state.table);
         const addRowEdge = this.getTableAddRowEdge(state.table);
         const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
-        const addColumnEdge = getTableAddColumnEdge(gridRect.right, viewportRect.right, contentRect.right);
+        const addColumnEdge = this.getTableAddColumnControlEdge(state.table, gridRect.right, viewportRect.right, contentRect.right);
         const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
             TABLE_ADD_CONTROL_THICKNESS, TABLE_ADD_CONTROL_GAP);
         const columnControlVisible = viewportRect.width > 0 && viewportRect.height > 0 &&
@@ -1888,11 +1914,19 @@ export class TableControl {
     private renderPinnedTableFrames() {
         const actions = new Set<HTMLElement>();
         const resizeTargets = new Set<HTMLElement>();
-        this.wysiwygElement.querySelectorAll<HTMLTableElement>(
-            '[data-type="NodeTable"][custom-pinthead="true"] > div:first-child > table').forEach(table => {
+        this.wysiwygElement.querySelectorAll(scrollableTableSelector).forEach(node => {
+            const table = node.querySelector<HTMLTableElement>(":scope > div:first-child > table");
+            if (!table) {
+                return;
+            }
             const viewport = table.parentElement;
-            applyTableViewportHeight(viewport.parentElement, viewport);
+            applyTableHeight(node, viewport);
             if (table.closest(".protyle-custom, .mindmap-view__preview-block")) {
+                return;
+            }
+            resizeTargets.add(table);
+            resizeTargets.add(viewport);
+            if (node.getAttribute("custom-pinthead") !== "true") {
                 return;
             }
             const action = table.nextElementSibling as HTMLElement;
@@ -1900,8 +1934,6 @@ export class TableControl {
                 return;
             }
             actions.add(action);
-            resizeTargets.add(table);
-            resizeTargets.add(viewport);
             const tableRect = table.getBoundingClientRect();
             const actionRect = action.getBoundingClientRect();
             const viewportRect = viewport.getBoundingClientRect();
@@ -1958,26 +1990,25 @@ export class TableControl {
         this.rowResizeHandle.classList.remove("fn__none");
     }
 
-    private renderViewportResizeHandle(table: HTMLTableElement, visible: boolean) {
+    private renderTableHeightResizeHandle(table: HTMLTableElement, visible: boolean) {
         if (!visible || !table?.isConnected) {
             return;
         }
-        const node = getTableNode(table.querySelector("th, td"));
-        if (node?.getAttribute("custom-pinthead") !== "true" || this.dragState || this.resizeState) {
+        if (this.dragState || this.resizeState) {
             return;
         }
-        const edge = this.getTableViewportResizeEdge(table);
+        const edge = this.getTableHeightResizeEdge(table);
         if (!edge) {
             return;
         }
-        this.viewportResizeTable = table;
-        this.setPosition(this.viewportResizeHandle, edge.left + edge.width / 2, edge.bottom - TABLE_ADD_CONTROL_GAP);
-        this.viewportResizeHandle.classList.remove("fn__none");
+        this.tableHeightResizeTable = table;
+        this.setPosition(this.tableHeightResizeHandle, edge.left + edge.width / 2, edge.bottom - TABLE_ADD_CONTROL_GAP);
+        this.tableHeightResizeHandle.classList.remove("fn__none");
     }
 
     private render() {
-        this.viewportResizeHandle.classList.add("fn__none");
-        this.viewportResizeTable = undefined;
+        this.tableHeightResizeHandle.classList.add("fn__none");
+        this.tableHeightResizeTable = undefined;
         this.renderPinnedTableFrames();
         if (this.dimensionDragging || this.dimensionHoverTimer === undefined) {
             this.renderDimensionGuide();
@@ -1999,13 +2030,13 @@ export class TableControl {
         const node = getTableNode(cell);
         const table = cell?.closest("table") as HTMLTableElement;
         const visible = !!cell && !!node && !!table && !this.protyle.disabled;
-        this.renderViewportResizeHandle(table, visible);
+        this.renderTableHeightResizeHandle(table, visible);
         [this.rowHandle, this.columnHandle, this.cellHandle, this.addRowButton, this.addColumnButton,
             this.addBothButton].forEach(item => {
             item.classList.add("fn__none");
             item.classList.remove("protyle-table-control__add--active");
         });
-        if (!this.columnResizeCleanup && !this.rowResizeCleanup && !this.viewportResizeCleanup) {
+        if (!this.columnResizeCleanup && !this.rowResizeCleanup && !this.tableHeightResizeCleanup) {
             this.resizeLabel.classList.add("fn__none");
         }
         if (visible && !this.touch) {
@@ -2014,7 +2045,7 @@ export class TableControl {
             const tableViewportRect = this.getTableViewportRect(table);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
-            const addColumnEdge = getTableAddColumnEdge(gridRect.right, viewportRect.right, contentRect.right);
+            const addColumnEdge = this.getTableAddColumnControlEdge(table, gridRect.right, viewportRect.right, contentRect.right);
             const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
                 TABLE_ADD_CONTROL_THICKNESS, TABLE_ADD_CONTROL_GAP);
             const columnControlVisible = viewportRect.width > 0 && viewportRect.height > 0 &&

@@ -51,9 +51,11 @@
     overflow-x: visible;
 
     .table,
-    [data-node-id].table[custom-pinthead="true"] {
+    [data-node-id].table {
       > div:first-child {
         overflow: visible;
+        width: auto;
+        max-width: none;
         max-height: none;
       }
     }

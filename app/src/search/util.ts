@@ -24,6 +24,7 @@ import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../protyle/util/hasClosest";
+import {scrollTableRowIntoView} from "../protyle/util/tableHeight";
 import {isDisabledFeature, isIPad, isNotCtrl, isPhablet, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFile} from "../util/newFile";
 import {
@@ -1226,18 +1227,19 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
 };
 
 const scrollToCurrent = (contentElement: HTMLElement, currentRange: Range, contentRect: DOMRect) => {
-    contentElement.scrollTop = contentElement.scrollTop + currentRange.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
     const tableElement = hasClosestByClassName(currentRange.startContainer, "table");
     if (tableElement) {
         const cellElement = hasClosestByTag(currentRange.startContainer, "TD") || hasClosestByTag(currentRange.startContainer, "TH");
         if (cellElement) {
-            tableElement.firstElementChild.scrollLeft = cellElement.offsetLeft;
-            if (tableElement.getAttribute("custom-pinthead") === "true") {
-                contentElement.scrollTop = contentElement.scrollTop + tableElement.getBoundingClientRect().top - contentRect.top;
-                tableElement.querySelector("table").scrollTop = cellElement.offsetTop;
+            const table = cellElement.closest("table");
+            const row = cellElement.closest("tr");
+            if (table && row) {
+                table.parentElement.scrollLeft = cellElement.offsetLeft;
+                scrollTableRowIntoView(table, row);
             }
         }
     }
+    contentElement.scrollTop += currentRange.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
 };
 
 const renderNextSearchMark = (options: {

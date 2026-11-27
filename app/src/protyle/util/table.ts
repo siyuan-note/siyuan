@@ -2,6 +2,7 @@ import {openInputDialog} from "../../dialog/inputDialog";
 import {escapeHtmlTextAndAttr} from "../../util/escape";
 import {Constants} from "../../constants";
 import {getTableRowOpeningHTML} from "./tableRowHeight";
+import {scrollTableRowIntoView} from "./tableHeight";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {
     focusBlock,
@@ -27,14 +28,7 @@ import {
 } from "./tableSelection";
 
 const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
-    if (nodeElement.getAttribute("custom-pinthead") === "true") {
-        const tableElement = nodeElement.querySelector("table");
-        if (tableElement.clientHeight + tableElement.scrollTop < rowElement.offsetTop + rowElement.clientHeight) {
-            tableElement.scrollTop = rowElement.offsetTop - tableElement.clientHeight + rowElement.clientHeight + 1;
-        } else if (tableElement.scrollTop > rowElement.offsetTop - rowElement.clientHeight) {
-            tableElement.scrollTop = rowElement.offsetTop - rowElement.clientHeight + 1;
-        }
-    } else {
+    if (!scrollTableRowIntoView(nodeElement.querySelector("table"), rowElement as HTMLTableRowElement)) {
         scrollCenter(protyle, rowElement);
     }
 };

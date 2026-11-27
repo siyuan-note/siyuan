@@ -1026,6 +1026,10 @@ test("table catalog follows the menu arrays and conditional declarations", () =>
         assert.equal(getEntryCatalogNode(`${parent}.insertTableHeaderRow`).type, "entry");
     }
     for (const parent of ["gutter.single.table", "inline.text.more"]) {
+        const height = getEntryCatalogNode(`${parent}.tableHeight`);
+        assert.equal(height.type, "entry");
+        const keys = getEntryCatalogChildren(parent).map(item => item.key);
+        assert.equal(keys.indexOf("tableHeight") + 1, keys.indexOf("pinTableHead"));
         for (const action of ["pin", "unpin"]) {
             const column = getEntryCatalogNode(`${parent}.${action}TableHeaderColumn`);
             assert.equal(column.type, "entry");

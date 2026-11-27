@@ -1451,6 +1451,7 @@ table + .protyle-action__table {
   pointer-events: none;
 
   &__handle,
+  &__table-height,
   &__add {
     position: fixed;
     z-index: 2;
@@ -1655,20 +1656,27 @@ table + .protyle-action__table {
     }
   }
 
-  &__viewport-height {
+  &__table-height {
     width: 48px;
     height: 16px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    cursor: ns-resize;
+    touch-action: none;
 
     &::before {
-      display: block;
+      content: "";
       width: 32px;
       height: 3px;
+      background-color: var(--b3-theme-on-surface-light);
+      border-radius: var(--b3-border-radius-b);
+      pointer-events: none;
     }
 
-    svg {
-      width: 20px;
-      height: 16px;
-      transform: rotate(90deg);
+    &:hover::before,
+    &:focus-visible::before {
+      background-color: var(--b3-theme-primary);
     }
   }
 
@@ -1689,11 +1697,11 @@ table + .protyle-action__table {
   }
 
   &--touch {
-    > .protyle-table-control__viewport-height {
+    > .protyle-table-control__table-height {
       height: 28px;
     }
 
-    > .protyle-table-control__handle:not(.protyle-table-control__viewport-height),
+    > .protyle-table-control__handle,
     > .protyle-table-control__add {
       display: none;
     }

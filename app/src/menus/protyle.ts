@@ -14,6 +14,7 @@ import {
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {getTableCellVerticalAlignmentMenus, setTableCellStyle} from "../protyle/util/tableControl";
+import {openTableHeight} from "../protyle/util/tableHeight";
 import {focusBlock, focusByOffset, focusByWbr, getEditorRange, selectAll} from "../protyle/util/selection";
 import {focusByRange} from "../protyle/util/selectionOffsets";
 import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFoldTransient} from "../protyle/util/viewFold";
@@ -2457,6 +2458,12 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             }
         });
     }
+    otherMenus.push({
+        id: "tableHeight",
+        icon: "iconHeight",
+        label: window.siyuan.languages.height,
+        click: () => openTableHeight(protyle, nodeElement),
+    });
     const isPinHead = nodeElement.getAttribute("custom-pinthead");
     otherMenus.push({
         id: isPinHead ? "unpinTableHead" : "pinTableHead",

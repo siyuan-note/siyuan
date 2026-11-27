@@ -24,6 +24,7 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
     document.head.append(fixtureStyle);
     const transactions: {before: string, after: string}[] = [];
     const attributeTransactions: {operations: IOperation[], undo: IOperation[]}[] = [];
+    let heightDialogOptions: import("../../dialog/inputDialog").IInputDialogOptions;
     const clipboard: {textPlain: string, textHTML?: string, textSiyuan?: string}[] = [];
     const pasted: {target: HTMLTableCellElement, textPlain: string}[] = [];
     const items: IMenu[] = [];
@@ -61,7 +62,7 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
     const constants = new Proxy<Record<string, string | number>>({ZWSP: "\u200b", TIMEOUT_LONGPRESS: 20,
         SIZE_DRAG_THRESHOLD: 5, TABLE_PINNED_COLUMN_ACTIVE: "data-table-pinned-column-active",
         TABLE_PINNED_COLUMN_CELL: "data-table-pinned-column-cell",
-        CUSTOM_SY_TABLE_VIEWPORT_HEIGHT: "custom-sy-table-viewport-height"}, {get: (target, key: string) => target[key] || key});
+        CUSTOM_SY_TABLE_HEIGHT: "custom-sy-table-viewport-height"}, {get: (target, key: string) => target[key] || key});
     const stubs: Record<string, object | (() => object)> = {
         "src/constants.ts": {Constants: constants},
         "src/menus/menuToggle.ts": {toggleMenu: (options: {build: (menu: object, session: object) => void}) => {
@@ -119,6 +120,7 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         "src/protyle/util/hasClosest.ts": {hasClosestByClassName: (node: Element, name: string) => node?.closest("." + name),
             hasClosestBlock: (node: Element) => node?.closest("[data-node-id]")},
         "src/dialog/message.ts": {showMessage: noop},
+        "src/dialog/inputDialog.ts": {openInputDialog: (options: typeof heightDialogOptions) => { heightDialogOptions = options; }},
         "src/util/highlightById.ts": {scrollCenter: noop},
         "dayjs": () => ({format: () => "20261017120000"}),
     };
@@ -1669,17 +1671,21 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
     for (const touch of [false, true]) {
         mobile = touch;
         const f = fixture();
-        const viewportStyle = document.createElement("style");
-        viewportStyle.textContent = layoutStyles[`${touch ? "mobile" : "base"}/${touch ? "midnight" : "daylight"}`];
-        document.head.append(viewportStyle);
+        const heightStyle = document.createElement("style");
+        heightStyle.textContent = layoutStyles[`${touch ? "mobile" : "base"}/${touch ? "midnight" : "daylight"}`];
+        document.head.append(heightStyle);
+        f.editor.setAttribute("contenteditable", "true");
+        f.editor.setAttribute("data-readonly", "false");
         const node = f.table.closest("[data-node-id]");
         const scroller = f.table.parentElement;
-        f.table.style.margin = "0";
+        f.table.style.removeProperty("margin");
         f.table.querySelectorAll("col").forEach(col => col.style.width = "36px");
         const tbody = f.table.tBodies[0];
         tbody.append(...Array.from({length: 8}, () => tbody.rows[0].cloneNode(true)));
-        node.setAttribute("custom-pinthead", "true");
         const heightAttribute = "custom-sy-table-viewport-height";
+        f.render();
+        check.equal(getComputedStyle(scroller).maxHeight, "none", "ordinary tables expand by default");
+        node.setAttribute("custom-pinthead", "true");
         f.render();
         check.equal(getComputedStyle(scroller).maxHeight, window.innerHeight / 2 + "px");
         node.setAttribute(heightAttribute, "120px");
@@ -1693,8 +1699,10 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
                 clientX: rect.left + 8, clientY: rect.top + 8}));
         }
         f.render();
-        const handle = f.touch(".protyle-table-control__viewport-height");
-        check.ok(handle && !handle.classList.contains("fn__none"), `${touch} exposes the viewport height handle`);
+        const handle = f.touch(".protyle-table-control__table-height");
+        check.ok(handle && !handle.classList.contains("fn__none"), `${touch} exposes the table height handle`);
+        check.equal(handle.querySelector("svg"), null, "the resize grip keeps a single shape on hover");
+        check.equal(getComputedStyle(handle).cursor, "ns-resize");
         check.equal(scroller.offsetHeight, 120);
         check.equal(getComputedStyle(scroller).maxHeight, "120px");
         scroller.scrollTop = 25;
@@ -1703,7 +1711,11 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         const x = rect.left + rect.width / 2;
         const y = rect.top + rect.height / 2;
         const tableRect = f.table.getBoundingClientRect();
-        check.ok(scroller.getBoundingClientRect().width > tableRect.width * 2);
+        const scrollerRect = scroller.getBoundingClientRect();
+        check.ok(scroller.scrollHeight > scroller.clientHeight);
+        check.ok(Math.abs(scrollerRect.right - tableRect.right - (scroller.offsetWidth - scroller.clientWidth)) < 2,
+            `${touch} places the vertical scrollbar immediately next to the narrow table`);
+        check.ok(scrollerRect.width < f.root.clientWidth / 2);
         check.ok(Math.abs(x - (tableRect.left + tableRect.width / 2)) < 1,
             `${touch} centers the handle over the narrow table`);
         const startHeight = scroller.offsetHeight;
@@ -1712,7 +1724,7 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         pointer(document, "pointermove", x, y + 60, 91);
         f.render();
         check.equal(Math.round(scroller.getBoundingClientRect().height), Math.round(startHeight + 60),
-            "rendering keeps the viewport drag preview visible");
+            "rendering keeps the table height preview visible");
         const guide = f.touch(".protyle-table-control__height-guide");
         check.ok(!guide.classList.contains("fn__none"));
         check.ok(Math.abs(Number.parseFloat(guide.style.left) - tableRect.left) < 1);
@@ -1721,7 +1733,7 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         pointer(document, "pointerup", x, y + 60, 91);
         const storedHeight = `${Math.round(startHeight + 60)}px`;
         check.equal(node.getAttribute(heightAttribute), storedHeight, `${touch} persists the height`);
-        check.equal(attributeTransactions.length, count + 1, `${touch} commits one viewport resize transaction`);
+        check.equal(attributeTransactions.length, count + 1, `${touch} commits one height transaction`);
         const resize = attributeTransactions.at(-1);
         check.deepEqual(resize.operations, [{action: "setAttrs", id: node.getAttribute("data-node-id"),
             data: JSON.stringify({[heightAttribute]: storedHeight})}]);
@@ -1739,7 +1751,8 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         check.equal(scroller.scrollTop, 25);
         node.removeAttribute("custom-pinthead");
         f.render();
-        check.equal(getComputedStyle(scroller).maxHeight, "none", `${touch} unpinning releases the fixed height`);
+        check.equal(getComputedStyle(scroller).maxHeight, storedHeight, `${touch} unpinning keeps the custom height`);
+        check.equal(getComputedStyle(f.table.tHead).position, "static");
         node.setAttribute("custom-pinthead", "true");
         f.render();
         check.equal(getComputedStyle(scroller).maxHeight, storedHeight, `${touch} reuses the height when pinned again`);
@@ -1771,6 +1784,8 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         const current = handle.getBoundingClientRect();
         const currentX = current.left + current.width / 2;
         const currentY = current.top + current.height / 2;
+        node.removeAttribute("custom-pinthead");
+        f.render();
         const fullHeight = scroller.scrollHeight + scroller.offsetHeight - scroller.clientHeight;
         pointer(handle, "pointerdown", currentX, currentY, 93);
         pointer(document, "pointermove", currentX, currentY + fullHeight, 93);
@@ -1781,8 +1796,34 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         node.setAttribute(heightAttribute, `${fullHeight + 100}px`);
         f.render();
         check.equal(scroller.offsetHeight, fullHeight, `${touch} uses the natural height with a larger saved limit`);
+        const height = load("src/protyle/util/tableHeight.ts") as typeof import("./tableHeight");
+        height.openTableHeight(f.owner, node);
+        check.equal(heightDialogOptions.type, "number");
+        check.equal(heightDialogOptions.value, String(fullHeight + 100));
+        const dialogElement = document.createElement("div");
+        const input = document.createElement("input");
+        input.dataset.dialogInput = "";
+        input.type = "number";
+        input.min = heightDialogOptions.min;
+        input.value = "144";
+        dialogElement.append(input);
+        const dialog = {element: dialogElement, destroy: noop} as unknown as Parameters<typeof heightDialogOptions.onConfirm>[1];
+        heightDialogOptions.onConfirm(input.value, dialog);
+        check.equal(scroller.offsetHeight, 144, "the numeric height works without pinned headers");
+        check.equal(attributeTransactions.at(-1).undo[0].data, JSON.stringify({[heightAttribute]: `${fullHeight + 100}px`}));
+        const targetRow = tbody.rows[tbody.rows.length - 1];
+        check.ok(height.scrollTableRowIntoView(f.table, targetRow));
+        check.ok(targetRow.getBoundingClientRect().bottom <= scroller.getBoundingClientRect().bottom + 1);
+        if (!touch) {
+            f.root.classList.add("export-img");
+            check.equal(getComputedStyle(scroller).maxHeight, "none", "image export expands capped ordinary tables");
+            f.root.classList.remove("export-img");
+        }
+        heightDialogOptions.actions[0].onClick(input.value, dialog);
+        check.equal(node.getAttribute(heightAttribute), null);
+        check.equal(getComputedStyle(scroller).maxHeight, "none", "restoring the default expands ordinary tables");
         f.dispose();
-        viewportStyle.remove();
+        heightStyle.remove();
     }
     realStyle.remove();
     const layoutStyle = document.createElement("style");
@@ -1865,8 +1906,9 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
                     const addRect = add.getBoundingClientRect();
                     check.ok(addRect.right <= f.root.getBoundingClientRect().right + 1,
                         context + " the entire add control fits in the editor");
-                    check.ok(Math.abs(viewport.right - (f.editor.getBoundingClientRect().right - 20)) < 1,
-                        context + " the scroll viewport uses the complete table block width");
+                    const gutter = pinned ? 26 : 0;
+                    check.ok(Math.abs(viewport.right - (f.editor.getBoundingClientRect().right - 20 - gutter)) < 1,
+                        context + " wide capped tables leave the column controls outside the scroller");
                     check.ok(f.table.getBoundingClientRect().right > viewport.right,
                         context + " the fixture overflows horizontally");
                     scroller.scrollLeft = 90;
@@ -1882,8 +1924,9 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
                     check.equal(transactions.length, count + 1, context + " adding creates one undo transaction");
                     check.equal(scroller.scrollLeft, scroller.scrollWidth - scroller.clientWidth,
                         context + " the appended column is scrolled into view");
-                    check.ok(Math.abs(scroller.getBoundingClientRect().right - f.table.getBoundingClientRect().right - 26) <= 1,
-                        context + " control space appears only at the scroll end");
+                    const innerGutter = pinned ? scroller.offsetWidth - scroller.clientWidth : 26;
+                    check.ok(Math.abs(scroller.getBoundingClientRect().right - f.table.getBoundingClientRect().right - innerGutter) <= 1,
+                        context + " wide tables keep space for column controls at the scroll end");
                     const endAdd = show();
                     const endRect = endAdd.getBoundingClientRect();
                     check.ok(Math.abs(endRect.left + endRect.width / 2 - f.table.getBoundingClientRect().right - 18) <= 1,
@@ -1936,7 +1979,7 @@ test("desktop and mobile table selection, resize feedback and gesture cancellati
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const files = ["tableControl", "tableTouch", "table", "tableSelection", "tableResize", "tableRowHeight", "tableViewportHeight",
+    const files = ["tableControl", "tableTouch", "table", "tableSelection", "tableResize", "tableRowHeight", "tableHeight",
         "tableColumnWidth", "tableGridCache", "tableCellRich", "tableCellRichValue", "tableCellRichContext", "tableVirtualizationDOM"]
         .map(file => "src/protyle/util/" + file + ".ts");
     files.push("src/mobile/util/multiSelectToolbar.ts");

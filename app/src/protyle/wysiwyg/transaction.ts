@@ -210,15 +210,15 @@ const syncBlockAttrs = (element: Element, operation: Extract<IOperation, {action
     const hasStyle = Object.prototype.hasOwnProperty.call(attrs, "style");
     const hasMindmapView = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_LIST_MINDMAP);
     const hasMindmapMetadata = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_LIST_MINDMAP_DATA);
-    const hasTableViewportHeight = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_TABLE_VIEWPORT_HEIGHT);
+    const hasTableHeight = Object.prototype.hasOwnProperty.call(attrs, Constants.CUSTOM_SY_TABLE_HEIGHT);
     const tabsAttrs = ["tabs-active-id", "tabs-position", "tabs-task"]
         .filter(name => Object.prototype.hasOwnProperty.call(attrs, name));
-    if (!hasFold && !hasStyle && !hasMindmapView && !hasMindmapMetadata && !hasTableViewportHeight && tabsAttrs.length === 0) {
+    if (!hasFold && !hasStyle && !hasMindmapView && !hasMindmapMetadata && !hasTableHeight && tabsAttrs.length === 0) {
         return;
     }
     element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-        if (hasTableViewportHeight) {
-            const name = Constants.CUSTOM_SY_TABLE_VIEWPORT_HEIGHT;
+        if (hasTableHeight) {
+            const name = Constants.CUSTOM_SY_TABLE_HEIGHT;
             if (attrs[name]) {
                 item.setAttribute(name, attrs[name]);
             } else {

@@ -627,10 +627,22 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
       padding: 0;
     }
 
-    &.table[custom-pinthead="true"] {
+    &.table {
       & > div:first-child {
-        max-height: var(--b3-table-viewport-preview-height, var(--b3-table-viewport-height, 50vh));
+        --b3-table-preview-max-height: initial;
+        --b3-table-max-height: initial;
+        --b3-table-default-max-height: initial;
+        --b3-table-end-margin: initial;
+        max-height: var(--b3-table-preview-max-height, var(--b3-table-max-height, var(--b3-table-default-max-height, none)));
+      }
+
+      &[custom-pinthead="true"] > div:first-child,
+      &[custom-sy-table-viewport-height] > div:first-child,
+      & > div:first-child[data-table-height-preview] {
+        width: fit-content;
+        max-width: calc(100% - var(--b3-table-add-column-space, 0px));
         overflow: auto;
+        --b3-table-end-margin: 0px;
 
         &::-webkit-scrollbar-track:vertical,
         &::-webkit-scrollbar-corner {
@@ -638,6 +650,12 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
         }
       }
 
+      &[custom-pinthead="true"] > div:first-child {
+        --b3-table-default-max-height: 50vh;
+      }
+    }
+
+    &.table[custom-pinthead="true"] {
       table {
         border-top: 0;
         border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
@@ -1175,10 +1193,11 @@ body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
 .protyle-wysiwyg[data-readonly="false"] {
   &[contenteditable="true"] [data-node-id].table {
     padding-bottom: 30px;
+    --b3-table-add-column-space: 26px;
 
     // 增列操作空间随表格内容滚动，仅在末尾露出。
     > div:first-child > table {
-      margin-right: 26px;
+      margin-right: var(--b3-table-end-margin, var(--b3-table-add-column-space));
     }
   }
 

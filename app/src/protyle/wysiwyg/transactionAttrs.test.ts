@@ -13,7 +13,7 @@ const attribute = "custom-sy-list-mindmap";
 const metadataAttribute = "custom-sy-list-mindmap-data";
 const viewportHeight = "custom-sy-table-viewport-height";
 const context = {Constants: {CUSTOM_SY_LIST_MINDMAP: attribute, CUSTOM_SY_LIST_MINDMAP_DATA: metadataAttribute,
-    CUSTOM_SY_TABLE_VIEWPORT_HEIGHT: viewportHeight},
+    CUSTOM_SY_TABLE_HEIGHT: viewportHeight},
     sync: undefined as any};
 runInNewContext(transpileModule(declaration.getText(source) + "\nglobalThis.sync = syncBlockAttrs;", {
     compilerOptions: {target: ScriptTarget.ES2021},
@@ -66,7 +66,7 @@ test("unrelated attribute transactions preserve the mind map view", () => {
     assert.equal(attrs.get("fold"), "1");
 });
 
-test("table viewport resize, undo and redo synchronize without replacing content", () => {
+test("table height changes, undo and redo synchronize without replacing content", () => {
     const copies = [new Map([["custom-pinthead", "true"]]), new Map([["custom-pinthead", "true"]])];
     const root = {querySelectorAll: (selector: string) => {
         assert.equal(selector, '[data-node-id="table-id"]');

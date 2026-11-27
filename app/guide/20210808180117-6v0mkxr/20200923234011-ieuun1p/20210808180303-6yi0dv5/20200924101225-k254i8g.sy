@@ -2007,7 +2007,34 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "With the header row pinned, hover over the table on desktop or tap a cell on mobile, then drag the handle at the bottom center of the visible table to set its maximum height. The table only takes up as much height as its content needs. The limit is saved for that table and restored if you pin the header row again. Resizing supports undo and redo."
+					"Data": "In the block menu, choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Table block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Height"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and enter the maximum height in pixels. You can also hover over the table on desktop or tap a cell on mobile, then drag the handle at the bottom center of the visible table. The limit is saved with the table and applies whether or not the header row is pinned. Choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Default"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the height dialog to clear the custom limit. Ordinary tables then expand with their content, while tables with a pinned header row use their default scroll height. Height changes support undo and redo."
 				}
 			]
 		},

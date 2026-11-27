@@ -929,6 +929,12 @@ func ParseAttributeViewRecoveryData(avID string, data []byte) (*AttributeView, e
 }
 
 func parseAttributeViewDataWithRecovery(avID string, data []byte, normalizeRichText, recovery bool) (ret *AttributeView, err error) {
+	defer func() {
+		// 解析失败时，部分结果中的主键 DOM 可能仍来自输入字节。
+		if err != nil && normalizeRichText {
+			ret.DiscardPrimaryRichDOM()
+		}
+	}()
 	// 仅处理已认证明文的开头 BOM；缓存和条件写入保留原始字节以检测外部修改。
 	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}

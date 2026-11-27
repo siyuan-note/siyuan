@@ -170,6 +170,7 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 			if err = av.SaveAttributeView(attrView); err != nil {
 				t.Fatal(err)
 			}
+			values.Values[0].Block.RichBlockDOM = "derived preview marker"
 			avData, err := json.Marshal(attrView)
 			if err != nil {
 				t.Fatal(err)
@@ -235,6 +236,20 @@ func TestImportSYAttributeViewBindingIsolation(t *testing.T) {
 			avBoxID := ""
 			if encrypted {
 				avBoxID = targetBoxID
+			}
+			storageDir := filepath.Join(util.DataDir, avBoxID, "storage", "av")
+			stored, err := os.ReadFile(filepath.Join(storageDir, newAvID+".json"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if encrypted {
+				stored, err = av.DecryptAVData(avBoxID, newAvID, stored)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			if bytes.Contains(stored, []byte(`"richBlockDOM"`)) {
+				t.Fatal("import persisted derived primary key markup")
 			}
 			imported, err := av.ParseAttributeViewInBox(newAvID, avBoxID)
 			if err != nil {

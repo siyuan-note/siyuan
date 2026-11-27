@@ -5,6 +5,7 @@
 package model
 
 import (
+	"encoding/json"
 	stdhtml "html"
 	"reflect"
 	"strings"
@@ -14,6 +15,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
+
+func TestRewriteAttributeViewArchiveDropsDerivedPrimaryDOM(t *testing.T) {
+	data := []byte(`{"keyValues":[{"values":[{"type":"block","block":{"content":"Plain title","richBlockDOM":"discard"}},{"type":"rollup","rollup":{"contents":[{"type":"block","block":{"content":"Rich title","richBlockDOM":"discard","rich":{"spec":1,"format":"kramdown","content":"**Rich title**"}}}]}}]}]}`)
+	got, err := rewriteAttributeViewDataAssetReferences(data, assetReferenceRewriteOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var parsed av.AttributeView
+	if err = json.Unmarshal(got, &parsed); err != nil {
+		t.Fatal(err)
+	}
+	values := parsed.KeyValues[0].Values
+	plain := values[0].Block
+	rich := values[1].Rollup.Contents[0].Block
+	if strings.Contains(string(got), "richBlockDOM") || plain.Content != "Plain title" ||
+		rich.Content != "Rich title" || rich.Rich == nil || rich.Rich.Content != "**Rich title**" {
+		t.Fatalf("unexpected archive values: %s", got)
+	}
+}
 
 func TestRewritePortableAssetReference(t *testing.T) {
 	got := rewriteAssetReference("assets/image.png?box=20260812000000-source0&style=thumb#preview",

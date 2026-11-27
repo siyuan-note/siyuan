@@ -104,6 +104,12 @@ const cases = async (sources: Record<string, string>, styles: Record<string, str
     load("luteMarkdownSyntax");
     const parser = load("richTextEditorLute");
     const dom = (html: string) => `<div data-type="NodeParagraph" data-node-id="${Lute.NewNodeID()}"><div contenteditable="true">${html}</div></div>`;
+    const untrusted: IAVCellValue = {type: "block", isDetached: true,
+        block: {content: "Plain title", richBlockDOM: dom('<span data-type="strong" onmouseover="discard">Styled</span>')}};
+    const untrustedHost = document.createElement("div");
+    untrustedHost.innerHTML = cell.renderCell(untrusted, 0, false, "table");
+    check.equal(untrustedHost.querySelector('[data-type="strong"]').textContent, "Styled");
+    check.equal(untrustedHost.querySelector("[onmouseover]"), null);
     const source: IAVCellValue = {type: "block", id: "value", blockID: "row", isDetached: true,
         block: {content: "Summary", rich: {spec: 1, format: "inline-ast", content: "full source"}, richBlockDOM: dom(
             '<span data-type="strong em">Styled</span><span data-type="inline-math" data-subtype="math" data-content="x^2" contenteditable="false"></span><span class="img" data-type="img" contenteditable="false"><img src="assets/a.png" alt="Image"></span><span data-type="block-ref" data-id="target" data-subtype="d">Ref</span>')}};

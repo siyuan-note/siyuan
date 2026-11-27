@@ -640,7 +640,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-l7jhm5i",
-								"updated": "20261126195512"
+								"updated": "20261127094542"
 							},
 							"Children": [
 								{
@@ -660,6 +660,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Редактор"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Двусторонние ссылки"
 								},
 								{
 									"Type": "NodeText",
@@ -729,7 +738,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20261122113000-bfyxm4l",
-								"updated": "20261126195512"
+								"updated": "20261127094542"
 							},
 							"Children": [
 								{
@@ -743,10 +752,6 @@
 								{
 									"Type": "NodeText",
 									"Data": " и измените текст — это сделает текст ссылки "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "ссылки "
 								},
 								{
 									"Type": "NodeText",

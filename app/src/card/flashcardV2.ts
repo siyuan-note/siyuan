@@ -2029,7 +2029,7 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
 <button data-type="pendingEdits" class="b3-button b3-button--outline" aria-pressed="${filters.editLater === "true"}">${window.siyuan.languages.flashcardPendingEdits}</button>
 <button data-type="filter" class="b3-button b3-button--outline">${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button>
 <button data-type="conflicts" class="fn__none b3-button b3-button--outline">${window.siyuan.languages.conflict}</button>
-<button data-type="cleanup" class="fn__none b3-button b3-button--outline">${window.siyuan.languages.flashcardCleanup}</button>
+<button data-type="cleanup" class="fn__none b3-button b3-button--outline">${window.siyuan.languages.invalid}</button>
 <button data-type="statistics" class="b3-button b3-button--outline">${window.siyuan.languages.statistics}</button>
 ${policyScope ? `<button data-type="scopePolicy" class="fn__none b3-button b3-button--outline">${window.siyuan.languages.config}</button>` : ""}
 ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-button b3-button--outline">${window.siyuan.languages.flashcardReviewSet}</button>` : ""}

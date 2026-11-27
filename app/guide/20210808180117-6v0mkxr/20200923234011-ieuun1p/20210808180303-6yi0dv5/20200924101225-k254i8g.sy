@@ -2007,7 +2007,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "With the header row pinned, hover over the table on desktop or tap a cell on mobile, then drag the handle at the bottom of the scroll area to adjust its height. The height is saved for that table and is used again if you re-enable the pinned header. Resizing supports undo and redo."
+					"Data": "With the header row pinned, hover over the table on desktop or tap a cell on mobile, then drag the handle at the bottom center of the visible table to set its maximum height. The table only takes up as much height as its content needs. The limit is saved for that table and restored if you pin the header row again. Resizing supports undo and redo."
 				}
 			]
 		},

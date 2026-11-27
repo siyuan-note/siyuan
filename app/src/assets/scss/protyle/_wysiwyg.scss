@@ -629,7 +629,6 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
 
     &.table[custom-pinthead="true"] {
       & > div:first-child {
-        height: var(--b3-table-viewport-preview-height, var(--b3-table-viewport-height, auto));
         max-height: var(--b3-table-viewport-preview-height, var(--b3-table-viewport-height, 50vh));
         overflow: auto;
 

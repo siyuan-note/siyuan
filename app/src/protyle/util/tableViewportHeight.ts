@@ -38,7 +38,8 @@ export const startTableViewportResize = (protyle: IProtyle, cell: HTMLTableCellE
     const startHeight = viewport.offsetHeight;
     const startY = event.clientY;
     const scale = viewport.getBoundingClientRect().height / startHeight || 1;
-    const minHeight = Math.max(TABLE_VIEWPORT_MIN_HEIGHT, (table.tHead?.offsetHeight || 0) + 24);
+    const maxHeight = startHeight + viewport.scrollHeight - viewport.clientHeight;
+    const minHeight = Math.min(maxHeight, Math.max(TABLE_VIEWPORT_MIN_HEIGHT, (table.tHead?.offsetHeight || 0) + 24));
     let height = startHeight;
     const controller = new AbortController();
     const {signal} = controller;
@@ -70,7 +71,7 @@ export const startTableViewportResize = (protyle: IProtyle, cell: HTMLTableCellE
         }
         move.preventDefault();
         height = move.clientY === startY ? startHeight :
-            Math.max(minHeight, Math.round(startHeight + (move.clientY - startY) / scale));
+            Math.min(maxHeight, Math.max(minHeight, Math.round(startHeight + (move.clientY - startY) / scale)));
         viewport.style.setProperty(previewProperty, height === startHeight ? "" : `${height}px`);
         preview(viewport.offsetHeight, move.clientX, move.clientY);
     }, {signal, passive: false});

@@ -1689,11 +1689,11 @@ table + .protyle-action__table {
   }
 
   &--touch {
-    .protyle-table-control__height {
+    > .protyle-table-control__viewport-height {
       height: 28px;
     }
 
-    > .protyle-table-control__handle,
+    > .protyle-table-control__handle:not(.protyle-table-control__viewport-height),
     > .protyle-table-control__add {
       display: none;
     }

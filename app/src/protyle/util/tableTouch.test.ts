@@ -1674,6 +1674,8 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         document.head.append(viewportStyle);
         const node = f.table.closest("[data-node-id]");
         const scroller = f.table.parentElement;
+        f.table.style.margin = "0";
+        f.table.querySelectorAll("col").forEach(col => col.style.width = "36px");
         const tbody = f.table.tBodies[0];
         tbody.append(...Array.from({length: 8}, () => tbody.rows[0].cloneNode(true)));
         node.setAttribute("custom-pinthead", "true");
@@ -1697,8 +1699,13 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         check.equal(getComputedStyle(scroller).maxHeight, "120px");
         scroller.scrollTop = 25;
         const rect = handle.getBoundingClientRect();
+        check.ok(rect.width > 0 && rect.height >= (touch ? 28 : 16), `${touch} renders a usable resize target`);
         const x = rect.left + rect.width / 2;
         const y = rect.top + rect.height / 2;
+        const tableRect = f.table.getBoundingClientRect();
+        check.ok(scroller.getBoundingClientRect().width > tableRect.width * 2);
+        check.ok(Math.abs(x - (tableRect.left + tableRect.width / 2)) < 1,
+            `${touch} centers the handle over the narrow table`);
         const startHeight = scroller.offsetHeight;
         const count = attributeTransactions.length;
         pointer(handle, "pointerdown", x, y, 91);
@@ -1706,6 +1713,11 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         f.render();
         check.equal(Math.round(scroller.getBoundingClientRect().height), Math.round(startHeight + 60),
             "rendering keeps the viewport drag preview visible");
+        const guide = f.touch(".protyle-table-control__height-guide");
+        check.ok(!guide.classList.contains("fn__none"));
+        check.ok(Math.abs(Number.parseFloat(guide.style.left) - tableRect.left) < 1);
+        check.ok(Math.abs(Number.parseFloat(guide.style.width) - tableRect.width) < 1,
+            `${touch} draws the drag guide across the narrow table`);
         pointer(document, "pointerup", x, y + 60, 91);
         const storedHeight = `${Math.round(startHeight + 60)}px`;
         check.equal(node.getAttribute(heightAttribute), storedHeight, `${touch} persists the height`);
@@ -1752,7 +1764,23 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
             f.root.classList.add("export-img");
             check.equal(getComputedStyle(scroller).maxHeight, "none");
             check.ok(scroller.offsetHeight > Number.parseInt(storedHeight), "export expands the complete table");
+            f.root.classList.remove("export-img");
         }
+        f.render();
+        check.ok(!handle.classList.contains("fn__none"));
+        const current = handle.getBoundingClientRect();
+        const currentX = current.left + current.width / 2;
+        const currentY = current.top + current.height / 2;
+        const fullHeight = scroller.scrollHeight + scroller.offsetHeight - scroller.clientHeight;
+        pointer(handle, "pointerdown", currentX, currentY, 93);
+        pointer(document, "pointermove", currentX, currentY + fullHeight, 93);
+        check.equal(scroller.offsetHeight, fullHeight, `${touch} stops expanding at the table content height`);
+        pointer(document, "pointerup", currentX, currentY + fullHeight, 93);
+        check.equal(node.getAttribute(heightAttribute), `${fullHeight}px`);
+        check.equal(attributeTransactions.length, count + 2);
+        node.setAttribute(heightAttribute, `${fullHeight + 100}px`);
+        f.render();
+        check.equal(scroller.offsetHeight, fullHeight, `${touch} uses the natural height with a larger saved limit`);
         f.dispose();
         viewportStyle.remove();
     }

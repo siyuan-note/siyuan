@@ -1155,7 +1155,7 @@ export class TableControl {
         const resizeTable = resizeHandle?.closest('[data-type="NodeTable"]')?.querySelector("table");
         if (resizeTable && this.wysiwygElement.contains(resizeTable) && !event.shiftKey) {
             boundary = {table: resizeTable, column: Number(resizeHandle.getAttribute("data-col-index"))};
-        } else if (fromControl && (event.target as Element).closest(".protyle-table-control__height") && this.rowBoundary) {
+        } else if (fromControl && this.rowResizeHandle.contains(event.target as Node) && this.rowBoundary) {
             boundary = {table: this.rowBoundary.cell.closest("table"), row: this.rowBoundary.row};
         } else if (targetCell && getTableNode(targetCell) && !this.protyle.disabled) {
             const table = targetCell.closest("table");
@@ -1594,15 +1594,14 @@ export class TableControl {
             return;
         }
         if (boundary.viewport) {
-            const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
-            const viewportRect = intersectRects(boundary.table.parentElement.getBoundingClientRect(), contentRect);
-            if (viewportRect.width <= 0 || viewportRect.height <= 0) {
+            const edge = this.getTableViewportResizeEdge(boundary.table);
+            if (!edge) {
                 return;
             }
             this.dimensionGuide.className = "protyle-table-control__height-guide";
-            this.dimensionGuide.style.left = `${viewportRect.left}px`;
-            this.dimensionGuide.style.top = `${viewportRect.bottom}px`;
-            this.dimensionGuide.style.width = `${viewportRect.width}px`;
+            this.dimensionGuide.style.left = `${edge.left}px`;
+            this.dimensionGuide.style.top = `${edge.bottom}px`;
+            this.dimensionGuide.style.width = `${edge.width}px`;
             this.dimensionGuide.style.height = "";
             return;
         }
@@ -1657,6 +1656,15 @@ export class TableControl {
         const wrapperRect = table.parentElement.getBoundingClientRect();
         const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
         return intersectRects(tableRect, wrapperRect, contentRect);
+    }
+
+    private getTableViewportResizeEdge(table: HTMLTableElement) {
+        const wrapperRect = table.parentElement.getBoundingClientRect();
+        const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
+        const visibleTable = intersectRects(table.getBoundingClientRect(), wrapperRect, contentRect);
+        if (visibleTable.width > 0 && visibleTable.height > 0 && wrapperRect.bottom <= contentRect.bottom) {
+            return {left: visibleTable.left, width: visibleTable.width, bottom: wrapperRect.bottom};
+        }
     }
 
     private getTableAddRowEdge(table: HTMLTableElement) {
@@ -1958,15 +1966,12 @@ export class TableControl {
         if (node?.getAttribute("custom-pinthead") !== "true" || this.dragState || this.resizeState) {
             return;
         }
-        const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
-        const bounds = table.parentElement.getBoundingClientRect();
-        const viewportRect = intersectRects(bounds, contentRect);
-        if (viewportRect.width <= 0 || viewportRect.height <= 0 || viewportRect.bottom < bounds.bottom) {
+        const edge = this.getTableViewportResizeEdge(table);
+        if (!edge) {
             return;
         }
         this.viewportResizeTable = table;
-        this.setPosition(this.viewportResizeHandle, viewportRect.left + viewportRect.width / 2,
-            viewportRect.bottom - TABLE_ADD_CONTROL_GAP);
+        this.setPosition(this.viewportResizeHandle, edge.left + edge.width / 2, edge.bottom - TABLE_ADD_CONTROL_GAP);
         this.viewportResizeHandle.classList.remove("fn__none");
     }
 

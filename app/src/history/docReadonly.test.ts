@@ -120,12 +120,20 @@ const createHistory = (mobile: boolean, readonly: boolean) => {
     let comparisons = 0;
     const diffPairs: IDocVersionRef[][] = [];
     const diffMessages: string[] = [];
+    const rendered: unknown[] = [];
     const snapshots = {reset: noop, load: noop, select: noop};
     const module = loadModule("history/doc.ts", mobile, {
-        "../dialog/adaptiveDialog": {AdaptiveDialog: class {element = root;}},
+        "../dialog/adaptiveDialog": {AdaptiveDialog: class {
+            element = root;
+            constructor(options: {mobileSheet?: {initiallyExpanded: boolean}}) {
+                if (mobile) {
+                    assert.equal(options.mobileSheet?.initiallyExpanded, true);
+                }
+            }
+        }},
         "../dialog/confirmDialog": {confirmDialog: () => { confirmations++; }},
         "../protyle": {Protyle: class {protyle = {options: {history: {}}};}},
-        "../protyle/util/onGet": {disabledProtyle: noop, onGet: noop},
+        "../protyle/util/onGet": {disabledProtyle: noop, onGet: (options: {data: unknown}) => rendered.push(options.data)},
         "../util/fetch": {
             fetchPost: (url: string, body: unknown, callback: (response: unknown) => void) => requests.push({url, body, callback}),
             fetchSyncPost: (url: string, body: unknown) => new Promise((callback) => requests.push({url, body, callback})),
@@ -147,7 +155,8 @@ const createHistory = (mobile: boolean, readonly: boolean) => {
         "./resizeSide": {resizeSide: noop},
         dayjs: () => ({format: () => "date"}),
     }, {window: {siyuan: {config: {readonly: false}, storage: {history: {}}, languages: {
-        pageCountAndHistoryCount: "${x} ${y}", rollbackConfirm: "${name} ${time}", historyNoPrevious: "No earlier version"}}},
+        pageCountAndHistoryCount: "${x} ${y}", rollbackConfirm: "${name} ${time}", historyNoPrevious: "No earlier version",
+        historySelectTwoVersions: "Select two versions"}}},
         Event, CustomEvent: class {constructor(public type: string) {}}}) as typeof import("./doc");
     module.openDocHistory({app: {} as Parameters<typeof module.openDocHistory>[0]["app"],
         id: "doc", notebookId: "notebook", pathString: "Document", readonly});
@@ -156,13 +165,15 @@ const createHistory = (mobile: boolean, readonly: boolean) => {
         const target = new TestElement();
         target.row = row;
         target.setAttribute("data-type", type);
-        target.setAttribute("data-created", time);
+        if (type !== "currentVersionItem") {
+            target.setAttribute("data-created", time);
+        }
         target.parentElement = new TestElement();
-        target.parentElement.setAttribute("data-created", "1");
+        target.parentElement.setAttribute("data-created", time);
         root.listeners.get("click")({target, stopPropagation: noop, preventDefault: noop});
         return target;
     };
-    return {file, requests, click, root, diffPairs, diffMessages, confirmations: () => confirmations,
+    return {file, requests, click, root, diffPairs, diffMessages, rendered, confirmations: () => confirmations,
         repoRollbacks: () => repoRollbacks, comparisons: () => comparisons};
 };
 
@@ -192,10 +203,14 @@ for (const mobile of [false, true]) {
         await nextTurn();
         assert.equal((view.file.querySelector('.history__text[data-type="mdPanel"]') as TestElement & {value: string}).value,
             "Historical content");
+        view.click("historyPreviewCompare");
+        assert.deepEqual(view.diffMessages, ["Select two versions"]);
         view.click("selectVersion");
-        view.requests.shift().callback({data: {items: [{path: "history/doc.sy", title: "Document"}]}});
-        view.click("compareVersions");
-        assert.equal(view.comparisons(), 1);
+        view.requests.shift().callback({code: 0, data: {items: [{path: "history/doc.sy", title: "Document"}]}});
+        await nextTurn();
+        assert.equal(view.diffPairs[0][0].type, "current");
+        assert.equal(view.diffPairs[0][1].path, "history/doc.sy");
+        assert.equal(view.comparisons(), 0);
     });
 }
 
@@ -266,6 +281,84 @@ test("switching to original invalidates an in-flight difference request", async 
     original.callback({code: 0, data: {content: "Original", isLargeDoc: true}});
     stale.callback({code: 0, data: {items: [{path: "stale.sy"}]}});
     await nextTurn();
+    assert.equal(view.diffPairs.length, 0);
+    assert.equal(view.requests.length, 0);
+});
+
+test("current original is read-only and current difference uses the newest unfiltered history", async () => {
+    const view = createHistory(false, true);
+    view.click("currentVersionItem", true);
+    const original = view.requests.shift();
+    assert.equal(original.url, "/api/filetree/getDoc");
+    assert.equal((original.body as {notebook: string}).notebook, "notebook");
+    const content = {code: 0, data: {content: "Current content", docInfo: {name: "Current title"}}};
+    original.callback(content);
+    await nextTurn();
+    assert.equal(view.rendered[0], content);
+    assert.equal(view.file.querySelector(".protyle-title__input").textContent, "Current title");
+
+    view.click("historyPreviewDiff");
+    const list = view.requests.shift();
+    assert.equal(list.url, "/api/history/searchHistory");
+    assert.equal((list.body as {op: string}).op, "all");
+    list.callback({code: 0, data: {histories: ["80", "60"], pageCount: 1}});
+    await nextTurn();
+    const latest = view.requests.shift();
+    assert.equal((latest.body as {created: string}).created, "80");
+    latest.callback({code: 0, data: {items: [{path: "latest.sy"}]}});
+    await nextTurn();
+    assert.equal(view.diffPairs[0][0].path, "latest.sy");
+    assert.equal(view.diffPairs[0][1].type, "current");
+    assert.equal(view.diffPairs[0][1].id, "doc");
+});
+
+test("specified comparison tracks checkbox changes immediately and ignores stale resolutions", async () => {
+    const view = createHistory(false, false);
+    view.click("selectVersion", false, "10");
+    assert.equal(view.requests.length, 0);
+    view.click("historyPreviewCompare");
+    view.click("selectVersion", false, "20");
+    const stale = view.requests.shift();
+    view.click("selectVersion", false, "30");
+    const next = view.requests.splice(0);
+    assert.deepEqual(next.map(item => (item.body as {created: string}).created), ["20", "30"]);
+    for (const item of next) {
+        item.callback({code: 0, data: {items: [{path: `${(item.body as {created: string}).created}.sy`}]}});
+    }
+    stale.callback({code: 0, data: {items: [{path: "stale.sy"}]}});
+    await nextTurn();
+    assert.equal(view.diffPairs.length, 1);
+    assert.equal(view.diffPairs[0][0].path, "20.sy");
+    assert.equal(view.diffPairs[0][1].path, "30.sy");
+    view.click("selectVersion", false, "20");
+    assert.equal(view.diffMessages.at(-1), "Select two versions");
+    assert.equal(view.requests.length, 0);
+    assert.equal(view.comparisons(), 0);
+});
+
+test("current difference reports no earlier version for an empty history", async () => {
+    const view = createHistory(true, false);
+    view.click("historyPreviewDiff");
+    view.click("currentVersionItem", true);
+    view.requests.shift().callback({code: 0, data: {histories: null, pageCount: 0}});
+    await nextTurn();
+    assert.deepEqual(view.diffMessages, ["No earlier version"]);
+    assert.equal(view.diffPairs.length, 0);
+    assert.equal(view.requests.length, 0);
+});
+
+test("the snapshot tab retains its version comparison", async () => {
+    const view = createHistory(false, true);
+    const target = new TestElement();
+    target.setAttribute("data-type", "selectVersion");
+    target.repoRow = new TestElement();
+    for (const [key, value] of Object.entries({"data-id": "file", "data-snapshot": "snapshot", "data-created": "42"})) {
+        target.repoRow.setAttribute(key, value);
+    }
+    view.root.listeners.get("click")({target, stopPropagation: noop, preventDefault: noop});
+    view.click("compareVersions");
+    await nextTurn();
+    assert.equal(view.comparisons(), 1);
     assert.equal(view.diffPairs.length, 0);
     assert.equal(view.requests.length, 0);
 });

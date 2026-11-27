@@ -20,12 +20,16 @@ import {forgetNotebookHistoryDialog, trackNotebookHistoryDialog} from "./noteboo
 
 const repoHistoryEditors = new WeakMap<HTMLElement, Protyle>();
 
+const filePreviewModes = ["historyPreviewOriginal", "historyPreviewDiff", "historyPreviewCompare"] as const;
+type FilePreviewMode = typeof filePreviewModes[number];
+type HistorySelection = IDocVersionRef & {historyOp?: string};
+
 const genCurrentVersionItem = () => `<li class="b3-list-item history__current-version" data-type="currentVersionItem">
     <span class="b3-list-item__text">${window.siyuan.languages.currentVer}</span>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectCurrentVersion" aria-pressed="true" aria-label="${window.siyuan.languages.currentVer}">
+    <button type="button" class="b3-button b3-button--text b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectCurrentVersion" aria-pressed="true" aria-label="${window.siyuan.languages.currentVer}">
         <svg><use xlink:href="#iconCheck"></use></svg>
-    </span>
+    </button>
 </li>`;
 
 const renderDoc = (element: HTMLElement, currentPage: number, id: string, readonly: boolean) => {
@@ -84,9 +88,9 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string, readon
     ${readonly ? "" : `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>`}
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
+    <button type="button" class="b3-button b3-button--text b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
         <svg><use xlink:href="#iconUncheck"></use></svg>
-    </span>
+    </button>
 </li>`;
         });
         listElement.innerHTML = logsHTML;
@@ -180,7 +184,8 @@ export const openDocHistory = (options: {
     let diffView: ReturnType<typeof mountDocVersionDiff>;
     let selectedHistoryRow: HTMLElement;
     let previewRequest = 0;
-    let diffMode = false;
+    let previewMode: FilePreviewMode = "historyPreviewOriginal";
+    let snapshotCompareRequest = 0;
     const getHistoryPath = (target: Element, op: string, id: string, cb: (item: {path: string, title: string}) => void) => {
         isLoading = true;
         const created = target.getAttribute("data-created");
@@ -198,7 +203,7 @@ export const openDocHistory = (options: {
         label: window.siyuan.languages.currentVer,
         created: Number.MAX_SAFE_INTEGER,
     };
-    const selectedVersions: IDocVersionRef[] = [currentVersion];
+    const selectedVersions: HistorySelection[] = [currentVersion];
     const contentHTML = `<div class="fn__flex-column" style="height: 100%;">
     <div class="layout-tab-bar fn__flex" ${isMobile() ? "" : 'style="border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0"'}>
         <div data-type="doc" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.fileHistory}</span><span class="fn__flex-1"></span></div>
@@ -206,7 +211,7 @@ export const openDocHistory = (options: {
     </div>
     <div class="fn__flex-1 fn__flex" id="docHistoryContainer">
         <div data-type="doc" class="history__repo fn__block" data-init="true">
-            <div class="history__action">
+            <div class="history__action history__file-toolbar">
                 <div class="block__icons">
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href="#iconLeft"></use></svg></span>
                     <button class="b3-button b3-button--text ft__selectnone" data-type="jumpRepoPage" disabled>1</button>
@@ -214,7 +219,11 @@ export const openDocHistory = (options: {
                     <span class="fn__space"></span>
                     <span class="ft__on-surface fn__flex-shrink ft__selectnone fn__none">${window.siyuan.languages.pageCountAndHistoryCount}</span>
                     <span class="fn__space"></span>
-                    <button class="b3-button b3-button--outline" data-type="compareVersions" disabled>${window.siyuan.languages.compare}</button>
+                    <div class="history__file-modes">
+                        <button type="button" data-type="historyPreviewOriginal" class="b3-button b3-button--outline" aria-pressed="true">${window.siyuan.languages.historyOriginal}</button>
+                        <button type="button" data-type="historyPreviewDiff" class="b3-button b3-button--outline" aria-pressed="false">${window.siyuan.languages.historyDifference}</button>
+                        <button type="button" data-type="historyPreviewCompare" class="b3-button b3-button--outline" aria-pressed="false">${window.siyuan.languages.historyCompareSelected}</button>
+                    </div>
                     <span class="fn__space"></span>
                     <div class="fn__flex-1"></div>
                     <select data-type="opselect" class="b3-select">
@@ -227,19 +236,12 @@ export const openDocHistory = (options: {
                     </select>
                 </div>
             </div>
-            <div class="fn__flex fn__flex-1 history__panel">
+            <div class="fn__flex fn__flex-1 history__panel history__file-panel">
                 <ul class="b3-list b3-list--background history__side" ${isMobile() ? "" : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDocWidth}"`}>
                     <li class="fn__loading"><span class="b3-loading" aria-hidden="true"></span></li>
                 </ul>
                 <div class="history__resize"></div>
                 <div class="fn__flex-1 fn__flex-column history__file-preview">
-                    <div class="history__action">
-                        <div class="block__icons">
-                            <button type="button" data-type="historyPreviewOriginal" class="b3-button b3-button--outline" aria-pressed="true">${window.siyuan.languages.historyOriginal}</button>
-                            <span class="fn__space"></span>
-                            <button type="button" data-type="historyPreviewDiff" class="b3-button b3-button--outline" aria-pressed="false">${window.siyuan.languages.historyDifference}</button>
-                        </div>
-                    </div>
                     <div class="protyle-title__input fn__none ft__center ft__breakword"></div>
                     <textarea class="fn__flex-1 history__text fn__none" readonly data-type="mdPanel"></textarea>
                     <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
@@ -277,6 +279,7 @@ export const openDocHistory = (options: {
     const dialog = new AdaptiveDialog({
         title: escapeHtml(options.pathString),
         content: contentHTML,
+        mobileSheet: {initiallyExpanded: true},
         width: isMobile() ? "100vw" : "90vw",
         height: isMobile() ? "100dvh" : "80vh",
         containerClassName: "b3-dialog__container--theme",
@@ -285,6 +288,7 @@ export const openDocHistory = (options: {
             getDocHistorySnapshots(fileElement)?.destroy();
             getDocHistorySnapshots(repoElement)?.destroy();
             previewRequest++;
+            snapshotCompareRequest++;
             diffView?.destroy();
             historyEditor?.destroy();
             historyEditor = undefined;
@@ -319,7 +323,7 @@ export const openDocHistory = (options: {
             }
         });
     };
-    const toggleVersionSelection = (version: IDocVersionRef) => {
+    const toggleVersionSelection = (version: HistorySelection) => {
         const key = versionKey(version);
         const index = selectedVersions.findIndex((item) => versionKey(item) === key);
         if (index > -1) {
@@ -330,7 +334,11 @@ export const openDocHistory = (options: {
             }
             selectedVersions.push(version);
         }
+        snapshotCompareRequest++;
         syncVersionSelection();
+        if (previewMode === "historyPreviewCompare") {
+            void previewHistoryFile();
+        }
     };
 
     const fileElement = dialog.element.querySelector('#docHistoryContainer [data-type="doc"]') as HTMLElement;
@@ -340,6 +348,13 @@ export const openDocHistory = (options: {
     fileElement.addEventListener("versionListRendered", syncVersionSelection);
     repoElement.addEventListener("versionListRendered", syncVersionSelection);
     const opElement = fileElement.querySelector(".b3-select") as HTMLSelectElement;
+    const historyRef = (row: HTMLElement): HistorySelection => {
+        const id = row.getAttribute("data-created");
+        return {
+            type: "history", id, created: Number(id) * 1000, historyOp: opElement.value,
+            label: dayjs(Number(id) * 1000).format("YYYY-MM-DD HH:mm:ss"),
+        };
+    };
     opElement.addEventListener("change", () => {
         renderDoc(fileElement, 1, options.id, readonly);
     });
@@ -366,20 +381,59 @@ export const openDocHistory = (options: {
     const pageNumElement = fileElement.querySelector('[data-type="jumpRepoPage"]');
     const titleElement = fileElement.querySelector(".protyle-title__input");
     const diffHost = fileElement.querySelector<HTMLElement>('[data-type="historyDiffPanel"]');
+    const fileToolbar = fileElement.querySelector(".history__file-toolbar");
     const hideOriginal = () => {
         titleElement.classList.add("fn__none");
         mdElement.classList.add("fn__none");
         docElement.classList.add("fn__none");
     };
     fileElement.addEventListener("historyFilePageChanging", () => {
-        previewRequest++;
         selectedHistoryRow = undefined;
+        if (previewMode === "historyPreviewCompare") {
+            return;
+        }
+        previewRequest++;
         diffView?.clear();
     });
+
+    const readItems = async (time: string, op: string) => {
+        const response = await fetchSyncPost("/api/history/getHistoryItems", {
+            query: options.id, type: 3, op, created: time,
+        });
+        if (response.code !== 0) {
+            throw new Error(response.msg);
+        }
+        const item = response.data.items?.[0];
+        if (!item) {
+            throw new Error(window.siyuan.languages.emptyContent);
+        }
+        return item;
+    };
+    const resolveVersion = async (version: HistorySelection): Promise<IDocVersionRef> => {
+        if (version.type !== "history") {
+            return version;
+        }
+        const {historyOp, ...ref} = version;
+        return {...ref, path: (await readItems(version.id, historyOp || "all")).path};
+    };
+    const compareFromSnapshots = async () => {
+        const request = ++snapshotCompareRequest;
+        try {
+            const [first, second] = await Promise.all(selectedVersions.map(resolveVersion));
+            if (request === snapshotCompareRequest && repoElement.isConnected && !repoElement.classList.contains("fn__none")) {
+                showDocVersionDiff(options.app, first, second);
+            }
+        } catch (error) {
+            if (request === snapshotCompareRequest) {
+                showMessage((error instanceof Error && error.message) || window.siyuan.languages.emptyContent);
+            }
+        }
+    };
 
     const previewHistoryFile = async () => {
         const row = selectedHistoryRow;
         const request = ++previewRequest;
+        const diffMode = previewMode !== "historyPreviewOriginal";
         hideOriginal();
         diffHost.classList.toggle("fn__none", !diffMode);
         if (diffMode) {
@@ -388,38 +442,38 @@ export const openDocHistory = (options: {
         } else {
             diffView?.clear();
         }
-        if (!row) {
-            return;
-        }
-        const current = () => request === previewRequest && row.isConnected;
-        const created = row.getAttribute("data-created");
-        const readItems = async (time: string, op: string) => {
-            const response = await fetchSyncPost("/api/history/getHistoryItems", {
-                query: options.id, type: 3, op, created: time,
-            });
-            if (response.code !== 0) {
-                throw new Error(response.msg);
-            }
-            const item = response.data.items?.[0];
-            if (!item) {
-                throw new Error(window.siyuan.languages.emptyContent);
-            }
-            return item;
-        };
+        const comparingSelection = previewMode === "historyPreviewCompare";
+        const current = () => request === previewRequest && fileElement.isConnected &&
+            (comparingSelection || !!row?.isConnected);
         try {
-            const item = await readItems(created, opElement.value);
+            if (comparingSelection) {
+                if (selectedVersions.length !== 2) {
+                    diffView.clear(window.siyuan.languages.historySelectTwoVersions);
+                    return;
+                }
+                const [first, second] = await Promise.all(selectedVersions.map(resolveVersion));
+                if (current()) {
+                    diffView.compare(first, second);
+                }
+                return;
+            }
+            if (!row?.isConnected) {
+                return;
+            }
+            const created = row.getAttribute("data-created");
+            const item = created ? await readItems(created, opElement.value) : undefined;
             if (!current()) {
                 return;
             }
             if (diffMode) {
-                const previous = await findPreviousHistoryTime(created, async (page) => {
+                const previous = await findPreviousHistoryTime(created || String(currentVersion.created), async (page) => {
                     const response = await fetchSyncPost("/api/history/searchHistory", {
                         query: options.id, type: 3, op: "all", page,
                     });
                     if (response.code !== 0) {
                         throw new Error(response.msg);
                     }
-                    return response.data;
+                    return {...response.data, histories: response.data.histories || []};
                 }, current);
                 if (!current()) {
                     return;
@@ -434,8 +488,30 @@ export const openDocHistory = (options: {
                         type: "history", id: time, path, created: Number(time) * 1000,
                         label: dayjs(Number(time) * 1000).format("YYYY-MM-DD HH:mm:ss"),
                     });
-                    diffView.compare(ref(previous, older.path), ref(created, item.path));
+                    diffView.compare(ref(previous, older.path), created ? ref(created, item.path) : currentVersion);
                 }
+                return;
+            }
+            if (!created) {
+                const response = await fetchSyncPost("/api/filetree/getDoc", {
+                    id: options.id, notebook: options.notebookId, includeDocInfo: true, highlight: false,
+                });
+                if (!current()) {
+                    return;
+                }
+                if (response.code !== 0) {
+                    throw new Error(response.msg);
+                }
+                historyEditor.protyle.options.history.created = "";
+                docElement.classList.remove("fn__none");
+                onGet({
+                    data: response,
+                    protyle: historyEditor.protyle,
+                    action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
+                    isValid: current,
+                });
+                titleElement.textContent = response.data.docInfo?.name || window.siyuan.languages.currentVer;
+                titleElement.classList.remove("fn__none");
                 return;
             }
             const response = await fetchSyncPost("/api/history/getDocHistoryContent", {
@@ -457,6 +533,7 @@ export const openDocHistory = (options: {
                     data: response,
                     protyle: historyEditor.protyle,
                     action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
+                    isValid: current,
                 });
             }
             titleElement.textContent = item.title;
@@ -498,6 +575,7 @@ export const openDocHistory = (options: {
                 return;
             }
             if (target.classList.contains("item")) {
+                snapshotCompareRequest++;
                 target.parentElement.querySelector(".item--focus").classList.remove("item--focus");
                 Array.from(dialog.element.querySelector("#docHistoryContainer").children).forEach((item: HTMLElement) => {
                     if (item.getAttribute("data-type") === type) {
@@ -543,47 +621,50 @@ export const openDocHistory = (options: {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "selectVersion" && !isLoading) {
-                const historyItemElement = target.parentElement;
-                const created = parseInt(historyItemElement.getAttribute("data-created")) * 1000;
-                getHistoryPath(historyItemElement, opElement.value, options.id, (item) => {
-                    isLoading = false;
-                    toggleVersionSelection({
-                        type: "history",
-                        id: historyItemElement.getAttribute("data-created"),
-                        path: item.path,
-                        label: `${window.siyuan.languages.fileHistory} ${historyItemElement.querySelector(".b3-list-item__text").textContent.trim()}`,
-                        created,
-                    });
-                });
+            } else if (type === "selectVersion" && previewMode === "historyPreviewCompare") {
+                toggleVersionSelection(historyRef(target.parentElement));
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "selectCurrentVersion") {
-                toggleVersionSelection(currentVersion);
+                if (!fileElement.contains(target) || previewMode === "historyPreviewCompare") {
+                    toggleVersionSelection(currentVersion);
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "historyPreviewOriginal" || type === "historyPreviewDiff") {
-                const nextMode = type === "historyPreviewDiff";
-                if (nextMode !== diffMode) {
-                    diffMode = nextMode;
-                    fileElement.querySelector('[data-type="historyPreviewOriginal"]').setAttribute("aria-pressed", String(!diffMode));
-                    fileElement.querySelector('[data-type="historyPreviewDiff"]').setAttribute("aria-pressed", String(diffMode));
+            } else if (type === "historyPreviewOriginal" || type === "historyPreviewDiff" || type === "historyPreviewCompare") {
+                if (type !== previewMode) {
+                    previewMode = type;
+                    fileElement.classList.toggle("history__file-compare-mode", type === "historyPreviewCompare");
+                    filePreviewModes.forEach(mode => fileToolbar.querySelector(`[data-type="${mode}"]`)
+                        .setAttribute("aria-pressed", String(mode === type)));
+                    syncVersionSelection();
                     void previewHistoryFile();
                 }
                 event.stopPropagation();
                 break;
             } else if (type === "compareVersions" && target.getAttribute("disabled") !== "disabled" &&
                 selectedVersions.length === 2) {
-                showDocVersionDiff(options.app, selectedVersions[0], selectedVersions[1]);
+                void compareFromSnapshots();
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item") && type === "currentVersionItem") {
-                historySnapshots.select("");
-                repoSnapshots.select("");
-                toggleVersionSelection(currentVersion);
+                if (fileElement.contains(target)) {
+                    if (previewMode === "historyPreviewCompare") {
+                        toggleVersionSelection(currentVersion);
+                    } else {
+                        historySnapshots.select("");
+                        selectedHistoryRow = target;
+                        target.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                        target.classList.add("b3-list-item--focus");
+                        void previewHistoryFile();
+                    }
+                } else {
+                    repoSnapshots.select("");
+                    toggleVersionSelection(currentVersion);
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -617,10 +698,14 @@ export const openDocHistory = (options: {
             } else if (target.classList.contains("b3-list-item") &&
                 target.hasAttribute("data-created") && fileElement.contains(target)) {
                 historySnapshots.select(target.getAttribute("data-created"));
-                selectedHistoryRow = target;
-                target.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
-                target.classList.add("b3-list-item--focus");
-                void previewHistoryFile();
+                if (previewMode === "historyPreviewCompare") {
+                    toggleVersionSelection(historyRef(target));
+                } else {
+                    selectedHistoryRow = target;
+                    target.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                    target.classList.add("b3-list-item--focus");
+                    void previewHistoryFile();
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;

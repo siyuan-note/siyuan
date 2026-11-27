@@ -1028,10 +1028,6 @@
     > input {
       margin-inline-end: 4px;
     }
-
-    > .b3-list-item__action {
-      background-color: var(--b3-theme-background);
-    }
   }
 
   &__v2-managed-main {
@@ -1064,17 +1060,6 @@
 
     &:hover {
       color: var(--b3-theme-primary);
-    }
-  }
-
-  &__v2-managed-card,
-  &__v2-managed-source {
-    > button.b3-list-item__action {
-      padding: 0;
-      border: 0;
-      color: inherit;
-      background: transparent;
-      cursor: pointer;
     }
   }
 

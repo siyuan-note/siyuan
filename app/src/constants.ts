@@ -110,6 +110,7 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_TABLE_HEADER_ROW: string = "custom-sy-table-header-row";
     public static readonly CUSTOM_SY_TABLE_HEADER_COLUMN: string = "custom-sy-table-header-column";
     public static readonly CUSTOM_SY_TABLE_PIN_COLUMN: string = "custom-sy-table-pin-column";
+    public static readonly CUSTOM_SY_TABLE_VIEWPORT_HEIGHT: string = "custom-sy-table-viewport-height";
     public static readonly CUSTOM_SY_AV_STATIC_TEXT: string = "custom-sy-av-s-text-";
     public static readonly CUSTOM_SY_LIVE_PHOTO: string = "custom-sy-live-photo";
     public static readonly CUSTOM_SY_LIVE_PHOTO_VIDEO: string = "custom-sy-live-photo-video";

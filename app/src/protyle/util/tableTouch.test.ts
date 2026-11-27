@@ -59,7 +59,8 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
     };
     const constants = new Proxy<Record<string, string | number>>({ZWSP: "\u200b", TIMEOUT_LONGPRESS: 20,
         SIZE_DRAG_THRESHOLD: 5, TABLE_PINNED_COLUMN_ACTIVE: "data-table-pinned-column-active",
-        TABLE_PINNED_COLUMN_CELL: "data-table-pinned-column-cell"}, {get: (target, key: string) => target[key] || key});
+        TABLE_PINNED_COLUMN_CELL: "data-table-pinned-column-cell",
+        CUSTOM_SY_TABLE_VIEWPORT_HEIGHT: "custom-sy-table-viewport-height"}, {get: (target, key: string) => target[key] || key});
     const stubs: Record<string, object | (() => object)> = {
         "src/constants.ts": {Constants: constants},
         "src/menus/menuToggle.ts": {toggleMenu: (options: {build: (menu: object, session: object) => void}) => {
@@ -1659,6 +1660,70 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         }
         f.dispose();
     }
+    for (const touch of [false, true]) {
+        mobile = touch;
+        const f = fixture();
+        const node = f.table.closest("[data-node-id]");
+        const scroller = f.table.parentElement;
+        node.setAttribute("custom-pinthead", "true");
+        node.setAttribute("custom-sy-table-viewport-height", "120px");
+        f.render();
+        if (touch) {
+            f.core.startTouchSelection(f.cell(1, 0));
+        } else {
+            const cell = f.cell(1, 0);
+            const rect = cell.getBoundingClientRect();
+            cell.dispatchEvent(new PointerEvent("pointermove", {bubbles: true,
+                clientX: rect.left + 8, clientY: rect.top + 8}));
+        }
+        f.render();
+        const handle = f.touch(".protyle-table-control__viewport-height");
+        check.ok(handle && !handle.classList.contains("fn__none"), `${touch} exposes the viewport height handle`);
+        check.equal(scroller.style.height, "120px");
+        check.equal(scroller.style.maxHeight, "120px");
+        const rect = handle.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const startHeight = scroller.getBoundingClientRect().height;
+        const count = transactions.length;
+        pointer(handle, "pointerdown", x, y, 91);
+        pointer(document, "pointermove", x, y + 60, 91);
+        check.equal(scroller.style.height, `${Math.round(startHeight + 60)}px`);
+        pointer(document, "pointerup", x, y + 60, 91);
+        const storedHeight = `${Math.round(startHeight + 60)}px`;
+        check.equal(node.getAttribute("custom-sy-table-viewport-height"), storedHeight, `${touch} persists the height`);
+        check.equal(transactions.length, count + 1, `${touch} commits one viewport resize transaction`);
+        scroller.style.removeProperty("height");
+        scroller.style.removeProperty("max-height");
+        f.render();
+        check.equal(scroller.style.height, storedHeight, `${touch} restores inline layout from the block attribute`);
+        check.equal(scroller.style.maxHeight, storedHeight);
+        node.removeAttribute("custom-pinthead");
+        f.render();
+        check.equal(scroller.style.height, "", `${touch} unpinning releases the fixed height`);
+        check.equal(scroller.style.maxHeight, "");
+        node.setAttribute("custom-pinthead", "true");
+        f.render();
+        check.equal(scroller.style.height, storedHeight, `${touch} reuses the height when pinned again`);
+        for (const cancel of ["pointercancel", "Escape"]) {
+            f.render();
+            check.equal(handle.classList.contains("fn__none"), false);
+            const current = handle.getBoundingClientRect();
+            const currentX = current.left + current.width / 2;
+            const currentY = current.top + current.height / 2;
+            pointer(handle, "pointerdown", currentX, currentY, 92);
+            pointer(document, "pointermove", currentX, currentY + 40, 92);
+            if (cancel === "Escape") {
+                document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+            } else {
+                pointer(document, "pointercancel", currentX, currentY + 40, 92);
+            }
+            check.equal(scroller.style.height, storedHeight, `${touch} ${cancel} restores the committed height`);
+            check.equal(node.getAttribute("custom-sy-table-viewport-height"), storedHeight);
+            check.equal(transactions.length, count + 1, `${touch} ${cancel} creates no transaction`);
+        }
+        f.dispose();
+    }
     realStyle.remove();
     const layoutStyle = document.createElement("style");
     document.head.append(layoutStyle);
@@ -1811,8 +1876,8 @@ test("desktop and mobile table selection, resize feedback and gesture cancellati
     skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
     timeout: 45000,
 }, async () => {
-    const files = ["tableControl", "tableTouch", "table", "tableSelection", "tableResize", "tableRowHeight", "tableColumnWidth", "tableGridCache",
-        "tableCellRich", "tableCellRichValue", "tableCellRichContext", "tableVirtualizationDOM"]
+    const files = ["tableControl", "tableTouch", "table", "tableSelection", "tableResize", "tableRowHeight", "tableViewportHeight",
+        "tableColumnWidth", "tableGridCache", "tableCellRich", "tableCellRichValue", "tableCellRichContext", "tableVirtualizationDOM"]
         .map(file => "src/protyle/util/" + file + ".ts");
     files.push("src/mobile/util/multiSelectToolbar.ts");
     const sources = Object.fromEntries(files.map(file => [file, transpileModule(

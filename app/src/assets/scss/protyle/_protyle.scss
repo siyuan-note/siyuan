@@ -1655,6 +1655,23 @@ table + .protyle-action__table {
     }
   }
 
+  &__viewport-height {
+    width: 48px;
+    height: 16px;
+
+    &::before {
+      display: block;
+      width: 32px;
+      height: 3px;
+    }
+
+    svg {
+      width: 20px;
+      height: 16px;
+      transform: rotate(90deg);
+    }
+  }
+
   &__width {
     width: 28px;
     cursor: col-resize;

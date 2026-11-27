@@ -1004,7 +1004,7 @@ const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
         statuses.push(generationLabels[result.card.generationStatus]);
     }
     return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
-<input data-type="selectCard" aria-label="${escapeAttr(title)}" class="b3-list-item__graphic" type="checkbox"${selectedCardIDs.has(result.card.id) ? " checked" : ""}>
+<input data-type="selectCard" aria-label="${escapeAttr(title)}" type="checkbox"${selectedCardIDs.has(result.card.id) ? " checked" : ""}>
 <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg>
 <span class="card__v2-managed-main">
 <button data-type="preview" class="card__v2-managed-title" aria-label="${escapeAttr(`${window.siyuan.languages.flashcardPreview} - ${title}`)}">${escapeHtml(title)}</button>
@@ -1043,7 +1043,7 @@ const renderManagedCards = (cards: IFlashcardSearchResult[], grouped: boolean, r
         const deleted = sourceCards[0].sourceStatus === "deleted";
         const editable = ["cloze", "ordered", "image-occlusion", "choice", "multi-line", "typed-answer"]
             .includes(sourceCards[0].sourceType);
-        return `<li class="b3-list-item b3-list-item--focus b3-list-item--hide-action card__v2-managed-source" data-source-id="${escapeAttr(sourceID)}">
+        return `<li class="b3-list-item b3-list-item--narrow b3-list-item--focus b3-list-item--hide-action card__v2-managed-source" data-source-id="${escapeAttr(sourceID)}">
 <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${escapeHtml(sourceCards[0].sourceTitle || sourceCards[0].sourceBlockID || sourceID)}</span>
 <span class="b3-list-item__meta">${sourceCards.length}</span>
@@ -2035,14 +2035,18 @@ ${policyScope ? `<button data-type="scopePolicy" class="fn__none b3-button b3-bu
 ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-button b3-button--outline">${window.siyuan.languages.flashcardReviewSet}</button>` : ""}
 <button data-type="flagDefinitions" class="fn__none b3-button b3-button--outline">${window.siyuan.languages.flashcardFlag}</button>
 <button data-type="managementMore" class="b3-button b3-button--outline">${window.siyuan.languages.more}</button>
-<label class="fn__flex-center"><input data-type="group" type="checkbox"${grouped ? " checked" : ""}><span class="fn__space"></span>${window.siyuan.languages.flashcardGroupBySource}</label>
+<label class="card__v2-checkbox"><input data-type="group" type="checkbox"${grouped ? " checked" : ""}><span>${window.siyuan.languages.flashcardGroupBySource}</span></label>
 </div>
 </div>
 <div class="card__v2-management-selection">
-<label class="fn__flex-center"><input data-type="selectPage" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardSelectPage}</label>
-<span data-type="selectedCount" class="b3-list-item__meta fn__flex-1">${window.siyuan.languages.selected} 0</span>
+<div class="fn__flex">
+<label class="card__v2-checkbox"><input data-type="selectPage" type="checkbox"><span>${window.siyuan.languages.flashcardSelectPage}</span></label>
+<span data-type="selectedCount" class="b3-list-item__meta">${window.siyuan.languages.selected} 0</span>
+</div>
+<div class="fn__flex">
 <button data-type="batchMenu" class="b3-button b3-button--outline" disabled>${window.siyuan.languages.manage}</button>
 <button data-type="batchApply" class="b3-button b3-button--text" disabled>${window.siyuan.languages.confirm}</button>
+</div>
 </div>
 <ul class="b3-list b3-list--background fn__flex-1 card__v2-management-list" tabindex="-1">${cards.length === 0 ? `<li class="b3-list-item card__empty">${filters.editLater === "true" ? window.siyuan.languages.flashcardEditLaterEmpty : window.siyuan.languages.emptyContent}</li>` : renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul></div>`;
             if (owner.dialog) {
@@ -2821,7 +2825,7 @@ export const openFlashcardV2ReviewPicker = (app: App) => {
                 content: `<div class="b3-dialog__content card__v2-panel card__v2-review-picker">
 <div class="b3-list b3-list--background card__v2-panel-list">
 <button data-type="all" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.all}</span></button>
-${revisions.map((revision, index) => `<div class="card__v2-picker-row"><input data-type="selectSet" data-index="${index}" type="checkbox" class="fn__none" aria-label="${escapeAttr(revision.payload.name)}"><button data-type="review" data-index="${index}" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconPlay"></use></svg><span class="b3-list-item__text">${escapeHtml(revision.payload.name)}</span><span class="b3-list-item__meta">${revision.payload.defaultReviewMode === "reinforcement" ? window.siyuan.languages.flashcardReviewReinforcement : window.siyuan.languages.flashcardReviewNormal}</span></button></div>`).join("")}
+${revisions.map((revision, index) => `<div class="card__v2-picker-row"><input data-type="selectSet" data-index="${index}" type="checkbox" class="fn__none" aria-label="${escapeAttr(revision.payload.name)}"><button data-type="review" data-index="${index}" class="b3-list-item b3-list-item--narrow"><svg class="b3-list-item__graphic"><use xlink:href="#iconPlay"></use></svg><span class="b3-list-item__text">${escapeHtml(revision.payload.name)}</span><span class="b3-list-item__meta">${revision.payload.defaultReviewMode === "reinforcement" ? window.siyuan.languages.flashcardReviewReinforcement : window.siyuan.languages.flashcardReviewNormal}</span></button></div>`).join("")}
 </div>
 <div data-type="selectionOptions" class="card__v2-picker-options fn__none">
 <label class="fn__flex"><span class="fn__flex-1">${window.siyuan.languages.reviewMode}</span><select data-type="reviewMode" class="b3-select"><option value="normal">${window.siyuan.languages.flashcardReviewNormal}</option><option value="reinforcement">${window.siyuan.languages.flashcardReviewReinforcement}</option></select></label>
@@ -4199,7 +4203,7 @@ const flashcardV2StatisticsBars = <T, >(values: T[], label: (value: T) => string
     const maximum = Math.max(1, ...values.map(count));
     return `<div class="b3-list b3-list--background">${values.map((value) => {
         const current = count(value);
-        return `<div class="b3-list-item"><span class="b3-list-item__text" style="flex:0 0 112px">${escapeHtml(label(value))}</span><span class="fn__flex-1" aria-hidden="true"><span class="card__v2-statistics-bar" style="width:${current / maximum * 100}%;min-width:${current > 0 ? "2px" : "0"}"></span></span><span class="b3-list-item__meta" style="min-width:48px;text-align:right">${current}${detail ? ` · ${escapeHtml(detail(value))}` : ""}</span></div>`;
+        return `<div class="b3-list-item b3-list-item--narrow"><span class="b3-list-item__text" style="flex:0 0 112px">${escapeHtml(label(value))}</span><span class="fn__flex-1" aria-hidden="true"><span class="card__v2-statistics-bar" style="width:${current / maximum * 100}%;min-width:${current > 0 ? "2px" : "0"}"></span></span><span class="b3-list-item__meta" style="min-width:48px;text-align:right">${current}${detail ? ` · ${escapeHtml(detail(value))}` : ""}</span></div>`;
     }).join("")}</div>`;
 };
 

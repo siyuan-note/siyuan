@@ -65,6 +65,38 @@ test("practice replaces a mounted session without closing its tab or leaving abo
         "cleanup-second", "remove-surface"]);
 });
 
+test("review displays the breadcrumb in the toolbar and filters source, answer and stale responses", () => {
+    const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
+    const contextStart = source.indexOf("const renderFlashcardV2Context =");
+    const contextEnd = source.indexOf("const flashcardV2SpeechText =", contextStart);
+    const toolbarStart = source.indexOf("const sessionContent =");
+    const toolbarEnd = source.indexOf("</div>", toolbarStart);
+    assert.match(source.slice(toolbarStart, toolbarEnd), /data-flashcard-path class="card__v2-session-path ft__on-surface"/);
+    const script = transpileModule(`${source.slice(contextStart, contextEnd)}
+        renderFlashcardV2Context(model, "source", [], ["Hidden answer"], {}, body, path, isCurrent);`, {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
+    let current = true;
+    let breadcrumb: (response: {data: {id: string, name: string}[]}) => void;
+    const path = {textContent: "", title: ""};
+    runInNewContext(script, {
+        model: {template: {contextPolicy: {breadcrumb: true, documentTitle: true}}},
+        body: {insertAdjacentHTML: () => assert.fail("breadcrumb must stay in the toolbar")},
+        path, isCurrent: () => current,
+        flashcardV2PlainText: (text: string) => text.toLowerCase(),
+        fetchPost: (url: string, _payload: unknown, callback: typeof breadcrumb) => {
+            assert.equal(url, "/api/block/getBlockBreadcrumb");
+            breadcrumb = callback;
+        },
+    });
+    breadcrumb({data: [{id: "doc", name: "Notebook"}, {id: "answer", name: "Hidden answer"},
+        {id: "parent", name: " Topic "}, {id: "source", name: "Question"}]});
+    assert.deepEqual(path, {textContent: "Notebook / Topic", title: "Notebook / Topic"});
+    current = false;
+    breadcrumb({data: [{id: "doc", name: "Obsolete"}]});
+    assert.equal(path.textContent, "Notebook / Topic");
+});
+
 test("waiting text stays outside the empty-state icon rule and actions share one row", () => {
     const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
     const snippet = source.slice(source.indexOf("const showWaiting ="),

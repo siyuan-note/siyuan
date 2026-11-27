@@ -37,7 +37,7 @@ export const openFlashcardV2Cleanup = (onChanged: () => void) => {
         content: `<div class="b3-dialog__content card__v2-panel">
 <div class="ft__secondary">${lang.flashcardCleanupTip}</div>
 <div class="card__v2-panel-toolbar">
-<label><input data-select-all type="checkbox" disabled> ${lang.selectAll}</label>
+<label class="card__v2-checkbox"><input data-select-all type="checkbox" disabled><span>${lang.selectAll}</span></label>
 <span class="fn__space"></span><span data-summary class="fn__flex-1"></span>
 <button data-scan class="b3-button b3-button--outline">${lang.refresh}</button>
 <span class="fn__space"></span><button data-delete class="b3-button b3-button--text" disabled>${lang.delete}</button>

@@ -249,10 +249,8 @@ const flashcardV2PlainText = (value: string) => {
 
 const renderFlashcardV2Context = (model: IFlashcardV2RenderModel, sourceBlockID: string,
     sensitiveReferences: IFlashcardV2SourceReference[], sensitiveTextValues: string[],
-    doms: Record<string, string>, element: HTMLElement, isCurrent: () => boolean) => {
+    doms: Record<string, string>, element: HTMLElement, pathElement: HTMLElement, isCurrent: () => boolean) => {
     const policy = model.template.contextPolicy;
-    element.classList.add("fn__none");
-    element.innerHTML = "";
     const ancestorDepth = Math.min(5, Math.max(0, Math.floor(policy?.ancestorDepth || 0)));
     const adjacentBefore = Math.min(5, Math.max(0, Math.floor(policy?.adjacentBefore || 0)));
     const adjacentAfter = Math.min(5, Math.max(0, Math.floor(policy?.adjacentAfter || 0)));
@@ -324,10 +322,9 @@ const renderFlashcardV2Context = (model: IFlashcardV2RenderModel, sourceBlockID:
             return name.length < 3 || !sensitiveTexts.some((answer) => answer === name || answer.includes(name));
         });
         if (paths.length > 0) {
-            element.insertAdjacentHTML("beforeend", `<div class="card__v2-context-path">${paths.map((item) =>
-                `<span data-node-id="${escapeAttr(item.id)}">${escapeHtml(item.name || "")}</span>`)
-                .join('<span class="fn__space"></span>/<span class="fn__space"></span>')}</div>`);
-            showContext();
+            const path = paths.map((item) => item.name.trim()).join(" / ");
+            pathElement.textContent = path;
+            pathElement.title = path;
         }
         const ancestors = ancestorDepth === 0 ? [] :
             allPaths.filter((item, index) => item.id !== sourceBlockID && index > 0)
@@ -526,8 +523,8 @@ ${weakCount ? `<div class="fn__hr"></div><span class="ft__on-surface">${window.s
 
 const sessionContent = () => `<div class="b3-dialog__content fn__flex-column card__v2-session">
 <div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
-    <span data-flashcard-count class="ft__on-surface"></span>
-    <span class="fn__flex-1"></span>
+    <span data-flashcard-count class="fn__flex-shrink ft__on-surface"></span>
+    <span data-flashcard-path class="card__v2-session-path ft__on-surface"></span>
     <button data-type="toggle-outline" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.outline}" aria-expanded="false"><svg><use xlink:href="#iconOutline"></use></svg></button>
     <button data-type="read-aloud" class="block__icon ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
     <button data-type="edit-source" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
@@ -537,7 +534,7 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
 <div class="fn__flex fn__flex-1 card__v2-session-body">
 <nav data-flashcard-outline class="card__v2-session-outline fn__none" aria-label="${window.siyuan.languages.outline}"></nav>
 <div class="card__block fn__flex-1 card__v2-session-content" aria-busy="true">
-    <div data-flashcard-context class="card__v2-context ft__secondary fn__none"></div>
+    <div data-flashcard-context class="card__v2-context ft__on-surface fn__none"></div>
     <div class="protyle-wysiwyg" contenteditable="false" data-flashcard-front></div>
     <div class="fn__none" data-flashcard-answer><div class="fn__hr"></div><div class="protyle-wysiwyg" contenteditable="false"></div></div>
 </div>
@@ -573,8 +570,13 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
     draft?: {model: IFlashcardV2RenderModel, doms: Record<string, string>}) => {
     const contentElement = dialog.element.querySelector(".card__block") as HTMLElement;
     const contextElement = dialog.element.querySelector("[data-flashcard-context]") as HTMLElement;
+    const pathElement = dialog.element.querySelector<HTMLElement>("[data-flashcard-path]");
     const frontElement = dialog.element.querySelector("[data-flashcard-front]") as HTMLElement;
     const answerElement = dialog.element.querySelector("[data-flashcard-answer]") as HTMLElement;
+    pathElement.textContent = "";
+    pathElement.title = "";
+    contextElement.classList.add("fn__none");
+    contextElement.innerHTML = "";
     setReviewActionsEnabled(dialog, false);
     const renderModel = (model: IFlashcardV2RenderModel) => {
         if (!isCurrent()) {
@@ -604,8 +606,6 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
                 dialog.element.appendChild(templateStyle);
             }
             dialog.element.querySelector("[data-flashcard-toolbar]").classList.remove("fn__none");
-            contextElement.classList.add("fn__none");
-            contextElement.innerHTML = "";
             frontElement.className = "protyle-wysiwyg";
             frontElement.innerHTML = "";
             answerElement.classList.add("fn__none");
@@ -705,7 +705,7 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
             // 草稿只使用经过权限检查的快照，避免再次读取正文触发修复写回。
             if (!draft) {
                 renderFlashcardV2Context(model, sourceBlockID, sensitiveReferences, sensitiveTextValues, doms,
-                    contextElement, isCurrent);
+                    contextElement, pathElement, isCurrent);
             }
             callback({
                 shownAt: performance.now(),
@@ -778,11 +778,12 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0,
 <span class="ft__on-surface">${window.siyuan.languages.flashcardPreviewTip}</span>
 <div class="card__v2-preview-navigation">
 <button data-type="previous" class="b3-button b3-button--outline">${window.siyuan.languages.previous}</button>
-<span data-flashcard-count aria-live="polite"></span>
+<span data-flashcard-count class="fn__flex-shrink" aria-live="polite"></span>
 <button data-type="next" class="b3-button b3-button--outline">${window.siyuan.languages.next}</button>
+<span data-flashcard-path class="card__v2-session-path ft__on-surface"></span>
 </div></div>
 <div class="card__block fn__flex-1 card__v2-session-content" aria-busy="true">
-<div data-flashcard-context class="card__v2-context ft__secondary fn__none"></div>
+<div data-flashcard-context class="card__v2-context ft__on-surface fn__none"></div>
 <div class="protyle-wysiwyg" contenteditable="false" data-flashcard-front></div>
 <div class="fn__none" data-flashcard-answer><div class="fn__hr"></div><div class="protyle-wysiwyg" contenteditable="false"></div></div>
 </div>
@@ -810,7 +811,6 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0,
         dialog.element.querySelector<HTMLButtonElement>('[data-type="next"]').disabled = index === cardIDs.length - 1;
         dialog.element.querySelector("[data-flashcard-front]").textContent = "";
         dialog.element.querySelector("[data-flashcard-answer]").classList.add("fn__none");
-        dialog.element.querySelector("[data-flashcard-context]").classList.add("fn__none");
         renderFlashcardV2Card(dialog, {cardID: cardIDs[index]}, isCurrent, (result) => {
             rendered = result;
             setReviewActionsEnabled(dialog, true);

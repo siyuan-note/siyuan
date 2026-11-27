@@ -9,6 +9,62 @@ import {createSectionRuntime, type Reaction} from "../util/sectionRuntime";
 
 
 for (const mobile of [false, true]) {
+    test(`configuration refresh restores unsaved plugin command defaults (mobile=${mobile})`, async () => {
+        const {parse} = require("ifdef-loader/preprocessor");
+        const compile = (file: string) => transpileModule(parse(readFileSync(file, "utf8"),
+            {MOBILE: mobile, BROWSER: mobile}, false, true), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText;
+        const {normalizePluginHotkey} = await import("../../util/hotKeyPolicy");
+        const {getKeymapBindings, setKeymapBindings} = await import("../../util/keymapBindings");
+        const commands: ICommand[] = [
+            {langKey: "single", hotkey: "⌥J"},
+            {langKey: "multiple", hotkeys: ["⌥K", "⌥L"]},
+            {langKey: "custom", hotkey: "⌥M"},
+            {langKey: "disabled", hotkeys: ["⌥N", "⌥O"]},
+        ];
+        const config = {keymap: {plugin: {}} as Config.IKeymap};
+        const window = {siyuan: {config, ws: {app: {plugins: [{name: "example", commands}]}}}};
+        const reply = {
+            custom: {default: "⌥M", custom: "⌥P"},
+            disabled: {default: "⌥N", custom: ""},
+        };
+        setKeymapBindings(reply.disabled, []);
+        const stubs: Record<string, unknown> = {
+            "../util/hotKeyPolicy": {normalizePluginHotkey},
+            "../util/keymapBindings": {getKeymapBindings, setKeymapBindings},
+            "../../boot/globalEvent/globalShortcut": {sendUnregisterGlobalShortcut() {}, sendGlobalShortcut() {}},
+            "../../layout/dock/util": {updateDockHotkeys() {}},
+            "../../boot/globalEvent/commonHotkey": {syncAppMenuShortcuts() {}},
+            "../setting/windowContext": {isSettingsWindow: () => false},
+            "../../layout/getAll": {getAllEditor: (): never[] => []},
+            "../../markdown/keymapSync": {syncMarkdownKeymap() {}},
+            "../../util/fetch": {fetchSyncPost: async () => ({code: 0, data: {conf: {keymap: {plugin: {example: reply}}}}})},
+            "../systemConfig": {systemConfig: (value: unknown) => value},
+            "../../util/functions": {objEquals: (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right)},
+            "./taskBlocker": {syncSettingTasks() {}},
+            "./tabs": {getSettingTabDefs: (): never[] => []},
+        };
+        const load = <T>(file: string) => {
+            const exports = {} as T;
+            runInNewContext(compile(file), {exports, window, document: {}, console, require: (id: string) => stubs[id] || {}});
+            return exports;
+        };
+        const pluginKeymap = load<typeof import("../../plugin/keymap")>("src/plugin/keymap.ts");
+        stubs["../../plugin/keymap"] = pluginKeymap;
+        stubs["../tabs/keymapRuntime"] = load<typeof import("../tabs/keymapRuntime")>("src/config/tabs/keymapRuntime.ts");
+        for (const command of commands) {
+            const item = pluginKeymap.updatePluginKeymap("example", command.langKey, command.hotkey, command.hotkeys);
+            command.hotkey = item.default;
+            command.customHotkey = item.custom;
+        }
+        const {refreshSettingConfig} = load<typeof import("./sync")>("src/config/setting/sync.ts");
+        await refreshSettingConfig("keymap");
+        assert.deepEqual(commands.map(command => command.customHotkey), ["⌥J", "⌥K", "⌥P", ""]);
+        assert.deepEqual(commands.map(command => getKeymapBindings(config.keymap.plugin.example[command.langKey])),
+            [["⌥J"], ["⌥K", "⌥L"], ["⌥P"], []]);
+    });
+
     test(`namespace patch and its push read confirmed configuration once (mobile=${mobile})`, async () => {
         const {parse} = require("ifdef-loader/preprocessor");
         const compile = (file: string) => transpileModule(parse(readFileSync(file, "utf8"),

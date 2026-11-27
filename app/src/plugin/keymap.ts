@@ -1,5 +1,6 @@
 import {normalizePluginHotkey} from "../util/hotKeyPolicy";
 import {getKeymapBindings, setKeymapBindings} from "../util/keymapBindings";
+import type {Plugin} from ".";
 
 export const updatePluginKeymap = (pluginName: string, key: string, hotkey: unknown, hotkeys?: string[]) => {
     if (!window.siyuan.config.keymap.plugin) {
@@ -45,6 +46,17 @@ export const ensurePluginKeymap = (pluginName: string, key: string, hotkey: unkn
         return keymapItem;
     }
     return updatePluginKeymap(pluginName, key, hotkey);
+};
+
+export const syncPluginCommandKeymap = (plugins: Pick<Plugin, "name" | "commands">[]) => {
+    const keymap = window.siyuan.config.keymap;
+    for (const plugin of plugins) {
+        for (const command of plugin.commands) {
+            const item = keymap.plugin?.[plugin.name]?.[command.langKey] ??
+                updatePluginKeymap(plugin.name, command.langKey, command.hotkey, command.hotkeys);
+            command.customHotkey = item.custom || "";
+        }
+    }
 };
 
 export const setPluginKeymapCustom = (keymap: Config.IKeymapPlugin, pluginName: string, key: string,

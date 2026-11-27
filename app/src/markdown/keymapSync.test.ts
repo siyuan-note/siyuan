@@ -76,6 +76,7 @@ test("initialization and settings changes both synchronize Markdown sidebar comm
             "../setting/windowContext": {isSettingsWindow: () => setting},
             "../../layout/getAll": {getAllEditor: (): unknown[] => []},
             "../../markdown/keymapSync": {syncMarkdownKeymap: () => calls.push("sync")},
+            "../../plugin/keymap": {syncPluginCommandKeymap() {}},
         }[name]),
     });
     assert.match(source, /syncMarkdownKeymap\(\);/);

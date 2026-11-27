@@ -14,6 +14,8 @@ import {remountOpenSettingTab} from "./mount";
 /// #if !MOBILE
 import {applyKeymap} from "../tabs/keymapRuntime";
 import {getSettingTabDefs, type TSettingTab} from "./tabs";
+/// #else
+import {syncPluginCommandKeymap} from "../../plugin/keymap";
 /// #endif
 
 // 待刷新的配置域及触发它的段版本号，0 表示不含版本号的强制刷新。
@@ -116,8 +118,9 @@ const applySettingConfig = async (next: Config.IConf, namespaces: Set<string>) =
         applyKeymap(next.keymap);
     }
     /// #else
-    if (includes("keymap")) {
+    if (includes("keymap") && !objEquals(window.siyuan.config.keymap, next.keymap)) {
         window.siyuan.config.keymap = next.keymap;
+        syncPluginCommandKeymap(window.siyuan.ws.app.plugins);
     }
     /// #endif
     const simple = ["fileTree", "search", "flashcard", "secrets", "variables", "repo", "system", "bazaar", "publish", "ocr", "snippet", "tag", "graph", "uiLayout", "stat"] as const;

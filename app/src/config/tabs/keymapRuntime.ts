@@ -4,6 +4,7 @@ import {syncAppMenuShortcuts} from "../../boot/globalEvent/commonHotkey";
 import {isSettingsWindow} from "../setting/windowContext";
 import {getAllEditor} from "../../layout/getAll";
 import {syncMarkdownKeymap} from "../../markdown/keymapSync";
+import {syncPluginCommandKeymap} from "../../plugin/keymap";
 
 export const applyKeymap = (data: Config.IKeymap) => {
     window.siyuan.config.keymap = data;
@@ -12,11 +13,7 @@ export const applyKeymap = (data: Config.IKeymap) => {
     }
     syncMarkdownKeymap();
     sendUnregisterGlobalShortcut(window.siyuan.ws.app);
-    window.siyuan.ws.app.plugins.forEach(plugin => {
-        plugin.commands.forEach(command => {
-            command.customHotkey = data.plugin?.[plugin.name]?.[command.langKey]?.custom || "";
-        });
-    });
+    syncPluginCommandKeymap(window.siyuan.ws.app.plugins);
     updateDockHotkeys();
     getAllEditor().forEach(editor => editor.protyle.scroll?.updateHotkeyLabels());
     sendGlobalShortcut(window.siyuan.ws.app);

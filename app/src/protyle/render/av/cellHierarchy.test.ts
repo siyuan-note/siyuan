@@ -5,7 +5,8 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {isAVReadonlyType} from "./capabilities";
-import {genAVDragFillValue} from "./dragFillValue";
+import {createAVDragFillOperation, genAVDragFillValue} from "./dragFillValue";
+import {cloneAVCellValueSnapshot, createAVStableTextCell} from "./cellValue";
 import {getAVHostBlockID} from "./host";
 import dayjs from "dayjs";
 
@@ -43,7 +44,7 @@ test("drag filling a first field retains hierarchy controls and the normal undo 
     const fill = load("cell.ts", "dragFillCellsValue", {
         getAVSelectedCells: (): import("./selectionState").IAVSelectedCell[] => [],
         hasClosestByClassName: () => ({dataset: {id: "child"}}), getTypeByCellElement: () => "text",
-        genCellValueByElement: () => structuredClone(target), genAVDragFillValue, isAVReadonlyType, getAVHostBlockID, dayjs,
+        genCellValueByElement: () => structuredClone(target), createAVDragFillOperation, genAVDragFillValue, isAVReadonlyType, getAVHostBlockID, dayjs,
         renderCell: (value: IAVCellValue) => `<span class="av__celltext">${value.text.content}</span>`,
         renderCellAttr() {}, renderAVRichTextElements() {}, updateAVSelectedCellValue() {}, focusBlock() {},
         transaction: (_protyle: IProtyle, redo: IOperation[], undo: IOperation[]) => transactions.push([redo, undo]),
@@ -64,3 +65,47 @@ test("drag filling a first field retains hierarchy controls and the normal undo 
     assert.equal(undo.action, "updateAttrViewCell");
     if (undo.action === "updateAttrViewCell") assert.equal(undo.data.text.content, "Before");
 });
+
+for (const stable of [false, true]) {
+    test(`drag fill saves and restores the explicit primary key source (${stable ? "model" : "DOM"})`, () => {
+        const rich: NonNullable<IAVCellValue["block"]["rich"]> = {spec: 1, format: "kramdown", content: "**rich**"};
+        const plain: IAVCellValue = {type: "block", isDetached: true, block: {content: "Plain"}};
+        const formatted: IAVCellValue = {type: "block", isDetached: true, block: {content: "rich", rich}};
+        for (const [source, previous, newRich, oldRich] of [
+            [formatted, plain, rich, null], [plain, formatted, null, rich],
+        ] as const) {
+            const target = {...previous, id: "target-value", keyID: "primary", blockID: "target-row"};
+            const selected = createAVStableTextCell({rowID: "target-row", colID: "primary", value: target});
+            const content = {innerHTML: ""};
+            const cell = {dataset: {id: target.id, colId: target.keyID}, querySelector: () => content,
+                getAttribute: () => "true"};
+            const node = {dataset: {avId: "database", nodeId: "carrier"}, getAttribute: () => "20261101000000",
+                querySelector: (): null => null, querySelectorAll: () => [cell]};
+            const transactions: IOperation[][][] = [];
+            const fill = load("cell.ts", "dragFillCellsValue", {
+                getAVSelectedCells: () => stable ? [selected] : [],
+                getAVData: () => ({view: {}}),
+                canEditAVHost: () => true, resolveAVSelectedCell: () => selected,
+                hasClosestByClassName: () => ({dataset: {id: target.blockID}}),
+                getTypeByCellElement: () => "block", genCellValueByElement: () => structuredClone(target),
+                cloneAVCellValueSnapshot, createAVDragFillOperation, genAVDragFillValue, isAVReadonlyType, getAVHostBlockID, dayjs,
+                renderCell: (value: IAVCellValue) => value.block.content,
+                renderCellAttr() {}, renderAVRichTextElements() {}, updateAVSelectedCellValue() {}, focusBlock() {},
+                updateAVCachedCellValue() {}, updateAttrViewCellInOtherElements() {},
+                transaction: (_protyle: IProtyle, redo: IOperation[], undo: IOperation[]) => transactions.push([redo, undo]),
+            });
+            fill({}, node, {"source-row": [{...source, keyID: "primary"}]}, []);
+            assert.equal(transactions.length, 1);
+            const [[redo], [undo]] = JSON.parse(JSON.stringify(transactions[0])) as IOperation[][];
+            assert.equal(redo.action, "updateAttrViewCell");
+            assert.equal(undo.action, "updateAttrViewCell");
+            assert.equal(redo.rowID, target.blockID);
+            assert.equal(undo.id, target.id);
+            assert.equal(redo.data.isDetached, true);
+            assert.equal(undo.data.isDetached, true);
+            assert.deepEqual(redo.data.block, {...source.block, rich: newRich});
+            assert.deepEqual(undo.data.block, {...previous.block, rich: oldRich});
+            assert.equal(plain.block.rich, undefined);
+        }
+    });
+}

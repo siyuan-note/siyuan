@@ -56,7 +56,7 @@ import {
     mergeAVBatchRelationValue,
     setAVBatchDisplayValue
 } from "./batchValue";
-import {genAVDragFillValue, rebindAVCellValue} from "./dragFillValue";
+import {createAVDragFillOperation, genAVDragFillValue, rebindAVCellValue} from "./dragFillValue";
 import {
     getAVRichTextPreviewHTML,
     getAVTextCopyContent,
@@ -2024,8 +2024,8 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 }
                 const operation = {avID: nodeElement.dataset.avId, blockID, valueID: target.cell.id,
                     keyID: target.colID, rowID: target.rowID};
-                doOperations.push(createAVCellUpdateOperation({...operation, data: value}));
-                undoOperations.push(createAVCellUpdateOperation({...operation, data: oldValue}));
+                doOperations.push(createAVDragFillOperation({...operation, data: value}));
+                undoOperations.push(createAVDragFillOperation({...operation, data: oldValue}));
                 // 范围可以跨越未挂载的行列，先同步模型，再更新当前显示的同一条目。
                 updateAVCachedCellValue(data.view, target.rowID, target.colID, value);
                 updateAttrViewCellInOtherElements(protyle, nodeElement.dataset.avId, target.rowID, target.colID, value);
@@ -2080,15 +2080,8 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 data.isDetached = true;
                 delete data.block.id;
             }
-            doOperations.push({
-                action: "updateAttrViewCell",
-                id: item.id,
-                avID,
-                blockID,
-                keyID,
-                rowID,
-                data
-            });
+            const operation = {avID, blockID, valueID: item.id, keyID, rowID};
+            doOperations.push(createAVDragFillOperation({...operation, data}));
             const contentElement = item.element.querySelector(".av__cellcontent") || item.element;
             contentElement.innerHTML = renderCell(data, 0, getAVCellShowIcon(iconView, data.type), "table", undefined,
                 item.element.dataset.dateFormat as TAVDateFormat);
@@ -2097,15 +2090,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
             updateAVSelectedCellValue(nodeElement, rowID, keyID, data);
             delete item.colId;
             delete item.element;
-            undoOperations.push({
-                action: "updateAttrViewCell",
-                id: item.id,
-                avID,
-                blockID,
-                keyID,
-                rowID,
-                data: item
-            });
+            undoOperations.push(createAVDragFillOperation({...operation, data: item}));
         });
     });
     focusBlock(nodeElement);

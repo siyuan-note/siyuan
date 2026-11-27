@@ -637,7 +637,7 @@ $block-rtl-selector: ".protyle-block--rtl" !default;
       }
 
       &[custom-pinthead="true"] > div:first-child,
-      &[custom-sy-table-viewport-height] > div:first-child,
+      &[custom-sy-table-height] > div:first-child,
       & > div:first-child[data-table-height-preview] {
         width: fit-content;
         max-width: calc(100% - var(--b3-table-add-column-space, 0px));

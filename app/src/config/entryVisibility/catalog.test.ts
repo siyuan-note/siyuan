@@ -1020,16 +1020,16 @@ test("table block width actions keep current-column and whole-table scopes toget
 });
 
 test("table catalog follows the menu arrays and conditional declarations", () => {
+    assert.equal(getEntryCatalogNode("gutter.single.table.tableHeight"), undefined);
+    const inlineHeight = getEntryCatalogNode("inline.text.more.tableHeight");
+    assert.deepEqual(inlineHeight.children.map(item => item.key),
+        getEntryCatalogNode("gutter.single.height").children.map(item => item.key));
     for (const parent of ["gutter.single.table", "inline.text"]) {
         const keys = getEntryCatalogChildren(parent).map(item => item.key);
         assert.equal(keys.indexOf("insertTableHeaderRow") + 1, keys.indexOf("insertRowAbove"));
         assert.equal(getEntryCatalogNode(`${parent}.insertTableHeaderRow`).type, "entry");
     }
     for (const parent of ["gutter.single.table", "inline.text.more"]) {
-        const height = getEntryCatalogNode(`${parent}.tableHeight`);
-        assert.equal(height.type, "entry");
-        const keys = getEntryCatalogChildren(parent).map(item => item.key);
-        assert.equal(keys.indexOf("tableHeight") + 1, keys.indexOf("pinTableHead"));
         for (const action of ["pin", "unpin"]) {
             const column = getEntryCatalogNode(`${parent}.${action}TableHeaderColumn`);
             assert.equal(column.type, "entry");
@@ -1054,8 +1054,11 @@ test("table catalog follows the menu arrays and conditional declarations", () =>
     ]);
     const alignment = table.slice(table.indexOf("const alignmentMenus"), table.indexOf("if (alignWholeTable)", table.indexOf("const alignmentMenus")));
     const alignmentIDs = Array.from(alignment.matchAll(/id: "([^"]+)"/g), match => match[1]);
+    const inlineOther = other.filter(id => !["distributeAllColWidths", "useDefaultWidthForAllColumns", "transposeTable", "alignment"].includes(id));
+    assert.match(table, /if \(!alignWholeTable\) \{\s*const height = createTableHeightMenu[\s\S]+?otherMenus\.push\(\{\.\.\.height, id: "tableHeight"\}\)/);
+    inlineOther.splice(inlineOther.indexOf("pinTableHead"), 0, "tableHeight");
     assert.deepEqual(getEntryCatalogChildren("inline.text.more").map(item => item.key), [
-        ...other.filter(id => !["distributeAllColWidths", "useDefaultWidthForAllColumns", "transposeTable", "alignment"].includes(id)),
+        ...inlineOther,
         ...alignmentIDs, ...moves,
     ]);
     [...inserts, ...removes].forEach(id => assert.ok(getEntryCatalogNode(`inline.text.${id}`)));

@@ -1,5 +1,5 @@
 import {Constants} from "../../constants";
-import {openInputDialog} from "../../dialog/inputDialog";
+import {createBlockHeightMenu} from "../gutter/height";
 import {transaction} from "../wysiwyg/transaction";
 import {finishTableCellEditing} from "./tableCellRichContext";
 
@@ -8,19 +8,22 @@ const heightAttribute = Constants.CUSTOM_SY_TABLE_HEIGHT;
 const heightProperty = "--b3-table-max-height";
 const previewProperty = "--b3-table-preview-max-height";
 
-const getStoredTableHeight = (node: Element) => {
-    const value = node.getAttribute(heightAttribute);
-    const match = value?.match(/^(\d+(?:\.\d+)?)px$/);
-    if (!match) {
-        return;
+const normalizeTableHeight = (value: string) => {
+    const match = value?.match(/^(\d+(?:\.\d+)?)(px|vh)$/);
+    const height = Number(match?.[1]);
+    if (!Number.isSafeInteger(Math.ceil(height)) || height <= 0) {
+        return "";
     }
-    const height = Number(match[1]);
-    return Number.isFinite(height) ? Math.max(TABLE_MIN_HEIGHT, height) : undefined;
+    return match[2] === "px" ? `${Math.max(TABLE_MIN_HEIGHT, height)}px` :
+        `${Math.max(1, Math.min(100, height))}vh`;
 };
 
+const getStoredTableHeight = (node: Element) => normalizeTableHeight(node.getAttribute(heightAttribute));
+const getCSSHeight = (height: string) => height.endsWith("vh") ? `max(${TABLE_MIN_HEIGHT}px, ${height})` : height;
+const getTableScroller = (node: Element) => node.querySelector<HTMLTableElement>(":scope > div:first-child > table")?.parentElement;
+
 export const applyTableHeight = (node: Element, scroller: HTMLElement) => {
-    const height = getStoredTableHeight(node);
-    const value = height === undefined ? "" : `${height}px`;
+    const value = getCSSHeight(getStoredTableHeight(node));
     if (scroller.style.getPropertyValue(heightProperty) !== value) {
         scroller.style.setProperty(heightProperty, value);
     }
@@ -29,60 +32,104 @@ export const applyTableHeight = (node: Element, scroller: HTMLElement) => {
 const getTableMinHeight = (table: HTMLTableElement, pinned: boolean) =>
     Math.max(TABLE_MIN_HEIGHT, pinned ? (table.tHead?.offsetHeight || 0) + 24 : 0);
 
-const setTableHeight = (protyle: IProtyle, node: Element, scroller: HTMLElement, height?: number) => {
-    if (!node.isConnected || protyle.disabled || scroller.parentElement !== node) {
+const setTableHeight = (protyle: IProtyle, nodes: Element[], height: string) => {
+    const next = normalizeTableHeight(height);
+    if (protyle.disabled || (height && !next)) {
         return;
     }
-    const previous = node.getAttribute(heightAttribute) || "";
-    const next = height === undefined ? "" : `${height}px`;
-    if (next === previous) {
-        return;
+    const operations: IOperation[] = [];
+    const undo: IOperation[] = [];
+    for (const node of nodes) {
+        const scroller = getTableScroller(node);
+        const id = node.getAttribute("data-node-id");
+        const previous = node.getAttribute(heightAttribute) || "";
+        if (!node.isConnected || !scroller || !id || next === previous) {
+            continue;
+        }
+        if (next) {
+            node.setAttribute(heightAttribute, next);
+        } else {
+            node.removeAttribute(heightAttribute);
+        }
+        applyTableHeight(node, scroller);
+        operations.push({action: "setAttrs", id, data: JSON.stringify({[heightAttribute]: next})});
+        undo.push({action: "setAttrs", id, data: JSON.stringify({[heightAttribute]: previous})});
     }
-    if (next) {
-        node.setAttribute(heightAttribute, next);
-    } else {
-        node.removeAttribute(heightAttribute);
+    if (operations.length > 0) {
+        transaction(protyle, operations, undo);
     }
-    applyTableHeight(node, scroller);
-    const id = node.getAttribute("data-node-id");
-    transaction(protyle, [{action: "setAttrs", id, data: JSON.stringify({[heightAttribute]: next})}],
-        [{action: "setAttrs", id, data: JSON.stringify({[heightAttribute]: previous})}]);
 };
 
-export const openTableHeight = (protyle: IProtyle, node: Element) => {
-    const table = node.querySelector<HTMLTableElement>(":scope > div:first-child > table");
-    const scroller = table?.parentElement;
-    if (!scroller || protyle.disabled) {
+const previewTableHeight = (scroller: HTMLElement, value?: string) => {
+    scroller.toggleAttribute("data-table-height-preview", value !== undefined);
+    scroller.style.setProperty(previewProperty, value ?? "");
+};
+
+export const createTableHeightMenu = (protyle: IProtyle, nodes: Element[]) => {
+    if (protyle.disabled || nodes.length === 0 ||
+        nodes.some(node => node.getAttribute("data-type") !== "NodeTable" || !getTableScroller(node))) {
         return;
     }
-    window.siyuan.menus.menu.remove();
-    const languages = window.siyuan.languages;
-    const min = getTableMinHeight(table, node.getAttribute("custom-pinthead") === "true");
-    const height = getStoredTableHeight(node);
-    openInputDialog({
-        title: languages.height,
-        label: languages.entryPixelHeight,
-        type: "number",
-        min: String(min),
-        max: String(Number.MAX_SAFE_INTEGER),
-        step: "1",
-        placeholder: languages.default,
-        value: height === undefined ? "" : String(height),
-        actions: [{
-            text: languages.default,
-            onClick: (_value, dialog) => {
-                setTableHeight(protyle, node, scroller);
-                dialog.destroy();
+    const menu = window.siyuan.menus.menu;
+    const previewed = new Set<HTMLElement>();
+    let pending: string | undefined;
+    let boundRemove = false;
+    const clear = () => {
+        previewed.forEach(scroller => previewTableHeight(scroller));
+        previewed.clear();
+        pending = undefined;
+    };
+    const commit = (value: string) => {
+        clear();
+        setTableHeight(protyle, nodes, value);
+    };
+    return createBlockHeightMenu(getStoredTableHeight(nodes[0]), height => {
+        const value = normalizeTableHeight(height);
+        if (protyle.disabled || (height && !value)) {
+            clear();
+            return;
+        }
+        if (!boundRemove) {
+            const previous = menu.removeCB;
+            menu.removeCB = () => {
+                boundRemove = false;
+                clear();
+                previous?.();
+            };
+            boundRemove = true;
+        }
+        pending = value;
+        for (const node of nodes) {
+            const scroller = node.isConnected && getTableScroller(node);
+            if (scroller) {
+                const fallback = node.getAttribute("custom-pinthead") === "true" ? "50vh" : "none";
+                previewTableHeight(scroller, value ? getCSSHeight(value) : fallback);
+                previewed.add(scroller);
             }
-        }],
-        onConfirm: (value, dialog) => {
-            const input = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
-            if (!input.reportValidity()) {
+        }
+    }, commit, input => {
+        const finish = () => {
+            if (pending === undefined) {
                 return;
             }
-            setTableHeight(protyle, node, scroller, value === "" ? undefined : Number(value));
-            dialog.destroy();
-        },
+            if (!input.validity.valid) {
+                clear();
+                return;
+            }
+            commit(pending);
+            menu.remove();
+        };
+        input.addEventListener(input.type === "number" ? "blur" : "change", finish);
+        input.addEventListener("pointercancel", clear);
+        input.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                clear();
+            } else if (input.type === "number" && event.key === "Enter" && !event.isComposing) {
+                event.preventDefault();
+                event.stopPropagation();
+                finish();
+            }
+        });
     });
 };
 
@@ -132,10 +179,9 @@ export const startTableHeightResize = (protyle: IProtyle, cell: HTMLTableCellEle
             return;
         }
         controller.abort();
-        scroller.style.removeProperty(previewProperty);
-        scroller.removeAttribute("data-table-height-preview");
+        previewTableHeight(scroller);
         if (!cancel && height !== startHeight) {
-            setTableHeight(protyle, node, scroller, height);
+            setTableHeight(protyle, [node], `${height}px`);
         }
         finished();
     };
@@ -150,8 +196,7 @@ export const startTableHeightResize = (protyle: IProtyle, cell: HTMLTableCellEle
         move.preventDefault();
         height = move.clientY === startY ? startHeight :
             Math.min(maxHeight, Math.max(minHeight, Math.round(startHeight + (move.clientY - startY) / scale)));
-        scroller.toggleAttribute("data-table-height-preview", height !== startHeight);
-        scroller.style.setProperty(previewProperty, height === startHeight ? "" : `${height}px`);
+        previewTableHeight(scroller, height === startHeight ? undefined : `${height}px`);
         preview(scroller.offsetHeight, move.clientX, move.clientY);
     }, {signal, passive: false});
     const end = (up: PointerEvent) => {

@@ -24,7 +24,6 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
     document.head.append(fixtureStyle);
     const transactions: {before: string, after: string}[] = [];
     const attributeTransactions: {operations: IOperation[], undo: IOperation[]}[] = [];
-    let heightDialogOptions: import("../../dialog/inputDialog").IInputDialogOptions;
     const clipboard: {textPlain: string, textHTML?: string, textSiyuan?: string}[] = [];
     const pasted: {target: HTMLTableCellElement, textPlain: string}[] = [];
     const items: IMenu[] = [];
@@ -38,7 +37,14 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
     menuScrim.id = "commonMenuScrim";
     document.body.append(menuScrim);
     const menu = {element: menuElement, append: (element: HTMLElement) => menuElement.append(element),
-        remove: () => { items.length = 0; menuElement.replaceChildren(); }, fullscreen: noop, popup: noop};
+        removeCB: undefined as (() => void) | undefined,
+        remove: () => {
+            const cleanup = menu.removeCB;
+            menu.removeCB = undefined;
+            cleanup?.();
+            items.length = 0;
+            menuElement.replaceChildren();
+        }, fullscreen: noop, popup: noop};
     const languages = new Proxy({}, {get: (_target, key: string) => key === "insertRowBefore" ||
         key === "insertRowAfter" || key === "insertColumnLeft1" || key === "insertColumnRight1" ? "${x}" : key});
     const hotkeys = new Proxy({}, {get: () => ({custom: ""})});
@@ -62,7 +68,7 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
     const constants = new Proxy<Record<string, string | number>>({ZWSP: "\u200b", TIMEOUT_LONGPRESS: 20,
         SIZE_DRAG_THRESHOLD: 5, TABLE_PINNED_COLUMN_ACTIVE: "data-table-pinned-column-active",
         TABLE_PINNED_COLUMN_CELL: "data-table-pinned-column-cell",
-        CUSTOM_SY_TABLE_HEIGHT: "custom-sy-table-viewport-height"}, {get: (target, key: string) => target[key] || key});
+        CUSTOM_SY_TABLE_HEIGHT: "custom-sy-table-height"}, {get: (target, key: string) => target[key] || key});
     const stubs: Record<string, object | (() => object)> = {
         "src/constants.ts": {Constants: constants},
         "src/menus/menuToggle.ts": {toggleMenu: (options: {build: (menu: object, session: object) => void}) => {
@@ -120,7 +126,6 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         "src/protyle/util/hasClosest.ts": {hasClosestByClassName: (node: Element, name: string) => node?.closest("." + name),
             hasClosestBlock: (node: Element) => node?.closest("[data-node-id]")},
         "src/dialog/message.ts": {showMessage: noop},
-        "src/dialog/inputDialog.ts": {openInputDialog: (options: typeof heightDialogOptions) => { heightDialogOptions = options; }},
         "src/util/highlightById.ts": {scrollCenter: noop},
         "dayjs": () => ({format: () => "20261017120000"}),
     };
@@ -1682,7 +1687,7 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         f.table.querySelectorAll("col").forEach(col => col.style.width = "36px");
         const tbody = f.table.tBodies[0];
         tbody.append(...Array.from({length: 8}, () => tbody.rows[0].cloneNode(true)));
-        const heightAttribute = "custom-sy-table-viewport-height";
+        const heightAttribute = "custom-sy-table-height";
         f.render();
         check.equal(getComputedStyle(scroller).maxHeight, "none", "ordinary tables expand by default");
         node.setAttribute("custom-pinthead", "true");
@@ -1720,6 +1725,9 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
             `${touch} centers the handle over the narrow table`);
         const startHeight = scroller.offsetHeight;
         const count = attributeTransactions.length;
+        handle.click();
+        check.ok(items.some(item => item.id === "height_25%"), "keyboard activation opens the common height menu");
+        menu.remove();
         pointer(handle, "pointerdown", x, y, 91);
         pointer(document, "pointermove", x, y + 60, 91);
         f.render();
@@ -1797,20 +1805,32 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
         f.render();
         check.equal(scroller.offsetHeight, fullHeight, `${touch} uses the natural height with a larger saved limit`);
         const height = load("src/protyle/util/tableHeight.ts") as typeof import("./tableHeight");
-        height.openTableHeight(f.owner, node);
-        check.equal(heightDialogOptions.type, "number");
-        check.equal(heightDialogOptions.value, String(fullHeight + 100));
-        const dialogElement = document.createElement("div");
-        const input = document.createElement("input");
-        input.dataset.dialogInput = "";
-        input.type = "number";
-        input.min = heightDialogOptions.min;
+        const heightMenu = height.createTableHeightMenu(f.owner, [node]);
+        check.equal(heightMenu.id, "height");
+        const renderHeightInput = (id: string) => {
+            const item = heightMenu.submenu.find(item => item.id === id);
+            const element = document.createElement("div");
+            element.innerHTML = item.label;
+            item.bind(element);
+            return element.querySelector("input");
+        };
+        const slider = renderHeightInput("heightDrag");
+        slider.value = "25";
+        slider.dispatchEvent(new Event("input"));
+        check.equal(scroller.offsetHeight, Math.round(window.innerHeight / 4), "the slider previews a percentage height");
+        check.equal(node.getAttribute(heightAttribute), `${fullHeight + 100}px`, "preview only changes the scroller");
+        menu.remove();
+        check.equal(scroller.offsetHeight, fullHeight, "closing the menu discards the preview");
+
+        heightMenu.submenu.find(item => item.id === "height_25%").click(undefined, undefined);
+        check.equal(node.getAttribute(heightAttribute), "25vh", "percentage preset is stored as a relative height");
+        check.equal(scroller.offsetHeight, Math.round(window.innerHeight / 4));
+        const input = renderHeightInput("heightInput");
         input.value = "144";
-        dialogElement.append(input);
-        const dialog = {element: dialogElement, destroy: noop} as unknown as Parameters<typeof heightDialogOptions.onConfirm>[1];
-        heightDialogOptions.onConfirm(input.value, dialog);
+        input.dispatchEvent(new Event("input"));
+        input.dispatchEvent(new Event("blur"));
         check.equal(scroller.offsetHeight, 144, "the numeric height works without pinned headers");
-        check.equal(attributeTransactions.at(-1).undo[0].data, JSON.stringify({[heightAttribute]: `${fullHeight + 100}px`}));
+        check.equal(attributeTransactions.at(-1).undo[0].data, JSON.stringify({[heightAttribute]: "25vh"}));
         const targetRow = tbody.rows[tbody.rows.length - 1];
         check.ok(height.scrollTableRowIntoView(f.table, targetRow));
         check.ok(targetRow.getBoundingClientRect().bottom <= scroller.getBoundingClientRect().bottom + 1);
@@ -1819,7 +1839,7 @@ const browserCases = async (sources: Record<string, string>, css: string, typogr
             check.equal(getComputedStyle(scroller).maxHeight, "none", "image export expands capped ordinary tables");
             f.root.classList.remove("export-img");
         }
-        heightDialogOptions.actions[0].onClick(input.value, dialog);
+        heightMenu.submenu.find(item => item.id === "default").click(undefined, undefined);
         check.equal(node.getAttribute(heightAttribute), null);
         check.equal(getComputedStyle(scroller).maxHeight, "none", "restoring the default expands ordinary tables");
         f.dispose();
@@ -1982,6 +2002,7 @@ test("desktop and mobile table selection, resize feedback and gesture cancellati
     const files = ["tableControl", "tableTouch", "table", "tableSelection", "tableResize", "tableRowHeight", "tableHeight",
         "tableColumnWidth", "tableGridCache", "tableCellRich", "tableCellRichValue", "tableCellRichContext", "tableVirtualizationDOM"]
         .map(file => "src/protyle/util/" + file + ".ts");
+    files.push("src/protyle/gutter/height.ts");
     files.push("src/mobile/util/multiSelectToolbar.ts");
     const sources = Object.fromEntries(files.map(file => [file, transpileModule(
         readFileSync(path.resolve(process.cwd(), file), "utf8"),

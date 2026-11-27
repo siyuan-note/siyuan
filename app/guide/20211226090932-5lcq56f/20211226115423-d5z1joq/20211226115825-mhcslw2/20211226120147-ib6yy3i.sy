@@ -2039,20 +2039,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "表格區塊"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
 					"TextMarkTextContent": "高度"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，可以用像素設定最大高度。也可以在桌面端將滑鼠移到表格上，或在行動端輕觸儲存格，再拖曳表格可見區域底部中央的控點。高度設定會隨表格儲存，固定或取消固定標題列後仍會生效。在高度對話框中選擇 "
+					"Data": "，可以輸入像素值，也可以用百分比預設或滑桿依視窗高度設定。也可以在桌面端將滑鼠移到表格上，或在行動端輕觸儲存格，再拖曳表格可見區域底部中央的控點。高度設定會隨表格儲存，固定或取消固定標題列後仍會生效。在高度對話框中選擇 "
 				},
 				{
 					"Type": "NodeTextMark",

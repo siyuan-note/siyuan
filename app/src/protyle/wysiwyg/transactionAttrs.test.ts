@@ -11,7 +11,7 @@ const declaration = source.statements.find(statement => isVariableStatement(stat
     statement.declarationList.declarations.some(item => item.name.getText(source) === "syncBlockAttrs"));
 const attribute = "custom-sy-list-mindmap";
 const metadataAttribute = "custom-sy-list-mindmap-data";
-const viewportHeight = "custom-sy-table-viewport-height";
+const viewportHeight = "custom-sy-table-height";
 const context = {Constants: {CUSTOM_SY_LIST_MINDMAP: attribute, CUSTOM_SY_LIST_MINDMAP_DATA: metadataAttribute,
     CUSTOM_SY_TABLE_HEIGHT: viewportHeight},
     sync: undefined as any};

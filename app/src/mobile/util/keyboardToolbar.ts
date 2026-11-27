@@ -1991,8 +1991,8 @@ export const initKeyboardToolbar = () => {
                     keyboardPanelClosing = false;
                     hideKeyboardToolbarUtil();
                     if (!protyle.gutter && getTableCellRichContext(protyle)) {
-                        const [{MenuItem}, {tableMenu}] = await Promise.all([
-                            import("../../menus/Menu"), import("../../menus/protyle"),
+                        const [{MenuItem}, {tableMenu}, {createTableHeightMenu}] = await Promise.all([
+                            import("../../menus/Menu"), import("../../menus/protyle"), import("../../protyle/util/tableHeight"),
                         ]);
                         if (!session.isCurrent()) {
                             return;
@@ -2022,6 +2022,11 @@ export const initKeyboardToolbar = () => {
                             label: window.siyuan.languages.table,
                             submenu: tableMenus,
                         }).element);
+                        const height = createTableHeightMenu(context.owner, [table]);
+                        if (height) {
+                            prepareTableCellMenuItems([height], () => finishTableCellEditing(context.cell));
+                            window.siyuan.menus.menu.append(new MenuItem(height).element);
+                        }
                         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                         window.siyuan.menus.menu.append(new MenuItem({
                             id: "insertBefore",

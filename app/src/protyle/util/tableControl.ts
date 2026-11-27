@@ -59,7 +59,7 @@ import {finishTableCellEditing} from "./tableCellRichContext";
 import {buildBlockDOMClipboardRichData} from "./blockDOMClipboard";
 import {showMessage} from "../../dialog/message";
 import {getTableRowBoundary, getTableRowOpeningHTML, startTableRowResize} from "./tableRowHeight";
-import {applyTableHeight, openTableHeight, startTableHeightResize} from "./tableHeight";
+import {applyTableHeight, createTableHeightMenu, startTableHeightResize} from "./tableHeight";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -444,8 +444,20 @@ export class TableControl {
             }
         });
         this.tableHeightResizeHandle.addEventListener("click", event => {
-            if (event.detail === 0 && this.tableHeightResizeTable) {
-                openTableHeight(this.protyle, this.tableHeightResizeTable.parentElement.parentElement);
+            if (event.detail !== 0 || !this.tableHeightResizeTable) {
+                return;
+            }
+            const handle = this.tableHeightResizeHandle;
+            const height = createTableHeightMenu(this.protyle, [this.tableHeightResizeTable.parentElement.parentElement]);
+            if (height) {
+                const rect = handle.getBoundingClientRect();
+                toggleMenu({
+                    target: handle,
+                    build: (menu, session) => {
+                        height.submenu.forEach(item => menu.append(new MenuItem(item, menu).element));
+                        session.show(() => this.touch ? menu.fullscreen() : menu.popup({x: rect.left, y: rect.bottom}));
+                    },
+                });
             }
         });
         protyle.element.append(this.element);

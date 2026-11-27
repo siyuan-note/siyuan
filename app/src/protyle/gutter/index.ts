@@ -50,7 +50,8 @@ import {embedBreadcrumbMenu} from "./embedBreadcrumbMenu";
 import {embedOpenMenu} from "./embedOpenMenu";
 import {embedConversionMenu} from "./embedConversion";
 import {toggleListMindmap} from "../render/listMindmap";
-import {getBlockHeightTarget, setBlockHeight} from "./height";
+import {createBlockHeightMenu, getBlockHeightTarget, setBlockHeight} from "./height";
+import {createTableHeightMenu} from "../util/tableHeight";
 import {orderGutterTurnIntoItems} from "./turnIntoMenu";
 import {
     getContenteditableElement,
@@ -3391,86 +3392,28 @@ export class Gutter {
     }
 
     private genHeights(nodeElements: Element[], protyle: IProtyle) {
-        if (nodeElements.length === 0 || nodeElements.some(item => !getBlockHeightTarget(item as HTMLElement))) {
+        if (nodeElements.length === 0) {
             return;
         }
-        const getHeight = (item: HTMLElement) => {
-            const target = getBlockHeightTarget(item);
-            return target.element.style[target.property] ||
-                (["NodeIFrame", "NodeWidget"].includes(item.dataset.type) ? item.querySelector("iframe")?.style.height || "" : "");
-        };
-        const setHeight = setBlockHeight;
-        let rangeElement: HTMLInputElement;
-        const firstElement = nodeElements[0] as HTMLElement;
-        const firstHeight = getHeight(firstElement);
-        const styles: IMenu[] = [{
-            id: "heightInput",
-            iconHTML: "",
-            type: "readonly",
-            label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" value="${firstHeight.endsWith("px") ? parseInt(firstHeight) : ""}" type="number" min="1" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}"><span class="fn__flex-center">px</span></div>`,
-            bind: (element) => {
-                const inputElement = element.querySelector("input");
-                inputElement.addEventListener("input", () => {
-                    const heightValue = inputElement.value ? inputElement.value + "px" : "";
-                    nodeElements.forEach((item: HTMLElement) => {
-                        setHeight(item, heightValue);
-                    });
-                    rangeElement.value = "0";
-                    rangeElement.parentElement.setAttribute("aria-label", heightValue || window.siyuan.languages.default);
-                });
-                this.updateNodeElements(nodeElements, protyle, inputElement);
+        if (nodeElements.some(item => item.getAttribute("data-type") === "NodeTable")) {
+            const tableMenu = createTableHeightMenu(protyle, nodeElements);
+            if (tableMenu) {
+                window.siyuan.menus.menu.append(new MenuItem(tableMenu).element);
             }
-        }];
-        ["25%", "33%", "50%", "67%", "75%", "100%"].forEach((item) => {
-            styles.push({
-                id: "height_" + item,
-                iconHTML: "",
-                label: item,
-                click: () => {
-                    this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        setHeight(e, parseInt(item) + "vh");
-                    });
-                }
-            });
-        });
-        styles.push({
-            id: "separator_1",
-            type: "separator"
-        });
-        const height = firstHeight.endsWith("vh") ? parseInt(firstHeight) : 0;
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "height",
-            icon: "iconHeight",
-            label: window.siyuan.languages.height,
-            submenu: styles.concat([{
-                id: "heightDrag",
-                iconHTML: "",
-                type: "readonly",
-                label: `<div style="margin: 4px 0;" aria-label="${firstHeight ? firstHeight.replace("vh", "%") : window.siyuan.languages.default}" class="b3-tooltips b3-tooltips__n"><input style="box-sizing: border-box" value="${height}" class="b3-slider fn__block" max="100" min="1" step="1" type="range"></div>`,
-                bind: (element) => {
-                    rangeElement = element.querySelector("input");
-                    rangeElement.addEventListener("input", () => {
-                        nodeElements.forEach((e: HTMLElement) => {
-                            setHeight(e, rangeElement.value + "vh");
-                        });
-                        rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
-                    });
-                    this.updateNodeElements(nodeElements, protyle, rangeElement);
-                }
-            }, {
-                id: "separator_2",
-                type: "separator"
-            }, {
-                id: "default",
-                iconHTML: "",
-                label: window.siyuan.languages.default,
-                click: () => {
-                    this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        setHeight(e, "");
-                    });
-                }
-            }]),
-        }).element);
+            return;
+        }
+        if (nodeElements.some(item => !getBlockHeightTarget(item as HTMLElement))) {
+            return;
+        }
+        const first = nodeElements[0] as HTMLElement;
+        const target = getBlockHeightTarget(first);
+        const height = target.element.style[target.property] ||
+            (["NodeIFrame", "NodeWidget"].includes(first.dataset.type) ? first.querySelector("iframe")?.style.height || "" : "");
+        const menu = createBlockHeightMenu(height,
+            value => nodeElements.forEach((item: HTMLElement) => setBlockHeight(item, value)),
+            value => this.genClick(nodeElements, protyle, item => setBlockHeight(item, value)),
+            input => this.updateNodeElements(nodeElements, protyle, input));
+        window.siyuan.menus.menu.append(new MenuItem(menu).element);
     }
 
     private appendAddToDatabaseMenu(protyle: IProtyle, nodeElement: Element) {

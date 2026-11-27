@@ -294,7 +294,7 @@ const gutterWidth = () => node("width", lang("width"), true, [
     node("default", lang("default")),
 ]);
 
-const gutterHeight = () => node("height", lang("height"), true, [
+const gutterHeight = (id = "height") => node(id, lang("height"), true, [
     node("heightInput", lang("entryPixelHeight")),
     node("height_25%", literal("25%")),
     node("height_33%", literal("33%")),
@@ -313,7 +313,6 @@ const gutterTable = () => node("table", lang("tableBlock"), true, [
     node("useDefaultWidth", lang("useDefaultWidth")),
     node("distributeAllColWidths", lang("distributeAllColWidths")),
     node("useDefaultWidthForAllColumns", lang("useDefaultWidthForAllColumns")),
-    node("tableHeight", lang("height")),
     node("pinTableHead", lang("pinTableHead")),
     node("unpinTableHead", lang("unpinTableHead")),
     node("pinTableHeaderColumn", lang("pinTableHeaderColumn")),
@@ -1009,7 +1008,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("more", lang("more"), true, [
                 node("cancelMerged", lang("cancelMerged")),
                 node("useDefaultWidth", lang("useDefaultWidth")),
-                node("tableHeight", lang("height")),
+                gutterHeight("tableHeight"),
                 node("pinTableHead", lang("pinTableHead")),
                 node("unpinTableHead", lang("unpinTableHead")),
                 node("pinTableHeaderColumn", lang("pinTableHeaderColumn")),

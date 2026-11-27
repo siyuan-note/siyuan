@@ -2012,20 +2012,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Table block"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Height"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and enter the maximum height in pixels. You can also hover over the table on desktop or tap a cell on mobile, then drag the handle at the bottom center of the visible table. The limit is saved with the table and applies whether or not the header row is pinned. Choose "
+					"Data": " to enter a pixel value or set a percentage of the window height with the presets or slider. You can also hover over the table on desktop or tap a cell on mobile, then drag the handle at the bottom center of the visible table. The limit is saved with the table and applies whether or not the header row is pinned. Choose "
 				},
 				{
 					"Type": "NodeTextMark",

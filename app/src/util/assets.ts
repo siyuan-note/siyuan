@@ -467,6 +467,42 @@ export const getThemeColor = (varName: string, fallback: string) => {
     return rgbaToHex(cssVarToRgba(varName)).slice(0, 7) || fallback;
 };
 
+const isNativePhoneDesktop = () => {
+    if (getFrontend() !== "desktop") {
+        return false;
+    }
+    if (isInIOS()) {
+        return isIPhone();
+    }
+    if (isInHarmony()) {
+        return /\(\s*Phone\s*;/i.test(navigator.userAgent);
+    }
+    return Boolean(isInAndroid() && /\bMobile\b/i.test(navigator.userAgent));
+};
+
+const getPhoneWindowEdgeColor = (fallback: string) => {
+    const color = cssVarToRgba("--b3-body-background");
+    const hex = rgbaToHex(color);
+    if (hex) {
+        return hex.endsWith("ff") ? hex : fallback;
+    }
+    // 自定义主题可能使用非 rgb() 色值；原生桥接只接收 sRGB 的 #RRGGBBAA。
+    if (typeof CSS !== "undefined" && CSS.supports("color", color)) {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 1;
+        const context = canvas.getContext("2d");
+        if (context) {
+            context.fillStyle = color;
+            context.fillRect(0, 0, 1, 1);
+            const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data;
+            if (a === 255) {
+                return "#" + padHex(r) + padHex(g) + padHex(b) + "ff";
+            }
+        }
+    }
+    return fallback;
+};
+
 const updateMobileTheme = (OSTheme: string) => {
     if (isInMobileApp()) {
         setTimeout(() => {
@@ -480,6 +516,13 @@ const updateMobileTheme = (OSTheme: string) => {
             }
             const fallback = mode === 0 ? "#ffffffff" : "#1e1e1eff";
             const backgroundColor = rgbaToHex(cssVarToRgba("--b3-theme-background")) || fallback;
+            let systemBarColor = backgroundColor;
+            if (isNativePhoneDesktop()) {
+                const root = document.documentElement;
+                systemBarColor = getPhoneWindowEdgeColor(backgroundColor.endsWith("ff") ? backgroundColor : fallback);
+                root.style.setProperty("--b3-phone-window-edge-color", systemBarColor);
+                root.setAttribute("data-native-phone-desktop", "");
+            }
             const loadingElement = document.getElementById("loading");
             if (loadingElement) {
                 document.body.style.backgroundColor = backgroundColor;
@@ -487,11 +530,11 @@ const updateMobileTheme = (OSTheme: string) => {
             }
             // 统一传 #RRGGBBAA：iOS 按 #RRGGBBAA 解析，Android / Harmony 将 #RRGGBBAA 转为 #AARRGGBB
             if (isInIOS()) {
-                window.webkit.messageHandlers.changeStatusBar.postMessage(backgroundColor + " " + mode);
+                window.webkit.messageHandlers.changeStatusBar.postMessage(systemBarColor + " " + mode);
             } else if (isInAndroid()) {
-                window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
+                window.JSAndroid.changeStatusBarColor(systemBarColor, mode);
             } else if (isInHarmony()) {
-                window.JSHarmony.changeStatusBarColor(backgroundColor, mode);
+                window.JSHarmony.changeStatusBarColor(systemBarColor, mode);
             }
         }, 500); // 移动端需要加载完才可以获取到颜色
     }

@@ -32,12 +32,21 @@ html {
 }
 
 body {
-  --b3-window-background-image: var(--b3-body-background-gradient, radial-gradient(
+  --b3-window-background-accent: var(--b3-body-background-gradient, radial-gradient(
                   ellipse 45% 20% at 0% 0%,
                   hsla(var(--b3-body-background-hl), calc(var(--b3-body-background-hl-opacity) * 0.5)) 0%,
                   transparent 100%
   ));
+  --b3-window-background-image: var(--b3-window-background-accent);
   background-image: var(--b3-window-background-image);
+}
+
+// 系统栏和网页使用同一个纯色外沿；浮动 Dock 复用同一张背景，不露出渐变断层。
+:root[data-native-phone-desktop] body {
+  --b3-window-background-image: linear-gradient(to bottom,
+    var(--b3-phone-window-edge-color) 1px, transparent 24px,
+    transparent calc(100% - 24px), var(--b3-phone-window-edge-color) calc(100% - 1px)),
+  var(--b3-window-background-accent);
 }
 
 .fullscreen {

@@ -730,6 +730,10 @@
       background: transparent;
       cursor: pointer;
 
+      &[data-keymap-tooltip-dismissed]:not(:hover)::after {
+        content: none;
+      }
+
       &--active {
         color: var(--b3-theme-primary);
       }

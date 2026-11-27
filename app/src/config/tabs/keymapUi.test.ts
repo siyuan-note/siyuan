@@ -2,8 +2,61 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
-import {createSourceFile, forEachChild, isClassDeclaration, isMethodDeclaration, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, forEachChild, isCallExpression, isClassDeclaration, isMethodDeclaration, isVariableStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {CALLOUT_PRESETS} from "../../protyle/wysiwyg/calloutType";
+
+test("finishing shortcut recording restores focus and dismisses only the focus tooltip until blur", () => {
+    const source = createSourceFile("keymapUi.ts", readFileSync("src/config/tabs/keymapUi.ts", "utf8"), ScriptTarget.ES2022, true);
+    let listenerSource: string;
+    const visit = (node: import("typescript").Node) => {
+        if (isCallExpression(node) && node.expression.getText(source) === "keymapListElement.addEventListener" &&
+            node.arguments[0]?.getText(source) === '"keydown"') {
+            listenerSource = node.getText(source);
+        }
+        forEachChild(node, visit);
+    };
+    visit(source);
+    assert.ok(listenerSource);
+    const code = transpileModule(listenerSource, {compilerOptions: {target: ScriptTarget.ES2022}}).outputText;
+    const styles = readFileSync("src/assets/scss/business/_config.scss", "utf8");
+    assert.match(styles, /&\[data-keymap-tooltip-dismissed\]:not\(:hover\)::after\s*\{\s*content:\s*none;/);
+    const attributes = new Map<string, string>();
+    const ownerDocument: {activeElement?: unknown} = {};
+    const addButton = Object.assign(new EventTarget(), {
+        ownerDocument,
+        setAttribute: (name: string, value: string) => attributes.set(name, value),
+        removeAttribute: (name: string) => attributes.delete(name),
+        focus: () => { ownerDocument.activeElement = addButton; },
+    });
+    const row = {dataset: {key: "general|test"}, querySelector: () => addButton};
+    const recorder = {};
+    let keydown: (event: unknown) => void;
+    const canceled: (boolean | undefined)[] = [];
+    const saved: string[][] = [];
+    const context = {
+        keymapListElement: {addEventListener: (_type: string, listener: typeof keydown) => { keydown = listener; }},
+        recording: {row, element: recorder},
+        Constants: {ZWSP: "|"},
+        getKeymapString: () => "F10",
+        isDisallowedTextInputHotkey: () => false, isReservedKeymap: () => false, matchHotKey: () => true, isMac: () => false,
+        getRowBindings: (): string[] => [],
+        cancelRecording: (restoreFocus?: boolean) => { canceled.push(restoreFocus); context.recording = undefined; },
+        saveRow: (_row: unknown, keys: string[]) => saved.push(keys),
+    };
+    runInNewContext(code, context);
+    const press = (key: string) => keydown({key, target: recorder, preventDefault() {}, stopImmediatePropagation() {}});
+    press("F10");
+    assert.deepEqual(saved, [["F10"]]);
+    assert.equal(ownerDocument.activeElement, addButton);
+    assert.equal(attributes.get("data-keymap-tooltip-dismissed"), "");
+    addButton.dispatchEvent(new Event("blur"));
+    assert.equal(attributes.has("data-keymap-tooltip-dismissed"), false);
+    context.recording = {row, element: recorder};
+    press("Escape");
+    assert.deepEqual(canceled, [undefined, true]);
+    assert.equal(saved.length, 1);
+    assert.equal(attributes.has("data-keymap-tooltip-dismissed"), false);
+});
 
 test("binding refresh keeps the active conflict filter until another search", () => {
     const source = createSourceFile("keymapUi.ts", readFileSync("src/config/tabs/keymapUi.ts", "utf8"), ScriptTarget.ES2021, true);

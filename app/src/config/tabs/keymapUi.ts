@@ -521,7 +521,12 @@ const bindKeymapList = (root: HTMLElement) => {
         cancelRecording();
         keys.push(hotkey);
         saveRow(row, keys);
-        row.querySelector<HTMLButtonElement>('[data-type="add"]').focus();
+        const addButton = row.querySelector<HTMLButtonElement>('[data-type="add"]');
+        addButton.focus();
+        if (addButton.ownerDocument.activeElement === addButton) {
+            addButton.setAttribute("data-keymap-tooltip-dismissed", "");
+            addButton.addEventListener("blur", () => addButton.removeAttribute("data-keymap-tooltip-dismissed"), {once: true});
+        }
     }, true);
     keymapListElement.addEventListener("keyup", (event: KeyboardEvent) => {
         if ((event.target as HTMLElement).closest(".config-keymap__controls")) {

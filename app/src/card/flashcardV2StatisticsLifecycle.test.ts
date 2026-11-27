@@ -15,6 +15,7 @@ const compiled = transpileModule(source.slice(start, end), {
 const flush = () => new Promise(resolve => setImmediate(resolve));
 const harness = () => {
     const handlers = new Map<string, () => void>();
+    const datePickers: unknown[] = [];
     const control = (name: string, value = "") => ({value, disabled: false,
         addEventListener: (event: string, handler: () => void) => handlers.set(`${name}:${event}`, handler)});
     let writes = 0;
@@ -37,6 +38,7 @@ const harness = () => {
         ensureFlashcardV2: (callback: () => void) => callback(),
         Dialog: class {element = element; constructor(value: typeof options) { options = value; }},
         window: {siyuan: {languages}}, isMobile: () => false,
+        bindDatePicker: (input: unknown) => datePickers.push(input),
         flashcardV2StatisticsDate: () => "2026-10-01",
         reportFlashcardV2Field: () => assert.fail("unexpected invalid dates"),
         renderFlashcardV2Statistics: (value: {name: string}) => value.name,
@@ -44,12 +46,13 @@ const harness = () => {
             new Promise<void>((resolve, reject) => requests.push({data, success, resolve, reject})),
     });
     exports.openFlashcardV2Statistics();
-    return {requests, controls, content, element, handlers, languages,
+    return {requests, controls, content, element, handlers, languages, datePickers,
         get options() { return options; }, get writes() { return writes; }};
 };
 
 test("statistics filters have distinct escaped accessible names without layout changes", () => {
     const h = harness();
+    assert.deepEqual(h.datePickers, [h.controls.statisticsFrom, h.controls.statisticsTo]);
     for (const [control, key] of [["statisticsRange", "flashcardStatisticsRange"], ["statisticsFrom", "startDate"],
         ["statisticsTo", "endDate"], ["statisticsBucket", "group"]]) {
         assert.ok(h.options.content.includes(`data-type="${control}" aria-label="${escapeAttr(h.languages[key as keyof typeof h.languages])}"`));

@@ -23,7 +23,7 @@ export const openFlashcardV2EditLater = (cardID: string, callback: () => void, i
             title: lang.flashcardEditLater,
             width: isMobile() ? "92vw" : "460px",
             content: `<div class="b3-dialog__content card__v2-form">
-<div class="card__v2-form-note">${lang.flashcardEditLaterTip}</div>
+<div class="ft__on-surface">${lang.flashcardEditLaterTip}</div>
 <label class="b3-label"><div class="b3-label__text">${lang.flashcardEditLaterNote}</div><textarea class="b3-text-field fn__block" rows="4" maxlength="4000">${escapeHtml(pending?.note || "")}</textarea></label></div>
 <div class="b3-dialog__action card__v2-edit-later-actions"><button data-action="cancel" class="b3-button b3-button--cancel">${lang.cancel}</button><div class="fn__space"></div><button data-action="save" class="b3-button ${pending ? "b3-button--outline" : "b3-button--text"}">${pending ? lang.save : lang.flashcardEditLater}</button>${pending ? `<div class="fn__space"></div><button data-action="complete" class="b3-button b3-button--text">${lang.flashcardEditLaterComplete}</button>` : ""}</div>`,
         });

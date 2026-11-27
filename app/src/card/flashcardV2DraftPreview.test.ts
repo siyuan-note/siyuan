@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {hasFlashcardAnswer, hideFlashcardAnswer} from "./flashcardMode";
 
 const createPreview = () => {
     const exports: {FlashcardV2DraftPreview?: new () => {
@@ -137,6 +138,28 @@ test("preview network failures notify only the current editor and remain retryab
         let retried = false;
         await preview.run(async () => "retry", () => { retried = true; }, () => true);
         assert.equal(retried, true);
+    }
+});
+
+test("ordered and grouped cloze previews leave mark visibility to their reveal controller", () => {
+    const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
+    const start = source.indexOf("const flashcardConfig = window.siyuan.config.flashcard;");
+    const end = source.indexOf("if (shouldShowFlashcardRatingsImmediately(", start);
+    assert.ok(start > 0 && end > start);
+    const script = transpileModule(source.slice(start, end), {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    for (const [sourceType, hasController, legacyMask] of [
+        ["ordered", true, false], ["cloze", true, false], ["cloze", false, true], ["block", false, true],
+    ]) {
+        const classes = new Set<string>();
+        runInNewContext(script, {
+            window: {siyuan: {config: {flashcard: {mark: true}}}},
+            model: {source: {sourceType}}, revealController: hasController ? {} : undefined,
+            hasFlashcardAnswer, hideFlashcardAnswer,
+            frontElement: {querySelector: () => ({})},
+            contentElement: {classList: {add: (name: string) => classes.add(name),
+                remove: (...names: string[]) => names.forEach(name => classes.delete(name))}},
+        });
+        assert.equal(classes.has("card__block--hidemark"), legacyMask, String(sourceType));
     }
 });
 

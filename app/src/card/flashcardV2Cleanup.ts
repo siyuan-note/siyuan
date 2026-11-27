@@ -2,7 +2,7 @@ import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchPost} from "../util/fetch";
 import {escapeAttr, escapeHtml} from "../util/escape";
-import {createFlashcardV2Operation} from "./flashcardV2Form";
+import {createFlashcardV2Operation, flashcardV2DisclosureIcon} from "./flashcardV2Form";
 
 interface IInvalidSource {
     sourceID: string;
@@ -78,11 +78,12 @@ export const openFlashcardV2Cleanup = (onChanged: () => void) => {
                 list.innerHTML = sources.map((source) => {
                     const reason = source.reason === "missing" ? lang.flashcardCleanupMissing :
                         source.reason === "closed" ? lang.flashcardCleanupClosed : lang.flashcardCleanupUnknown;
+                    const checkboxLabel = source.blockIDs[0] ? `${reason} - ${source.blockIDs[0]}` : reason;
                     return `<li class="b3-list-item card__v2-cleanup-row">
-<span class="card__v2-cleanup-selection">${source.reason === "missing" ? `<input type="checkbox" data-id="${escapeAttr(source.sourceID)}" aria-label="${escapeAttr(source.sourceID)}">` : ""}</span>
-<details class="card__v2-cleanup-details">
-<summary aria-label="${escapeAttr(`${lang.flashcardCardSource} - ${reason}`)}"><svg class="b3-list-item__arrow" aria-hidden="true"><use xlink:href="#iconRight"></use></svg><span>${reason}</span></summary>
-<div class="card__v2-cleanup-ids ft__breakword"><div class="ft__on-surface">${lang.flashcardCardSource}</div>${escapeHtml(source.sourceID)}<br>${source.blockIDs.map(id => escapeHtml(id)).join("<br>")}</div>
+<span class="card__v2-cleanup-selection">${source.reason === "missing" ? `<input type="checkbox" data-id="${escapeAttr(source.sourceID)}" aria-label="${escapeAttr(checkboxLabel)}">` : ""}</span>
+<details class="card__v2-disclosure card__v2-cleanup-details">
+<summary aria-label="${escapeAttr(`${lang.flashcardCardSource} - ${reason}`)}">${flashcardV2DisclosureIcon}<span>${reason}</span></summary>
+<div class="card__v2-cleanup-ids ft__breakword">${source.blockIDs.map(id => escapeHtml(id)).join("<br>")}</div>
 </details>
 <span class="b3-list-item__meta">${lang.riffCard} ${source.cardCount}</span></li>`;
                 }).join("") || `<li class="b3-list-item">${lang.emptyContent}</li>`;

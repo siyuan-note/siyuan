@@ -4,6 +4,7 @@ import {fetchPost} from "../util/fetch";
 import {genUUID} from "../util/genID";
 import {isMobile} from "../util/functions";
 import {isFlashcardV2Object} from "./flashcardV2Contract";
+import {createFlashcardV2DisclosureTitle} from "./flashcardV2Form";
 import {FlashcardV2OrderedState} from "./flashcardV2OrderedState";
 import {readOrderedSummaryBlock, resolveOrderedSummaries, type OrderedSummaryStep} from "./flashcardV2OrderedSummary";
 import type {FlashcardV2OrderedSourceDetails} from "../types/api";
@@ -41,7 +42,7 @@ export const openFlashcardV2Ordered = (sourceID: string, reload: () => void, par
     const dialog = new Dialog({
         title: language.flashcardReorderSteps,
         width: isMobile() ? "92vw" : "640px",
-        content: '<div class="b3-dialog__content"><p data-role="tip"></p><p data-role="status" role="status" aria-live="polite"></p><ol data-role="steps" class="fn__list"></ol></div><div class="b3-dialog__action"><button type="button" data-action="refresh" class="b3-button b3-button--outline"></button><div class="fn__space"></div><button type="button" data-action="cancel" class="b3-button b3-button--cancel"></button><div class="fn__space"></div><button type="button" data-action="save" class="b3-button b3-button--text"></button></div>',
+        content: "<div class=\"b3-dialog__content\"><p data-role=\"tip\" class=\"ft__on-surface\"></p><p data-role=\"status\" role=\"status\" aria-live=\"polite\"></p><ol data-role=\"steps\" class=\"fn__list card__v2-ordered-steps\"></ol></div><div class=\"b3-dialog__action\"><button type=\"button\" data-action=\"refresh\" class=\"b3-button b3-button--outline\"></button><div class=\"fn__space\"></div><button type=\"button\" data-action=\"cancel\" class=\"b3-button b3-button--cancel\"></button><div class=\"fn__space\"></div><button type=\"button\" data-action=\"save\" class=\"b3-button b3-button--text\"></button></div>",
         beforeClose: () => !saving,
         destroyCallback: () => {
             state.close(); abort.abort();
@@ -67,10 +68,12 @@ export const openFlashcardV2Ordered = (sourceID: string, reload: () => void, par
         const steps = state.steps;
         steps.forEach((step, index) => {
             const item = document.createElement("li"); item.className = "b3-label"; item.dataset.stepId = step.id;
-            const details = document.createElement("details"); details.open = expanded.has(step.id);
-            const summary = document.createElement("summary"); summary.className = "ft__breakword";
+            const details = document.createElement("details");
+            details.className = "card__v2-disclosure";
+            details.open = expanded.has(step.id);
+            const summary = createFlashcardV2DisclosureTitle(step.text.length > 160 ? step.text.slice(0, 160) + "..." : step.text);
+            summary.className = "ft__breakword";
             summary.id = genUUID(); item.setAttribute("role", "group"); item.setAttribute("aria-labelledby", summary.id);
-            summary.textContent = step.text.length > 160 ? step.text.slice(0, 160) + "..." : step.text;
             const full = document.createElement("p"); full.className = "ft__breakword"; full.textContent = step.text;
             details.append(summary, full); item.append(details);
             const controls = document.createElement("div"); controls.className = "fn__flex"; item.append(controls);

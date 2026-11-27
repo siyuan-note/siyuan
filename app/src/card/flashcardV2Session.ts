@@ -682,9 +682,13 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
             const choiceController = prepareFlashcardV2Choice(frontElement, model);
             const playbackController = prepareFlashcardV2Playback(model, frontElement, answerElement,
                 specialFront !== undefined);
-            const hasInternalAnswer = hasFlashcardAnswer(frontElement, window.siyuan.config.flashcard);
+            const flashcardConfig = window.siyuan.config.flashcard;
+            // 文本遮挡控制器负责逐步显示标记，通用标记样式会遮住已经揭晓的步骤。
+            const displayConfig = revealController && (model.source.sourceType === "cloze" || model.source.sourceType === "ordered") ?
+                {...flashcardConfig, mark: false} : flashcardConfig;
+            const hasInternalAnswer = hasFlashcardAnswer(frontElement, displayConfig);
             if (hasInternalAnswer) {
-                hideFlashcardAnswer(contentElement, window.siyuan.config.flashcard);
+                hideFlashcardAnswer(contentElement, displayConfig);
             }
             if (shouldShowFlashcardRatingsImmediately(Boolean(revealController), hasInternalAnswer,
                 hasRenderedAnswer)) {
@@ -774,14 +778,12 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0,
             rendered?.playbackController.cancel();
         },
         content: `<div class="b3-dialog__content fn__flex-column card__v2-session card__v2-preview">
-<div data-flashcard-toolbar class="card__v2-session-toolbar card__v2-preview-toolbar">
-<span class="ft__on-surface">${window.siyuan.languages.flashcardPreviewTip}</span>
-<div class="card__v2-preview-navigation">
+<div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
 <button data-type="previous" class="b3-button b3-button--outline">${window.siyuan.languages.previous}</button>
 <span data-flashcard-count class="fn__flex-shrink" aria-live="polite"></span>
 <button data-type="next" class="b3-button b3-button--outline">${window.siyuan.languages.next}</button>
 <span data-flashcard-path class="card__v2-session-path ft__on-surface"></span>
-</div></div>
+</div>
 <div class="card__block fn__flex-1 card__v2-session-content" aria-busy="true">
 <div data-flashcard-context class="card__v2-context ft__on-surface fn__none"></div>
 <div class="protyle-wysiwyg" contenteditable="false" data-flashcard-front></div>
@@ -1419,6 +1421,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     target: button,
                     build: (_menu, session) => {
                         const menu = new Menu();
+                        menu.element.classList.add("b3-menu--compact-icons");
                         menu.addItem({
                             id: "flashcardV2EditSource",
                             icon: "iconEdit",

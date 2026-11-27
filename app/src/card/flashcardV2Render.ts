@@ -922,6 +922,7 @@ const hideTextOcclusion = (element: Element, occlusionID: string) => {
         item.classList.add("card__v2-occlusion");
         item.classList.toggle("card__v2-occlusion--placeholder", index === 0);
     });
+    return elements.length > 0;
 };
 
 const revealTextOcclusion = (element: Element, occlusionID: string) => {
@@ -931,17 +932,20 @@ const revealTextOcclusion = (element: Element, occlusionID: string) => {
 };
 
 const prepareTextOcclusions = (element: Element, plan: IFlashcardV2OcclusionPlan) => {
-    const hidden = unique(plan.steps.flat().concat(plan.persistent));
-    if (hidden.length === 0 || !hidden.some((occlusionID) => findOcclusionElements(element, occlusionID).length > 0)) {
+    const hidden = unique(plan.steps.flat().concat(plan.persistent))
+        .filter((occlusionID) => hideTextOcclusion(element, occlusionID));
+    if (hidden.length === 0) {
         return;
     }
-    hidden.forEach((occlusionID) => hideTextOcclusion(element, occlusionID));
+    const pending = new Set(hidden);
+    const steps = plan.steps.map((step) => step.filter((occlusionID) => pending.delete(occlusionID)))
+        .filter((step) => step.length > 0);
     let index = 0;
     return {
         revealNext: () => {
-            plan.steps[index]?.forEach((occlusionID) => revealTextOcclusion(element, occlusionID));
+            steps[index]?.forEach((occlusionID) => revealTextOcclusion(element, occlusionID));
             index++;
-            return index >= plan.steps.length;
+            return index >= steps.length;
         },
     };
 };

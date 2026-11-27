@@ -25,10 +25,12 @@ import {openFlashcardV2Preview, openFlashcardV2ReviewSession, openFlashcardV2Sou
 import {
     createFlashcardV2Operation,
     enhanceFlashcardV2MultiSelect,
+    flashcardV2DisclosureIcon,
     reportFlashcardV2Field,
     submitFlashcardV2Form,
     validateFlashcardV2Fields,
 } from "./flashcardV2Form";
+import {bindDatePicker} from "../datePicker/binding";
 import {openFlashcardV2Due} from "./flashcardV2Due";
 import {flashcardV2LocalDateTime} from "./flashcardV2Calendar";
 import {openFlashcardV2EditLater, type IFlashcardV2EditLater} from "./flashcardV2EditLater";
@@ -767,7 +769,7 @@ const openFlashcardV2PresetEditor = (revision: IFlashcardEntityRevision<IFlashca
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardTargetRetention}</div><input data-type="retention" class="b3-text-field fn__block" required type="number" min="0" max="1" step="any" value="${current?.requestRetention ?? window.siyuan.config.flashcard.requestRetention}"><div class="b3-label__text ft__on-surface">${window.siyuan.languages.flashcardFSRSParamRequestRetentionTip}</div></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardNewCardLimit}</div><input data-type="newLimit" class="b3-text-field fn__block" required type="number" min="0" step="1" value="${current?.newLimit ?? window.siyuan.config.flashcard.newCardLimit}"><div class="b3-label__text ft__on-surface">${window.siyuan.languages.flashcardNewCardLimitTip}</div></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardReviewCardLimit}</div><input data-type="reviewLimit" class="b3-text-field fn__block" required type="number" min="0" step="1" value="${current?.reviewLimit ?? window.siyuan.config.flashcard.reviewCardLimit}"><div class="b3-label__text ft__on-surface">${window.siyuan.languages.flashcardReviewCardLimitTip}</div></label>
-<details class="card__v2-details"><summary>${window.siyuan.languages.configGroupAdvanced}</summary><div class="card__v2-form-section">
+<details class="card__v2-details card__v2-disclosure"><summary>${flashcardV2DisclosureIcon}<span>${window.siyuan.languages.configGroupAdvanced}</span></summary><div class="card__v2-form-section">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamMaximumInterval}</div><input data-type="maximumInterval" class="b3-text-field fn__block" required type="number" min="1" step="1" value="${current?.maximumInterval ?? window.siyuan.config.flashcard.maximumInterval}"><div class="b3-label__text ft__on-surface">${window.siyuan.languages.flashcardFSRSParamMaximumIntervalTip}</div></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamWeights}</div><textarea data-type="weights" class="b3-text-field fn__block">${escapeHtml((current?.weights || defaultWeights).join(","))}</textarea><div class="b3-label__text ft__on-surface">${window.siyuan.languages.flashcardFSRSParamWeightsTip}</div></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardLeeches}</div><input data-type="leechThreshold" class="b3-text-field fn__block" required type="number" min="0" step="1" value="${current?.leechThreshold ?? 8}"></label>
@@ -924,7 +926,7 @@ const openFlashcardV2ReviewSetSession = (app: App, reviewSetID: string, name: st
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardSessionMode}</div>
 <select data-type="reviewMode" class="b3-select fn__block"><option value="normal">${window.siyuan.languages.flashcardReviewNormal}</option><option value="reinforcement">${window.siyuan.languages.flashcardReviewReinforcement}</option></select></label>
 <div data-type="reinforcementOptions" class="fn__none card__v2-form-section">
-<div class="card__v2-form-note">${window.siyuan.languages.flashcardReviewReinforcementTip}</div>
+<div class="ft__on-surface">${window.siyuan.languages.flashcardReviewReinforcementTip}</div>
 <label class="b3-label fn__flex-center"><input data-type="includeSuspended" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardIncludeSuspended}</label>
 <label class="b3-label fn__flex-center"><input data-type="includeBuried" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardIncludeBuried}</label>
 <label class="b3-label fn__flex-center"><input data-type="includePaused" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardIncludePaused}</label>
@@ -1003,9 +1005,11 @@ const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
     if (generationLabels[result.card.generationStatus]) {
         statuses.push(generationLabels[result.card.generationStatus]);
     }
-    return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
+    return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card${result.card.editLater ? " card__v2-managed-card--edit-later" : ""}" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
+<span class="card__v2-managed-leading">
 <input data-type="selectCard" aria-label="${escapeAttr(title)}" type="checkbox"${selectedCardIDs.has(result.card.id) ? " checked" : ""}>
 <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg>
+</span>
 <span class="card__v2-managed-main">
 <button data-type="preview" class="card__v2-managed-title" aria-label="${escapeAttr(`${window.siyuan.languages.flashcardPreview} - ${title}`)}">${escapeHtml(title)}</button>
 <span class="card__v2-managed-details">${grouped ? "" : `<span>${escapeHtml(`${type} ${variant}`.trim())}</span>`}${statuses.map((status) => `<span class="card__v2-managed-badge">${escapeHtml(status)}</span>`).join("")}<span>${window.siyuan.languages.flashcardReviews} ${result.reviewState.reps}</span>${result.effectivePriority === "unset" ? "" : `<span>${escapeHtml(priorityLabel(result.effectivePriority))}</span>`}</span>
@@ -1178,7 +1182,7 @@ const openFlashcardV2Direction = (sourceID: string, cards: IFlashcardSearchResul
     const dialog = new Dialog({
         title: window.siyuan.languages.flashcardDirectionSettings,
         width: isMobile() ? "92vw" : "420px",
-        content: `<div class="b3-dialog__content card__v2-form"><div class="card__v2-form-note">${window.siyuan.languages.flashcardSourceActionTip}</div><select class="b3-select fn__block">
+        content: `<div class="b3-dialog__content card__v2-form"><div class="ft__on-surface">${window.siyuan.languages.flashcardSourceActionTip}</div><select class="b3-select fn__block">
 <option value="forward">${window.siyuan.languages.flashcardDirectionForward}</option>
 <option value="reverse">${window.siyuan.languages.flashcardDirectionReverse}</option>
 <option value="bidirectional">${window.siyuan.languages.flashcardDirectionBidirectional}</option>
@@ -1357,11 +1361,13 @@ const openFlashcardV2StudyPolicy = (scopeType: "document" | "notebook", scopeID:
         priority.value = current?.payload.priority || "";
         const defaultPreset = dialog.element.querySelector('[data-type="defaultPreset"]') as HTMLSelectElement;
         defaultPreset.value = current?.payload.defaultPresetID || "";
+        const targetDateInput = dialog.element.querySelector<HTMLInputElement>('[data-type="targetDate"]');
+        bindDatePicker(targetDateInput);
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
         buttons[0].addEventListener("click", () => dialog.destroy());
         buttons[1].addEventListener("click", () => {
             const now = Date.now();
-            const targetValue = (dialog.element.querySelector('[data-type="targetDate"]') as HTMLInputElement).value;
+            const targetValue = targetDateInput.value;
             const targetDate = targetValue ? new Date(targetValue).getTime() : undefined;
             if (targetDate !== undefined && !Number.isFinite(targetDate)) {
                 return;
@@ -1856,7 +1862,7 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardBurialStatus}</div><select data-filter="buried" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option><option value="true">${window.siyuan.languages.flashcardBuriedCards}</option><option value="false">${window.siyuan.languages.flashcardUnburiedCards}</option></select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardDueOnOrAfter}</div><input data-filter="dueFrom" class="b3-text-field fn__block" type="datetime-local" value="${escapeAttr(filters.dueFrom || "")}"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardDueOnOrBefore}</div><input data-filter="dueTo" class="b3-text-field fn__block" type="datetime-local" value="${escapeAttr(filters.dueTo || "")}"></label>
-</div><details class="card__v2-details"><summary>${window.siyuan.languages.configGroupAdvanced}</summary><div class="card__v2-form--grid">
+</div><details class="card__v2-details card__v2-disclosure"><summary>${flashcardV2DisclosureIcon}<span>${window.siyuan.languages.configGroupAdvanced}</span></summary><div class="card__v2-form--grid">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardReviews} ≥</div><input data-filter="repsFrom" class="b3-text-field fn__block" type="number" min="0" value="${escapeAttr(filters.repsFrom || "")}"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardReviews} ≤</div><input data-filter="repsTo" class="b3-text-field fn__block" type="number" min="0" value="${escapeAttr(filters.repsTo || "")}"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardLapses} ≥</div><input data-filter="lapsesFrom" class="b3-text-field fn__block" type="number" min="0" value="${escapeAttr(filters.lapsesFrom || "")}"></label>
@@ -1872,6 +1878,9 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
     const elements = [...dialog.element.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-filter]")];
     elements.forEach((element) => {
         element.value = filters[element.dataset.filter as TFlashcardManagementStringFilter] || "";
+        if (element instanceof HTMLInputElement && element.type === "datetime-local") {
+            bindDatePicker(element);
+        }
         if (element.value && element.closest("details")) {
             element.closest("details").open = true;
         }
@@ -1936,7 +1945,7 @@ ${conflict.revisions.map((revision) => {
                     conflict.revisions.map(item => item.payload));
                 return `<div class="card__v2-conflict-revision"><label class="fn__flex-center"><input type="radio" name="flashcardConflict${conflictIndex}" value="${escapeAttr(revision.revisionID)}"${revision.revisionID === conflict.selectedRevisionID ? " checked" : ""}><span class="fn__space"></span><span class="fn__flex-1">${new Date(revision.updatedAt).toLocaleString()}</span>${revision.deleted ? `<span class="ft__error">${window.siyuan.languages.delete}</span>` : ""}</label>
 ${summary.map(field => `<div class="fn__flex"><span class="ft__secondary">${escapeHtml(field.label)}</span><span class="fn__space"></span>${field.different ? `<mark>${escapeHtml(field.value)}</mark>` : `<span>${escapeHtml(field.value)}</span>`}</div>`).join("")}
-<details><summary>JSON</summary><div class="ft__secondary">${escapeHtml(conflict.entityID)} / ${escapeHtml(revision.revisionID)}</div><pre class="fn__code">${escapeHtml(payload || "null")}</pre></details></div>`;
+<details class="card__v2-disclosure"><summary>${flashcardV2DisclosureIcon}<span>JSON</span></summary><div class="ft__secondary">${escapeHtml(conflict.entityID)} / ${escapeHtml(revision.revisionID)}</div><pre class="fn__code">${escapeHtml(payload || "null")}</pre></details></div>`;
             }).join("")}
 </div>`).join("")}
 </div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text"${conflicts.length === 0 ? " disabled" : ""}>${window.siyuan.languages.confirm}</button></div>`,
@@ -2222,6 +2231,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                         target: target,
                         build: (_menu, session) => {
                             const menu = new Menu();
+                            menu.element.classList.add("b3-menu--compact-icons");
                             ["saveReviewSet", "scopePolicy", "flagDefinitions", "cleanup", "conflicts"].forEach((action) => {
                                 const button = dialog.element.querySelector<HTMLButtonElement>(`[data-type="${action}"]`);
                                 if (button) {
@@ -2318,6 +2328,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     });
                     toggleMenu({target, build: (_menu, session) => {
                         const menu = new Menu();
+                        menu.element.classList.add("b3-menu--compact-icons");
                         menu.addItem(option("tags", lang.tag));
                         menu.addItem(option("membership", reviewSetID ? lang.remove : lang.flashcardReviewSet));
                         menu.addItem({label: lang.flashcardReviewState, submenu: [
@@ -2449,6 +2460,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                         target: target,
                         build: (_menu, session) => {
                             const menu = new Menu();
+                            menu.element.classList.add("b3-menu--compact-icons");
                             ["editSource", "sourceHistory", "sourceTags", "sourcePreset", "documentPolicy", "notebookPolicy", "sourceLifecycle"]
                                 .forEach((action) => {
                                     const actionElement = item.querySelector(`[data-type="${action}"]`) as HTMLElement;
@@ -2480,6 +2492,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                         target: target,
                         build: (_menu, session) => {
                             const menu = new Menu();
+                            menu.element.classList.add("b3-menu--compact-icons");
                             const addAction = (id: string, label: string, action: string) => {
                                 menu.addItem({
                                     id,
@@ -2705,6 +2718,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                         target: target,
                         build: (_menu, session) => {
                             const menu = new Menu();
+                            menu.element.classList.add("b3-menu--compact-icons");
                             flashcardV2FlagMenuItems(selectedCard.card.flag, flagDefinitions, (flag) => {
                                 fetchPost("/api/flashcard/manageCards", {
                                     operationID: genUUID(),
@@ -3675,7 +3689,7 @@ const openFlashcardV2AdvancedSourceEditor = (blockIDs: string[], edit?: IFlashca
                     selected: ReadonlySet<string>) =>
                     `<label class="b3-label b3-label--inner card__v2-advanced-field"><div class="b3-label__text">${escapeHtml(target.label)}</div><select data-type="clozeGroups" data-target-index="${targetIndex}" class="b3-select fn__block" multiple size="${Math.min(6, Math.max(2, clozeTargets.length))}">${clozeGroupOrder.map((groupID, groupIndex) => `<option value="${escapeAttr(groupID)}"${selected.has(groupID) ? " selected" : ""}>${groupIndex + 1}</option>`).join("")}</select></label>`;
                 const clozeEditorHTML = `<div data-type="clozeEditor" class="card__v2-advanced-section">
-<div data-type="clozeTargets" class="fn__flex-column" style="gap:12px">
+<div data-type="clozeTargets" class="card__v2-advanced-targets">
 ${clozeTargets.map((target, targetIndex) => {
                     const selected = initialGroupIDs(target);
                     return clozeTargetHTML(target, targetIndex, selected.size > 0 ? selected :
@@ -3684,7 +3698,7 @@ ${clozeTargets.map((target, targetIndex) => {
 </div>
 ${clozeTargets.length === 0 ? `<div data-type="clozeEmpty" class="card__empty">${window.siyuan.languages.emptyContent}</div>` : ""}
 ${newInlineTargets.length > 0 ? `<div class="card__v2-advanced-section-action"><button data-type="includeNewMarks" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardIncludeNewMarks} (${newInlineTargets.length})</button></div>` : ""}
-<div data-type="clozeGroupOrder" class="b3-list b3-list--background"></div>
+<div data-type="clozeGroupOrder" class="b3-list b3-list--background card__v2-advanced-groups"></div>
 <div class="card__v2-advanced-section-action"><button data-type="addClozeGroup" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.group}</button></div>
 </div>`;
                 const imageEditorHTML = imageSource ? `<div data-type="imageEditor" class="fn__none card__v2-advanced-section">
@@ -3729,12 +3743,12 @@ ${typedFuzzyEnabled ? `<div class="b3-label__text ft__on-surface">${window.siyua
                 const dialog = new Dialog({
                     title: window.siyuan.languages.configGroupAdvanced,
                     width: isMobile() ? "96vw" : "720px",
-                    height: imageSource || blockIDs.length >= 3 ? "82vh" : undefined,
+                    height: blockIDs.length >= 3 ? "82vh" : undefined,
                     containerClassName: "card__v2-advanced-dialog",
                     beforeClose: () => { draftPreview.close(); return true; },
                     destroyCallback: () => imageEditor?.destroy(),
                     content: `<div class="b3-dialog__content card__v2-advanced">
-${edit ? `<div class="card__v2-form-note">${window.siyuan.languages.flashcardSourceActionTip}</div>` : ""}
+${edit ? `<div class="ft__on-surface">${window.siyuan.languages.flashcardSourceActionTip}</div>` : ""}
 <label class="b3-label b3-label--inner card__v2-advanced-field">
     <div class="b3-label__text">${window.siyuan.languages.type}</div>
     <select data-type="mode" class="b3-select fn__block">
@@ -3837,7 +3851,13 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                     });
                     clozeChoices.forEach((render) => render());
                     dialog.element.querySelector('[data-type="clozeGroupOrder"]').innerHTML =
-                        clozeGroupOrder.map((groupID, groupIndex) => `<div class="b3-list-item" data-group-id="${escapeAttr(groupID)}"><span class="b3-list-item__text">${window.siyuan.languages.group} ${groupIndex + 1}</span><button data-type="moveClozeGroupUp" class="b3-button b3-button--outline"${groupIndex === 0 ? " disabled" : ""}>${window.siyuan.languages.up}</button><span class="fn__space"></span><button data-type="moveClozeGroupDown" class="b3-button b3-button--outline"${groupIndex === clozeGroupOrder.length - 1 ? " disabled" : ""}>${window.siyuan.languages.down}</button><span class="fn__space"></span><button data-type="removeClozeGroup" class="b3-button b3-button--outline">${window.siyuan.languages.delete}</button></div>`).join("");
+                        clozeGroupOrder.map((groupID, groupIndex) => `<div class="b3-list-item b3-list-item--narrow" data-group-id="${escapeAttr(groupID)}">
+<span class="b3-list-item__text">${window.siyuan.languages.group} ${groupIndex + 1}</span>
+<div class="card__v2-advanced-group-actions">
+<button data-type="moveClozeGroupUp" class="b3-button b3-button--outline"${groupIndex === 0 ? " disabled" : ""}>${window.siyuan.languages.up}</button>
+<button data-type="moveClozeGroupDown" class="b3-button b3-button--outline"${groupIndex === clozeGroupOrder.length - 1 ? " disabled" : ""}>${window.siyuan.languages.down}</button>
+<button data-type="removeClozeGroup" class="b3-button b3-button--outline">${window.siyuan.languages.delete}</button>
+</div></div>`).join("");
                     updateConfirm();
                 };
                 dialog.element.querySelector('[data-type="clozeGroupOrder"]').addEventListener("click", (event) => {
@@ -4266,7 +4286,7 @@ const renderFlashcardV2Statistics = (statistics: IFlashcardStatistics) => {
         [window.siyuan.languages.flashcardAccuracy, statistics.history.reviews > 0 ? percent(statistics.history.accuracy) : "-"],
     ];
     return `<div class="card__v2-statistics-summary">${summary.map(([label, value]) => `<div><span class="ft__on-surface">${label}</span><strong>${value}</strong></div>`).join("")}</div>
-<details class="card__v2-details"><summary>${window.siyuan.languages.cardStatus}</summary>
+<details class="card__v2-details card__v2-disclosure"><summary>${flashcardV2DisclosureIcon}<span>${window.siyuan.languages.cardStatus}</span></summary>
 ${statisticsItem(window.siyuan.languages.riffCard, statistics.overview.currentCards)}
 ${statisticsItem(window.siyuan.languages.flashcardNewCard, state.new || 0)}
 ${statisticsItem(window.siyuan.languages.flashcardLearningCards, state.learning || 0)}
@@ -4281,7 +4301,7 @@ ${statisticsItem(window.siyuan.languages.flashcardOrphanedCards, generation.orph
 ${statisticsItem(window.siyuan.languages.flashcardDeletedCards, statistics.overview.deletedCards)}
 ${statisticsItem(window.siyuan.languages.flashcardLeeches, statistics.overview.leeches)}
 <div class="fn__hr"></div>
-</details><details class="card__v2-details"><summary>${window.siyuan.languages.flashcardReviewHistory}</summary>
+</details><details class="card__v2-details card__v2-disclosure"><summary>${flashcardV2DisclosureIcon}<span>${window.siyuan.languages.flashcardReviewHistory}</span></summary>
 ${statisticsItem(window.siyuan.languages.total, statistics.history.reviews)}
 ${statisticsItem(window.siyuan.languages.flashcardReviewedCards, statistics.history.uniqueCards)}
 ${statisticsItem(window.siyuan.languages.flashcardLapses, statistics.history.lapses)}
@@ -4308,7 +4328,7 @@ ${flashcardV2StatisticsBars(statistics.byHour, (value) => `${String(value.hour).
 ${flashcardV2StatisticsBars(statistics.futureDue, (value) => new Date(value.start).toLocaleDateString(),
         (value) => value.cards)}
 <div class="fn__hr"></div>
-<details class="card__v2-details"><summary>${window.siyuan.languages.configGroupAdvanced}</summary>
+<details class="card__v2-details card__v2-disclosure"><summary>${flashcardV2DisclosureIcon}<span>${window.siyuan.languages.configGroupAdvanced}</span></summary>
 ${flashcardV2StatisticsDistribution(window.siyuan.languages.flashcardInterval, statistics.intervalDistribution)}
 <div class="fn__hr"></div>
 ${flashcardV2StatisticsDistribution(window.siyuan.languages.flashcardStability, statistics.stabilityDistribution)}
@@ -4341,6 +4361,8 @@ export const openFlashcardV2Statistics = (reviewSetID = "", query?: IFlashcardQu
         });
         const from = dialog.element.querySelector('[data-type="statisticsFrom"]') as HTMLInputElement;
         const to = dialog.element.querySelector('[data-type="statisticsTo"]') as HTMLInputElement;
+        bindDatePicker(from);
+        bindDatePicker(to);
         const range = dialog.element.querySelector('[data-type="statisticsRange"]') as HTMLSelectElement;
         const bucket = dialog.element.querySelector('[data-type="statisticsBucket"]') as HTMLSelectElement;
         const content = dialog.element.querySelector('[data-type="statisticsContent"]');
@@ -4381,7 +4403,7 @@ export const openFlashcardV2Statistics = (reviewSetID = "", query?: IFlashcardQu
                     apply.disabled = false;
                     content.setAttribute("aria-busy", "false");
                     if (!loaded) {
-                        content.innerHTML = `<div class="card__v2-form-note">${window.siyuan.languages.flashcardLoadFailed}</div><button data-type="retry" class="b3-button b3-button--outline">${window.siyuan.languages.retry}</button>`;
+                        content.innerHTML = `<div class="ft__on-surface">${window.siyuan.languages.flashcardLoadFailed}</div><button data-type="retry" class="b3-button b3-button--outline">${window.siyuan.languages.retry}</button>`;
                         content.querySelector("button").addEventListener("click", load);
                     }
                 }

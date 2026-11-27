@@ -1,6 +1,7 @@
 import {Dialog} from "../dialog";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
+import {createFlashcardV2DisclosureTitle} from "./flashcardV2Form";
 import type {FlashcardV2CardRenderModel} from "../types/api";
 
 // 仅展示已有声明，不把可写的模式类型或插件命名空间当作作者认证。
@@ -33,7 +34,7 @@ export const openFlashcardV2Template = (cardID: string) => {
         title: language.flashcardInspectTemplate,
         width: isMobile() ? "92vw" : "640px",
         height: "70vh",
-        content: '<div class="b3-dialog__content"><p data-role="tip"></p><p role="status" data-role="status" aria-live="polite"></p><div data-role="details"></div></div><div class="b3-dialog__action"><button type="button" data-action="refresh" class="b3-button b3-button--outline"></button><div class="fn__space"></div><button type="button" data-action="close" class="b3-button b3-button--text"></button></div>',
+        content: "<div class=\"b3-dialog__content\"><p data-role=\"tip\" class=\"ft__on-surface\"></p><p role=\"status\" data-role=\"status\" aria-live=\"polite\"></p><div data-role=\"details\" class=\"card__v2-template-details\"></div></div><div class=\"b3-dialog__action\"><button type=\"button\" data-action=\"refresh\" class=\"b3-button b3-button--outline\"></button><div class=\"fn__space\"></div><button type=\"button\" data-action=\"close\" class=\"b3-button b3-button--text\"></button></div>",
         destroyCallback: () => { closed = true; generation++; abort.abort(); },
     });
     const root = dialog.element;
@@ -57,7 +58,8 @@ export const openFlashcardV2Template = (cardID: string) => {
     };
     const code = (label: string, value: string) => {
         const section = document.createElement("details");
-        const title = document.createElement("summary"); title.textContent = label;
+        section.className = "card__v2-disclosure";
+        const title = createFlashcardV2DisclosureTitle(label);
         const text = document.createElement("pre"); text.textContent = value;
         section.append(title, text); details.append(section);
     };

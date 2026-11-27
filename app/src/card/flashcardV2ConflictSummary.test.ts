@@ -67,7 +67,7 @@ test("conflict UI keeps full escaped JSON, marks deleted revisions and uses retr
     const source = readFileSync("src/card/flashcardV2.ts", "utf8");
     const conflict = source.slice(source.indexOf("const openFlashcardV2Conflicts ="),
         source.indexOf("interface IFlashcardManagementDialog"));
-    assert.match(conflict, /<details><summary>JSON<\/summary>/);
+    assert.match(conflict, /<details class="card__v2-disclosure"><summary>\$\{flashcardV2DisclosureIcon\}<span>JSON<\/span><\/summary>/);
     assert.match(conflict, /escapeHtml\(payload \|\| "null"\)/);
     assert.doesNotMatch(conflict, /slice\(0, 4000\)/);
     assert.match(conflict, /revision.deleted \?/);

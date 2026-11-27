@@ -12,6 +12,9 @@ test("read-only template dialog preserves declarations and unknown fields withou
     const source = transpileModule(readFileSync("src/card/flashcardV2Template.ts", "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
+    const formSource = transpileModule(readFileSync("src/card/flashcardV2Form.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
     const expression = `(async()=>{
         const assert=(value,message)=>{if(!value)throw new Error(message)};
         const dialogs=[],pending=[],calls=[];let plugins=0;
@@ -19,6 +22,8 @@ test("read-only template dialog preserves declarations and unknown fields withou
         class Dialog{constructor(options){this.options=options;this.element=document.createElement('section');this.element.innerHTML=options.content;document.body.append(this.element);dialogs.push(this)}destroy(){if(this.element.isConnected){this.element.remove();this.options.destroyCallback?.()}}}
         const modules={'../dialog':{Dialog},'../util/functions':{isMobile:()=>false},
             '../util/fetch':{fetchPost:(url,data,cb,_headers,fail,signal,timeout)=>{calls.push(url);return new Promise(resolve=>pending.push({url,data,cb,fail,signal,timeout,resolve}))}}};
+        modules['./flashcardV2Form']={};
+        new Function('require','exports',${JSON.stringify(formSource)})(()=>({}),modules['./flashcardV2Form']);
         const exports={};new Function('require','exports',${JSON.stringify(source)})(name=>{assert(!!modules[name],'unexpected module '+name);return modules[name]},exports);
         const {describeFlashcardTemplate:describe,openFlashcardV2Template:open}=exports;
         const payload=()=>({card:{id:'card',sourceID:'source',templateID:'template'},
@@ -42,6 +47,8 @@ test("read-only template dialog preserves declarations and unknown fields withou
         first.element.querySelector('[data-action="refresh"]').click();await finish(pending.shift(),{code:0,data:model});
         assert(first.element.querySelectorAll('input:checked').length===2,'separate readonly state checkboxes missing');
         assert([...first.element.querySelectorAll('input')].every(input=>input.disabled),'editable state exposed');
+        const sections=[...first.element.querySelectorAll('details.card__v2-disclosure')];
+        assert(sections.length===2&&sections.every(section=>!section.open&&section.querySelector('summary use').getAttribute('xlink:href')==='#iconRight'),'shared disclosure icons missing');
         const configs=[...first.element.querySelectorAll('pre')].map(pre=>pre.textContent);
         assert(JSON.parse(configs[1]).futureUnknown.nested[0]==='preserved','display lost unknown fields');
         assert(!first.element.textContent.includes('DO_NOT_SHOW'),'unrelated source or state leaked');

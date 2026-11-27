@@ -402,6 +402,10 @@
     max-height: var(--b3-menu-items-max-height, none);
   }
 
+  &--compact-icons .b3-menu__items--no-leading-icons > .b3-menu__item > .b3-menu__icon--placeholder {
+    display: none;
+  }
+
   // 由 markMenuInnerScroll() 标记的菜单：搜索框固定，滚动交给内层列表。
   // items 不再作为滚动容器，让 popup() 按锚点位置写入的可用高度生效（filter 的 50vh 会提前截断它，
   // 导致窗口还有余量也出现滚动条）；放不下时由内层列表滚动。

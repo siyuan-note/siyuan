@@ -10,7 +10,7 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 test("synthetic ordered dialog preserves retry input, focus and safe close/load boundaries", async () => {
     const directory = mkdtempSync(join(tmpdir(), "siyuan-ordered-ui-"));
     const sources: Record<string, string> = {};
-    for (const name of ["flashcardV2Ordered", "flashcardV2OrderedState", "flashcardV2OrderedSummary"]) {
+    for (const name of ["flashcardV2Ordered", "flashcardV2OrderedState", "flashcardV2OrderedSummary", "flashcardV2Form"]) {
         sources[`./${name}`] = transpileModule(readFileSync(`src/card/${name}.ts`, "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText;
@@ -29,6 +29,7 @@ test("synthetic ordered dialog preserves retry input, focus and safe close/load 
             '../dialog':{Dialog}, '../dialog/confirmDialog':{confirmDialog: ({confirm}) => confirmations.push(confirm)},
             '../util/fetch':{fetchPost:(url,data,cb,_headers,fail,signal,timeout)=>new Promise(resolve=>pending.push({url,data:JSON.parse(JSON.stringify(data)),cb,fail,resolve,signal,timeout}))},
             '../util/genID':{genUUID:()=> 'operation-'+(++sequence)}, '../util/functions':{isMobile:()=>false},
+            '../dialog/message':{},
             './flashcardV2Contract':{isFlashcardV2Object:value=>value!==null&&typeof value==='object'&&!Array.isArray(value)},
         };
         const sources=${JSON.stringify(sources)};
@@ -45,6 +46,7 @@ test("synthetic ordered dialog preserves retry input, focus and safe close/load 
         assert(initial.timeout===30000,'load lacks timeout');assert(button(first,'save').disabled,'loading save enabled');
         await finish(initial,{code:0,data:details()});
         assert(first.element.querySelector('summary').textContent==='Alpha <b>safe</b>','summary changed');assert(!first.element.querySelector('summary b'),'summary injected markup');
+        assert(first.element.querySelector('details.card__v2-disclosure summary use')?.getAttribute('xlink:href')==='#iconRight','shared disclosure icon missing');
         assert(button(first,'up').disabled,'top up enabled');first.element.querySelector('details').open=true;button(first,'down').click();
         assert(first.element.querySelector('[data-step-id="a"] details').open,'expanded content lost after move');
         assert(document.activeElement.closest('li').dataset.stepId==='a','focus did not follow moved identity');

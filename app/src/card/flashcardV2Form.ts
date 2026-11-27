@@ -1,6 +1,17 @@
 import {showMessage} from "../dialog/message";
 import {genUUID} from "../util/genID";
 
+export const flashcardV2DisclosureIcon = "<svg class=\"b3-list-item__arrow\" aria-hidden=\"true\"><use xlink:href=\"#iconRight\"></use></svg>";
+
+export const createFlashcardV2DisclosureTitle = (label: string) => {
+    const summary = document.createElement("summary");
+    summary.innerHTML = flashcardV2DisclosureIcon;
+    const text = document.createElement("span");
+    text.textContent = label;
+    summary.append(text);
+    return summary;
+};
+
 // 相同内容重试复用操作标识和时间，避免响应丢失后重复创建卡源或实体。
 export const createFlashcardV2Operation = () => {
     let signature: string;

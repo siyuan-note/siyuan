@@ -7,6 +7,7 @@
   }
 
   &__v2-edit-later-note {
+    line-height: 1.5;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
@@ -15,7 +16,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 4px;
   }
 
   &__main {
@@ -544,13 +544,6 @@
       gap: 12px;
     }
 
-    &-note {
-      padding: 10px 12px;
-      border-radius: var(--b3-border-radius);
-      background-color: var(--b3-theme-surface);
-      color: var(--b3-theme-on-surface);
-    }
-
     &--grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -624,15 +617,19 @@
     }
   }
 
-  &__v2-review-picker button.b3-list-item {
-    width: 100%;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    text-align: left;
+  &__v2-review-picker {
+    > ul.b3-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
 
-    &:focus-visible {
-      box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
+    button.b3-list-item {
+      width: 100%;
+
+      &:focus-visible {
+        box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
+      }
     }
   }
 
@@ -797,6 +794,10 @@
     min-height: 0;
     overflow: auto;
 
+    > * {
+      flex-shrink: 0;
+    }
+
     &-field {
       display: flex;
       flex-direction: column;
@@ -823,6 +824,27 @@
     &-section-action {
       display: flex;
       justify-content: flex-start;
+    }
+
+    &-targets {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    &-groups > .b3-list-item {
+      flex-wrap: wrap;
+      gap: 4px 8px;
+
+      > .b3-list-item__text {
+        min-width: min(6em, 100%);
+      }
+    }
+
+    &-group-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     &-image-toolbar {
@@ -864,7 +886,6 @@
       align-items: center;
       justify-content: space-between;
       min-height: 28px;
-      padding: 0 4px;
       color: var(--b3-theme-on-surface);
 
       > strong {
@@ -887,7 +908,6 @@
     box-sizing: border-box;
     height: 100%;
     min-height: 0;
-    padding: 12px;
     gap: 12px;
 
     &-toolbar {
@@ -1016,7 +1036,7 @@
   }
 
   &__v2-checkbox > input,
-  &__v2-managed-card > input {
+  &__v2-managed-leading > input {
     flex: none;
     margin: 0;
   }
@@ -1041,22 +1061,6 @@
     &-details {
       flex: 1;
       min-width: 0;
-
-      > summary {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        list-style: none;
-        cursor: pointer;
-
-        &::-webkit-details-marker {
-          display: none;
-        }
-      }
-
-      &[open] > summary > .b3-list-item__arrow {
-        transform: rotate(90deg);
-      }
     }
 
     &-ids {
@@ -1084,6 +1088,31 @@
   &__v2-managed-card {
     position: relative;
     min-height: 34px;
+
+    &--edit-later {
+      align-items: flex-start;
+      padding-block: 6px;
+
+      > .b3-list-item__action {
+        margin-block-start: max(0px, (var(--b3-ui-list-height, 28px) - 22px) / 2);
+      }
+
+      > .card__v2-managed-main {
+        row-gap: 6px;
+      }
+
+      .card__v2-managed-title {
+        min-block-size: var(--b3-ui-list-height, 28px);
+        padding-block: 0;
+      }
+    }
+  }
+
+  &__v2-managed-leading {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--b3-ui-list-height, 28px);
+    flex-shrink: 0;
 
     > input {
       margin-inline-end: 4px;
@@ -1131,8 +1160,46 @@
     > summary {
       padding: 12px 0;
       color: var(--b3-theme-on-surface);
-      cursor: pointer;
     }
+  }
+
+  &__v2-disclosure {
+    > summary {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+      cursor: pointer;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+    }
+
+    &[open] > summary > .b3-list-item__arrow {
+      transform: rotate(90deg);
+    }
+  }
+
+  &__v2-template-details {
+    > .b3-label {
+      padding-inline: 0;
+    }
+
+    > .card__v2-disclosure {
+      padding-block: 8px;
+
+      > pre {
+        margin-block: 6px 0;
+        margin-inline: 18px 0;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+    }
+  }
+
+  &__v2-ordered-steps > .b3-label {
+    padding-inline: 0;
   }
 
   &__v2-checklist {
@@ -1194,23 +1261,11 @@
     gap: 8px;
   }
 
-  &__v2-preview-toolbar,
-  &__v2-preview-navigation,
   &__v2-preview-actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-  }
-
-  &__v2-preview-toolbar {
-    justify-content: space-between;
-  }
-
-  &__v2-preview-navigation {
-    flex: 1 1 240px;
-    flex-wrap: nowrap;
-    min-width: 0;
   }
 
   &__v2-preview-actions {
@@ -1283,10 +1338,6 @@
 }
 
 @media screen and (max-width: 750px) {
-  .card__v2-management {
-    padding: 8px;
-  }
-
   .card__v2-managed-card.b3-list-item--hide-action,
   .card__v2-managed-source.b3-list-item--hide-action {
     > .b3-list-item__action {

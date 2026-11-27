@@ -76,16 +76,22 @@ const harness = () => {
 const source = (reason = "missing", revisionID = "r1") => ({sourceID: "source", revisionID,
     blockIDs: ["block"], cardCount: 2, reason});
 
-test("cleanup shows a concise tip and discloses IDs under the status using the shared icon", async () => {
+test("cleanup shows a concise tip and discloses only block IDs under the status", async () => {
     const ui = harness();
-    await ui.requests[0].finish({sources: [source(), {...source("closed"), sourceID: "closed"},
+    const sourceID = "00000000-0000-4000-8000-000000000001";
+    await ui.requests[0].finish({sources: [{...source(), sourceID, blockIDs: ["block-one", "block-two"]},
+        {...source("closed"), sourceID: "closed"},
         {...source("unknown"), sourceID: "unknown"}]});
     assert.equal(ui.inputs().length, 1);
+    assert.equal(ui.inputs()[0].dataset.id, sourceID);
     assert.match(ui.content(), /<div class="ft__on-surface">flashcardCleanupScanTip<\/div>/);
     assert.doesNotMatch(ui.content(), /flashcardCleanupTip/);
-    assert.match(ui.html(), /<details class="card__v2-cleanup-details">\s*<summary aria-label="flashcardCardSource - flashcardCleanupMissing">/);
+    assert.match(ui.html(), /<details class="card__v2-disclosure card__v2-cleanup-details">\s*<summary aria-label="flashcardCardSource - flashcardCleanupMissing">/);
     assert.match(ui.html(), /<use xlink:href="#iconRight"><\/use>/);
     assert.doesNotMatch(ui.html(), /<details[^>]* open/);
+    assert.match(ui.html(), /<div class="card__v2-cleanup-ids ft__breakword">block-one<br>block-two<\/div>/);
+    assert.ok(!ui.html().replace(`data-id="${sourceID}"`, "").includes(sourceID));
+    assert.match(ui.html(), /aria-label="flashcardCleanupMissing - block-one"/);
     assert.match(ui.html(), /flashcardCleanupMissing/);
     assert.match(ui.html(), /riffCard 2/);
     assert.equal(ui.requests.length, 1);

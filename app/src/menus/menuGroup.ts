@@ -17,6 +17,13 @@ export const updateMenuItemGroupClasses = (itemsElement: Element) => {
         if (element.classList.contains(name) === enabled) { return; }
         if (enabled) { element.classList.add(name); } else { element.classList.remove(name); }
     };
+    if (itemsElement.closest(".b3-menu--compact-icons")) {
+        const hasLeadingIcon = itemElements.some(item => !item.classList.contains("fn__none") &&
+            !item.classList.contains("b3-menu__title") && Array.from(item.children).some(icon =>
+            icon.classList.contains("b3-menu__icon") && !icon.classList.contains("b3-menu__icon--small") &&
+            !icon.classList.contains("b3-menu__icon--placeholder") && !icon.classList.contains("fn__none")));
+        setClass(itemsElement, "b3-menu__items--no-leading-icons", !hasLeadingIcon);
+    }
     setClass(itemsElement, "b3-menu__items--menu", itemElements.length > 0);
     if (itemElements.length === 0) {
         return;

@@ -6,6 +6,7 @@ import {
     flashcardV2OcclusionIDForReference,
     flashcardV2TemplateURI,
     isSafeFlashcardV2CSSValue,
+    prepareFlashcardV2Reveal,
     renderFlashcardV2AnkiTemplate,
     renderFlashcardV2Choice,
     renderFlashcardV2MultiLine,
@@ -93,6 +94,37 @@ describe("flashcardV2Render", () => {
         }, {mode: "single", stepIDs: ["s1", "s2"]}));
 
         assert.deepEqual(plan, {steps: [["o1", "o1b"], ["o2"]], persistent: []});
+    });
+
+    it("reveals a visible answer on each click when the ordered plan contains missing or repeated marks", () => {
+        const mark = (id: string) => {
+            const classes = new Set<string>();
+            return {
+                classes,
+                getAttribute: (attribute: string) => attribute === "data-occlusion-id" ? id : null,
+                classList: {
+                    add: (name: string) => classes.add(name),
+                    remove: (...names: string[]) => names.forEach(name => classes.delete(name)),
+                    toggle: (name: string, active: boolean) => active ? classes.add(name) : classes.delete(name),
+                },
+            };
+        };
+        const first = mark("first");
+        const second = mark("second");
+        const element = {querySelectorAll: () => [first, second]} as unknown as Element;
+        const view = prepareFlashcardV2Reveal(element, model("ordered", {steps: [
+            {id: "s1", displayOrder: 0, occlusionIDs: ["missing"]},
+            {id: "s2", displayOrder: 1, occlusionIDs: ["first"]},
+            {id: "s3", displayOrder: 2, occlusionIDs: ["first"]},
+            {id: "s4", displayOrder: 3, occlusionIDs: ["second"]},
+        ]}, {mode: "single", stepIDs: ["s1", "s2", "s3", "s4"]}));
+        const hidden = "card__v2-occlusion";
+        assert.ok(first.classes.has(hidden) && second.classes.has(hidden));
+        assert.equal(view.revealNext(), false);
+        assert.equal(first.classes.has(hidden), false);
+        assert.equal(second.classes.has(hidden), true);
+        assert.equal(view.revealNext(), true);
+        assert.equal(second.classes.has(hidden), false);
     });
 
     it("keeps future progressive steps hidden after revealing the current answer", () => {

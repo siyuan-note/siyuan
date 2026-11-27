@@ -39,12 +39,12 @@ const declaration = (file: ts.SourceFile, name: string) => {
 const checkClicks = (code: string, mobile: boolean) => {
     const check = (condition: unknown, message: string) => { if (!condition) throw new Error(message); };
     document.body.innerHTML = `<div class="protyle-wysiwyg" contenteditable="true" style="height:600px"><div class="av" data-type="NodeAttributeView" data-av-type="table" data-node-id="database">
-<div class="av__scroll"><div class="av__body"><div class="av__row av__row--header"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>
+<div class="av__scroll"><div class="av__body" data-group-id=""><div class="av__row av__row--header"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>
 <div class="av__row" data-id="row"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>
-<div class="av__cell" data-id="empty" data-dtype="text"><span class="av__celltext"></span></div>
+<div class="av__cell" data-id="empty" data-col-id="empty" data-dtype="text"><span class="av__celltext"></span></div>
 <div class="av__cell" data-id="filled" data-dtype="text"><span class="av__celltext">value</span></div>
 <div class="av__cell" data-id="select" data-dtype="select"><span class="av__celltext"></span></div>
-<div class="av__cell" data-id="rich" data-dtype="text"><div class="av__celltext av__celltext--rich"><p><strong>formatted</strong><a href="https://example.com">link</a></p></div></div>
+<div class="av__cell" data-id="rich" data-col-id="rich" data-dtype="text"><div class="av__celltext av__celltext--rich"><p><strong>formatted</strong><a href="https://example.com">link</a></p></div></div>
 </div><div class="av__row av__row--footer"><div class="av__firstcol" aria-hidden="true"><svg></svg></div></div></div></div>
 <div class="av__cursor" contenteditable="true">&#8203;</div></div><div class="p"><span>ordinary text</span></div></div>`;
     const element = document.querySelector<HTMLElement>(".protyle-wysiwyg");
@@ -52,6 +52,7 @@ const checkClicks = (code: string, mobile: boolean) => {
     const opened: HTMLElement[] = [];
     const navigated: string[] = [];
     const selected: HTMLElement[] = [];
+    let keyboardSelection: {cells: HTMLElement[], focus: {groupID: string, rowID: string, colID: string}};
     let filled = 0;
     const closest = (target: Node, name: string) =>
         (target?.nodeType === Node.TEXT_NODE ? target.parentElement : target as Element)?.closest("." + name);
@@ -66,7 +67,7 @@ const checkClicks = (code: string, mobile: boolean) => {
     window.siyuan = {menus: {menu: {element: menu}}, config: {keymap: {editor: {general: {}}}}} as any;
     const closestAV = (target: Element) => closest(target, "av");
     const dependencies = {
-        Constants: {SIZE_DRAG_THRESHOLD: 5},
+        Constants: {SIZE_DRAG_THRESHOLD: 5, KEYCODELIST: {32: " "}},
         protyle, isMobile: () => mobile, isOnlyMeta: (event: MouseEvent) => event.ctrlKey || event.metaKey,
         hasClosestByClassName: closest, hasClosestBlock: closestAV, getAVHost: closestAV,
         hasClosestByTag: (target: Element, tag: string) => target?.closest(tag),
@@ -89,7 +90,12 @@ const checkClicks = (code: string, mobile: boolean) => {
         },
         addDragFill() { filled++; }, resetAVRowSelect() {}, updateHeader() {}, clearAVItemSelectionState() {},
         getAvBodyData: () => ({rows: [{id: "row"}]}),
-        getAVCellSelection() {}, matchHotKey: () => false,
+        getAVCellSelection: () => keyboardSelection, getAVItemSelection() {}, getAVSelectedItems: (): never[] => [],
+        openAVRangeInput: (_protyle: unknown, _block: HTMLElement, open: (cell: HTMLElement) => void) => {
+            open(keyboardSelection.cells[0]);
+            return true;
+        },
+        matchHotKey: () => false,
         focusByRange: (range: Range) => {getSelection().removeAllRanges(); getSelection().addRange(range);},
         getTypeByCellElement: (cell: HTMLElement) => cell.dataset.dtype,
         popTextCell: (_protyle: unknown, cells: HTMLElement[]) => opened.push(...cells),
@@ -201,18 +207,34 @@ const checkClicks = (code: string, mobile: boolean) => {
             send("mouseup", start, 110);
             send("click", start, 110);
             check(block.contains(getSelection().anchorNode), `${view}: dragging a single cell transfers the native caret into the database`);
-            const beforeEnter = opened.length;
-            const enter = new KeyboardEvent("keydown", {key: "Enter", bubbles: true, cancelable: true});
-            element.dispatchEvent(enter);
-            check(enter.defaultPrevented && opened.length === beforeEnter + 1 && opened.at(-1) === start,
-                `${view}: Enter edits the dragged cell after calculation row cleanup`);
+            const press = (key: string, options?: KeyboardEventInit) => {
+                const event = new KeyboardEvent("keydown", {key, keyCode: key === " " ? 32 : 13,
+                    bubbles: true, cancelable: true, ...options});
+                element.dispatchEvent(event);
+                return event;
+            };
+            const activate = (key: string, message: string) => {
+                const before = opened.length;
+                check(press(key).defaultPrevented && opened.length === before + 1 && opened.at(-1) === start,
+                    `${view}: ${JSON.stringify(key)} ${message}`);
+            };
+            activate("Enter", "edits the selected cell after calculation row cleanup");
+            keyboardSelection = {cells: [start, end], focus: {groupID: "", rowID: "row", colID: end.dataset.colId}};
+            activate("Enter", "starts range entry at the first editable cell");
+            activate(" ", "starts range entry at the first editable cell");
+            keyboardSelection = undefined;
+            activate(" ", "edits the selected cell");
+            const before = opened.length;
+            press(" ", {ctrlKey: true});
+            press(" ", {isComposing: true});
+            check(opened.length === before, `${view}: modified space and IME composition do not open the cell`);
         }
     }
     return "av-cell-click-ok";
 };
 
 for (const mobile of [false, true]) {
-    test(`database cell selection skips calculation placeholders${mobile ? "" : " and keeps Enter in the database"} (${mobile ? "mobile" : "desktop"})`, {
+    test(`database cell selection skips calculation placeholders${mobile ? "" : " and routes Enter and Space to editing"} (${mobile ? "mobile" : "desktop"})`, {
         skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
         timeout: 30000,
     }, async () => {

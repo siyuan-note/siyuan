@@ -76,8 +76,9 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         return true;
     }
     const cellSelection = getAVCellSelection(nodeElement);
-    if (event.key === "Enter" && cellSelection?.cells.length > 1 &&
-        !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+    const unmodified = !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey;
+    const activateCell = event.key === "Enter" || (unmodified && event.key === " ");
+    if (activateCell && unmodified && cellSelection?.cells.length > 1 &&
         openAVRangeInput(protyle, nodeElement, cell => {
             if (!event.repeat) popTextCell(protyle, [cell]);
         })) {
@@ -142,7 +143,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             event.preventDefault();
             return true;
         }
-        if (event.key === "Enter") {
+        if (activateCell) {
             if (!event.repeat || !selectsNextAVCellOnEnter(selectCellElement.dataset.dtype)) {
                 popTextCell(protyle, [selectCellElement]);
             }

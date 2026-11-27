@@ -94,7 +94,7 @@ func flashcardCleanupInventory(ctx context.Context, dataDir string, isEncrypted 
 			ret.incomplete = true
 			continue
 		}
-		if box.Encrypted || box.BoxCrypt != nil && len(box.BoxCrypt.WrappedDEK) > 0 {
+		if box.Encrypted {
 			continue
 		}
 		// 运行时也会把无法核实身份的笔记本视为加密，以禁止读取内容。

@@ -122,10 +122,10 @@ func TestFlashcardCleanupSkipsEncryptedNotebooksAndScansCurrentDocumentSpecs(t *
 	if err != nil || ret["missing"] != flashcardv2.BlockUnknown {
 		t.Fatalf("notebook with uncertain encryption identity: %+v, %v", ret, err)
 	}
-	write(uncertainBox, ".siyuan/conf.json", `{"boxCrypt":{}}`)
+	write(uncertainBox, ".siyuan/conf.json", `{"encrypted":false,"boxCrypt":{"wrappedDEK":"YWJj"}}`)
 	ret, err = scanFlashcardBlockPresence(context.Background(), root, []string{"missing"}, func(string) bool { return false })
 	if err != nil || ret["missing"] != flashcardv2.BlockUnknown {
-		t.Fatalf("notebook with incomplete encryption metadata: %+v, %v", ret, err)
+		t.Fatalf("notebook with conflicting encryption metadata: %+v, %v", ret, err)
 	}
 }
 

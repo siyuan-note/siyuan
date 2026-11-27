@@ -127,6 +127,47 @@ test("refresh does not steal focus from another dialog", () => {
     assert.equal(ui.focused(), "");
 });
 
+test("review set pages stay scoped and use one card per source to load missing titles", () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const start = source.indexOf("        const cardsWithoutSource =");
+    const end = source.indexOf("export const openFlashcardV2Management =", start);
+    const script = transpileModule(`const open = () => {
+        const queryCards = (cardIDs?: string[], total?: number, resolvedCards?: unknown[]) => {
+        ${source.slice(start, end)}
+        open();`, {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText;
+    const members = ["first", "second"].map((id) => ({card: {id, sourceID: "shared"}}));
+    const summary = {sourceBlockID: "block", sourceTitle: "Title"};
+    const pages: {total: number, cardIDs: string[] | null, cards?: typeof members}[] = [
+        {total: 0, cardIDs: null}, {total: 0, cardIDs: []},
+        {total: 2, cardIDs: ["first", "second"], cards: members},
+    ];
+    for (const grouped of [false, true]) {
+        for (const page of pages) {
+            const requests: string[] = [];
+            let rendered: unknown[];
+            runInNewContext(script, {
+                reviewSetID: "review-set", managementQuery: undefined, now: 1000, grouped, offset: 0,
+                flashcardV2ManagementPageSize: 50,
+                renderCards: (cards: unknown[]) => { rendered = Array.from(cards); },
+                fetchPost: (route: string, payload: {query?: {root: {value: string[]}}},
+                    callback: (response: {data: unknown}) => void) => {
+                    requests.push(route);
+                    if (route === "/api/flashcard/previewReviewSet") {
+                        callback({data: structuredClone(page)});
+                    } else {
+                        assert.deepEqual(Array.from(payload.query.root.value), ["second"]);
+                        callback({data: {cards: [{...members[1], ...summary}]}});
+                    }
+                    return Promise.resolve();
+                },
+            });
+            assert.deepEqual(requests, page.cards ? ["/api/flashcard/previewReviewSet", "/api/flashcard/queryCards"] :
+                ["/api/flashcard/previewReviewSet"]);
+            assert.deepEqual(rendered, page.cards?.map((card) => ({...card, ...summary})) ?? []);
+        }
+    }
+});
+
 test("management reuses its dialog and keeps grouped actions behind the explicit apply step", () => {
     const source = readFileSync("src/card/flashcardV2.ts", "utf8");
     const management = source.slice(source.indexOf("const openFlashcardV2ReviewSetCards ="),

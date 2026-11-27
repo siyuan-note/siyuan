@@ -2786,16 +2786,19 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
             refreshSelection();
             owner.view.restore(dialog.element);
         };
-        if (resolvedCards) {
-            renderCards(resolvedCards);
+        const cardsWithoutSource = resolvedCards?.filter((card) => !card.sourceBlockID);
+        if (cardIDs?.length === 0 || cardsWithoutSource?.length === 0) {
+            renderCards(resolvedCards ?? []);
             return;
         }
-        fetchPost("/api/flashcard/queryCards", {
-            query: cardIDs ? {
+        // 卡包分页返回卡片顺序，每个缺少块信息的卡源只查询一张卡。
+        const detailCardIDs = cardsWithoutSource ? [...new Map(cardsWithoutSource.map((result) =>
+            [result.card.sourceID, result.card.id])).values()] : cardIDs;
+        let rendered = false;
+        void fetchPost("/api/flashcard/queryCards", {
+            query: detailCardIDs ? {
                 version: 1,
-                root: cardIDs.length === 0 ?
-                    {operator: "predicate", field: "cardID", comparator: "equal", value: "__empty__"} :
-                    {operator: "predicate", field: "cardID", comparator: "in", value: cardIDs},
+                root: {operator: "predicate", field: "cardID", comparator: "in", value: detailCardIDs},
             } : managementQuery,
             options: {
                 now,
@@ -2804,11 +2807,31 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                 includeBuried: true,
                 includePaused: true,
                 includeConflicts: true,
-                groupBySource: cardIDs ? false : grouped,
-                limit: cardIDs ? Math.max(1, cardIDs.length) : flashcardV2ManagementPageSize + 1,
-                offset: cardIDs ? 0 : offset,
+                groupBySource: detailCardIDs ? false : grouped,
+                limit: detailCardIDs?.length ?? flashcardV2ManagementPageSize + 1,
+                offset: detailCardIDs ? 0 : offset,
             },
-        }, (queryResponse) => renderCards(queryResponse.data.cards as IFlashcardSearchResult[]));
+        }, (queryResponse) => {
+            const details = queryResponse.data.cards as IFlashcardSearchResult[];
+            if (!resolvedCards) {
+                renderCards(details);
+            } else {
+                const sources = new Map(details.map((result) => [result.card.sourceID, result]));
+                for (const card of cardsWithoutSource) {
+                    const source = sources.get(card.card.sourceID);
+                    if (source) {
+                        card.sourceBlockID = source.sourceBlockID;
+                        card.sourceTitle = source.sourceTitle;
+                    }
+                }
+                renderCards(resolvedCards);
+            }
+            rendered = true;
+        }).finally(() => {
+            if (!rendered && resolvedCards) {
+                renderCards(resolvedCards);
+            }
+        });
     };
     if (reviewSetID === "") {
         queryCards();
@@ -2830,7 +2853,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
             offset,
         },
     }, (previewResponse) => {
-        queryCards(previewResponse.data.cardIDs as string[], previewResponse.data.total as number,
+        queryCards((previewResponse.data.cardIDs as string[] | null) ?? [], previewResponse.data.total as number,
             previewResponse.data.cards as IFlashcardSearchResult[]);
     });
 };

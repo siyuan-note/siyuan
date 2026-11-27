@@ -275,7 +275,10 @@ jobs:
       - name: Test editor workflow safeguards
         id: test_editor_workflow_safeguards
         continue-on-error: true
-        run: python -m unittest discover -s scripts -p "test_*workflow.py"
+        shell: bash
+        run: |
+          python -m unittest discover -s scripts -p "test_*workflow.py"
+          python -m unittest discover -s scripts -p "test_cd_retry.py"
       - name: Test workflow outcome reporting
         id: workflow_report_tests
         continue-on-error: true
@@ -1188,11 +1191,12 @@ jobs:
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x ./gradlew
+          retry="$GITHUB_WORKSPACE/go/src/github.com/$GITHUB_REPOSITORY/scripts/cd-retry.py"
           # 新版 Android 工程验证所有渠道；固定到旧提交的构建仍可使用原有流程。
           if [ -f scripts/verify-build.gradle ]; then
-            ./gradlew --init-script scripts/verify-build.gradle :app:verifyBuildConfiguration
+            python3 "$retry" android ./gradlew --init-script scripts/verify-build.gradle :app:verifyBuildConfiguration
           fi
-          ./gradlew assembleOfficialRelease
+          python3 "$retry" android ./gradlew assembleOfficialRelease
           cd app/build/outputs/apk/official/release
           mv siyuan-*-official-release.apk siyuan-${{ needs.prepare.outputs.version }}.apk
         working-directory: ${{ github.workspace }}/siyuan-android
@@ -1206,6 +1210,9 @@ jobs:
   create_release:
     name: Create Release
     runs-on: ubuntu-24.04
+    concurrency:
+      group: cd-publish-${{ github.ref }}
+      cancel-in-progress: false
     needs: [prepare, languages, contracts, kernel-tests-linux, kernel-tests-windows, frontend-tests, build, build_macos_amd64, build_macos_arm64, package_macos_amd64, package_macos_arm64, build_android, startup_verify, startup_static, main_e2e, editor_e2e]
     # 发布需要桌面启动和全部安装包校验通过；独立 E2E 的软失败只记录。
     if: >-
@@ -1221,6 +1228,12 @@ jobs:
           needs.main_e2e.result != 'cancelled' &&
           needs.editor_e2e.result != 'cancelled' }}
     steps:
+      - name: Checkout release scripts
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          path: source
+
       - name: Download release artifacts
         uses: actions/download-artifact@v8
         with:
@@ -1252,75 +1265,9 @@ jobs:
           sha256sum --check --strict SHA256SUMS.txt
 
       - name: Create Release
-        uses: ncipollo/release-action@v1
-        with:
-          name: ${{ needs.prepare.outputs.release_title }}
-          tag: ${{ github.ref_name }}
-          body: ${{ needs.prepare.outputs.release_body }}
-          draft: true
-          prerelease: true
-          allowUpdates: true
-          omitDraftDuringUpdate: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify Release Is Draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          test "$(gh release view "${{ github.ref_name }}" --json isDraft --jq '.isDraft')" = "true"
-
-      - name: Upload Release Assets
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          gh release upload "${{ github.ref_name }}" release-assets/* --clobber
-
-      - name: Validate and Publish Release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          VERSION="${{ needs.prepare.outputs.version }}"
-          TAG="${{ github.ref_name }}"
-          RELEASE_ID="$(gh release view "${TAG}" --json databaseId --jq '.databaseId')"
-          EXPECTED_ASSETS=(
-            "siyuan-${VERSION}-linux.AppImage"
-            "siyuan-${VERSION}-linux.tar.gz"
-            "siyuan-${VERSION}-linux.deb"
-            "siyuan-${VERSION}-linux.rpm"
-            "siyuan-${VERSION}-mac.dmg"
-            "siyuan-${VERSION}-mac-arm64.dmg"
-            "siyuan-${VERSION}-win.exe"
-            "siyuan-${VERSION}.apk"
-            "SHA256SUMS.txt"
-          )
-          declare -A EXPECTED_DIGESTS
-          for asset in "${EXPECTED_ASSETS[@]}"; do
-            EXPECTED_DIGESTS["${asset}"]="sha256:$(sha256sum "release-assets/${asset}" | awk '{print $1}')"
-          done
-
-          for attempt in {1..12}; do
-            ASSETS="$(gh api -H "X-GitHub-Api-Version: 2022-11-28" \
-              "repos/${GH_REPO}/releases/${RELEASE_ID}/assets?per_page=100")"
-            READY=true
-            for asset in "${EXPECTED_ASSETS[@]}"; do
-              REMOTE_DIGEST="$(jq -r --arg name "${asset}" \
-                '.[] | select(.name == $name and .state == "uploaded") | .digest // empty' <<< "${ASSETS}")"
-              if [ "${REMOTE_DIGEST}" != "${EXPECTED_DIGESTS[$asset]}" ]; then
-                READY=false
-                break
-              fi
-            done
-            if [ "${READY}" = true ]; then
-              gh release edit "${TAG}" --draft=false --prerelease
-              exit 0
-            fi
-            sleep 5
-          done
-
-          echo "Release assets or SHA-256 digests are incomplete"
-          exit 1
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+          RELEASE_TITLE: ${{ needs.prepare.outputs.release_title }}
+          RELEASE_BODY: ${{ needs.prepare.outputs.release_body }}
+        run: python3 source/scripts/cd-retry.py release release-assets

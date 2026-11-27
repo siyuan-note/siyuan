@@ -1,4 +1,6 @@
 {
+	"agentQuoteReadFailed": "לא ניתן לקרוא את הטקסט שנבחר. יש לבחור אותו מחדש ולנסות שוב",
+	"agentQuoteInsertFailed": "לא ניתן להוסיף את הציטוט לשדה הקלט של הסוכן. יש לפתוח את חלונית הסוכן ולנסות שוב",
 	"flashcardCleanupScanTip": "נסרקות מחברות שאינן מוצפנות. אפשר למחוק רק מקורות שחסרונם אושר.",
 	"agentQuickPhraseSendTip": "לחצו תוך כדי החזקת ${key} כדי לשלוח",
 	"mobileWorkspaceSwitch": "מעבר",

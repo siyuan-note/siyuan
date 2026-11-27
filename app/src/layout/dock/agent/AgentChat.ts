@@ -804,9 +804,17 @@ export class AgentChat extends Model {
     }
 
     public async insertQuote(quote: AgentQuote, inBackground = false) {
-        await this.initialSession;
-        await this.sessionViewChange;
-        if (!this.destroyed) return (this.editingComposer || this.composer)?.insertQuote(quote, inBackground);
+        try {
+            await this.initialSession;
+            await this.sessionViewChange;
+            if (!this.destroyed) {
+                const count = (this.editingComposer || this.composer)?.insertQuote(quote, inBackground);
+                if (count) return count;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        showMessage(window.siyuan.languages.agentQuoteInsertFailed, 3000, "error");
     }
 
     private bindQuoteAction(actions: HTMLElement, message: HTMLElement, content: string) {

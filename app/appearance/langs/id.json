@@ -1,4 +1,6 @@
 {
+	"agentQuoteReadFailed": "Teks yang dipilih tidak dapat dibaca. Pilih kembali teksnya dan coba lagi",
+	"agentQuoteInsertFailed": "Kutipan tidak dapat dimasukkan ke kolom input agen. Buka panel agen dan coba lagi",
 	"flashcardCleanupScanTip": "Pemindaian mencakup buku catatan yang tidak terenkripsi. Hanya sumber yang dipastikan hilang yang dapat dihapus.",
 	"agentQuickPhraseSendTip": "Tahan ${key} lalu klik untuk mengirim",
 	"mobileWorkspaceSwitch": "Beralih",

@@ -1,4 +1,6 @@
 {
+	"agentQuoteReadFailed": "Não foi possível ler o texto selecionado. Selecione-o novamente e tente outra vez",
+	"agentQuoteInsertFailed": "Não foi possível inserir a citação no campo de entrada do agente. Abra o painel do agente e tente novamente",
 	"flashcardCleanupScanTip": "A verificação abrange cadernos não criptografados. Só é possível excluir fontes cuja ausência foi confirmada.",
 	"agentQuickPhraseSendTip": "Mantenha ${key} pressionada e clique para enviar",
 	"mobileWorkspaceSwitch": "Alternar",

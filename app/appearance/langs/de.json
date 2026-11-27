@@ -1,4 +1,6 @@
 {
+	"agentQuoteReadFailed": "Der ausgewählte Text konnte nicht gelesen werden. Wähle ihn erneut aus und versuche es noch einmal",
+	"agentQuoteInsertFailed": "Das Zitat konnte nicht in das Eingabefeld des Agenten eingefügt werden. Öffne das Agentenfenster und versuche es erneut",
 	"flashcardCleanupScanTip": "Geprüft werden unverschlüsselte Notizbücher. Nur nachweislich fehlende Quellen lassen sich löschen.",
 	"agentQuickPhraseSendTip": "Zum Senden ${key} gedrückt halten und klicken",
 	"mobileWorkspaceSwitch": "Wechseln",

@@ -21,7 +21,7 @@ test("editor quotes reveal a floating agent once and report hidden insertions or
             async insertQuote(quote: AgentQuote, inBackground: boolean) {
                 events.push([quote.text, inBackground]);
                 if (quote.text === "formatted") events.push(quote.markdown);
-                return canInsert ? ++count : undefined;
+                if (canInsert) return ++count;
             },
         }},
         isFloating: () => true,
@@ -43,7 +43,8 @@ test("editor quotes reveal a floating agent once and report hidden insertions or
     }).outputText, {
         exports: methods,
         document: {querySelector: () => active},
-        window: {siyuan: {config: {}, languages: {agentQuoteAdded: "Quotes: ${count}", confirmActionFailed: "Could not quote"}}},
+        window: {siyuan: {config: {}, languages: {agentQuoteAdded: "Quotes: ${count}",
+            agentQuoteReadFailed: "Could not read the selection", agentQuoteInsertFailed: "Could not insert into the composer"}}},
         require: (name: string) => ({
             "../layout/tabUtil": {getDockByType: () => dockAvailable ? dock : undefined},
             "../dialog/message": {showMessage: (message: string) => events.push(message)},
@@ -79,6 +80,6 @@ test("editor quotes reveal a floating agent once and report hidden insertions or
         "reveal", ["first", false], ["visible", false], ["formatted", false], "~~formatted~~",
         ["hover-hidden", true], "Quotes: 4", ["closed", true], "Quotes: 5",
         "reveal", ["first in another editor", false],
-        ["insertion failed", false], "Could not quote", "Could not quote", "Could not quote",
+        ["insertion failed", false], "Could not insert into the composer", "Could not read the selection",
     ]);
 });

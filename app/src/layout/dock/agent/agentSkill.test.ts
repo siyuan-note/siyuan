@@ -9,13 +9,15 @@ import {createSourceFile, isClassDeclaration, isExpressionStatement, isFunctionD
 
 const browserCases = async (source: string) => {
     const check: typeof assert = require("node:assert/strict");
-    window.siyuan = {languages: {emptyContent: "Empty"}, zIndex: 1} as unknown as typeof window.siyuan;
+    window.siyuan = {languages: {emptyContent: "Empty", agentQuoteInsertFailed: "Could not insert into the composer"},
+        zIndex: 1} as unknown as typeof window.siyuan;
     const requests: Array<(response: {data: Array<{name: string; description: string}>}) => void> = [];
     const insertItems: IHintData[] = [{id: "bold", value: "strong", html: "Bold"}];
     let inserted = "";
     let marked = "";
     let slashEnabled = false;
     const deletions: {before: string; after: string}[] = [];
+    const messages: string[] = [];
     const dependencies = {
         hintSlash: () => insertItems,
         getConfiguredEntryVisibility: (entry: string, stopAt?: string) => entry === stopAt || slashEnabled,
@@ -45,11 +47,12 @@ const browserCases = async (source: string) => {
         isProtyleListItemFragment: () => false,
         hasClosestBlock: (node: Node) => (node instanceof Element ? node : node.parentElement).closest("[data-node-id]"),
         insertHTML: (html: string) => { inserted = html; },
+        showMessage: (message: string) => { messages.push(message); },
     };
     const api = new Function(...Object.keys(dependencies), source +
         "\nreturn {hintSkill, mountLiteSlashMenu, normalizeAgentTokens, expandAgentTokenSelection, deleteAgentToken, " +
         "AGENT_SKILL_SELECTOR, AGENT_QUOTE_SELECTOR, createAgentQuote, readAgentQuote, projectAgentQuotes, quotePreview, rangeMarkdown, " +
-        "Hint, isBuiltinSlashHint, bindComposerInput, applyPhrase, insertQuote, insertMentions};")(...Object.values(dependencies));
+        "Hint, QuoteTarget, isBuiltinSlashHint, bindComposerInput, applyPhrase, insertQuote, insertMentions};")(...Object.values(dependencies));
     const element = document.createElement("div");
     element.className = "protyle-hint fn__none";
     document.body.appendChild(element);
@@ -308,6 +311,8 @@ const browserCases = async (source: string) => {
     const sourceAnchor = getSelection().anchorNode;
     const fragment = {focus: () => check.notEqual(draft.style.display, "none", "a hidden composer cannot take focus")};
     const instance = {insert: (html: string) => {
+        if (!dependencies.hasClosestBlock(toolbar.range.startContainer)) return;
+        toolbar.range.deleteContents();
         toolbar.range.insertNode(toolbar.range.createContextualFragment(html));
         dependencies.focusByRange(toolbar.range);
     }};
@@ -324,6 +329,32 @@ const browserCases = async (source: string) => {
     check.equal(api.insertQuote(fragment, composer, instance, quotes[2], false), 3);
     check.ok(draft.contains(getSelection().anchorNode));
     check.deepEqual(Array.from(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)).map(api.readAgentQuote), quotes.slice(0, 3));
+
+    const staleRange = document.createRange();
+    staleRange.setStart(draft, 0);
+    staleRange.collapse(true);
+    toolbar.range = staleRange;
+    select(editor.querySelector(api.AGENT_QUOTE_SELECTOR).nextSibling, 0);
+    const previousAnchor = getSelection().anchorNode;
+    const chat = new api.QuoteTarget();
+    chat.composer = {insertQuote: (quote: unknown, background: boolean) =>
+        api.insertQuote(fragment, composer, instance, quote, background)};
+    check.equal(await chat.insertQuote(quotes[3]), 4,
+        "a saved caret at the editor root should fall back to the last editable block");
+    check.notEqual(getSelection().anchorNode, previousAnchor);
+    check.equal(api.readAgentQuote(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)[3]).text, quotes[3].text);
+    check.deepEqual(messages, []);
+    const replacement = document.createRange();
+    replacement.selectNode(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)[3]);
+    dependencies.focusByRange(replacement);
+    check.equal(await chat.insertQuote(quotes[0]), 4, "replacing a quote keeps the count unchanged");
+    check.equal(api.readAgentQuote(draft.querySelectorAll(api.AGENT_QUOTE_SELECTOR)[3]).text, quotes[0].text);
+    chat.composer = {insertQuote: () => api.insertQuote(fragment, composer, {insert() {}}, quotes[3], false)};
+    check.equal(await chat.insertQuote(quotes[3]), undefined, "existing quotes do not make a failed insertion succeed");
+    check.deepEqual(messages, ["Could not insert into the composer"]);
+    chat.composer = null;
+    check.equal(await chat.insertQuote(quotes[3]), undefined);
+    check.deepEqual(messages, ["Could not insert into the composer", "Could not insert into the composer"]);
 
     const first = {id: "20261126093000-abcdef0", label: "Block A"};
     const second = {id: "20261126093000-abcdef1", label: "<Block B>"};
@@ -381,6 +412,9 @@ test("mobile commands, atomic skills, inline quotes, block references and phrase
     const quote = handle.properties.find(property => property.name?.getText(composer) === "insertQuote");
     const mentions = handle.properties.find(property => property.name?.getText(composer) === "insertMentions");
     assert.ok(phrase && quote && mentions);
+    const chat = createSourceFile("chat.ts", read("AgentChat.ts"), ScriptTarget.Latest, true);
+    const quoteTarget = chat.statements.find(isClassDeclaration).members.find(member =>
+        isMethodDeclaration(member) && member.name.getText(chat) === "insertQuote");
     const inputBindings = mount.body.statements.filter(statement => {
         if (isVariableStatement(statement)) {
             return statement.declarationList.declarations.some(declaration =>
@@ -397,6 +431,7 @@ test("mobile commands, atomic skills, inline quotes, block references and phrase
         read("../../../protyle/util/clipboardData.ts"),
         read("agentQuote.ts"), read("agentSkill.ts"), read("../../../mobile/util/liteSlashMenu.ts"), composerSource,
         "class Hint {" + hintSource + "}",
+        "class QuoteTarget {" + quoteTarget.getText(chat) + "}",
         "const applyPhrase = (fragment, p, getBlockHTML, instruction) => ({" + phrase.getText(composer) + "}).applyPhrase(instruction);",
         "const insertQuote = (fragment, p, protyle, value, background) => { const wysiwyg = p.wysiwyg; return ({" +
             quote.getText(composer) + "}).insertQuote(value, background); };",

@@ -95,38 +95,46 @@ export const quoteEditorSelection = async (editor: IProtyle, range: Range) => {
     if (!editor.block.rootID || isEncryptedBox(editor.notebookId)) {
         return;
     }
-    const showFailure = () => showMessage(window.siyuan.languages.confirmActionFailed, 3000, "error");
+    const showReadFailure = () => showMessage(window.siyuan.languages.agentQuoteReadFailed, 3000, "error");
+    const showInsertFailure = () => showMessage(window.siyuan.languages.agentQuoteInsertFailed, 3000, "error");
     if (!range || range.collapsed) {
-        showFailure();
+        showReadFailure();
         return;
     }
-    const parts = getBlockRanges(editor.wysiwyg.element, range);
-    if (!parts.length) {
-        showFailure();
-        return;
-    }
-    const first = parts[0];
-    const last = parts[parts.length - 1];
-    const text = parts.map(part => part.range.toString()).join("\n");
-    if (!text.trim()) {
-        showFailure();
-        return;
-    }
+    let quote: AgentQuote;
     try {
+        const parts = getBlockRanges(editor.wysiwyg.element, range);
+        const text = parts.map(part => part.range.toString()).join("\n");
+        if (!text.trim()) {
+            showReadFailure();
+            return;
+        }
+        const first = parts[0];
+        const last = parts[parts.length - 1];
         const cellIndex = (part: typeof first) => part.editableElement.matches("th, td") ?
             Array.from(part.blockElement.querySelectorAll("th, td")).indexOf(part.editableElement) : undefined;
         const markdown = parts.map(part => rangeMarkdown(editor.lute, part.range, part.editableElement)).join("\n");
-        const quote: AgentQuote = {text, markdown: markdown.trim() !== text.trim() ? markdown : undefined,
+        quote = {text, markdown: markdown.trim() !== text.trim() ? markdown : undefined,
             source: {kind: "selection", id: first.blockElement.dataset.nodeId,
             endID: last.blockElement.dataset.nodeId, start: first.start, end: last.end,
             startCell: cellIndex(first), endCell: cellIndex(last)}};
+    } catch (error) {
+        console.error(error);
+        showReadFailure();
+        return;
+    }
+    try {
         /// #if MOBILE
         const mobileChat = await openEditorAgent(editor.app);
-        if (!await mobileChat?.insertQuote(quote)) showFailure();
+        if (mobileChat) {
+            await mobileChat.insertQuote(quote);
+        } else {
+            showInsertFailure();
+        }
         /// #else
         const chat = await openEditorAgent(editor.app, quotedEditors.has(editor) ? "repeat" : "first");
         if (!chat) {
-            showFailure();
+            showInsertFailure();
             return;
         }
         const dock = getDockByType("agentChat");
@@ -134,9 +142,7 @@ export const quoteEditorSelection = async (editor: IProtyle, range: Range) => {
         const inBackground = !!floating && (!dock.isPanelVisible() ||
             dock.layout.element.style.opacity !== "1" || !document.querySelector(agentDockItem));
         const count = await chat.insertQuote(quote, inBackground);
-        if (!count) {
-            showFailure();
-        } else if (floating) {
+        if (count && floating) {
             quotedEditors.add(editor);
             if (inBackground) {
                 showMessage(window.siyuan.languages.agentQuoteAdded.replace("${count}", count.toString()), 3000, "info", "agent-quote-added");
@@ -145,6 +151,6 @@ export const quoteEditorSelection = async (editor: IProtyle, range: Range) => {
         /// #endif
     } catch (error) {
         console.error(error);
-        showFailure();
+        showInsertFailure();
     }
 };

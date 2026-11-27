@@ -14,6 +14,7 @@ import {removeCompressURL} from "../../../util/image";
 import {mountProtyleLiteFragment} from "../../../protyle/lite/fragmentEditor";
 import {AGENT_SKILL_SELECTOR, deleteAgentToken, expandAgentTokenSelection, normalizeAgentTokens} from "./agentSkill";
 import {focusByRange} from "../../../protyle/util/selectionOffsets";
+import {hasClosestBlock} from "../../../protyle/util/hasClosest";
 import {getConfiguredEntryVisibility} from "../../../config/entryVisibility/runtime";
 import {SLASH_MENU_ROOT_PATH} from "../../../config/entryVisibility/catalog";
 
@@ -502,30 +503,27 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         },
         insertQuote: (quote, inBackground) => {
             const selection = getSelection();
-            const original = inBackground && selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : undefined;
-            const previousCount = inBackground ? wysiwyg.element.querySelectorAll(AGENT_QUOTE_SELECTOR).length : 0;
-            const saved = p.toolbar.range;
-            if (!saved || !wysiwyg.element.contains(saved.commonAncestorContainer)) {
-                if (!inBackground) fragment.focus(true);
-                const active = !inBackground && selection?.rangeCount ? selection.getRangeAt(0) : undefined;
-                if (active && wysiwyg.element.contains(active.commonAncestorContainer)) {
-                    p.toolbar.range = active.cloneRange();
-                } else {
-                    const editables = wysiwyg.element.querySelectorAll('[contenteditable="true"]');
-                    const last = editables[editables.length - 1];
-                    if (!last) return;
-                    const end = document.createRange();
-                    end.selectNodeContents(last);
-                    end.collapse(false);
-                    p.toolbar.range = end;
-                }
+            const active = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+            const original = inBackground ? active?.cloneRange() : undefined;
+            const previousQuotes = wysiwyg.element.querySelectorAll(AGENT_QUOTE_SELECTOR);
+            // 草稿重绘后，保存的选区可能退到编辑区根节点，插入需要落在正文块内。
+            let range = [inBackground ? undefined : active, p.toolbar.range].find(item => item &&
+                [item.startContainer, item.endContainer].every(node =>
+                    wysiwyg.element.contains(node) && hasClosestBlock(node)))?.cloneRange();
+            if (!range) {
+                const editables = wysiwyg.element.querySelectorAll('[contenteditable="true"]');
+                const last = editables[editables.length - 1];
+                if (!last) return;
+                range = document.createRange();
+                range.selectNodeContents(last);
+                range.collapse(false);
             }
             if (inBackground) {
-                p.toolbar.range = p.toolbar.range.cloneRange();
-                p.toolbar.range.collapse(false);
+                range.collapse(false);
             }
-            expandAgentTokenSelection(p.toolbar.range);
-            if (!inBackground) focusByRange(p.toolbar.range);
+            expandAgentTokenSelection(range);
+            if (!inBackground) focusByRange(range);
+            p.toolbar.range = range;
             protyle.insert(createAgentQuote(quote), false, true);
             if (inBackground && selection && (!selection.anchorNode || wysiwyg.element.contains(selection.anchorNode))) {
                 if (original?.commonAncestorContainer.isConnected) {
@@ -535,7 +533,10 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                 }
             }
             const count = wysiwyg.element.querySelectorAll(AGENT_QUOTE_SELECTOR).length;
-            if (count > previousCount) return count;
+            if (count > previousQuotes.length || (!inBackground && count &&
+                Array.from(previousQuotes).some(mark => !wysiwyg.element.contains(mark)))) {
+                return count;
+            }
         },
         insertMention: (id: string, label: string) => {
             protyle.insert('<span data-type="block-ref" data-id="' + id + '" data-subtype="d">' +

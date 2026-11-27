@@ -1,4 +1,6 @@
 {
+	"agentQuoteReadFailed": "Seçili metin okunamadı. Metni yeniden seçip tekrar deneyin",
+	"agentQuoteInsertFailed": "Alıntı ajan giriş alanına eklenemedi. Ajan panelini açıp tekrar deneyin",
 	"flashcardCleanupScanTip": "Şifrelenmemiş not defterleri taranır. Yalnızca eksik olduğu doğrulanan kaynaklar silinebilir.",
 	"agentQuickPhraseSendTip": "Göndermek için ${key} tuşunu basılı tutup tıklayın",
 	"mobileWorkspaceSwitch": "Geç",

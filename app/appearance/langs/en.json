@@ -1,4 +1,6 @@
 {
+	"agentQuoteReadFailed": "Could not read the selected text. Select it again and retry",
+	"agentQuoteInsertFailed": "Could not insert the quote into the agent input. Open the agent panel and try again",
 	"flashcardCleanupScanTip": "Scans unencrypted notebooks. Only confirmed missing sources can be deleted.",
 	"agentQuickPhraseSendTip": "Hold ${key} and click to send",
 	"mobileWorkspaceSwitch": "Switch",

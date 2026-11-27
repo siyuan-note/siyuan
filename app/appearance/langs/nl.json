@@ -1,4 +1,6 @@
 {
+	"agentQuoteReadFailed": "De geselecteerde tekst kon niet worden gelezen. Selecteer de tekst opnieuw en probeer het nog eens",
+	"agentQuoteInsertFailed": "Het citaat kon niet in het invoerveld van de agent worden geplaatst. Open het agentpaneel en probeer het opnieuw",
 	"flashcardCleanupScanTip": "Alleen niet-versleutelde notitieboeken worden gescand. Alleen bronnen die aantoonbaar ontbreken, kunnen worden verwijderd.",
 	"agentQuickPhraseSendTip": "Houd ${key} ingedrukt en klik om te verzenden",
 	"mobileWorkspaceSwitch": "Wisselen",

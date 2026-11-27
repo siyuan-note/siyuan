@@ -1,4 +1,6 @@
 {
+	"agentQuoteReadFailed": "No se pudo leer el texto seleccionado. Selecciónalo de nuevo e inténtalo otra vez",
+	"agentQuoteInsertFailed": "No se pudo insertar la cita en el campo de entrada del agente. Abre el panel del agente y vuelve a intentarlo",
 	"flashcardCleanupScanTip": "Se revisan los cuadernos sin cifrar. Solo se pueden eliminar las fuentes cuya ausencia se ha confirmado.",
 	"agentQuickPhraseSendTip": "Mantén pulsada la tecla ${key} y haz clic para enviar",
 	"mobileWorkspaceSwitch": "Cambiar",

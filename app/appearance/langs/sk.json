@@ -1,4 +1,6 @@
 {
+	"agentQuoteReadFailed": "Vybraný text sa nepodarilo načítať. Vyberte ho znova a skúste to ešte raz",
+	"agentQuoteInsertFailed": "Citát sa nepodarilo vložiť do vstupného poľa agenta. Otvorte panel agenta a skúste to znova",
 	"flashcardCleanupScanTip": "Kontrolujú sa nešifrované zápisníky. Odstrániť možno iba zdroje, ktorých chýbanie je potvrdené.",
 	"agentQuickPhraseSendTip": "Podržte ${key} a kliknutím odošlite",
 	"mobileWorkspaceSwitch": "Prepnúť",

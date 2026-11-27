@@ -1,4 +1,6 @@
 {
+	"agentQuoteReadFailed": "선택한 텍스트를 읽을 수 없습니다. 다시 선택한 뒤 재시도하세요",
+	"agentQuoteInsertFailed": "에이전트 입력란에 인용을 삽입하지 못했습니다. 에이전트 패널을 열고 다시 시도하세요",
 	"flashcardCleanupScanTip": "암호화되지 않은 노트북을 검사합니다. 누락이 확인된 카드 원본만 삭제할 수 있습니다.",
 	"agentQuickPhraseSendTip": "${key} 키를 누른 채 클릭하여 전송",
 	"mobileWorkspaceSwitch": "전환",

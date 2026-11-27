@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "연속 공백 합치기",
 	"flashcardAnswerIgnorePunctuation": "문장 부호 무시",
 	"flashcardCleanup": "유효하지 않은 플래시카드 검색",
-	"flashcardCleanupTip": "모든 노트북을 검사합니다. 누락이 확인된 카드 원본만 선택할 수 있습니다. 닫혀 있거나 확인할 수 없는 원본은 건너뜁니다. 삭제는 원본에서 생성된 모든 카드에 적용되며 일정과 복습 기록은 유지됩니다.",
+	"flashcardCleanupTip": "암호화되지 않은 노트북을 검사합니다. 누락이 확인된 카드 원본만 선택할 수 있습니다. 닫혀 있거나 확인할 수 없는 원본은 건너뜁니다. 삭제는 원본에서 생성된 모든 카드에 적용되며 일정과 복습 기록은 유지됩니다.",
 	"flashcardCleanupMissing": "필수 블록 누락",
 	"flashcardCleanupClosed": "노트북이 닫혀 있음",
 	"flashcardCleanupUnknown": "확인할 수 없음",

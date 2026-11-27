@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "Ardışık boşlukları birleştir",
 	"flashcardAnswerIgnorePunctuation": "Noktalama işaretlerini yok say",
 	"flashcardCleanup": "Geçersiz bilgi kartlarını algıla",
-	"flashcardCleanupTip": "Tüm not defterlerini tarar. Yalnızca eksik olduğu doğrulanan kaynaklar seçilebilir. Kapalı veya doğrulanamayan kaynaklar atlanır. Silme işlemi bir kaynağın tüm kartlarını etkiler; zamanlama ve tekrar geçmişi korunur.",
+	"flashcardCleanupTip": "Şifrelenmemiş not defterlerini tarar. Yalnızca eksik olduğu doğrulanan kaynaklar seçilebilir. Kapalı veya doğrulanamayan kaynaklar atlanır. Silme işlemi bir kaynağın tüm kartlarını etkiler; zamanlama ve tekrar geçmişi korunur.",
 	"flashcardCleanupMissing": "Gerekli blok eksik",
 	"flashcardCleanupClosed": "Not defteri kapalı",
 	"flashcardCleanupUnknown": "Doğrulanamıyor",

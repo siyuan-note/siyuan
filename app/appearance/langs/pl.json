@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "Scal kolejne białe znaki",
 	"flashcardAnswerIgnorePunctuation": "Ignoruj interpunkcję",
 	"flashcardCleanup": "Wykryj nieprawidłowe fiszki",
-	"flashcardCleanupTip": "Sprawdź wszystkie notatniki. Można wybrać tylko źródła, których brak potwierdzono. Źródła zamknięte lub niemożliwe do sprawdzenia są pomijane. Usunięcie obejmuje wszystkie fiszki danego źródła i zachowuje harmonogram oraz historię powtórek.",
+	"flashcardCleanupTip": "Sprawdź niezaszyfrowane notatniki. Można wybrać tylko źródła, których brak potwierdzono. Źródła zamknięte lub niemożliwe do sprawdzenia są pomijane. Usunięcie obejmuje wszystkie fiszki danego źródła i zachowuje harmonogram oraz historię powtórek.",
 	"flashcardCleanupMissing": "Brak wymaganego bloku",
 	"flashcardCleanupClosed": "Notatnik zamknięty",
 	"flashcardCleanupUnknown": "Nie można zweryfikować",

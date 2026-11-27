@@ -19,6 +19,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -52,21 +53,57 @@ type flashcardFileStamp struct {
 	Mode     fs.FileMode
 }
 
+type flashcardCleanupSnapshot struct {
+	files       map[string]flashcardFileStamp
+	closedBoxes map[string]bool
+	incomplete  bool
+}
+
 // flashcardCleanupInventory 同时记录目录，检测扫描期间发生的新增、移动和恢复。
-func flashcardCleanupInventory(ctx context.Context, dataDir string) (map[string]flashcardFileStamp, error) {
-	ret := map[string]flashcardFileStamp{}
+func flashcardCleanupInventory(ctx context.Context, dataDir string, isEncrypted func(string) bool) (flashcardCleanupSnapshot, error) {
+	ret := flashcardCleanupSnapshot{files: map[string]flashcardFileStamp{}, closedBoxes: map[string]bool{}}
 	entries, err := os.ReadDir(dataDir)
 	if err != nil {
-		return nil, err
+		return ret, err
 	}
 	for _, entry := range entries {
-		if !ast.IsNodeIDPattern(entry.Name()) {
+		if err = ctx.Err(); err != nil {
+			return ret, err
+		}
+		boxID := entry.Name()
+		if !ast.IsNodeIDPattern(boxID) {
 			continue
 		}
 		if !entry.IsDir() || entry.Type()&os.ModeSymlink != 0 {
-			return nil, errors.New("unsupported notebook path")
+			return ret, errors.New("unsupported notebook path")
 		}
-		err = filepath.WalkDir(filepath.Join(dataDir, entry.Name()), func(path string, d fs.DirEntry, walkErr error) error {
+		boxPath := filepath.Join(dataDir, boxID)
+		confDir := filepath.Join(boxPath, ".siyuan")
+		confPath := filepath.Join(confDir, "conf.json")
+		if info, statErr := os.Lstat(confDir); statErr != nil || !info.IsDir() {
+			ret.incomplete = true
+			continue
+		}
+		if info, statErr := os.Lstat(confPath); statErr != nil || !info.Mode().IsRegular() {
+			ret.incomplete = true
+			continue
+		}
+		data, readErr := filelock.ReadFile(confPath)
+		var box *conf.BoxConf
+		if readErr != nil || json.Unmarshal(data, &box) != nil || box == nil {
+			ret.incomplete = true
+			continue
+		}
+		if box.Encrypted || box.BoxCrypt != nil && len(box.BoxCrypt.WrappedDEK) > 0 {
+			continue
+		}
+		// 运行时也会把无法核实身份的笔记本视为加密，以禁止读取内容。
+		if box.BoxCrypt != nil || isEncrypted(boxID) {
+			ret.incomplete = true
+			continue
+		}
+		ret.closedBoxes[boxID] = box.Closed
+		err = filepath.WalkDir(boxPath, func(path string, d fs.DirEntry, walkErr error) error {
 			if err := ctx.Err(); err != nil {
 				return err
 			}
@@ -87,11 +124,11 @@ func flashcardCleanupInventory(ctx context.Context, dataDir string) (map[string]
 			if info.Mode()&os.ModeSymlink != 0 {
 				return errors.New("unsupported notebook symbolic link")
 			}
-			ret[path] = flashcardFileStamp{Size: info.Size(), Modified: info.ModTime().UnixNano(), Mode: info.Mode()}
+			ret.files[path] = flashcardFileStamp{Size: info.Size(), Modified: info.ModTime().UnixNano(), Mode: info.Mode()}
 			return nil
 		})
 		if err != nil {
-			return nil, err
+			return ret, err
 		}
 	}
 	return ret, nil
@@ -119,51 +156,33 @@ func scanFlashcardBlockPresence(ctx context.Context, dataDir string, blockIDs []
 	for _, id := range blockIDs {
 		ret[id] = flashcardv2.BlockUnknown
 	}
-	before, err := flashcardCleanupInventory(ctx, dataDir)
+	before, err := flashcardCleanupInventory(ctx, dataDir, isEncrypted)
 	if err != nil {
 		return ret, err
 	}
-	complete := true
-	boxes := map[string]*conf.BoxConf{}
-	for path, stamp := range before {
-		rel, relErr := filepath.Rel(dataDir, path)
-		if relErr != nil {
-			return ret, relErr
-		}
-		parts := strings.Split(rel, string(filepath.Separator))
-		if len(parts) != 1 || !stamp.Mode.IsDir() {
-			continue
-		}
-		boxID := parts[0]
-		if isEncrypted(boxID) {
-			complete = false
-			continue
-		}
-		data, readErr := filelock.ReadFile(filepath.Join(path, ".siyuan", "conf.json"))
-		var box conf.BoxConf
-		if readErr != nil || json.Unmarshal(data, &box) != nil || box.Encrypted || box.BoxCrypt != nil {
-			complete = false
-			continue
-		}
-		boxes[boxID] = &box
-	}
-	for path, stamp := range before {
+	complete := !before.incomplete
+	for path, stamp := range before.files {
 		if err = ctx.Err(); err != nil {
 			return ret, err
 		}
 		if stamp.Mode.IsDir() || !strings.HasSuffix(path, ".sy") {
 			continue
 		}
-		rel, _ := filepath.Rel(dataDir, path)
-		box := boxes[strings.Split(rel, string(filepath.Separator))[0]]
-		if box == nil {
-			continue
+		rel, relErr := filepath.Rel(dataDir, path)
+		if relErr != nil {
+			return ret, relErr
 		}
+		boxID, _, _ := strings.Cut(rel, string(filepath.Separator))
 		data, readErr := filelock.ReadFile(path)
 		var root flashcardCleanupNode
 		if readErr != nil || json.Unmarshal(data, &root) != nil || root.Type != "NodeDocument" ||
-			root.ID != strings.TrimSuffix(filepath.Base(path), ".sy") ||
-			(root.Spec != "" && root.Spec != "1" && root.Spec != "2" && root.Spec != "3" && root.Spec != "4") {
+			root.ID != strings.TrimSuffix(filepath.Base(path), ".sy") {
+			complete = false
+			continue
+		}
+		switch root.Spec {
+		case "", "1", "2", "3", treenode.TableCellRichDocumentSpec, "5", treenode.DocumentTitleSpec, treenode.RichDocumentTitleSpec:
+		default:
 			complete = false
 			continue
 		}
@@ -175,7 +194,7 @@ func scanFlashcardBlockPresence(ctx context.Context, dataDir string, blockIDs []
 			// 同时保留兼容格式的属性 ID，宁可少清理，也不因旧格式差异误删。
 			for _, id := range []string{node.ID, node.Properties["id"]} {
 				if _, wanted := ret[id]; wanted {
-					if box.Closed {
+					if before.closedBoxes[boxID] {
 						ret[id] = flashcardv2.BlockClosed
 					} else if ret[id] != flashcardv2.BlockClosed {
 						ret[id] = flashcardv2.BlockPresent
@@ -188,7 +207,7 @@ func scanFlashcardBlockPresence(ctx context.Context, dataDir string, blockIDs []
 		}
 		visit(root)
 	}
-	after, err := flashcardCleanupInventory(ctx, dataDir)
+	after, err := flashcardCleanupInventory(ctx, dataDir, isEncrypted)
 	if err != nil {
 		return ret, err
 	}

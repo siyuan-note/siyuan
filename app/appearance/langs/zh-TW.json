@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "合併連續空白",
 	"flashcardAnswerIgnorePunctuation": "忽略標點",
 	"flashcardCleanup": "偵測無效閃卡",
-	"flashcardCleanupTip": "偵測所有筆記本，僅可選取已確認遺失的卡片來源。已關閉或無法驗證的來源將略過。刪除會影響該來源產生的所有卡片，並保留排程與複習歷史。",
+	"flashcardCleanupTip": "偵測未加密的筆記本，僅可選取已確認遺失的卡片來源。已關閉或無法驗證的來源將略過。刪除會影響該來源產生的所有卡片，並保留排程與複習歷史。",
 	"flashcardCleanupMissing": "必要區塊已遺失",
 	"flashcardCleanupClosed": "筆記本已關閉",
 	"flashcardCleanupUnknown": "無法確認",

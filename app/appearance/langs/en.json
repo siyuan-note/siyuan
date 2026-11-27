@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "Merge consecutive whitespace",
 	"flashcardAnswerIgnorePunctuation": "Ignore punctuation",
 	"flashcardCleanup": "Detect invalid flashcards",
-	"flashcardCleanupTip": "Scan all notebooks. Only confirmed missing sources can be selected. Closed or unverifiable sources are skipped. Deletion affects all cards from a source and preserves scheduling and review history.",
+	"flashcardCleanupTip": "Scan unencrypted notebooks. Only confirmed missing sources can be selected. Closed or unverifiable sources are skipped. Deletion affects all cards from a source and preserves scheduling and review history.",
 	"flashcardCleanupMissing": "Required block missing",
 	"flashcardCleanupClosed": "Notebook closed",
 	"flashcardCleanupUnknown": "Unable to verify",

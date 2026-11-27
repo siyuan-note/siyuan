@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "Aufeinanderfolgenden Leerraum zusammenfassen",
 	"flashcardAnswerIgnorePunctuation": "Satzzeichen ignorieren",
 	"flashcardCleanup": "Ungültige Lernkarten erkennen",
-	"flashcardCleanupTip": "Alle Notizbücher prüfen. Nur nachweislich fehlende Quellen sind auswählbar. Geschlossene oder nicht überprüfbare Quellen werden übersprungen. Das Löschen betrifft alle Karten einer Quelle und erhält Lernplanung und Wiederholungsverlauf.",
+	"flashcardCleanupTip": "Unverschlüsselte Notizbücher prüfen. Nur nachweislich fehlende Quellen sind auswählbar. Geschlossene oder nicht überprüfbare Quellen werden übersprungen. Das Löschen betrifft alle Karten einer Quelle und erhält Lernplanung und Wiederholungsverlauf.",
 	"flashcardCleanupMissing": "Erforderlicher Block fehlt",
 	"flashcardCleanupClosed": "Notizbuch geschlossen",
 	"flashcardCleanupUnknown": "Nicht überprüfbar",

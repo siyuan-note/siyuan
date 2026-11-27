@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "Gabungkan spasi berurutan",
 	"flashcardAnswerIgnorePunctuation": "Abaikan tanda baca",
 	"flashcardCleanup": "Deteksi kartu kilas tidak valid",
-	"flashcardCleanupTip": "Pindai semua buku catatan. Hanya sumber yang dipastikan hilang yang dapat dipilih. Sumber yang ditutup atau tidak dapat diverifikasi akan dilewati. Penghapusan memengaruhi semua kartu dari suatu sumber dan mempertahankan jadwal serta riwayat ulasan.",
+	"flashcardCleanupTip": "Pindai buku catatan yang tidak terenkripsi. Hanya sumber yang dipastikan hilang yang dapat dipilih. Sumber yang ditutup atau tidak dapat diverifikasi akan dilewati. Penghapusan memengaruhi semua kartu dari suatu sumber dan mempertahankan jadwal serta riwayat ulasan.",
 	"flashcardCleanupMissing": "Blok wajib tidak ditemukan",
 	"flashcardCleanupClosed": "Buku catatan ditutup",
 	"flashcardCleanupUnknown": "Tidak dapat diverifikasi",

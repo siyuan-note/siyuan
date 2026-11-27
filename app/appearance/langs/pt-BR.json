@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "Combinar espaços consecutivos",
 	"flashcardAnswerIgnorePunctuation": "Ignorar pontuação",
 	"flashcardCleanup": "Detectar cartões inválidos",
-	"flashcardCleanupTip": "Verifica todos os cadernos. Somente fontes cuja ausência foi confirmada podem ser selecionadas. Fontes fechadas ou não verificáveis são ignoradas. A exclusão afeta todos os cartões de uma fonte e preserva o agendamento e o histórico de revisões.",
+	"flashcardCleanupTip": "Verifica os cadernos não criptografados. Somente fontes cuja ausência foi confirmada podem ser selecionadas. Fontes fechadas ou não verificáveis são ignoradas. A exclusão afeta todos os cartões de uma fonte e preserva o agendamento e o histórico de revisões.",
 	"flashcardCleanupMissing": "Bloco necessário ausente",
 	"flashcardCleanupClosed": "Caderno fechado",
 	"flashcardCleanupUnknown": "Não foi possível verificar",

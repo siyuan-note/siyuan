@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "連続する空白をまとめる",
 	"flashcardAnswerIgnorePunctuation": "句読点を無視",
 	"flashcardCleanup": "無効なフラッシュカードを検出",
-	"flashcardCleanupTip": "すべてのノートブックを検査します。欠落が確認されたカードソースのみ選択できます。閉じたノートブックのソースや検証できないソースはスキップします。削除はソースから生成されたすべてのカードに適用され、スケジュールと復習履歴は保持されます。",
+	"flashcardCleanupTip": "暗号化されていないノートブックを検査します。欠落が確認されたカードソースのみ選択できます。閉じたノートブックのソースや検証できないソースはスキップします。削除はソースから生成されたすべてのカードに適用され、スケジュールと復習履歴は保持されます。",
 	"flashcardCleanupMissing": "必須ブロックがありません",
 	"flashcardCleanupClosed": "ノートブックは閉じています",
 	"flashcardCleanupUnknown": "確認できません",

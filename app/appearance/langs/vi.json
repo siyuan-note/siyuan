@@ -91,7 +91,7 @@
 	"flashcardAnswerCollapseWhitespace": "Gộp các khoảng trắng liên tiếp",
 	"flashcardAnswerIgnorePunctuation": "Bỏ qua dấu câu",
 	"flashcardCleanup": "Phát hiện thẻ học không hợp lệ",
-	"flashcardCleanupTip": "Quét tất cả sổ tay. Chỉ có thể chọn nguồn đã được xác nhận là bị thiếu. Các nguồn đã đóng hoặc không thể xác minh sẽ bị bỏ qua. Thao tác xóa áp dụng cho mọi thẻ cùng nguồn và giữ lại lịch ôn cùng lịch sử ôn tập",
+	"flashcardCleanupTip": "Quét các sổ tay không mã hóa. Chỉ có thể chọn nguồn đã được xác nhận là bị thiếu. Các nguồn đã đóng hoặc không thể xác minh sẽ bị bỏ qua. Thao tác xóa áp dụng cho mọi thẻ cùng nguồn và giữ lại lịch ôn cùng lịch sử ôn tập",
 	"flashcardCleanupMissing": "Thiếu khối bắt buộc",
 	"flashcardCleanupClosed": "Sổ tay đã đóng",
 	"flashcardCleanupUnknown": "Không thể xác minh",

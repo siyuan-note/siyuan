@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "Unisci gli spazi consecutivi",
 	"flashcardAnswerIgnorePunctuation": "Ignora la punteggiatura",
 	"flashcardCleanup": "Rileva schede non valide",
-	"flashcardCleanupTip": "Controlla tutti i quaderni. Sono selezionabili solo le fonti la cui assenza è confermata. Le fonti chiuse o non verificabili vengono ignorate. L’eliminazione riguarda tutte le schede di una fonte e conserva la pianificazione e la cronologia dei ripassi.",
+	"flashcardCleanupTip": "Controlla i quaderni non crittografati. Sono selezionabili solo le fonti la cui assenza è confermata. Le fonti chiuse o non verificabili vengono ignorate. L’eliminazione riguarda tutte le schede di una fonte e conserva la pianificazione e la cronologia dei ripassi.",
 	"flashcardCleanupMissing": "Blocco necessario mancante",
 	"flashcardCleanupClosed": "Quaderno chiuso",
 	"flashcardCleanupUnknown": "Impossibile verificare",

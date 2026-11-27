@@ -979,7 +979,7 @@
 	"flashcardAnswerCollapseWhitespace": "Combinar espacios consecutivos",
 	"flashcardAnswerIgnorePunctuation": "Ignorar puntuación",
 	"flashcardCleanup": "Detectar tarjetas no válidas",
-	"flashcardCleanupTip": "Revisa todos los cuadernos. Solo se pueden seleccionar fuentes cuya ausencia esté confirmada. Se omiten las fuentes cerradas o no verificables. La eliminación afecta a todas las tarjetas de una fuente y conserva la programación y el historial de repasos.",
+	"flashcardCleanupTip": "Revisa los cuadernos sin cifrar. Solo se pueden seleccionar fuentes cuya ausencia esté confirmada. Se omiten las fuentes cerradas o no verificables. La eliminación afecta a todas las tarjetas de una fuente y conserva la programación y el historial de repasos.",
 	"flashcardCleanupMissing": "Falta un bloque necesario",
 	"flashcardCleanupClosed": "Cuaderno cerrado",
 	"flashcardCleanupUnknown": "No se puede verificar",

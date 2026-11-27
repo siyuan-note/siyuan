@@ -72,7 +72,7 @@ import {bindAnchoredInputPosition} from "../../../dialog/anchoredInputPosition";
 import {createAVLocationFromText, createAVLocationReplacement, getAVLocationDisplayText, getAVLocationText, isAVLocationEmpty} from "./locationValue";
 import {openAVLocationEditor} from "./locationEditor";
 import {showMessage} from "../../../dialog/message";
-import {isAVContinuousInputKey, prepareAVContinuousInput, selectsNextAVCellOnEnter} from "./continuousInput";
+import {isAVContinuousInputKey, isAVTextConfirmKey, prepareAVContinuousInput, selectsNextAVCellOnEnter} from "./continuousInput";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -801,6 +801,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     let cellRect = cellElements[0].getBoundingClientRect();
+    const allowSingleCellConfirm = type === "text" && cellElements.length === 1 && isTableLikeView(viewType) &&
+        !hasClosestByClassName(cellElements[0], "custom-attr");
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
     if (isTableLikeView(viewType) && options?.scrollIntoView !== false) {
         cellScrollIntoView(blockElement, cellElements[0], false);
@@ -870,6 +872,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 anchorElement: cellElements[0],
                 value: stableCells[0].cell.value,
                 stableCells,
+                allowSingleCellConfirm,
                 initialInput: options?.initialInput,
                 onSave: async (value, nodeElement, selectedCells) => {
                     await updateCellsValue(protyle, nodeElement, value, undefined, undefined, undefined,
@@ -1100,8 +1103,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             if (electronUndo(event)) {
                 return;
             }
-            const textConfirm = type === "text" && event.key === "Enter" && (event.ctrlKey || event.metaKey) &&
-                event.keyCode !== 229 && !event.shiftKey && !event.altKey;
+            const textConfirm = type === "text" && isAVTextConfirmKey(event);
             if (type !== "template" && (type !== "text" && isAVContinuousInputKey(event, true) || textConfirm)) {
                 const selectNextCell = selectsNextAVCellOnEnter(type) && !getAVCellSelection(blockElement)?.input;
                 const next = prepareAVContinuousInput(protyle, blockElement, cellElements, cell => {
@@ -1111,7 +1113,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                         popTextCell(protyle, [cell]);
                     }
                 }, type === "text");
-                if (next) {
+                if (next || (textConfirm && allowSingleCellConfirm)) {
                     event.preventDefault();
                     event.stopPropagation();
                     if (event.repeat) return;
@@ -1119,7 +1121,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                     inputElement.disabled = true;
                     try {
                         const saved = await updateCellValueByInput(protyle, type, blockElement, cellElements, true, inputTarget, true);
-                        if (saved) next();
+                        if (saved) next?.();
                     } catch (error) {
                         console.error(error);
                         if (avMaskElement.isConnected) showMessage(window.siyuan.languages.settingsPendingSaveError);

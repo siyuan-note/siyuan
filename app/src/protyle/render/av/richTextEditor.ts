@@ -20,6 +20,7 @@ import {focusBlock} from "../../util/selection";
 import {configureAVRichTextEditorLute, createAVRichTextEditorLute} from "./richTextEditorLute";
 import {createAVPrimaryEditValue, getAVPrimaryInitialDOM} from "./primaryRich";
 import {renderImageDisplay} from "../imageDisplay";
+import {isAVTextConfirmKey} from "./continuousInput";
 import {
     createAVRichTextValue,
     getAVRichTextBlockDOM,
@@ -67,6 +68,7 @@ interface AVRichTextEditorOptions {
     onSave: (value: IAVCellValue, nodeElement: HTMLElement,
              stableCells: import("./selectionState").IAVSelectedCell[]) => void | Promise<void>;
     onDestroy?: () => void;
+    allowSingleCellConfirm?: boolean;
     prepareNextInput?: (anchorElement: HTMLElement, rangeOnly?: boolean) => (() => void) | undefined;
 }
 
@@ -302,14 +304,14 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         }
         // 桌面保存期间阻止重复结束，但允许失效标记取消迟到提交。
         finishing = true;
-        panelElement.inert = true;
         const active = document.activeElement;
+        panelElement.inert = true;
         try {
             if (save) await saveContent();
-            const canContinue = !continueInput || document.activeElement === active ||
+            const canRestoreFocus = document.activeElement === active ||
                 document.activeElement === document.body || panelElement.contains(document.activeElement);
             cleanup();
-            if (restoreFocus && canContinue && !cancelled && !activeEditor && isOwnerConnected() &&
+            if (restoreFocus && canRestoreFocus && !cancelled && !activeEditor && isOwnerConnected() &&
                 options.protyle.wysiwyg.element.contains(options.nodeElement)) {
                 focusBlock(options.nodeElement);
                 continueInput?.();
@@ -334,26 +336,22 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         maskElement.querySelector('[data-type="confirm"]')?.addEventListener("click", () =>
             void finish(true, true, options.prepareNextInput?.(options.anchorElement, true)));
     }
-    const continueInput = (event: Event, repeat = false, rangeOnly = false) => {
-        if (fragment.wysiwyg.contains(event.target as Node) && fragment.hintElement.classList.contains("fn__none") &&
-            fragment.protyle.toolbar.element.classList.contains("fn__none") &&
-            fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
-            const next = options.prepareNextInput?.(options.anchorElement, rangeOnly);
-            if (next) {
+    panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (!fragment.hintElement.classList.contains("fn__none") ||
+            !fragment.protyle.toolbar.element.classList.contains("fn__none") ||
+            !fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
+            return;
+        }
+        if (isAVTextConfirmKey(event) && fragment.wysiwyg.contains(event.target as Node)) {
+            const next = options.prepareNextInput?.(options.anchorElement, true);
+            if (next || options.allowSingleCellConfirm) {
                 event.preventDefault();
                 event.stopPropagation();
-                if (!repeat) void finish(true, true, next);
-                return true;
+                if (!event.repeat) void finish(true, true, next);
             }
+            return;
         }
-        return false;
-    };
-    panelElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.key === "Enter" && (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey &&
-            !event.isComposing && event.keyCode !== 229 && continueInput(event, event.repeat, true)) return;
-        if (event.key === "Escape" && fragment.hintElement.classList.contains("fn__none") &&
-            fragment.protyle.toolbar.element.classList.contains("fn__none") &&
-            fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
+        if (event.key === "Escape") {
             event.preventDefault();
             event.stopPropagation();
             void finish(true, true);

@@ -61,6 +61,7 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
         value: settings.primary ? primaryValues[0] :
             {type: "text", text: {content: "initial"}},
         stableCells: [] as import("./selectionState").IAVSelectedCell[],
+        allowSingleCellConfirm: !settings.primary && settings.tableInput === true,
         initialInput: settings.initialInput,
         onSave: (value: IAVCellValue) => { saved.push(value); lifecycle.push("save"); return settings.save?.(); },
         onDestroy: () => lifecycle.push("callback"),
@@ -321,6 +322,29 @@ const createEditorFixture = (settings: {primary?: boolean; mobile?: boolean; cha
             assert.equal(editor.lifecycle.includes("destroy"), false);
             assert.equal(editor.inert, false);
         });
+        for (const mobile of [false, true]) {
+            it(`handles Ctrl or Cmd+Enter in a single ${primary ? "primary" : "text"} cell (${mobile ? "mobile" : "desktop"})`, async () => {
+                const editor = createEditor({mobile, tableInput: true, changed: true});
+                for (const keys of [{}, {shiftKey: true}, {ctrlKey: true, isComposing: true},
+                    {ctrlKey: true, keyCode: 229}, {ctrlKey: true, altKey: true}]) {
+                    editor.enter(keys);
+                }
+                assert.deepEqual(editor.lifecycle, []);
+                editor.enter({ctrlKey: true, repeat: true});
+                assert.equal(editor.lifecycle.includes("save"), false);
+                editor.enter(mobile ? {ctrlKey: true} : {metaKey: true});
+                await editor.settle();
+                if (primary) {
+                    assert.deepEqual(editor.lifecycle, []);
+                    return;
+                }
+                assert.equal(editor.saved.length, 1);
+                assert.equal(editor.saved[0].text.content, "updated");
+                assert.equal(editor.lifecycle.includes("destroy"), true);
+                assert.equal(editor.lifecycle.includes("focus"), !mobile);
+                assert.equal(editor.lifecycle.includes("next"), false);
+            });
+        }
         for (const mobile of [false, true]) {
             it(`leaves paragraph and list Enter events to the block editor (${mobile ? "mobile" : "desktop"})`, async () => {
                 const editor = createEditor({mobile, tableInput: true, changed: true});

@@ -9,6 +9,9 @@ export const isAVContinuousInputKey = (event: KeyboardEvent, allowRepeat = false
     !event.isComposing && event.keyCode !== 229 && (!event.repeat || allowRepeat) &&
     !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey;
 
+export const isAVTextConfirmKey = (event: KeyboardEvent) => event.key === "Enter" &&
+    (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey && !event.isComposing && event.keyCode !== 229;
+
 export const selectsNextAVCellOnEnter = (type: string | undefined) =>
     type === "select" || type === "number" || type === "url" || type === "email" || type === "phone";
 

@@ -29,6 +29,7 @@ test("fallback text input leaves Enter available for multiline editing", async (
     const keydown = runInNewContext(inputCode, {
         type: "text", inputElement: input, electronUndo: () => false, isNotCtrl: () => true,
         isAVContinuousInputKey: continuous.isAVContinuousInputKey,
+        isAVTextConfirmKey: continuous.isAVTextConfirmKey,
         prepareAVContinuousInput: () => assert.fail("text Enter must keep editing"),
     }) as (event: KeyboardEvent) => Promise<void>;
     for (const options of [{}, {repeat: true}, {shiftKey: true}, {isComposing: true}]) {
@@ -42,10 +43,10 @@ test("fallback text input leaves Enter available for multiline editing", async (
     }
 });
 
-test("Enter selects the next scalar cell and opens the next editor only during range input", async () => {
+test("scalar Enter selects the next cell and text confirmation advances only during range input", async () => {
     const types = ["number", "url", "email", "phone", "text"];
     for (const {type, rangeInput, result} of types.flatMap(type =>
-        (type === "text" ? [true] : [false, true]).flatMap(rangeInput =>
+        [false, true].flatMap(rangeInput =>
             ["saved", "failed", "focusMoved"].map(result => ({type, rangeInput, result}))))) {
         let complete: () => void;
         let fail: () => void;
@@ -53,6 +54,7 @@ test("Enter selects the next scalar cell and opens the next editor only during r
         let saves = 0;
         let next = 0;
         let errors = 0;
+        let restoredFocus = 0;
         const scrolledCells: unknown[] = [];
         const openedCells: unknown[] = [];
         const input = {value: "42", dataset: {changed: "true"}, disabled: false};
@@ -66,6 +68,7 @@ test("Enter selects the next scalar cell and opens the next editor only during r
             protyle: {}, type, blockElement: block, cellElements: [cell], inputElement: input, avMaskElement: mask,
             inputTarget: () => ({elements: [cell], cells: [] as import("./selectionState").IAVSelectedCell[]}), electronUndo: () => false,
             isAVContinuousInputKey: continuous.isAVContinuousInputKey,
+            isAVTextConfirmKey: continuous.isAVTextConfirmKey,
             selectsNextAVCellOnEnter: continuous.selectsNextAVCellOnEnter,
             getAVCellSelection: () => rangeInput ? {input: {}} : undefined,
             cellScrollIntoView: (host: unknown, target: unknown) => {
@@ -76,6 +79,7 @@ test("Enter selects the next scalar cell and opens the next editor only during r
             prepareAVContinuousInput: (_protyle: unknown, _block: unknown, _cells: unknown,
                                        open: (target: typeof nextCell) => void, rangeOnly: boolean) => {
                 assert.equal(rangeOnly, type === "text");
+                if (rangeOnly && !rangeInput) return;
                 return () => {
                     next++;
                     open(nextCell);
@@ -86,7 +90,12 @@ test("Enter selects the next scalar cell and opens the next editor only during r
                 saves++;
                 return saving;
             },
-            hasClosestByClassName: (): null => null, isTableLikeView: () => true, addDragFill() {}, focusBlock() {},
+            hasClosestByClassName: (): null => null, isTableLikeView: () => true, addDragFill() {},
+            focusBlock: (target: unknown) => {
+                assert.equal(target, block);
+                restoredFocus++;
+            },
+            allowSingleCellConfirm: type === "text",
             document,
             window: {siyuan: {languages: {settingsPendingSaveError: "failed"}}},
             showMessage: () => {errors++;}, console: {error() {}},
@@ -102,9 +111,10 @@ test("Enter selects the next scalar cell and opens the next editor only during r
         if (result === "failed") fail();
         else complete();
         await pending;
-        assert.equal(next, result === "saved" ? 1 : 0);
-        assert.deepEqual(scrolledCells, result === "saved" && !rangeInput ? [nextCell] : []);
+        assert.equal(next, result === "saved" && (type !== "text" || rangeInput) ? 1 : 0);
+        assert.deepEqual(scrolledCells, result === "saved" && !rangeInput && type !== "text" ? [nextCell] : []);
         assert.deepEqual(openedCells, result === "saved" && rangeInput ? [nextCell] : []);
+        assert.equal(restoredFocus, result === "saved" ? 1 : 0);
         assert.equal(mask.isConnected, result === "failed");
         assert.equal(input.disabled, false);
         assert.equal(errors, result === "failed" ? 1 : 0);

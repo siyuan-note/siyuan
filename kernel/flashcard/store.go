@@ -6,6 +6,7 @@ package flashcard
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -49,17 +50,21 @@ func OpenStore(ctx context.Context, journalRoot, projectionPath, deviceID string
 		_ = journal.Close()
 		return nil, err
 	}
-	for _, batch := range batches {
-		if err = projection.ApplyBatch(ctx, batch); err != nil {
-			_ = projection.Close()
-			_ = journal.Close()
-			return nil, fmt.Errorf("catch up flashcard projection: %w", err)
+	store := &Store{journal: journal, projection: projection, projectionPath: projectionPath}
+	rebuild, err := store.hasOriginalLegacyProjection(ctx)
+	if err == nil {
+		if rebuild {
+			err = store.rebuildProjectionLocked(ctx, batches)
+		} else {
+			err = store.replayJournal(ctx, batches)
 		}
 	}
-	store := &Store{journal: journal, projection: projection, projectionPath: projectionPath}
+	if err != nil {
+		_ = store.Close()
+		return nil, fmt.Errorf("catch up flashcard projection: %w", err)
+	}
 	if _, err = store.resolveReviewConflictsLocked(ctx); err != nil {
-		_ = projection.Close()
-		_ = journal.Close()
+		_ = store.Close()
 		return nil, err
 	}
 	return store, nil
@@ -143,15 +148,44 @@ func (store *Store) Refresh(ctx context.Context) error {
 	if err := store.journal.Reload(); err != nil {
 		return store.invalidateLocked(fmt.Errorf("reload flashcard journal: %w", err))
 	}
-	for _, batch := range store.journal.Batches() {
-		if err := store.projection.ApplyBatch(ctx, batch); err != nil {
-			return store.invalidateLocked(fmt.Errorf("refresh flashcard projection with operation [%s]: %w",
-				batch.OperationID, err))
-		}
-	}
-	_, err := store.resolveReviewConflictsLocked(ctx)
+	rebuild, err := store.hasOriginalLegacyProjection(ctx)
 	if err != nil {
 		return store.invalidateLocked(err)
+	}
+	if rebuild {
+		// 已公开的存储由下一次打开重建，避免在读操作期间替换其投影。
+		return store.invalidateLocked(errors.New("flashcard projection requires legacy migration replay"))
+	}
+	if err = store.replayJournal(ctx, store.journal.Batches()); err != nil {
+		return store.invalidateLocked(err)
+	}
+	_, err = store.resolveReviewConflictsLocked(ctx)
+	if err != nil {
+		return store.invalidateLocked(err)
+	}
+	return nil
+}
+
+func (store *Store) hasOriginalLegacyProjection(ctx context.Context) (bool, error) {
+	for batchID, originalChecksum := range store.journal.legacyProjectionChecksums() {
+		var appliedChecksum string
+		err := store.projection.db.QueryRowContext(ctx, `SELECT checksum FROM operation_batches WHERE batch_id = ?`, batchID).
+			Scan(&appliedChecksum)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return false, fmt.Errorf("check projected legacy migration batch: %w", err)
+		}
+		if err == nil && appliedChecksum == originalChecksum {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (store *Store) replayJournal(ctx context.Context, batches []OperationBatch) error {
+	for _, batch := range batches {
+		if err := store.projection.ApplyBatch(ctx, batch); err != nil {
+			return fmt.Errorf("replay flashcard operation [%s]: %w", batch.OperationID, err)
+		}
 	}
 	return nil
 }
@@ -170,10 +204,14 @@ func (store *Store) RebuildProjection(ctx context.Context) error {
 	if store.closed {
 		return errors.New("flashcard store is closed")
 	}
+	return store.rebuildProjectionLocked(ctx, store.journal.Batches())
+}
+
+func (store *Store) rebuildProjectionLocked(ctx context.Context, batches []OperationBatch) error {
 	if err := store.projection.Close(); err != nil {
 		return err
 	}
-	if err := RebuildProjectionWithSnapshots(ctx, store.projectionPath, store.journal.Batches(),
+	if err := RebuildProjectionWithSnapshots(ctx, store.projectionPath, batches,
 		SnapshotRoot(store.journal.root)); err != nil {
 		projection, openErr := OpenProjection(store.projectionPath)
 		if openErr == nil {

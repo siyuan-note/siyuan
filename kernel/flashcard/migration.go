@@ -567,25 +567,21 @@ func buildLegacyRecords(ctx context.Context, decks []legacyDeckInput, logs []leg
 		sourceID := DeterministicID("legacy-card-source", blockID)
 		refID := DeterministicID("legacy-card-source-ref", sourceID, legacyQuickFieldID, blockID)
 		cardID := GeneratedCardID(sourceID, legacyQuickTemplateID, "legacy-quick")
-		status := "active"
-		generationStatus := GenerationActive
 		if !blockInfo.Exists {
-			status = "orphaned"
-			generationStatus = GenerationOrphaned
 			report.OrphanedSources++
 		}
 		generationConfig := json.RawMessage(`{"mode":"auto"}`)
 		entities = append(entities,
 			plannedEntity{entityType: EntityCardSource, entityID: sourceID, updatedAt: selected.updatedAt, payload: CardSource{
 				ID: sourceID, SchemaID: legacyQuickSchemaID, SourceType: "block", PrimaryRefID: refID,
-				DefaultPresetID: legacyPresetID, GenerationConfig: generationConfig, Status: status,
+				DefaultPresetID: legacyPresetID, GenerationConfig: generationConfig, Status: "active",
 			}},
 			plannedEntity{entityType: EntityCardSourceRef, entityID: refID, updatedAt: selected.updatedAt,
 				payload: CardSourceRef{ID: refID, SourceID: sourceID, FieldID: legacyQuickFieldID, EntityType: "block",
 					EntityID: blockID, Role: "content", Sort: 0, Required: true}},
 			plannedEntity{entityType: EntityCard, entityID: cardID, updatedAt: selected.updatedAt, payload: Card{
 				ID: cardID, SourceID: sourceID, TemplateID: legacyQuickTemplateID, VariantKey: "legacy-quick",
-				GenerationStatus: generationStatus, CreatedAt: selected.createdAt, UpdatedAt: selected.updatedAt,
+				GenerationStatus: GenerationActive, CreatedAt: selected.createdAt, UpdatedAt: selected.updatedAt,
 			}},
 		)
 		stateRevisionID := OperationRevisionID(operationID, EntityReviewState, cardID)

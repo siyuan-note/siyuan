@@ -294,7 +294,7 @@ func (store *Store) LegacyMigrationStatus(ctx context.Context) (LegacyMigrationS
 			if err = decodeStrictJSON(event.Payload, &payload); err != nil {
 				return LegacyMigrationStatus{}, fmt.Errorf("decode flashcard legacy divergence: %w", err)
 			}
-			divergences[payload.ActivationEventID] = event
+			divergences[store.journal.canonicalLegacyActivationID(payload.ActivationEventID)] = event
 		}
 	}
 	if status.Activated != nil {

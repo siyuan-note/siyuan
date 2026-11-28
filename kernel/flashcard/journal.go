@@ -9,8 +9,10 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -83,10 +85,13 @@ type Journal struct {
 	nextSequence         uint64
 	active               *Segment
 	activePath           string
+	rawBatches           []OperationBatch
 	batches              []OperationBatch
 	operations           map[string]operationEntry
 	batchChecksums       map[string]string
 	writerSequences      map[string]string
+	legacyChecksums      map[string]string
+	activationAliases    map[string]string
 	mu                   sync.Mutex
 	closed               bool
 }
@@ -158,7 +163,7 @@ func (journal *Journal) abort() {
 	journal.activePath = ""
 }
 
-// Batches 返回校验通过的全部权威操作批次。
+// Batches 返回从已校验分段派生的投影重放批次。
 func (journal *Journal) Batches() []OperationBatch {
 	journal.mu.Lock()
 	defer journal.mu.Unlock()
@@ -357,13 +362,18 @@ func (journal *Journal) sealActive() error {
 }
 
 func (journal *Journal) registerBatch(batch OperationBatch) {
-	journal.batches = append(journal.batches, cloneBatch(batch))
-	journal.operations[batch.OperationID] = operationEntry{batch: cloneBatch(batch), digest: batch.OperationDigest}
+	journal.registerRawBatch(batch)
+	journal.batches = append(journal.batches, batch)
+	journal.operations[batch.OperationID] = operationEntry{batch: batch, digest: batch.OperationDigest}
+}
+
+func (journal *Journal) registerRawBatch(batch OperationBatch) {
+	journal.rawBatches = append(journal.rawBatches, batch)
 	journal.batchChecksums[batch.BatchID] = batch.Checksum
 	journal.writerSequences[writerSequenceKey(batch.WriterID, batch.Sequence)] = batch.Checksum
 }
 
-func (journal *Journal) loadSegments() error {
+func (journal *Journal) loadSegments() (err error) {
 	writersDir := filepath.Join(journal.root, "writers")
 	writersInfo, err := os.Lstat(writersDir)
 	if os.IsNotExist(err) {
@@ -380,6 +390,16 @@ func (journal *Journal) loadSegments() error {
 		return fmt.Errorf("read flashcard writers: %w", err)
 	}
 	segmentChecksums := map[string]string{}
+	previousCount := len(journal.rawBatches)
+	defer func() {
+		if err != nil {
+			for _, batch := range journal.rawBatches[previousCount:] {
+				delete(journal.batchChecksums, batch.BatchID)
+				delete(journal.writerSequences, writerSequenceKey(batch.WriterID, batch.Sequence))
+			}
+			journal.rawBatches = journal.rawBatches[:previousCount]
+		}
+	}()
 	for _, writerEntry := range writerEntries {
 		if writerEntry.Type()&os.ModeSymlink != 0 {
 			return fmt.Errorf("%w: writer directory is a symbolic link", ErrCorruptSegment)
@@ -435,8 +455,13 @@ func (journal *Journal) loadSegments() error {
 			}
 		}
 	}
-	sortBatches(journal.batches)
-	for _, batch := range journal.batches {
+	if len(journal.rawBatches) == previousCount {
+		return nil
+	}
+	if err = journal.buildReplayBatches(); err != nil {
+		return fmt.Errorf("%w: %w", ErrCorruptSegment, err)
+	}
+	for _, batch := range journal.rawBatches[previousCount:] {
 		if batch.WriterID == journal.writerID && batch.Sequence > journal.nextSequence {
 			journal.nextSequence = batch.Sequence
 		}
@@ -455,11 +480,62 @@ func (journal *Journal) loadBatch(batch OperationBatch) error {
 	if previous, ok := journal.writerSequences[sequenceKey]; ok && previous != batch.Checksum {
 		return errors.New("writer sequence has different batches")
 	}
-	if previous, ok := journal.operations[batch.OperationID]; ok && previous.digest != batch.OperationDigest {
-		return ErrOperationConflict
-	}
-	journal.registerBatch(batch)
+	journal.registerRawBatch(batch)
 	return nil
+}
+
+func (journal *Journal) buildReplayBatches() error {
+	batches := slices.Clone(journal.rawBatches)
+	prepared := map[legacyMigrationVariant]legacyMigrationReplay{}
+	for index := range batches {
+		variant, replay, err := replayLegacyPreparation(&batches[index])
+		if err != nil {
+			return err
+		}
+		if replay.digest != "" {
+			prepared[variant] = replay
+		}
+	}
+	operations := make(map[string]operationEntry, len(batches))
+	legacyChecksums := map[string]string{}
+	activationAliases := map[string]string{}
+	for index := range batches {
+		batch := &batches[index]
+		original, canonical, err := replayLegacyActivation(batch, prepared)
+		if err != nil {
+			return err
+		}
+		if original != "" {
+			activationAliases[original] = canonical
+		}
+		if previous, found := operations[batch.OperationID]; found && previous.digest != batch.OperationDigest {
+			return fmt.Errorf("%w [%s]", ErrOperationConflict, batch.OperationID)
+		}
+		operations[batch.OperationID] = operationEntry{batch: *batch, digest: batch.OperationDigest}
+		if originalChecksum := journal.batchChecksums[batch.BatchID]; originalChecksum != batch.Checksum {
+			legacyChecksums[batch.BatchID] = originalChecksum
+		}
+	}
+	journal.batches = batches
+	journal.operations = operations
+	journal.legacyChecksums = legacyChecksums
+	journal.activationAliases = activationAliases
+	return nil
+}
+
+func (journal *Journal) legacyProjectionChecksums() map[string]string {
+	journal.mu.Lock()
+	defer journal.mu.Unlock()
+	return maps.Clone(journal.legacyChecksums)
+}
+
+func (journal *Journal) canonicalLegacyActivationID(eventID string) string {
+	journal.mu.Lock()
+	defer journal.mu.Unlock()
+	if canonical, found := journal.activationAliases[eventID]; found {
+		return canonical
+	}
+	return eventID
 }
 
 func loadSegment(path string) (Segment, error) {

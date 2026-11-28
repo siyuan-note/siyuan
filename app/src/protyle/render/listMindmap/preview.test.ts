@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import * as path from "node:path";
 import {promisify} from "node:util";
 import test from "node:test";
-import {createSourceFile, isClassDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isClassDeclaration, isPropertyDeclaration, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
 
 const compile = (text: string) => transpileModule(text.replace(/^export /gm, ""), {
     compilerOptions: {target: ScriptTarget.ES2021},
@@ -139,22 +139,27 @@ const cases = async (source: string, css: string, formulas: string[]) => {
     check.deepEqual(chartIDs, ["source-instance"], "theme changes exclude preview copies");
     check.deepEqual(chartThemes, ["dark"]);
 
-    const table = block("NodeTable", "<table><tbody><tr><td>Cell</td></tr></tbody></table>" +
-        '<div class="protyle-action__table"></div>');
+    const table = block("NodeTable", "<div><table><tbody><tr><td>Cell</td></tr></tbody></table>" +
+        '<div class="protyle-action__table"></div></div>');
     table.setAttribute("custom-pinthead", "true");
+    table.setAttribute("custom-sy-table-height", "120px");
     const tablePreview = preview(table);
     const cell = table.querySelector("td");
     check.equal(api.getCell(cell.firstChild), cell);
     check.equal(api.getTableNode(cell), table);
     check.equal(api.getCell(tablePreview.querySelector("td")), undefined);
     check.equal(api.getTableNode(tablePreview.querySelector("td")), undefined);
+    const previewHost = document.createElement("div");
+    root.append(previewHost);
+    previewHost.append(tablePreview);
     const controls = Object.assign(new api.TablePreviewControl(), {
-        wysiwygElement: tablePreview, pinnedTableActions: new Set(), pinnedTableResizeTargets: new Set(),
+        wysiwygElement: previewHost, pinnedTableActions: new Set(), pinnedTableResizeTargets: new Set(),
         pinnedTableResizeObserver: {observe: () => check.fail("Preview registered a pinned table control")},
         getTableGridRect: () => check.fail("Preview registered table resize handles"),
     });
     check.equal(controls.getEdgeHover(0, 0), undefined);
     controls.renderPinnedTableFrames();
+    check.equal((tablePreview.firstElementChild as HTMLElement).style.getPropertyValue("--b3-table-max-height"), "120px");
     check.equal(controls.pinnedTableActions.size, 0);
 
     // 表格单元格的列表标记属于只读内容，预览保留序号、圆点和任务状态。
@@ -313,6 +318,11 @@ test("special block previews cannot acquire document writes or lose unsupported 
 }, async () => {
     const tableSource = createSourceFile("tableControl.ts", readFileSync(path.join(__dirname,
         "../../util/tableControl.ts"), "utf8"), ScriptTarget.Latest, true);
+    const constantsSource = createSourceFile("constants.ts", readFileSync(path.join(__dirname,
+        "../../../constants.ts"), "utf8"), ScriptTarget.Latest, true);
+    const tableHeightAttribute = constantsSource.statements.find(isClassDeclaration).members.find(member =>
+        isPropertyDeclaration(member) && member.name.getText(constantsSource) === "CUSTOM_SY_TABLE_HEIGHT");
+    assert.ok(isPropertyDeclaration(tableHeightAttribute) && tableHeightAttribute.initializer);
     const tableClass = tableSource.statements.find(isClassDeclaration);
     const methods = tableClass.members.filter(member => ["getEdgeHover", "renderPinnedTableFrames"]
         .includes(member.name?.getText(tableSource)));
@@ -336,7 +346,10 @@ test("special block previews cannot acquire document writes or lose unsupported 
         extract("../av/render.ts", ["avRender", "getAVElements"]) +
         extract("../../util/tableVirtualizationDOM.ts", ["TABLE_VIRTUAL_ID", "TABLE_VIRTUAL_ROWS"]) +
         extract("../../util/tableResize.ts", ["TABLE_ADD_CONTROL_GAP", "TABLE_ADD_CONTROL_THICKNESS"]) +
-        extract("../../util/tableControl.ts", ["getCell", "getTableNode"]) +
+        compile(`const Constants = {CUSTOM_SY_TABLE_HEIGHT: ${tableHeightAttribute.initializer.getText(constantsSource)}};`) +
+        extract("../../util/tableHeight.ts", ["TABLE_MIN_HEIGHT", "heightAttribute", "heightProperty",
+            "normalizeTableHeight", "getStoredTableHeight", "getCSSHeight", "applyTableHeight"]) +
+        extract("../../util/tableControl.ts", ["scrollableTableSelector", "getCell", "getTableNode"]) +
         compile(`class TablePreviewControl {${methods.map(method => method.getText(tableSource)).join("\n")}}`) +
         compile(readFileSync(path.join(__dirname, "appearance.ts"), "utf8")
             .replace(/^import [\s\S]*?;\r?\n/gm, "").replace(/^export /gm, "")) +

@@ -279,7 +279,7 @@ const runElectron = async () => {
         const toolbarSource = parse("protyle/toolbar/index");
         const toolbarClass = toolbarSource.statements.find(statement => ts.isClassDeclaration(statement) &&
             statement.name.text === "Toolbar");
-        const methodNames = ["showContent", "showMultiSelectMode", "isMultiSelectMode", "clearSubElement"];
+        const methodNames = ["showContent", "showMultiSelectMode", "isMultiSelectMode", "closeMultiSelectMode", "clearSubElement"];
         const methods = toolbarClass.members.filter(member => methodNames.includes(member.name?.getText(toolbarSource)));
         assert.equal(methods.length, methodNames.length);
         const wysiwygSource = read("protyle/wysiwyg/index");

@@ -1338,6 +1338,10 @@ test("table cell editors preserve input, viewport and alignment, and consume tab
         statement.declarationList.declarations.some(declaration =>
             declaration.name.getText(list) === "setTaskListItemMarker"))
         .map(statement => statement.getText(list)).join("\n");
+    const tableHeight = createSourceFile("tableHeight.ts", read("../util/tableHeight.ts"), ScriptTarget.Latest, true);
+    const scrollTableRow = tableHeight.statements.filter(isVariableStatement).find(statement =>
+        statement.declarationList.declarations.some(declaration => declaration.name.getText(tableHeight) === "scrollTableRowIntoView"));
+    assert.ok(scrollTableRow);
     const source = ["../util/longTextWrap.ts", "../util/inlineElementBoundary.ts", "../toolbar/fontFamilyCore.ts",
         "../../util/escape.ts", "../util/tableVirtualizationDOM.ts", "setLute.ts", "../wysiwyg/codeBlockUtil.ts", "av/richTextValue.ts", "av/richText.ts",
         "../wysiwyg/taskListMarker.ts", "../util/tableCellRichLute.ts", "../util/tableCellRichValue.ts", "../util/tableCellRich.ts",
@@ -1345,7 +1349,8 @@ test("table cell editors preserve input, viewport and alignment, and consume tab
         "../util/tableSelection.ts", "../util/tableRowHeight.ts", "../wysiwyg/tableVirtualization.ts",
         "../util/hasClosest.ts", "../wysiwyg/getBlock.ts", "../util/table.ts", "../wysiwyg/blockquote.ts",
         "../wysiwyg/input.ts", "../wysiwyg/nativeTextMenu.ts", "tableCellRich.ts"]
-        .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource) + "\n" + compile(taskSource);
+        .map(file => compile(read(file))).join("\n") + "\n" + compile(selectionSource) + "\n" + compile(taskSource) +
+        "\n" + compile(scrollTableRow.getText(tableHeight));
     const wysiwyg = createSourceFile("wysiwyg.ts", read("../wysiwyg/index.ts"), ScriptTarget.Latest, true);
     const tableControl = createSourceFile("tableControl.ts", read("../util/tableControl.ts"), ScriptTarget.Latest, true);
     const columnResize = tableControl.statements.find(isClassDeclaration).members.find(member =>

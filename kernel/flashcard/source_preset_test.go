@@ -15,7 +15,7 @@ import (
 	"testing"
 )
 
-func TestSourcePresetUsesNearestScopeAndPreservesExistingSources(t *testing.T) {
+func TestSourcePresetFollowsNearestScopeWithoutChangingExistingSchedule(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)
 	defer store.Close()
@@ -56,12 +56,14 @@ func TestSourcePresetUsesNearestScopeAndPreservesExistingSources(t *testing.T) {
 	if _, err := store.CreateQuickSources(ctx, request); err != nil {
 		t.Fatal(err)
 	}
+	if err := store.projection.ReplaceBlockMetadata(ctx, locations); err != nil {
+		t.Fatal(err)
+	}
 	assertPreset := func(sourceID, expected string) {
 		t.Helper()
-		revision, found, err := store.projection.CurrentEntity(ctx, EntityCardSource, sourceID)
-		var source CardSource
-		if err != nil || !found || json.Unmarshal(revision.Payload, &source) != nil || source.DefaultPresetID != expected {
-			t.Fatalf("source %s preset: %+v; wanted %s, err=%v", sourceID, source, expected, err)
+		actual, err := store.projection.sourcePresetID(ctx, sourceID)
+		if err != nil || actual != expected {
+			t.Fatalf("source %s: preset=%q wanted=%q err=%v", sourceID, actual, expected, err)
 		}
 	}
 	for index, expected := range []string{"child-preset", "parent-preset", "notebook-preset", legacyPresetID} {
@@ -79,9 +81,15 @@ func TestSourcePresetUsesNearestScopeAndPreservesExistingSources(t *testing.T) {
 	if _, err := store.CreateQuickSources(ctx, request); err != nil {
 		t.Fatal(err)
 	}
-	assertPreset(LegacyQuickSourceID("a"), "child-preset")
+	if err := store.projection.ReplaceBlockMetadata(ctx, request.BlockMetadata); err != nil {
+		t.Fatal(err)
+	}
+	assertPreset(LegacyQuickSourceID("a"), legacyPresetID)
 	assertReviewStateForTest(t, ctx, store, LegacyQuickCardID("a"), 987654321, 0)
 	newLocation := []BlockMetadata{{BlockID: "new", NotebookID: "book", RootID: "child", Path: "/parent/child.sy"}}
+	if err := store.projection.ReplaceBlockMetadata(ctx, append(request.BlockMetadata, newLocation...)); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := store.CreateBasicSource(ctx, BasicSourceRequest{OperationID: "scope-basic", SourceID: "basic",
 		BlockIDs: []string{"new", "answer"}, Direction: BasicDirectionBidirectional, CreatedAt: 40,
 		BlockMetadata: newLocation}); err != nil {
@@ -222,10 +230,10 @@ func TestSourcePresetCreationRetryKeepsOriginalPresetAfterSourceEdit(t *testing.
 				t.Fatalf("create source: cards=%v err=%v", cardIDs, err)
 			}
 			var source CardSource
-			if err = json.Unmarshal(created.Payload, &source); err != nil || source.DefaultPresetID != "preset-a" {
-				t.Fatalf("creation did not capture the scope preset: %+v err=%v", source, err)
+			if err = json.Unmarshal(created.Payload, &source); err != nil || source.DefaultPresetID != "" || source.PresetOverrideID != "" {
+				t.Fatalf("creation unexpectedly saved an inherited preset: %+v err=%v", source, err)
 			}
-			source.DefaultPresetID = "preset-b"
+			source.PresetOverrideID = "preset-b"
 			edited, err := store.MutateEntities(ctx, "edit-source-preset", []EntityMutation{{
 				EntityType: EntityCardSource, EntityID: source.ID, ExpectedRevisionID: created.RevisionID,
 				UpdatedAt: 20, Payload: mustRawJSON(t, source),
@@ -396,4 +404,93 @@ func TestSourcePresetSchemaFiveProjectionAndSnapshotReopen(t *testing.T) {
 	if preservedHash, hashErr := fileSHA256(legacySnapshotPath); hashErr != nil || preservedHash != legacyHash {
 		t.Fatalf("legacy snapshot was modified during upgrade: hash=%s err=%v", preservedHash, hashErr)
 	}
+}
+
+func TestOldSourceFollowsDocumentWithoutRewritingHistoryOrOverrides(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	setupLegacyCompatibilityBuiltins(t, ctx, store, 1)
+	applyGenerationEntities(t, ctx, store, "preset-fixtures", 2,
+		testSchedulerPreset("inbox-preset", false, false), testSchedulerPreset("filed-preset", false, false),
+		testSchedulerPreset("fixed-preset", false, false))
+	for _, item := range []struct{ scope, preset string }{{"inbox", "inbox-preset"}, {"filed", "filed-preset"}} {
+		if _, err := store.SaveStudyPolicy(ctx, SaveStudyPolicyRequest{
+			OperationID: NewID(), ScopeType: "notebook", ScopeID: item.scope, DefaultPresetID: &item.preset, UpdatedAt: 3,
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	metadata := func(book string) {
+		t.Helper()
+		if err := store.projection.ReplaceBlockMetadata(ctx, []BlockMetadata{{
+			BlockID: "question", NotebookID: book, RootID: "doc", Path: "/doc.sy",
+		}}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	metadata("inbox")
+	created, err := store.CreateBasicSource(ctx, BasicSourceRequest{
+		OperationID: "create-inbox", SourceID: "shared-source", BlockIDs: []string{"question", "answer"},
+		Direction: BasicDirectionBidirectional, CreatedAt: 100000,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var source CardSource
+	if err = json.Unmarshal(created.SourceRevision.Payload, &source); err != nil {
+		t.Fatal(err)
+	}
+	source.DefaultPresetID = "inbox-preset"
+	legacy, err := store.MutateEntities(ctx, "alpha-source", []EntityMutation{{
+		EntityType: EntityCardSource, EntityID: source.ID, ExpectedRevisionID: created.SourceRevision.RevisionID,
+		UpdatedAt: 100001, Payload: mustRawJSON(t, source),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	card, fixed := created.Cards.Created[0], created.Cards.Created[1]
+	if _, err = store.ManageCards(ctx, CardManagementRequest{OperationID: "keep-card-override",
+		CardIDs: []string{fixed}, Action: CardActionSetPreset, ChangedAt: 100002, PresetID: "fixed-preset",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	rate := func(operationID string, at int64, preset string) ReviewResult {
+		t.Helper()
+		result, err := store.ReviewCard(ctx, ReviewRequest{OperationID: operationID,
+			CardID: card, Rating: ReviewGood, ReviewedAt: at, ReviewMode: "normal"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		revision, found, err := store.projection.CurrentEntity(ctx, EntitySchedulerPreset, preset)
+		if err != nil || !found || revision.RevisionID != result.PresetRevisionID {
+			t.Fatalf("rating used revision %q, wanted %s (%q)", result.PresetRevisionID, preset, revision.RevisionID)
+		}
+		return result
+	}
+	first := rate("review-inbox", 200000, "inbox-preset")
+	beforeMove := len(store.journal.Batches())
+	metadata("filed")
+	if len(store.journal.Batches()) != beforeMove {
+		t.Fatal("moving preset scope wrote authority records")
+	}
+	model, err := store.projection.CardRenderModel(ctx, card)
+	if err != nil || model.Source.DefaultPresetID != "filed-preset" {
+		t.Fatalf("rendered source preset=%q, err=%v", model.Source.DefaultPresetID, err)
+	}
+
+	revision, found, err := store.projection.CurrentEntity(ctx, EntityCardSource, source.ID)
+	if err != nil || !found || revision.RevisionID != legacy.Revisions[0].RevisionID {
+		t.Fatalf("moving the reference unexpectedly rewrote the source: %v", err)
+	}
+	assertReviewStateForTest(t, ctx, store, card, first.AfterState.Due, first.AfterState.Reps)
+	for preset, expected := range map[string]string{"filed-preset": card, "fixed-preset": fixed} {
+		query := predicateQuery("presetID", QueryEqual, mustRawJSON(t, preset))
+		results, err := store.projection.SearchCards(ctx, &query, CardSearchOptions{Now: first.AfterState.Due})
+		if err != nil {
+			t.Fatal(err)
+		}
+		assertSearchCardIDs(t, results, []string{expected})
+	}
+	rate("review-filed", first.AfterState.Due, "filed-preset")
 }

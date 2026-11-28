@@ -110,9 +110,12 @@ func (store *Store) ReviewCard(ctx context.Context, request ReviewRequest) (Revi
 	if err = decodeStrictJSON(sourceRevision.Payload, &source); err != nil {
 		return ReviewResult{}, err
 	}
-	presetID := source.DefaultPresetID
-	if card.PresetOverrideID != "" {
-		presetID = card.PresetOverrideID
+	presetID := card.PresetOverrideID
+	if presetID == "" {
+		presetID, err = store.projection.sourcePresetID(ctx, source.ID)
+		if err != nil {
+			return ReviewResult{}, err
+		}
 	}
 	if presetID == "" {
 		return ReviewResult{}, errors.New("flashcard has no scheduler preset")

@@ -207,11 +207,11 @@ func (store *Store) CreateQuickSources(ctx context.Context, request QuickSourceR
 				EntityID: blockID, Role: "content", Required: true}); err != nil {
 			return QuickSourceResult{}, err
 		}
-		presetID, err := store.resolveSourcePreset(ctx, request.OperationID, sourceID, request.DefaultPresetID, blockID, request.BlockMetadata)
+		preset, err := store.sourcePresetForCreation(ctx, request.OperationID, sourceID, request.DefaultPresetID)
 		if err != nil {
 			return QuickSourceResult{}, err
 		}
-		if err := store.appendQuickSourceMutation(ctx, &mutations, sourceID, refID, presetID, request.CreatedAt); err != nil {
+		if err := store.appendQuickSourceMutation(ctx, &mutations, sourceID, refID, preset, request.CreatedAt); err != nil {
 			return QuickSourceResult{}, err
 		}
 		cardRevision, found, err := store.projection.CurrentEntity(ctx, EntityCard, cardID)
@@ -266,7 +266,7 @@ func quickSourceResult(blockIDs []string) QuickSourceResult {
 }
 
 func (store *Store) appendQuickSourceMutation(ctx context.Context, mutations *[]EntityMutation,
-	sourceID, refID, presetID string, updatedAt int64) error {
+	sourceID, refID string, preset sourcePresetSelection, updatedAt int64) error {
 	revision, found, err := store.projection.CurrentEntity(ctx, EntityCardSource, sourceID)
 	if err != nil {
 		return err
@@ -284,7 +284,7 @@ func (store *Store) appendQuickSourceMutation(ctx context.Context, mutations *[]
 		return nil
 	}
 	source := CardSource{ID: sourceID, SchemaID: legacyQuickSchemaID, SourceType: "block", PrimaryRefID: refID,
-		DefaultPresetID: presetID, GenerationConfig: json.RawMessage(`{"mode":"auto"}`), Status: "active"}
+		DefaultPresetID: preset.legacyID, PresetOverrideID: preset.overrideID, GenerationConfig: json.RawMessage(`{"mode":"auto"}`), Status: "active"}
 	*mutations = append(*mutations, legacyMutation(EntityCardSource, sourceID, revision, found, updatedAt, source))
 	return nil
 }

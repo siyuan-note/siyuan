@@ -129,6 +129,7 @@ type CardSource struct {
 	SourceType          string          `json:"sourceType"`
 	PrimaryRefID        string          `json:"primaryRefID"`
 	DefaultPresetID     string          `json:"defaultPresetID,omitempty"`
+	PresetOverrideID    string          `json:"presetOverrideID,omitempty"`
 	Priority            string          `json:"priority,omitempty"`
 	GenerationConfig    json.RawMessage `json:"generationConfig"`
 	Status              string          `json:"status"`

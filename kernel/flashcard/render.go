@@ -54,6 +54,10 @@ func (projection *Projection) CardRenderModel(ctx context.Context, cardID string
 	if err = decodeStrictJSON(sourceRevision.Payload, &ret.Source); err != nil {
 		return CardRenderModel{}, err
 	}
+	if ret.Source.DefaultPresetID, err = projection.sourcePresetID(ctx, ret.Source.ID); err != nil {
+		return CardRenderModel{}, err
+	}
+	ret.Source.PresetOverrideID = ""
 	templateRevision, found, err := projection.CurrentEntity(ctx, EntityCardTemplate, ret.Card.TemplateID)
 	if err != nil || !found || templateRevision.Deleted {
 		if err != nil {

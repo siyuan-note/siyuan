@@ -38,6 +38,10 @@ var businessReferenceChecks = []referenceCheck{
 	{name: "card source scheduler preset", query: `SELECT s.id FROM card_sources s
 		LEFT JOIN scheduler_presets p ON p.id = s.default_preset_id
 		WHERE s.default_preset_id <> '' AND p.id IS NULL LIMIT 1`},
+	{name: "card source scheduler override", query: `SELECT s.id FROM card_sources s
+		JOIN entities e ON e.entity_type = 'cardSource' AND e.entity_id = s.id
+		LEFT JOIN scheduler_presets p ON p.id = json_extract(e.payload, '$.presetOverrideID')
+		WHERE NULLIF(json_extract(e.payload, '$.presetOverrideID'), '') IS NOT NULL AND p.id IS NULL LIMIT 1`},
 	{name: "card review state", query: `SELECT rs.card_id FROM review_states rs
 		LEFT JOIN cards c ON c.id = rs.card_id WHERE c.id IS NULL LIMIT 1`},
 	{name: "card missing review state", query: `SELECT c.id FROM cards c

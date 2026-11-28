@@ -414,7 +414,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The card source provides the default scheduling preset; decks do not assign presets. If both cards use preset A by default and you set the reverse card to B, the forward card still uses A. Switch the reverse card back to inheritance to use the source preset again. If you do not choose a preset when making a source, SiYuan checks the current document, its ancestors, the notebook, and the workspace default, in that order, and saves the first available preset to the source."
+					"Data": "A card's own scheduling preset comes first, followed by the card source's preset. When neither is set, a built-in card follows its primary block's current document, nearest parent document, notebook, and workspace default, in that order. Moving the block uses the new preset for future ratings without changing existing due dates or review history. Decks do not assign presets."
 				}
 			]
 		},

@@ -1433,23 +1433,37 @@ const openFlashcardV2StudyPolicy = (scopeType: "document" | "notebook", scopeID:
     });
 };
 
-const openFlashcardV2SourcePreset = (sourceID: string, presets: IFlashcardPreset[], callback: () => void) => {
+const openFlashcardV2SourcePreset = (sourceID: string, effectiveSourcePresetID: string, presets: IFlashcardPreset[], callback: () => void) => {
     fetchPost("/api/flashcard/getEntity", {entityType: "cardSource", entityID: sourceID}, (response) => {
         if (!response.data.found) {
             return;
         }
-        const revision = response.data.revision as IFlashcardEntityRevision<{defaultPresetID: string}>;
+        const revision = response.data.revision as IFlashcardEntityRevision<{
+            defaultPresetID?: string;
+            presetOverrideID?: string;
+            pluginNamespace?: string;
+            sourceType: string;
+        }>;
+        const followsDocument = !revision.payload.pluginNamespace &&
+            ["block", "multi-block", "qa", "cloze", "ordered", "image-occlusion", "choice", "multi-line", "typed-answer"]
+                .includes(revision.payload.sourceType);
+        const selectedPresetID = revision.payload.presetOverrideID ||
+            (followsDocument ? "" : revision.payload.defaultPresetID || "");
+        const currentPreset = presets.find((preset) => preset.id === effectiveSourcePresetID);
+        const followLabel = !selectedPresetID && currentPreset ?
+            `${window.siyuan.languages.flashcardFollowDocumentPreset} · ${currentPreset.name}` :
+            window.siyuan.languages.flashcardFollowDocumentPreset;
         const dialog = new Dialog({
             title: window.siyuan.languages.flashcardSourcePreset,
             width: isMobile() ? "92vw" : "440px",
-            content: `<div class="b3-dialog__content card__v2-form"><select class="b3-select fn__block">${presets.map((preset) => `<option value="${escapeAttr(preset.id)}">${escapeHtml(preset.name)}</option>`).join("")}</select><div class="b3-label__text">${window.siyuan.languages.flashcardSourcePresetTip}</div></div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
+            content: `<div class="b3-dialog__content card__v2-form"><select class="b3-select fn__block">${followsDocument ? `<option value="">${escapeHtml(followLabel)}</option>` : ""}${presets.map((preset) => `<option value="${escapeAttr(preset.id)}">${escapeHtml(preset.name)}</option>`).join("")}</select><div class="b3-label__text">${window.siyuan.languages.flashcardSourcePresetTip}</div></div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
         });
         const select = dialog.element.querySelector("select") as HTMLSelectElement;
-        select.value = revision.payload.defaultPresetID;
+        select.value = selectedPresetID;
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
         buttons[0].addEventListener("click", () => dialog.destroy());
         buttons[1].addEventListener("click", () => {
-            if (!select.value) {
+            if (!followsDocument && !select.value) {
                 return;
             }
             buttons[1].disabled = true;
@@ -1460,7 +1474,7 @@ const openFlashcardV2SourcePreset = (sourceID: string, presets: IFlashcardPreset
                     entityID: sourceID,
                     expectedRevisionID: revision.revisionID,
                     updatedAt: Date.now(),
-                    payload: {...revision.payload, defaultPresetID: select.value},
+                    payload: {...revision.payload, presetOverrideID: select.value || undefined},
                 }],
             }, () => {
                 dialog.destroy();
@@ -2736,7 +2750,8 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "sourcePreset" && item.dataset.sourceId) {
-                    openFlashcardV2SourcePreset(item.dataset.sourceId, managementOptions.presets, reloadPage);
+                    const sourceCard = cards.find((card) => card.card.sourceID === item.dataset.sourceId);
+                    openFlashcardV2SourcePreset(item.dataset.sourceId, sourceCard?.defaultPresetID, managementOptions.presets, reloadPage);
                     return;
                 }
                 if (type === "sourceLifecycle" && item.dataset.sourceId) {

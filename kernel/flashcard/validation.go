@@ -245,6 +245,9 @@ func (source *CardSource) validate(entityID string) error {
 	if err := validateRequiredJSON("card source generation config", source.GenerationConfig); err != nil {
 		return err
 	}
+	if source.PresetOverrideID != strings.TrimSpace(source.PresetOverrideID) {
+		return errors.New("card source scheduler preset is invalid")
+	}
 	switch source.SourceType {
 	case "block", "multi-block", "qa", "av-row", "legacy-history":
 	case "cloze":

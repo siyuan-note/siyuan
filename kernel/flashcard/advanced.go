@@ -136,11 +136,11 @@ func (store *Store) CreateAdvancedSource(ctx context.Context,
 	if err != nil {
 		return AdvancedSourceResult{}, err
 	}
-	source.DefaultPresetID, err = store.resolveSourcePreset(ctx, request.OperationID, request.SourceID, request.DefaultPresetID,
-		request.BlockIDs[0], request.BlockMetadata)
+	preset, err := store.sourcePresetForCreation(ctx, request.OperationID, request.SourceID, request.DefaultPresetID)
 	if err != nil {
 		return AdvancedSourceResult{}, err
 	}
+	source.DefaultPresetID, source.PresetOverrideID = preset.legacyID, preset.overrideID
 	variants, err := EnumerateCardVariants(source, template)
 	if err != nil {
 		return AdvancedSourceResult{}, err
@@ -256,7 +256,7 @@ func (store *Store) UpdateAdvancedSource(ctx context.Context,
 	if err != nil {
 		return AdvancedSourceResult{}, err
 	}
-	source.DefaultPresetID = currentSource.DefaultPresetID
+	source.DefaultPresetID, source.PresetOverrideID = currentSource.DefaultPresetID, currentSource.PresetOverrideID
 	source.Priority = currentSource.Priority
 	source.Status = currentSource.Status
 	mutations, err := store.advancedReferenceMutations(ctx, request, references)

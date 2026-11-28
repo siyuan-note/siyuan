@@ -547,7 +547,7 @@ func (store *Store) importAnkiNote(ctx context.Context, request AnkiImportReques
 		if err = decodeStrictJSON(currentSource.Payload, &preserved); err != nil {
 			return false, 0, 0, err
 		}
-		source.DefaultPresetID = preserved.DefaultPresetID
+		source.DefaultPresetID, source.PresetOverrideID = preserved.DefaultPresetID, preserved.PresetOverrideID
 		source.Priority = preserved.Priority
 		source.DisabledTemplateIDs = preserved.DisabledTemplateIDs
 		if err = decodeStrictJSON(preserved.GenerationConfig, &previousConfig); err != nil {

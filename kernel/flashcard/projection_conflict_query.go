@@ -25,7 +25,7 @@ func (projection *Projection) CardHasUnresolvedConflict(ctx context.Context, car
 				SELECT ref.id FROM card_source_refs ref WHERE ref.source_id = c.source_id
 			)) OR
 			(ec.entity_type = ? AND ec.entity_id =
-				COALESCE(NULLIF(c.preset_override_id, ''), s.default_preset_id)) OR
+				`+effectivePresetSQL+`) OR
 			(ec.entity_type = ? AND ec.entity_id IN (
 				SELECT policy.id FROM study_policies policy
 				JOIN card_source_refs primary_ref ON primary_ref.id = s.primary_ref_id

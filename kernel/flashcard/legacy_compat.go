@@ -80,7 +80,7 @@ func (projection *Projection) LegacyQuickCards(ctx context.Context, deckID strin
 		args = append(args, MembershipInclude)
 	}
 	rows, err := projection.db.QueryContext(ctx, `SELECT ce.payload, se.payload, r.entity_id, s.priority,
-		s.default_preset_id FROM cards c
+		`+sourcePresetSQL+` FROM cards c
 		JOIN entities ce ON ce.entity_type = ? AND ce.entity_id = c.id AND ce.deleted = 0
 		JOIN review_states state ON state.card_id = c.id
 		JOIN entities se ON se.entity_type = ? AND se.entity_id = c.id AND se.deleted = 0
@@ -255,7 +255,10 @@ func (store *Store) PreviewReviewDues(ctx context.Context, cardID string, review
 	}
 	presetID := card.PresetOverrideID
 	if presetID == "" {
-		presetID = source.DefaultPresetID
+		presetID, err = store.projection.sourcePresetID(ctx, source.ID)
+		if err != nil {
+			return nil, err
+		}
 	}
 	presetRevision, found, err := store.projection.CurrentEntity(ctx, EntitySchedulerPreset, presetID)
 	if err != nil || !found || presetRevision.Deleted {
@@ -401,13 +404,13 @@ func (store *Store) AddLegacyQuickCards(ctx context.Context, operationID, deckID
 				EntityID: blockID, Role: "content", Required: true}); err != nil {
 			return nil, err
 		}
-		presetID, presetErr := store.resolveSourcePreset(ctx, operationID, sourceID, "", blockID, metadata)
+		preset, presetErr := store.sourcePresetForCreation(ctx, operationID, sourceID, "")
 		if presetErr != nil {
 			return nil, presetErr
 		}
 		if err = store.appendLegacyEntityIfMissing(ctx, &mutations, EntityCardSource, sourceID, updatedAt,
 			CardSource{ID: sourceID, SchemaID: legacyQuickSchemaID, SourceType: "block", PrimaryRefID: refID,
-				DefaultPresetID: presetID, GenerationConfig: json.RawMessage(`{"mode":"auto"}`),
+				DefaultPresetID: preset.legacyID, PresetOverrideID: preset.overrideID, GenerationConfig: json.RawMessage(`{"mode":"auto"}`),
 				Status: "active"}); err != nil {
 			return nil, err
 		}

@@ -137,7 +137,7 @@ var querySQLFields = map[string]string{
 	"editLater":        "(json_extract(ce.payload, '$.editLater') IS NOT NULL)",
 	"flag":             "c.flag",
 	"priority":         effectivePrioritySQL,
-	"presetID":         "COALESCE(NULLIF(c.preset_override_id, ''), s.default_preset_id)",
+	"presetID":         effectivePresetSQL,
 	"notebookID":       primaryBlockNotebookSQL,
 	"rootID":           primaryBlockRootSQL,
 	"path":             primaryBlockPathSQL,
@@ -250,7 +250,7 @@ func compileCardSearchFilter(query *QueryAST, options CardSearchOptions) ([]stri
 					SELECT ref.id FROM card_source_refs ref WHERE ref.source_id = c.source_id
 				)) OR
 				(ec.entity_type = ? AND ec.entity_id =
-					COALESCE(NULLIF(c.preset_override_id, ''), s.default_preset_id)) OR
+					`+effectivePresetSQL+`) OR
 				(ec.entity_type = ? AND ec.entity_id IN (
 					SELECT policy.id FROM study_policies policy
 					JOIN card_source_refs primary_ref ON primary_ref.id = s.primary_ref_id
@@ -309,7 +309,7 @@ func (projection *Projection) searchCardSourcePage(ctx context.Context, where []
 func (projection *Projection) searchCardsWithFilter(ctx context.Context, where []string, args []any, order string,
 	limit, offset int) ([]CardSearchResult, error) {
 	statement := `SELECT ce.payload, se.payload, s.source_type, s.status, s.priority, ` + inheritedPrioritySQL +
-		`, s.default_preset_id, ` + effectivePrioritySQL + `, COALESCE(` + primaryBlockNotebookSQL +
+		`, ` + sourcePresetSQL + `, ` + effectivePrioritySQL + `, COALESCE(` + primaryBlockNotebookSQL +
 		`, ''), COALESCE(` + primaryBlockPathSQL + `, ''), COALESCE(` + primaryBlockRootSQL + `, ''), ` +
 		sourceAvailableSQL + `,
 		COALESCE((SELECT json_group_array(tag_id) FROM (

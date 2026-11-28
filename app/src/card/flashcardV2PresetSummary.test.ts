@@ -63,3 +63,61 @@ test("preset summary styles wrap locally without shrinking action controls", () 
     assert.match(section, /&-content\s*\{[^}]*min-width: 0;[^}]*white-space: normal;[^}]*word-break: normal;/);
     assert.match(section, /&-summary\s*\{[^}]*flex-wrap: wrap;/);
 });
+
+test("the source chooser shows document inheritance without selecting a stale Alpha preset", () => {
+    const start = source.indexOf("const openFlashcardV2SourcePreset =");
+    const end = source.indexOf("const flashcardTagPath =", start);
+    assert.ok(start > 0 && end > start);
+    const script = transpileModule(source.slice(start, end) +
+        '\nopenFlashcardV2SourcePreset("source", "live", presets, () => {});', {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
+    const run = (presetOverrideID?: string) => {
+        const options = {html: "", value: "", width: ""};
+        const selector = {get value() { return options.value; }, set value(value: string) { options.value = value; }};
+        let confirm: () => void;
+        let mutation: {defaultPresetID?: string; presetOverrideID?: string};
+        runInNewContext(script, {
+            escapeAttr, escapeHtml, isMobile: () => true, genUUID: () => "operation",
+            presets: [{id: "live", name: "Current <preset>"}, {id: "old", name: "Old"}, {id: "fixed", name: "Fixed"}],
+            window: {siyuan: {languages: {flashcardFollowDocumentPreset: "Follow document default"}}},
+            Dialog: class {
+                element = {
+                    querySelector: () => selector,
+                    querySelectorAll: () => [{addEventListener: () => {}}, {
+                        addEventListener: (_: string, callback: () => void) => { confirm = callback; },
+                    }],
+                };
+                constructor({content, width}: {content: string; width: string}) {
+                    options.html = content;
+                    options.width = width;
+                }
+                destroy() {}
+            },
+            fetchPost: (url: string, request: {mutations?: {payload: typeof mutation}[]},
+                done: (response?: unknown) => void) => {
+                if (url.endsWith("getEntity")) {
+                    done({data: {found: true, revision: {revisionID: "original",
+                        payload: {sourceType: "qa", defaultPresetID: "old", presetOverrideID}}}});
+                } else {
+                    mutation = request.mutations[0].payload;
+                    done();
+                }
+                return Promise.resolve();
+            },
+        });
+        const selected = options.value;
+        selector.value = "";
+        confirm();
+        return {...options, selected, mutation};
+    };
+
+    const inherited = run();
+    assert.equal(inherited.width, "92vw");
+    assert.ok(inherited.html.includes("Follow document default · " + escapeHtml("Current <preset>")));
+    assert.equal(inherited.selected, "");
+    const explicit = run("fixed");
+    assert.equal(explicit.selected, "fixed");
+    assert.equal(explicit.mutation.presetOverrideID, undefined);
+    assert.equal(explicit.mutation.defaultPresetID, "old");
+});

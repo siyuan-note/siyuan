@@ -289,7 +289,8 @@ func (store *Store) RestoreSourceHistory(ctx context.Context, request RestoreSou
 	if source.PluginNamespace != "" || source.SchemaID != currentSource.SchemaID {
 		return EntityRevision{}, errors.New("unsupported flashcard source history restore")
 	}
-	source.DefaultPresetID, source.Priority, source.Status = currentSource.DefaultPresetID, currentSource.Priority, currentSource.Status
+	source.DefaultPresetID, source.PresetOverrideID = currentSource.DefaultPresetID, currentSource.PresetOverrideID
+	source.Priority, source.Status = currentSource.Priority, currentSource.Status
 	restored, err := NewOperationEntityRevision(request.OperationID, EntityCardSource, request.SourceID,
 		[]string{request.ExpectedRevisionID}, request.UpdatedAt, false, source)
 	if err != nil {

@@ -65,8 +65,7 @@ func (store *Store) CreateBasicSource(ctx context.Context, request BasicSourceRe
 	if err := store.ensureBasicEntities(ctx); err != nil {
 		return BasicSourceResult{}, err
 	}
-	presetID, err := store.resolveSourcePreset(ctx, request.OperationID, request.SourceID, request.DefaultPresetID,
-		request.BlockIDs[0], request.BlockMetadata)
+	preset, err := store.sourcePresetForCreation(ctx, request.OperationID, request.SourceID, request.DefaultPresetID)
 	if err != nil {
 		return BasicSourceResult{}, err
 	}
@@ -96,7 +95,7 @@ func (store *Store) CreateBasicSource(ctx context.Context, request BasicSourceRe
 	}
 	source := CardSource{
 		ID: request.SourceID, SchemaID: basicSchemaID, SourceType: "qa", PrimaryRefID: refs[0].ID,
-		DefaultPresetID: presetID, GenerationConfig: json.RawMessage(`{"type":"basic"}`), Status: "active",
+		DefaultPresetID: preset.legacyID, PresetOverrideID: preset.overrideID, GenerationConfig: json.RawMessage(`{"type":"basic"}`), Status: "active",
 		DisabledTemplateIDs: basicDisabledTemplates(request.Direction),
 	}
 	sourcePayload, err := CanonicalJSON(source)

@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Avanzamento del ripasso",
+	"flashcardSessionCompleted": "Completate",
+	"flashcardSessionRemaining": "Rimanenti",
+	"flashcardSessionSkipped": "Saltate",
+	"flashcardHideSessionCount": "Nascondi il conteggio del ripasso",
+	"flashcardShowSessionCount": "Mostra il conteggio del ripasso",
 	"flashcardFlagRed": "Rosso",
 	"flashcardFlagOrange": "Arancione",
 	"flashcardFlagGreen": "Verde",

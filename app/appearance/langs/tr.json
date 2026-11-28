@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Tekrar ilerlemesi",
+	"flashcardSessionCompleted": "Tamamlanan",
+	"flashcardSessionRemaining": "Kalan",
+	"flashcardSessionSkipped": "Atlanan",
+	"flashcardHideSessionCount": "Tekrar sayacını gizle",
+	"flashcardShowSessionCount": "Tekrar sayacını göster",
 	"flashcardFlagRed": "Kırmızı",
 	"flashcardFlagOrange": "Turuncu",
 	"flashcardFlagGreen": "Yeşil",

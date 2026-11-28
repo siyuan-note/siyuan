@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Review progress",
+	"flashcardSessionCompleted": "Completed",
+	"flashcardSessionRemaining": "Remaining",
+	"flashcardSessionSkipped": "Skipped",
+	"flashcardHideSessionCount": "Hide the review count",
+	"flashcardShowSessionCount": "Show the review count",
 	"flashcardFlagRed": "Red",
 	"flashcardFlagOrange": "Orange",
 	"flashcardFlagGreen": "Green",

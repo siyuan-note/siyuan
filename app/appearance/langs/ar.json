@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "تقدّم المراجعة",
+	"flashcardSessionCompleted": "مكتملة",
+	"flashcardSessionRemaining": "متبقية",
+	"flashcardSessionSkipped": "متخطّاة",
+	"flashcardHideSessionCount": "إخفاء عداد المراجعة",
+	"flashcardShowSessionCount": "إظهار عداد المراجعة",
 	"flashcardFlagRed": "أحمر",
 	"flashcardFlagOrange": "برتقالي",
 	"flashcardFlagGreen": "أخضر",

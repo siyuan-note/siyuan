@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Progresso da revisão",
+	"flashcardSessionCompleted": "Concluídos",
+	"flashcardSessionRemaining": "Restantes",
+	"flashcardSessionSkipped": "Ignorados",
+	"flashcardHideSessionCount": "Ocultar a contagem da revisão",
+	"flashcardShowSessionCount": "Mostrar a contagem da revisão",
 	"flashcardFlagRed": "Vermelho",
 	"flashcardFlagOrange": "Laranja",
 	"flashcardFlagGreen": "Verde",

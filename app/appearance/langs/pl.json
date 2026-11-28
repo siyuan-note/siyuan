@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Postęp powtórki",
+	"flashcardSessionCompleted": "Ukończone",
+	"flashcardSessionRemaining": "Pozostałe",
+	"flashcardSessionSkipped": "Pominięte",
+	"flashcardHideSessionCount": "Ukryj licznik powtórek",
+	"flashcardShowSessionCount": "Pokaż licznik powtórek",
 	"flashcardFlagRed": "Czerwony",
 	"flashcardFlagOrange": "Pomarańczowy",
 	"flashcardFlagGreen": "Zielony",

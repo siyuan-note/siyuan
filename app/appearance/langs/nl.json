@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Herhalingsvoortgang",
+	"flashcardSessionCompleted": "Voltooid",
+	"flashcardSessionRemaining": "Resterend",
+	"flashcardSessionSkipped": "Overgeslagen",
+	"flashcardHideSessionCount": "Herhalingsteller verbergen",
+	"flashcardShowSessionCount": "Herhalingsteller tonen",
 	"flashcardFlagRed": "Rood",
 	"flashcardFlagOrange": "Oranje",
 	"flashcardFlagGreen": "Groen",

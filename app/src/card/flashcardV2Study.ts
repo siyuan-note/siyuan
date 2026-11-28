@@ -65,3 +65,24 @@ export class FlashcardV2WeakCards {
             .map((item) => item.card.id);
     }
 }
+
+export const priorityLabel = (priority: string) => {
+    const labels: Record<string, string> = {
+        exam: window.siyuan.languages.flashcardPriorityExam,
+        learning: window.siyuan.languages.flashcardPriorityLearning,
+        retaining: window.siyuan.languages.flashcardPriorityRetaining,
+        paused: window.siyuan.languages.flashcardPriorityPaused,
+        unset: window.siyuan.languages.flashcardPriorityUnset,
+    };
+    return labels[priority] || labels.unset;
+};
+
+export const reviewStateLabel = (state: string) => {
+    const labels: Record<string, string> = {
+        new: window.siyuan.languages.flashcardNewCard,
+        learning: window.siyuan.languages.flashcardLearningCards,
+        review: window.siyuan.languages.flashcardReviewCard,
+        relearning: window.siyuan.languages.flashcardRelearningCards,
+    };
+    return labels[state] || state;
+};

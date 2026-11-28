@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Tiến độ ôn tập",
+	"flashcardSessionCompleted": "Đã hoàn thành",
+	"flashcardSessionRemaining": "Còn lại",
+	"flashcardSessionSkipped": "Đã bỏ qua",
+	"flashcardHideSessionCount": "Ẩn bộ đếm ôn tập",
+	"flashcardShowSessionCount": "Hiện bộ đếm ôn tập",
 	"flashcardFlagRed": "Đỏ",
 	"flashcardFlagOrange": "Cam",
 	"flashcardFlagGreen": "Xanh lá",

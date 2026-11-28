@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "복습 진행 상황",
+	"flashcardSessionCompleted": "완료",
+	"flashcardSessionRemaining": "남음",
+	"flashcardSessionSkipped": "건너뜀",
+	"flashcardHideSessionCount": "복습 카드 수 숨기기",
+	"flashcardShowSessionCount": "복습 카드 수 표시",
 	"flashcardFlagRed": "빨간색",
 	"flashcardFlagOrange": "주황색",
 	"flashcardFlagGreen": "초록색",

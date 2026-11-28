@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Напредак понављања",
+	"flashcardSessionCompleted": "Завршено",
+	"flashcardSessionRemaining": "Преостало",
+	"flashcardSessionSkipped": "Прескочено",
+	"flashcardHideSessionCount": "Сакриј бројач понављања",
+	"flashcardShowSessionCount": "Прикажи бројач понављања",
 	"flashcardFlagRed": "Црвена",
 	"flashcardFlagOrange": "Наранџаста",
 	"flashcardFlagGreen": "Зелена",

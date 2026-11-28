@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "התקדמות בחזרה",
+	"flashcardSessionCompleted": "הושלמו",
+	"flashcardSessionRemaining": "נותרו",
+	"flashcardSessionSkipped": "דולגו",
+	"flashcardHideSessionCount": "הסתרת מונה החזרה",
+	"flashcardShowSessionCount": "הצגת מונה החזרה",
 	"flashcardFlagRed": "אדום",
 	"flashcardFlagOrange": "כתום",
 	"flashcardFlagGreen": "ירוק",

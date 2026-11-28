@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Ход повторения",
+	"flashcardSessionCompleted": "Завершено",
+	"flashcardSessionRemaining": "Осталось",
+	"flashcardSessionSkipped": "Пропущено",
+	"flashcardHideSessionCount": "Скрыть счётчик повторения",
+	"flashcardShowSessionCount": "Показать счётчик повторения",
 	"flashcardFlagRed": "Красный",
 	"flashcardFlagOrange": "Оранжевый",
 	"flashcardFlagGreen": "Зелёный",

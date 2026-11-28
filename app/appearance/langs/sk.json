@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Priebeh opakovania",
+	"flashcardSessionCompleted": "Dokončené",
+	"flashcardSessionRemaining": "Zostávajúce",
+	"flashcardSessionSkipped": "Preskočené",
+	"flashcardHideSessionCount": "Skryť počet kariet na opakovanie",
+	"flashcardShowSessionCount": "Zobraziť počet kariet na opakovanie",
 	"flashcardFlagRed": "Červená",
 	"flashcardFlagOrange": "Oranžová",
 	"flashcardFlagGreen": "Zelená",

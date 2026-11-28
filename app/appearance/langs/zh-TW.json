@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "複習進度",
+	"flashcardSessionCompleted": "已完成",
+	"flashcardSessionRemaining": "待複習",
+	"flashcardSessionSkipped": "已略過",
+	"flashcardHideSessionCount": "隱藏複習計數",
+	"flashcardShowSessionCount": "顯示複習計數",
 	"flashcardFlagRed": "紅色",
 	"flashcardFlagOrange": "橙色",
 	"flashcardFlagGreen": "綠色",

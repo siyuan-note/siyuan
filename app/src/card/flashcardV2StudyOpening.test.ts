@@ -101,7 +101,7 @@ test("subset cancellation preserves management and confirmation passes the callb
         let started = 0;
         let notified = 0;
         const onTabOpened = () => { notified++; };
-        const options = {reviewMode: "normal", cardIDs: ["qa"]};
+        const options = {reviewMode: "reinforcement", cardIDs: ["qa"], includeSuspended: true, includeBuried: false, includePaused: true};
         const controls: Record<string, unknown> = {
             scope: {value: "selected", addEventListener: () => {}},
             mode: {value: "normal", addEventListener: () => {}}, order: {value: "selected"},
@@ -117,10 +117,14 @@ test("subset cancellation preserves management and confirmation passes the callb
                     }}))};
                 destroy() { closed++; }
             },
-            orderFlashcardV2StudyCards: () => ["qa"], flashcardV2SubsetOptions: () => options,
+            orderFlashcardV2StudyCards: () => ["qa"],
+            flashcardV2SubsetOptions: () => ({cardIDs: ["qa"]}),
+            flashcardV2ReviewOptionsHTML: () => "",
+            bindFlashcardV2ReviewOptions: () => () => ({reviewMode: "reinforcement",
+                includeSuspended: true, includeBuried: false, includePaused: true}),
             openFlashcardV2ReviewSession: (...args: unknown[]) => {
                 started++;
-                assert.equal(args[3], options);
+                assert.deepEqual({...args[3] as object}, options);
                 assert.equal(args[4], undefined);
                 assert.equal(args[5], onTabOpened);
             },

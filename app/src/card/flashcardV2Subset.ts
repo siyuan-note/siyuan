@@ -1,3 +1,4 @@
+import {bindFlashcardV2ReviewOptions, flashcardV2ReviewOptionsHTML} from "./flashcardV2ReviewOptions";
 import {Dialog} from "../dialog";
 import type {App} from "../index";
 import {isMobile} from "../util/functions";
@@ -24,6 +25,7 @@ export const openFlashcardV2SubsetSession = (app: App, name: string, reviewSetID
 <label class="b3-label"><div class="b3-label__text">${languages.reviewMode}</div>
 <select data-type="mode" class="b3-select fn__block"><option value="normal">${languages.flashcardReviewNormal}</option><option value="reinforcement">${languages.flashcardReviewReinforcement}</option></select>
 <div data-type="modeTip" class="b3-label__text"></div></label>
+${flashcardV2ReviewOptionsHTML()}
 <label data-type="orderField" class="b3-label"><div class="b3-label__text">${languages.sort}</div>
 <select data-type="order" class="b3-select fn__block"><option value="selected">${languages.sortDefault}</option><option value="random">${languages.random}</option><option value="due">${languages.flashcardStudyDueFirst}</option><option value="difficulty">${languages.flashcardStudyDifficultFirst}</option><option value="lapses">${languages.flashcardStudyLapsesFirst}</option></select></label>
 </div>
@@ -32,21 +34,19 @@ export const openFlashcardV2SubsetSession = (app: App, name: string, reviewSetID
     const scope = dialog.element.querySelector<HTMLSelectElement>('[data-type="scope"]');
     const mode = dialog.element.querySelector<HTMLSelectElement>('[data-type="mode"]');
     const order = dialog.element.querySelector<HTMLSelectElement>('[data-type="order"]');
+    const getReviewOptions = bindFlashcardV2ReviewOptions(dialog.element, mode);
     const update = () => {
         dialog.element.querySelector('[data-type="orderField"]').classList.toggle("fn__none", scope.value !== "selected");
-        dialog.element.querySelector('[data-type="modeTip"]').textContent = mode.value === "normal" ?
-            languages.flashcardReviewNormalTip : languages.flashcardReviewReinforcementTip;
     };
     scope.addEventListener("change", update);
-    mode.addEventListener("change", update);
     update();
     const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
     buttons[0].addEventListener("click", () => dialog.destroy());
     buttons[1].addEventListener("click", () => {
         const cardIDs = scope.value === "selected" ?
             orderFlashcardV2StudyCards(cards, order.value as TFlashcardV2StudyOrder) : undefined;
-        const options = flashcardV2SubsetOptions(reviewSetID, query, cardIDs,
-            mode.value === "reinforcement" ? "reinforcement" : "normal");
+        const reviewOptions = getReviewOptions();
+        const options = {...flashcardV2SubsetOptions(reviewSetID, query, cardIDs, reviewOptions.reviewMode), ...reviewOptions};
         dialog.destroy();
         openFlashcardV2ReviewSession(app, "", name, options, undefined, onTabOpened);
     });

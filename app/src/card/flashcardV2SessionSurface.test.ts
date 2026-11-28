@@ -72,7 +72,8 @@ test("mobile review uses an expanded drawer and displays progress next to the ti
     const render = runInNewContext(transpileModule(`${source.slice(start, end)}
         ({title: mobileSessionTitle("Review <cards>", true), mobile: sessionContent(true), desktop: sessionContent()});`, {
         compilerOptions: {target: ScriptTarget.ES2021},
-    }).outputText, {escapeHtml, window: {siyuan: {languages: {}}}});
+    }).outputText, {escapeHtml, flashcardV2ReviewCounterHTML: () => "<button data-flashcard-count></button>",
+        window: {siyuan: {languages: {}}}});
     assert.match(render.title, /#iconRiffCard[\s\S]*Review &lt;cards>[\s\S]*data-flashcard-count/);
     assert.doesNotMatch(render.mobile, /data-flashcard-count/);
     assert.match(render.desktop, /data-flashcard-count/);
@@ -123,6 +124,7 @@ test("review shows toolbar controls without hover and keeps rating intervals wit
     const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
     const markup = source.slice(source.indexOf("const sessionContent ="), source.indexOf("const renderFlashcardV2Card ="));
     const html = runInNewContext(`${markup}\nsessionContent();`, {
+        flashcardV2ReviewCounterHTML: () => "",
         window: {speechSynthesis: {}, siyuan: {languages: {flashcardFlag: "Flag", skip: "Skip"}}},
     }) as string;
     const toolbar = html.slice(html.indexOf("data-flashcard-toolbar"), html.indexOf("card__v2-session-body"));
@@ -133,7 +135,7 @@ test("review shows toolbar controls without hover and keeps rating intervals wit
     }
     assert.doesNotMatch(html, /data-type="toggle-outline"|data-flashcard-outline/);
     assert.match(toolbar, /<button data-type="undo-review"[^>]*class="[^"]*fn__none/);
-    const withoutSpeech = runInNewContext(`${markup}\nsessionContent();`, {window: {siyuan: {languages: {}}}});
+    const withoutSpeech = runInNewContext(`${markup}\nsessionContent();`, {flashcardV2ReviewCounterHTML: () => "", window: {siyuan: {languages: {}}}});
     assert.match(withoutSpeech, /<button data-type="read-aloud"[^>]*class="[^"]*fn__none/);
     for (const rating of ["again", "hard", "good", "easy"]) {
         assert.match(html, new RegExp(`<button data-rating="${rating}"[^\\n]*data-rating-interval[^\\n]*</button>`));
@@ -217,7 +219,7 @@ test("real waiting completion chain clears the previous locate target and invali
             requestPending: false, waitingTimer: undefined, lastReview: undefined,
             dialog: {element}, setFlashcardLocateBlockID,
             outline: {update: () => { outlineResets++; }}, clearWaiting: () => { waitingClears++; },
-            setReviewActionsEnabled: () => {}, flashcardV2QueueProgress: () => "1 / 1",
+            setReviewActionsEnabled: () => {}, flashcardV2QueueBreakdown: () => ({}), reviewCounter: {update: () => {}},
             sessionCompletionContent: () => "Completed", weakCards: {cards: (): unknown[] => []},
             nextCard: () => assert.fail("not due yet"), Date: {now: () => 1000},
             window: {setInterval: () => 1, siyuan: {languages: {

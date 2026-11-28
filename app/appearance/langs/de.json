@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Lernfortschritt",
+	"flashcardSessionCompleted": "Abgeschlossen",
+	"flashcardSessionRemaining": "Verbleibend",
+	"flashcardSessionSkipped": "Übersprungen",
+	"flashcardHideSessionCount": "Anzahl der Lernkarten ausblenden",
+	"flashcardShowSessionCount": "Anzahl der Lernkarten anzeigen",
 	"flashcardFlagRed": "Rot",
 	"flashcardFlagOrange": "Orange",
 	"flashcardFlagGreen": "Grün",

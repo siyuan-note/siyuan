@@ -309,11 +309,26 @@
     }
   }
 
+  &__v2-image-viewport {
+    position: relative;
+    max-height: 48vh;
+    overflow: auto;
+
+    &[data-zoomed] > .card__v2-image-editor {
+      max-width: none;
+
+      > img {
+        max-width: none;
+        max-height: none;
+      }
+    }
+  }
+
   &__v2-image-editor {
     position: relative;
     display: table;
     max-width: 100%;
-    margin: 16px auto 0;
+    margin: 0 auto;
     user-select: none;
 
     > img {
@@ -328,6 +343,14 @@
       inset: 0;
       cursor: crosshair;
       touch-action: none;
+
+      &[data-mode="edit"] {
+        cursor: move;
+      }
+
+      &[data-mode="pan"] {
+        cursor: grab;
+      }
     }
   }
 
@@ -1402,6 +1425,32 @@
 .card__v2-managed-card > button:focus-visible {
   outline: 2px solid var(--b3-theme-primary);
   outline-offset: -2px;
+}
+
+.card__v2-queue-counter {
+  flex: none;
+}
+
+.card__v2-queue-details {
+  display: grid;
+  gap: 8px;
+}
+
+.card__v2-queue-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 16px;
+  margin: 0;
+  text-align: start;
+
+  & + & {
+    margin-top: 8px;
+  }
+
+  dd {
+    margin: 0;
+    text-align: end;
+  }
 }
 
 .card__v2-review-set {

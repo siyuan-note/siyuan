@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Progreso del repaso",
+	"flashcardSessionCompleted": "Completadas",
+	"flashcardSessionRemaining": "Pendientes",
+	"flashcardSessionSkipped": "Omitidas",
+	"flashcardHideSessionCount": "Ocultar el contador de repaso",
+	"flashcardShowSessionCount": "Mostrar el contador de repaso",
 	"flashcardFlagRed": "Rojo",
 	"flashcardFlagOrange": "Naranja",
 	"flashcardFlagGreen": "Verde",

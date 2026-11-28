@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "Progres peninjauan",
+	"flashcardSessionCompleted": "Selesai",
+	"flashcardSessionRemaining": "Tersisa",
+	"flashcardSessionSkipped": "Dilewati",
+	"flashcardHideSessionCount": "Sembunyikan jumlah kartu ulasan",
+	"flashcardShowSessionCount": "Tampilkan jumlah kartu ulasan",
 	"flashcardFlagRed": "Merah",
 	"flashcardFlagOrange": "Jingga",
 	"flashcardFlagGreen": "Hijau",

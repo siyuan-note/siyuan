@@ -1,3 +1,4 @@
+import {bindFlashcardV2ReviewCounter, flashcardV2ReviewCounterHTML} from "./flashcardV2ReviewCounter";
 import {Dialog} from "../dialog";
 import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {notifyFlashcardV2ReviewChange} from "./flashcardV2ReviewChanges";
@@ -58,7 +59,7 @@ import {matchHotKey} from "../protyle/util/hotKey";
 import {flashcardV2FlagColors, flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
 import {openFlashcardReviewTab} from "./openFlashcardReviewTab";
-import {deferFlashcardV2QueueCard, flashcardV2QueueProgress, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
+import {deferFlashcardV2QueueCard, flashcardV2QueueBreakdown, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
 import {openFlashcardV2Due} from "./flashcardV2Due";
 import {openFlashcardV2EditLater, type IFlashcardV2EditLater} from "./flashcardV2EditLater";
 import {FlashcardV2WeakCards, flashcardV2SubsetOptions} from "./flashcardV2Study";
@@ -79,6 +80,7 @@ interface IFlashcardV2SessionQueueCard {
         editLater?: IFlashcardV2EditLater;
     };
     reviewState: {
+        state: string;
         stateRevisionID: string;
         due: number;
         suspended: boolean;
@@ -458,12 +460,12 @@ ${weakCount ? `<div class="fn__hr"></div><span class="ft__on-surface">${window.s
 const mobileSessionTitle = (name: string, showCount = false) => `<span class="fn__flex">
     <svg class="block__logoicon fn__flex-center fn__flex-shrink" aria-hidden="true"><use xlink:href="#iconRiffCard"></use></svg>
     <span class="fn__ellipsis">${escapeHtml(name)}</span>
-    ${showCount ? '<span class="fn__space"></span><span data-flashcard-count class="fn__flex-shrink ft__on-surface"></span>' : ""}
+    ${showCount ? `<span class="fn__space"></span>${flashcardV2ReviewCounterHTML(true)}` : ""}
 </span>`;
 
 const sessionContent = (mobile = false) => `<div class="b3-dialog__content fn__flex-column card__v2-session">
 <div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
-    ${mobile ? "" : '<span data-flashcard-count class="fn__flex-shrink ft__on-surface"></span>'}
+    ${mobile ? "" : flashcardV2ReviewCounterHTML(false)}
     <span data-flashcard-path class="card__v2-session-path ft__on-surface"></span>
     <button data-type="flag" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.flashcardFlag}" aria-haspopup="menu" disabled><svg><use xlink:href="#iconFlag"></use></svg></button>
     <button data-type="read-aloud" class="block__icon block__icon--show ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
@@ -703,7 +705,6 @@ const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2
     includeRatingIntervals: boolean,
     isCurrent: () => boolean, callback: (rendered: IFlashcardV2RenderedCard) => void,
     unavailable: () => void) => {
-    dialog.element.querySelector("[data-flashcard-count]").textContent = flashcardV2QueueProgress(queue);
     renderFlashcardV2Card(dialog, queue[index].sessionCard, isCurrent, callback, unavailable, {includeRatingIntervals});
 };
 
@@ -998,6 +999,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 height: "78vh",
                 content: sessionContent(mobile),
                 destroyCallback: () => {
+                    reviewCounter?.destroy();
                     outline?.destroy();
                     clearWaiting();
                     renderGeneration++;
@@ -1009,6 +1011,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     }
                 },
             }, mount);
+            const reviewCounter = bindFlashcardV2ReviewCounter(dialog.element, mobile,
+                () => completedPending || sessionFinished ? undefined : queue[index]?.card.id);
             dialog.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
             dialog.element.setAttribute("data-flashcard-v2-review", "");
             let outlineSourceOpen = false;
@@ -1067,6 +1071,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 }
                 clearWaiting();
                 completedPending = false;
+                reviewCounter.update(flashcardV2QueueBreakdown(queue));
                 const generation = ++renderGeneration;
                 outline.update();
                 setFlashcardLocateBlockID(dialog.element);
@@ -1101,7 +1106,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 renderPending = false;
                 completedPending = true;
                 setReviewActionsEnabled(dialog, true);
-                dialog.element.querySelector("[data-flashcard-count]").textContent = flashcardV2QueueProgress(queue);
+                reviewCounter.update(flashcardV2QueueBreakdown(queue));
                 const contentElement = dialog.element.querySelector(".card__block");
                 const frontElement = contentElement.querySelector("[data-flashcard-front]");
                 dialog.element.querySelector("[data-flashcard-toolbar]").classList.add("fn__none");

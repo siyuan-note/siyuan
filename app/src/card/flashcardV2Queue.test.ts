@@ -1,9 +1,9 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {deferFlashcardV2QueueCard, flashcardV2QueueProgress, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
+import {deferFlashcardV2QueueCard, flashcardV2QueueBreakdown, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
 
-const card = (id: string, status = "queued", repeatDue = 0, generationStatus = "active") => ({
-    card: {id, generationStatus}, sessionCard: {status}, repeatDue,
+const card = (id: string, status = "queued", repeatDue = 0, generationStatus = "active", state = "new") => ({
+    card: {id, generationStatus}, sessionCard: {status}, repeatDue, reviewState: {state},
 });
 
 describe("flashcardV2Queue", () => {
@@ -16,7 +16,7 @@ describe("flashcardV2Queue", () => {
         assert.equal(deferFlashcardV2QueueCard(queue, 1, 100, deferred), true);
         assert.equal(selectFlashcardV2Queue(queue, 100, deferred).index, 2);
         assert.equal(JSON.stringify(queue), original);
-        assert.equal(flashcardV2QueueProgress(queue), "0 / 3");
+        assert.equal(flashcardV2QueueBreakdown(queue).remaining, 3);
         refreshFlashcardV2Queue(queue, [card("third", "reviewed"), card("second"), card("first", "shown")]);
         assert.equal(selectFlashcardV2Queue(queue, 100, deferred).index, 0);
         assert.deepEqual(queue.map((item) => item.card.id), ["first", "second", "third"]);
@@ -49,7 +49,7 @@ describe("flashcardV2Queue", () => {
         assert.deepEqual(selectFlashcardV2Queue(queue, 4999), {index: 1, nextDue: 5000});
         assert.deepEqual(selectFlashcardV2Queue(queue, 5000), {index: 0, nextDue: 0});
         assert.equal(queue[0].sessionCard.status, "reviewed");
-        assert.equal(flashcardV2QueueProgress(queue), "1 / 201");
+        assert.equal(flashcardV2QueueBreakdown(queue).remaining, 201);
     });
 
     it("waits for the last learning card and chooses the earliest due repeat", () => {
@@ -65,7 +65,7 @@ describe("flashcardV2Queue", () => {
         refreshFlashcardV2Queue(queue, [card("outside"), card("second"), card("first", "skipped")]);
         assert.deepEqual(queue.map((item) => item.card.id), ["first", "second", "missing"]);
         assert.deepEqual(selectFlashcardV2Queue(queue, 6000), {index: 1, nextDue: 0});
-        assert.equal(flashcardV2QueueProgress(queue), "2 / 3");
+        assert.equal(flashcardV2QueueBreakdown(queue).skipped, 2);
     });
 
     it("restores an undone card and excludes skipped, deleted and graduated cards", () => {
@@ -75,4 +75,16 @@ describe("flashcardV2Queue", () => {
         assert.deepEqual(selectFlashcardV2Queue(queue, 6000), {index: 0, nextDue: 0});
         assert.equal(queue[0].repeatDue, 0);
     });
+});
+
+it("reports pending repeats by state and separates completed and skipped cards", () => {
+    const queue = [
+        card("queued"), card("learning", "reviewed", 5000, "active", "learning"),
+        card("review", "shown", 0, "active", "review"), card("again", "reviewed", 10, "active", "relearning"),
+        card("done", "reviewed"), card("skipped", "skipped"),
+        card("disabled", "shown", 0, "disabledByTemplate"),
+        {...card("edit"), card: {id: "edit", generationStatus: "active", editLater: {note: "", updatedAt: 1}}},
+    ];
+    assert.deepEqual(flashcardV2QueueBreakdown(queue),
+        {total: 8, remaining: 4, completed: 1, skipped: 3, new: 1, learning: 1, review: 1, relearning: 1});
 });

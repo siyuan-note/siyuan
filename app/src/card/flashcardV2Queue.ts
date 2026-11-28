@@ -76,5 +76,20 @@ export const refreshFlashcardV2Queue = <T extends IQueueCard>(queue: T[], refres
     });
 };
 
-export const flashcardV2QueueProgress = (queue: IQueueCard[]) =>
-    `${queue.filter((item) => item.sessionCard.status === "reviewed" || item.sessionCard.status === "skipped").length} / ${queue.length}`;
+export const flashcardV2QueueBreakdown = (queue: readonly (IQueueCard & {reviewState: {state: string}})[]) => {
+    const progress = {total: queue.length, completed: 0, remaining: 0, skipped: 0, new: 0, learning: 0, review: 0, relearning: 0};
+    for (const item of queue) {
+        if (item.sessionCard.status === "skipped" || item.card.generationStatus !== "active" || item.card.editLater) {
+            progress.skipped++;
+        } else if (item.sessionCard.status === "reviewed" && !item.repeatDue) {
+            progress.completed++;
+        } else {
+            progress.remaining++;
+            const state = item.reviewState.state;
+            if (state === "new" || state === "learning" || state === "review" || state === "relearning") {
+                progress[state]++;
+            }
+        }
+    }
+    return progress;
+};

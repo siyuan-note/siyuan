@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "ความคืบหน้าการทบทวน",
+	"flashcardSessionCompleted": "เสร็จแล้ว",
+	"flashcardSessionRemaining": "คงเหลือ",
+	"flashcardSessionSkipped": "ข้ามแล้ว",
+	"flashcardHideSessionCount": "ซ่อนตัวนับการทบทวน",
+	"flashcardShowSessionCount": "แสดงตัวนับการทบทวน",
 	"flashcardFlagRed": "แดง",
 	"flashcardFlagOrange": "ส้ม",
 	"flashcardFlagGreen": "เขียว",

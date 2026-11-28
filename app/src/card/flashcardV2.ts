@@ -1,3 +1,5 @@
+import {bindFlashcardV2ReviewOptions, flashcardV2ReviewOptionsHTML} from "./flashcardV2ReviewOptions";
+import {priorityLabel, reviewStateLabel} from "./flashcardV2Study";
 import {createFlashcardV2AnkiImportState} from "./flashcardV2AnkiImport";
 import {loadFlashcardV2GroupNumbers} from "./flashcardV2GroupNumber";
 import {openFlashcardV2Template} from "./flashcardV2Template";
@@ -336,27 +338,6 @@ const mergedTagIDs = (...sets: string[][]) => [...new Set(sets.flat())].sort();
 
 const flashcardFlagStyle = (flag: number) => flashcardV2FlagColors[flag] ?
     ` style="color:${flashcardV2FlagColors[flag]}"` : "";
-
-const priorityLabel = (priority: string) => {
-    const labels: Record<string, string> = {
-        exam: window.siyuan.languages.flashcardPriorityExam,
-        learning: window.siyuan.languages.flashcardPriorityLearning,
-        retaining: window.siyuan.languages.flashcardPriorityRetaining,
-        paused: window.siyuan.languages.flashcardPriorityPaused,
-        unset: window.siyuan.languages.flashcardPriorityUnset,
-    };
-    return labels[priority] || labels.unset;
-};
-
-const reviewStateLabel = (state: string) => {
-    const labels: Record<string, string> = {
-        new: window.siyuan.languages.flashcardNewCard,
-        learning: window.siyuan.languages.flashcardLearningCards,
-        review: window.siyuan.languages.flashcardReviewCard,
-        relearning: window.siyuan.languages.flashcardRelearningCards,
-    };
-    return labels[state] || state;
-};
 
 const refreshEffectiveCardValues = (card: IFlashcardSearchResult) => {
     card.effectivePresetID = card.card.presetOverrideID || card.defaultPresetID;
@@ -921,33 +902,20 @@ const openFlashcardV2ReviewSetSession = (app: App, reviewSetID: string, name: st
         content: `<div class="b3-dialog__content card__v2-form">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardSessionMode}</div>
 <select data-type="reviewMode" class="b3-select fn__block"><option value="normal">${window.siyuan.languages.flashcardReviewNormal}</option><option value="reinforcement">${window.siyuan.languages.flashcardReviewReinforcement}</option></select></label>
-<div data-type="reinforcementOptions" class="fn__none card__v2-form-section">
-<div class="ft__on-surface">${window.siyuan.languages.flashcardReviewReinforcementTip}</div>
-<label class="b3-label fn__flex-center"><input data-type="includeSuspended" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardIncludeSuspended}</label>
-<label class="b3-label fn__flex-center"><input data-type="includeBuried" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardIncludeBuried}</label>
-<label class="b3-label fn__flex-center"><input data-type="includePaused" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardIncludePaused}</label>
-</div></div>
+<div data-type="modeTip" class="ft__on-surface"></div>
+${flashcardV2ReviewOptionsHTML()}</div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
     });
     const mode = dialog.element.querySelector('[data-type="reviewMode"]') as HTMLSelectElement;
-    const reinforcementOptions = dialog.element.querySelector('[data-type="reinforcementOptions"]');
-    const updateMode = () => reinforcementOptions.classList.toggle("fn__none", mode.value !== "reinforcement");
     mode.value = defaultMode || "normal";
-    updateMode();
-    mode.addEventListener("change", updateMode);
+    const getReviewOptions = bindFlashcardV2ReviewOptions(dialog.element, mode);
     const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
     buttons[0].addEventListener("click", () => dialog.destroy());
     buttons[1].addEventListener("click", () => {
-        const reviewMode = mode.value as "normal" | "reinforcement";
-        openFlashcardV2ReviewSession(app, reviewSetID, name, {
-            reviewMode,
-            includeSuspended: (dialog.element.querySelector('[data-type="includeSuspended"]') as HTMLInputElement).checked,
-            includeBuried: (dialog.element.querySelector('[data-type="includeBuried"]') as HTMLInputElement).checked,
-            includePaused: (dialog.element.querySelector('[data-type="includePaused"]') as HTMLInputElement).checked,
-        });
+        openFlashcardV2ReviewSession(app, reviewSetID, name, getReviewOptions());
         dialog.destroy();
     });
 };
@@ -2914,7 +2882,8 @@ ${revisions.map((revision, index) => `<div class="card__v2-picker-row"><input da
 </div>
 <div data-type="selectionOptions" class="card__v2-picker-options fn__none">
 <label class="fn__flex"><span class="fn__flex-1">${window.siyuan.languages.reviewMode}</span><select data-type="reviewMode" class="b3-select"><option value="normal">${window.siyuan.languages.flashcardReviewNormal}</option><option value="reinforcement">${window.siyuan.languages.flashcardReviewReinforcement}</option></select></label>
-<div data-type="modeTip" class="ft__on-surface">${window.siyuan.languages.flashcardReviewNormalTip}</div>
+<div data-type="modeTip" class="ft__on-surface"></div>
+${flashcardV2ReviewOptionsHTML()}
 </div></div>
 <div class="b3-dialog__action card__v2-picker-actions"><button data-type="pendingEdits" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardPendingEdits}</button><button data-type="manage" class="b3-button b3-button--outline">${window.siyuan.languages.manage}</button><button data-type="multiple" class="b3-button b3-button--outline" aria-pressed="false"${revisions.length === 0 ? " disabled" : ""}>${window.siyuan.languages.multiSelect}</button><button data-type="start" class="b3-button b3-button--text fn__none" disabled>${window.siyuan.languages.flashcardStudy}</button></div>`,
             });
@@ -2937,10 +2906,7 @@ ${revisions.map((revision, index) => `<div class="card__v2-picker-row"><input da
                 });
             };
             dialog.element.addEventListener("change", updateSelection);
-            mode.addEventListener("change", () => {
-                dialog.element.querySelector('[data-type="modeTip"]').textContent = mode.value === "normal" ?
-                    window.siyuan.languages.flashcardReviewNormalTip : window.siyuan.languages.flashcardReviewReinforcementTip;
-            });
+            const getReviewOptions = bindFlashcardV2ReviewOptions(dialog.element, mode);
             dialog.element.addEventListener("click", (event) => {
                 const target = (event.target as HTMLElement).closest<HTMLElement>("button[data-type]");
                 if (!target) {
@@ -2983,8 +2949,9 @@ ${revisions.map((revision, index) => `<div class="card__v2-picker-row"><input da
                     if (selected.length === 0) {
                         return;
                     }
+                    const reviewOptions = getReviewOptions();
                     next = () => openFlashcardV2ReviewSession(app, "", selected.map((revision) => revision.payload.name).join(" / "), {
-                        reviewMode: mode.value === "reinforcement" ? "reinforcement" : "normal",
+                        ...reviewOptions,
                         reviewSetIDs: selected.map((revision) => revision.entityID),
                     });
                 }
@@ -3440,14 +3407,26 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     onChange: (hasShapes: boolean) => void, initial?: IFlashcardV2AdvancedEdit["generationConfig"]): IFlashcardV2ImageEditor => {
     const image = element.querySelector("img") as HTMLImageElement;
     const canvas = element.querySelector("canvas") as HTMLCanvasElement;
+    const viewport = element.querySelector<HTMLElement>(".card__v2-image-viewport");
     const context = canvas.getContext("2d");
     const shapeSelect = element.querySelector('[data-type="imageShape"]') as HTMLSelectElement;
     const groupSelect = element.querySelector('[data-type="imageGroup"]') as HTMLSelectElement;
     const frontMode = element.querySelector('[data-type="imageFrontMode"]') as HTMLSelectElement;
     const polygonButton = element.querySelector('[data-type="finishPolygon"]') as HTMLButtonElement;
     const undoButton = element.querySelector('[data-type="undoImageShape"]') as HTMLButtonElement;
+    const deleteButton = element.querySelector<HTMLButtonElement>('[data-type="deleteImageShape"]');
+    const zoomIn = element.querySelector<HTMLButtonElement>('[data-type="zoomImageIn"]');
+    const zoomOut = element.querySelector<HTMLButtonElement>('[data-type="zoomImageOut"]');
+    const zoomReset = element.querySelector<HTMLButtonElement>('[data-type="resetImageZoom"]');
     const shapes: IFlashcardV2ImageShape[] = [];
     const groupOrder: string[] = [];
+    const history: {shapes: IFlashcardV2ImageShape[], groups: string[]}[] = [];
+    let zoom = 1;
+    let pointerID: number | undefined;
+    let selected = -1;
+    let editDrag: {origin: IFlashcardV2ImagePoint, shape: IFlashcardV2ImageShape, resize: boolean,
+        draft?: IFlashcardV2ImageShape} | undefined;
+    let pan: {x: number, y: number, left: number, top: number} | undefined;
     let start: IFlashcardV2ImagePoint | undefined;
     let current: IFlashcardV2ImagePoint | undefined;
     let polygon: IFlashcardV2ImagePoint[] = [];
@@ -3471,6 +3450,39 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             x: Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)),
             y: Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height)),
         };
+    };
+    const bounds = (shape: IFlashcardV2ImageShape) => {
+        if (shape.type !== "polygon") {
+            return {x: shape.x, y: shape.y, width: shape.width, height: shape.height};
+        }
+        const xs = shape.points.map(({x}) => x);
+        const ys = shape.points.map(({y}) => y);
+        const x = Math.min(...xs);
+        const y = Math.min(...ys);
+        return {x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y};
+    };
+    const contains = (shape: IFlashcardV2ImageShape, point: IFlashcardV2ImagePoint) => {
+        const {x, y, width, height} = bounds(shape);
+        if (point.x < x || point.x > x + width || point.y < y || point.y > y + height) {
+            return false;
+        }
+        if (shape.type === "ellipse") {
+            return ((point.x - x) / width - .5) ** 2 + ((point.y - y) / height - .5) ** 2 <= .25;
+        }
+        if (shape.type !== "polygon") {
+            return true;
+        }
+        let inside = false;
+        shape.points.forEach((a, index) => {
+            const b = shape.points[(index + 1) % shape.points.length];
+            if ((a.y > point.y) !== (b.y > point.y) && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) {
+                inside = !inside;
+            }
+        });
+        return inside;
+    };
+    const record = () => {
+        history.push({shapes: [...shapes], groups: [...groupOrder]});
     };
     const groupColor = (groupID: string, alpha: number) => {
         const index = Math.max(0, groupOrder.indexOf(groupID));
@@ -3503,10 +3515,10 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         if (destroyed) {
             return;
         }
-        const ratio = window.devicePixelRatio || 1;
         // 画布与图片共享父级变换，使用布局尺寸避免将弹窗缩放重复应用到画布。
         const width = Math.max(1, image.clientWidth);
         const height = Math.max(1, image.clientHeight);
+        const ratio = Math.min(window.devicePixelRatio || 1, 4096 / width, 4096 / height);
         if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
             canvas.width = Math.round(width * ratio);
             canvas.height = Math.round(height * ratio);
@@ -3515,7 +3527,15 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         canvas.style.height = `${height}px`;
         context.setTransform(ratio, 0, 0, ratio, 0, 0);
         context.clearRect(0, 0, width, height);
-        shapes.forEach((shape) => drawShape(shape, width, height));
+        shapes.forEach((shape, index) => drawShape(index === selected ? editDrag?.draft || shape : shape, width, height));
+        if (selected >= 0) {
+            const shape = editDrag?.draft || shapes[selected];
+            const box = bounds(shape);
+            context.strokeStyle = groupColor(shape.groupID, 1);
+            context.strokeRect(box.x * width, box.y * height, box.width * width, box.height * height);
+            context.fillStyle = context.strokeStyle;
+            context.fillRect((box.x + box.width) * width - 4, (box.y + box.height) * height - 4, 8, 8);
+        }
         if (start && current && shapeSelect.value !== "polygon") {
             const x = Math.min(start.x, current.x);
             const y = Math.min(start.y, current.y);
@@ -3533,6 +3553,38 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             });
         }
     };
+    const select = (index: number) => {
+        selected = index;
+        deleteButton.disabled = selected < 0;
+        redraw();
+    };
+    const layoutImage = () => {
+        if (destroyed) {
+            return;
+        }
+        viewport.toggleAttribute("data-zoomed", zoom !== 1);
+        const width = Math.min(image.naturalWidth, viewport.clientWidth, window.innerHeight * .48 *
+            image.naturalWidth / image.naturalHeight);
+        image.style.width = zoom !== 1 && width > 0 ? `${width * zoom}px` : "";
+        redraw();
+    };
+    const changeZoom = (value: number) => {
+        const next = Math.max(1, Math.min(4, value));
+        if (next === zoom || pointerID !== undefined) {
+            return;
+        }
+        const stage = image.parentElement;
+        const x = (viewport.scrollLeft + viewport.clientWidth / 2 - stage.offsetLeft) / Math.max(1, image.clientWidth);
+        const y = (viewport.scrollTop + viewport.clientHeight / 2 - stage.offsetTop) / Math.max(1, image.clientHeight);
+        zoom = next;
+        layoutImage();
+        viewport.scrollLeft = stage.offsetLeft + x * image.clientWidth - viewport.clientWidth / 2;
+        viewport.scrollTop = stage.offsetTop + y * image.clientHeight - viewport.clientHeight / 2;
+        zoomIn.disabled = zoom === 4;
+        zoomOut.disabled = zoom === 1;
+        zoomReset.disabled = zoom === 1;
+        zoomReset.textContent = `${Math.round(zoom * 100)}%`;
+    };
     const updateGroups = () => {
         const selected = groupSelect.value;
         groupSelect.innerHTML = `<option value="">+</option>${groupOrder.map((groupID, index) =>
@@ -3543,6 +3595,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     };
     updateGroups();
     const addShape = (shape: Omit<IFlashcardV2ImageShape, "id" | "groupID">) => {
+        record();
         let groupID = groupSelect.value;
         if (!groupID) {
             groupID = genUUID();
@@ -3563,18 +3616,37 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         redraw();
     };
     const undo = () => {
+        if (pointerID !== undefined) {
+            return;
+        }
         if (polygon.length > 0) {
             polygon.pop();
             polygonButton.disabled = polygon.length < 3;
         } else {
-            const removed = shapes.pop();
-            if (removed && !shapes.some((shape) => shape.groupID === removed.groupID)) {
-                groupOrder.splice(groupOrder.indexOf(removed.groupID), 1);
-                updateGroups();
+            const previous = history.pop();
+            if (!previous) {
+                return;
             }
+            shapes.splice(0, shapes.length, ...previous.shapes);
+            groupOrder.splice(0, groupOrder.length, ...previous.groups);
+            updateGroups();
+            select(-1);
         }
         onChange(shapes.length > 0);
         redraw();
+    };
+    const deleteShape = () => {
+        if (selected < 0 || pointerID !== undefined) {
+            return;
+        }
+        record();
+        const [removed] = shapes.splice(selected, 1);
+        if (!shapes.some(({groupID}) => groupID === removed.groupID)) {
+            groupOrder.splice(groupOrder.indexOf(removed.groupID), 1);
+            updateGroups();
+        }
+        select(-1);
+        onChange(shapes.length > 0);
     };
     const keydown = (event: KeyboardEvent) => {
         if (element.classList.contains("fn__none") || event.altKey || !(event.ctrlKey || event.metaKey) ||
@@ -3588,54 +3660,140 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         }
     };
     document.addEventListener("keydown", keydown, true);
+    canvas.addEventListener("keydown", event => {
+        if (event.key === "Delete" && selected >= 0) {
+            event.preventDefault();
+            event.stopPropagation();
+            deleteShape();
+        }
+    });
     canvas.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || pointerID !== undefined) {
+            return;
+        }
+        const at = point(event);
         if (shapeSelect.value === "polygon") {
-            polygon.push(point(event));
+            polygon.push(at);
             polygonButton.disabled = polygon.length < 3;
             redraw();
             return;
         }
-        start = point(event);
-        current = start;
+        if (shapeSelect.value === "pan") {
+            pan = {x: event.clientX, y: event.clientY, left: viewport.scrollLeft, top: viewport.scrollTop};
+        } else if (shapeSelect.value === "edit") {
+            const box = selected >= 0 ? bounds(shapes[selected]) : undefined;
+            const rect = canvas.getBoundingClientRect();
+            const resize = !!box && Math.abs(at.x - box.x - box.width) * rect.width <= 12 &&
+                Math.abs(at.y - box.y - box.height) * rect.height <= 12;
+            if (!resize) {
+                let index = shapes.length - 1;
+                while (index >= 0 && !contains(shapes[index], at)) {
+                    index--;
+                }
+                select(index);
+            }
+            if (selected < 0) {
+                return;
+            }
+            editDrag = {origin: at, shape: shapes[selected], resize};
+        } else {
+            start = at;
+            current = at;
+        }
+        pointerID = event.pointerId;
         canvas.setPointerCapture(event.pointerId);
         redraw();
     });
-    canvas.addEventListener("pointermove", (event) => {
-        if (start) {
+    const movePointer = (event: PointerEvent) => {
+        if (pan) {
+            viewport.scrollLeft = pan.left + pan.x - event.clientX;
+            viewport.scrollTop = pan.top + pan.y - event.clientY;
+        } else if (editDrag) {
+            const at = point(event);
+            const {origin, shape, resize} = editDrag;
+            const box = bounds(shape);
+            const dx = at.x - origin.x;
+            const dy = at.y - origin.y;
+            if (!dx && !dy) {
+                editDrag.draft = undefined;
+            } else {
+                const x = resize ? box.x : Math.max(0, Math.min(1 - box.width, box.x + dx));
+                const y = resize ? box.y : Math.max(0, Math.min(1 - box.height, box.y + dy));
+                const width = resize ? Math.min(1 - x, Math.max(.005, box.width + dx)) : box.width;
+                const height = resize ? Math.min(1 - y, Math.max(.005, box.height + dy)) : box.height;
+                editDrag.draft = shape.type === "polygon" ? {...shape, points: shape.points.map(point => ({
+                    x: box.width ? x + (point.x - box.x) * width / box.width : x,
+                    y: box.height ? y + (point.y - box.y) * height / box.height : y,
+                }))} : {...shape, x, y, width, height};
+            }
+        } else if (start) {
             current = point(event);
+        }
+    };
+    const clearPointer = () => {
+        pointerID = undefined;
+        start = undefined;
+        current = undefined;
+        editDrag = undefined;
+        pan = undefined;
+        redraw();
+    };
+    canvas.addEventListener("pointermove", event => {
+        if (event.pointerId === pointerID) {
+            movePointer(event);
             redraw();
         }
     });
     canvas.addEventListener("pointerup", (event) => {
-        if (!start) {
+        if (event.pointerId !== pointerID) {
             return;
         }
-        current = point(event);
-        const x = Math.min(start.x, current.x);
-        const y = Math.min(start.y, current.y);
-        const width = Math.abs(start.x - current.x);
-        const height = Math.abs(start.y - current.y);
-        if (width >= .005 && height >= .005) {
-            addShape({type: shapeSelect.value as TFlashcardV2ImageShapeType, x, y, width, height});
+        movePointer(event);
+        if (editDrag?.draft) {
+            record();
+            shapes[selected] = editDrag.draft;
+            onChange(true);
+        } else if (start) {
+            const x = Math.min(start.x, current.x);
+            const y = Math.min(start.y, current.y);
+            const width = Math.abs(start.x - current.x);
+            const height = Math.abs(start.y - current.y);
+            if (width >= .005 && height >= .005) {
+                addShape({type: shapeSelect.value as TFlashcardV2ImageShapeType, x, y, width, height});
+            }
         }
-        start = undefined;
-        current = undefined;
-        redraw();
+        clearPointer();
     });
+    const cancelPointer = (event: PointerEvent) => {
+        if (event.pointerId === pointerID) {
+            clearPointer();
+        }
+    };
+    canvas.addEventListener("pointercancel", cancelPointer);
+    canvas.addEventListener("lostpointercapture", cancelPointer);
     shapeSelect.addEventListener("change", () => {
+        clearPointer();
         polygon = [];
+        canvas.dataset.mode = shapeSelect.value;
         polygonButton.classList.toggle("fn__none", shapeSelect.value !== "polygon");
         polygonButton.disabled = true;
-        redraw();
+        deleteButton.classList.toggle("fn__none", shapeSelect.value !== "edit");
+        select(-1);
     });
     groupSelect.addEventListener("change", redraw);
     polygonButton.addEventListener("click", finishPolygon);
     undoButton.addEventListener("click", undo);
-    image.addEventListener("load", redraw);
-    window.addEventListener("resize", redraw);
+    deleteButton.addEventListener("click", deleteShape);
+    zoomIn.addEventListener("click", () => changeZoom(zoom + .5));
+    zoomOut.addEventListener("click", () => changeZoom(zoom - .5));
+    zoomReset.addEventListener("click", () => changeZoom(1));
+    image.addEventListener("load", layoutImage);
+    window.addEventListener("resize", layoutImage);
     const observer = new ResizeObserver(redraw);
     observer.observe(image);
-    const frame = requestAnimationFrame(redraw);
+    const viewportObserver = new ResizeObserver(layoutImage);
+    viewportObserver.observe(viewport);
+    const frame = requestAnimationFrame(layoutImage);
     return {
         getConfig: () => ({
             assetID,
@@ -3660,9 +3818,10 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         destroy: () => {
             destroyed = true;
             observer.disconnect();
+            viewportObserver.disconnect();
             cancelAnimationFrame(frame);
-            image.removeEventListener("load", redraw);
-            window.removeEventListener("resize", redraw);
+            image.removeEventListener("load", layoutImage);
+            window.removeEventListener("resize", layoutImage);
             document.removeEventListener("keydown", keydown, true);
         },
     };
@@ -3738,11 +3897,14 @@ ${newInlineTargets.length > 0 ? `<div class="card__v2-advanced-section-action"><
         <option value="rectangle">${window.siyuan.languages.flashcardRectangle}</option>
         <option value="ellipse">${window.siyuan.languages.flashcardEllipse}</option>
         <option value="polygon">${window.siyuan.languages.flashcardPolygon}</option>
+        <option value="edit">${window.siyuan.languages.edit}</option>
+        <option value="pan">${window.siyuan.languages.move}</option>
     </select>
     <span class="fn__space"></span>
     <label class="fn__flex-center">${window.siyuan.languages.group}<span class="fn__space"></span><select data-type="imageGroup" class="b3-select"><option value="">+</option></select></label>
     <span class="fn__space"></span>
     <button data-type="finishPolygon" class="b3-button b3-button--outline fn__none" disabled>${window.siyuan.languages.confirm}</button>
+    <button data-type="deleteImageShape" class="b3-button b3-button--outline fn__none" disabled>${window.siyuan.languages.delete}</button>
     <span class="fn__space"></span>
     <button data-type="undoImageShape" class="b3-button b3-button--outline">${window.siyuan.languages.undo}</button>
 </div>
@@ -3750,7 +3912,12 @@ ${newInlineTargets.length > 0 ? `<div class="card__v2-advanced-section-action"><
     <option value="hideAllAnswerOne">${window.siyuan.languages.flashcardImageHideAll}</option>
     <option value="hideCurrent">${window.siyuan.languages.flashcardImageHideCurrent}</option>
 </select>
-<div class="card__v2-image-editor"><img src="${escapeAttr(imageSource.assetID)}"><canvas></canvas></div>
+<div class="card__v2-advanced-image-toolbar">
+    <button data-type="zoomImageOut" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.zoomOut)}" disabled><svg aria-hidden="true"><use xlink:href="#iconZoomOut"></use></svg></button>
+    <button data-type="resetImageZoom" class="b3-button b3-button--text ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.reset)}" disabled>100%</button>
+    <button data-type="zoomImageIn" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.zoomIn)}"><svg aria-hidden="true"><use xlink:href="#iconZoomIn"></use></svg></button>
+</div>
+<div class="card__v2-image-viewport"><div class="card__v2-image-editor"><img src="${escapeAttr(imageSource.assetID)}" alt=""><canvas tabindex="0"></canvas></div></div>
 </div>` : "";
                 const choiceEditorHTML = blockIDs.length >= 3 ? `<div data-type="choiceEditor" class="fn__none card__v2-advanced-section">
 <div class="b3-label b3-label--inner card__v2-advanced-field"><div class="b3-label__text">${window.siyuan.languages.flashcardChoiceQuestion}</div>${escapeHtml(flashcardV2BlockText(blockIDs[0], doms[blockIDs[0]] || ""))}</div>

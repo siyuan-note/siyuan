@@ -6,6 +6,9 @@ import {ScriptTarget, transpileModule} from "typescript";
 
 class Control {
     value = "";
+    textContent = "";
+    dataset: Record<string, string> = {};
+    toggleAttribute() {}
     innerHTML = "";
     disabled = false;
     classList = {contains: () => false, toggle: () => {}};
@@ -19,19 +22,22 @@ const setup = () => {
     const draws: number[][] = [];
     const context = {beginPath() {}, closePath() {}, moveTo() {}, lineTo() {}, ellipse() {},
         rect: (...values: number[]) => draws.push(values), fill() {}, stroke() {}, arc() {},
-        setTransform() {}, clearRect() {}};
-    const image = Object.assign(new Control(), {clientWidth: 600, clientHeight: 300,
+        setTransform() {}, clearRect() {}, strokeRect() {}, fillRect() {}};
+    const image = Object.assign(new Control(), {clientWidth: 600, clientHeight: 300, naturalWidth: 600, naturalHeight: 300, style: {width: ""},
+        parentElement: {offsetLeft: 0, offsetTop: 0},
         getBoundingClientRect: () => ({width: 480, height: 240})});
     const canvas = Object.assign(new Control(), {width: 0, height: 0, style: {width: "", height: ""},
         getContext: () => context, setPointerCapture() {},
         getBoundingClientRect: () => ({left: 20, top: 30,
             width: parseFloat(canvas.style.width) * .8, height: parseFloat(canvas.style.height) * .8})});
-    const controls = new Map<string, Control>([["img", image], ["canvas", canvas]]);
-    for (const key of ["imageShape", "imageGroup", "imageFrontMode", "finishPolygon", "undoImageShape"]) {
+    const viewport = Object.assign(new Control(), {clientWidth: 600, clientHeight: 300, scrollLeft: 0, scrollTop: 0});
+    const controls = new Map<string, Control>([["img", image], ["canvas", canvas], [".card__v2-image-viewport", viewport]]);
+    for (const key of ["imageShape", "imageGroup", "imageFrontMode", "finishPolygon", "undoImageShape", "deleteImageShape",
+        "zoomImageIn", "zoomImageOut", "resetImageZoom"]) {
         controls.set(`[data-type="${key}"]`, new Control());
     }
     controls.get('[data-type="imageShape"]').value = "rectangle";
-    const window = Object.assign(new Control(), {devicePixelRatio: 2});
+    const window = Object.assign(new Control(), {devicePixelRatio: 2, innerHeight: 900});
     const document = new Control();
     let resize: () => void;
     let disconnected = false;
@@ -52,12 +58,16 @@ const setup = () => {
         requestAnimationFrame: (callback: () => void) => { frame = callback; return 1; },
         cancelAnimationFrame: () => { cancelled = true; },
         ResizeObserver: class {
-            constructor(callback: () => void) { resize = callback; }
-            observe(target: unknown) { assert.equal(target, image); }
+            constructor(private callback: () => void) {}
+            observe(target: unknown) {
+                assert.ok(target === image || target === viewport);
+                if (target === image) { resize = this.callback; }
+            }
             disconnect() { disconnected = true; }
         },
     });
-    return {editor, image, canvas, draws, window, document, frame: () => frame(), resize: () => resize(),
+    return {editor, image, canvas, draws, window, document, viewport,
+        control: (key: string) => controls.get('[data-type="' + key + '"]'), frame: () => frame(), resize: () => resize(),
         disconnected: () => disconnected, cancelled: () => cancelled};
 };
 
@@ -79,7 +89,7 @@ test("layout resize redraws existing normalized shapes and transformed pointers 
     state.resize();
     assert.equal(state.canvas.style.width, "400px");
     assert.deepEqual(state.draws.at(-1), [40, 40, 120, 80]);
-    state.canvas.emit("pointerdown", {clientX: 100, clientY: 70, pointerId: 1});
+    state.canvas.emit("pointerdown", {clientX: 100, clientY: 70, pointerId: 1, button: 0});
     state.canvas.emit("pointerup", {clientX: 260, clientY: 150, pointerId: 1});
     const shape = state.editor.getConfig().shapes[1];
     assert.equal(shape.x, .25);
@@ -110,4 +120,48 @@ test("destroy removes global hooks and prevents pending resize or animation call
     assert.equal(state.window.listeners.size, 0);
     assert.equal(state.document.listeners.size, 0);
     assert.equal(state.image.listeners.size, 0);
+});
+
+test("editing keeps the existing shape and group IDs and deletion is undoable", () => {
+    const state = setup();
+    state.frame();
+    const mode = state.control("imageShape");
+    mode.value = "edit";
+    mode.emit("change");
+    const at = (x: number, y: number) => ({clientX: 20 + x * 480, clientY: 30 + y * 240, pointerId: 1, button: 0});
+    state.canvas.emit("pointerdown", at(.25, .4));
+    state.canvas.emit("pointerup", at(.35, .5));
+    const moved = state.editor.getConfig();
+    assert.equal(moved.shapes[0].id, "existing");
+    assert.equal(moved.groups[0].id, "group");
+    assert.ok(Math.abs(moved.shapes[0].x - .2) < 1e-9);
+    state.canvas.emit("pointerdown", at(.5, .7));
+    state.canvas.emit("pointerup", at(.55, .8));
+    assert.ok(Math.abs(state.editor.getConfig().shapes[0].width - .35) < 1e-9);
+    state.control("deleteImageShape").emit("click");
+    assert.equal(state.editor.getConfig().groups.length, 0);
+    state.control("undoImageShape").emit("click");
+    assert.equal(state.editor.getConfig().shapes[0].id, "existing");
+    state.editor.destroy();
+});
+
+test("zoom and panning leave normalized shape coordinates unchanged", () => {
+    const state = setup();
+    state.frame();
+    const original = state.editor.getConfig();
+    state.control("zoomImageIn").emit("click");
+    assert.equal(state.image.style.width, "900px");
+    assert.equal(state.control("resetImageZoom").textContent, "150%");
+    const mode = state.control("imageShape");
+    mode.value = "pan";
+    mode.emit("change");
+    state.canvas.emit("pointerdown", {clientX: 150, clientY: 150, pointerId: 1, button: 0});
+    state.canvas.emit("pointermove", {clientX: 100, clientY: 110, pointerId: 1});
+    assert.equal(state.viewport.scrollLeft, 50);
+    assert.equal(state.viewport.scrollTop, 40);
+    assert.deepEqual(state.editor.getConfig(), original);
+    state.canvas.emit("pointercancel", {pointerId: 1});
+    state.control("resetImageZoom").emit("click");
+    assert.equal(state.image.style.width, "");
+    state.editor.destroy();
 });

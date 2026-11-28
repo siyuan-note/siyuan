@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "समीक्षा की प्रगति",
+	"flashcardSessionCompleted": "पूर्ण",
+	"flashcardSessionRemaining": "शेष",
+	"flashcardSessionSkipped": "छोड़े गए",
+	"flashcardHideSessionCount": "समीक्षा की गिनती छिपाएँ",
+	"flashcardShowSessionCount": "समीक्षा की गिनती दिखाएँ",
 	"flashcardFlagRed": "लाल",
 	"flashcardFlagOrange": "नारंगी",
 	"flashcardFlagGreen": "हरा",

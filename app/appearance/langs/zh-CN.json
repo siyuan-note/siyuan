@@ -1,4 +1,10 @@
 {
+	"flashcardSessionProgress": "复习进度",
+	"flashcardSessionCompleted": "已完成",
+	"flashcardSessionRemaining": "待复习",
+	"flashcardSessionSkipped": "已跳过",
+	"flashcardHideSessionCount": "隐藏复习计数",
+	"flashcardShowSessionCount": "显示复习计数",
 	"flashcardFlagRed": "红色",
 	"flashcardFlagOrange": "橙色",
 	"flashcardFlagGreen": "绿色",

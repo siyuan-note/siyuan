@@ -1,6 +1,6 @@
 import {getFlashcardV2BlockScope} from "./flashcardV2BlockScope";
 import {loadFlashcardManagementText} from "./flashcardV2ManagementText";
-import type {TFlashcardAuthoringMode} from "./flashcardV2AuthoringTypes";
+import type {IFlashcardV2ClozeDraft, TFlashcardAuthoringMode} from "./flashcardV2AuthoringTypes";
 import {
     extendFlashcardV2ImageRegion,
     flashcardImageOCRRegions,
@@ -4464,7 +4464,8 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
 };
 
 const openFlashcardV2AdvancedSourceEditor = (blockIDs: string[], edit?: IFlashcardV2AdvancedEdit,
-    callback?: () => void, selectedImageAsset?: string, initialMode?: Exclude<TFlashcardAuthoringMode, "qa">) => {
+    callback?: () => void, selectedImageAsset?: string, initialMode?: Exclude<TFlashcardAuthoringMode, "qa">,
+    clozeDraft?: IFlashcardV2ClozeDraft) => {
     if (blockIDs.length === 0) {
         return;
     }
@@ -4476,7 +4477,8 @@ const openFlashcardV2AdvancedSourceEditor = (blockIDs: string[], edit?: IFlashca
             const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardReviewSet));
             const openDialog = (doms: Record<string, string>, imageSource?: { assetID: string, blockID: string }) => {
                 const pluginTypes = listFlashcardV2PluginTypes().filter((item) => item.registration.create);
-                const preparedInline = prepareFlashcardV2InlineOcclusions(blockIDs, doms);
+                const preparedInline = prepareFlashcardV2InlineOcclusions(blockIDs,
+                    clozeDraft ? {...doms, [clozeDraft.blockID]: clozeDraft.dom} : doms);
                 const initialOcclusionIDs = new Set([
                     ...(edit?.generationConfig.occlusions || []).map((occlusion) => occlusion.id),
                     ...(edit?.generationConfig.steps || []).flatMap((step) => step.occlusionIDs),
@@ -4904,10 +4906,15 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                     void submitFlashcardV2Form(dialog.element, async () => {
                         if (usesInlineTargets && (mode === "cloze" || mode === "orderedSingle" ||
                             mode === "orderedCards") && preparedInline.updates.length > 0) {
-                            let updated = false;
-                            await fetchPost("/api/block/batchUpdateBlock", {blocks: preparedInline.updates}, () => {
-                                updated = true;
-                            });
+                            let updated: boolean;
+                            if (clozeDraft) {
+                                updated = await clozeDraft.save(preparedInline.updates[0].data);
+                            } else {
+                                updated = false;
+                                await fetchPost("/api/block/batchUpdateBlock", {blocks: preparedInline.updates}, () => {
+                                    updated = true;
+                                });
+                            }
                             if (!updated) {
                                 return false;
                             }
@@ -4953,7 +4960,7 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
 };
 
 const openFlashcardV2AdvancedSourcePicker = (blockIDs: string[], candidates: IFlashcardV2AdvancedCandidate[],
-    callback?: () => void) => {
+    callback?: () => void, clozeDraft?: IFlashcardV2ClozeDraft) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.configGroupAdvanced,
         width: isMobile() ? "92vw" : "520px",
@@ -4979,9 +4986,11 @@ ${candidates.map((candidate, index) => `<li><button type="button" data-candidate
         const candidateIndex = item.dataset.candidateIndex;
         dialog.destroy();
         if (candidateIndex === undefined) {
-            openFlashcardV2AdvancedSourceEditor(blockIDs, undefined, callback);
+            openFlashcardV2AdvancedSourceEditor(blockIDs, undefined, callback, undefined,
+                clozeDraft ? "cloze" : undefined, clozeDraft);
         } else {
-            openFlashcardV2AdvancedSourceEditor(blockIDs, candidates[Number(candidateIndex)].edit, callback);
+            openFlashcardV2AdvancedSourceEditor(blockIDs, candidates[Number(candidateIndex)].edit, callback,
+                undefined, undefined, clozeDraft);
         }
     });
 };
@@ -5106,7 +5115,7 @@ export const openFlashcardV2BadgeMenu = (anchor: HTMLButtonElement, blockID: str
     });
 };
 
-export const openFlashcardV2SourceMode = (blockIDs: string[], mode: TFlashcardAuthoringMode) => {
+export const openFlashcardV2SourceMode = (blockIDs: string[], mode: TFlashcardAuthoringMode, clozeDraft?: IFlashcardV2ClozeDraft) => {
     if (mode === "qa") {
         openFlashcardV2BasicSource(blockIDs);
     } else if (mode === "cloze") {
@@ -5114,9 +5123,9 @@ export const openFlashcardV2SourceMode = (blockIDs: string[], mode: TFlashcardAu
             void loadFlashcardV2AdvancedCandidates(blockIDs).then(candidates => {
                 const matching = candidates.filter(candidate => candidate.edit.sourceType === "cloze");
                 if (matching.length > 1) {
-                    openFlashcardV2AdvancedSourcePicker(blockIDs, matching);
+                    openFlashcardV2AdvancedSourcePicker(blockIDs, matching, undefined, clozeDraft);
                 } else {
-                    openFlashcardV2AdvancedSourceEditor(blockIDs, matching[0]?.edit, undefined, undefined, mode);
+                    openFlashcardV2AdvancedSourceEditor(blockIDs, matching[0]?.edit, undefined, undefined, mode, clozeDraft);
                 }
             });
         });

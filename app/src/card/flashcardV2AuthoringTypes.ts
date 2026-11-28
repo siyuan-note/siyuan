@@ -8,3 +8,9 @@ export const FLASHCARD_SLASH_TYPES = [
 ] as const;
 
 export type TFlashcardAuthoringMode = Exclude<typeof FLASHCARD_SLASH_TYPES[number]["mode"], "imageOcclusion"> | "cloze";
+
+export interface IFlashcardV2ClozeDraft {
+    blockID: string;
+    dom: string;
+    save: (dom: string) => Promise<boolean>;
+}

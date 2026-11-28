@@ -6,6 +6,7 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import type {IFlashcardV2ClozeDraft} from "./flashcardV2AuthoringTypes";
 
 const browserCase = (source: string) => {
     const editor = document.createElement("div");
@@ -160,6 +161,115 @@ const runInAuthoringBrowser = async (body: string) => {
 const authoringSource = (file: string) => transpileModule(readFileSync("src/card/" + file, "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
+
+const clozeSelectionCase = async (sources: Record<string, string>) => {
+    const load = (name: string, modules: Record<string, unknown> = {}) => {
+        const exports = {};
+        new Function("exports", "require", sources[name])(exports, (path: string) => modules[path] || {});
+        return exports;
+    };
+    const closest = load("hasClosest");
+    const boundary = load("inlineElementBoundary", {"./longTextWrap": load("longTextWrap")});
+    const marker = load("inlineElementMarker", {"./inlineElementBoundary": boundary});
+    let draft: IFlashcardV2ClozeDraft;
+    let mobile = false;
+    let rejectWrite = false;
+    const transactions: {data: string; undo: string}[] = [];
+    const {Toolbar} = load("toolbar", {
+        "../util/hasClosest": closest,
+        "../util/inlineElementBoundary": boundary,
+        "../util/inlineElementMarker": marker,
+        "../wysiwyg/getBlock": load("getBlock", {"../util/hasClosest": closest}),
+        "./inlineRangeBoundary": load("inlineRangeBoundary"),
+        "./fontFamilyCore": load("fontFamilyCore"),
+        "./Font": {setFontStyle: (): void => undefined, hasSameTextStyle: () => true},
+        "./util": load("toolbarUtil", {"../util/inlineElementMarker": marker,
+            "./Font": {hasSameTextStyle: () => true},
+            "../../util/functions": {isArrayEqual: (left: string[], right: string[]) => left.join(" ") === right.join(" ")}}),
+        "../util/selection": {fixTableRange: (): void => undefined},
+        "../../constants": {Constants: {ZWSP: "\u200b"}},
+        "../../util/functions": {isMobile: () => mobile},
+        "../../util/pathName": {isEncryptedBox: () => false},
+        "dayjs": () => ({format: () => "20261128170000"}),
+        "../../card/flashcardV2": {openFlashcardV2SourceMode: (_ids: string[], _mode: string, staged: IFlashcardV2ClozeDraft) => {
+            draft = staged;
+        }},
+        "../wysiwyg/transaction": {
+            transaction: async (_editor: unknown, operations: {data: string}[], undo: {data: string}[],
+                options: {callback: () => void}) => {
+                if (rejectWrite) { throw new Error("transaction failed"); }
+                transactions.push({data: operations[0].data, undo: undo[0].data});
+                options.callback();
+            },
+        },
+    }) as typeof import("../protyle/toolbar");
+    const toolbar = Object.create(Toolbar.prototype) as InstanceType<typeof Toolbar>;
+    const editor = document.createElement("div");
+    editor.className = "protyle-wysiwyg";
+    document.body.append(editor);
+    const protyle = {element: editor, block: {rootID: "root"}, wysiwyg: {element: editor}} as unknown as IProtyle;
+    const outcomes = [];
+    for (mobile of [false, true]) {
+        const block = document.createElement("div");
+        block.dataset.nodeId = "block";
+        block.dataset.type = "NodeParagraph";
+        block.innerHTML = '<div contenteditable="true">before <span data-type="strong">answer</span> after</div>';
+        editor.replaceChildren(block);
+        const original = block.outerHTML;
+        const range = document.createRange();
+        range.selectNodeContents(block.querySelector("span").firstChild);
+        const open = async () => {
+            toolbar.createFlashcardCloze(protyle, range);
+            await new Promise(resolve => setTimeout(resolve, 0));
+        };
+        const startingCount = transactions.length;
+        await open();
+        const staged = document.createElement("template");
+        staged.innerHTML = draft.dom;
+        const mark = staged.content.querySelector<HTMLElement>('span[data-type~="mark"]');
+        const stagedText = mark.textContent;
+        const stagedStrong = mark.dataset.type.includes("strong");
+        draft = undefined;
+        const cancelled = block.outerHTML === original && transactions.length === startingCount;
+        await open();
+        mark.dataset.occlusionId = "occlusion-id";
+        rejectWrite = true;
+        const unchangedAfterFailure = await draft.save(staged.innerHTML).then(() => false,
+            () => block.outerHTML === original && transactions.length === startingCount);
+        rejectWrite = false;
+        const confirmed = await draft.save(staged.innerHTML);
+        const stored = transactions.at(-1);
+        const rendered = block.querySelector<HTMLElement>('[data-occlusion-id="occlusion-id"]');
+        outcomes.push({mobile, stagedText, stagedStrong, cancelled, unchangedAfterFailure, confirmed,
+            undo: stored.undo === original, savedOnce: transactions.length === startingCount + 1,
+            storedMatchesEditor: stored.data === block.outerHTML,
+            rendered: rendered?.textContent, text: block.textContent});
+    }
+    const block = editor.firstElementChild;
+    block.innerHTML = '<div contenteditable="true">one two</div>';
+    const text = block.firstElementChild.firstChild;
+    const staleRange = document.createRange();
+    staleRange.setStart(text, 0);
+    staleRange.setEnd(text, 3);
+    toolbar.createFlashcardCloze(protyle, staleRange);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    text.textContent += " edited";
+    const staleRejected = !await draft.save(draft.dom) && block.textContent === "one two edited";
+    return {outcomes, staleRejected, writes: transactions.length};
+};
+
+test("selected cloze text is staged through cancellation and written only on confirmation", async () => {
+    const sources = Object.fromEntries(Object.entries({toolbar: "toolbar/index", toolbarUtil: "toolbar/util",
+        inlineRangeBoundary: "toolbar/inlineRangeBoundary", fontFamilyCore: "toolbar/fontFamilyCore", hasClosest: "util/hasClosest",
+        inlineElementBoundary: "util/inlineElementBoundary", inlineElementMarker: "util/inlineElementMarker",
+        longTextWrap: "util/longTextWrap", getBlock: "wysiwyg/getBlock",
+    }).map(([key, file]) => [key, authoringSource(`../protyle/${file}.ts`)]));
+    const result = await runInAuthoringBrowser("window.siyuan={config:{}};(" + clozeSelectionCase.toString() + ")(" +
+        JSON.stringify(sources) + ");");
+    assert.deepEqual(result, {outcomes: [false, true].map(mobile => ({mobile, stagedText: "answer", stagedStrong: true,
+        cancelled: true, unchangedAfterFailure: true, confirmed: true, undo: true, savedOnce: true,
+        storedMatchesEditor: true, rendered: "answer", text: "before answer after"})), staleRejected: true, writes: 2});
+});
 
 test("slash card commands ask before splitting and directly handle empty paragraphs or existing list structure", async () => {
     const result = await runInAuthoringBrowser(

@@ -484,23 +484,55 @@ export class Toolbar {
     public createFlashcardCloze(protyle: IProtyle, range = this.range) {
         const block = this.getFlashcardClozeBlock(protyle, range);
         if (!block) { return; }
-        const id = block.getAttribute("data-node-id");
-        const previous = block.outerHTML;
+        const blockID = block.getAttribute("data-node-id");
+        const editable = getContenteditableElement(block);
+        const previousContent = editable.innerHTML;
         const rootID = protyle.block.rootID;
-        this.range = range;
-        this.setInlineMarkInBlock(protyle, "mark", "range", undefined, false);
-        const data = block.outerHTML;
-        if (data === previous) { return; }
-        void Promise.resolve(transaction(protyle, [{action: "update", id, data}], [{action: "update", id, data: previous}], {
-            awaitResponse: true,
-            callback: () => {
-                void import("../../card/flashcardV2").then(({openFlashcardV2SourceMode}) => {
-                    if (protyle.element.isConnected && protyle.block.rootID === rootID) {
-                        openFlashcardV2SourceMode([id], "cloze");
-                    }
+        const draftBlock = block.cloneNode(true) as HTMLElement;
+        const findDraftNode = (node: Node): Node => {
+            if (node === block) { return draftBlock; }
+            const parent = node.parentNode;
+            return findDraftNode(parent).childNodes[Array.from(parent.childNodes).indexOf(node as ChildNode)];
+        };
+        const originalRange = this.range;
+        const draftRange = document.createRange();
+        draftRange.setStart(findDraftNode(range.startContainer), range.startOffset);
+        draftRange.setEnd(findDraftNode(range.endContainer), range.endOffset);
+        this.range = draftRange;
+        try {
+            this.setInlineMarkInBlock(protyle, "mark", "range", undefined, false);
+        } finally {
+            this.range = originalRange;
+        }
+        if (!draftBlock.querySelector('span[data-type~="mark"]')) { return; }
+
+        const isCurrent = () => protyle.block.rootID === rootID && this.getFlashcardClozeBlock(protyle, range) === block &&
+            editable.isConnected && editable.innerHTML === previousContent;
+        const save = async (dom: string) => {
+            if (!isCurrent()) { return false; }
+            const template = document.createElement("template");
+            template.innerHTML = dom;
+            const draftContent = getContenteditableElement(template.content.firstElementChild);
+            const update = block.cloneNode(true) as HTMLElement;
+            getContenteditableElement(update).replaceChildren(...draftContent.childNodes);
+            update.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            let saved = false;
+            await transaction(protyle, [{action: "update", id: blockID, data: update.outerHTML}],
+                [{action: "update", id: blockID, data: block.outerHTML}], {
+                    awaitResponse: true,
+                    callback: () => { saved = true; },
                 });
-            },
-        })).catch(error => console.error("Flashcard selection update failed", error));
+            if (saved && isCurrent()) {
+                editable.replaceChildren(...getContenteditableElement(update).childNodes);
+                block.setAttribute("updated", update.getAttribute("updated"));
+            }
+            return saved;
+        };
+        void import("../../card/flashcardV2").then(({openFlashcardV2SourceMode}) => {
+            if (isCurrent()) {
+                openFlashcardV2SourceMode([blockID], "cloze", {blockID, dom: draftBlock.outerHTML, save});
+            }
+        }).catch(error => console.error("Flashcard selection failed", error));
     }
 
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar",
@@ -1178,7 +1210,7 @@ export class Toolbar {
             });
         } else {
             // 添加
-            if (!toolbarElement.classList.contains("fn__none") && type !== "text" && actionBtn) {
+            if (actionBtn && type !== "text" && !toolbarElement.classList.contains("fn__none")) {
                 actionBtn.classList.add("protyle-toolbar__item--current");
             }
             if (selectText === "" || (type === "text" && textObj?.type === "fontFamily" &&

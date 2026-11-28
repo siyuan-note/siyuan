@@ -78,6 +78,9 @@ export class Outline extends Model {
         this.notebookId = options.notebookId || "";
         this.type = options.type;
         options.tab.panelElement.classList.add("fn__flex-column", "file-tree", "sy__outline", "dockPanel");
+        if (options.type === "pin") {
+            options.tab.panelElement.dataset.workspaceReviewOutline = "";
+        }
         options.tab.panelElement.innerHTML = `<div class="block__icons fn__hidescrollbar">
     <div class="block__logo fn__flex-1">${window.siyuan.languages.outline}</div>
     <input spellcheck="false" class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.searchPlaceholder}" />

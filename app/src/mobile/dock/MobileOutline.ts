@@ -70,6 +70,7 @@ export class MobileOutline extends Model {
         this.isPreview = options.isPreview;
         this.blockId = options.blockId;
         this.element = options.element;
+        this.element.dataset.workspaceReviewOutline = "";
         this.element.innerHTML = `<div class="toolbar toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">

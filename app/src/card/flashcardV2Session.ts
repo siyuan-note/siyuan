@@ -53,7 +53,7 @@ import {
     shouldLoadFlashcardV2HeadingChildren,
 } from "./flashcardV2State";
 import {setFlashcardLocateBlockID} from "./flashcardLocate";
-import {createFlashcardOutline} from "./flashcardOutline";
+import {bindWorkspaceReviewOutline} from "./workspaceReviewOutline";
 import {matchHotKey} from "../protyle/util/hotKey";
 import {flashcardV2FlagColors, flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
@@ -466,7 +466,6 @@ const sessionContent = (mobile = false) => `<div class="b3-dialog__content fn__f
     ${mobile ? "" : '<span data-flashcard-count class="fn__flex-shrink ft__on-surface"></span>'}
     <span data-flashcard-path class="card__v2-session-path ft__on-surface"></span>
     <button data-type="flag" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.flashcardFlag}" aria-haspopup="menu" disabled><svg><use xlink:href="#iconFlag"></use></svg></button>
-    <button data-type="toggle-outline" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.outline}" aria-expanded="false"><svg><use xlink:href="#iconOutline"></use></svg></button>
     <button data-type="read-aloud" class="block__icon block__icon--show ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
     <button data-type="edit-source" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
     <button data-type="skip" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.skip}" disabled><svg><use xlink:href="#iconForward"></use></svg></button>
@@ -474,7 +473,6 @@ const sessionContent = (mobile = false) => `<div class="b3-dialog__content fn__f
     <button data-type="undo-review" class="block__icon block__icon--show ariaLabel fn__none" aria-label="${window.siyuan.languages.undo}"><svg><use xlink:href="#iconUndo"></use></svg></button>
 </div>
 <div class="fn__flex fn__flex-1 card__v2-session-body">
-<nav data-flashcard-outline class="card__v2-session-outline fn__none" aria-label="${window.siyuan.languages.outline}"></nav>
 <div class="card__block fn__flex-1 card__v2-session-content" aria-busy="true">
     <div data-flashcard-context class="card__v2-context ft__on-surface fn__none"></div>
     <div class="protyle-wysiwyg" contenteditable="false" data-flashcard-front></div>
@@ -1014,7 +1012,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             dialog.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
             dialog.element.setAttribute("data-flashcard-v2-review", "");
             let outlineSourceOpen = false;
-            const outline = createFlashcardOutline(app, dialog.element, (blockID) => {
+            const outline = bindWorkspaceReviewOutline(app, dialog.element, mobile, (blockID) => {
                 if (outlineSourceOpen || sessionFinished || requestPending || renderPending ||
                     !dialog.element.isConnected || dialog.element.dataset.dialogClosing === "true") { return; }
                 outlineSourceOpen = true;
@@ -1418,6 +1416,14 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     build: (_menu, session) => {
                         const menu = new Menu();
                         menu.element.classList.add("b3-menu--compact-icons");
+                        if (!mount && outline.available()) {
+                            menu.addItem({
+                                id: "flashcardV2WorkspaceOutline",
+                                icon: "iconOutline",
+                                label: window.siyuan.languages.outline,
+                                click: () => outline.toggle(),
+                            });
+                        }
                         menu.addItem({
                             id: "flashcardV2EditSource",
                             icon: "iconEdit",
@@ -1878,7 +1884,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             });
             dialog.element.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (matchHotKey(window.siyuan.config.keymap.general.outline, event)) {
-                    if (!event.repeat) {
+                    if (!event.repeat && outline.available()) {
                         outline.toggle();
                     }
                     event.preventDefault();

@@ -10,10 +10,8 @@ interface IOutlineHeading {
 }
 
 // 大纲只读取已显示的卡面文字，避免从原文标题中提前暴露答案。
-export const createFlashcardOutline = (app: App, surface: HTMLElement, openSource?: (blockID: string) => void) => {
-    const panel = surface.querySelector<HTMLElement>("[data-flashcard-outline]");
-    const content = surface.querySelector<HTMLElement>(".card__block");
-    const toggle = surface.querySelector<HTMLButtonElement>('[data-type="toggle-outline"]');
+export const createFlashcardOutline = (app: App, content: HTMLElement, openSource?: (blockID: string) => void) => {
+    let panel: HTMLElement;
     let generation = 0;
     let sourceID = "";
     let headings: IOutlineHeading[] = [];
@@ -25,6 +23,9 @@ export const createFlashcardOutline = (app: App, surface: HTMLElement, openSourc
         .map((element) => [element.dataset.nodeId, element]));
     const visibleHeading = (id: string) => visibleHeadings().get(id);
     const highlight = () => {
+        if (!panel) {
+            return;
+        }
         const top = content.getBoundingClientRect().top;
         const visible = visibleHeadings();
         let current = "";
@@ -39,6 +40,9 @@ export const createFlashcardOutline = (app: App, surface: HTMLElement, openSourc
         });
     };
     const render = () => {
+        if (!panel) {
+            return;
+        }
         panel.replaceChildren();
         const visible = visibleHeadings();
         let position = 0;
@@ -76,12 +80,15 @@ export const createFlashcardOutline = (app: App, surface: HTMLElement, openSourc
         });
         append(headings, 0);
         if (!headings.length) {
-            panel.textContent = window.siyuan.languages.emptyContent;
+            const empty = document.createElement("div");
+            empty.className = "b3-list--empty";
+            empty.textContent = window.siyuan.languages.emptyContent;
+            panel.appendChild(empty);
         }
         highlight();
     };
     const load = () => {
-        if (loaded || !sourceID || disposed || panel.classList.contains("fn__none")) {
+        if (loaded || !sourceID || disposed || !panel) {
             return;
         }
         loaded = true;
@@ -105,18 +112,20 @@ export const createFlashcardOutline = (app: App, surface: HTMLElement, openSourc
             }, undefined, failed);
         }, undefined, failed);
     };
-    const togglePanel = () => {
-        const hidden = panel.classList.toggle("fn__none");
-        toggle.setAttribute("aria-expanded", String(!hidden));
-        if (!hidden) {
-            load();
-            render();
-        }
-    };
-    toggle.addEventListener("click", togglePanel);
     content.addEventListener("scroll", highlight, {passive: true});
     return {
-        toggle: togglePanel,
+        mount: (element?: HTMLElement) => {
+            if (panel === element) {
+                return;
+            }
+            panel = element;
+            if (!panel && !headings.length) {
+                generation++;
+                loaded = false;
+            }
+            render();
+            load();
+        },
         update: (id = "") => {
             generation++;
             sourceID = id;
@@ -134,7 +143,7 @@ export const createFlashcardOutline = (app: App, surface: HTMLElement, openSourc
             disposed = true;
             generation++;
             content.removeEventListener("scroll", highlight);
-            toggle.removeEventListener("click", togglePanel);
+            panel = undefined;
         },
     };
 };

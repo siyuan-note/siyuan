@@ -42,7 +42,9 @@ export class Dialog {
         }
         const ownedMenu = document.activeElement?.closest<HTMLElement>(".b3-menu");
         const activeOwnedMenu = ownedMenu && isMenuOverlayTarget(this.element, ownedMenu) ? ownedMenu : undefined;
-        const container = activeOwnedMenu || (menu.contains(document.activeElement) && isAbove(menu, this.element.querySelector(".b3-dialog")) ?
+        const reviewOutline = this.element.hasAttribute("data-flashcard-v2-review") &&
+            document.activeElement?.closest<HTMLElement>("[data-workspace-review-outline-content]");
+        const container = activeOwnedMenu || reviewOutline || (menu.contains(document.activeElement) && isAbove(menu, this.element.querySelector(".b3-dialog")) ?
             menu : activePopover || this.element.querySelector(".b3-dialog__container") as HTMLElement);
         const elements = Array.from(container.querySelectorAll<HTMLElement>(
             "a[href], button, input, select, textarea, [tabindex], [contenteditable]"

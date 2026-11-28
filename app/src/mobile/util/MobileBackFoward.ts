@@ -28,6 +28,7 @@ export const goBack = () => {
     const avPanelElement = document.querySelector<HTMLElement>(".av__panel");
     const avCellElement = document.querySelector<HTMLElement>(".av__mask:not(.av__richtext-mask)");
     const topDialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
+    const reviewOutline = document.querySelector("[data-workspace-review-outline-content]")?.closest<HTMLElement>(".side-panel");
     const selectMenuElement = getMobileSelectMenuElement();
     const inputMask = getAnchoredInputMask();
     const activeMenu = window.siyuan.menus.menu.element;
@@ -63,6 +64,10 @@ export const goBack = () => {
     } else if (avPanelElement && (!topDialog ||
         isAbove(avPanelElement, topDialog.element.querySelector(".b3-dialog")))) {
         avPanelElement.dispatchEvent(new CustomEvent("click", {detail: "back"}));
+        return;
+    } else if (reviewOutline?.style.transform === "translateX(0px)" && topDialog &&
+        isAbove(reviewOutline, topDialog.element.querySelector(".b3-dialog"))) {
+        closePanel();
         return;
     } else if (window.siyuan.dialogs.length !== 0) {
         requestDialogClose(window.siyuan.dialogs[window.siyuan.dialogs.length - 1], "back");

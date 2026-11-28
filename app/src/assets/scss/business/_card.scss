@@ -1,5 +1,42 @@
 @use "../util/function";
 
+.workspace-review-outline--active {
+  > :not([data-workspace-review-outline-content], .block__icons, .toolbar) {
+    display: none;
+  }
+
+  > .block__icons > :not(.block__logo, [data-type="min"]),
+  > .toolbar > :not(.toolbar__text) {
+    display: none;
+  }
+
+  > [data-workspace-review-outline-content] {
+    min-height: 0;
+    overflow: auto;
+    padding: 8px 0;
+
+    > .b3-list--empty {
+      overflow-wrap: anywhere;
+    }
+
+    > button {
+      box-sizing: border-box;
+      width: 100%;
+      margin: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: start;
+
+      &:hover,
+      &.b3-list-item--focus {
+        background: var(--b3-list-hover);
+      }
+    }
+  }
+}
+
 [data-flashcard-v2-review] > .b3-dialog > .b3-dialog__scrim {
   background-color: var(--b3-theme-surface);
 }
@@ -198,31 +235,6 @@
     &-body {
       min-height: 0;
       min-width: 0;
-    }
-
-    &-outline {
-      flex: 0 0 28%;
-      max-width: 240px;
-      min-width: 0;
-      overflow: auto;
-      border-right: 1px solid var(--b3-border-color);
-      padding: 8px 0;
-
-      > button {
-        box-sizing: border-box;
-        width: 100%;
-        margin: 0;
-        border: 0;
-        background: transparent;
-        color: inherit;
-        font: inherit;
-        text-align: left;
-
-        &:hover,
-        &.b3-list-item--focus {
-          background: var(--b3-list-hover);
-        }
-      }
     }
 
     &-toolbar {

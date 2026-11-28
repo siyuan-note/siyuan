@@ -155,6 +155,30 @@ test("mobile back closes a child dialog before an underlying fullscreen menu", (
     assert.deepEqual(calls, ["dialog"]);
 });
 
+test("mobile back closes a raised review outline without ending the review", () => {
+    const source = transpileModule(readFileSync(join(__dirname, "MobileBackFoward.ts"), "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+    }).outputText;
+    const calls: string[] = [];
+    const panel = {style: {transform: "translateX(0px)", zIndex: "3"}};
+    const dialog = {element: {querySelector: () => ({style: {zIndex: "2"}})}};
+    const menu = {classList: {contains: () => false}};
+    const api = {} as typeof import("./MobileBackFoward");
+    runInNewContext(source, {
+        exports: api,
+        document: {getElementById: (): undefined => undefined, querySelector: (selector: string) =>
+            selector === "[data-workspace-review-outline-content]" ? {closest: () => panel} : undefined},
+        window: {siyuan: {menus: {menu: {element: menu}}, dialogs: [dialog]}},
+        require: () => ({getCurrentEditor: (): undefined => undefined, getAnchoredInputMask: (): undefined => undefined,
+            getMobileSelectMenuElement: (): undefined => undefined,
+            isAbove, closePanel: () => { calls.push("outline"); }, requestDialogClose: () => { calls.push("review"); }}),
+    });
+    api.goBack();
+    panel.style.zIndex = "1";
+    api.goBack();
+    assert.deepEqual(calls, ["outline", "review"]);
+});
+
 test("mobile back handles the top database editor before its retained parent and document history", () => {
     const source = transpileModule(readFileSync(join(__dirname, "MobileBackFoward.ts"), "utf8"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},

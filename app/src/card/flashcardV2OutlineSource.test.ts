@@ -17,7 +17,8 @@ test("session outline opens one foreground source editor and refreshes on return
     const context = {
         app: {}, dialog: {element: {isConnected: true, dataset: {dialogClosing: "false"}}},
         sessionFinished: false, requestPending: false, renderPending: false,
-        createFlashcardOutline: (_app: unknown, _surface: unknown, callback: (id: string) => void) => { navigate = callback; },
+        mobile: false,
+        bindWorkspaceReviewOutline: (_app: unknown, _surface: unknown, _mobile: boolean, callback: (id: string) => void) => { navigate = callback; },
         openFlashcardV2SourceEditor: (_app: unknown, id: string, callback: () => void, locate: boolean) => {
             opened.push([id, locate]); close = callback;
         },

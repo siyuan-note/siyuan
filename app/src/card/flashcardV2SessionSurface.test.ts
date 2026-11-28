@@ -125,12 +125,13 @@ test("review shows toolbar controls without hover and keeps rating intervals wit
     const html = runInNewContext(`${markup}\nsessionContent();`, {
         window: {speechSynthesis: {}, siyuan: {languages: {flashcardFlag: "Flag", skip: "Skip"}}},
     }) as string;
-    const toolbar = html.slice(html.indexOf("data-flashcard-toolbar"), html.indexOf("data-flashcard-outline"));
+    const toolbar = html.slice(html.indexOf("data-flashcard-toolbar"), html.indexOf("card__v2-session-body"));
     assert.match(toolbar, /<button data-type="flag"[^>]*block__icon--show[^>]*aria-label="Flag" aria-haspopup="menu"/);
     assert.match(toolbar, /<button data-type="skip"[^>]*block__icon--show[^>]*aria-label="Skip"/);
-    for (const action of ["toggle-outline", "read-aloud", "edit-source", "more", "undo-review"]) {
+    for (const action of ["read-aloud", "edit-source", "more", "undo-review"]) {
         assert.match(toolbar, new RegExp(`<button data-type="${action}" class="block__icon block__icon--show ariaLabel`));
     }
+    assert.doesNotMatch(html, /data-type="toggle-outline"|data-flashcard-outline/);
     assert.match(toolbar, /<button data-type="undo-review"[^>]*class="[^"]*fn__none/);
     const withoutSpeech = runInNewContext(`${markup}\nsessionContent();`, {window: {siyuan: {languages: {}}}});
     assert.match(withoutSpeech, /<button data-type="read-aloud"[^>]*class="[^"]*fn__none/);

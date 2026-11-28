@@ -232,16 +232,18 @@ type FlashcardV2CardSchemaField struct {
 }
 
 type FlashcardV2CardSearchOptions struct {
-	Now              int64 `json:"now" api:"optional,nullable"`
-	IncludeInactive  bool  `json:"includeInactive" api:"optional,nullable"`
-	IncludeSuspended bool  `json:"includeSuspended" api:"optional,nullable"`
-	IncludeBuried    bool  `json:"includeBuried" api:"optional,nullable"`
-	IncludePaused    bool  `json:"includePaused" api:"optional,nullable"`
-	IncludeConflicts bool  `json:"includeConflicts" api:"optional,nullable"`
-	GroupBySource    bool  `json:"groupBySource" api:"optional,nullable"`
-	ReturnCards      bool  `json:"returnCards" api:"optional,nullable"`
-	Limit            int   `json:"limit" api:"optional,nullable"`
-	Offset           int   `json:"offset" api:"optional,nullable"`
+	Now              int64  `json:"now" api:"optional,nullable"`
+	IncludeInactive  bool   `json:"includeInactive" api:"optional,nullable"`
+	IncludeSuspended bool   `json:"includeSuspended" api:"optional,nullable"`
+	IncludeBuried    bool   `json:"includeBuried" api:"optional,nullable"`
+	IncludePaused    bool   `json:"includePaused" api:"optional,nullable"`
+	IncludeConflicts bool   `json:"includeConflicts" api:"optional,nullable"`
+	GroupBySource    bool   `json:"groupBySource" api:"optional,nullable"`
+	ReturnCards      bool   `json:"returnCards" api:"optional,nullable"`
+	SortBy           string `json:"sortBy,omitempty" api:"optional,nullable,enum=due|reps|interval|difficulty|stability"`
+	SortDescending   bool   `json:"sortDescending,omitempty" api:"optional,nullable"`
+	Limit            int    `json:"limit" api:"optional,nullable"`
+	Offset           int    `json:"offset" api:"optional,nullable"`
 }
 
 type FlashcardV2CardSearchResult struct {
@@ -456,6 +458,8 @@ type FlashcardV2ImageOcclusionGroup struct {
 	DisplayOrder int      `json:"displayOrder" api:"optional,nullable"`
 	// VisibleRegion 裁剪复习视图，使用原图归一化坐标并完整覆盖本组的所有遮挡。省略时显示整张图。
 	VisibleRegion *FlashcardV2ImageOcclusionRegion `json:"visibleRegion,omitempty" api:"optional,nullable"`
+	// StepOrder 按顺序揭晓本组全部遮挡，最后统一评分。省略时一次揭晓本组遮挡。
+	StepOrder []string `json:"stepOrder,omitempty" api:"optional,nullable"`
 }
 
 type FlashcardV2ImageOcclusionRegion struct {

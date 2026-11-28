@@ -44,6 +44,10 @@ export const flashcardV2SubsetOptions = (reviewSetID: string, query: IFlashcardQ
 export class FlashcardV2WeakCards {
     private ratings = new Map<string, string>();
 
+    snapshot(): [string, string][] {
+        return [...this.ratings];
+    }
+
     record(cardID: string, rating: string): string | undefined {
         const previous = this.ratings.get(cardID);
         this.ratings.set(cardID, rating);

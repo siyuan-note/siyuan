@@ -21,6 +21,7 @@ import {focusByRange, getSelectionOffset} from "../util/selectionOffsets";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash, hintTag} from "./extend";
 import {searchRef} from "./searchRef";
 import {getSlashEntryKey, TSlashMenuItem} from "./slashMenu";
+import {FLASHCARD_SLASH_TYPES} from "../../card/flashcardV2AuthoringTypes";
 import {getFrequentSlashItems, recordSlashExecution} from "./frequentSlashStorage";
 import {escapeAttr} from "../../util/escape";
 import {createDailyNoteReference} from "./dailyNote";
@@ -1443,6 +1444,18 @@ ${genHintItemHTML(item)}
             blockRender(protyle, protyle.wysiwyg.element);
             return;
         } else if (this.splitChar === "/" || this.splitChar === "、") {
+            const cardMode = value.startsWith("flashcard:") ?
+                FLASHCARD_SLASH_TYPES.find(item => value === "flashcard:" + item.mode)?.mode : undefined;
+            if (cardMode) {
+                const savedRange = range.cloneRange();
+                const currentHTML = nodeElement.outerHTML;
+                void import("../../card/flashcardV2Authoring").then(({runFlashcardSlashCommand}) => {
+                    if (nodeElement.isConnected && nodeElement.outerHTML === currentHTML) {
+                        runFlashcardSlashCommand(protyle, nodeElement, savedRange, cardMode);
+                    }
+                });
+                return;
+            }
             if (slashEntryKey && value !== Constants.ZWSP + 3) {
                 recordSlashExecution(slashEntryKey);
             }

@@ -187,7 +187,7 @@ test("draft renderer consumes its snapshot without model, block, context, or ses
         unavailable: () => { throw new Error("Unexpected unavailable"); },
         setReviewActionsEnabled() {}, setActionsVisible() {},
         createFlashcardV2TemplateStyle: (): undefined => undefined,
-        selectReferences: (references: unknown[]) => references,
+        selectFlashcardV2References: (references: unknown[]) => references,
         renderFlashcardV2AnkiTemplate: (): undefined => undefined,
         renderFlashcardV2Choice: (): undefined => undefined,
         renderFlashcardV2MultiLine: (): undefined => undefined,

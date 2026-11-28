@@ -722,6 +722,8 @@ export type AssetInsertCoverData = { "succFiles": Array<AssetUploadSuccess> | nu
 
 export type AssetOCRData = { "ocrJSON": Array<Record<string, string> | null> | null; "text": string; };
 
+export type AssetOCRRequestInput = { "localOnly"?: boolean | null; "path": string; };
+
 export type AssetOCRTextRequestInput = { "path"?: string | null; };
 
 export type AssetPathData = { "path": string; };
@@ -1410,7 +1412,7 @@ export type FlashcardQueryInput = { "root": FlashcardQueryExpressionFieldsInput;
 
 export type FlashcardReviewState = { "buriedReason"?: string; "buriedUntil"?: number; "cardID": string; "difficulty": number; "due": number; "elapsedDays": number; "lapses": number; "lastReview"?: number; "reps": number; "scheduledDays": number; "stability": number; "state": string; "stateRevisionID": string; "suspended": boolean; };
 
-export type FlashcardSearchOptionsInput = { "groupBySource"?: boolean | null; "includeBuried"?: boolean | null; "includeConflicts"?: boolean | null; "includeInactive"?: boolean | null; "includePaused"?: boolean | null; "includeSuspended"?: boolean | null; "limit"?: number | null; "now"?: number | null; "offset"?: number | null; "returnCards"?: boolean | null; };
+export type FlashcardSearchOptionsInput = { "groupBySource"?: boolean | null; "includeBuried"?: boolean | null; "includeConflicts"?: boolean | null; "includeInactive"?: boolean | null; "includePaused"?: boolean | null; "includeSuspended"?: boolean | null; "limit"?: number | null; "now"?: number | null; "offset"?: number | null; "returnCards"?: boolean | null; "sortBy"?: "due" | "reps" | "interval" | "difficulty" | "stability"; "sortDescending"?: boolean | null; };
 
 export type FlashcardSearchResult = { "card": FlashcardCard; "cardTagIDs": Array<string> | null; "defaultPresetID": string; "effectivePresetID": string; "effectivePriority": string; "effectiveTagIDs": Array<string> | null; "inheritedPriority": string; "reviewState": FlashcardReviewState; "sourceAvailable": boolean; "sourceBlockID"?: string; "sourceNotebookID"?: string; "sourcePath"?: string; "sourcePriority": string; "sourceRootID"?: string; "sourceStatus": string; "sourceTagIDs": Array<string> | null; "sourceTitle"?: string; "sourceType": string; };
 
@@ -1464,7 +1466,7 @@ export type FlashcardV2CardSchema = { "builtinType"?: string; "createdAt": numbe
 
 export type FlashcardV2CardSchemaField = { "id": string; "name": string; "required": boolean; "sort": number; "type": string; };
 
-export type FlashcardV2CardSearchOptionsInput = { "groupBySource"?: boolean | null; "includeBuried"?: boolean | null; "includeConflicts"?: boolean | null; "includeInactive"?: boolean | null; "includePaused"?: boolean | null; "includeSuspended"?: boolean | null; "limit"?: number | null; "now"?: number | null; "offset"?: number | null; "returnCards"?: boolean | null; };
+export type FlashcardV2CardSearchOptionsInput = { "groupBySource"?: boolean | null; "includeBuried"?: boolean | null; "includeConflicts"?: boolean | null; "includeInactive"?: boolean | null; "includePaused"?: boolean | null; "includeSuspended"?: boolean | null; "limit"?: number | null; "now"?: number | null; "offset"?: number | null; "returnCards"?: boolean | null; "sortBy"?: "due" | "reps" | "interval" | "difficulty" | "stability"; "sortDescending"?: boolean | null; };
 
 export type FlashcardV2CardSearchResult = { "card": FlashcardV2Card; "cardTagIDs": Array<string> | null; "defaultPresetID": string; "effectivePresetID": string; "effectivePriority": string; "effectiveTagIDs": Array<string> | null; "inheritedPriority": string; "reviewState": FlashcardV2ReviewState; "sourceAvailable": boolean; "sourceNotebookID"?: string; "sourcePath"?: string; "sourcePriority": string; "sourceRootID"?: string; "sourceStatus": string; "sourceTagIDs": Array<string> | null; "sourceType": string; };
 
@@ -1518,7 +1520,7 @@ export type FlashcardV2HistoryDocument = { "notebookID": string; "rootID": strin
 
 export type FlashcardV2ImageOcclusionConfigInput = { "assetID"?: string | null; "frontMode"?: string | null; "groups"?: Array<FlashcardV2ImageOcclusionGroupInput> | null; "shapes"?: Array<FlashcardV2ImageOcclusionShapeInput> | null; };
 
-export type FlashcardV2ImageOcclusionGroupInput = { "displayOrder"?: number | null; "id"?: string | null; "shapeIDs"?: Array<string> | null; "visibleRegion"?: FlashcardV2ImageOcclusionRegionInput | null; };
+export type FlashcardV2ImageOcclusionGroupInput = { "displayOrder"?: number | null; "id"?: string | null; "shapeIDs"?: Array<string> | null; "stepOrder"?: Array<string> | null; "visibleRegion"?: FlashcardV2ImageOcclusionRegionInput | null; };
 
 export type FlashcardV2ImageOcclusionPointInput = { "x"?: number | null; "y"?: number | null; };
 
@@ -4224,9 +4226,10 @@ export interface APIPOSTRoutes {
      * 始终使用当前设备选择的提供商，内核可在无界面的环境中识别。
      * ai 使用设备保存的 aiModelId，返回原样文本和空 ocrJSON，不虚构坐标；本地提供商保持 TSV 数据。
      * 不自动回退到另一提供商；取消、模型或推理错误不覆盖已有文本，加密笔记本不参与 OCR。
+     * localOnly 为 true 时仅使用当前配置的本地提供商，配置为 AI 时返回错误。
      */
     "/api/asset/ocr": {
-        request: AssetPathRequestInput;
+        request: AssetOCRRequestInput;
         response: { "code": 0; "data": AssetOCRData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
@@ -6667,6 +6670,7 @@ export interface APIPOSTRoutes {
     /**
      * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
      * 图片遮挡组可用 visibleRegion 指定复习区域，归一化矩形须位于原图内并覆盖本组的每个遮挡，省略时显示整张图。
+     * 图片遮挡组可用 stepOrder 按顺序揭晓，须包含本组的所有遮挡且至少有两步；生成同一张卡，最后统一评分。
      */
     "/api/flashcard/createAdvancedSource": {
         request: FlashcardV2AdvancedSourceRequestInput;
@@ -6925,6 +6929,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     * 合并动态成员、纳入和排除后，按 queryCards 的同一规则排序再分页。
      */
     "/api/flashcard/previewReviewSet": {
         request: FlashcardV2PreviewFlashcardReviewSetRequestInput;
@@ -6933,6 +6938,9 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 可按到期、复习次数、间隔、难度或稳定度排序，再做分页。同值按卡片 ID 排序；按卡源分组时不使用按列排序。
+     */
     "/api/flashcard/queryCards": {
         request: QueryFlashcardsRequestInput;
         response: { "code": 0; "data": QueryFlashcardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

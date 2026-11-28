@@ -21,7 +21,9 @@ test("the leading flag is a named native menu button visible on mouse and touch 
     assert.match(html, /block__icon--show block__icon--touch/);
     assert.match(html, /xlink:href="#iconFlag"/);
     assert.match(html, /<\/button>/);
-    const leading = source.slice(source.indexOf('<span class="card__v2-managed-leading">'), source.indexOf('<span class="card__v2-managed-main">'));
+    const row = source.indexOf("const renderManagedCard =");
+    const leading = source.slice(source.indexOf('<span class="card__v2-managed-leading">', row),
+        source.indexOf('<span class="card__v2-managed-main">', row));
     assert.ok(leading.includes(line));
     assert.doesNotMatch(leading, /iconRiffCard/);
     const css = readFileSync("src/assets/scss/business/_card.scss", "utf8");

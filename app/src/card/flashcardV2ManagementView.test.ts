@@ -184,14 +184,16 @@ test("review set pages stay scoped and use one card per source to load missing t
             let rendered: unknown[];
             runInNewContext(script, {
                 reviewSetID: "review-set", managementQuery: undefined, now: 1000, grouped, offset: 0,
-                flashcardV2ManagementPageSize: 50,
+                flashcardV2ManagementPageSize: 50, sort: grouped ? undefined : {sortBy: "due", sortDescending: true},
                 renderCards: (cards: unknown[]) => { rendered = Array.from(cards); },
-                fetchPost: (route: string, payload: {query?: {root: {value: string[]}}},
+                fetchPost: (route: string, payload: {query?: {root: {value: string[]}}, options: {sortBy?: string}},
                     callback: (response: {data: unknown}) => void) => {
                     requests.push(route);
                     if (route === "/api/flashcard/previewReviewSet") {
+                        assert.equal(payload.options.sortBy, grouped ? undefined : "due");
                         callback({data: structuredClone(page)});
                     } else {
+                        assert.equal(payload.options.sortBy, undefined);
                         assert.deepEqual(Array.from(payload.query.root.value), ["second"]);
                         callback({data: {cards: [{...members[1], ...summary}]}});
                     }

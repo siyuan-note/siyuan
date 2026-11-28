@@ -80,6 +80,10 @@ export const DESKTOP_TOOLBAR_ENTRIES: IToolbarEntry[] = [{
     name: "mark",
     lang: "mark",
 }, {
+    key: "flashcardCloze",
+    name: "flashcardCloze",
+    lang: "flashcardClozeCards",
+}, {
     key: "sup",
     name: "sup",
     lang: "sup",

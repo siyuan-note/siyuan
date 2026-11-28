@@ -1,6 +1,9 @@
 import {getFlashcardV2BlockScope} from "./flashcardV2BlockScope";
+import {loadFlashcardManagementText} from "./flashcardV2ManagementText";
+import type {TFlashcardAuthoringMode} from "./flashcardV2AuthoringTypes";
 import {
     extendFlashcardV2ImageRegion,
+    flashcardImageOCRRegions,
     flashcardV2ImageRegionContains,
     isFlashcardV2ImageRegion,
     type IFlashcardV2ImageRegion,
@@ -50,7 +53,7 @@ import {openFlashcardV2EditLater, type IFlashcardV2EditLater} from "./flashcardV
 import {openFlashcardV2SubsetSession} from "./flashcardV2Subset";
 import type {App} from "../index";
 import {listFlashcardV2PluginTypes} from "./flashcardV2Plugin";
-import type {IFlashcardQueryAST, IFlashcardQueryExpression} from "./flashcardV2Query";
+import {flashcardV2DocumentTreeQuery, type IFlashcardQueryAST, type IFlashcardQueryExpression} from "./flashcardV2Query";
 import {flashcardV2FlagColors, flashcardV2FlagLabel, flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {
     appendFlashcardV2ClozeTargets,
@@ -184,6 +187,8 @@ interface IFlashcardSearchResult {
         reps: number;
         lapses: number;
         difficulty?: number;
+        stability?: number;
+        scheduledDays?: number;
         suspended: boolean;
         buriedUntil?: number;
     };
@@ -280,6 +285,7 @@ const isFlashcardStudyPolicy = (value: unknown): value is IFlashcardStudyPolicy 
     (value.defaultPresetID === undefined || typeof value.defaultPresetID === "string");
 
 interface IFlashcardManagementFilters {
+    documentTree?: IFlashcardQueryExpression;
     blockIDs?: string[];
     rootIDs?: string[];
     content?: string;
@@ -312,7 +318,7 @@ interface IFlashcardManagementFilters {
     retrievabilityTo?: string;
 }
 
-type TFlashcardManagementStringFilter = Exclude<keyof IFlashcardManagementFilters, "blockIDs" | "rootIDs">;
+type TFlashcardManagementStringFilter = Exclude<keyof IFlashcardManagementFilters, "blockIDs" | "rootIDs" | "documentTree">;
 
 interface IFlashcardManagementOptions {
     tags: IFlashcardTag[];
@@ -524,6 +530,9 @@ const managementStateShortcuts = (filters: IFlashcardManagementFilters) => {
 
 const flashcardManagementQuery = (filters: IFlashcardManagementFilters): IFlashcardQueryAST | undefined => {
     const predicates: IFlashcardQueryExpression[] = [];
+    if (filters.documentTree) {
+        predicates.push(filters.documentTree);
+    }
     const add = (field: string, comparator: string, value: IFlashcardQueryExpression["value"]) => {
         predicates.push({operator: "predicate", field, comparator, value});
     };
@@ -626,7 +635,7 @@ const flashcardManagementQuery = (filters: IFlashcardManagementFilters): IFlashc
 };
 
 const flashcardManagementFilterCount = (filters: IFlashcardManagementFilters) =>
-    Object.entries(filters).filter(([key, value]) => !["blockIDs", "rootIDs", "tagScope"].includes(key) &&
+    Object.entries(filters).filter(([key, value]) => !["blockIDs", "rootIDs", "documentTree", "tagScope"].includes(key) &&
         value !== undefined && value !== "").length;
 
 const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IReviewSet> | undefined,
@@ -972,6 +981,37 @@ const flashcardV2SourceTypeLabels = () => {
     return sourceTypeLabels;
 };
 
+const flashcardManagementColumns = [
+    {key: "due", label: "flashcardDueCard"},
+    {key: "reps", label: "flashcardReviews"},
+    {key: "interval", label: "flashcardInterval"},
+    {key: "difficulty", label: "flashcardDifficulty"},
+    {key: "stability", label: "flashcardStability"},
+] as const;
+
+type TFlashcardManagementSort = typeof flashcardManagementColumns[number]["key"];
+
+const managedCardMetrics = (state: IFlashcardSearchResult["reviewState"]) => {
+    const date = new Date(state.due);
+    const due = state.due > 0 && Number.isFinite(date.getTime()) ? date : undefined;
+    const metric = (value: number) => Number.isFinite(value) ? value.toLocaleString(undefined, {maximumFractionDigits: 2}) : "—";
+    return `<span class="card__v2-managed-metrics">
+<span>${due ? `<time datetime="${due.toISOString()}" title="${escapeAttr(due.toLocaleString())}">${escapeHtml(due.toLocaleDateString())}</time>` : "—"}</span>
+<span>${metric(state.reps)}</span><span>${metric(state.scheduledDays)}</span><span>${metric(state.difficulty)}</span><span>${metric(state.stability)}</span>
+</span>`;
+};
+
+const managedCardHeader = (sort?: IFlashcardManagementDialog["sort"]) =>
+    `<li class="b3-list-item b3-list-item--narrow card__v2-managed-header">
+<span class="card__v2-managed-leading"></span><span class="card__v2-managed-main"><span class="card__v2-managed-text">
+<span>${window.siyuan.languages.avParentItem}</span><span>${window.siyuan.languages.flashcardChoiceQuestion}</span><span>${window.siyuan.languages.flashcardCorrectAnswer}</span>
+</span></span>
+<span class="card__v2-managed-metrics">${flashcardManagementColumns.map(({key, label}) => {
+        const order = sort?.sortBy === key ? sort.sortDescending ? "desc" : "asc" : "";
+        const title = window.siyuan.languages[label];
+        return `<button type="button" data-type="sortColumn" data-sort-key="${key}" class="b3-button b3-button--text" aria-pressed="${!!order}" aria-label="${escapeAttr(order ? title + " - " + window.siyuan.languages[order] : title)}">${title}${order ? `<svg aria-hidden="true"><use xlink:href="#icon${order === "asc" ? "Up" : "Down"}"></use></svg>` : ""}</button>`;
+    }).join("")}</span><span class="card__v2-managed-header-actions"></span></li>`;
+
 const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
     selectedCardIDs: ReadonlySet<string> = new Set(), flagDefinitions: IFlashcardFlagDefinition[] = [],
     grouped = false, position = 0) => {
@@ -1007,11 +1047,16 @@ const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
 <button type="button" data-type="flag" data-menu="true" aria-haspopup="menu" data-position="north" class="block__icon block__icon--show block__icon--touch ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.flashcardFlag)} - ${escapeAttr(flashcardV2FlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconFlag"></use></svg></button>
 </span>
 <span class="card__v2-managed-main">
-<button data-type="preview" class="card__v2-managed-title" aria-label="${escapeAttr(`${window.siyuan.languages.flashcardPreview} - ${title}`)}">${escapeHtml(title)}</button>
+<span class="card__v2-managed-text">
+${grouped ? "" : '<span data-card-parent class="card__v2-managed-summary">—</span>'}
+<button data-type="preview" data-card-front class="card__v2-managed-title" aria-label="${escapeAttr(`${window.siyuan.languages.flashcardPreview} - ${title}`)}">${escapeHtml(title)}</button>
+${grouped ? "" : '<span data-card-back class="card__v2-managed-summary">—</span>'}
+</span>
 <span class="card__v2-managed-details">${grouped ? "" : `<span>${escapeHtml(`${type} ${variant}`.trim())}</span>`}${statuses.map((status) => `<span class="card__v2-managed-badge">${escapeHtml(status)}</span>`).join("")}<span>${window.siyuan.languages.flashcardReviews} ${result.reviewState.reps}</span>${result.effectivePriority === "unset" ? "" : `<span>${escapeHtml(priorityLabel(result.effectivePriority))}</span>`}</span>
 ${result.card.editLater?.note ? `<span class="card__v2-edit-later-note ft__on-surface">${escapeHtml(result.card.editLater.note)}</span>` : ""}
 ${result.card.editLater ? `<span class="card__v2-edit-later-tools">${result.sourceBlockID ? `<button data-type="editCard" class="b3-button b3-button--outline"><svg><use xlink:href="#iconEdit"></use></svg>${window.siyuan.languages.edit}</button>` : ""}<button data-type="editLater" class="b3-button b3-button--text">${window.siyuan.languages.flashcardEditLaterComplete}</button></span>` : ""}
 </span>
+${grouped ? "" : managedCardMetrics(result.reviewState)}
 ${result.sourceType === "qa" ? `<span data-type="direction" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDirectionSettings}"><svg><use xlink:href="#iconBoth"></use></svg></span>` : ""}
 <span data-type="preset" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardPreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
 <span data-type="priority" class="fn__none"></span>
@@ -1888,7 +1933,7 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
     });
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => dialog.destroy());
     dialog.element.querySelector('[data-type="clear"]').addEventListener("click", () => {
-        callback({blockIDs: filters.blockIDs, rootIDs: filters.rootIDs});
+        callback({blockIDs: filters.blockIDs, rootIDs: filters.rootIDs, documentTree: filters.documentTree});
         dialog.destroy();
     });
     dialog.element.querySelector('[data-type="confirm"]').addEventListener("click", () => {
@@ -1903,7 +1948,8 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
                 return;
             }
         }
-        const next: IFlashcardManagementFilters = {blockIDs: filters.blockIDs, rootIDs: filters.rootIDs, leech: filters.leech};
+        const next: IFlashcardManagementFilters = {blockIDs: filters.blockIDs, rootIDs: filters.rootIDs,
+            documentTree: filters.documentTree, leech: filters.leech};
         elements.forEach((element) => {
             const value = element.value.trim();
             if (value !== "") {
@@ -1992,6 +2038,7 @@ ${summary.map(field => `<div class="fn__flex"><span class="ft__secondary">${esca
 
 interface IFlashcardManagementDialog {
     view: FlashcardV2ManagementView;
+    sort?: {sortBy: TFlashcardManagementSort, sortDescending: boolean};
     dialog?: Dialog;
     membershipSubmission?: ReturnType<typeof createFlashcardV2MembershipSubmission>;
     batchPending?: symbol;
@@ -2041,6 +2088,7 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
     }
     const now = Date.now();
     const managementQuery = flashcardManagementQuery(filters);
+    const sort = grouped ? undefined : owner.sort;
     const filterCount = flashcardManagementFilterCount(filters);
     const policyScope = filters.rootIDs?.length === 1 ?
         {type: "document" as const, id: filters.rootIDs[0]} : filters.notebookID ?
@@ -2100,7 +2148,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
 </div>
 </div>
 <div class="card__v2-management-content">
-<ul class="b3-list b3-list--background fn__flex-1 card__v2-management-list" tabindex="-1">${cards.length === 0 ? `<li class="b3-list-item card__empty">${filters.editLater === "true" ? window.siyuan.languages.flashcardEditLaterEmpty : window.siyuan.languages.emptyContent}</li>` : renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul>
+<ul class="b3-list b3-list--background fn__flex-1 card__v2-management-list" tabindex="-1">${cards.length === 0 ? `<li class="b3-list-item card__empty">${filters.editLater === "true" ? window.siyuan.languages.flashcardEditLaterEmpty : window.siyuan.languages.emptyContent}</li>` : (grouped ? "" : managedCardHeader(sort)) + renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul>
 <aside data-card-source-preview class="card__v2-management-source-preview fn__none" aria-label="${escapeAttr(window.siyuan.languages.flashcardCardSource)}">
 <button type="button" data-type="closeSourcePreview" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.close)}"><svg aria-hidden="true"><use xlink:href="#iconClose"></use></svg></button>
 <div data-card-source-preview-body class="protyle-wysiwyg" data-readonly="true" contenteditable="false"></div></aside></div></div>`;
@@ -2113,6 +2161,21 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
             }
             const dialog = owner.dialog;
             const listenerOptions = owner.view.bind();
+            if (!grouped && window.matchMedia("(min-width: 960px) and (pointer: fine)").matches) {
+                void loadFlashcardManagementText(cards, listenerOptions.signal, (id, text) => {
+                    const row = dialog.element.querySelector<HTMLElement>(`[data-id="${CSS.escape(id)}"]`);
+                    for (const [key, value] of Object.entries(text)) {
+                        const cell = row?.querySelector<HTMLElement>(`[data-card-${key}]`);
+                        if (cell && value) {
+                            cell.textContent = value;
+                            cell.title = value;
+                            if (key === "front") {
+                                cell.setAttribute("aria-label", window.siyuan.languages.flashcardPreview + " - " + value);
+                            }
+                        }
+                    }
+                });
+            }
             const sourcePreview = dialog.element.querySelector<HTMLElement>("[data-card-source-preview]");
             const sourcePreviewBody = sourcePreview.querySelector<HTMLElement>("[data-card-source-preview-body]");
             let sourcePreviewRequest = 0;
@@ -2238,6 +2301,14 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 const type = target.dataset.type;
+                if (type === "sortColumn") {
+                    const sortBy = flashcardManagementColumns.find(column => column.key === target.dataset.sortKey)?.key;
+                    if (sortBy) {
+                        owner.sort = {sortBy, sortDescending: sort?.sortBy === sortBy && !sort.sortDescending};
+                        openFlashcardV2ReviewSetCards(reviewSetID, name, 0, filters, managementOptions, grouped, owner, false);
+                    }
+                    return;
+                }
                 if (type === "stateShortcut") {
                     const nextFilters = {...filters};
                     for (const key of managementStateFilters) {
@@ -2860,6 +2931,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                 includePaused: true,
                 includeConflicts: true,
                 groupBySource: detailCardIDs ? false : grouped,
+                ...(detailCardIDs ? {} : sort),
                 limit: detailCardIDs?.length ?? flashcardV2ManagementPageSize + 1,
                 offset: detailCardIDs ? 0 : offset,
             },
@@ -2900,6 +2972,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
             includePaused: true,
             includeConflicts: true,
             groupBySource: grouped,
+            ...sort,
             returnCards: true,
             limit: flashcardV2ManagementPageSize + 1,
             offset,
@@ -2946,6 +3019,22 @@ export const openFlashcardV2BlockScope = (app: App, id: string, type: string, mo
 export const openFlashcardV2ManagementByRoots = (rootIDs: string[], name: string) => {
     const uniqueRootIDs = [...new Set(rootIDs.filter(Boolean))];
     ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", name, 0, {rootIDs: uniqueRootIDs}));
+};
+
+export const openFlashcardV2DocumentTree = (app: App, id: string, mode: "review" | "manage") => {
+    ensureFlashcardV2(() => {
+        void fetchPost("/api/filetree/getPathByID", {id}, ({data}) => {
+            if (!data?.notebook || !data.path?.endsWith(".sy")) {
+                return;
+            }
+            const query = flashcardV2DocumentTreeQuery(id, data.notebook, data.path);
+            if (mode === "review") {
+                openFlashcardV2ReviewSetSession(app, "", window.siyuan.languages.flashcardReviewDocumentTree, "normal", query);
+            } else {
+                openFlashcardV2ReviewSetCards("", window.siyuan.languages.flashcardManageDocumentTree, 0, {documentTree: query.root});
+            }
+        });
+    });
 };
 
 export const openFlashcardV2ReviewPicker = (app: App) => {
@@ -3252,7 +3341,8 @@ interface IFlashcardV2ImageEditor {
     getConfig: () => {
         assetID: string;
         shapes: Array<Omit<IFlashcardV2ImageShape, "groupID">>;
-        groups: Array<{ id: string, shapeIDs: string[], displayOrder: number, visibleRegion?: IFlashcardV2ImageRegion }>;
+        groups: Array<{ id: string, shapeIDs: string[], displayOrder: number, visibleRegion?: IFlashcardV2ImageRegion,
+            stepOrder?: string[] }>;
         frontMode: string;
     };
     hasShapes: () => boolean;
@@ -3262,7 +3352,8 @@ interface IFlashcardV2ImageEditor {
 
 interface IFlashcardV2AdvancedGenerationConfig {
     occlusions?: Array<{ id: string, groupIDs: string[], displayOrder: number }>;
-    groups?: Array<{ id: string, displayOrder: number, shapeIDs?: string[], visibleRegion?: IFlashcardV2ImageRegion }>;
+    groups?: Array<{ id: string, displayOrder: number, shapeIDs?: string[], visibleRegion?: IFlashcardV2ImageRegion,
+        stepOrder?: string[] }>;
     steps?: Array<{ id: string, displayOrder: number, occlusionIDs: string[] }>;
     shapes?: Array<Omit<IFlashcardV2ImageShape, "groupID">>;
     frontMode?: string;
@@ -3295,6 +3386,7 @@ const isFlashcardV2AdvancedGenerationConfig = (value: unknown): value is IFlashc
     if (!optionalList(value.occlusions, (item) => orderedItem(item) && "groupIDs" in item && isFlashcardV2Strings(item.groupIDs)) ||
         !optionalList(value.groups, (item) => orderedItem(item) &&
             (!("shapeIDs" in item) || isFlashcardV2Strings(item.shapeIDs)) &&
+            (!("stepOrder" in item) || item.stepOrder == null || isFlashcardV2Strings(item.stepOrder)) &&
             (!("visibleRegion" in item) || item.visibleRegion == null || isFlashcardV2ImageRegion(item.visibleRegion))) ||
         !optionalList(value.steps, (item) => orderedItem(item) && "occlusionIDs" in item && isFlashcardV2Strings(item.occlusionIDs)) ||
         !optionalList(value.options, orderedItem)) {
@@ -3517,6 +3609,13 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     const splitButton = element.querySelector<HTMLButtonElement>('[data-type="splitImageShapes"]');
     const drawRegionButton = element.querySelector<HTMLButtonElement>('[data-type="drawImageRegion"]');
     const resetRegionButton = element.querySelector<HTMLButtonElement>('[data-type="resetImageRegion"]');
+    const recognizeButton = element.querySelector<HTMLButtonElement>('[data-type="recognizeImageMasks"]');
+    const recognition = new AbortController();
+    const orderField = element.querySelector<HTMLElement>('[data-type="imageStepOrder"]');
+    const orderToggle = orderField.querySelector<HTMLInputElement>("input");
+    const orderUp = orderField.querySelector<HTMLButtonElement>('[data-type="imageStepUp"]');
+    const orderDown = orderField.querySelector<HTMLButtonElement>('[data-type="imageStepDown"]');
+    const stepNumber = orderField.querySelector<HTMLElement>('[data-type="imageStepNumber"]');
     const zoomIn = element.querySelector<HTMLButtonElement>('[data-type="zoomImageIn"]');
     const zoomOut = element.querySelector<HTMLButtonElement>('[data-type="zoomImageOut"]');
     const zoomReset = element.querySelector<HTMLButtonElement>('[data-type="resetImageZoom"]');
@@ -3525,7 +3624,8 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     const shapes: IFlashcardV2ImageShape[] = [];
     const groupOrder: string[] = [];
     const regions = new Map<string, IFlashcardV2ImageRegion>();
-    const history: {shapes: IFlashcardV2ImageShape[], groups: string[], regions: typeof regions}[] = [];
+    const orders = new Map<string, string[]>();
+    const history: {shapes: IFlashcardV2ImageShape[], groups: string[], regions: typeof regions, orders: typeof orders}[] = [];
     let zoom = 1;
     let spaceHeld = false;
     let pointerID: number | undefined;
@@ -3546,6 +3646,9 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             groupOrder.push(group.id);
             if (group.visibleRegion) {
                 regions.set(group.id, group.visibleRegion);
+            }
+            if (group.stepOrder?.length > 1) {
+                orders.set(group.id, group.stepOrder);
             }
             group.shapeIDs?.forEach((shapeID) => {
                 const shape = initial.shapes.find((item) => item.id === shapeID);
@@ -3657,7 +3760,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         return inside;
     };
     const record = () => {
-        history.push({shapes: [...shapes], groups: [...groupOrder], regions: new Map(regions)});
+        history.push({shapes: [...shapes], groups: [...groupOrder], regions: new Map(regions), orders: new Map(orders)});
     };
     const groupColor = (groupID: string, alpha: number) => {
         const index = Math.max(0, groupOrder.indexOf(groupID));
@@ -3728,6 +3831,24 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
                 context.strokeRect(box.x * width, box.y * height, box.width * width, box.height * height);
             }
         });
+        const activeOrder = orders.get(shapes[selected]?.groupID);
+        if (activeOrder) {
+            context.save();
+            for (const [index, id] of activeOrder.entries()) {
+                const shape = shapes.find(item => item.id === id);
+                if (!shape) { continue; }
+                const box = bounds(shape);
+                const x = box.x * width;
+                const y = box.y * height;
+                context.font = "bold 14px sans-serif";
+                context.lineWidth = 3;
+                context.strokeStyle = "#000";
+                context.fillStyle = "#fff";
+                context.strokeText(String(index + 1), x + 4, y + 15);
+                context.fillText(String(index + 1), x + 4, y + 15);
+            }
+            context.restore();
+        }
         const regionGroup = drawRegionFor || shapes[selected]?.groupID;
         const region = drawRegionFor && start && current ? dragBounds() : regions.get(regionGroup);
         if (region) {
@@ -3760,6 +3881,17 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         resetRegionButton.disabled = !regions.has(groupID);
         canvas.dataset.mode = drawRegionFor ? "region" : shapeSelect.value;
     };
+    const updateOrderControls = () => {
+        const groupID = shapes[selected]?.groupID;
+        const order = orders.get(groupID);
+        const index = order?.indexOf(shapes[selected]?.id) ?? -1;
+        orderField.classList.toggle("fn__none", shapeSelect.value !== "edit" || selectedIDs.size !== 1 ||
+            shapes.filter(shape => shape.groupID === groupID).length < 2);
+        orderToggle.checked = !!order;
+        stepNumber.textContent = index >= 0 ? `${index + 1} / ${order.length}` : "";
+        orderUp.disabled = index <= 0;
+        orderDown.disabled = index < 0 || index === order.length - 1;
+    };
     const select = (index: number, toggle = false) => {
         if (!toggle) {
             selectedIDs.clear();
@@ -3787,6 +3919,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             return false;
         });
         updateRegionControls();
+        updateOrderControls();
         redraw();
     };
     const fitWidth = () => Math.min(image.naturalWidth, viewport.clientWidth,
@@ -3839,6 +3972,14 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
                 regions.delete(groupID);
             }
         }
+        for (const [groupID, order] of orders) {
+            const memberIDs = shapes.filter(shape => shape.groupID === groupID).map(shape => shape.id);
+            if (memberIDs.length < 2) {
+                orders.delete(groupID);
+            } else {
+                orders.set(groupID, order.filter(id => memberIDs.includes(id)).concat(memberIDs.filter(id => !order.includes(id))));
+            }
+        }
         drawRegionFor = undefined;
         updateGroups();
         select(-1);
@@ -3889,6 +4030,9 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         }
         shapes.push({...shape, id: genUUID(), groupID});
         fitRegionToShape(shapes.at(-1));
+        if (orders.has(groupID)) {
+            orders.set(groupID, [...orders.get(groupID), shapes.at(-1).id]);
+        }
         updateGroups();
         groupSelect.value = "";
         onChange(true);
@@ -3918,6 +4062,8 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             groupOrder.splice(0, groupOrder.length, ...previous.groups);
             regions.clear();
             previous.regions.forEach((region, groupID) => regions.set(groupID, region));
+            orders.clear();
+            previous.orders.forEach((order, groupID) => orders.set(groupID, order));
             drawRegionFor = undefined;
             updateGroups();
             select(-1);
@@ -4160,6 +4306,64 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             redraw();
         }
     });
+    recognizeButton?.addEventListener("click", () => {
+        if (destroyed || !image.naturalWidth || !image.naturalHeight || pointerID !== undefined) { return; }
+        recognizeButton.disabled = true;
+        void fetchPost("/api/asset/ocr", {path: assetID, localOnly: true}, ({data}) => {
+            if (destroyed || pointerID !== undefined) { return; }
+            const newRegions = flashcardImageOCRRegions(data.ocrJSON || [], image.naturalWidth, image.naturalHeight)
+                .filter(region => !shapes.some(shape => shape.type === "rectangle" &&
+                    flashcardV2ImageRegionContains(region, bounds(shape)) &&
+                    flashcardV2ImageRegionContains(bounds(shape), region)));
+            if (newRegions.length === 0) {
+                showMessage(window.siyuan.languages.emptyContent);
+                return;
+            }
+            record();
+            for (const region of newRegions) {
+                const groupID = genUUID();
+                groupOrder.push(groupID);
+                shapes.push({...region, type: "rectangle", id: genUUID(), groupID});
+            }
+            updateAfterEdit();
+        }, undefined, undefined, recognition.signal, 120000).catch(error => {
+            if (!destroyed) { console.error("Flashcard OCR failed", error); }
+        }).finally(() => {
+            if (!destroyed) { recognizeButton.disabled = false; }
+        });
+    });
+    orderToggle.addEventListener("change", () => {
+        if (selected < 0 || pointerID !== undefined) {
+            updateOrderControls();
+            return;
+        }
+        const groupID = shapes[selected].groupID;
+        record();
+        if (orderToggle.checked) {
+            orders.set(groupID, shapes.filter(shape => shape.groupID === groupID).map(shape => shape.id));
+        } else {
+            orders.delete(groupID);
+        }
+        updateOrderControls();
+        onChange(true);
+        redraw();
+    });
+    const moveStep = (direction: number) => {
+        const groupID = shapes[selected]?.groupID;
+        const order = orders.get(groupID);
+        const index = order?.indexOf(shapes[selected]?.id) ?? -1;
+        const next = index + direction;
+        if (pointerID !== undefined || index < 0 || next < 0 || next >= order.length) { return; }
+        record();
+        const copy = [...order];
+        [copy[index], copy[next]] = [copy[next], copy[index]];
+        orders.set(groupID, copy);
+        updateOrderControls();
+        onChange(true);
+        redraw();
+    };
+    orderUp.addEventListener("click", () => moveStep(-1));
+    orderDown.addEventListener("click", () => moveStep(1));
     multiButton.addEventListener("click", () => {
         const enabled = multiButton.getAttribute("aria-pressed") === "true";
         multiButton.setAttribute("aria-pressed", String(!enabled));
@@ -4213,6 +4417,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
                 shapeIDs: shapes.filter((shape) => shape.groupID === groupID).map((shape) => shape.id),
                 displayOrder,
                 ...(regions.has(groupID) ? {visibleRegion: regions.get(groupID)} : {}),
+                ...(orders.has(groupID) ? {stepOrder: orders.get(groupID)} : {}),
             })),
             frontMode: frontMode.value,
         }),
@@ -4220,6 +4425,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         redraw,
         destroy: () => {
             destroyed = true;
+            recognition.abort();
             observer.disconnect();
             viewportObserver.disconnect();
             cancelAnimationFrame(frame);
@@ -4232,7 +4438,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
 };
 
 const openFlashcardV2AdvancedSourceEditor = (blockIDs: string[], edit?: IFlashcardV2AdvancedEdit,
-    callback?: () => void, selectedImageAsset?: string) => {
+    callback?: () => void, selectedImageAsset?: string, initialMode?: Exclude<TFlashcardAuthoringMode, "qa">) => {
     if (blockIDs.length === 0) {
         return;
     }
@@ -4316,9 +4522,16 @@ ${newInlineTargets.length > 0 ? `<div class="card__v2-advanced-section-action"><
     <button data-type="undoImageShape" class="b3-button b3-button--outline">${window.siyuan.languages.undo}</button>
 </div>
 <label data-type="imageMaskLabelField" class="b3-label fn__none"><div class="b3-label__text">${window.siyuan.languages.flashcardImageMaskLabel}</div><input type="text" class="b3-text-field fn__block"></label>
+<div data-type="imageStepOrder" class="card__v2-advanced-image-toolbar fn__none">
+    <label class="fn__flex-center"><input class="b3-switch" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardImageSequential}</label>
+    <span data-type="imageStepNumber"></span>
+    <button type="button" data-type="imageStepUp" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.moveToUp)}"><svg aria-hidden="true"><use xlink:href="#iconUp"></use></svg></button>
+    <button type="button" data-type="imageStepDown" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.moveToDown)}"><svg aria-hidden="true"><use xlink:href="#iconDown"></use></svg></button>
+</div>
 <div class="card__v2-advanced-image-toolbar">
     <button type="button" data-type="drawImageRegion" class="b3-button b3-button--outline fn__none" aria-pressed="false" disabled>${window.siyuan.languages.flashcardDrawImageRegion}</button>
     <button type="button" data-type="resetImageRegion" class="b3-button b3-button--outline fn__none" disabled>${window.siyuan.languages.flashcardResetImageRegion}</button>
+    ${/^assets\//.test(imageSource.assetID) ? `<button type="button" data-type="recognizeImageMasks" class="b3-button b3-button--outline"><svg aria-hidden="true"><use xlink:href="#iconOCR"></use></svg>${window.siyuan.languages.performOCR}</button>` : ""}
 </div>
 <select data-type="imageFrontMode" class="b3-select fn__block">
     <option value="hideAllAnswerOne">${window.siyuan.languages.flashcardImageHideAll}</option>
@@ -4524,7 +4737,7 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                     dynamicChoiceCount.disabled = !dynamicChoice.checked;
                     updateConfirm();
                 });
-                modeElement.value = selectedImageAsset ? "imageOcclusion" : flashcardV2AdvancedEditMode(edit);
+                modeElement.value = selectedImageAsset ? "imageOcclusion" : initialMode || flashcardV2AdvancedEditMode(edit);
                 if (edit?.sourceType === "choice") {
                     const correctOptionIDs = new Set(edit.generationConfig.correctOptionIDs || []);
                     choiceInputs.forEach((input) => {
@@ -4735,6 +4948,25 @@ ${candidates.map((candidate, index) => `<li><button type="button" data-candidate
 
 export const openFlashcardV2ImageSource = (blockID: string, asset: string) =>
     openFlashcardV2AdvancedSourceEditor([blockID], undefined, undefined, asset);
+
+export const openFlashcardV2SourceMode = (blockIDs: string[], mode: TFlashcardAuthoringMode) => {
+    if (mode === "qa") {
+        openFlashcardV2BasicSource(blockIDs);
+    } else if (mode === "cloze") {
+        ensureFlashcardV2(() => {
+            void loadFlashcardV2AdvancedCandidates(blockIDs).then(candidates => {
+                const matching = candidates.filter(candidate => candidate.edit.sourceType === "cloze");
+                if (matching.length > 1) {
+                    openFlashcardV2AdvancedSourcePicker(blockIDs, matching);
+                } else {
+                    openFlashcardV2AdvancedSourceEditor(blockIDs, matching[0]?.edit, undefined, undefined, mode);
+                }
+            });
+        });
+    } else {
+        openFlashcardV2AdvancedSourceEditor(blockIDs, undefined, undefined, undefined, mode);
+    }
+};
 
 export const openFlashcardV2AdvancedSource = (blockIDs: string[], edit?: IFlashcardV2AdvancedEdit,
     callback?: () => void) => {

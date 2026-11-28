@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ScriptTarget, transpileModule} from "typescript";
+import {flashcardV2DocumentTreeQuery} from "./flashcardV2Query";
 
 test("block review scopes include folded children and exclude rendered query results", async () => {
     const source = readFileSync("src/card/flashcardV2BlockScope.ts", "utf8");
@@ -34,4 +35,15 @@ test("block review scopes include folded children and exclude rendered query res
     assert.equal(await runInNewContext(script, {
         id: "selected", type: "NodeHeading", fetchSyncPost: async () => ({code: -1}),
     }), undefined);
+});
+
+test("a document scope covers its exact root and child paths in the same notebook", () => {
+    const query = flashcardV2DocumentTreeQuery("doc", "book", "/parent/doc.sy");
+    assert.deepEqual(query.root.children, [
+        {operator: "predicate", field: "notebookID", comparator: "equal", value: "book"},
+        {operator: "or", children: [
+            {operator: "predicate", field: "rootID", comparator: "equal", value: "doc"},
+            {operator: "predicate", field: "path", comparator: "startsWith", value: "/parent/doc/"},
+        ]},
+    ]);
 });

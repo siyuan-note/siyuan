@@ -16,6 +16,11 @@ type AssetPathRequest struct {
 	Path string `json:"path"`
 }
 
+type AssetOCRRequest struct {
+	Path      string `json:"path"`
+	LocalOnly bool   `json:"localOnly,omitempty" api:"optional,nullable"`
+}
+
 type AssetCleanupIgnoreData struct {
 	Content  string `json:"content"`
 	Revision string `json:"revision"`

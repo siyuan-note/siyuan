@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Masken nacheinander aufdecken",
+	"flashcardReviewDocumentTree": "Karten dieses Dokuments und seiner Unterdokumente wiederholen",
+	"flashcardManageDocumentTree": "Karten dieses Dokuments und seiner Unterdokumente verwalten",
+	"flashcardSplitParagraphTip": "Den Absatz am Cursor in Frage und Antwort aufteilen",
+	"flashcardAlternativeAnswer": "Alternative Antwort",
 	"flashcardDrawImageRegion": "Wiederholungsbereich festlegen",
 	"flashcardResetImageRegion": "Ganzes Bild anzeigen",
 	"flashcardImageRegionMustContainMasks": "Der Bereich muss alle Masken dieser Gruppe enthalten",

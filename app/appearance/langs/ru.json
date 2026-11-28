@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Открывать маски по очереди",
+	"flashcardReviewDocumentTree": "Повторить карточки документа и его вложенных документов",
+	"flashcardManageDocumentTree": "Управлять карточками документа и его вложенных документов",
+	"flashcardSplitParagraphTip": "Разделить абзац в позиции курсора, чтобы подготовить вопрос и ответ",
+	"flashcardAlternativeAnswer": "Альтернативный ответ",
 	"flashcardDrawImageRegion": "Задать область повторения",
 	"flashcardResetImageRegion": "Показать изображение целиком",
 	"flashcardImageRegionMustContainMasks": "Область должна включать все маски этой группы",

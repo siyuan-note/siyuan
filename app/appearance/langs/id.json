@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Buka penutup satu per satu",
+	"flashcardReviewDocumentTree": "Ulas kartu dalam dokumen ini dan subdokumennya",
+	"flashcardManageDocumentTree": "Kelola kartu dalam dokumen ini dan subdokumennya",
+	"flashcardSplitParagraphTip": "Pisahkan paragraf di posisi kursor untuk menyiapkan pertanyaan dan jawaban",
+	"flashcardAlternativeAnswer": "Jawaban alternatif",
 	"flashcardDrawImageRegion": "Atur area ulasan",
 	"flashcardResetImageRegion": "Tampilkan gambar utuh",
 	"flashcardImageRegionMustContainMasks": "Area harus mencakup semua penutup dalam grup ini",

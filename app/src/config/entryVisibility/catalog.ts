@@ -20,6 +20,7 @@ import {
     isPluginTopBarEntryKey,
 } from "../../plugin/topBarKey";
 import {MOBILE_TOOLBAR_CONTEXT_KEYS} from "./mobileToolbarContext";
+import {FLASHCARD_SLASH_TYPES} from "../../card/flashcardV2AuthoringTypes";
 import type {IBreadcrumbButtonCatalogEntry} from "../../plugin/breadcrumbButtonRegistry";
 
 export {getPluginDockEntryKey} from "../../plugin/dockKey";
@@ -167,6 +168,10 @@ const docTreeCommon = (multi = false) => [
     node("riffCard", lang("riffCard"), false, [
         node("spaceRepetition", lang("spaceRepetition")),
         node("manage", lang("manage")),
+        ...(!multi ? [
+            node("flashcardReviewDocumentTree", lang("flashcardReviewDocumentTree"), false),
+            node("flashcardManageDocumentTree", lang("flashcardManageDocumentTree"), false),
+        ] : []),
         node("quickMakeCard", lang("quickMakeCard")),
         node("removeCard", lang("removeCard")),
         flashcardSourceEntry(),
@@ -579,6 +584,7 @@ const slashMenuBuiltinChildren = [
     node("database", lang("database")),
     node("newFileRef", lang("newFileRef")),
     node("newSubDocRef", lang("newSubDocRef")),
+    ...FLASHCARD_SLASH_TYPES.map(({id, label}) => node(id, lang(label), false)),
     separator("separator_1"),
     node("heading1", lang("heading1")),
     node("heading2", lang("heading2")),
@@ -892,6 +898,8 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("riffCard", lang("riffCard"), false, [
                 node("spaceRepetition", lang("spaceRepetition"), false),
                 node("manage", lang("manage"), false),
+                node("flashcardReviewDocumentTree", lang("flashcardReviewDocumentTree"), false),
+                node("flashcardManageDocumentTree", lang("flashcardManageDocumentTree"), false),
                 node("quickMakeCard", lang("quickMakeCard"), false),
                 node("removeCard", lang("removeCard"), false),
                 flashcardSourceEntry(false),

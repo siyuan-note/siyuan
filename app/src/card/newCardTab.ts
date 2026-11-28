@@ -8,6 +8,8 @@ import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
 import {normalizeFlashcardTabData, type IFlashcardTabData} from "./flashcardTab";
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
+import {takeFlashcardSurfaceTransfer} from "./flashcardV2SurfaceTransfer";
+import {receiveFlashcardReviewInWindow} from "./flashcardV2WindowTransfer";
 
 export const newCardModel = (options: {
     app: App,
@@ -28,6 +30,27 @@ export const newCardModel = (options: {
         },
         init() {
             this.element.classList.add("fn__flex-column");
+            const mount = {
+                element: this.element as HTMLElement,
+                signal: controller.signal,
+                close: () => this.tab.parent.removeTab(this.tab.id),
+            };
+            if (options.data.transferID) {
+                if (!takeFlashcardSurfaceTransfer(options.data.transferID)?.(mount)) {
+                    queueMicrotask(mount.close);
+                }
+                return;
+            }
+            if (options.data.windowTransferID) {
+                const title = this.data.title || window.siyuan.languages.riffCard;
+                receiveFlashcardReviewInWindow(options.data.windowTransferID, controller.signal,
+                    state => openFlashcardV2ReviewSession(options.app, this.data.reviewSetID || "", title,
+                        this.data.review, mount, undefined, state), () => {
+                        showMessage(window.siyuan.languages.flashcardLoadFailed);
+                        mount.close();
+                    });
+                return;
+            }
             ensureFlashcardV2(() => {
                 const open = (reviewSetID?: string) => {
                     if (controller.signal.aborted) {
@@ -35,11 +58,7 @@ export const newCardModel = (options: {
                     }
                     this.data = normalizeFlashcardTabData(this.data, reviewSetID);
                     openFlashcardV2ReviewSession(options.app, this.data.reviewSetID || "", this.data.title || window.siyuan.languages.riffCard,
-                        this.data.review, {
-                            element: this.element as HTMLElement,
-                            signal: controller.signal,
-                            close: () => this.tab.parent.removeTab(this.tab.id),
-                        });
+                        this.data.review, mount);
                 };
                 if (!this.data.review && this.data.cardType === "all" && this.data.id) {
                     const loadDeck = (offset: number) => {

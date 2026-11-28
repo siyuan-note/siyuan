@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Maskeleri sırayla aç",
+	"flashcardReviewDocumentTree": "Bu belgedeki ve alt belgelerindeki kartları tekrar et",
+	"flashcardManageDocumentTree": "Bu belgedeki ve alt belgelerindeki kartları yönet",
+	"flashcardSplitParagraphTip": "Soru ve yanıtı hazırlamak için paragrafı imleç konumundan böl",
+	"flashcardAlternativeAnswer": "Alternatif yanıt",
 	"flashcardDrawImageRegion": "Tekrar alanını ayarla",
 	"flashcardResetImageRegion": "Görselin tamamını göster",
 	"flashcardImageRegionMustContainMasks": "Alan bu gruptaki tüm maskeleri içermelidir",

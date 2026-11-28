@@ -90,6 +90,7 @@ var CreateQuickFlashcardSources = define[CreateQuickFlashcardSourcesRequest, Qui
 var SetFlashcardEditLater = define[SetFlashcardEditLaterRequest, FlashcardEditLaterData](
 	"setFlashcardEditLater", "/api/flashcard/setCardEditLater", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
+// QueryFlashcards 可按到期、复习次数、间隔、难度或稳定度排序，再做分页。同值按卡片 ID 排序；按卡源分组时不使用按列排序。
 var QueryFlashcards = define[QueryFlashcardsRequest, QueryFlashcardsData](
 	"queryFlashcards", "/api/flashcard/queryCards", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
@@ -1434,7 +1435,8 @@ var SetImageOCRText = define[SetAssetOCRTextRequest, Null]("setImageOCRText", "/
 // AssetOCR 始终使用当前设备选择的提供商，内核可在无界面的环境中识别。
 // ai 使用设备保存的 aiModelId，返回原样文本和空 ocrJSON，不虚构坐标；本地提供商保持 TSV 数据。
 // 不自动回退到另一提供商；取消、模型或推理错误不覆盖已有文本，加密笔记本不参与 OCR。
-var AssetOCR = define[AssetPathRequest, AssetOCRData]("ocr", "/api/asset/ocr", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
+// localOnly 为 true 时仅使用当前配置的本地提供商，配置为 AI 时返回错误。
+var AssetOCR = define[AssetOCRRequest, AssetOCRData]("ocr", "/api/asset/ocr", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")
 
 // AIOCR 手动调用设备选择的 OCR AI 模型识别本地 assets/ 图片，不使用会话、工具。
 // 未保存独立模型且本地提供商仍被选中时兼容智能体模型；显式模型失效时返回错误，不回退。
@@ -2122,6 +2124,7 @@ var ActivateFlashcardMigration = define[FlashcardV2ActivateFlashcardMigrationReq
 
 // CreateAdvancedFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
 // 图片遮挡组可用 visibleRegion 指定复习区域，归一化矩形须位于原图内并覆盖本组的每个遮挡，省略时显示整张图。
+// 图片遮挡组可用 stepOrder 按顺序揭晓，须包含本组的所有遮挡且至少有两步；生成同一张卡，最后统一评分。
 var CreateAdvancedFlashcardSource = define[FlashcardV2AdvancedSourceRequest, FlashcardV2AdvancedSourceResult]("createAdvancedFlashcardSource", "/api/flashcard/createAdvancedSource", AuthenticatedAccess|AdminAccess|WritableAccess, StructJSONBody, ResponseOptions{}, "POST")
 
 // CreateBasicFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
@@ -2190,6 +2193,7 @@ var PreviewAnkiFlashcardPackage = define[FlashcardV2AnkiUploadRequest, Flashcard
 var PreviewFlashcardMigration = define[EmptyRequest, FlashcardV2LegacyFlashcardMigrationPreview]("previewFlashcardMigration", "/api/flashcard/previewMigration", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 
 // PreviewFlashcardReviewSet 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+// 合并动态成员、纳入和排除后，按 queryCards 的同一规则排序再分页。
 var PreviewFlashcardReviewSet = define[FlashcardV2PreviewFlashcardReviewSetRequest, FlashcardV2ReviewSetCardPage]("previewFlashcardReviewSet", "/api/flashcard/previewReviewSet", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
 // ReconcileFlashcardSource 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。

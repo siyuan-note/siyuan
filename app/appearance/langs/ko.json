@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "가림 영역을 하나씩 공개",
+	"flashcardReviewDocumentTree": "이 문서와 하위 문서의 카드 복습",
+	"flashcardManageDocumentTree": "이 문서와 하위 문서의 카드 관리",
+	"flashcardSplitParagraphTip": "커서 위치에서 문단을 나누어 카드의 질문과 답변을 준비합니다",
+	"flashcardAlternativeAnswer": "대체 답변",
 	"flashcardDrawImageRegion": "복습 영역 설정",
 	"flashcardResetImageRegion": "전체 이미지 보기",
 	"flashcardImageRegionMustContainMasks": "영역에 이 그룹의 모든 가림 영역을 포함해야 합니다",

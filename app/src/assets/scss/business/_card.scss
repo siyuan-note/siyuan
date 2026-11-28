@@ -1281,6 +1281,74 @@
     }
   }
 
+  &__v2-managed-header,
+  &__v2-managed-metrics,
+  &__v2-managed-summary {
+    display: none;
+  }
+
+  &__v2-managed-text {
+    display: contents;
+  }
+
+  @media (min-width: 960px) and (pointer: fine) {
+    &__v2-managed-header {
+      display: flex;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: var(--b3-theme-surface);
+
+      > .card__v2-managed-leading {
+        inline-size: 43px;
+      }
+    }
+
+    &__v2-managed-header-actions {
+      flex: 0 0 78px;
+    }
+
+    &__v2-managed-metrics {
+      display: grid;
+      flex: 0 0 328px;
+      grid-template-columns: 86px 54px 58px 64px 66px;
+      align-items: center;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+
+      > span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      > button {
+        justify-content: center;
+        min-width: 0;
+      }
+    }
+
+    &__v2-managed-text {
+      display: grid;
+      grid-template-columns: minmax(30px, .75fr) minmax(44px, 1fr) minmax(44px, 1fr);
+      flex: 1 0 100%;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    &__v2-managed-summary {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__v2-managed-source ~ .card__v2-managed-card .card__v2-managed-text {
+      display: contents;
+    }
+  }
+
   @media (hover: hover) and (pointer: fine) {
     &__v2-managed-leading > input:not(:checked) {
       opacity: 0;
@@ -1614,6 +1682,10 @@
   > .card__v2-management-list {
     min-width: 0;
   }
+}
+
+.card__v2-session-host {
+  min-height: 0;
 }
 
 .card__v2-management-source-preview {

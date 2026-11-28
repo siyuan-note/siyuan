@@ -15,7 +15,7 @@ import {Constants} from "../../constants";
 import {openCardByScope} from "../../card/openCard";
 import {openFlashcardV2ManagementByRoots} from "../../card/flashcardV2";
 import {getDocDisplayName, getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../../util/pathName";
-import {createQuickSources, flashcardSourceMenuItems} from "../../card/makeCard";
+import {createQuickSources, flashcardDocumentTreeMenuItems, flashcardSourceMenuItems} from "../../card/makeCard";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import dayjs from "dayjs";
 import {popSearch} from "../../mobile/menu/search";
@@ -238,7 +238,7 @@ export const openDocumentMenu = (options: {
                 click: () => {
                     openFlashcardV2ManagementByRoots([id], docInfo.name);
                 }
-            }, {
+            }, ...flashcardDocumentTreeMenuItems(app, id), {
                 id: "quickMakeCard",
                 iconHTML: "",
                 label: window.siyuan.languages.quickMakeCard,

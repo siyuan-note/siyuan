@@ -104,6 +104,7 @@ type ImageOcclusionGroup struct {
 	ShapeIDs      []string              `json:"shapeIDs"`
 	DisplayOrder  int                   `json:"displayOrder"`
 	VisibleRegion *ImageOcclusionRegion `json:"visibleRegion,omitempty"`
+	StepOrder     []string              `json:"stepOrder,omitempty"`
 }
 
 type ImageOcclusionRegion struct {
@@ -793,6 +794,23 @@ func (config *ImageOcclusionConfig) validate() error {
 		}
 		if err := validateUniqueStrings("image occlusion group shape IDs", group.ShapeIDs, false); err != nil {
 			return err
+		}
+		if len(group.StepOrder) > 0 {
+			if len(group.StepOrder) != len(group.ShapeIDs) || len(group.StepOrder) < 2 {
+				return fmt.Errorf("image occlusion group [%s] requires an order of all its shapes", group.ID)
+			}
+			if err := validateUniqueStrings("image occlusion step order", group.StepOrder, false); err != nil {
+				return err
+			}
+			groupShapeIDs := make(map[string]bool, len(group.ShapeIDs))
+			for _, shapeID := range group.ShapeIDs {
+				groupShapeIDs[shapeID] = true
+			}
+			for _, step := range group.StepOrder {
+				if !groupShapeIDs[step] {
+					return fmt.Errorf("image occlusion group [%s] has a step for another group", group.ID)
+				}
+			}
 		}
 		region := group.VisibleRegion
 		if region != nil && (!normalizedCoordinate(region.X) || !normalizedCoordinate(region.Y) ||

@@ -28,7 +28,8 @@ const setup = () => {
     const messages: string[] = [];
     const context = {beginPath() {}, closePath() {}, moveTo() {}, lineTo() {}, ellipse() {},
         rect: (...values: number[]) => draws.push(values), fill() {}, stroke() {}, arc() {},
-        setTransform() {}, clearRect() {}, strokeRect() {}, fillRect() {}, save() {}, restore() {}, setLineDash() {}};
+        setTransform() {}, clearRect() {}, strokeRect() {}, fillRect() {}, save() {}, restore() {}, setLineDash() {},
+        strokeText() {}, fillText() {}};
     const image = Object.assign(new Control(), {clientWidth: 600, clientHeight: 300, naturalWidth: 600, naturalHeight: 300, style: {width: ""},
         parentElement: {offsetLeft: 0, offsetTop: 0},
         getBoundingClientRect: () => ({width: 480, height: 240})});
@@ -46,6 +47,11 @@ const setup = () => {
     }
     controls.get('[data-type="imageShape"]').value = "rectangle";
     controls.set('[data-type="imageMaskLabelField"]', Object.assign(new Control(), {querySelector: () => labelInput}));
+    const orderControls = new Map(["input", '[data-type="imageStepUp"]', '[data-type="imageStepDown"]',
+        '[data-type="imageStepNumber"]'].map(key => [key, new Control()]));
+    controls.set('[data-type="imageStepOrder"]', Object.assign(new Control(), {
+        querySelector: (selector: string) => orderControls.get(selector),
+    }));
     const window = Object.assign(new Control(), {devicePixelRatio: 2, innerHeight: 900,
         siyuan: {languages: {flashcardImageRegionMustContainMasks: "Include every mask"}}});
     const document = new Control();
@@ -63,7 +69,7 @@ const setup = () => {
         '\nbindFlashcardV2ImageEditor(element, "image.png", () => {}, initial);', {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText, {
-        window, document, initial, element: {querySelector: (selector: string) => controls.get(selector)},
+        window, document, initial, AbortController, element: {querySelector: (selector: string) => controls.get(selector)},
         bindFlashcardV2Pinch: () => {}, escapeAttr: (value: string) => value, genUUID: () => `generated-${++id}`,
         extendFlashcardV2ImageRegion, flashcardV2ImageRegionContains,
         showMessage: (value: string) => messages.push(value),
@@ -78,7 +84,7 @@ const setup = () => {
             disconnect() { disconnected = true; }
         },
     });
-    return {editor, image, canvas, draws, window, document, viewport, labelInput, messages,
+    return {editor, image, canvas, draws, window, document, viewport, labelInput, messages, orderControls,
         control: (key: string) => controls.get('[data-type="' + key + '"]'), frame: () => frame(), resize: () => resize(),
         disconnected: () => disconnected, cancelled: () => cancelled};
 };

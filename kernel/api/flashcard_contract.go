@@ -65,7 +65,8 @@ var queryFlashcards = contractHandler(apicontract.QueryFlashcards, func(c *gin.C
 		Now: options.Now, IncludeInactive: options.IncludeInactive, IncludeSuspended: options.IncludeSuspended,
 		IncludeBuried: options.IncludeBuried, IncludePaused: options.IncludePaused,
 		IncludeConflicts: options.IncludeConflicts, GroupBySource: options.GroupBySource,
-		ReturnCards: options.ReturnCards, Limit: options.Limit, Offset: options.Offset,
+		ReturnCards: options.ReturnCards, SortBy: options.SortBy, SortDescending: options.SortDescending,
+		Limit: options.Limit, Offset: options.Offset,
 	})
 	if err != nil {
 		return apicontract.Failure[apicontract.QueryFlashcardsData](-1, err.Error())

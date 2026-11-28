@@ -306,6 +306,10 @@ export class Toolbar {
         const quote = this.element.querySelector<HTMLElement>('[data-type="agentQuote"]');
         if (quote) quote.dataset.entryUnavailable = String(!protyle.block.rootID || isEncryptedBox(protyle.notebookId) ||
             window.siyuan.config.readonly || window.siyuan.isPublish);
+        const cloze = this.element.querySelector<HTMLElement>('[data-type="flashcardCloze"]');
+        if (cloze) {
+            cloze.dataset.entryUnavailable = String(!this.getFlashcardClozeBlock(protyle, range));
+        }
         updateBlockTypeButton(protyle, this.element.querySelector('[data-type="block-type"]'), range);
         applyToolbarEntryVisibility(this.element);
         this.rangePosition = undefined;
@@ -456,6 +460,47 @@ export class Toolbar {
             textNode = walker.nextNode() as Text;
         }
         return true;
+    }
+
+    public getFlashcardClozeBlock(protyle: IProtyle, range?: Range) {
+        if (!range || range.collapsed || !protyle.block.rootID || protyle.lite || protyle.disabled ||
+            window.siyuan.config.readonly || window.siyuan.isPublish || isEncryptedBox(protyle.notebookId) ||
+            !range.startContainer.isConnected ||
+            !stripSemanticMarkersFromRangeText(range).trim()) {
+            return;
+        }
+        const block = hasClosestBlock(range.startContainer);
+        if (!block || block !== hasClosestBlock(range.endContainer) || block.getAttribute("data-type") !== "NodeParagraph" ||
+            block.closest('[data-type="NodeBlockQueryEmbed"]') ||
+            block.closest(".protyle-wysiwyg") !== protyle.wysiwyg.element) {
+            return;
+        }
+        if (![...block.querySelectorAll('[data-occlusion-id], [contenteditable="false"]:not(.protyle-attr)')]
+            .some(element => range.intersectsNode(element))) {
+            return block;
+        }
+    }
+
+    public createFlashcardCloze(protyle: IProtyle, range = this.range) {
+        const block = this.getFlashcardClozeBlock(protyle, range);
+        if (!block) { return; }
+        const id = block.getAttribute("data-node-id");
+        const previous = block.outerHTML;
+        const rootID = protyle.block.rootID;
+        this.range = range;
+        this.setInlineMarkInBlock(protyle, "mark", "range", undefined, false);
+        const data = block.outerHTML;
+        if (data === previous) { return; }
+        void Promise.resolve(transaction(protyle, [{action: "update", id, data}], [{action: "update", id, data: previous}], {
+            awaitResponse: true,
+            callback: () => {
+                void import("../../card/flashcardV2").then(({openFlashcardV2SourceMode}) => {
+                    if (protyle.element.isConnected && protyle.block.rootID === rootID) {
+                        openFlashcardV2SourceMode([id], "cloze");
+                    }
+                });
+            },
+        })).catch(error => console.error("Flashcard selection update failed", error));
     }
 
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar",

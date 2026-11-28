@@ -23,3 +23,14 @@ export const flashcardV2LocationQuery = (field: "notebookID" | "rootID", id: str
         value: id,
     },
 });
+
+export const flashcardV2DocumentTreeQuery = (id: string, notebookID: string, path: string): IFlashcardQueryAST => ({
+    version: 1,
+    root: {operator: "and", children: [
+        flashcardV2LocationQuery("notebookID", notebookID).root,
+        {operator: "or", children: [
+            flashcardV2LocationQuery("rootID", id).root,
+            {operator: "predicate", field: "path", comparator: "startsWith", value: path.slice(0, -3) + "/"},
+        ]},
+    ]},
+});

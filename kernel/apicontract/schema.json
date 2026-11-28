@@ -17202,6 +17202,28 @@
       ],
       "additionalProperties": false
     },
+    "AssetOCRRequestInput": {
+      "type": "object",
+      "properties": {
+        "localOnly": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
     "AssetOCRTextRequestInput": {
       "type": "object",
       "properties": {
@@ -31094,6 +31116,33 @@
               "type": "null"
             }
           ]
+        },
+        "sortBy": {
+          "enum": [
+            "due",
+            "reps",
+            "interval",
+            "difficulty",
+            "stability"
+          ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sortDescending": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -32723,6 +32772,33 @@
               "type": "null"
             }
           ]
+        },
+        "sortBy": {
+          "enum": [
+            "due",
+            "reps",
+            "interval",
+            "difficulty",
+            "stability"
+          ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sortDescending": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -33766,6 +33842,19 @@
           ]
         },
         "shapeIDs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stepOrder": {
           "anyOf": [
             {
               "type": "array",
@@ -147326,7 +147415,7 @@
       ],
       "body": "json",
       "request": {
-        "$ref": "#/$defs/AssetPathRequestInput"
+        "$ref": "#/$defs/AssetOCRRequestInput"
       },
       "response": {
         "anyOf": [

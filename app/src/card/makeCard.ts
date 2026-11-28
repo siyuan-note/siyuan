@@ -8,11 +8,23 @@ import {
     openFlashcardV2AdvancedSource,
     openFlashcardV2AnkiPreview,
     openFlashcardV2BasicSource,
+    openFlashcardV2DocumentTree,
     openFlashcardV2Management,
     openFlashcardV2Presets,
     openFlashcardV2ReviewSets,
     openFlashcardV2Statistics
 } from "./flashcardV2";
+
+export const flashcardDocumentTreeMenuItems = (app: App, id: string, onOpen?: () => void): IMenu[] =>
+    (["review", "manage"] as const).map(mode => ({
+        id: mode === "review" ? "flashcardReviewDocumentTree" : "flashcardManageDocumentTree",
+        label: mode === "review" ? window.siyuan.languages.flashcardReviewDocumentTree : window.siyuan.languages.flashcardManageDocumentTree,
+        iconHTML: "",
+        click: () => {
+            openFlashcardV2DocumentTree(app, id, mode);
+            onOpen?.();
+        },
+    }));
 
 export const createQuickSources = (blockIDs: string[], callback?: () => void) => {
     if (blockIDs.length === 0) {

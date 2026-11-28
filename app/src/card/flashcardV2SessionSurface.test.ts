@@ -6,19 +6,53 @@ import {createSourceFile, isVariableStatement, ModuleKind, ScriptTarget, transpi
 import {getFlashcardLocateBlockID, isCurrentFlashcardLocateTarget, setFlashcardLocateBlockID} from "./flashcardLocate";
 import {escapeHtml} from "../util/escape";
 
-const loadSurface = (globals: Record<string, unknown>) => {
+const loadSurface = (globals: Record<string, unknown>, name = "createSessionSurface") => {
     const path = "src/card/flashcardV2Session.ts";
     const source = createSourceFile(path, readFileSync(path, "utf8"), ScriptTarget.ES2021, true);
     const declaration = source.statements.find(statement => isVariableStatement(statement) &&
-        statement.declarationList.declarations.some(item => item.name.getText(source) === "createSessionSurface"));
+        statement.declarationList.declarations.some(item => item.name.getText(source) === name));
     assert.ok(declaration);
-    const compiled = transpileModule(`${declaration.getText(source)}\nexports.create = createSessionSurface;`, {
+    const compiled = transpileModule(`${declaration.getText(source)}\nexports.create = ${name};`, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
     const exports: any = {};
     runInNewContext(compiled, {exports, queueMicrotask, ...globals});
     return exports.create;
 };
+
+test("moving a session retires the old host without destroying state", async () => {
+    const content = {className: "", innerHTML: "", dataset: {}, isConnected: true, focus() {}, remove() {}};
+    const events: string[] = [];
+    const root = {
+        setAttribute() {},
+        querySelector: () => ({appendChild: (element: typeof content) => assert.equal(element, content)}),
+        firstElementChild: {addEventListener() {}},
+    };
+    const create = loadSurface({
+        Constants: {DIALOG_OPENCARD: "cards"},
+        document: {createElement: () => content},
+        Dialog: class {
+            element = root;
+            constructor(private options: {destroyCallback: () => void}) {}
+            destroy() { events.push("close-dialog"); this.options.destroyCallback(); }
+        },
+    }, "createMovableSessionSurface");
+    const surface = create({content: "active review", destroyCallback: () => events.push("end-session")});
+    const controller = new AbortController();
+    const mount = {signal: controller.signal,
+        element: {replaceChildren: (element: typeof content) => assert.equal(element, content)},
+        close: () => { events.push("close-tab"); controller.abort(); }};
+    assert.equal(surface.move(mount), true);
+    assert.deepEqual(events, ["close-dialog"]);
+    assert.equal(surface.mount, mount);
+    assert.equal(surface.move(), true);
+    assert.equal(surface.element, content);
+    assert.deepEqual(events, ["close-dialog", "close-tab"]);
+    assert.equal(surface.mount, undefined);
+    surface.destroy();
+    await Promise.resolve();
+    assert.deepEqual(events, ["close-dialog", "close-tab", "close-dialog", "end-session"]);
+});
 
 test("another practice round waits for the dialog closing lifecycle to finish", async () => {
     const calls: string[] = [];
@@ -206,7 +240,8 @@ test("real waiting completion chain clears the previous locate target and invali
             removeAttribute: (name: string) => attributes.delete(name),
             querySelector: (selector: string) => selector === ".card__block" ? content :
                 selector === "[data-flashcard-front]" ? front :
-                    selector === "[data-flashcard-count]" ? {textContent: ""} : hidden,
+                    selector === "[data-flashcard-count]" ? {textContent: ""} :
+                        selector === ".card__v2-session-host" ? null : hidden,
         };
         const previousBlock = "synthetic-previous-source";
         setFlashcardLocateBlockID(element, previousBlock);

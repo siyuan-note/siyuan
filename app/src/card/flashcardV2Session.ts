@@ -14,7 +14,7 @@ import type {App} from "../index";
 import {Protyle} from "../protyle";
 import {fetchPost} from "../util/fetch";
 import {isFlashcardV2Object, readFlashcardV2Revision} from "./flashcardV2Contract";
-import {isMobile} from "../util/functions";
+import {isBrowser, isMobile} from "../util/functions";
 import {genUUID} from "../util/genID";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {
@@ -34,6 +34,7 @@ import {
     applyFlashcardV2AnkiCloze,
     createFlashcardV2TemplateStyle,
     flashcardV2ReferenceHTML,
+    selectFlashcardV2References,
     prepareFlashcardV2Choice,
     prepareFlashcardV2Reveal,
     prepareFlashcardV2TypedAnswers,
@@ -60,7 +61,7 @@ import {bindWorkspaceReviewOutline} from "./workspaceReviewOutline";
 import {matchHotKey} from "../protyle/util/hotKey";
 import {flashcardV2FlagColors, flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
-import {openFlashcardReviewTab} from "./openFlashcardReviewTab";
+import {moveFlashcardReviewToTab, moveFlashcardReviewToWindow, openFlashcardReviewTab} from "./openFlashcardReviewTab";
 import {deferFlashcardV2QueueCard, flashcardV2QueueBreakdown, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
 import {openFlashcardV2Due} from "./flashcardV2Due";
 import {openFlashcardV2EditLater, type IFlashcardV2EditLater} from "./flashcardV2EditLater";
@@ -141,6 +142,16 @@ interface IFlashcardV2LastReview {
     previousRating?: string;
 }
 
+export interface IFlashcardV2SessionTransfer {
+    sessionID: string;
+    index: number;
+    queue: IFlashcardV2SessionQueueCard[];
+    lastReview?: IFlashcardV2LastReview;
+    deferredCardIDs: string[];
+    ratings: [string, string][];
+    answer?: {reveals: number, values: Array<{value: string, checked: boolean}>};
+}
+
 interface IFlashcardV2PlaybackController {
     activate: (side: "front" | "back") => void;
     speak: (side: "front" | "back") => void;
@@ -175,6 +186,8 @@ interface IFlashcardSessionSurface {
     element: HTMLElement;
     destroy: () => void;
     dispose: (callback?: () => void) => void;
+    mount?: IFlashcardSessionMount;
+    move?: (mount?: IFlashcardSessionMount) => boolean;
 }
 
 export interface IFlashcardSessionMount {
@@ -211,10 +224,84 @@ const createSessionSurface = (options: ConstructorParameters<typeof AdaptiveDial
         element.remove();
     };
     mount.signal.addEventListener("abort", dispose, {once: true});
-    return {element, destroy: mount.close, dispose: (callback) => {
+    return {element, mount, destroy: mount.close, dispose: (callback) => {
         dispose();
         callback?.();
     }};
+};
+
+const createMovableSessionSurface = (options: ConstructorParameters<typeof Dialog>[0],
+    initialMount?: IFlashcardSessionMount): IFlashcardSessionSurface => {
+    const element = document.createElement("div");
+    element.className = "fn__flex-column fn__flex-1 card__v2-session-host";
+    element.innerHTML = options.content;
+    let version = 0;
+    let ended = false;
+    let host: {close: () => void, detach: () => void};
+    let mount = initialMount;
+    let afterClose: (() => void) | undefined;
+    const finish = () => {
+        ended = true;
+        host.detach();
+        options.destroyCallback?.();
+        element.remove();
+        if (afterClose) { queueMicrotask(afterClose); }
+    };
+    const attach = (target?: IFlashcardSessionMount) => {
+        const generation = ++version;
+        delete element.dataset.dialogClosing;
+        const onClose = () => {
+            if (generation === version && !ended) { finish(); }
+        };
+        mount = target;
+        if (mount) {
+            mount.element.replaceChildren(element);
+            mount.signal.addEventListener("abort", onClose, {once: true});
+            host = {close: mount.close, detach: () => target.signal.removeEventListener("abort", onClose)};
+        } else {
+            const dialog = new Dialog({...options, content: "", destroyCallback: onClose, beforeClose: () => {
+                if (options.beforeClose?.() === false) { return false; }
+                if (generation === version) { element.dataset.dialogClosing = "true"; }
+                return true;
+            }});
+            dialog.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
+            dialog.element.setAttribute("data-flashcard-v2-review", "");
+            dialog.element.querySelector(".b3-dialog__body").appendChild(element);
+            dialog.element.firstElementChild.addEventListener("click", (event: MouseEvent) => {
+                if (typeof event.detail === "string") {
+                    element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: event.detail}));
+                }
+            });
+            host = {close: () => dialog.destroy(), detach: () => {}};
+        }
+    };
+    attach(initialMount);
+    return {
+        element,
+        get mount() { return mount; },
+        destroy: () => host.close(),
+        dispose: (callback) => {
+            afterClose = callback;
+            if (mount) {
+                finish();
+            } else {
+                host.close();
+            }
+        },
+        move: (target) => {
+            if (ended || target?.signal.aborted || !element.isConnected || !target && !mount) {
+                return false;
+            }
+            const previous = host;
+            attach(target);
+            previous.detach();
+            previous.close();
+            queueMicrotask(() => {
+                if (element.isConnected) { element.focus({preventScroll: true}); }
+            });
+            return true;
+        },
+    };
 };
 
 let flashcardV2ReviewOpening = false;
@@ -223,24 +310,6 @@ const nextLocalDay = (now: number) => {
     const date = new Date(now);
     date.setHours(24, 0, 0, 0);
     return date.getTime();
-};
-
-const selectReferences = (references: IFlashcardV2SourceReference[], spec?: IFlashcardV2RenderModel["template"]["frontSpec"]) => {
-    if (!spec) {
-        return [];
-    }
-    const fieldIDs = new Set(spec.fieldIDs || []);
-    if (spec.fieldID) {
-        fieldIDs.add(spec.fieldID);
-    }
-    const roles = new Set(spec.roles || []);
-    if (spec.role) {
-        roles.add(spec.role);
-    }
-    if (fieldIDs.size === 0 && roles.size === 0) {
-        return [];
-    }
-    return references.filter((reference) => fieldIDs.has(reference.fieldID) || roles.has(reference.role));
 };
 
 const referenceHTML = (references: IFlashcardV2SourceReference[], doms: Record<string, string>) => {
@@ -498,6 +567,7 @@ const sessionContent = (mobile = false) => `<div class="b3-dialog__content fn__f
     <button data-type="edit-source" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
     <button data-type="skip" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.skip}" disabled><svg><use xlink:href="#iconForward"></use></svg></button>
     ${mobile ? "" : `<button data-type="review-fullscreen" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.fullscreen}" aria-pressed="false"><svg><use xlink:href="#iconFullscreen"></use></svg></button>`}
+    ${mobile ? "" : `<button data-type="review-placement" data-menu="true" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.flashcardOpenMode}" aria-haspopup="menu"><svg aria-hidden="true"><use xlink:href="#iconOpen"></use></svg></button>`}
     <button data-type="more" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
     <button data-type="undo-review" class="block__icon block__icon--show ariaLabel fn__none" aria-label="${window.siyuan.languages.undo}"><svg><use xlink:href="#iconUndo"></use></svg></button>
 </div>
@@ -587,11 +657,11 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
                 button.querySelector("[data-rating-interval]").textContent =
                     model.ratingIntervals?.[button.dataset.rating] ?? "";
             });
-            let frontReferences = selectReferences(references, model.template.frontSpec);
+            let frontReferences = selectFlashcardV2References(references, model.template.frontSpec);
             if (frontReferences.length === 0) {
                 frontReferences = references.slice(0, 1);
             }
-            let backReferences = selectReferences(references, model.template.backSpec);
+            let backReferences = selectFlashcardV2References(references, model.template.backSpec);
             if (backReferences.length === 0) {
                 backReferences = references;
             }
@@ -860,7 +930,7 @@ export const openFlashcardV2SourceEditor = (app: App, blockID: string, callback:
 
 export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name: string,
     options: IFlashcardV2ReviewSessionOptions = {reviewMode: "normal"}, mount?: IFlashcardSessionMount,
-    onTabOpened?: () => void) => {
+    onTabOpened?: () => void, transfer?: IFlashcardV2SessionTransfer) => {
     if (mount?.signal.aborted) {
         return;
     }
@@ -887,51 +957,21 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             flashcardV2ReviewOpening = false;
         }
     };
-    const sessionID = genUUID();
+    const sessionID = transfer?.sessionID || genUUID();
     const now = Date.now();
     const practiceLimit = options.reviewMode === "reinforcement" ? options.practiceLimit : undefined;
     let sessionStarted = false;
-    void fetchPost("/api/flashcard/startSession", {
-        operationID: genUUID(),
-        sessionID,
-        reviewSetID,
-        reviewSetIDs: options.reviewSetIDs,
-        cardIDs: options.cardIDs,
-        query: options.query,
-        reviewMode: options.reviewMode,
-        seed: sessionID,
-        now,
-        ...flashcardV2ReviewDay(now),
-        newLimit: practiceLimit ?? window.siyuan.config.flashcard.newCardLimit,
-        reviewLimit: practiceLimit ?? window.siyuan.config.flashcard.reviewCardLimit,
-        includeSuspended: options.reviewMode === "reinforcement" && Boolean(options.includeSuspended),
-        includeBuried: options.reviewMode === "reinforcement" && Boolean(options.includeBuried),
-        includePaused: options.reviewMode === "reinforcement" && Boolean(options.includePaused),
-    }, () => {
+    const onSessionReady = () => {
         sessionStarted = true;
-        if (mount?.signal.aborted) {
-            void finishSession(sessionID, "abandoned");
-            return;
-        }
-        let queueLoaded = false;
-        const queueNow = Date.now();
-        void fetchPost("/api/flashcard/getSessionQueue", {
-            sessionID, now: queueNow, ...flashcardV2ReviewDay(queueNow),
-        }, (queueResponse) => {
-            queueLoaded = true;
-            if (mount?.signal.aborted) {
-                void finishSession(sessionID, "abandoned");
-                return;
+        const renderQueue = (queue: IFlashcardV2SessionQueueCard[]) => {
+            if (!transfer) {
+                emitFlashcardV2Lifecycle(app, "flashcard-review-session-started", {
+                    sessionID,
+                    reviewSetID,
+                    reviewMode: options.reviewMode,
+                    cardCount: queue.length,
+                });
             }
-            const queue = (queueResponse.data.cards as IFlashcardV2SessionQueueCard[])
-                .filter((item) => item.card.generationStatus === "active" &&
-                    (item.sessionCard.status === "queued" || item.sessionCard.status === "shown"));
-            emitFlashcardV2Lifecycle(app, "flashcard-review-session-started", {
-                sessionID,
-                reviewSetID,
-                reviewMode: options.reviewMode,
-                cardCount: queue.length,
-            });
             if (mount?.signal.aborted) {
                 void finishSession(sessionID, "abandoned");
                 return;
@@ -973,7 +1013,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 });
                 return;
             }
-            let index = 0;
+            let index = transfer?.index || 0;
             let shownAt = performance.now();
             let revealController: IFlashcardV2RevealController | undefined;
             let typedAnswerController: IFlashcardV2TypedAnswerController | undefined;
@@ -994,9 +1034,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 window.clearInterval(waitingTimer);
                 waitingTimer = undefined;
             };
-            let lastReview: IFlashcardV2LastReview | undefined;
+            let lastReview = transfer?.lastReview;
+            let transferredAnswer = transfer?.answer;
+            let restoringAnswer = false;
+            let reveals = 0;
             const weakCards = new FlashcardV2WeakCards();
-            const deferredCardIDs: string[] = [];
+            transfer?.ratings.forEach(([id, rating]) => weakCards.record(id, rating));
+            const deferredCardIDs = transfer?.deferredCardIDs || [];
             let renderGeneration = 0;
             let sessionEndEmitted = false;
             const flagDefinitions = new Map<number, string>();
@@ -1021,7 +1065,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 });
             };
             let restoreFullscreen: (() => void) | undefined;
-            const dialog = createSessionSurface({
+            const createReviewSurface = mobile ? createSessionSurface : createMovableSessionSurface;
+            const dialog = createReviewSurface({
                 title: mobile ? mobileSessionTitle(name, true) : name,
                 mobileSheet,
                 positionId: Constants.DIALOG_OPENCARD,
@@ -1078,6 +1123,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 queueLength: queue.length,
             });
             const flagIcon = dialog.element.querySelector<SVGElement>('[data-type="flag"] svg');
+            const answerInputs = () => [...dialog.element.querySelectorAll<HTMLInputElement>(
+                "input[data-anki-type-answer], input[data-flashcard-type-answer], [data-choice-option] input")];
             const acceptRendered = (rendered: IFlashcardV2RenderedCard) => {
                 playbackController?.cancel();
                 shownAt = rendered.shownAt;
@@ -1105,8 +1152,25 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     reviewMode: options.reviewMode,
                     face: "front",
                 });
+                if (transferredAnswer) {
+                    const saved = transferredAnswer;
+                    transferredAnswer = undefined;
+                    const inputs = answerInputs();
+                    for (const [index, input] of inputs.entries()) {
+                        if (saved.values[index]) {
+                            input.value = saved.values[index].value;
+                            input.checked = saved.values[index].checked;
+                        }
+                    }
+                    restoringAnswer = true;
+                    for (let step = 0; step < saved.reveals; step++) {
+                        if (reveal()) { break; }
+                    }
+                    restoringAnswer = false;
+                }
             };
             const renderCurrent = () => {
+                reveals = 0;
                 const deferred = deferredCardIDs.indexOf(queue[index].card.id);
                 if (deferred >= 0) {
                     deferredCardIDs.splice(deferred, 1);
@@ -1264,25 +1328,29 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 }
                 const contentElement = dialog.element.querySelector(".card__block");
                 const complete = revealController?.revealNext() ?? true;
+                reveals++;
                 if (complete) {
                     answerResult = checkFlashcardV2Answer(() => pluginAnswerController?.check() ??
                         choiceController?.check() ?? typedAnswerController?.check(),
                     () => showMessage(window.siyuan.languages.flashcardAnswerCheckFailed, 6000, "error"));
                     showFlashcardAnswer(contentElement);
                     dialog.element.querySelector("[data-flashcard-answer]").classList.remove("fn__none");
-                    playbackController?.activate("back");
-                    emitFlashcardV2Lifecycle(app, "flashcard-review-answer-revealed", {
-                        cardID: currentModel?.card.id,
-                        sourceID: currentModel?.card.sourceID,
-                        sourceType: currentModel?.source.sourceType,
-                        sessionID,
-                        reviewSetID,
-                        reviewMode: options.reviewMode,
-                        face: "back",
-                    });
+                    if (!restoringAnswer) {
+                        playbackController?.activate("back");
+                        emitFlashcardV2Lifecycle(app, "flashcard-review-answer-revealed", {
+                            cardID: currentModel?.card.id,
+                            sourceID: currentModel?.card.sourceID,
+                            sourceType: currentModel?.source.sourceType,
+                            sessionID,
+                            reviewSetID,
+                            reviewMode: options.reviewMode,
+                            face: "back",
+                        });
+                    }
                 }
                 outline.reveal(complete);
                 setActionsVisible(dialog, complete);
+                return complete;
             };
             const updateManagedQueueCards = (data: {
                 cards?: Record<string, IFlashcardV2SessionQueueCard["card"]>,
@@ -1466,7 +1534,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         const menu = new Menu();
                         menu.element.classList.add("b3-menu--compact-icons");
                         const lang = window.siyuan.languages;
-                        if (!mount && outline.available()) {
+                        if (!dialog.mount && outline.available()) {
                             menu.addItem({
                                 id: "flashcardV2WorkspaceOutline",
                                 icon: "iconOutline",
@@ -1686,14 +1754,69 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     handleReviewShortcut(event.detail);
                 }
             });
+            let movingReview = false;
             dialog.element.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
+                const placement = target.closest<HTMLElement>('[data-type="review-placement"]');
+                if (placement && dialog.move && !movingReview) {
+                    toggleMenu({target: placement, build: (_menu, popup) => {
+                        const menu = new Menu();
+                        const lang = window.siyuan.languages;
+                        const targets = [
+                            {mode: "dialog", icon: "iconOpen", label: lang.flashcardOpenDialog},
+                            {mode: "tab", icon: "iconOpen", label: lang.openInNewTab},
+                            {mode: "right", icon: "iconLayoutRight", label: lang.insertRight},
+                            {mode: "bottom", icon: "iconLayoutBottom", label: lang.insertBottom},
+                            ...(!isBrowser() ? [{mode: "window", icon: "iconOpenWindow", label: lang.openByNewWindow} as const] : []),
+                        ] as const;
+                        for (const {mode, icon, label} of targets) {
+                            menu.addItem({icon, label, disabled: mode === "dialog" && !dialog.mount,
+                                click: () => {
+                                    if (movingReview || sessionFinished || requestPending || outlineSourceOpen) { return; }
+                                    restoreFullscreen?.();
+                                    if (mode === "dialog") {
+                                        dialog.move();
+                                        return;
+                                    }
+                                    if (mode === "window") {
+                                        if (renderPending || completedPending || retryManagedSkip || !queue[index]) { return; }
+                                        requestPending = true;
+                                        const state: IFlashcardV2SessionTransfer = {
+                                            sessionID, queue, index, lastReview, deferredCardIDs, ratings: weakCards.snapshot(),
+                                            answer: currentModel?.source.pluginNamespace ? undefined : {
+                                                reveals, values: answerInputs().map(({value, checked}) => ({value, checked})),
+                                            },
+                                        };
+                                        void moveFlashcardReviewToWindow(reviewSetID, name, options, state, () => {
+                                            if (sessionFinished || !dialog.element.isConnected) { return; }
+                                            sessionFinished = true;
+                                            return dialog.destroy;
+                                        }).then(moved => {
+                                            if (!moved && dialog.element.isConnected) { showMessage(lang.flashcardLoadFailed); }
+                                        }).catch(error => {
+                                            console.error("Flashcard review window relocation failed", error);
+                                            if (dialog.element.isConnected) { showMessage(lang.flashcardLoadFailed); }
+                                        }).finally(() => { requestPending = false; });
+                                        return;
+                                    }
+                                    movingReview = true;
+                                    void moveFlashcardReviewToTab(app, reviewSetID, name, options, mode, dialog.move)
+                                        .catch(error => console.error("Flashcard review relocation failed", error))
+                                        .finally(() => { movingReview = false; });
+                                },
+                            });
+                        }
+                        const rect = placement.getBoundingClientRect();
+                        popup.show(() => menu.open({x: rect.left, y: rect.bottom, h: rect.height}));
+                    }});
+                    return;
+                }
                 if (target.closest('[data-type="retry-skip"]')) {
                     retryManagedSkip?.();
                     return;
                 }
                 if (target.closest('[data-type="pending-edits"]')) {
-                    if (mount) {
+                    if (dialog.mount) {
                         openPendingEditList();
                     } else {
                         dialog.dispose(openPendingEditList);
@@ -1858,12 +1981,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                             sessionFinished = true;
                             emitSessionEnded("completed");
                             if (practiceWeak) {
+                                const currentMount = dialog.mount;
                                 dialog.dispose(() => openFlashcardV2ReviewSession(app, "", name, {
                                     ...flashcardV2SubsetOptions("", undefined, practiceIDs, "reinforcement"),
                                     includeSuspended: options.includeSuspended,
                                     includeBuried: options.includeBuried,
                                     includePaused: options.includePaused,
-                                }, mount));
+                                }, currentMount));
                             } else {
                                 dialog.destroy();
                             }
@@ -1976,14 +2100,54 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             });
             dialog.element.setAttribute("tabindex", "-1");
             dialog.element.focus();
+            setUndoVisible(dialog, !!lastReview);
             renderCurrent();
+        };
+        if (transfer) {
+            renderQueue(transfer.queue);
+            return;
+        }
+        if (mount?.signal.aborted) {
+            void finishSession(sessionID, "abandoned");
+            return;
+        }
+        let queueLoaded = false;
+        const queueNow = Date.now();
+        void fetchPost("/api/flashcard/getSessionQueue", {
+            sessionID, now: queueNow, ...flashcardV2ReviewDay(queueNow),
+        }, (response) => {
+            queueLoaded = true;
+            renderQueue((response.data.cards as IFlashcardV2SessionQueueCard[])
+                .filter(item => item.card.generationStatus === "active" &&
+                    (item.sessionCard.status === "queued" || item.sessionCard.status === "shown")));
         }).then(() => {
             if (!queueLoaded) {
                 releaseOpening();
                 void finishSession(sessionID, "abandoned");
             }
         });
-    }).then(() => {
+    };
+    if (transfer) {
+        onSessionReady();
+        return;
+    }
+    void fetchPost("/api/flashcard/startSession", {
+        operationID: genUUID(),
+        sessionID,
+        reviewSetID,
+        reviewSetIDs: options.reviewSetIDs,
+        cardIDs: options.cardIDs,
+        query: options.query,
+        reviewMode: options.reviewMode,
+        seed: sessionID,
+        now,
+        ...flashcardV2ReviewDay(now),
+        newLimit: practiceLimit ?? window.siyuan.config.flashcard.newCardLimit,
+        reviewLimit: practiceLimit ?? window.siyuan.config.flashcard.reviewCardLimit,
+        includeSuspended: options.reviewMode === "reinforcement" && Boolean(options.includeSuspended),
+        includeBuried: options.reviewMode === "reinforcement" && Boolean(options.includeBuried),
+        includePaused: options.reviewMode === "reinforcement" && Boolean(options.includePaused),
+    }, onSessionReady).then(() => {
         if (!sessionStarted) {
             releaseOpening();
         }

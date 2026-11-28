@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "आवरण एक-एक करके दिखाएँ",
+	"flashcardReviewDocumentTree": "इस दस्तावेज़ और उसके उपदस्तावेज़ों के कार्ड दोहराएँ",
+	"flashcardManageDocumentTree": "इस दस्तावेज़ और उसके उपदस्तावेज़ों के कार्ड प्रबंधित करें",
+	"flashcardSplitParagraphTip": "सवाल और जवाब बनाने के लिए अनुच्छेद को कर्सर पर बाँटें",
+	"flashcardAlternativeAnswer": "वैकल्पिक जवाब",
 	"flashcardDrawImageRegion": "समीक्षा क्षेत्र तय करें",
 	"flashcardResetImageRegion": "पूरी छवि दिखाएँ",
 	"flashcardImageRegionMustContainMasks": "क्षेत्र में इस समूह के सभी आवरण शामिल होने चाहिए",

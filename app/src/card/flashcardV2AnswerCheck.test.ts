@@ -55,6 +55,7 @@ test("actual review reveal still exposes answer and manual ratings after checker
         canUseReviewActions: () => true,
         dialog: {element: {querySelector: () => ({classList: {remove: () => calls.push("answer-visible")}})}},
         revealController: undefined,
+        reveals: 0, restoringAnswer: false,
         pluginAnswerController: {check: () => { throw new Error("plugin failed"); }},
         choiceController: undefined, typedAnswerController: undefined,
         showMessage: () => calls.push("warning"),

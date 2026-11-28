@@ -1,4 +1,5 @@
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {FLASHCARD_SLASH_TYPES} from "../../card/flashcardV2AuthoringTypes";
 import {fetchPost} from "../../util/fetch";
 import {registerBuiltinSlashHint} from "./builtinSlash";
 import {canPickIOSPhotos} from "../upload/iosPhotos";
@@ -165,7 +166,13 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         id: "newSubDocRef",
         value: Constants.ZWSP + 6,
         icon: "iconFile",
-    }, {
+    }, ...(!protyle.disabled && !protyle.lite && !window.siyuan.config.readonly && !window.siyuan.isPublish &&
+        !isEncryptedBox(protyle.notebookId) ?
+        FLASHCARD_SLASH_TYPES.map(({id, label, mode}) => ({
+            id, filter: [window.siyuan.languages[label], window.siyuan.languages.riffCard, "flashcard"],
+            value: "flashcard:" + mode,
+            icon: "iconRiffCard",
+        })) : []), {
         value: "",
         id: "separator_1",
         html: "separator",

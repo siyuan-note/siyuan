@@ -283,6 +283,14 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         icon: "iconMark",
         tipPosition: "n",
     }, {
+        name: "flashcardCloze",
+        lang: "flashcardClozeCards",
+        icon: "iconRiffCard",
+        tipPosition: "n",
+        click(editor) {
+            editor.protyle.toolbar.createFlashcardCloze(editor.protyle);
+        },
+    }, {
         name: "sup",
         lang: "sup",
         hotkey: window.siyuan.config.keymap.editor.insert.sup.custom,

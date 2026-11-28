@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Revelar as máscaras uma a uma",
+	"flashcardReviewDocumentTree": "Revisar cartões deste documento e dos subdocumentos",
+	"flashcardManageDocumentTree": "Gerenciar cartões deste documento e dos subdocumentos",
+	"flashcardSplitParagraphTip": "Dividir o parágrafo no cursor para preparar a pergunta e a resposta",
+	"flashcardAlternativeAnswer": "Resposta alternativa",
 	"flashcardDrawImageRegion": "Definir área de revisão",
 	"flashcardResetImageRegion": "Mostrar a imagem inteira",
 	"flashcardImageRegionMustContainMasks": "A área deve incluir todas as máscaras deste grupo",

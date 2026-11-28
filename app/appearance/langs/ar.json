@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "كشف الأقنعة بالتتابع",
+	"flashcardReviewDocumentTree": "مراجعة بطاقات المستند ومستنداته الفرعية",
+	"flashcardManageDocumentTree": "إدارة بطاقات المستند ومستنداته الفرعية",
+	"flashcardSplitParagraphTip": "سيُفصل النص عند المؤشر لتجهيز السؤال والإجابة",
+	"flashcardAlternativeAnswer": "إجابة بديلة",
 	"flashcardDrawImageRegion": "تحديد منطقة المراجعة",
 	"flashcardResetImageRegion": "عرض الصورة كاملة",
 	"flashcardImageRegionMustContainMasks": "يجب أن تشمل المنطقة جميع الأقنعة في هذه المجموعة",

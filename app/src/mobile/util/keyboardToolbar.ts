@@ -153,6 +153,9 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
             if (name === "quickMakeCard") {
                 return !!getMobileQuickCardBlockID(protyle, range);
             }
+            if (name === "flashcardCloze") {
+                return !!protyle?.toolbar.getFlashcardClozeBlock(protyle, range);
+            }
             if (name === "block-type") {
                 return !!range && !!getBlockTypeSelection(protyle, range);
             }
@@ -1661,6 +1664,7 @@ export const initKeyboardToolbar = () => {
             <button class="keyboard__action" data-type="u" aria-label="${window.siyuan.languages.underline}"><svg><use xlink:href="#iconUnderline"></use></svg></button>
             <button class="keyboard__action" data-type="s" aria-label="${window.siyuan.languages.strike}"><svg><use xlink:href="#iconStrike"></use></svg></button>
             <button class="keyboard__action" data-type="mark" aria-label="${window.siyuan.languages.mark}"><svg><use xlink:href="#iconMark"></use></svg></button>
+            <button class="keyboard__action" data-type="flashcardCloze" aria-label="${window.siyuan.languages.flashcardClozeCards}"><svg><use xlink:href="#iconRiffCard"></use></svg></button>
             <button class="keyboard__action" data-type="sup" aria-label="${window.siyuan.languages.sup}"><svg><use xlink:href="#iconSup"></use></svg></button>
             <button class="keyboard__action" data-type="sub" aria-label="${window.siyuan.languages.sub}"><svg><use xlink:href="#iconSub"></use></svg></button>
             <button class="keyboard__action" data-type="code" aria-label="${window.siyuan.languages["inline-code"]}"><svg><use xlink:href="#iconInlineCode"></use></svg></button>
@@ -1860,6 +1864,10 @@ export const initKeyboardToolbar = () => {
                     createQuickSources([blockID]);
                 }
             }
+            return;
+        }
+        if (type === "flashcardCloze") {
+            protyle.toolbar.createFlashcardCloze(protyle, range);
             return;
         }
         if (type === "agentQuote") {

@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Révéler les masques un par un",
+	"flashcardReviewDocumentTree": "Réviser les cartes de ce document et de ses sous-documents",
+	"flashcardManageDocumentTree": "Gérer les cartes de ce document et de ses sous-documents",
+	"flashcardSplitParagraphTip": "Scinder le paragraphe au curseur pour préparer la question et la réponse",
+	"flashcardAlternativeAnswer": "Réponse alternative",
 	"flashcardDrawImageRegion": "Définir la zone de révision",
 	"flashcardResetImageRegion": "Afficher l’image entière",
 	"flashcardImageRegionMustContainMasks": "La zone doit contenir tous les masques de ce groupe",

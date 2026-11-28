@@ -119,7 +119,7 @@ var setImageOCRText = contractHandler(apicontract.SetImageOCRText, func(c *gin.C
 	return apicontract.Success(apicontract.Null{})
 })
 
-var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request apicontract.AssetPathRequest) apicontract.Response[apicontract.AssetOCRData] {
+var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request apicontract.AssetOCRRequest) apicontract.Response[apicontract.AssetOCRData] {
 
 	path, _, _ := strings.Cut(request.Path, "#")
 
@@ -136,7 +136,11 @@ var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request api
 	}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Minute)
 	defer cancel()
-	text, ocrJSON, err := model.OCRAsset(ctx, path)
+	runOCR := model.OCRAsset
+	if request.LocalOnly {
+		runOCR = model.OCRAssetLocal
+	}
+	text, ocrJSON, err := runOCR(ctx, path)
 	if nil != err {
 		return apicontract.FailureWithTimeout[apicontract.AssetOCRData](-1, err.Error(), 7000)
 	}

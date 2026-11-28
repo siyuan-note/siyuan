@@ -37,7 +37,7 @@ import type {IDocTreeItem} from "../layout/dock/docTree/types";
 import type {App} from "../index";
 import {openDocHistory} from "../history/doc";
 import {openEditorTab} from "./util";
-import {createQuickSources, flashcardSourceMenuItems} from "../card/makeCard";
+import {createQuickSources, flashcardDocumentTreeMenuItems, flashcardSourceMenuItems} from "../card/makeCard";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {isPhablet, saveExportFile} from "../protyle/util/compatibility";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
@@ -1047,7 +1047,11 @@ export const initDocumentMenu = (app: App, options: {
                     closePanel();
                     /// #endif
                 }
-            }, {
+            }, ...flashcardDocumentTreeMenuItems(app, id, () => {
+                /// #if MOBILE
+                closePanel();
+                /// #endif
+            }), {
                 id: "quickMakeCard",
                 iconHTML: "",
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,

@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Hiện từng phần che theo thứ tự",
+	"flashcardReviewDocumentTree": "Ôn thẻ trong tài liệu này và các tài liệu con",
+	"flashcardManageDocumentTree": "Quản lý thẻ trong tài liệu này và các tài liệu con",
+	"flashcardSplitParagraphTip": "Tách đoạn tại con trỏ để chuẩn bị câu hỏi và câu trả lời",
+	"flashcardAlternativeAnswer": "Câu trả lời thay thế",
 	"flashcardDrawImageRegion": "Đặt vùng ôn tập",
 	"flashcardResetImageRegion": "Hiện toàn bộ hình ảnh",
 	"flashcardImageRegionMustContainMasks": "Vùng này phải chứa tất cả phần che trong nhóm",

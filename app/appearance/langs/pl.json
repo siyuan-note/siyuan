@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Odsłaniaj maski po kolei",
+	"flashcardReviewDocumentTree": "Powtarzaj fiszki z tego dokumentu i jego poddokumentów",
+	"flashcardManageDocumentTree": "Zarządzaj fiszkami z tego dokumentu i jego poddokumentów",
+	"flashcardSplitParagraphTip": "Podziel akapit przy kursorze, aby przygotować pytanie i odpowiedź",
+	"flashcardAlternativeAnswer": "Odpowiedź alternatywna",
 	"flashcardDrawImageRegion": "Ustaw obszar powtórki",
 	"flashcardResetImageRegion": "Pokaż cały obraz",
 	"flashcardImageRegionMustContainMasks": "Obszar musi obejmować wszystkie maski w tej grupie",

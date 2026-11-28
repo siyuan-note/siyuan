@@ -59,16 +59,18 @@ func (expression *FlashcardQueryExpression) UnmarshalJSON(data []byte) error {
 // FlashcardSearchOptions 的开关默认均为 false，now 为毫秒时间戳，limit 为 0 时最多返回一百万张。
 // limit 与 offset 必须非负；groupBySource 按卡源分页并返回整组卡片，未分组时按卡片分页。
 type FlashcardSearchOptions struct {
-	Now              int64 `json:"now" api:"optional,nullable"`
-	IncludeInactive  bool  `json:"includeInactive" api:"optional,nullable"`
-	IncludeSuspended bool  `json:"includeSuspended" api:"optional,nullable"`
-	IncludeBuried    bool  `json:"includeBuried" api:"optional,nullable"`
-	IncludePaused    bool  `json:"includePaused" api:"optional,nullable"`
-	IncludeConflicts bool  `json:"includeConflicts" api:"optional,nullable"`
-	GroupBySource    bool  `json:"groupBySource" api:"optional,nullable"`
-	ReturnCards      bool  `json:"returnCards" api:"optional,nullable"`
-	Limit            int   `json:"limit" api:"optional,nullable"`
-	Offset           int   `json:"offset" api:"optional,nullable"`
+	Now              int64  `json:"now" api:"optional,nullable"`
+	IncludeInactive  bool   `json:"includeInactive" api:"optional,nullable"`
+	IncludeSuspended bool   `json:"includeSuspended" api:"optional,nullable"`
+	IncludeBuried    bool   `json:"includeBuried" api:"optional,nullable"`
+	IncludePaused    bool   `json:"includePaused" api:"optional,nullable"`
+	IncludeConflicts bool   `json:"includeConflicts" api:"optional,nullable"`
+	GroupBySource    bool   `json:"groupBySource" api:"optional,nullable"`
+	ReturnCards      bool   `json:"returnCards" api:"optional,nullable"`
+	SortBy           string `json:"sortBy,omitempty" api:"optional,nullable,enum=due|reps|interval|difficulty|stability"`
+	SortDescending   bool   `json:"sortDescending,omitempty" api:"optional,nullable"`
+	Limit            int    `json:"limit" api:"optional,nullable"`
+	Offset           int    `json:"offset" api:"optional,nullable"`
 }
 
 // FlashcardCard 的 editLater 省略时表示没有编辑待办；variantData 是由卡片类型定义的 JSON 数据。

@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "เปิดส่วนปิดบังทีละส่วน",
+	"flashcardReviewDocumentTree": "ทบทวนการ์ดในเอกสารนี้และเอกสารย่อย",
+	"flashcardManageDocumentTree": "จัดการการ์ดในเอกสารนี้และเอกสารย่อย",
+	"flashcardSplitParagraphTip": "แยกย่อหน้าที่ตำแหน่งเคอร์เซอร์เพื่อเตรียมคำถามและคำตอบ",
+	"flashcardAlternativeAnswer": "คำตอบทางเลือก",
 	"flashcardDrawImageRegion": "กำหนดพื้นที่ทบทวน",
 	"flashcardResetImageRegion": "แสดงรูปภาพทั้งหมด",
 	"flashcardImageRegionMustContainMasks": "พื้นที่ต้องครอบคลุมส่วนปิดบังทั้งหมดในกลุ่มนี้",

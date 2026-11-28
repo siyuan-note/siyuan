@@ -20,17 +20,19 @@ const maxCardSearchLimit = 1000000
 // CardSearchOptions 控制管理查询是否包含不可复习状态。
 type CardSearchOptions struct {
 	// 学习入口排除待编辑卡片；管理查询仍能查看和修复这些卡片。
-	ForStudy         bool  `json:"-"`
-	Now              int64 `json:"now"`
-	IncludeInactive  bool  `json:"includeInactive"`
-	IncludeSuspended bool  `json:"includeSuspended"`
-	IncludeBuried    bool  `json:"includeBuried"`
-	IncludePaused    bool  `json:"includePaused"`
-	IncludeConflicts bool  `json:"includeConflicts"`
-	GroupBySource    bool  `json:"groupBySource"`
-	ReturnCards      bool  `json:"returnCards"`
-	Limit            int   `json:"limit"`
-	Offset           int   `json:"offset"`
+	ForStudy         bool   `json:"-"`
+	Now              int64  `json:"now"`
+	IncludeInactive  bool   `json:"includeInactive"`
+	IncludeSuspended bool   `json:"includeSuspended"`
+	IncludeBuried    bool   `json:"includeBuried"`
+	IncludePaused    bool   `json:"includePaused"`
+	IncludeConflicts bool   `json:"includeConflicts"`
+	GroupBySource    bool   `json:"groupBySource"`
+	ReturnCards      bool   `json:"returnCards"`
+	SortBy           string `json:"sortBy,omitempty"`
+	SortDescending   bool   `json:"sortDescending,omitempty"`
+	Limit            int    `json:"limit"`
+	Offset           int    `json:"offset"`
 }
 
 // CardSearchResult 返回卡片、共享复习状态和当前卡源配置。
@@ -147,6 +149,25 @@ var numericQueryFields = map[string]struct{}{
 	"difficulty": {}, "flag": {},
 }
 
+var flashcardSearchSortColumns = map[string]string{
+	"due": "rs.due", "reps": "rs.reps", "interval": "rs.scheduled_days",
+	"difficulty": "rs.difficulty", "stability": "rs.stability",
+}
+
+func cardSearchOrder(options CardSearchOptions) (string, error) {
+	if options.SortBy == "" {
+		return "c.id", nil
+	}
+	column, valid := flashcardSearchSortColumns[options.SortBy]
+	if !valid || options.GroupBySource {
+		return "", errors.New("unsupported flashcard card sort")
+	}
+	if options.SortDescending {
+		column += " DESC"
+	}
+	return column + ", c.id", nil
+}
+
 // SearchCards 使用受限 AST 查询业务投影，不接受调用方提供 SQL。
 func (projection *Projection) SearchCards(ctx context.Context, query *QueryAST,
 	options CardSearchOptions) ([]CardSearchResult, error) {
@@ -161,7 +182,10 @@ func (projection *Projection) SearchCards(ctx context.Context, query *QueryAST,
 	if err != nil {
 		return nil, err
 	}
-	order := "c.id"
+	order, err := cardSearchOrder(options)
+	if err != nil {
+		return nil, err
+	}
 	offset := options.Offset
 	if options.GroupBySource {
 		sourceIDs, sourceErr := projection.searchCardSourcePage(ctx, where, args, limit, offset)
@@ -459,11 +483,17 @@ func (projection *Projection) reviewSetCardPageWithEligible(ctx context.Context,
 	if err = decodeStrictJSON(revision.Payload, &reviewSet); err != nil {
 		return ReviewSetCardPage{}, err
 	}
+	if _, err = cardSearchOrder(options); err != nil {
+		return ReviewSetCardPage{}, err
+	}
 	setOptions := options
 	setOptions.GroupBySource = false
 	setOptions.Limit = 0
 	setOptions.Offset = 0
-	if !reuseEligible {
+	filterOptions := setOptions
+	filterOptions.SortBy = ""
+	filterOptions.SortDescending = false
+	if !reuseEligible || options.SortBy != "" {
 		eligibleResults, err = projection.SearchCards(ctx, nil, setOptions)
 		if err != nil {
 			return ReviewSetCardPage{}, err
@@ -479,7 +509,7 @@ func (projection *Projection) reviewSetCardPageWithEligible(ctx context.Context,
 		if parseErr != nil {
 			return ReviewSetCardPage{}, parseErr
 		}
-		dynamicResults, searchErr := projection.SearchCards(ctx, &query, setOptions)
+		dynamicResults, searchErr := projection.SearchCards(ctx, &query, filterOptions)
 		if searchErr != nil {
 			return ReviewSetCardPage{}, searchErr
 		}
@@ -527,7 +557,7 @@ func (projection *Projection) reviewSetCardPageWithEligible(ctx context.Context,
 		delete(selected, cardID)
 	}
 	if query != nil {
-		filteredResults, searchErr := projection.SearchCards(ctx, query, setOptions)
+		filteredResults, searchErr := projection.SearchCards(ctx, query, filterOptions)
 		if searchErr != nil {
 			return ReviewSetCardPage{}, searchErr
 		}
@@ -542,12 +572,20 @@ func (projection *Projection) reviewSetCardPageWithEligible(ctx context.Context,
 		}
 	}
 	ret := make([]string, 0, len(selected))
-	for cardID := range selected {
-		if _, available := eligible[cardID]; available {
-			ret = append(ret, cardID)
+	if options.SortBy != "" {
+		for _, card := range eligibleResults {
+			if _, included := selected[card.Card.ID]; included {
+				ret = append(ret, card.Card.ID)
+			}
 		}
+	} else {
+		for cardID := range selected {
+			if _, available := eligible[cardID]; available {
+				ret = append(ret, cardID)
+			}
+		}
+		sort.Strings(ret)
 	}
-	sort.Strings(ret)
 	if options.GroupBySource {
 		cardsBySource := map[string][]string{}
 		sourceByCard := make(map[string]string, len(eligibleResults))

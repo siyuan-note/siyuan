@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Reveal masks one by one",
+	"flashcardReviewDocumentTree": "Review cards in this document and its subdocuments",
+	"flashcardManageDocumentTree": "Manage cards in this document and its subdocuments",
+	"flashcardSplitParagraphTip": "Split the paragraph at the cursor to prepare the card’s question and answer",
+	"flashcardAlternativeAnswer": "Alternative answer",
 	"flashcardDrawImageRegion": "Set review area",
 	"flashcardResetImageRegion": "Show full image",
 	"flashcardImageRegionMustContainMasks": "The area must contain every mask in this group",

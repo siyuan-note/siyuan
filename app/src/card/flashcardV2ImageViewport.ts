@@ -255,6 +255,10 @@ ${target && session && !region ? `<button type="button" data-zoom="auto" class="
     }, true);
     return {
         controls,
+        setTarget: (next: typeof target) => {
+            target = next;
+            fitInline();
+        },
         destroy: () => {
             inlineSize.disconnect();
             image.removeEventListener("load", fitInline);

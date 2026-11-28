@@ -113,6 +113,35 @@ func TestCardSearchGroupsBeforePagination(t *testing.T) {
 	assertSearchCardIDs(t, second, []string{"card-query-3", "card-query-4", "card-query-5"})
 }
 
+func TestCardSearchSortsAcrossPagesAndReviewSetMembership(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	now := int64(1786431600000)
+	setupQueryFixtures(t, ctx, store, now)
+	options := CardSearchOptions{Now: now, IncludeInactive: true, IncludeSuspended: true, IncludeBuried: true,
+		SortBy: "difficulty", SortDescending: true, Limit: 1, ReturnCards: true}
+	first, err := store.Projection().SearchCards(ctx, nil, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertSearchCardIDs(t, first, []string{"card-query-4"})
+	options.Offset = 1
+	second, err := store.Projection().SearchCards(ctx, nil, options)
+	if err != nil || len(second) != 1 || second[0].Card.ID == first[0].Card.ID {
+		t.Fatalf("unexpected second page: %+v (%v)", second, err)
+	}
+	options.Offset = 0
+	page, err := store.Projection().ReviewSetCardPage(ctx, "review-set-query", options)
+	if err != nil || page.Total != 3 || len(page.CardIDs) != 1 || page.CardIDs[0] != "card-query-4" {
+		t.Fatalf("review set did not sort before paging: %+v (%v)", page, err)
+	}
+	options.SortBy = "unrecognized column"
+	if _, err = store.Projection().SearchCards(ctx, nil, options); err == nil {
+		t.Fatal("unknown sort column was accepted")
+	}
+}
+
 func TestReviewSetCombinesDynamicMembersIncludesAndExclusions(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)

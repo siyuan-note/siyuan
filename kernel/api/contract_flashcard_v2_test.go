@@ -40,12 +40,17 @@ func compareFlashcardRequest[Request, Data, Legacy any](t *testing.T, endpoint a
 }
 
 func TestAPIContractFlashcardMigratedRequestCompatibility(t *testing.T) {
+	request, err := apicontract.QueryFlashcards.Decode(strings.NewReader(
+		`{"options":{"sortBy":"interval","sortDescending":true,"limit":20,"offset":40}}`))
+	if err != nil || request.Options.SortBy != "interval" || !request.Options.SortDescending {
+		t.Fatalf("card search lost its sort options: %+v (%v)", request, err)
+	}
 	compareFlashcardRequest[apicontract.FlashcardV2BasicSourceRequest, apicontract.FlashcardV2BasicSourceResult, flashcardv2.BasicSourceRequest](t,
 		apicontract.CreateBasicFlashcardSource, []string{`{"OperationID":"op","BlockIDs":["block"],"createdAt":1,"bidirectional":null}`, `{"createdAt":1.5}`})
 	compareFlashcardRequest[apicontract.FlashcardV2AdvancedSourceRequest, apicontract.FlashcardV2AdvancedSourceResult, flashcardv2.AdvancedSourceRequest](t,
 		apicontract.CreateAdvancedFlashcardSource, []string{
 			`{"mode":"choice","distractorQuery":{"version":1,"root":{"operator":"predicate","value":9007199254740993}}}`,
-			`{"mode":"imageOcclusion","imageConfig":{"groups":[{"id":"a","shapeIDs":["shape"],"visibleRegion":{"x":0.1,"y":0.2,"width":0.5,"height":0.4}},{"id":"b","shapeIDs":["other"]}]}}`,
+			`{"mode":"imageOcclusion","imageConfig":{"groups":[{"id":"a","shapeIDs":["shape","other"],"stepOrder":["other","shape"],"visibleRegion":{"x":0.1,"y":0.2,"width":0.5,"height":0.4}}]}}`,
 		})
 	compareFlashcardRequest[apicontract.FlashcardV2MutateFlashcardEntitiesRequest, apicontract.FlashcardV2EntityMutationResult, mutateFlashcardEntitiesRequest](t,
 		apicontract.MutateFlashcardEntities, []string{`{"operationID":"op","mutations":[{"entityType":"source","payload":{"n":9007199254740993}},{"payload":null},{}]}`})

@@ -275,6 +275,19 @@ func TestImageOcclusionValidationAndStableGroupVariants(t *testing.T) {
 		}
 	}
 	config.Groups[0].VisibleRegion = nil
+	for _, order := range [][]string{{"shape-b", "shape-a"}, {"shape-a"}, {"shape-a", "shape-a"}, {"shape-b", "foreign"}} {
+		config.Groups[0].StepOrder = order
+		source.GenerationConfig = mustRawJSON(t, config)
+		ordered, err := EnumerateCardVariants(source, template)
+		if order[0] == "shape-b" && order[1] == "shape-a" {
+			if err != nil || len(ordered) != 1 || ordered[0].Key != variants[0].Key {
+				t.Fatalf("ordered image masks must remain one card: %+v (%v)", ordered, err)
+			}
+		} else if err == nil {
+			t.Fatalf("invalid image step order was accepted: %+v", order)
+		}
+	}
+	config.Groups[0].StepOrder = nil
 	config.Shapes[0].Width = 2
 	source.GenerationConfig = mustRawJSON(t, config)
 	if _, err = EnumerateCardVariants(source, template); err == nil {

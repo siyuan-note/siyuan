@@ -82,7 +82,7 @@ interface IImageOcclusionConfig {
         height?: number,
         points?: Array<{ x: number, y: number }>
     }>;
-    groups: Array<{ id: string, shapeIDs: string[], visibleRegion?: IFlashcardV2ImageRegion }>;
+    groups: Array<{ id: string, shapeIDs: string[], visibleRegion?: IFlashcardV2ImageRegion, stepOrder?: string[] }>;
     frontMode: "hideAllAnswerOne" | "hideCurrent";
 }
 
@@ -570,6 +570,24 @@ const ankiReferenceHasContent = (dom: string) => {
     return dom.replace(/<[^>]*>/g, "").replace(/&nbsp;|\u200b/g, "").trim() !== "";
 };
 
+export const selectFlashcardV2References = (references: IFlashcardV2SourceReference[], spec?: IFlashcardV2RenderModel["template"]["frontSpec"]) => {
+    if (!spec) {
+        return [];
+    }
+    const fieldIDs = new Set(spec.fieldIDs || []);
+    if (spec.fieldID) {
+        fieldIDs.add(spec.fieldID);
+    }
+    const roles = new Set(spec.roles || []);
+    if (spec.role) {
+        roles.add(spec.role);
+    }
+    if (fieldIDs.size === 0 && roles.size === 0) {
+        return [];
+    }
+    return references.filter((reference) => fieldIDs.has(reference.fieldID) || roles.has(reference.role));
+};
+
 export const flashcardV2ReferenceHTML = (reference: IFlashcardV2SourceReference, doms: Record<string, string>) => {
     const dom = doms[reference.entityID];
     const occlusionID = flashcardV2OcclusionIDForReference(reference);
@@ -997,53 +1015,63 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
     wrapper.className = "card__v2-image-occlusion";
     image.parentElement.insertBefore(wrapper, image);
     wrapper.appendChild(image);
-    let targetBounds: {left: number, top: number, right: number, bottom: number} | undefined;
-    const maskLabels: HTMLElement[] = [];
-    visibleShapes.forEach((shape) => {
+    const overlays = new Map<string, {element: HTMLElement, shape: IImageOcclusionConfig["shapes"][number]}>();
+    for (const shape of visibleShapes) {
         const style = shapeStyle(shape);
-        if (!style) {
-            return;
-        }
+        if (!style) { continue; }
         const overlay = document.createElement("span");
         overlay.className = "card__v2-image-shape";
-        if (targetShapeIDs.has(shape.id)) {
-            overlay.classList.add("card__v2-image-shape--target");
-            overlay.setAttribute("role", "img");
-            overlay.setAttribute("aria-label", shape.label || window.siyuan.languages.flashcardImageTarget);
+        overlay.dataset.shapeId = shape.id;
+        overlay.setAttribute("style", style);
+        overlay.setAttribute("aria-hidden", "true");
+        wrapper.appendChild(overlay);
+        overlays.set(shape.id, {element: overlay, shape});
+    }
+    const targets = group.shapeIDs.filter(id => overlays.has(id));
+    const order = Array.isArray(group.stepOrder) ? unique(group.stepOrder).filter(id => targets.includes(id)) : [];
+    const steps = order.length > 1 && order.length === targets.length ? order.map(id => [id]) : [targets];
+    let step = 0;
+    const hint = document.createElement("div");
+    hint.className = "b3-label__text ft__on-surface";
+    if (steps.length > 1) {
+        hint.setAttribute("aria-live", "polite");
+    }
+    wrapper.insertAdjacentElement("afterend", hint);
+    const maskLabels: HTMLElement[] = [];
+    const highlightStep = () => {
+        hint.textContent = window.siyuan.languages.flashcardImageTargetTip +
+            (steps.length > 1 ? " " + (step + 1) + " / " + steps.length : "");
+        let targetBounds: {left: number, top: number, right: number, bottom: number} | undefined;
+        for (const id of steps[step]) {
+            const {element, shape} = overlays.get(id);
+            element.classList.add("card__v2-image-shape--target");
+            element.removeAttribute("aria-hidden");
+            element.setAttribute("role", "img");
+            element.setAttribute("aria-label", shape.label || window.siyuan.languages.flashcardImageTarget);
             const points = shape.type === "polygon" ? shape.points :
                 [{x: shape.x, y: shape.y}, {x: shape.x + shape.width, y: shape.y + shape.height}];
-            targetBounds ||= {left: 1, top: 1, right: 0, bottom: 0};
+            const xs = points.map(point => point.x);
+            const ys = points.map(point => point.y);
+            const box = {left: Math.min(...xs), top: Math.min(...ys), right: Math.max(...xs), bottom: Math.max(...ys)};
+            targetBounds = targetBounds ? {
+                left: Math.min(targetBounds.left, box.left), top: Math.min(targetBounds.top, box.top),
+                right: Math.max(targetBounds.right, box.right), bottom: Math.max(targetBounds.bottom, box.bottom),
+            } : box;
             if (shape.label) {
-                const xs = points.map(point => point.x);
-                const ys = points.map(point => point.y);
                 const label = document.createElement("span");
                 label.className = "card__v2-image-mask-label";
                 label.setAttribute("aria-hidden", "true");
-                label.setAttribute("style", "left:" + (Math.min(...xs) + Math.max(...xs)) * 50 +
-                    "%;top:" + (Math.min(...ys) + Math.max(...ys)) * 50 + "%");
+                label.setAttribute("style", "left:" + (box.left + box.right) * 50 + "%;top:" + (box.top + box.bottom) * 50 + "%");
                 label.textContent = shape.label;
+                wrapper.appendChild(label);
                 maskLabels.push(label);
             }
-            for (const point of points) {
-                targetBounds.left = Math.min(targetBounds.left, point.x);
-                targetBounds.top = Math.min(targetBounds.top, point.y);
-                targetBounds.right = Math.max(targetBounds.right, point.x);
-                targetBounds.bottom = Math.max(targetBounds.bottom, point.y);
-            }
-        } else {
-            overlay.setAttribute("aria-hidden", "true");
         }
-        overlay.dataset.shapeId = shape.id;
-        overlay.setAttribute("style", style);
-        wrapper.appendChild(overlay);
-    });
-    maskLabels.forEach(label => wrapper.appendChild(label));
-    const hint = document.createElement("div");
-    hint.className = "b3-label__text ft__on-surface";
-    hint.textContent = window.siyuan.languages.flashcardImageTargetTip;
-    wrapper.insertAdjacentElement("afterend", hint);
-    const display = bindViewport?.(wrapper, image, targetBounds, group.visibleRegion);
-    const otherShapes = [...wrapper.querySelectorAll<HTMLElement>("[data-shape-id]")]
+        return targetBounds;
+    };
+    const initialTarget = highlightStep();
+    const display = bindViewport?.(wrapper, image, initialTarget, group.visibleRegion);
+    const otherShapes = Array.from(overlays.values(), ({element}) => element)
         .filter(shape => !targetShapeIDs.has(shape.dataset.shapeId));
     const toggle = document.createElement("button");
     toggle.type = "button";
@@ -1062,17 +1090,22 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
     return {
         destroy: display?.destroy,
         revealNext: () => {
+            if (step >= steps.length) { return true; }
+            maskLabels.splice(0).forEach(label => label.remove());
+            for (const id of steps[step++]) {
+                const {element} = overlays.get(id);
+                element.classList.remove("card__v2-image-shape--target");
+                element.classList.add("card__v2-image-shape--revealed");
+                element.removeAttribute("role");
+                element.removeAttribute("aria-label");
+                element.setAttribute("aria-hidden", "true");
+            }
+            if (step < steps.length) {
+                const nextTarget = highlightStep();
+                display?.setTarget(nextTarget);
+                return false;
+            }
             hint.remove();
-            maskLabels.forEach(label => label.remove());
-            wrapper.querySelectorAll<HTMLElement>("[data-shape-id]").forEach((overlay) => {
-                if (targetShapeIDs.has(overlay.dataset.shapeId)) {
-                    overlay.classList.remove("card__v2-image-shape--target");
-                    overlay.classList.add("card__v2-image-shape--revealed");
-                    overlay.removeAttribute("role");
-                    overlay.removeAttribute("aria-label");
-                    overlay.setAttribute("aria-hidden", "true");
-                }
-            });
             toggle.classList.remove("fn__none");
             return true;
         },

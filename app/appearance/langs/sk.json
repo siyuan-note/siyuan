@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Odhaliť masky postupne",
+	"flashcardReviewDocumentTree": "Opakovať kartičky z tohto dokumentu a jeho poddokumentov",
+	"flashcardManageDocumentTree": "Spravovať kartičky z tohto dokumentu a jeho poddokumentov",
+	"flashcardSplitParagraphTip": "Rozdeliť odsek pri kurzore a pripraviť otázku a odpoveď",
+	"flashcardAlternativeAnswer": "Alternatívna odpoveď",
 	"flashcardDrawImageRegion": "Nastaviť oblasť opakovania",
 	"flashcardResetImageRegion": "Zobraziť celý obrázok",
 	"flashcardImageRegionMustContainMasks": "Oblasť musí obsahovať všetky masky v tejto skupine",

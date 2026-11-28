@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "マスクを順番に表示",
+	"flashcardReviewDocumentTree": "このドキュメントと子ドキュメントのカードを復習",
+	"flashcardManageDocumentTree": "このドキュメントと子ドキュメントのカードを管理",
+	"flashcardSplitParagraphTip": "カーソル位置で段落を分けて、カードの問題と答えを準備します",
+	"flashcardAlternativeAnswer": "別の解答候補",
 	"flashcardDrawImageRegion": "復習範囲を設定",
 	"flashcardResetImageRegion": "画像全体を表示",
 	"flashcardImageRegionMustContainMasks": "このグループのマスクがすべて範囲に入るようにしてください",

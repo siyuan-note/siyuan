@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Maskers één voor één onthullen",
+	"flashcardReviewDocumentTree": "Kaarten in dit document en zijn subdocumenten herhalen",
+	"flashcardManageDocumentTree": "Kaarten in dit document en zijn subdocumenten beheren",
+	"flashcardSplitParagraphTip": "Splits de alinea bij de cursor om de vraag en het antwoord voor te bereiden",
+	"flashcardAlternativeAnswer": "Alternatief antwoord",
 	"flashcardDrawImageRegion": "Herhaalgebied instellen",
 	"flashcardResetImageRegion": "Hele afbeelding tonen",
 	"flashcardImageRegionMustContainMasks": "Het gebied moet alle maskers van deze groep bevatten",

@@ -32,7 +32,7 @@ class ElementStub {
     remove() { this.removed = true; }
 }
 
-const render = (frontMode: string) => {
+const render = (frontMode: string, stepOrder?: string[]) => {
     const source = readFileSync("src/card/flashcardV2Render.ts", "utf8");
     const code = source.slice(source.lastIndexOf("const normalized =", source.indexOf("const shapeStyle =")),
         source.indexOf("export const prepareFlashcardV2Reveal ="));
@@ -42,7 +42,7 @@ const render = (frontMode: string) => {
     parent.appendChild(image);
     const model = {source: {generationConfig: {
         assetID: "image.png", frontMode,
-        groups: [{id: "current", shapeIDs: ["rect", "ellipse", "polygon"]}],
+        groups: [{id: "current", shapeIDs: ["rect", "ellipse", "polygon"], stepOrder}],
         shapes: [
             {id: "rect", type: "rectangle", x: .1, y: .1, width: .2, height: .2, label: "Region <A>"},
             {id: "ellipse", type: "ellipse", x: .4, y: .1, width: .2, height: .2},
@@ -51,16 +51,21 @@ const render = (frontMode: string) => {
         ],
     }}, card: {variantData: {groupID: "current"}}};
     const controls = new ElementStub();
+    const focus: unknown[] = [];
     const controller = runInNewContext(transpileModule(code +
         "\nprepareImageOcclusions(element, model, bindFlashcardV2ImageViewport);", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText, {
         document: {createElement: () => new ElementStub()},
         window: {siyuan: {languages: {flashcardImageTarget: "Current answer", flashcardImageTargetTip: "Striped answer"}}},
         element: {querySelectorAll: () => [image]}, model,
-        bindFlashcardV2ImageViewport: () => ({controls, destroy: () => {}}),
+        unique: (items: string[]) => [...new Set(items)],
+        bindFlashcardV2ImageViewport: (_wrapper: unknown, _image: unknown, target: unknown) => {
+            focus.push(target);
+            return {controls, destroy: () => {}, setTarget: (next: unknown) => focus.push(next)};
+        },
     });
     const wrapper = parent.children.find(child => child.className === "card__v2-image-occlusion");
-    const hint = parent.children.find(child => child.textContent === "Striped answer");
-    return {controller, wrapper, hint, controls};
+    const hint = parent.children.find(child => child.textContent.startsWith("Striped answer"));
+    return {controller, wrapper, hint, controls, focus};
 };
 
 test("all-hidden mode marks every current shape accessibly and keeps other groups neutral", () => {
@@ -92,6 +97,23 @@ test("current-only mode retains its visibility and non-color cue", () => {
     const {wrapper} = render("hideCurrent");
     assert.equal(wrapper.querySelectorAll().length, 3);
     assert.ok(wrapper.querySelectorAll().every(shape => shape.className.includes("--target")));
+});
+
+test("an ordered image card advances its focus and completes only after its final mask", () => {
+    const {controller, wrapper, hint, focus} = render("hideAllAnswerOne", ["ellipse", "rect", "polygon"]);
+    const [rect, ellipse, polygon, other] = wrapper.querySelectorAll();
+    assert.match(ellipse.className, /--target/);
+    assert.doesNotMatch(rect.className, /--target|--revealed/);
+    assert.equal(controller.revealNext(), false);
+    assert.match(ellipse.className, /--revealed/);
+    assert.match(rect.className, /--target/);
+    assert.equal(hint.textContent, "Striped answer 2 / 3");
+    assert.equal(controller.revealNext(), false);
+    assert.match(polygon.className, /--target/);
+    assert.equal(controller.revealNext(), true);
+    assert.equal(hint.removed, true);
+    assert.doesNotMatch(other.className, /--revealed/);
+    assert.deepEqual(focus.map(target => (target as {top: number}).top), [.1, .1, .5]);
 });
 
 test("target pattern overlays an opaque base and does not rely on clipped polygon borders", () => {

@@ -33,3 +33,26 @@ export const extendFlashcardV2ImageRegion = (region: IFlashcardV2ImageRegion, bo
     return {x, y, width: Math.max(region.x + region.width, bounds.x + bounds.width) - x,
         height: Math.max(region.y + region.height, bounds.y + bounds.height) - y};
 };
+
+export const flashcardImageOCRRegions = (rows: Array<Record<string, string> | null>,
+    imageWidth: number, imageHeight: number): IFlashcardV2ImageRegion[] => {
+    const page = rows.find(row => row?.level === "1" && row.page_num === "1");
+    const width = Number(page?.width) || imageWidth;
+    const height = Number(page?.height) || imageHeight;
+    if (!(width > 0 && height > 0)) { return []; }
+    const normalize = (value: number, size: number) => Math.max(0, Math.min(1, value / size));
+    const result: IFlashcardV2ImageRegion[] = [];
+    for (const row of rows) {
+        if (row?.level !== "5" || row.page_num !== "1" || !row.text?.trim()) { continue; }
+        const left = Number(row.left);
+        const top = Number(row.top);
+        const x = normalize(left, width);
+        const y = normalize(top, height);
+        const region = {x, y, width: normalize(left + Number(row.width), width) - x,
+            height: normalize(top + Number(row.height), height) - y};
+        if (isFlashcardV2ImageRegion(region)) {
+            result.push(region);
+        }
+    }
+    return result;
+};

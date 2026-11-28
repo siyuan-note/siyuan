@@ -182,6 +182,14 @@ func OCRAsset(ctx context.Context, path string) (string, []map[string]string, er
 	return ocrAsset(ctx, path, Conf.GetOCR(), false)
 }
 
+func OCRAssetLocal(ctx context.Context, path string) (string, []map[string]string, error) {
+	value := Conf.GetOCR()
+	if value.Provider == "ai" {
+		return "", nil, errors.New("a local OCR provider is required")
+	}
+	return ocrAsset(ctx, path, value, false)
+}
+
 func ocrAsset(ctx context.Context, path string, value conf.OCR, automatic bool) (_ string, _ []map[string]string, resultErr error) {
 	if value.Provider == "ai" {
 		text, err := aiOCRAsset(ctx, path, value, automatic)

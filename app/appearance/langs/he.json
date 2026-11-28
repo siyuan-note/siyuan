@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "חשיפת המסכות לפי הסדר",
+	"flashcardReviewDocumentTree": "חזרה על כרטיסים במסמך ובמסמכי המשנה שלו",
+	"flashcardManageDocumentTree": "ניהול כרטיסים במסמך ובמסמכי המשנה שלו",
+	"flashcardSplitParagraphTip": "פיצול הפסקה במיקום הסמן להכנת השאלה והתשובה",
+	"flashcardAlternativeAnswer": "תשובה חלופית",
 	"flashcardDrawImageRegion": "הגדרת אזור חזרה",
 	"flashcardResetImageRegion": "הצגת התמונה המלאה",
 	"flashcardImageRegionMustContainMasks": "האזור חייב לכלול את כל המסכות בקבוצה",

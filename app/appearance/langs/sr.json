@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "Otkrivaj maske redom",
+	"flashcardReviewDocumentTree": "Ponavljaj kartice ovog dokumenta i njegovih poddokumenata",
+	"flashcardManageDocumentTree": "Upravljaj karticama ovog dokumenta i njegovih poddokumenata",
+	"flashcardSplitParagraphTip": "Podeli pasus kod kursora da pripremiš pitanje i odgovor",
+	"flashcardAlternativeAnswer": "Alternativni odgovor",
 	"flashcardDrawImageRegion": "Podesi oblast za ponavljanje",
 	"flashcardResetImageRegion": "Prikaži celu sliku",
 	"flashcardImageRegionMustContainMasks": "Oblast mora da obuhvati sve maske u ovoj grupi",

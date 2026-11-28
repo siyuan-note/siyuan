@@ -8,6 +8,8 @@ export interface IFlashcardTabData {
     title?: string;
     reviewSetID?: string;
     review?: IFlashcardV2ReviewSessionOptions;
+    transferID?: string;
+    windowTransferID?: string;
 }
 
 // 布局只保存复习范围，旧队列和游标由新会话重新计算。

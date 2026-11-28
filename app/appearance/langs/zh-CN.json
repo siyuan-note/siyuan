@@ -1,4 +1,9 @@
 {
+	"flashcardImageSequential": "按顺序揭晓遮挡",
+	"flashcardReviewDocumentTree": "复习当前文档及子文档的闪卡",
+	"flashcardManageDocumentTree": "管理当前文档及子文档的闪卡",
+	"flashcardSplitParagraphTip": "将从光标处拆分段落，以准备卡片的正面与答案",
+	"flashcardAlternativeAnswer": "备选答案",
 	"flashcardDrawImageRegion": "设置复习区域",
 	"flashcardResetImageRegion": "显示整张图片",
 	"flashcardImageRegionMustContainMasks": "复习区域必须包含本组的所有遮挡",

@@ -204,7 +204,6 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 			migrateTaskStatusMenu(profile)
 		}
 		migrateChartHeightMenu(profile)
-		migrateFlashcardMenu(profile)
 		profileIDs[profile.ID] = true
 		profiles = append(profiles, profile)
 	}

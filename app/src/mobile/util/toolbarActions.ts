@@ -10,6 +10,7 @@ export const MOBILE_TOOLBAR_ACTIONS = [
     {name: "redo", lang: "redo", icon: "iconRedo"},
     {name: "moveup", lang: "moveToUp", icon: "iconUp"},
     {name: "movedown", lang: "moveToDown", icon: "iconDown"},
+    {name: "quickMakeCard", lang: "quickMakeCard", icon: "iconRiffCard", defaultVisible: false},
 ];
 
 // 常用插入按钮复用斜杠菜单命令，避免维护另一套内容转换逻辑。

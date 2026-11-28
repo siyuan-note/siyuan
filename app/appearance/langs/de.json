@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Wiederholungsbereich festlegen",
+	"flashcardResetImageRegion": "Ganzes Bild anzeigen",
+	"flashcardImageRegionMustContainMasks": "Der Bereich muss alle Masken dieser Gruppe enthalten",
 	"flashcardImageMaskLabel": "Hinweis auf der Abdeckung",
 	"flashcardFocusImageMask": "Auf die aktuelle Abdeckung fokussieren",
 	"flashcardReviewSubtree": "Karten dieses Blocks und seiner Unterblöcke lernen",

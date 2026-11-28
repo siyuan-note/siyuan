@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Ustaw obszar powtórki",
+	"flashcardResetImageRegion": "Pokaż cały obraz",
+	"flashcardImageRegionMustContainMasks": "Obszar musi obejmować wszystkie maski w tej grupie",
 	"flashcardImageMaskLabel": "Podpowiedź na masce",
 	"flashcardFocusImageMask": "Automatycznie przybliż aktualną maskę",
 	"flashcardReviewSubtree": "Powtarzaj karty tego bloku i jego potomków",

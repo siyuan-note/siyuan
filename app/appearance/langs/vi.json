@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Đặt vùng ôn tập",
+	"flashcardResetImageRegion": "Hiện toàn bộ hình ảnh",
+	"flashcardImageRegionMustContainMasks": "Vùng này phải chứa tất cả phần che trong nhóm",
 	"flashcardImageMaskLabel": "Gợi ý trên vùng che",
 	"flashcardFocusImageMask": "Tự động tập trung vào vùng che hiện tại",
 	"flashcardReviewSubtree": "Ôn các thẻ trong khối này và các khối con",

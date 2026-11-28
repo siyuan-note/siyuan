@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "समीक्षा क्षेत्र तय करें",
+	"flashcardResetImageRegion": "पूरी छवि दिखाएँ",
+	"flashcardImageRegionMustContainMasks": "क्षेत्र में इस समूह के सभी आवरण शामिल होने चाहिए",
 	"flashcardImageMaskLabel": "ढके क्षेत्र का संकेत",
 	"flashcardFocusImageMask": "वर्तमान ढके क्षेत्र पर अपने आप फ़ोकस करें",
 	"flashcardReviewSubtree": "इस ब्लॉक और इसके अधीन ब्लॉकों के कार्ड की समीक्षा करें",

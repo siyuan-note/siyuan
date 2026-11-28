@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Definir zona de repaso",
+	"flashcardResetImageRegion": "Mostrar la imagen completa",
+	"flashcardImageRegionMustContainMasks": "La zona debe incluir todas las máscaras del grupo",
 	"flashcardImageMaskLabel": "Pista de la máscara",
 	"flashcardFocusImageMask": "Enfocar automáticamente la máscara actual",
 	"flashcardReviewSubtree": "Repasar tarjetas de este bloque y sus descendientes",

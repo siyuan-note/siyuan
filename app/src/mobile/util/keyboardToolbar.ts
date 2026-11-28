@@ -110,6 +110,22 @@ let toolbarProtyle: IProtyle;
 let fontFamilyMenu: {element: HTMLElement, protyle: IProtyle} | undefined;
 let unmountLiteSlashMenu: (() => void) | undefined;
 
+const getMobileQuickCardBlockID = (protyle: IProtyle | undefined, range: Range | undefined) => {
+    if (!protyle?.block.rootID || protyle.lite || protyle.disabled || !range?.collapsed ||
+        window.siyuan.config.readonly || window.siyuan.isPublish) {
+        return;
+    }
+    const node = range.startContainer;
+    if (!node.isConnected || hasClosestByClassName(node, "protyle-wysiwyg", true) !== protyle.wysiwyg.element) {
+        return;
+    }
+    const block = hasClosestBlock(node);
+    if (block && block.getAttribute("data-type") !== "NodeThematicBreak" &&
+        !block.closest('[data-type="NodeBlockQueryEmbed"]')) {
+        return block.getAttribute("data-node-id") || undefined;
+    }
+};
+
 const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string | IMenuItem>) => {
     const protyle = getCurrentEditor()?.protyle;
     const selection = getSelection();
@@ -133,6 +149,9 @@ const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string
             if (name === "agentQuote") {
                 return hasText && !!protyle?.block.rootID && !isEncryptedBox(protyle.notebookId) &&
                     !window.siyuan.config.readonly && !window.siyuan.isPublish;
+            }
+            if (name === "quickMakeCard") {
+                return !!getMobileQuickCardBlockID(protyle, range);
             }
             if (name === "block-type") {
                 return !!range && !!getBlockTypeSelection(protyle, range);
@@ -1695,7 +1714,7 @@ export const initKeyboardToolbar = () => {
     toolbarElement.addEventListener("mousedown", event => {
         const buttonElement = hasClosestByTag(event.target as HTMLElement, "BUTTON");
         const type = buttonElement && buttonElement.getAttribute("data-type");
-        if (type === "undo" || type === "redo" || type === "block" || type === "block-type") {
+        if (type === "undo" || type === "redo" || type === "block" || type === "block-type" || type === "quickMakeCard") {
             // 保持编辑器焦点，避免工具栏操作期间软键盘收起。
             event.preventDefault();
         }
@@ -1824,13 +1843,23 @@ export const initKeyboardToolbar = () => {
             }
             return;
         }
-        // 块菜单允许在编辑器失焦后使用当前文档中保存的选区。
-        const range = type === "block" && protyle ?
+        // 块级操作在编辑器失焦后仍可使用当前文档的选区。
+        const range = (type === "block" || type === "quickMakeCard") && protyle ?
             getEditorFocusRange(protyle.wysiwyg.element, currentRange, protyle.toolbar.range) : currentRange;
         if (!range) {
             return;
         }
         if (window.siyuan.config.readonly || !protyle || protyle.disabled) {
+            return;
+        }
+        if (type === "quickMakeCard") {
+            const blockID = getMobileQuickCardBlockID(protyle, range);
+            if (blockID) {
+                const {createQuickSources} = await import("../../card/makeCard");
+                if (getCurrentEditor()?.protyle === protyle && getMobileQuickCardBlockID(protyle, range) === blockID) {
+                    createQuickSources([blockID]);
+                }
+            }
             return;
         }
         if (type === "agentQuote") {

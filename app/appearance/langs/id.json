@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Atur area ulasan",
+	"flashcardResetImageRegion": "Tampilkan gambar utuh",
+	"flashcardImageRegionMustContainMasks": "Area harus mencakup semua penutup dalam grup ini",
 	"flashcardImageMaskLabel": "Petunjuk area tertutup",
 	"flashcardFocusImageMask": "Fokus otomatis pada area tertutup saat ini",
 	"flashcardReviewSubtree": "Tinjau kartu dalam blok ini dan turunannya",

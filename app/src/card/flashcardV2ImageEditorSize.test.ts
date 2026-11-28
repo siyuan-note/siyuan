@@ -3,12 +3,14 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ScriptTarget, transpileModule} from "typescript";
+import {extendFlashcardV2ImageRegion, flashcardV2ImageRegionContains} from "./flashcardV2ImageRegion";
 
 class Control {
     value = "";
     textContent = "";
     dataset: Record<string, string> = {};
     toggleAttribute() {}
+    focus() {}
     attributes = new Map<string, string>();
     getAttribute(key: string) { return this.attributes.get(key); }
     setAttribute(key: string, value: string) { this.attributes.set(key, value); }
@@ -23,9 +25,10 @@ class Control {
 
 const setup = () => {
     const draws: number[][] = [];
+    const messages: string[] = [];
     const context = {beginPath() {}, closePath() {}, moveTo() {}, lineTo() {}, ellipse() {},
         rect: (...values: number[]) => draws.push(values), fill() {}, stroke() {}, arc() {},
-        setTransform() {}, clearRect() {}, strokeRect() {}, fillRect() {}};
+        setTransform() {}, clearRect() {}, strokeRect() {}, fillRect() {}, save() {}, restore() {}, setLineDash() {}};
     const image = Object.assign(new Control(), {clientWidth: 600, clientHeight: 300, naturalWidth: 600, naturalHeight: 300, style: {width: ""},
         parentElement: {offsetLeft: 0, offsetTop: 0},
         getBoundingClientRect: () => ({width: 480, height: 240})});
@@ -38,12 +41,13 @@ const setup = () => {
     const controls = new Map<string, Control>([["img", image], ["canvas", canvas], [".card__v2-image-viewport", viewport]]);
     for (const key of ["imageShape", "imageGroup", "imageFrontMode", "finishPolygon", "undoImageShape", "deleteImageShape",
         "zoomImageIn", "zoomImageOut", "resetImageZoom", "selectImageShapes", "mergeImageShapes", "splitImageShapes",
-        "actualImageSize", "fullscreenImageEditor"]) {
+        "actualImageSize", "fullscreenImageEditor", "drawImageRegion", "resetImageRegion"]) {
         controls.set(`[data-type="${key}"]`, new Control());
     }
     controls.get('[data-type="imageShape"]').value = "rectangle";
     controls.set('[data-type="imageMaskLabelField"]', Object.assign(new Control(), {querySelector: () => labelInput}));
-    const window = Object.assign(new Control(), {devicePixelRatio: 2, innerHeight: 900});
+    const window = Object.assign(new Control(), {devicePixelRatio: 2, innerHeight: 900,
+        siyuan: {languages: {flashcardImageRegionMustContainMasks: "Include every mask"}}});
     const document = new Control();
     let resize: () => void;
     let disconnected = false;
@@ -61,6 +65,8 @@ const setup = () => {
     }).outputText, {
         window, document, initial, element: {querySelector: (selector: string) => controls.get(selector)},
         bindFlashcardV2Pinch: () => {}, escapeAttr: (value: string) => value, genUUID: () => `generated-${++id}`,
+        extendFlashcardV2ImageRegion, flashcardV2ImageRegionContains,
+        showMessage: (value: string) => messages.push(value),
         requestAnimationFrame: (callback: () => void) => { frame = callback; return 1; },
         cancelAnimationFrame: () => { cancelled = true; },
         ResizeObserver: class {
@@ -72,10 +78,41 @@ const setup = () => {
             disconnect() { disconnected = true; }
         },
     });
-    return {editor, image, canvas, draws, window, document, viewport, labelInput,
+    return {editor, image, canvas, draws, window, document, viewport, labelInput, messages,
         control: (key: string) => controls.get('[data-type="' + key + '"]'), frame: () => frame(), resize: () => resize(),
         disconnected: () => disconnected, cancelled: () => cancelled};
 };
+
+test("a group crop must cover its masks, grows when they move, and can be reset and undone", () => {
+    const state = setup();
+    state.frame();
+    const click = (key: string) => state.control(key).emit("click");
+    const pointer = (x: number, y: number) => ({clientX: 20 + x * 480, clientY: 30 + y * 240, button: 0, pointerId: 1});
+    const drag = (x: number, y: number, endX: number, endY: number) => {
+        state.canvas.emit("pointerdown", pointer(x, y));
+        state.canvas.emit("pointerup", pointer(endX, endY));
+    };
+    const region = () => state.editor.getConfig().groups[0].visibleRegion;
+    state.control("imageShape").value = "edit";
+    state.control("imageShape").emit("change");
+    drag(.25, .4, .25, .4);
+    click("drawImageRegion");
+    drag(.2, .25, .35, .5);
+    assert.equal(region(), undefined);
+    assert.deepEqual(state.messages, ["Include every mask"]);
+    drag(.05, .1, .55, .8);
+    assert.equal(region().x, .05);
+    assert.equal(region().width, .5);
+    assert.equal(state.control("drawImageRegion").getAttribute("aria-pressed"), "false");
+    drag(.25, .4, .65, .4);
+    assert.ok(Math.abs(region().x + region().width - .8) < 1e-9);
+    click("resetImageRegion");
+    assert.equal(region(), undefined);
+    click("undoImageShape");
+    assert.ok(Math.abs(region().x + region().width - .8) < 1e-9);
+    assert.equal(state.editor.getConfig().groups[0].id, "group");
+    state.editor.destroy();
+});
 
 test("dialog transform does not shrink the editor canvas twice", () => {
     const state = setup();

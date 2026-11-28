@@ -256,6 +256,25 @@ func TestImageOcclusionValidationAndStableGroupVariants(t *testing.T) {
 	if len(variants) != 1 || variants[0].Key != "group:group-a" {
 		t.Fatalf("unexpected image occlusion variants: %+v", variants)
 	}
+	config.Groups[0].VisibleRegion = &ImageOcclusionRegion{Width: 0.4, Height: 0.4}
+	source.GenerationConfig = mustRawJSON(t, config)
+	cropped, err := EnumerateCardVariants(source, template)
+	if err != nil || len(cropped) != 1 || cropped[0].Key != variants[0].Key {
+		t.Fatalf("a crop must preserve the image group variant: %+v (%v)", cropped, err)
+	}
+	for _, invalid := range []ImageOcclusionRegion{
+		{Width: 0.25, Height: 0.4},
+		{X: 0.05, Width: 0.4, Height: 0.4},
+		{Width: 0.4, Height: 0},
+		{X: 0.5, Width: 0.6, Height: 0.4},
+	} {
+		config.Groups[0].VisibleRegion = &invalid
+		source.GenerationConfig = mustRawJSON(t, config)
+		if _, err = EnumerateCardVariants(source, template); err == nil {
+			t.Fatalf("invalid visible region was accepted: %+v", invalid)
+		}
+	}
+	config.Groups[0].VisibleRegion = nil
 	config.Shapes[0].Width = 2
 	source.GenerationConfig = mustRawJSON(t, config)
 	if _, err = EnumerateCardVariants(source, template); err == nil {

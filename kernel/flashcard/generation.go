@@ -100,9 +100,17 @@ type ImageOcclusionPoint struct {
 
 // ImageOcclusionGroup 允许多个形状形成一张稳定遮挡卡。
 type ImageOcclusionGroup struct {
-	ID           string   `json:"id"`
-	ShapeIDs     []string `json:"shapeIDs"`
-	DisplayOrder int      `json:"displayOrder"`
+	ID            string                `json:"id"`
+	ShapeIDs      []string              `json:"shapeIDs"`
+	DisplayOrder  int                   `json:"displayOrder"`
+	VisibleRegion *ImageOcclusionRegion `json:"visibleRegion,omitempty"`
+}
+
+type ImageOcclusionRegion struct {
+	X      float64 `json:"x"`
+	Y      float64 `json:"y"`
+	Width  float64 `json:"width"`
+	Height float64 `json:"height"`
 }
 
 // ChoiceGenerationConfig 保存固定选择题的稳定选项、正确答案和随机顺序策略。
@@ -742,12 +750,12 @@ func (config *ImageOcclusionConfig) validate() error {
 	if config.FrontMode != "hideAllAnswerOne" && config.FrontMode != "hideCurrent" {
 		return fmt.Errorf("unsupported image occlusion front mode [%s]", config.FrontMode)
 	}
-	shapeIDs := map[string]struct{}{}
+	shapes := map[string]ImageOcclusionShape{}
 	for _, shape := range config.Shapes {
 		if strings.TrimSpace(shape.ID) == "" {
 			return errors.New("image occlusion shape ID is required")
 		}
-		if _, duplicate := shapeIDs[shape.ID]; duplicate {
+		if _, duplicate := shapes[shape.ID]; duplicate {
 			return fmt.Errorf("duplicate image occlusion shape ID [%s]", shape.ID)
 		}
 		switch shape.Type {
@@ -768,7 +776,7 @@ func (config *ImageOcclusionConfig) validate() error {
 		default:
 			return fmt.Errorf("unsupported image occlusion shape type [%s]", shape.Type)
 		}
-		shapeIDs[shape.ID] = struct{}{}
+		shapes[shape.ID] = shape
 	}
 	groupIDs := map[string]struct{}{}
 	orders := map[int]struct{}{}
@@ -786,21 +794,49 @@ func (config *ImageOcclusionConfig) validate() error {
 		if err := validateUniqueStrings("image occlusion group shape IDs", group.ShapeIDs, false); err != nil {
 			return err
 		}
+		region := group.VisibleRegion
+		if region != nil && (!normalizedCoordinate(region.X) || !normalizedCoordinate(region.Y) ||
+			!normalizedLength(region.Width) || !normalizedLength(region.Height) ||
+			region.X+region.Width > 1+imageRegionTolerance || region.Y+region.Height > 1+imageRegionTolerance) {
+			return fmt.Errorf("image occlusion group [%s] has an invalid visible region", group.ID)
+		}
 		for _, shapeID := range group.ShapeIDs {
-			if _, found := shapeIDs[shapeID]; !found {
+			shape, found := shapes[shapeID]
+			if !found {
 				return fmt.Errorf("image occlusion group references unknown shape [%s]", shapeID)
+			}
+			if region != nil && !region.contains(shape) {
+				return fmt.Errorf("image occlusion visible region does not contain shape [%s]", shapeID)
 			}
 			shapeUse[shapeID]++
 		}
 		groupIDs[group.ID] = struct{}{}
 		orders[group.DisplayOrder] = struct{}{}
 	}
-	for shapeID := range shapeIDs {
+	for shapeID := range shapes {
 		if shapeUse[shapeID] == 0 {
 			return fmt.Errorf("image occlusion shape [%s] is not assigned to a group", shapeID)
 		}
 	}
 	return nil
+}
+
+const imageRegionTolerance = 1e-9
+
+func (region *ImageOcclusionRegion) contains(shape ImageOcclusionShape) bool {
+	containsPoint := func(x, y float64) bool {
+		return x >= region.X-imageRegionTolerance && y >= region.Y-imageRegionTolerance &&
+			x <= region.X+region.Width+imageRegionTolerance && y <= region.Y+region.Height+imageRegionTolerance
+	}
+	if shape.Type == "polygon" {
+		for _, point := range shape.Points {
+			if !containsPoint(point.X, point.Y) {
+				return false
+			}
+		}
+		return true
+	}
+	return containsPoint(shape.X, shape.Y) && containsPoint(shape.X+shape.Width, shape.Y+shape.Height)
 }
 
 func (config *ChoiceGenerationConfig) validate() error {

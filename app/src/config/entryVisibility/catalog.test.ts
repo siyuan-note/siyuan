@@ -45,6 +45,18 @@ import {
 } from "./catalog";
 import {getBuiltinProfileEntryVisibility} from "./profile";
 
+test("keyboard quick card is an optional action in the no-selection context", () => {
+    const context = TOOLBAR_ENTRY_ROOT_PATH + ".mobile-input";
+    const key = "mobile-quickMakeCard";
+    const path = context + "." + key;
+    const siblings = getEntryCatalogChildren(context).map(item => item.key);
+    assert.equal(siblings[siblings.indexOf(key) - 1], "mobile-movedown");
+    assert.equal(getEntryCatalogNode(path).simple, false);
+    assert.equal(getEntryCatalogDefaultVisibility(path), false);
+    assert.equal(getEntryCatalogCustomDefaultVisibility(path), false);
+    assert.equal(getEntryCatalogNode(TOOLBAR_ENTRY_ROOT_PATH + ".mobile-selection." + key), undefined);
+});
+
 test("reference creation visibility has stable paths and preserves existing defaults", () => {
     const path = "editor.ref";
     assert.deepEqual(getEntryCatalogChildren(path).map(item => item.key), ["newFile", "newSubDoc", "newFileAtPath"]);

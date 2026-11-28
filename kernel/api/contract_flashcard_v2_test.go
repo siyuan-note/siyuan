@@ -43,7 +43,10 @@ func TestAPIContractFlashcardMigratedRequestCompatibility(t *testing.T) {
 	compareFlashcardRequest[apicontract.FlashcardV2BasicSourceRequest, apicontract.FlashcardV2BasicSourceResult, flashcardv2.BasicSourceRequest](t,
 		apicontract.CreateBasicFlashcardSource, []string{`{"OperationID":"op","BlockIDs":["block"],"createdAt":1,"bidirectional":null}`, `{"createdAt":1.5}`})
 	compareFlashcardRequest[apicontract.FlashcardV2AdvancedSourceRequest, apicontract.FlashcardV2AdvancedSourceResult, flashcardv2.AdvancedSourceRequest](t,
-		apicontract.CreateAdvancedFlashcardSource, []string{`{"mode":"choice","distractorQuery":{"version":1,"root":{"operator":"predicate","value":9007199254740993}}}`})
+		apicontract.CreateAdvancedFlashcardSource, []string{
+			`{"mode":"choice","distractorQuery":{"version":1,"root":{"operator":"predicate","value":9007199254740993}}}`,
+			`{"mode":"imageOcclusion","imageConfig":{"groups":[{"id":"a","shapeIDs":["shape"],"visibleRegion":{"x":0.1,"y":0.2,"width":0.5,"height":0.4}},{"id":"b","shapeIDs":["other"]}]}}`,
+		})
 	compareFlashcardRequest[apicontract.FlashcardV2MutateFlashcardEntitiesRequest, apicontract.FlashcardV2EntityMutationResult, mutateFlashcardEntitiesRequest](t,
 		apicontract.MutateFlashcardEntities, []string{`{"operationID":"op","mutations":[{"entityType":"source","payload":{"n":9007199254740993}},{"payload":null},{}]}`})
 	compareFlashcardRequest[apicontract.FlashcardV2ReviewRequest, apicontract.FlashcardV2ReviewResult, flashcardv2.ReviewRequest](t,

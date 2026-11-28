@@ -341,6 +341,23 @@
     pointer-events: none;
   }
 
+  &__v2-image-review-region {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+
+    > .card__v2-image-occlusion {
+      position: absolute;
+      max-width: none;
+
+      > img {
+        max-width: none;
+        max-height: none;
+      }
+    }
+  }
+
   &__v2-image-review-controls {
     display: flex;
     flex-wrap: wrap;

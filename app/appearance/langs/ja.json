@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "復習範囲を設定",
+	"flashcardResetImageRegion": "画像全体を表示",
+	"flashcardImageRegionMustContainMasks": "このグループのマスクがすべて範囲に入るようにしてください",
 	"flashcardImageMaskLabel": "マスクのヒント",
 	"flashcardFocusImageMask": "現在のマスクに自動で焦点を合わせる",
 	"flashcardReviewSubtree": "このブロックと子孫ブロックのカードを復習",

@@ -1,4 +1,10 @@
 import {getFlashcardV2BlockScope} from "./flashcardV2BlockScope";
+import {
+    extendFlashcardV2ImageRegion,
+    flashcardV2ImageRegionContains,
+    isFlashcardV2ImageRegion,
+    type IFlashcardV2ImageRegion,
+} from "./flashcardV2ImageRegion";
 import {bindFlashcardV2ReviewOptions, flashcardV2ReviewOptionsHTML} from "./flashcardV2ReviewOptions";
 import {bindFlashcardV2Pinch} from "./flashcardV2ImageViewport";
 import {priorityLabel, reviewStateLabel} from "./flashcardV2Study";
@@ -3246,7 +3252,7 @@ interface IFlashcardV2ImageEditor {
     getConfig: () => {
         assetID: string;
         shapes: Array<Omit<IFlashcardV2ImageShape, "groupID">>;
-        groups: Array<{ id: string, shapeIDs: string[], displayOrder: number }>;
+        groups: Array<{ id: string, shapeIDs: string[], displayOrder: number, visibleRegion?: IFlashcardV2ImageRegion }>;
         frontMode: string;
     };
     hasShapes: () => boolean;
@@ -3256,7 +3262,7 @@ interface IFlashcardV2ImageEditor {
 
 interface IFlashcardV2AdvancedGenerationConfig {
     occlusions?: Array<{ id: string, groupIDs: string[], displayOrder: number }>;
-    groups?: Array<{ id: string, displayOrder: number, shapeIDs?: string[] }>;
+    groups?: Array<{ id: string, displayOrder: number, shapeIDs?: string[], visibleRegion?: IFlashcardV2ImageRegion }>;
     steps?: Array<{ id: string, displayOrder: number, occlusionIDs: string[] }>;
     shapes?: Array<Omit<IFlashcardV2ImageShape, "groupID">>;
     frontMode?: string;
@@ -3288,7 +3294,8 @@ const isFlashcardV2AdvancedGenerationConfig = (value: unknown): value is IFlashc
         typeof item.id === "string" && typeof item.displayOrder === "number";
     if (!optionalList(value.occlusions, (item) => orderedItem(item) && "groupIDs" in item && isFlashcardV2Strings(item.groupIDs)) ||
         !optionalList(value.groups, (item) => orderedItem(item) &&
-            (!("shapeIDs" in item) || isFlashcardV2Strings(item.shapeIDs))) ||
+            (!("shapeIDs" in item) || isFlashcardV2Strings(item.shapeIDs)) &&
+            (!("visibleRegion" in item) || item.visibleRegion == null || isFlashcardV2ImageRegion(item.visibleRegion))) ||
         !optionalList(value.steps, (item) => orderedItem(item) && "occlusionIDs" in item && isFlashcardV2Strings(item.occlusionIDs)) ||
         !optionalList(value.options, orderedItem)) {
         return false;
@@ -3508,6 +3515,8 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     const multiButton = element.querySelector<HTMLButtonElement>('[data-type="selectImageShapes"]');
     const mergeButton = element.querySelector<HTMLButtonElement>('[data-type="mergeImageShapes"]');
     const splitButton = element.querySelector<HTMLButtonElement>('[data-type="splitImageShapes"]');
+    const drawRegionButton = element.querySelector<HTMLButtonElement>('[data-type="drawImageRegion"]');
+    const resetRegionButton = element.querySelector<HTMLButtonElement>('[data-type="resetImageRegion"]');
     const zoomIn = element.querySelector<HTMLButtonElement>('[data-type="zoomImageIn"]');
     const zoomOut = element.querySelector<HTMLButtonElement>('[data-type="zoomImageOut"]');
     const zoomReset = element.querySelector<HTMLButtonElement>('[data-type="resetImageZoom"]');
@@ -3515,7 +3524,8 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     const fullscreenButton = element.querySelector<HTMLButtonElement>('[data-type="fullscreenImageEditor"]');
     const shapes: IFlashcardV2ImageShape[] = [];
     const groupOrder: string[] = [];
-    const history: {shapes: IFlashcardV2ImageShape[], groups: string[]}[] = [];
+    const regions = new Map<string, IFlashcardV2ImageRegion>();
+    const history: {shapes: IFlashcardV2ImageShape[], groups: string[], regions: typeof regions}[] = [];
     let zoom = 1;
     let spaceHeld = false;
     let pointerID: number | undefined;
@@ -3527,12 +3537,16 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     let pan: {x: number, y: number, left: number, top: number} | undefined;
     let start: IFlashcardV2ImagePoint | undefined;
     let current: IFlashcardV2ImagePoint | undefined;
+    let drawRegionFor: string | undefined;
     let polygon: IFlashcardV2ImagePoint[] = [];
     let touchPolygonPoint: number | undefined;
     let destroyed = false;
     if (initial?.groups && initial?.shapes) {
         [...initial.groups].sort((left, right) => left.displayOrder - right.displayOrder).forEach((group) => {
             groupOrder.push(group.id);
+            if (group.visibleRegion) {
+                regions.set(group.id, group.visibleRegion);
+            }
             group.shapeIDs?.forEach((shapeID) => {
                 const shape = initial.shapes.find((item) => item.id === shapeID);
                 if (shape) {
@@ -3559,6 +3573,16 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         const x = Math.min(...xs);
         const y = Math.min(...ys);
         return {x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y};
+    };
+    const dragBounds = () => ({
+        x: Math.min(start.x, current.x), y: Math.min(start.y, current.y),
+        width: Math.abs(start.x - current.x), height: Math.abs(start.y - current.y),
+    });
+    const fitRegionToShape = (shape: IFlashcardV2ImageShape) => {
+        const region = regions.get(shape.groupID);
+        if (region) {
+            regions.set(shape.groupID, extendFlashcardV2ImageRegion(region, bounds(shape)));
+        }
     };
     const handles = (box: ReturnType<typeof bounds>, width: number, height: number): Handle[] => {
         const controls: Handle[] = [{x: box.x + box.width / 2,
@@ -3633,7 +3657,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         return inside;
     };
     const record = () => {
-        history.push({shapes: [...shapes], groups: [...groupOrder]});
+        history.push({shapes: [...shapes], groups: [...groupOrder], regions: new Map(regions)});
     };
     const groupColor = (groupID: string, alpha: number) => {
         const index = Math.max(0, groupOrder.indexOf(groupID));
@@ -3704,11 +3728,19 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
                 context.strokeRect(box.x * width, box.y * height, box.width * width, box.height * height);
             }
         });
-        if (start && current && shapeSelect.value !== "polygon") {
-            const x = Math.min(start.x, current.x);
-            const y = Math.min(start.y, current.y);
+        const regionGroup = drawRegionFor || shapes[selected]?.groupID;
+        const region = drawRegionFor && start && current ? dragBounds() : regions.get(regionGroup);
+        if (region) {
+            context.save();
+            context.strokeStyle = groupColor(regionGroup, 1);
+            context.setLineDash([6, 4]);
+            context.lineWidth = 3;
+            context.strokeRect(region.x * width, region.y * height, region.width * width, region.height * height);
+            context.restore();
+        }
+        if (!drawRegionFor && start && current && shapeSelect.value !== "polygon") {
             drawShape({id: "", groupID: groupSelect.value || "", type: shapeSelect.value as TFlashcardV2ImageShapeType,
-                x, y, width: Math.abs(start.x - current.x), height: Math.abs(start.y - current.y)}, width, height, .35);
+                ...dragBounds()}, width, height, .35);
         }
         if (polygon.length > 0) {
             drawShape({id: "", groupID: groupSelect.value || "", type: "polygon", points: polygon}, width, height,
@@ -3720,6 +3752,13 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
                 context.fill();
             });
         }
+    };
+    const updateRegionControls = () => {
+        const groupID = shapes[selected]?.groupID;
+        drawRegionButton.disabled = !groupID;
+        drawRegionButton.setAttribute("aria-pressed", String(!!drawRegionFor));
+        resetRegionButton.disabled = !regions.has(groupID);
+        canvas.dataset.mode = drawRegionFor ? "region" : shapeSelect.value;
     };
     const select = (index: number, toggle = false) => {
         if (!toggle) {
@@ -3747,6 +3786,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             seenGroups.add(groupID);
             return false;
         });
+        updateRegionControls();
         redraw();
     };
     const fitWidth = () => Math.min(image.naturalWidth, viewport.clientWidth,
@@ -3794,6 +3834,12 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     const updateAfterEdit = () => {
         const remainingGroups = new Set(shapes.map(shape => shape.groupID));
         groupOrder.splice(0, groupOrder.length, ...groupOrder.filter(id => remainingGroups.has(id)));
+        for (const groupID of regions.keys()) {
+            if (!remainingGroups.has(groupID)) {
+                regions.delete(groupID);
+            }
+        }
+        drawRegionFor = undefined;
         updateGroups();
         select(-1);
         onChange(shapes.length > 0);
@@ -3807,6 +3853,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         shapes.forEach((shape, index) => {
             if (selectedIDs.has(shape.id) && shape.groupID !== groupID) {
                 shapes[index] = {...shape, groupID};
+                fitRegionToShape(shapes[index]);
             }
         });
         updateAfterEdit();
@@ -3841,6 +3888,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             groupOrder.push(groupID);
         }
         shapes.push({...shape, id: genUUID(), groupID});
+        fitRegionToShape(shapes.at(-1));
         updateGroups();
         groupSelect.value = "";
         onChange(true);
@@ -3868,6 +3916,9 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             }
             shapes.splice(0, shapes.length, ...previous.shapes);
             groupOrder.splice(0, groupOrder.length, ...previous.groups);
+            regions.clear();
+            previous.regions.forEach((region, groupID) => regions.set(groupID, region));
+            drawRegionFor = undefined;
             updateGroups();
             select(-1);
         }
@@ -3901,7 +3952,14 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             event.preventDefault();
             event.stopPropagation();
         }
-        if (event.key === "Delete" && selected >= 0) {
+        if (event.key === "Escape" && drawRegionFor) {
+            drawRegionFor = undefined;
+            clearPointer();
+            updateRegionControls();
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        if (event.key === "Delete" && selected >= 0 && !drawRegionFor) {
             event.preventDefault();
             event.stopPropagation();
             deleteShape();
@@ -3924,7 +3982,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         }
         if (spaceHeld || shapeSelect.value === "pan") {
             pan = {x: event.clientX, y: event.clientY, left: viewport.scrollLeft, top: viewport.scrollTop};
-        } else if (shapeSelect.value === "edit") {
+        } else if (shapeSelect.value === "edit" && !drawRegionFor) {
             const box = selected >= 0 ? bounds(shapes[selected]) : undefined;
             const rect = canvas.getBoundingClientRect();
             const multi = event.shiftKey || multiButton.getAttribute("aria-pressed") === "true";
@@ -4008,14 +4066,25 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         if (editDrag?.draft) {
             record();
             shapes[selected] = editDrag.draft;
+            fitRegionToShape(shapes[selected]);
             onChange(true);
         } else if (start) {
-            const x = Math.min(start.x, current.x);
-            const y = Math.min(start.y, current.y);
-            const width = Math.abs(start.x - current.x);
-            const height = Math.abs(start.y - current.y);
-            if (width >= .005 && height >= .005) {
-                addShape({type: shapeSelect.value as TFlashcardV2ImageShapeType, x, y, width, height});
+            const region = dragBounds();
+            if (region.width >= .005 && region.height >= .005) {
+                if (drawRegionFor) {
+                    if (shapes.some(shape => shape.groupID === drawRegionFor &&
+                        !flashcardV2ImageRegionContains(region, bounds(shape)))) {
+                        showMessage(window.siyuan.languages.flashcardImageRegionMustContainMasks);
+                    } else {
+                        record();
+                        regions.set(drawRegionFor, region);
+                        drawRegionFor = undefined;
+                        updateRegionControls();
+                        onChange(true);
+                    }
+                } else {
+                    addShape({type: shapeSelect.value as TFlashcardV2ImageShapeType, ...region});
+                }
             }
         }
         clearPointer();
@@ -4049,10 +4118,10 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     shapeSelect.addEventListener("change", () => {
         clearPointer();
         polygon = [];
-        canvas.dataset.mode = shapeSelect.value;
+        drawRegionFor = undefined;
         polygonButton.classList.toggle("fn__none", shapeSelect.value !== "polygon");
         polygonButton.disabled = true;
-        [deleteButton, multiButton, mergeButton, splitButton].forEach(button =>
+        [deleteButton, multiButton, mergeButton, splitButton, drawRegionButton, resetRegionButton].forEach(button =>
             button.classList.toggle("fn__none", shapeSelect.value !== "edit"));
         select(-1);
     });
@@ -4072,6 +4141,25 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     labelInput.addEventListener("blur", () => { editingLabel = false; });
     mergeButton.addEventListener("click", mergeSelected);
     splitButton.addEventListener("click", splitSelected);
+    drawRegionButton.addEventListener("click", () => {
+        if (pointerID === undefined && selected >= 0) {
+            drawRegionFor = drawRegionFor ? undefined : shapes[selected].groupID;
+            updateRegionControls();
+            canvas.focus({preventScroll: true});
+            redraw();
+        }
+    });
+    resetRegionButton.addEventListener("click", () => {
+        const groupID = shapes[selected]?.groupID;
+        if (pointerID === undefined && regions.has(groupID)) {
+            record();
+            regions.delete(groupID);
+            drawRegionFor = undefined;
+            updateRegionControls();
+            onChange(true);
+            redraw();
+        }
+    });
     multiButton.addEventListener("click", () => {
         const enabled = multiButton.getAttribute("aria-pressed") === "true";
         multiButton.setAttribute("aria-pressed", String(!enabled));
@@ -4124,6 +4212,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
                 id: groupID,
                 shapeIDs: shapes.filter((shape) => shape.groupID === groupID).map((shape) => shape.id),
                 displayOrder,
+                ...(regions.has(groupID) ? {visibleRegion: regions.get(groupID)} : {}),
             })),
             frontMode: frontMode.value,
         }),
@@ -4227,6 +4316,10 @@ ${newInlineTargets.length > 0 ? `<div class="card__v2-advanced-section-action"><
     <button data-type="undoImageShape" class="b3-button b3-button--outline">${window.siyuan.languages.undo}</button>
 </div>
 <label data-type="imageMaskLabelField" class="b3-label fn__none"><div class="b3-label__text">${window.siyuan.languages.flashcardImageMaskLabel}</div><input type="text" class="b3-text-field fn__block"></label>
+<div class="card__v2-advanced-image-toolbar">
+    <button type="button" data-type="drawImageRegion" class="b3-button b3-button--outline fn__none" aria-pressed="false" disabled>${window.siyuan.languages.flashcardDrawImageRegion}</button>
+    <button type="button" data-type="resetImageRegion" class="b3-button b3-button--outline fn__none" disabled>${window.siyuan.languages.flashcardResetImageRegion}</button>
+</div>
 <select data-type="imageFrontMode" class="b3-select fn__block">
     <option value="hideAllAnswerOne">${window.siyuan.languages.flashcardImageHideAll}</option>
     <option value="hideCurrent">${window.siyuan.languages.flashcardImageHideCurrent}</option>

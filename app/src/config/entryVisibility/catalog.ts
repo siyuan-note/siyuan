@@ -536,7 +536,9 @@ export const SLASH_MENU_FREQUENT_PATH = `${SLASH_MENU_ROOT_PATH}.frequent`;
 // 共享工具栏声明决定目录默认顺序，块类型位于首位，字体和字号位于外观之前。
 // 移动端操作按钮复用统一声明，复制和剪切由悬浮工具栏提供，显隐和排序使用已有配置标识。
 const toolbarBuiltinChildren = [
-    ...MOBILE_TOOLBAR_ACTIONS.map(item => node(getMobileToolbarActionKey(item.name), lang(item.lang), true)),
+    ...MOBILE_TOOLBAR_ACTIONS.map(item => node(getMobileToolbarActionKey(item.name), lang(item.lang),
+        item.defaultVisible !== false, undefined, undefined, item.defaultVisible === false ?
+            {defaultVisible: () => false, customDefaultVisible: false} : undefined)),
     separator("mobile-separator"),
     ...DESKTOP_TOOLBAR_ENTRIES.map((item) => {
         if (item.separator) {

@@ -1,5 +1,6 @@
 import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {escapeAttr} from "../util/escape";
+import {isFlashcardV2ImageRegion, type IFlashcardV2ImageRegion} from "./flashcardV2ImageRegion";
 
 const focusedReviews = new WeakSet<Element>();
 
@@ -59,19 +60,44 @@ export const bindFlashcardV2Pinch = (element: HTMLElement, cancelSingle: () => v
     (["pointerup", "pointercancel", "lostpointercapture"] as const).forEach(type => element.addEventListener(type, release, true));
 };
 
+const mountImageRegion = (layer: HTMLElement, image: HTMLImageElement, region: IFlashcardV2ImageRegion) => {
+    const frame = document.createElement("span");
+    frame.className = "card__v2-image-review-region";
+    layer.before(frame);
+    frame.appendChild(layer);
+    return {
+        frame,
+        fitWidth: (maxWidth: number, maxHeight: number) => Math.min(image.naturalWidth * region.width, maxWidth,
+            maxHeight * image.naturalWidth / image.naturalHeight * region.width / region.height),
+        layout: (width: number) => {
+            const imageWidth = width / region.width;
+            const imageHeight = imageWidth * image.naturalHeight / image.naturalWidth;
+            frame.style.width = `${width}px`;
+            frame.style.height = `${imageHeight * region.height}px`;
+            layer.style.left = `${-region.x * imageWidth}px`;
+            layer.style.top = `${-region.y * imageHeight}px`;
+            image.style.width = `${imageWidth}px`;
+            image.style.height = "auto";
+        },
+    };
+};
+
 export const bindFlashcardV2ImageViewport = (wrapper: HTMLElement, image: HTMLImageElement,
-    target: {left: number, top: number, right: number, bottom: number} | undefined) => {
+    target: {left: number, top: number, right: number, bottom: number} | undefined,
+    visibleRegion?: IFlashcardV2ImageRegion) => {
     const lang = window.siyuan.languages;
+    const region = isFlashcardV2ImageRegion(visibleRegion) ? visibleRegion : undefined;
     const session = wrapper.closest(".card__v2-session");
     const card = wrapper.closest(".card__block");
     const inlineViewport = document.createElement("span");
     inlineViewport.className = "card__v2-image-review-scroll";
     wrapper.insertAdjacentElement("beforebegin", inlineViewport);
     inlineViewport.appendChild(wrapper);
+    const inlineRegion = region && mountImageRegion(wrapper, image, region);
     const controls = document.createElement("div");
     controls.className = "card__v2-image-review-controls";
     controls.innerHTML = `<button type="button" data-zoom="open" class="b3-button b3-button--outline" aria-label="${escapeAttr(lang.zoomIn)}"><svg aria-hidden="true"><use xlink:href="#iconZoomIn"></use></svg></button>
-${target && session ? `<button type="button" data-zoom="auto" class="b3-button b3-button--outline" aria-pressed="false">${lang.flashcardFocusImageMask}</button>` : ""}`;
+${target && session && !region ? `<button type="button" data-zoom="auto" class="b3-button b3-button--outline" aria-pressed="false">${lang.flashcardFocusImageMask}</button>` : ""}`;
     inlineViewport.insertAdjacentElement("afterend", controls);
     const focusButton = controls.querySelector<HTMLButtonElement>('[data-zoom="auto"]');
     const originalWidth = image.style.width;
@@ -80,6 +106,13 @@ ${target && session ? `<button type="button" data-zoom="auto" class="b3-button b
         const height = (card?.clientHeight || 0) - controls.offsetHeight - 30;
         if (height > 0) {
             inlineViewport.style.setProperty("--card-image-height", `${height}px`);
+        }
+        if (inlineRegion) {
+            if (image.naturalWidth && image.naturalHeight) {
+                inlineRegion.layout(inlineRegion.fitWidth(inlineViewport.clientWidth,
+                    height > 0 ? height : window.innerHeight * .48));
+            }
+            return;
         }
         const focus = !!target && !!session && focusedReviews.has(session);
         const aspect = image.naturalWidth / image.naturalHeight;
@@ -147,6 +180,8 @@ ${target && session ? `<button type="button" data-zoom="auto" class="b3-button b
         previewImage.removeAttribute("style");
         previewImage.draggable = false;
         viewport.appendChild(clone);
+        const previewRegion = region && mountImageRegion(clone, previewImage, region);
+        const previewContent = previewRegion?.frame || clone;
         const zoomIn = dialog.element.querySelector<HTMLButtonElement>('[data-zoom="in"]');
         const zoomOut = dialog.element.querySelector<HTMLButtonElement>('[data-zoom="out"]');
         let zoom = 1;
@@ -154,21 +189,25 @@ ${target && session ? `<button type="button" data-zoom="auto" class="b3-button b
         const layout = () => {
             const aspect = previewImage.naturalWidth / previewImage.naturalHeight;
             if (Number.isFinite(aspect) && aspect > 0) {
-                const width = Math.min(previewImage.naturalWidth, viewport.clientWidth, viewport.clientHeight * aspect);
-                previewImage.style.width = `${Math.floor(width * zoom)}px`;
+                if (previewRegion) {
+                    previewRegion.layout(previewRegion.fitWidth(viewport.clientWidth, viewport.clientHeight) * zoom);
+                } else {
+                    const width = Math.min(previewImage.naturalWidth, viewport.clientWidth, viewport.clientHeight * aspect);
+                    previewImage.style.width = `${Math.floor(width * zoom)}px`;
+                }
             }
             zoomIn.disabled = zoom >= 8;
             zoomOut.disabled = zoom <= 1;
         };
         const zoomTo = (value: number, x = viewport.clientWidth / 2, y = viewport.clientHeight / 2) => {
-            const oldWidth = clone.offsetWidth;
-            const oldHeight = clone.offsetHeight;
-            const pointX = (viewport.scrollLeft + x - clone.offsetLeft) / Math.max(1, oldWidth);
-            const pointY = (viewport.scrollTop + y - clone.offsetTop) / Math.max(1, oldHeight);
+            const oldWidth = previewContent.offsetWidth;
+            const oldHeight = previewContent.offsetHeight;
+            const pointX = (viewport.scrollLeft + x - previewContent.offsetLeft) / Math.max(1, oldWidth);
+            const pointY = (viewport.scrollTop + y - previewContent.offsetTop) / Math.max(1, oldHeight);
             zoom = Math.max(1, Math.min(8, value));
             layout();
-            viewport.scrollLeft = clone.offsetLeft + pointX * clone.offsetWidth - x;
-            viewport.scrollTop = clone.offsetTop + pointY * clone.offsetHeight - y;
+            viewport.scrollLeft = previewContent.offsetLeft + pointX * previewContent.offsetWidth - x;
+            viewport.scrollTop = previewContent.offsetTop + pointY * previewContent.offsetHeight - y;
         };
         previewImage.addEventListener("load", layout, {once: true});
         size.observe(viewport);

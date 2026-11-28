@@ -6,10 +6,11 @@ import {join} from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import {compile} from "sass";
 
-const browserCase = async (source: string) => {
+const browserCase = async (source: string, regionSource: string, css: string) => {
     const style = document.createElement("style");
-    style.textContent = ".card__v2-image-review-scroll{display:block}.card__v2-image-preview-scroll{width:600px;height:440px}";
+    style.textContent = css + ".card__v2-image-preview-scroll{flex:none;width:600px;height:440px}";
     document.head.appendChild(style);
     const fixture = document.createElement("div");
     fixture.className = "card__v2-session";
@@ -35,8 +36,14 @@ const browserCase = async (source: string) => {
         }
     }
     const exports = {};
-    new Function("exports", "require", source)(exports, (path: string) =>
-        path.includes("adaptiveDialog") ? {AdaptiveDialog: Dialog} : {escapeAttr: (value: string) => value});
+    const regionExports = {};
+    new Function("exports", regionSource)(regionExports);
+    new Function("exports", "require", source)(exports, (path: string) => {
+        if (path.includes("adaptiveDialog")) {
+            return {AdaptiveDialog: Dialog};
+        }
+        return path.includes("flashcardV2ImageRegion") ? regionExports : {escapeAttr: (value: string) => value};
+    });
     const {bindFlashcardV2ImageViewport} = exports as typeof import("./flashcardV2ImageViewport");
     const view = bindFlashcardV2ImageViewport(layer, img, {left: .2, top: .25, right: .35, bottom: .4});
     const inline = fixture.querySelector<HTMLElement>(".card__v2-image-review-scroll");
@@ -48,20 +55,41 @@ const browserCase = async (source: string) => {
     const maskedClone = Array.from(fullscreen.querySelectorAll<HTMLElement>("[data-shape-id]"), el => el.dataset.shapeId);
     const originalStillMounted = layer.contains(img);
     view.destroy();
-    return {initialFit, autoFocused, maskedClone, originalStillMounted,
-        closed: !document.querySelector(".card__v2-image-preview-scroll")};
+    const closed = !document.querySelector(".card__v2-image-preview-scroll");
+
+    inline.replaceWith(layer);
+    view.controls.remove();
+    const cropped = bindFlashcardV2ImageViewport(layer, img, {left: .2, top: .25, right: .35, bottom: .4},
+        {x: .1, y: .2, width: .5, height: .5});
+    const frame = layer.parentElement;
+    const clip = getComputedStyle(frame).overflow;
+    const inReview = [frame.offsetWidth, frame.offsetHeight, layer.offsetLeft, layer.offsetTop];
+    cropped.controls.querySelector<HTMLButtonElement>('[data-zoom="open"]').click();
+    const preview = document.querySelector(".card__v2-image-preview-scroll");
+    await preview.querySelector("img").decode();
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    const previewFrame = preview.querySelector<HTMLElement>(".card__v2-image-review-region");
+    const enlarged = [previewFrame.offsetWidth, previewFrame.offsetHeight, preview.querySelectorAll("[data-shape-id]").length];
+    document.querySelector<HTMLButtonElement>('[data-zoom="in"]').click();
+    const zoomed = [previewFrame.offsetWidth, previewFrame.offsetHeight];
+    cropped.destroy();
+    return {initialFit, autoFocused, maskedClone, originalStillMounted, closed, clip, inReview, enlarged, zoomed};
 };
 
-test("the enlarged image clones both masks and closes with the owning review", async () => {
+test("the enlarged review image preserves both masks and the group crop", async () => {
     const path = mkdtempSync(join(tmpdir(), "siyuan-mask-viewport-"));
     try {
         const source = transpileModule(readFileSync("src/card/flashcardV2ImageViewport.ts", "utf8"), {
             compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
         }).outputText;
+        const regionSource = transpileModule(readFileSync("src/card/flashcardV2ImageRegion.ts", "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+        }).outputText;
+        const css = compile("src/assets/scss/business/_card.scss").css;
         const lang = {zoomIn: "Zoom in", zoomOut: "Zoom out", fitImage: "Fit image",
             flashcardFocusImageMask: "Focus current mask", flashcardImageOcclusion: "Image occlusion"};
         const command = "const __name = value => value; window.siyuan={languages:" + JSON.stringify(lang) + "};(" + browserCase.toString() +
-            ")(" + JSON.stringify(source) + ");";
+            ")(" + [source, regionSource, css].map(value => JSON.stringify(value)).join(",") + ");";
         const script = join(path, "viewport.cjs");
         writeFileSync(script, "const {app,BrowserWindow}=require('electron');" +
             "app.setPath('userData'," + JSON.stringify(join(path, "profile")) + ");" +
@@ -82,6 +110,10 @@ test("the enlarged image clones both masks and closes with the owning review", a
         assert.deepEqual(result.maskedClone, ["target", "other"]);
         assert.equal(result.originalStillMounted, true);
         assert.equal(result.closed, true);
+        assert.equal(result.clip, "hidden");
+        assert.deepEqual(result.inReview, [120, 90, -24, -36]);
+        assert.deepEqual(result.enlarged, [120, 90, 2]);
+        assert.deepEqual(result.zoomed, [180, 135]);
     } finally {
         rmSync(path, {recursive: true, force: true});
     }

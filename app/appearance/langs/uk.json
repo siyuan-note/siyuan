@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Задати область повторення",
+	"flashcardResetImageRegion": "Показати все зображення",
+	"flashcardImageRegionMustContainMasks": "Область має охоплювати всі маски цієї групи",
 	"flashcardImageMaskLabel": "Підказка на масці",
 	"flashcardFocusImageMask": "Автоматично наближати поточну маску",
 	"flashcardReviewSubtree": "Повторювати картки цього блока та його нащадків",

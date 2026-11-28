@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Tekrar alanını ayarla",
+	"flashcardResetImageRegion": "Görselin tamamını göster",
+	"flashcardImageRegionMustContainMasks": "Alan bu gruptaki tüm maskeleri içermelidir",
 	"flashcardImageMaskLabel": "Maske ipucu",
 	"flashcardFocusImageMask": "Mevcut maskeye otomatik odaklan",
 	"flashcardReviewSubtree": "Bu bloktaki ve alt bloklardaki kartları tekrarla",

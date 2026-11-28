@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Definir área de revisão",
+	"flashcardResetImageRegion": "Mostrar a imagem inteira",
+	"flashcardImageRegionMustContainMasks": "A área deve incluir todas as máscaras deste grupo",
 	"flashcardImageMaskLabel": "Dica da máscara",
 	"flashcardFocusImageMask": "Focar automaticamente na máscara atual",
 	"flashcardReviewSubtree": "Revisar cartões deste bloco e seus descendentes",

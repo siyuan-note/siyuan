@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Définir la zone de révision",
+	"flashcardResetImageRegion": "Afficher l’image entière",
+	"flashcardImageRegionMustContainMasks": "La zone doit contenir tous les masques de ce groupe",
 	"flashcardImageMaskLabel": "Indice du masque",
 	"flashcardFocusImageMask": "Centrer automatiquement sur le masque actuel",
 	"flashcardReviewSubtree": "Réviser les cartes de ce bloc et de ses descendants",

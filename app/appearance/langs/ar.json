@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "تحديد منطقة المراجعة",
+	"flashcardResetImageRegion": "عرض الصورة كاملة",
+	"flashcardImageRegionMustContainMasks": "يجب أن تشمل المنطقة جميع الأقنعة في هذه المجموعة",
 	"flashcardImageMaskLabel": "تلميح منطقة الحجب",
 	"flashcardFocusImageMask": "التركيز تلقائيًا على المنطقة المحجوبة الحالية",
 	"flashcardReviewSubtree": "مراجعة بطاقات هذه الكتلة والكتل التابعة",

@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Imposta area di ripasso",
+	"flashcardResetImageRegion": "Mostra l’immagine intera",
+	"flashcardImageRegionMustContainMasks": "L’area deve contenere tutte le maschere di questo gruppo",
 	"flashcardImageMaskLabel": "Suggerimento sulla maschera",
 	"flashcardFocusImageMask": "Centra automaticamente la maschera corrente",
 	"flashcardReviewSubtree": "Ripassa le schede di questo blocco e dei suoi discendenti",

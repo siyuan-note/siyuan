@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "הגדרת אזור חזרה",
+	"flashcardResetImageRegion": "הצגת התמונה המלאה",
+	"flashcardImageRegionMustContainMasks": "האזור חייב לכלול את כל המסכות בקבוצה",
 	"flashcardImageMaskLabel": "רמז על האזור המוסתר",
 	"flashcardFocusImageMask": "מיקוד אוטומטי באזור ההסתרה הנוכחי",
 	"flashcardReviewSubtree": "חזרה על כרטיסים בבלוק הזה ובצאצאיו",

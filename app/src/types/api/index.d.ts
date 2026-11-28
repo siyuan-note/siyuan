@@ -1518,9 +1518,11 @@ export type FlashcardV2HistoryDocument = { "notebookID": string; "rootID": strin
 
 export type FlashcardV2ImageOcclusionConfigInput = { "assetID"?: string | null; "frontMode"?: string | null; "groups"?: Array<FlashcardV2ImageOcclusionGroupInput> | null; "shapes"?: Array<FlashcardV2ImageOcclusionShapeInput> | null; };
 
-export type FlashcardV2ImageOcclusionGroupInput = { "displayOrder"?: number | null; "id"?: string | null; "shapeIDs"?: Array<string> | null; };
+export type FlashcardV2ImageOcclusionGroupInput = { "displayOrder"?: number | null; "id"?: string | null; "shapeIDs"?: Array<string> | null; "visibleRegion"?: FlashcardV2ImageOcclusionRegionInput | null; };
 
 export type FlashcardV2ImageOcclusionPointInput = { "x"?: number | null; "y"?: number | null; };
+
+export type FlashcardV2ImageOcclusionRegionInput = { "height": number; "width": number; "x": number; "y": number; };
 
 export type FlashcardV2ImageOcclusionShapeInput = { "height"?: number | null; "id"?: string | null; "label"?: string | null; "points"?: Array<FlashcardV2ImageOcclusionPointInput> | null; "type"?: string | null; "width"?: number | null; "x"?: number | null; "y"?: number | null; };
 
@@ -6664,6 +6666,7 @@ export interface APIPOSTRoutes {
     };
     /**
      * 保留闪卡接口的权限、字段默认值与业务校验；失败返回 code=-1 和空 data。
+     * 图片遮挡组可用 visibleRegion 指定复习区域，归一化矩形须位于原图内并覆盖本组的每个遮挡，省略时显示整张图。
      */
     "/api/flashcard/createAdvancedSource": {
         request: FlashcardV2AdvancedSourceRequestInput;
@@ -6890,6 +6893,7 @@ export interface APIPOSTRoutes {
     /**
      * 只读构造内置静态题型模型及普通块快照，不打开闪卡存储或迁移旧数据。
      * 来源必须存在于开放的非加密笔记本；不支持动态干扰项和插件，最多 1000 个块和变体。
+     * 图片遮挡组的 visibleRegion 与创建接口使用相同的复习区域校验。
      * 模型 ID 仅供草稿渲染，未保存卡片、排期、历史或会话；失败返回 code=-1 和空 data。
      */
     "/api/flashcard/previewAdvancedSource": {

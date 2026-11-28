@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "設定複習區域",
+	"flashcardResetImageRegion": "顯示整張圖片",
+	"flashcardImageRegionMustContainMasks": "複習區域須包含此群組的所有遮擋",
 	"flashcardImageMaskLabel": "遮擋提示語",
 	"flashcardFocusImageMask": "自動聚焦目前遮擋",
 	"flashcardReviewSubtree": "複習目前區塊及其子區塊的閃卡",

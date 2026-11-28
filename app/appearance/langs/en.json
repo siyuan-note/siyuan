@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Set review area",
+	"flashcardResetImageRegion": "Show full image",
+	"flashcardImageRegionMustContainMasks": "The area must contain every mask in this group",
 	"flashcardImageMaskLabel": "Mask hint",
 	"flashcardFocusImageMask": "Auto-focus the current mask",
 	"flashcardReviewSubtree": "Review cards in this block and its descendants",

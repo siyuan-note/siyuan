@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Podesi oblast za ponavljanje",
+	"flashcardResetImageRegion": "Prikaži celu sliku",
+	"flashcardImageRegionMustContainMasks": "Oblast mora da obuhvati sve maske u ovoj grupi",
 	"flashcardImageMaskLabel": "Наговештај на маски",
 	"flashcardFocusImageMask": "Аутоматски фокусирај тренутну маску",
 	"flashcardReviewSubtree": "Понављај картице овог блока и његових потомака",

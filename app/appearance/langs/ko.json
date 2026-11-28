@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "복습 영역 설정",
+	"flashcardResetImageRegion": "전체 이미지 보기",
+	"flashcardImageRegionMustContainMasks": "영역에 이 그룹의 모든 가림 영역을 포함해야 합니다",
 	"flashcardImageMaskLabel": "가림 영역 힌트",
 	"flashcardFocusImageMask": "현재 가림 영역에 자동 초점",
 	"flashcardReviewSubtree": "이 블록과 하위 블록의 카드 복습",

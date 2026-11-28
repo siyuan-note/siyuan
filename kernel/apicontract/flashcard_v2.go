@@ -454,6 +454,15 @@ type FlashcardV2ImageOcclusionGroup struct {
 	ID           string   `json:"id" api:"optional,nullable"`
 	ShapeIDs     []string `json:"shapeIDs" api:"optional,nullable"`
 	DisplayOrder int      `json:"displayOrder" api:"optional,nullable"`
+	// VisibleRegion 裁剪复习视图，使用原图归一化坐标并完整覆盖本组的所有遮挡。省略时显示整张图。
+	VisibleRegion *FlashcardV2ImageOcclusionRegion `json:"visibleRegion,omitempty" api:"optional,nullable"`
+}
+
+type FlashcardV2ImageOcclusionRegion struct {
+	X      float64 `json:"x"`
+	Y      float64 `json:"y"`
+	Width  float64 `json:"width"`
+	Height float64 `json:"height"`
 }
 
 type FlashcardV2ImageOcclusionPoint struct {

@@ -16,6 +16,46 @@ const compiled = transpileModule(`${declaration.getText(source).replace(/^export
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText;
 
+test("keyboard quick card uses the editable block at the caret", () => {
+    const declaration = source.statements.find(node => isVariableStatement(node) &&
+        node.declarationList.declarations.some(item => item.name.getText(source) === "getMobileQuickCardBlockID"));
+    assert.ok(declaration);
+    const code = transpileModule(`${declaration.getText(source)}\ngetMobileQuickCardBlockID;`, {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
+    const editor = {};
+    const node = {isConnected: true};
+    let owner = editor;
+    let embedded = false;
+    let type = "NodeParagraph";
+    const config = {readonly: false};
+    const getBlockID = runInNewContext(code, {
+        window: {siyuan: {config}},
+        hasClosestByClassName: () => owner,
+        hasClosestBlock: () => ({
+            getAttribute: (name: string) => name === "data-type" ? type : "sample-block",
+            closest: () => embedded,
+        }),
+    });
+    const protyle = {block: {rootID: "doc"}, wysiwyg: {element: editor}};
+    const caret = {startContainer: node, collapsed: true};
+    assert.equal(getBlockID(protyle, caret), "sample-block");
+    assert.equal(getBlockID(protyle, {...caret, collapsed: false}), undefined);
+    assert.equal(getBlockID({...protyle, disabled: true}, caret), undefined);
+    assert.equal(getBlockID({...protyle, lite: true}, caret), undefined);
+    config.readonly = true;
+    assert.equal(getBlockID(protyle, caret), undefined);
+    config.readonly = false;
+    embedded = true;
+    assert.equal(getBlockID(protyle, caret), undefined);
+    embedded = false;
+    type = "NodeThematicBreak";
+    assert.equal(getBlockID(protyle, caret), undefined);
+    type = "NodeParagraph";
+    owner = {};
+    assert.equal(getBlockID(protyle, caret), undefined);
+});
+
 const fixture = () => {
     const gutter = {} as HTMLElement;
     const calls: string[] = [];

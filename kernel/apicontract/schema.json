@@ -33777,6 +33777,16 @@
               "type": "null"
             }
           ]
+        },
+        "visibleRegion": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FlashcardV2ImageOcclusionRegionInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -33805,6 +33815,30 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "FlashcardV2ImageOcclusionRegionInput": {
+      "type": "object",
+      "properties": {
+        "height": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "height",
+        "width",
+        "x",
+        "y"
+      ],
       "additionalProperties": false
     },
     "FlashcardV2ImageOcclusionShapeInput": {

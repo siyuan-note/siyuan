@@ -1,4 +1,5 @@
 import type {bindFlashcardV2ImageViewport} from "./flashcardV2ImageViewport";
+import type {IFlashcardV2ImageRegion} from "./flashcardV2ImageRegion";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {genUUID} from "../util/genID";
 import type {FlashcardV2CardRenderModel} from "../types/api";
@@ -81,7 +82,7 @@ interface IImageOcclusionConfig {
         height?: number,
         points?: Array<{ x: number, y: number }>
     }>;
-    groups: Array<{ id: string, shapeIDs: string[] }>;
+    groups: Array<{ id: string, shapeIDs: string[], visibleRegion?: IFlashcardV2ImageRegion }>;
     frontMode: "hideAllAnswerOne" | "hideCurrent";
 }
 
@@ -1041,7 +1042,7 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
     hint.className = "b3-label__text ft__on-surface";
     hint.textContent = window.siyuan.languages.flashcardImageTargetTip;
     wrapper.insertAdjacentElement("afterend", hint);
-    const display = bindViewport?.(wrapper, image, targetBounds);
+    const display = bindViewport?.(wrapper, image, targetBounds, group.visibleRegion);
     const otherShapes = [...wrapper.querySelectorAll<HTMLElement>("[data-shape-id]")]
         .filter(shape => !targetShapeIDs.has(shape.dataset.shapeId));
     const toggle = document.createElement("button");

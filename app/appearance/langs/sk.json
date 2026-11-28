@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Nastaviť oblasť opakovania",
+	"flashcardResetImageRegion": "Zobraziť celý obrázok",
+	"flashcardImageRegionMustContainMasks": "Oblasť musí obsahovať všetky masky v tejto skupine",
 	"flashcardImageMaskLabel": "Pomôcka na maske",
 	"flashcardFocusImageMask": "Automaticky priblížiť aktuálnu masku",
 	"flashcardReviewSubtree": "Opakovať karty tohto bloku a jeho potomkov",

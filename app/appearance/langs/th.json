@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "กำหนดพื้นที่ทบทวน",
+	"flashcardResetImageRegion": "แสดงรูปภาพทั้งหมด",
+	"flashcardImageRegionMustContainMasks": "พื้นที่ต้องครอบคลุมส่วนปิดบังทั้งหมดในกลุ่มนี้",
 	"flashcardImageMaskLabel": "คำใบ้บนส่วนที่ปิดบัง",
 	"flashcardFocusImageMask": "โฟกัสส่วนที่ปิดบังปัจจุบันโดยอัตโนมัติ",
 	"flashcardReviewSubtree": "ทบทวนบัตรคำในบล็อกนี้และบล็อกย่อย",

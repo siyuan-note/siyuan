@@ -1,4 +1,7 @@
 {
+	"flashcardDrawImageRegion": "Herhaalgebied instellen",
+	"flashcardResetImageRegion": "Hele afbeelding tonen",
+	"flashcardImageRegionMustContainMasks": "Het gebied moet alle maskers van deze groep bevatten",
 	"flashcardImageMaskLabel": "Hint op het masker",
 	"flashcardFocusImageMask": "Automatisch scherpstellen op het huidige masker",
 	"flashcardReviewSubtree": "Herhaal kaarten in dit blok en de afstammende blokken",

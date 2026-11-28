@@ -855,7 +855,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "On mobile, switching cards, changing pages or the review scope, submitting a rating, and setting due dates, resetting or removing cards wait for the current edits to be saved. If saving fails, the current card and draft remain available. Retry the action after the connection recovers."
+					"Data": "On mobile, the review panel opens from the bottom and shows progress next to the title. On mobile, switching cards, changing pages or the review scope, submitting a rating, and setting due dates, resetting or removing cards wait for the current edits to be saved. If saving fails, the current card and draft remain available. Retry the action after the connection recovers."
 				}
 			]
 		},

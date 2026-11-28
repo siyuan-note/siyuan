@@ -1,4 +1,5 @@
 import {Dialog} from "../dialog";
+import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {notifyFlashcardV2ReviewChange} from "./flashcardV2ReviewChanges";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
@@ -153,11 +154,12 @@ export interface IFlashcardSessionMount {
     close: () => void;
 }
 
-const createSessionSurface = (options: ConstructorParameters<typeof Dialog>[0],
+const createSessionSurface = (options: ConstructorParameters<typeof AdaptiveDialog>[0],
     mount?: IFlashcardSessionMount): IFlashcardSessionSurface => {
     if (!mount) {
         let disposed: (() => void) | undefined;
-        const dialog = new Dialog({...options, destroyCallback: (value) => {
+        const Surface = options.mobileSheet ? AdaptiveDialog : Dialog;
+        const dialog = new Surface({...options, destroyCallback: (value) => {
             options.destroyCallback?.(value);
             // 等待对话框从全局列表移除，再打开下一轮练习。
             if (disposed) {
@@ -521,9 +523,15 @@ ${reviewMode === "normal" ? `<span class="ft__on-surface">${escapeHtml(window.si
 ${weakCount ? `<div class="fn__hr"></div><span class="ft__on-surface">${window.siyuan.languages.flashcardReviewReinforcementTip}</span>` : ""}
 <span class="card__v2-completion-actions"><button data-type="pending-edits" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardPendingEdits}</button>${weakCount ? `<button data-type="practice-weak" class="b3-button b3-button--outline">${escapeHtml(window.siyuan.languages.flashcardRetryWeak.replace("${count}", weakCount.toString()))}</button>` : ""}${canUndo ? `<button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button>` : ""}<button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.flashcardFinishSession}</button></span>`;
 
-const sessionContent = () => `<div class="b3-dialog__content fn__flex-column card__v2-session">
+const mobileSessionTitle = (name: string, showCount = false) => `<span class="fn__flex">
+    <svg class="block__logoicon fn__flex-center fn__flex-shrink" aria-hidden="true"><use xlink:href="#iconRiffCard"></use></svg>
+    <span class="fn__ellipsis">${escapeHtml(name)}</span>
+    ${showCount ? '<span class="fn__space"></span><span data-flashcard-count class="fn__flex-shrink ft__on-surface"></span>' : ""}
+</span>`;
+
+const sessionContent = (mobile = false) => `<div class="b3-dialog__content fn__flex-column card__v2-session">
 <div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
-    <span data-flashcard-count class="fn__flex-shrink ft__on-surface"></span>
+    ${mobile ? "" : '<span data-flashcard-count class="fn__flex-shrink ft__on-surface"></span>'}
     <span data-flashcard-path class="card__v2-session-path ft__on-surface"></span>
     <button data-type="flag" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.flashcardFlag}" aria-haspopup="menu" disabled><svg><use xlink:href="#iconBookmark"></use></svg></button>
     <button data-type="toggle-outline" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.outline}" aria-expanded="false"><svg><use xlink:href="#iconOutline"></use></svg></button>
@@ -912,6 +920,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
     if (!mount) {
         flashcardV2ReviewOpening = true;
     }
+    const mobile = !mount && isMobile();
+    const mobileSheet = mobile ? {initiallyExpanded: true} : undefined;
     const releaseOpening = () => {
         if (!mount) {
             flashcardV2ReviewOpening = false;
@@ -980,8 +990,9 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         return;
                     }
                     const completionDialog = createSessionSurface({
-                        title: name,
-                        width: isMobile() ? "92vw" : "520px",
+                        title: mobile ? mobileSessionTitle(name) : name,
+                        mobileSheet,
+                        width: "520px",
                         content: `<div class="b3-dialog__content card__empty card__empty--space card__v2-completion">${sessionCompletionContent(false, options.reviewMode)}</div>`,
                     }, mount);
                     completionDialog.element.setAttribute("data-flashcard-v2-review", "");
@@ -1050,11 +1061,12 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 });
             };
             const dialog = createSessionSurface({
-                title: name,
+                title: mobile ? mobileSessionTitle(name, true) : name,
+                mobileSheet,
                 positionId: Constants.DIALOG_OPENCARD,
-                width: isMobile() ? "100vw" : "860px",
-                height: isMobile() ? "100dvh" : "78vh",
-                content: sessionContent(),
+                width: "860px",
+                height: "78vh",
+                content: sessionContent(mobile),
                 destroyCallback: () => {
                     outline?.destroy();
                     clearWaiting();

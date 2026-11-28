@@ -65,6 +65,28 @@ test("practice replaces a mounted session without closing its tab or leaving abo
         "cleanup-second", "remove-surface"]);
 });
 
+test("mobile review uses an expanded drawer and displays progress next to the title", () => {
+    const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
+    const start = source.indexOf("const mobileSessionTitle =");
+    const end = source.indexOf("const renderFlashcardV2Card =", start);
+    const render = runInNewContext(transpileModule(`${source.slice(start, end)}
+        ({title: mobileSessionTitle("Review <cards>", true), mobile: sessionContent(true), desktop: sessionContent()});`, {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText, {escapeHtml, window: {siyuan: {languages: {}}}});
+    assert.match(render.title, /#iconRiffCard[\s\S]*Review &lt;cards>[\s\S]*data-flashcard-count/);
+    assert.doesNotMatch(render.mobile, /data-flashcard-count/);
+    assert.match(render.desktop, /data-flashcard-count/);
+
+    const sheet = {initiallyExpanded: true};
+    const create = loadSurface({AdaptiveDialog: class {
+        element = {};
+        constructor(options: {mobileSheet: typeof sheet}) {
+            assert.equal(options.mobileSheet, sheet);
+        }
+    }});
+    assert.ok(create({mobileSheet: sheet}).element);
+});
+
 test("review displays the breadcrumb in the toolbar and filters source, answer and stale responses", () => {
     const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
     const contextStart = source.indexOf("const renderFlashcardV2Context =");

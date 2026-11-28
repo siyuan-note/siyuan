@@ -161,6 +161,22 @@ const browserCases = async (sources: string[]) => {
     document.body.classList.remove("mobile-keyboard--open");
     check.equal(getComputedStyle(flashcardPanel).paddingBottom, "48px",
         "flashcard ratings regain the Android navigation inset after input ends");
+    flashcard.dataset.flashcardV2Review = "";
+    flashcardPanel.style.width = "320px";
+    flashcardPanel.querySelector(".b3-dialog__body").innerHTML = `<div class="b3-dialog__content fn__flex-column card__v2-session">
+<div class="card__v2-session-content fn__flex-1">Question</div>
+<div class="fn__flex card__action card__v2-session-actions">${["Повторить", "Трудно", "Хорошо", "Легко"].map(label =>
+    `<button class="b3-button">${label}<span class="fn__block">10 минут</span></button>`).join("")}</div></div>`;
+    const reviewActions = flashcardPanel.querySelector<HTMLElement>(".card__v2-session-actions");
+    const ratingButtons = Array.from(reviewActions.querySelectorAll("button"));
+    for (const [surface, background] of [["rgb(242, 242, 242)", "rgb(255, 255, 255)"], ["rgb(36, 36, 36)", "rgb(24, 24, 24)"]]) {
+        flashcard.style.setProperty("--b3-theme-surface", surface);
+        flashcard.style.setProperty("--b3-theme-background", background);
+        check.equal(getComputedStyle(flashcard.querySelector(".b3-dialog__scrim")).backgroundColor, surface);
+        check.equal(getComputedStyle(flashcardPanel.querySelector(".card__v2-session-content")).backgroundColor, background);
+    }
+    check.equal(new Set(ratingButtons.map(button => button.getBoundingClientRect().top)).size, 1);
+    check.ok(ratingButtons.at(-1).getBoundingClientRect().right <= reviewActions.getBoundingClientRect().right);
     document.body.classList.remove("body--android");
     delete document.documentElement.dataset.frontend;
     document.body.style.removeProperty("--android-navigation-bar-height");

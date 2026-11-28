@@ -1,5 +1,25 @@
 @use "../util/function";
 
+[data-flashcard-v2-review] > .b3-dialog > .b3-dialog__scrim {
+  background-color: var(--b3-theme-surface);
+}
+
+.mobile-bottom-sheet-dialog {
+  .card__v2-session-content {
+    background-color: var(--b3-theme-background);
+  }
+
+  .card__v2-session-actions {
+    flex-wrap: nowrap;
+
+    > .b3-button {
+      flex-basis: 0;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
 .card {
   &__v2-edit-later-actions {
     flex-wrap: wrap;

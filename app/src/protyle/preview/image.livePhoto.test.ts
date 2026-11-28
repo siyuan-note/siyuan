@@ -15,7 +15,7 @@ test("image gallery handles source scopes, copy feedback, Live Photos, and mobil
     const temporary = mkdtempSync(path.join(root, "siyuan-live-photo-gallery-"));
     const css = compileString(readFileSync("src/assets/scss/viewerjs/_viewer.scss", "utf8") +
         readFileSync("src/assets/scss/component/_snackbar.scss", "utf8") +
-        ".fn__none { display: none !important; }").css;
+        ":root { --b3-theme-background: #fff; } .fn__none { display: none !important; }").css;
     const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
     const mobilePng = await sharp({create: {width: 480, height: 320, channels: 3, background: "#fff"}}).png().toBuffer();
     const server = createServer((request, response) => {
@@ -104,6 +104,10 @@ test("image gallery handles source scopes, copy feedback, Live Photos, and mobil
             exports.previewDocImage(image,"document","assets/second.mov");
             await wait(()=>window.siyuan.viewer?.viewed);
             const viewer=window.siyuan.viewer;
+            const desktopBackdrop = getComputedStyle(viewer.viewer);
+            if (desktopBackdrop.backdropFilter !== "none" || desktopBackdrop.backgroundColor !== "rgba(0, 0, 0, 0.24)") {
+                throw new Error("Desktop gallery backdrop changed");
+            }
             if (getComputedStyle(viewer.navigation).display==="none" || viewer.toolbar.querySelector(".viewer-next") ||
                 !viewer.options.rotateOnTouch || !viewer.options.rotateOnGesture) {
                 throw new Error("Desktop gallery controls changed");
@@ -204,6 +208,13 @@ test("image gallery handles source scopes, copy feedback, Live Photos, and mobil
                 const mobile = window.siyuan.viewer;
                 const footer = mobile.viewer.querySelector(".viewer-footer");
                 const canvas = mobile.viewer.querySelector(".viewer-canvas");
+                const backdrop = getComputedStyle(mobile.viewer);
+                const backdropColor = backdrop.backgroundColor;
+                if (backdrop.backdropFilter !== "blur(8px)" || backdrop.transitionDuration !== "0s" ||
+                    !backdropColor.endsWith("0.42)") ||
+                    getComputedStyle(mobile.image).filter !== "none" || getComputedStyle(footer).filter !== "none") {
+                    throw new Error("Mobile gallery must blur only its backdrop when opened");
+                }
                 const buttons = [...mobile.toolbar.querySelectorAll("li")].filter(item => item.getClientRects().length);
                 const positions = buttons.map(item => item.getBoundingClientRect());
                 const next = mobile.toolbar.querySelector(".viewer-next");

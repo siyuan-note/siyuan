@@ -84,11 +84,14 @@ func (projection *Projection) CardRenderModel(ctx context.Context, cardID string
 	return ret, nil
 }
 
+// 从卡源索引定位引用，再按实体类型和 ID 读取内容。
+const cardSourceReferencesSQL = `SELECT e.payload FROM card_source_refs r
+	CROSS JOIN entities e ON e.entity_type = ? AND e.entity_id = r.id AND e.deleted = 0
+	WHERE r.source_id = ? ORDER BY r.sort, r.id`
+
 // CardSourceReferences 按显示顺序返回卡源的全部当前引用。
 func (projection *Projection) CardSourceReferences(ctx context.Context, sourceID string) ([]CardSourceRef, error) {
-	rows, err := projection.db.QueryContext(ctx, `SELECT e.payload FROM card_source_refs r
-		JOIN entities e ON e.entity_type = ? AND e.entity_id = r.id AND e.deleted = 0
-		WHERE r.source_id = ? ORDER BY r.sort, r.id`, EntityCardSourceRef, sourceID)
+	rows, err := projection.db.QueryContext(ctx, cardSourceReferencesSQL, EntityCardSourceRef, sourceID)
 	if err != nil {
 		return nil, fmt.Errorf("query flashcard source references: %w", err)
 	}

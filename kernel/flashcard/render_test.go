@@ -6,6 +6,7 @@ package flashcard
 
 import (
 	"context"
+	"strings"
 	"testing"
 )
 
@@ -32,5 +33,35 @@ func TestCardRenderModelIncludesStableOrderedReferencesAndVariant(t *testing.T) 
 		len(model.References) != 1 || model.References[0].EntityID != "render-block" ||
 		model.ReviewState.CardID != model.Card.ID {
 		t.Fatalf("incomplete flashcard render model: %+v", model)
+	}
+}
+
+func TestCardSourceReferencesUsesSourceLookupBeforeEntityLookup(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	rows, err := store.Projection().db.QueryContext(ctx, "EXPLAIN QUERY PLAN "+cardSourceReferencesSQL,
+		EntityCardSourceRef, "source")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	var lookup []string
+	for rows.Next() {
+		var id, parent, unused int
+		var detail string
+		if err = rows.Scan(&id, &parent, &unused, &detail); err != nil {
+			t.Fatal(err)
+		}
+		if strings.HasPrefix(detail, "SEARCH ") {
+			lookup = append(lookup, detail)
+		}
+	}
+	if err = rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if len(lookup) != 2 || !strings.Contains(lookup[0], "idx_card_source_refs_source") ||
+		!strings.Contains(lookup[1], "entity_type=? AND entity_id=?") {
+		t.Fatalf("unexpected reference lookup plan: %v", lookup)
 	}
 }

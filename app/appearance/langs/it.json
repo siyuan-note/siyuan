@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Tag di primo livello",
+	"flashcardBuriedCardsTip": "Dopo la valutazione, il preset di pianificazione può nascondere fino a domani le altre carte della stessa sorgente. Dissotterra una carta per ripassarla di nuovo",
+	"flashcardCurrentCardTags": "Tag della carta corrente",
+	"flashcardParentTag": "Tag superiore",
+	"flashcardQuestion": "Domanda",
+	"flashcardRemoveSource": "Rimuovi origine della carta",
+	"flashcardSaveFilterAsDeck": "Salva i filtri attuali come mazzo",
+	"flashcardSourcePreview": "Anteprima del blocco di origine",
+	"flashcardSourceTags": "Tag dell’origine della carta",
 	"flashcardManageCards": "Gestisci schede di ripasso",
 	"flashcardManageDecks": "Gestisci mazzi",
 	"flashcardImportAnki": "Importa pacchetto Anki",

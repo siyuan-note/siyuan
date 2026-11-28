@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Tag najwyższego poziomu",
+	"flashcardBuriedCardsTip": "Po ocenie ustawienie harmonogramu może ukryć do jutra pozostałe karty z tego samego źródła. Cofnij ukrycie, aby znów powtarzać kartę",
+	"flashcardCurrentCardTags": "Tagi bieżącej karty",
+	"flashcardParentTag": "Tag nadrzędny",
+	"flashcardQuestion": "Pytanie",
+	"flashcardRemoveSource": "Usuń źródło kart",
+	"flashcardSaveFilterAsDeck": "Zapisz bieżące filtry jako talię",
+	"flashcardSourcePreview": "Podgląd bloku źródłowego",
+	"flashcardSourceTags": "Tagi źródła kart",
 	"flashcardManageCards": "Zarządzaj fiszkami",
 	"flashcardManageDecks": "Zarządzaj taliami",
 	"flashcardImportAnki": "Importuj pakiet Anki",

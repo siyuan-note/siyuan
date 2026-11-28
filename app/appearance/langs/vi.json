@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Thẻ cấp cao nhất",
+	"flashcardBuriedCardsTip": "Sau khi chấm thẻ, thiết lập lịch có thể ẩn những thẻ khác cùng nguồn đến ngày mai. Bỏ ẩn để có thể ôn lại thẻ",
+	"flashcardCurrentCardTags": "Thẻ gắn cho phiếu hiện tại",
+	"flashcardParentTag": "Thẻ gắn cấp trên",
+	"flashcardQuestion": "Câu hỏi",
+	"flashcardRemoveSource": "Xóa nguồn phiếu",
+	"flashcardSaveFilterAsDeck": "Lưu bộ lọc hiện tại thành bộ thẻ",
+	"flashcardSourcePreview": "Xem trước khối nguồn",
+	"flashcardSourceTags": "Thẻ gắn của nguồn phiếu",
 	"flashcardManageCards": "Quản lý thẻ ghi nhớ",
 	"flashcardManageDecks": "Quản lý bộ thẻ",
 	"flashcardImportAnki": "Nhập gói Anki",

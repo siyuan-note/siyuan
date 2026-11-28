@@ -17,7 +17,8 @@ test("flag menus use localized colors and a neutral icon for clearing the flag",
     const changes: number[] = [];
     const items = exports.flashcardV2FlagMenuItems(1, [{flag: 4, name: "<Study>"}], flag => changes.push(flag));
     assert.deepEqual(Array.from(items, item => item.label), colorNames.map((name, flag) => flag === 4 ? "&lt;Study>" : name));
-    assert.ok(items.every(item => item.icon === "iconFlag"));
+    assert.equal(items[0].icon, "iconFlag");
+    assert.ok(items.slice(1).every(item => item.icon === "iconFlagFilled"));
     const svg = {style: {color: ""}};
     items[0].bind({querySelector: () => svg} as unknown as HTMLElement);
     assert.equal(svg.style.color, "var(--b3-theme-on-surface)");
@@ -84,6 +85,7 @@ test("flag names are inline actions and stage edits, cancellation and clearing b
             destroy() {}
         },
         isMobile: () => false, flashcardFlagStyle: () => "", flashcardV2FlagLabel: (flag: number) => colorNames[flag],
+        flashcardV2FlagIcon: (flag: number) => flag > 0 ? "iconFlagFilled" : "iconFlag",
         escapeAttr, escapeHtml, genUUID: () => "operation",
         fetchPost: (url: string, payload: unknown, done: () => void) => {
             submitted.push({url, payload: JSON.parse(JSON.stringify(payload))});
@@ -92,7 +94,7 @@ test("flag names are inline actions and stage edits, cancellation and clearing b
     });
     assert.ok(html.includes('<span class="fn__ellipsis">&lt;old></span></button>'));
     assert.ok(html.includes('placeholder="Green"'));
-    assert.equal((html.match(/xlink:href="#iconFlag"/g) || []).length, 7);
+    assert.equal((html.match(/xlink:href="#iconFlagFilled"/g) || []).length, 7);
     assert.equal((html.match(/class="b3-text-field fn__none"/g) || []).length, 7);
     first.edit();
     assert.equal(first.inputClasses.has("fn__none"), false);

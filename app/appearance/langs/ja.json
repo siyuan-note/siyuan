@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "最上位タグ",
+	"flashcardBuriedCardsTip": "評価すると、スケジュールのプリセットに従って同じソースの他のカードが翌日まで非表示になる場合があります。埋没を解除すると復習できます",
+	"flashcardCurrentCardTags": "現在のカードのタグ",
+	"flashcardParentTag": "親タグ",
+	"flashcardQuestion": "問題",
+	"flashcardRemoveSource": "カードソースを削除",
+	"flashcardSaveFilterAsDeck": "現在のフィルターをデッキとして保存",
+	"flashcardSourcePreview": "カードソースの原文",
+	"flashcardSourceTags": "カードソースのタグ",
 	"flashcardManageCards": "フラッシュカードを管理",
 	"flashcardManageDecks": "デッキを管理",
 	"flashcardImportAnki": "Anki パッケージをインポート",

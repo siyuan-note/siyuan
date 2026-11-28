@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "शीर्ष-स्तरीय टैग",
+	"flashcardBuriedCardsTip": "कार्ड का मूल्यांकन करने पर शेड्यूल के प्रीसेट के अनुसार उसी स्रोत के अन्य कार्ड कल तक छिप सकते हैं। फिर से दोहराने के लिए कार्ड को वापस दिखाएँ",
+	"flashcardCurrentCardTags": "मौजूदा कार्ड के टैग",
+	"flashcardParentTag": "मूल टैग",
+	"flashcardQuestion": "प्रश्न",
+	"flashcardRemoveSource": "कार्ड का स्रोत हटाएँ",
+	"flashcardSaveFilterAsDeck": "मौजूदा फ़िल्टर को डेक के रूप में सहेजें",
+	"flashcardSourcePreview": "स्रोत ब्लॉक का पूर्वावलोकन",
+	"flashcardSourceTags": "कार्ड स्रोत के टैग",
 	"flashcardManageCards": "फ़्लैशकार्ड प्रबंधित करें",
 	"flashcardManageDecks": "कार्ड डेक प्रबंधित करें",
 	"flashcardImportAnki": "Anki पैकेज आयात करें",

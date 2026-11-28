@@ -36,7 +36,7 @@ class ElementStub {
     focus() {}
 }
 
-const render = (frontMode: string, stepOrder?: string[], selfCheck = false, edgeOrigins = false) => {
+const render = (frontMode: string, stepOrder?: string[], selfCheck = false, edgeOrigins = false, label = "Region <A>") => {
     const source = readFileSync("src/card/flashcardV2Render.ts", "utf8");
     const code = source.slice(source.lastIndexOf("const normalized =", source.indexOf("const shapeStyle =")),
         source.indexOf("export const prepareFlashcardV2Reveal ="));
@@ -48,7 +48,7 @@ const render = (frontMode: string, stepOrder?: string[], selfCheck = false, edge
         assetID: "image.png", frontMode,
         groups: [{id: "current", shapeIDs: ["rect", "ellipse", "polygon", ...(edgeOrigins ? ["other"] : [])], stepOrder}],
         shapes: [
-            {id: "rect", type: "rectangle", ...(edgeOrigins ? {} : {x: .1}), y: .1, width: .2, height: .2, label: "Region <A>",
+            {id: "rect", type: "rectangle", ...(edgeOrigins ? {} : {x: .1}), y: .1, width: .2, height: .2, label,
                 ...(selfCheck ? {answer: "Alpha", explanationBlockID: "block-a"} : {})},
             {id: "ellipse", type: "ellipse", x: .4, ...(edgeOrigins ? {} : {y: .1}), width: .2, height: .2,
                 ...(selfCheck ? {answer: "Beta", explanationBlockID: "block-b"} : {})},
@@ -115,6 +115,18 @@ test("current-only mode retains its visibility and non-color cue", () => {
     const {wrapper} = render("hideCurrent");
     assert.equal(wrapper.querySelectorAll().length, 3);
     assert.ok(wrapper.querySelectorAll().every(shape => shape.className.includes("--target")));
+});
+
+test("an image mask shows its authored hint and keeps its answer in the answer check", () => {
+    const withHint = render("hideCurrent", undefined, true, false, "Alpha");
+    assert.equal(withHint.wrapper.children.find(child => child.className === "card__v2-image-mask-label")?.textContent, "1 Alpha");
+    const withoutHint = render("hideCurrent", undefined, true, false, "");
+    assert.ok(withoutHint.wrapper.children.filter(child => child.className === "card__v2-image-mask-label")
+        .every(child => !child.textContent.includes("Alpha")));
+    assert.equal(withoutHint.fields.children[0].children[1].value, "");
+    withoutHint.fields.children[0].children[1].value = "Alpha";
+    withoutHint.controller.revealNext();
+    assert.equal(withoutHint.controller.checkedAnswers[0].correct, true);
 });
 
 test("an ordered image card advances its focus and completes only after its final mask", () => {
@@ -184,7 +196,7 @@ test("target pattern overlays an opaque base and does not rely on clipped polygo
     const css = readFileSync("src/assets/scss/business/_card.scss", "utf8");
     const shape = css.slice(css.indexOf("&__v2-image-shape"), css.indexOf("&__v2-image-editor"));
     assert.match(shape, /background-color: var\(--b3-theme-surface\)/);
-    assert.match(shape, /background-color: var\(--b3-theme-primary\)/);
+    assert.match(shape, /&--target \{\s*background-color: var\(--b3-theme-surface\)/);
     assert.match(shape, /repeating-linear-gradient/);
     assert.doesNotMatch(shape, /opacity:/);
 });

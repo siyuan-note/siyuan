@@ -295,10 +295,46 @@ test("notebook entry keeps its initial scope but uses the stable management titl
     }).outputText, {
         window: {siyuan: {languages: {manage: "Manage"}}},
         ensureFlashcardV2: (callback: () => void) => callback(),
-        openFlashcardV2ReviewSetCards: (...values: unknown[]) => { args = values; },
+        openFlashcardManagement: (...values: unknown[]) => { args = values; },
     });
     assert.equal(args[1], "Manage");
     assert.equal((args[3] as {notebookID: string}).notebookID, "notebook-a");
+    assert.equal(args[2], "notebook:notebook-a");
+});
+
+test("management restores filters per entry and clearing them keeps the fixed scope", () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const filterCount = source.slice(source.indexOf("const flashcardManagementFilterCount ="),
+        source.indexOf("const openFlashcardV2ReviewSetEditor ="));
+    const helpers = source.slice(source.indexOf("const openFlashcardManagement ="),
+        source.indexOf("const openFlashcardV2ReviewSetCards ="));
+    const storage = {flashcards: {groupBySource: true, managementFilters: {
+        global: {flag: "2"},
+        "notebook:fixed": {content: "find me", notebookID: "other"},
+    }}};
+    let filters: Record<string, unknown>;
+    let owner: unknown;
+    const [open, save] = runInNewContext(transpileModule(
+        filterCount + helpers + "\n[openFlashcardManagement, saveFlashcardManagementFilters];", {
+            compilerOptions: {target: ScriptTarget.ES2021},
+        }).outputText, {
+        window: {siyuan: {storage}},
+        Constants: {LOCAL_FLASHCARD: "flashcards"},
+        FlashcardV2ManagementView,
+        setStorageVal: (key: keyof typeof storage, value: typeof storage.flashcards) => assert.equal(storage[key], value),
+        openFlashcardV2ReviewSetCards: (_id: string, _name: string, _offset: number, value: typeof filters,
+            _options: unknown, _grouped: unknown, currentOwner: unknown) => { filters = value; owner = currentOwner; },
+    });
+    open("", "Manage", "notebook:fixed", {notebookID: "fixed"});
+    assert.equal(filters.content, "find me");
+    assert.equal(filters.notebookID, "fixed");
+    save(owner, {notebookID: "fixed"});
+    assert.equal(storage.flashcards.managementFilters["notebook:fixed"], undefined);
+    assert.equal(storage.flashcards.managementFilters.global.flag, "2");
+    assert.equal(storage.flashcards.groupBySource, true);
+    open("", "Manage", "notebook:fixed", {notebookID: "fixed"});
+    assert.equal(filters.content, undefined);
+    assert.equal(filters.notebookID, "fixed");
 });
 
 test("the source preview ignores a superseded request and a response after the management page closes", async () => {
@@ -356,6 +392,7 @@ test("grouped and ungrouped management use the same columns with sorting in the 
         flashcardV2SourceTypeLabels: () => ({qa: "Q&A"}),
         reviewStateLabel: () => "New",
         flashcardV2FlagLabel: () => "Red",
+        flashcardV2FlagIcon: () => "iconFlagFilled",
         flashcardFlagStyle: () => "",
     });
     const result = {
@@ -388,6 +425,7 @@ test("state shortcuts stay compact and card flags and columns align with the fir
     assert.match(css, /@container flashcard-management-list \(min-width: 680px\) \{\s*&__v2-managed-header \{/);
     assert.match(css, /> \.card__v2-managed-leading,\s*> \.card__v2-managed-main \{\s*align-self: flex-start;/);
     assert.match(css, /&__v2-managed-header,\s*&__v2-managed-card \{\s*> \.card__v2-managed-leading \{\s*inline-size: 43px;/);
-    assert.match(css, /&__v2-managed-card\.b3-list-item--hide-action \{\s*> \[data-type="suspend"\],\s*> \[data-type="previewFull"\],\s*> \[data-type="more"\] \{\s*display: flex;\s*opacity: 0;/);
-    assert.match(css, /&:hover,\s*&:focus-within \{\s*> \[data-type="suspend"\],\s*> \[data-type="previewFull"\],\s*> \[data-type="more"\] \{\s*opacity: 1;/);
+    assert.match(css, /&__v2-managed-card\.b3-list-item--hide-action \{\s*> \[data-type="suspend"\],\s*> \[data-type="more"\] \{\s*display: flex;\s*opacity: 0;/);
+    assert.match(css, /&:hover,\s*&:focus-within \{\s*> \[data-type="suspend"\],\s*> \[data-type="more"\] \{\s*opacity: 1;/);
+    assert.match(css, /\[data-type="previewFull"\],\s*> \[data-type="sourceMore"\] \{\s*display: flex;/);
 });

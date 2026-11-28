@@ -10,6 +10,7 @@ import {
     renderFlashcardV2AnkiTemplate,
     renderFlashcardV2Choice,
     renderFlashcardV2MultiLine,
+    selectFlashcardV2References,
     type IFlashcardV2RenderModel
 } from "./flashcardV2Render";
 
@@ -21,6 +22,17 @@ const model = (sourceType: string, generationConfig: unknown, variantData: Recor
 }) as IFlashcardV2RenderModel;
 
 describe("flashcardV2Render", () => {
+    it("uses different questions for the two directions of a native Q&A card", () => {
+        const references = [
+            {entityType: "block", entityID: "question", fieldID: "prompt", role: "front", sort: 0},
+            {entityType: "block", entityID: "definition", fieldID: "answer", role: "back", sort: 1},
+        ] as IFlashcardV2RenderModel["references"];
+        const forward = selectFlashcardV2References(references, {type: "field", fieldID: "prompt"});
+        const reverse = selectFlashcardV2References(references, {type: "field", fieldID: "answer"});
+        assert.deepEqual(forward.map(reference => reference.entityID), ["question"]);
+        assert.deepEqual(reverse.map(reference => reference.entityID), ["definition"]);
+    });
+
     it("normalizes typed answers with configurable whitespace, punctuation, case, and diacritics", () => {
         const result = checkFlashcardV2Answer("  CAFE,   au lait! ", ["Café au lait"], {
             ignorePunctuation: true,
@@ -99,9 +111,13 @@ describe("flashcardV2Render", () => {
     it("reveals a visible answer on each click when the ordered plan contains missing or repeated marks", () => {
         const mark = (id: string) => {
             const classes = new Set<string>();
+            const attributes = new Set<string>();
             return {
                 classes,
+                attributes,
                 getAttribute: (attribute: string) => attribute === "data-occlusion-id" ? id : null,
+                setAttribute: (attribute: string) => attributes.add(attribute),
+                removeAttribute: (attribute: string) => attributes.delete(attribute),
                 classList: {
                     add: (name: string) => classes.add(name),
                     remove: (...names: string[]) => names.forEach(name => classes.delete(name)),
@@ -120,11 +136,13 @@ describe("flashcardV2Render", () => {
         ]}, {mode: "single", stepIDs: ["s1", "s2", "s3", "s4"]}));
         const hidden = "card__v2-occlusion";
         assert.ok(first.classes.has(hidden) && second.classes.has(hidden));
+        assert.ok(first.attributes.has("inert") && second.attributes.has("inert"));
         assert.equal(view.revealNext(), false);
         assert.equal(first.classes.has(hidden), false);
         assert.equal(second.classes.has(hidden), true);
         assert.equal(view.revealNext(), true);
         assert.equal(second.classes.has(hidden), false);
+        assert.equal(second.attributes.has("inert"), false);
     });
 
     it("keeps future progressive steps hidden after revealing the current answer", () => {

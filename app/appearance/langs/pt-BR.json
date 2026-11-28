@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Etiqueta de nível superior",
+	"flashcardBuriedCardsTip": "Após a avaliação, a predefinição de agendamento pode ocultar outras cartas da mesma fonte até amanhã. Desenterre uma carta para voltar a revisá-la",
+	"flashcardCurrentCardTags": "Etiquetas da carta atual",
+	"flashcardParentTag": "Etiqueta superior",
+	"flashcardQuestion": "Pergunta",
+	"flashcardRemoveSource": "Remover fonte das cartas",
+	"flashcardSaveFilterAsDeck": "Salvar filtros atuais como baralho",
+	"flashcardSourcePreview": "Prévia do bloco de origem",
+	"flashcardSourceTags": "Etiquetas da fonte das cartas",
 	"flashcardManageCards": "Gerenciar cartões",
 	"flashcardManageDecks": "Gerenciar baralhos",
 	"flashcardImportAnki": "Importar pacote do Anki",

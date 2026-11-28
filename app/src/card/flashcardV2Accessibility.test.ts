@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ScriptTarget, transpileModule} from "typescript";
+import {flashcardV2FlagIcon} from "./flashcardV2Flag";
 
 const source = readFileSync("src/card/flashcardV2.ts", "utf8");
 const escapeAttr = (value: string) => value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
@@ -12,6 +13,7 @@ test("the leading flag is a named native menu button visible on mouse and touch 
     const html = runInNewContext("`" + line + "`", {
         result: {card: {flag: 2}}, flagDefinitions: [], escapeAttr,
         flashcardV2FlagLabel: () => 'Study "later"', flashcardFlagStyle: () => "",
+        flashcardV2FlagIcon,
         window: {siyuan: {languages: {flashcardFlag: "Flag"}}},
     });
     assert.match(html, /^<button type="button" data-type="flag"/);
@@ -19,7 +21,7 @@ test("the leading flag is a named native menu button visible on mouse and touch 
     assert.match(html, /data-position="north"/);
     assert.match(html, /aria-label="Flag - Study &quot;later&quot;"/);
     assert.match(html, /block__icon--show block__icon--touch/);
-    assert.match(html, /xlink:href="#iconFlag"/);
+    assert.match(html, /xlink:href="#iconFlagFilled"/);
     assert.match(html, /<\/button>/);
     const row = source.indexOf("const renderManagedCard =");
     const leading = source.slice(source.indexOf('<span class="card__v2-managed-leading">', row),

@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Top-level tag",
+	"flashcardBuriedCardsTip": "Reviewing a card can hide other cards from the same source until tomorrow, depending on the scheduling preset. Use Unbury to make a card available again",
+	"flashcardCurrentCardTags": "Current card tags",
+	"flashcardParentTag": "Parent tag",
+	"flashcardQuestion": "Question",
+	"flashcardRemoveSource": "Remove card source",
+	"flashcardSaveFilterAsDeck": "Save current filters as a deck",
+	"flashcardSourcePreview": "Source block preview",
+	"flashcardSourceTags": "Card source tags",
 	"flashcardManageCards": "Manage flashcards",
 	"flashcardManageDecks": "Manage decks",
 	"flashcardImportAnki": "Import Anki package",

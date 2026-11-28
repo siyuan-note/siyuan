@@ -11,10 +11,17 @@ export const flashcardV2FlagLabel = (flag: number, definitions: readonly FlagNam
     (flag !== 0 && definitions.find(definition => definition.flag === flag)?.name) ||
     window.siyuan.languages[flagNameKeys[flag]] || String(flag);
 
+export const flashcardV2FlagIcon = (flag: number) => flag > 0 ? "iconFlagFilled" : "iconFlag";
+
+export const setFlashcardV2FlagIcon = (icon: SVGElement, flag: number) => {
+    icon.style.color = flashcardV2FlagColors[flag] || "";
+    icon.querySelector("use").setAttribute("xlink:href", "#" + flashcardV2FlagIcon(flag));
+};
+
 export const flashcardV2FlagMenuItems = (current: number, definitions: readonly FlagName[],
     select: (flag: number) => void): IMenu[] => flashcardV2FlagColors.map((color, flag) => ({
     id: `flashcardV2Flag${flag}`,
-    icon: "iconFlag",
+    icon: flashcardV2FlagIcon(flag),
     label: escapeHtml(flashcardV2FlagLabel(flag, definitions)),
     checked: current === flag,
     bind: (element) => {

@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "En üst düzey etiket",
+	"flashcardBuriedCardsTip": "Bir kart puanlandığında, zamanlama ön ayarı aynı kaynaktan gelen diğer kartları yarına kadar gizleyebilir. Kartı yeniden çalışmak için gizlemeyi kaldırın",
+	"flashcardCurrentCardTags": "Geçerli kartın etiketleri",
+	"flashcardParentTag": "Üst etiket",
+	"flashcardQuestion": "Soru",
+	"flashcardRemoveSource": "Kart kaynağını kaldır",
+	"flashcardSaveFilterAsDeck": "Geçerli filtreleri deste olarak kaydet",
+	"flashcardSourcePreview": "Kaynak blok önizlemesi",
+	"flashcardSourceTags": "Kart kaynağı etiketleri",
 	"flashcardManageCards": "Bilgi kartlarını yönet",
 	"flashcardManageDecks": "Desteleri yönet",
 	"flashcardImportAnki": "Anki paketini içe aktar",

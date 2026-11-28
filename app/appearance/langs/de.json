@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Oberste Ebene",
+	"flashcardBuriedCardsTip": "Nach der Bewertung können andere Karten derselben Quelle je nach Zeitplanvorgabe bis morgen ausgeblendet werden. Hebe das Ausblenden auf, um eine Karte wieder verfügbar zu machen",
+	"flashcardCurrentCardTags": "Tags der aktuellen Karte",
+	"flashcardParentTag": "Übergeordneter Tag",
+	"flashcardQuestion": "Frage",
+	"flashcardRemoveSource": "Kartenquelle entfernen",
+	"flashcardSaveFilterAsDeck": "Aktuelle Filter als Stapel speichern",
+	"flashcardSourcePreview": "Vorschau des Quellblocks",
+	"flashcardSourceTags": "Tags der Kartenquelle",
 	"flashcardManageCards": "Lernkarten verwalten",
 	"flashcardManageDecks": "Stapel verwalten",
 	"flashcardImportAnki": "Anki-Paket importieren",

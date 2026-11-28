@@ -7,21 +7,27 @@ import {ScriptTarget, transpileModule} from "typescript";
 const source = readFileSync("src/card/flashcardV2.ts", "utf8");
 const start = source.indexOf("const editableReviewSetPredicates:");
 const end = source.indexOf("const openFlashcardV2ReviewSetEditor", start);
-const script = source.slice(start, end);
-const context: Record<string, any> = {};
-runInNewContext(transpileModule(`${script}\nthis.api = {reviewSetPredicateValues, reviewSetQuery, flashcardManagementQuery, flashcardManagementFilterCount};`, {
+const script = source.slice(source.indexOf("const flashcardTagFilter ="), source.indexOf("const flashcardTagFilterFields =")) +
+    source.slice(start, end);
+const context: Record<string, any> = {FLASHCARD_LEECH_TAG_ID: "leech"};
+runInNewContext(transpileModule(`${script}\nthis.api = {reviewSetTagValues, reviewSetQuery, flashcardManagementQuery, flashcardManagementFilterCount};`, {
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText, context);
 const plain = (value: unknown) => JSON.parse(JSON.stringify(value));
 
 test("tag scope is identical in management and saved review sets", () => {
     for (const tagScope of ["", "descendantOf"]) {
-        const filters = {tagID: "parent", tagScope};
-        const saved = context.api.reviewSetQuery(filters);
-        const management = context.api.flashcardManagementQuery(filters);
-        assert.deepEqual(plain(saved), plain(management));
-        assert.equal(saved.root.comparator, tagScope || "equal");
-        assert.deepEqual(plain(context.api.reviewSetPredicateValues(saved)), filters);
+        for (const tagMatch of ["any", "all"]) {
+            const filters = {tagIDs: ["parent", "other"], tagScope, tagMatch};
+            const saved = context.api.reviewSetQuery({}, undefined, filters);
+            const management = context.api.flashcardManagementQuery(filters);
+            assert.deepEqual(plain(saved), plain(management));
+            assert.equal(saved.root.operator, tagMatch === "all" ? "and" : "or");
+            assert.ok(saved.root.children.every((child: {comparator: string}) => child.comparator === (tagScope || "equal")));
+            assert.deepEqual(plain(context.api.reviewSetTagValues(saved)), filters);
+            const edited = context.api.reviewSetQuery({priority: "exam"}, saved);
+            assert.deepEqual(plain(edited.root.children[0]), plain(saved.root));
+        }
     }
 });
 
@@ -30,7 +36,7 @@ test("editing a descendant filter replaces rather than compounds it", () => {
         {operator: "predicate", field: "tagID", comparator: "descendantOf", value: "old"},
         {operator: "predicate", field: "flag", comparator: "equal", value: 2},
     ]}};
-    const updated = context.api.reviewSetQuery({tagID: "new", tagScope: ""}, base);
+    const updated = context.api.reviewSetQuery({}, base, {tagIDs: ["new"], tagScope: ""});
     assert.equal(updated.root.children.length, 2);
     assert.equal(updated.root.children[0].field, "flag");
     assert.equal(updated.root.children[1].comparator, "equal");
@@ -38,7 +44,7 @@ test("editing a descendant filter replaces rather than compounds it", () => {
     assert.equal(context.api.reviewSetQuery({tagScope: "descendantOf"}).root.operator, "matchAll");
     assert.equal(context.api.flashcardManagementQuery({tagScope: "descendantOf"}), undefined);
     assert.equal(context.api.flashcardManagementFilterCount({tagScope: "descendantOf"}), 0);
-    assert.equal(context.api.flashcardManagementFilterCount({tagID: "parent", tagScope: "descendantOf"}), 1);
+    assert.equal(context.api.flashcardManagementFilterCount({tagIDs: ["parent", "sibling"], tagScope: "descendantOf"}), 1);
 });
 
 test("preset inheritance is the source default, never the card override", () => {
@@ -50,5 +56,4 @@ test("preset inheritance is the source default, never the card override", () => 
         label: ""};
     runInNewContext(`${source.slice(from, to)}this.label = defaultLabel;`, state);
     assert.equal(state.label, "Inherit: Source preset");
-    assert.equal((source.match(/data-filter="tagScope"/g) || []).length, 2);
 });

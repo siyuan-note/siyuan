@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Étiquette de premier niveau",
+	"flashcardBuriedCardsTip": "Après la notation, les autres cartes de la même source peuvent être masquées jusqu’au lendemain selon le préréglage de planification. Rétablissez une carte enterrée pour la réviser",
+	"flashcardCurrentCardTags": "Étiquettes de la carte actuelle",
+	"flashcardParentTag": "Étiquette parente",
+	"flashcardQuestion": "Question",
+	"flashcardRemoveSource": "Supprimer la source des cartes",
+	"flashcardSaveFilterAsDeck": "Enregistrer les filtres actuels comme paquet",
+	"flashcardSourcePreview": "Aperçu du bloc source",
+	"flashcardSourceTags": "Étiquettes de la source des cartes",
 	"flashcardManageCards": "Gérer les cartes mémoire",
 	"flashcardManageDecks": "Gérer les paquets",
 	"flashcardImportAnki": "Importer un paquet Anki",

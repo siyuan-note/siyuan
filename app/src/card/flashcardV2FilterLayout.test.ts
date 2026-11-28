@@ -11,8 +11,9 @@ const basic = filter.slice(filter.indexOf("content: `"), filter.indexOf("</div><
 const style = readFileSync("src/assets/scss/business/_card.scss", "utf8");
 
 test("filter template keeps related fields together in DOM navigation order", () => {
-    assert.deepEqual([...basic.matchAll(/data-filter="([^"]+)"/g)].map(match => match[1]), [
-        "content", "notebookID", "path", "sourceType", "templateID", "tagID", "tagScope", "flag", "presetID",
+    assert.deepEqual([...basic.matchAll(/data-filter="([^"]+)"|data-type="(flagFilter)"|(flashcardTagFilterFields)\(options.tags/g)]
+        .map(match => match[1] || match[2] || match[3]), [
+        "content", "notebookID", "path", "sourceType", "templateID", "flashcardTagFilterFields", "flagFilter", "presetID",
         "generationStatus", "reviewState", "editLater", "priority", "suspended", "buried", "dueFrom", "dueTo",
     ]);
     assert.match(basic, /<label class="b3-label card__v2-form-field--wide">[^\n]+data-filter="content"/);

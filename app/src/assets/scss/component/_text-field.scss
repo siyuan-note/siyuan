@@ -46,6 +46,11 @@
     padding: 0 4px;
   }
 
+  &--editor-font {
+    font-size: var(--b3-font-size-editor);
+    line-height: 1.5;
+  }
+
   &--size {
     padding: 2px 8px;
     width: 64px;

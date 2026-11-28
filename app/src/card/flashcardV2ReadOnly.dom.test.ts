@@ -6,8 +6,9 @@ import * as path from "node:path";
 import {test} from "node:test";
 import {promisify} from "node:util";
 import {createSourceFile, isVariableStatement, ScriptTarget, transpileModule} from "typescript";
+import {compile} from "sass";
 
-const browserCase = async (source: string, luteSource: string) => {
+const browserCase = async (source: string, luteSource: string, reviewCSS: string) => {
     const check: typeof assert = require("node:assert/strict");
     const insert = (text: string) => require("electron").ipcRenderer.invoke("insert-review-text", text);
     new Function(luteSource)();
@@ -63,6 +64,28 @@ const browserCase = async (source: string, luteSource: string) => {
     editor.focus();
     await insert("saved through the source editor");
     check.equal(editor.textContent, "saved through the source editor", "another editor is unaffected");
+
+    const style = document.createElement("style");
+    style.textContent = reviewCSS;
+    document.head.append(style);
+    const layout = document.createElement("div");
+    layout.className = "card__block";
+    layout.style.cssText = "max-width:230px;font:26px/1.5 sans-serif;--b3-font-size-editor:26px;--b3-theme-primary-lightest:pink";
+    layout.innerHTML = "<div>Start <span>one two three four five six</span> end</div>" +
+        "<div data-flashcard-reference><div>First line<br>Second line</div></div>" +
+        '<input class="b3-text-field b3-text-field--editor-font" data-flashcard-type-answer>';
+    document.body.append(layout);
+    const inline = layout.querySelector("span");
+    const block = layout.querySelector("[data-flashcard-reference]");
+    const rects = (node: Element) => [...node.getClientRects()].map(rect => [rect.x, rect.y, rect.width, rect.height]);
+    const before = [rects(inline), rects(block)];
+    check.ok(before[0].length > 1, "inline fixture wraps onto multiple lines");
+    inline.classList.add("card__v2-occlusion");
+    block.classList.add("card__v2-occlusion");
+    check.deepEqual([rects(inline), rects(block)], before, "concealment keeps line and block dimensions");
+    check.equal(getComputedStyle(inline).webkitTextFillColor, "rgba(0, 0, 0, 0)");
+    check.equal(getComputedStyle(block.firstElementChild).visibility, "hidden");
+    check.equal(getComputedStyle(layout.querySelector("input")).fontSize, "26px");
     return "Read-only flashcard surfaces verified";
 };
 
@@ -78,7 +101,9 @@ test("review content rejects native text input while answer and source editor in
     const source = transpileModule(helper.getText(file).replace(/^export /, ""),
         {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
     const luteSource = readFileSync("stage/protyle/js/lute/lute.min.js", "utf8");
-    const contents = `const __name = value => value; (${browserCase.toString()})(${JSON.stringify(source)}, ${JSON.stringify(luteSource)})`;
+    const reviewCSS = ["src/assets/scss/business/_card.scss", "src/assets/scss/component/_text-field.scss"]
+        .map(file => compile(file).css).join("\n");
+    const contents = `const __name = value => value; (${browserCase.toString()})(${JSON.stringify(source)}, ${JSON.stringify(luteSource)}, ${JSON.stringify(reviewCSS)})`;
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-review-read-only-"));
     const script = path.join(temporary, "run.cjs");
     writeFileSync(script, `const {app, BrowserWindow, ipcMain} = require("electron");

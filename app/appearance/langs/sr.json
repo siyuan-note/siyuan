@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Ознака највишег нивоа",
+	"flashcardBuriedCardsTip": "После оцењивања, подешавање распореда може сакрити остале картице из истог извора до сутра. Откријте картицу да бисте је поново прегледали",
+	"flashcardCurrentCardTags": "Ознаке тренутне картице",
+	"flashcardParentTag": "Надређена ознака",
+	"flashcardQuestion": "Питање",
+	"flashcardRemoveSource": "Уклони извор картица",
+	"flashcardSaveFilterAsDeck": "Сачувај тренутне филтере као шпил",
+	"flashcardSourcePreview": "Преглед изворног блока",
+	"flashcardSourceTags": "Ознаке извора картица",
 	"flashcardManageCards": "Управљање картицама",
 	"flashcardManageDecks": "Управљање шпиловима",
 	"flashcardImportAnki": "Увези Anki пакет",

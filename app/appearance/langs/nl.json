@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Tag op het hoogste niveau",
+	"flashcardBuriedCardsTip": "Na beoordeling kan de planningsvoorinstelling andere kaarten uit dezelfde bron tot morgen verbergen. Maak het verbergen ongedaan om een kaart weer te kunnen herhalen",
+	"flashcardCurrentCardTags": "Tags van de huidige kaart",
+	"flashcardParentTag": "Bovenliggende tag",
+	"flashcardQuestion": "Vraag",
+	"flashcardRemoveSource": "Kaartbron verwijderen",
+	"flashcardSaveFilterAsDeck": "Huidige filters opslaan als kaartenset",
+	"flashcardSourcePreview": "Voorbeeld van het bronblok",
+	"flashcardSourceTags": "Tags van de kaartbron",
 	"flashcardManageCards": "Flitskaarten beheren",
 	"flashcardManageDecks": "Kaartensets beheren",
 	"flashcardImportAnki": "Anki-pakket importeren",

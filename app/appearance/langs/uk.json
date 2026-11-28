@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Тег верхнього рівня",
+	"flashcardBuriedCardsTip": "Після оцінювання інші картки з того самого джерела можуть бути приховані до завтра відповідно до налаштувань розкладу. Скасуйте приховування, щоб знову повторювати картку",
+	"flashcardCurrentCardTags": "Теги поточної картки",
+	"flashcardParentTag": "Батьківський тег",
+	"flashcardQuestion": "Запитання",
+	"flashcardRemoveSource": "Видалити джерело карток",
+	"flashcardSaveFilterAsDeck": "Зберегти поточні фільтри як колоду",
+	"flashcardSourcePreview": "Перегляд вихідного блока",
+	"flashcardSourceTags": "Теги джерела карток",
 	"flashcardManageCards": "Керування картками",
 	"flashcardManageDecks": "Керування колодами",
 	"flashcardImportAnki": "Імпортувати пакет Anki",

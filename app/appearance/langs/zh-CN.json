@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "顶级标签",
+	"flashcardBuriedCardsTip": "评分后，排程预设可将其他同源卡片推迟到次日。可使用「取消埋藏」恢复复习",
+	"flashcardCurrentCardTags": "当前卡片标签",
+	"flashcardParentTag": "上级标签",
+	"flashcardQuestion": "题目",
+	"flashcardRemoveSource": "移除卡源",
+	"flashcardSaveFilterAsDeck": "将当前筛选保存为卡包",
+	"flashcardSourcePreview": "卡源原文",
+	"flashcardSourceTags": "卡源标签",
 	"flashcardManageCards": "管理闪卡",
 	"flashcardManageDecks": "管理卡包",
 	"flashcardImportAnki": "导入 Anki 卡包",

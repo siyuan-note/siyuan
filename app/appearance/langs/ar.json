@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "وسم من المستوى الأعلى",
+	"flashcardBuriedCardsTip": "قد يؤدي تقييم بطاقة إلى إخفاء البطاقات الأخرى من المصدر نفسه حتى الغد حسب إعداد الجدولة. ألغِ الإخفاء لتتمكن من مراجعة البطاقة مجددًا",
+	"flashcardCurrentCardTags": "وسوم البطاقة الحالية",
+	"flashcardParentTag": "الوسم الأب",
+	"flashcardQuestion": "السؤال",
+	"flashcardRemoveSource": "إزالة مصدر البطاقات",
+	"flashcardSaveFilterAsDeck": "حفظ عوامل التصفية الحالية كمجموعة بطاقات",
+	"flashcardSourcePreview": "معاينة كتلة المصدر",
+	"flashcardSourceTags": "وسوم مصدر البطاقات",
 	"flashcardManageCards": "إدارة البطاقات التعليمية",
 	"flashcardManageDecks": "إدارة مجموعات البطاقات",
 	"flashcardImportAnki": "استيراد حزمة Anki",

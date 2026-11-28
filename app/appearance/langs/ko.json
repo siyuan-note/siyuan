@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "최상위 태그",
+	"flashcardBuriedCardsTip": "카드를 평가하면 일정 프리셋에 따라 같은 출처의 다른 카드가 내일까지 숨겨질 수 있습니다. 숨김을 해제하면 다시 복습할 수 있습니다",
+	"flashcardCurrentCardTags": "현재 카드 태그",
+	"flashcardParentTag": "상위 태그",
+	"flashcardQuestion": "문제",
+	"flashcardRemoveSource": "카드 출처 제거",
+	"flashcardSaveFilterAsDeck": "현재 필터를 덱으로 저장",
+	"flashcardSourcePreview": "출처 블록 미리보기",
+	"flashcardSourceTags": "카드 출처 태그",
 	"flashcardManageCards": "플래시카드 관리",
 	"flashcardManageDecks": "덱 관리",
 	"flashcardImportAnki": "Anki 패키지 가져오기",

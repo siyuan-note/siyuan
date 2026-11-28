@@ -83,6 +83,7 @@ test("tag creation and child editing serialize assignment saves and unknown clos
         readFlashcardV2Revision: (value: unknown) => value, isFlashcardTag() {},
         getFlashcardV2TagSelection: () => ({selected: [] as string[], mixed: [] as string[]}),
         flashcardTagParentOptions: () => "", renderFlashcardTagChoices: () => "", isMobile: () => false,
+        flashcardV2DisclosureIcon: "",
         window: {siyuan: {languages: {}}}, showMessage() {},
         callback: () => {refreshes++;},
     };

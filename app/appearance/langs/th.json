@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "แท็กระดับบนสุด",
+	"flashcardBuriedCardsTip": "เมื่อให้คะแนนการ์ด การตั้งค่ากำหนดการอาจซ่อนการ์ดอื่นจากแหล่งเดียวกันจนถึงวันพรุ่งนี้ ยกเลิกการซ่อนเพื่อทบทวนการ์ดอีกครั้ง",
+	"flashcardCurrentCardTags": "แท็กของการ์ดปัจจุบัน",
+	"flashcardParentTag": "แท็กแม่",
+	"flashcardQuestion": "คำถาม",
+	"flashcardRemoveSource": "ลบแหล่งที่มาของการ์ด",
+	"flashcardSaveFilterAsDeck": "บันทึกตัวกรองปัจจุบันเป็นสำรับ",
+	"flashcardSourcePreview": "ตัวอย่างบล็อกต้นทาง",
+	"flashcardSourceTags": "แท็กของแหล่งที่มาการ์ด",
 	"flashcardManageCards": "จัดการแฟลชการ์ด",
 	"flashcardManageDecks": "จัดการสำรับการ์ด",
 	"flashcardImportAnki": "นำเข้าแพ็กเกจ Anki",

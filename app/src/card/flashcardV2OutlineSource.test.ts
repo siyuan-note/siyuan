@@ -65,7 +65,7 @@ test("source editor enables heading scroll only for explicit outline navigation 
         window: {siyuan: {languages: {edit: "Edit"}}}, isMobile: () => false,
         Constants: {CB_GET_ALL: "all", CB_GET_FOCUS: "focus", CB_GET_SCROLL: "scroll"},
         Dialog: class {
-            element = {querySelector: () => ({})};
+            element = {querySelector: () => ({replaceChildren() {}}), querySelectorAll: (): never[] => []};
             constructor(options: typeof dialogOptions) { dialogOptions = options; }
         },
         Protyle: class {

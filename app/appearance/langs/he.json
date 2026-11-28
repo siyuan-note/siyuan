@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "תגית ברמה העליונה",
+	"flashcardBuriedCardsTip": "דירוג כרטיס עשוי להסתיר כרטיסים אחרים מאותו מקור עד מחר לפי הגדרות התזמון. בטלו את ההסתרה כדי לחזור על הכרטיס",
+	"flashcardCurrentCardTags": "תגיות הכרטיס הנוכחי",
+	"flashcardParentTag": "תגית אב",
+	"flashcardQuestion": "שאלה",
+	"flashcardRemoveSource": "הסרת מקור הכרטיסים",
+	"flashcardSaveFilterAsDeck": "שמירת המסננים הנוכחיים כחפיסה",
+	"flashcardSourcePreview": "תצוגה מקדימה של בלוק המקור",
+	"flashcardSourceTags": "תגיות מקור הכרטיסים",
 	"flashcardManageCards": "ניהול כרטיסיות",
 	"flashcardManageDecks": "ניהול חפיסות",
 	"flashcardImportAnki": "ייבוא חבילת Anki",

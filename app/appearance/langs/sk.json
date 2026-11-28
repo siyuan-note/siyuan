@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Značka najvyššej úrovne",
+	"flashcardBuriedCardsTip": "Po ohodnotení sa podľa nastavenia plánu môžu ostatné karty z rovnakého zdroja skryť do zajtra. Zrušte skrytie, aby ste si kartu mohli zopakovať",
+	"flashcardCurrentCardTags": "Značky aktuálnej karty",
+	"flashcardParentTag": "Nadradená značka",
+	"flashcardQuestion": "Otázka",
+	"flashcardRemoveSource": "Odstrániť zdroj kariet",
+	"flashcardSaveFilterAsDeck": "Uložiť aktuálne filtre ako balíček",
+	"flashcardSourcePreview": "Náhľad zdrojového bloku",
+	"flashcardSourceTags": "Značky zdroja kariet",
 	"flashcardManageCards": "Spravovať kartičky",
 	"flashcardManageDecks": "Spravovať balíčky",
 	"flashcardImportAnki": "Importovať balíček Anki",

@@ -648,7 +648,7 @@ export const renderFlashcardV2AnkiTemplate = (model: IFlashcardV2RenderModel, si
             return "";
         }
         if (token.filter === "type" && side === "front") {
-            return `<input class="b3-text-field fn__block" data-anki-type-answer="${escapeAttr(fieldID)}" autocomplete="off">`;
+            return `<input class="b3-text-field b3-text-field--editor-font fn__block" data-anki-type-answer="${escapeAttr(fieldID)}" autocomplete="off">`;
         }
         return flashcardV2ReferenceHTML(reference, doms);
     }).join("");
@@ -954,16 +954,17 @@ const findOcclusionElements = (element: Element, occlusionID: string) => {
 
 const hideTextOcclusion = (element: Element, occlusionID: string) => {
     const elements = findOcclusionElements(element, occlusionID);
-    elements.forEach((item, index) => {
+    elements.forEach((item) => {
         item.classList.add("card__v2-occlusion");
-        item.classList.toggle("card__v2-occlusion--placeholder", index === 0);
+        item.setAttribute("inert", "");
     });
     return elements.length > 0;
 };
 
 const revealTextOcclusion = (element: Element, occlusionID: string) => {
     findOcclusionElements(element, occlusionID).forEach((item) => {
-        item.classList.remove("card__v2-occlusion", "card__v2-occlusion--placeholder");
+        item.classList.remove("card__v2-occlusion");
+        item.removeAttribute("inert");
     });
 };
 
@@ -1078,7 +1079,7 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
             input.type = "text";
             input.maxLength = maximumAnswerLength;
             input.autocomplete = "off";
-            input.className = "b3-text-field fn__block";
+            input.className = "b3-text-field b3-text-field--editor-font fn__block";
             input.setAttribute("aria-label", label.textContent);
             input.setAttribute("data-flashcard-image-answer", "");
             row.append(label, input);

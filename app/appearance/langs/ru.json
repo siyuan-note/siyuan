@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Тег верхнего уровня",
+	"flashcardBuriedCardsTip": "После оценки другие карточки из того же источника могут быть скрыты до завтра согласно настройкам расписания. Отмените скрытие, чтобы снова увидеть карточку",
+	"flashcardCurrentCardTags": "Теги текущей карточки",
+	"flashcardParentTag": "Родительский тег",
+	"flashcardQuestion": "Вопрос",
+	"flashcardRemoveSource": "Удалить источник карточек",
+	"flashcardSaveFilterAsDeck": "Сохранить текущие фильтры как колоду",
+	"flashcardSourcePreview": "Исходный блок карточки",
+	"flashcardSourceTags": "Теги источника карточек",
 	"flashcardManageCards": "Управление карточками",
 	"flashcardManageDecks": "Управление колодами",
 	"flashcardImportAnki": "Импорт пакета Anki",

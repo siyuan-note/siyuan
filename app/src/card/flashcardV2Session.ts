@@ -60,7 +60,7 @@ import {
 import {setFlashcardLocateBlockID} from "./flashcardLocate";
 import {bindWorkspaceReviewOutline} from "./workspaceReviewOutline";
 import {matchHotKey} from "../protyle/util/hotKey";
-import {flashcardV2FlagColors, flashcardV2FlagMenuItems} from "./flashcardV2Flag";
+import {flashcardV2FlagMenuItems, setFlashcardV2FlagIcon} from "./flashcardV2Flag";
 import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
 import {moveFlashcardReviewToTab, moveFlashcardReviewToWindow, openFlashcardReviewTab} from "./openFlashcardReviewTab";
 import {deferFlashcardV2QueueCard, flashcardV2QueueBreakdown, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
@@ -743,7 +743,7 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
             }
             if (model.source.sourceType === "typed-answer" && model.template.answerMode === "typed") {
                 frontElement.insertAdjacentHTML("beforeend",
-                    '<input class="b3-text-field fn__block" data-flashcard-type-answer autocomplete="off">');
+                    '<input class="b3-text-field b3-text-field--editor-font fn__block" data-flashcard-type-answer autocomplete="off">');
             }
             answerElement.querySelector(".protyle-wysiwyg").innerHTML = specialFront === undefined ?
                 (ankiBack === undefined ? referenceHTML(answerReferences, doms) : ankiBack) : "";
@@ -961,13 +961,25 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0,
     load();
 };
 
-export const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => void, locate = false) => {
+export const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => void, locate = false,
+    references: readonly IFlashcardV2SourceReference[] = []) => {
     const editorHolder: { current?: Protyle } = {};
+    const lang = window.siyuan.languages;
+    const blocks = [...new Map(references.filter(ref => ref.entityType === "block").map(ref => [ref.entityID, ref])).values()]
+        .sort((left, right) => left.sort - right.sort);
+    const blockLabel = (reference: IFlashcardV2SourceReference) => {
+        if (reference.role === "front" || reference.role === "question") { return lang.flashcardQuestion; }
+        if (reference.role === "back" || reference.role.startsWith("answer:")) { return lang.flashcardManagementAnswer; }
+        return lang.block;
+    };
     const dialog = new Dialog({
-        title: window.siyuan.languages.edit,
+        title: lang.edit,
         width: isMobile() ? "100vw" : "80vw",
         height: isMobile() ? "100dvh" : "78vh",
-        content: '<div data-type="flashcardSourceEditor" style="height:100%"></div>',
+        content: `<div class="card__v2-source-editor">${blocks.length > 1 ?
+            `<div class="card__v2-source-editor-blocks">${blocks.map((reference, index) =>
+                `<button type="button" data-edit-block="${escapeAttr(reference.entityID)}" class="b3-button b3-button--outline" aria-pressed="false">${escapeHtml(blockLabel(reference))} ${index + 1}</button>`).join("")}</div>` : ""}
+<div data-type="flashcardSourceEditor" class="card__v2-source-editor-body"></div></div>`,
         destroyCallback: () => {
             editorHolder.current?.destroy();
             if (window.siyuan.mobile?.popEditor === editorHolder.current) {
@@ -977,23 +989,31 @@ export const openFlashcardV2SourceEditor = (app: App, blockID: string, callback:
         },
         resizeCallback: () => editorHolder.current?.resize(),
     });
-    const editor = new Protyle(app, dialog.element.querySelector('[data-type="flashcardSourceEditor"]'), {
-        blockId: blockID,
-        action: locate ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL] : [Constants.CB_GET_ALL],
-        render: {
-            background: true,
-            breadcrumbDocName: true,
-            gutter: true,
-            title: true,
-        },
-        typewriterMode: false,
-    });
-    editorHolder.current = editor;
-    if (window.siyuan.mobile) {
-        window.siyuan.mobile.popEditor = editor;
-    }
-    dialog.editors = {source: editor};
-    editor.resize();
+    const body = dialog.element.querySelector<HTMLElement>('[data-type="flashcardSourceEditor"]');
+    const buttons = [...dialog.element.querySelectorAll<HTMLButtonElement>("[data-edit-block]")];
+    const showBlock = (id: string) => {
+        editorHolder.current?.destroy();
+        body.replaceChildren();
+        const editor = new Protyle(app, body, {
+            blockId: id,
+            action: locate ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL] : [Constants.CB_GET_ALL],
+            render: {background: true, breadcrumbDocName: true, gutter: true, title: true},
+            typewriterMode: false,
+        });
+        editorHolder.current = editor;
+        if (window.siyuan.mobile) {
+            window.siyuan.mobile.popEditor = editor;
+        }
+        dialog.editors = {source: editor};
+        buttons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.editBlock === id)));
+        editor.resize();
+    };
+    buttons.forEach(button => button.addEventListener("click", () => {
+        if (button.getAttribute("aria-pressed") !== "true") {
+            showBlock(button.dataset.editBlock);
+        }
+    }));
+    showBlock(blockID);
 };
 
 export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name: string,
@@ -1213,7 +1233,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 playbackController = rendered.playbackController;
                 currentModel = rendered.model;
                 queue[index].card.flag = rendered.model.card.flag ?? queue[index].card.flag;
-                flagIcon.style.color = flashcardV2FlagColors[queue[index].card.flag] || "";
+                setFlashcardV2FlagIcon(flagIcon, queue[index].card.flag);
                 pluginEdit = rendered.pluginEdit;
                 answerResult = undefined;
                 renderPending = false;
@@ -1535,7 +1555,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 }, (response) => {
                     managed = true;
                     updateManagedQueueCards(response.data);
-                    flagIcon.style.color = flashcardV2FlagColors[queue[index]?.card.flag] || "";
+                    setFlashcardV2FlagIcon(flagIcon, queue[index]?.card.flag);
                     requestPending = false;
                 }).catch(error => console.error("Flashcard management failed", error)).finally(() => {
                     if (!managed) {
@@ -1766,13 +1786,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         menu.addItem({
                             id: "flashcardV2CardTags",
                             icon: "iconTag",
-                            label: `${window.siyuan.languages.tag} - ${window.siyuan.languages.riffCard}`,
+                            label: window.siyuan.languages.flashcardCurrentCardTags,
                             click: () => queryCurrentCardTags("card"),
                         });
                         menu.addItem({
                             id: "flashcardV2SourceTags",
                             icon: "iconTag",
-                            label: `${window.siyuan.languages.tag} - ${window.siyuan.languages.flashcardCardSource}`,
+                            label: window.siyuan.languages.flashcardSourceTags,
                             click: () => queryCurrentCardTags("source"),
                         });
                         if (isMobile()) {
@@ -2104,7 +2124,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     }
                     openFlashcardV2SourceEditor(app, sourceBlockID, () => {
                         refreshCurrent();
-                    });
+                    }, false, currentModel?.references);
                     return;
                 }
                 if (target.closest('[data-type="show"]')) {

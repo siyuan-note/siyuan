@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Tag tingkat atas",
+	"flashcardBuriedCardsTip": "Setelah kartu dinilai, prasetel penjadwalan dapat menyembunyikan kartu lain dari sumber yang sama hingga besok. Tampilkan kembali kartu agar dapat diulas",
+	"flashcardCurrentCardTags": "Tag kartu saat ini",
+	"flashcardParentTag": "Tag induk",
+	"flashcardQuestion": "Pertanyaan",
+	"flashcardRemoveSource": "Hapus sumber kartu",
+	"flashcardSaveFilterAsDeck": "Simpan filter saat ini sebagai dek",
+	"flashcardSourcePreview": "Pratinjau blok sumber",
+	"flashcardSourceTags": "Tag sumber kartu",
 	"flashcardManageCards": "Kelola kartu hafalan",
 	"flashcardManageDecks": "Kelola dek",
 	"flashcardImportAnki": "Impor paket Anki",

@@ -1,4 +1,13 @@
 {
+	"flashcardTopLevelTag": "Etiqueta de nivel superior",
+	"flashcardBuriedCardsTip": "Tras calificar una tarjeta, el ajuste de programación puede ocultar las demás tarjetas de la misma fuente hasta mañana. Desentierra una tarjeta para volver a repasarla",
+	"flashcardCurrentCardTags": "Etiquetas de la tarjeta actual",
+	"flashcardParentTag": "Etiqueta superior",
+	"flashcardQuestion": "Pregunta",
+	"flashcardRemoveSource": "Eliminar fuente de tarjetas",
+	"flashcardSaveFilterAsDeck": "Guardar los filtros actuales como mazo",
+	"flashcardSourcePreview": "Vista previa del bloque de origen",
+	"flashcardSourceTags": "Etiquetas de la fuente de tarjetas",
 	"flashcardManageCards": "Gestionar tarjetas",
 	"flashcardManageDecks": "Gestionar mazos",
 	"flashcardImportAnki": "Importar paquete de Anki",

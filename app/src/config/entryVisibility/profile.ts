@@ -68,6 +68,44 @@ export const migrateChartHeightMenu = (profile: Pick<Config.IEntryVisibilityProf
     }
 };
 
+// 将旧卡源子菜单中的全局工具合并到主菜单。已有主菜单配置优先，其次合并各入口的显隐和排序。
+export const migrateFlashcardMenu = ({entries, orders}: Pick<Config.IEntryVisibilityProfile, "entries" | "orders">) => {
+    const target = "mainMenu.riffCard";
+    const moved = new Map([
+        ["management", "manage"], ["reviewSets", "reviewSets"], ["presets", "presets"],
+        ["statistics", "statistics"], ["anki", "anki"],
+    ]);
+    const visibility = new Map<string, boolean>();
+    const order = new Set<string>();
+    for (const parent of ["docTree.document.riffCard", "document.title.riffCard", "gutter.single",
+        "docTree.multi.riffCard", "gutter.multi"]) {
+        const source = `${parent}.addToDeck`;
+        for (const [key, newKey] of moved) {
+            const path = `${source}.${key}`;
+            if (path in entries) {
+                visibility.set(newKey, Boolean(visibility.get(newKey)) ||
+                    (entries[path] && entries[source] !== false && entries[parent] !== false));
+                delete entries[path];
+            }
+        }
+        if (orders[source]?.some(key => moved.has(key))) {
+            orders[source].forEach(key => {
+                const newKey = moved.get(key);
+                if (newKey) {
+                    order.add(newKey);
+                }
+            });
+            orders[source] = orders[source].filter(key => !moved.has(key));
+        }
+    }
+    visibility.forEach((visible, key) => {
+        entries[`${target}.${key}`] ??= visible;
+    });
+    if (order.size) {
+        orders[target] ??= [...order];
+    }
+};
+
 // 展开任务状态子菜单，合并重复入口的可见性，并在原菜单位置保留子项顺序及插件位置。
 export const migrateTaskStatusMenu = (profile: Pick<Config.IEntryVisibilityProfile, "entries" | "orders">) => {
     const parent = "gutter.single.listBlock";
@@ -177,6 +215,7 @@ export const normalizeEntryVisibilityImportProfile = (
         migrateTaskStatusMenu({entries, orders});
     }
     migrateChartHeightMenu({entries, orders});
+    migrateFlashcardMenu({entries, orders});
     const defaults = version >= 7 && (profile.defaults === "simple" || profile.defaults === "full")
         ? profile.defaults : undefined;
     if (!defaults) {

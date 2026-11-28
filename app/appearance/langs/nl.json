@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Flitskaarten beheren",
+	"flashcardManageDecks": "Kaartensets beheren",
+	"flashcardImportAnki": "Anki-pakket importeren",
+	"flashcardReviewDocument": "Kaarten in dit document herhalen",
+	"flashcardManageDocument": "Kaarten in dit document beheren",
+	"flashcardReviewNotebook": "Kaarten in dit notitieboek herhalen",
+	"flashcardManageNotebook": "Kaarten in dit notitieboek beheren",
+	"flashcardStatisticsDocumentTree": "Kaartstatistieken voor dit document en de subdocumenten",
 	"flashcardManagementParentBlock": "Bovenliggend blok",
 	"flashcardManagementPrompt": "Vraag",
 	"flashcardManagementAnswer": "Antwoord",

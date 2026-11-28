@@ -226,7 +226,7 @@ export const openDocumentMenu = (options: {
             const riffCardMenu: IMenu[] = [{
                 id: "spaceRepetition",
                 iconHTML: "",
-                label: window.siyuan.languages.spaceRepetition,
+                label: window.siyuan.languages.flashcardReviewDocument,
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
                     openCardByScope(app, "doc", id, docInfo.name);
@@ -234,7 +234,7 @@ export const openDocumentMenu = (options: {
             }, {
                 id: "manage",
                 iconHTML: "",
-                label: window.siyuan.languages.manage,
+                label: window.siyuan.languages.flashcardManageDocument,
                 click: () => {
                     openFlashcardV2ManagementByRoots([id], docInfo.name);
                 }
@@ -257,7 +257,7 @@ export const openDocumentMenu = (options: {
                 id: "addToDeck",
                 iconHTML: "",
                 label: window.siyuan.languages.flashcardCardSource,
-                submenu: flashcardSourceMenuItems(app, [id]),
+                submenu: flashcardSourceMenuItems([id]),
             }];
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "riffCard",

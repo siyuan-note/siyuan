@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "ניהול כרטיסיות",
+	"flashcardManageDecks": "ניהול חפיסות",
+	"flashcardImportAnki": "ייבוא חבילת Anki",
+	"flashcardReviewDocument": "חזרה על כרטיסיות במסמך הנוכחי",
+	"flashcardManageDocument": "ניהול כרטיסיות במסמך הנוכחי",
+	"flashcardReviewNotebook": "חזרה על כרטיסיות במחברת הנוכחית",
+	"flashcardManageNotebook": "ניהול כרטיסיות במחברת הנוכחית",
+	"flashcardStatisticsDocumentTree": "סטטיסטיקת כרטיסיות במסמך הנוכחי ובמסמכי המשנה שלו",
 	"flashcardManagementParentBlock": "בלוק אב",
 	"flashcardManagementPrompt": "שאלה",
 	"flashcardManagementAnswer": "תשובה",

@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Управление карточками",
+	"flashcardManageDecks": "Управление колодами",
+	"flashcardImportAnki": "Импорт пакета Anki",
+	"flashcardReviewDocument": "Повторить карточки этого документа",
+	"flashcardManageDocument": "Управление карточками этого документа",
+	"flashcardReviewNotebook": "Повторить карточки этого блокнота",
+	"flashcardManageNotebook": "Управление карточками этого блокнота",
+	"flashcardStatisticsDocumentTree": "Статистика карточек этого документа и его дочерних документов",
 	"flashcardManagementParentBlock": "Родительский блок",
 	"flashcardManagementPrompt": "Вопрос",
 	"flashcardManagementAnswer": "Ответ",

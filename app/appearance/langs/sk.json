@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Spravovať kartičky",
+	"flashcardManageDecks": "Spravovať balíčky",
+	"flashcardImportAnki": "Importovať balíček Anki",
+	"flashcardReviewDocument": "Opakovať kartičky v tomto dokumente",
+	"flashcardManageDocument": "Spravovať kartičky v tomto dokumente",
+	"flashcardReviewNotebook": "Opakovať kartičky v tomto zápisníku",
+	"flashcardManageNotebook": "Spravovať kartičky v tomto zápisníku",
+	"flashcardStatisticsDocumentTree": "Štatistiky kartičiek v tomto dokumente a jeho poddokumentoch",
 	"flashcardManagementParentBlock": "Nadradený blok",
 	"flashcardManagementPrompt": "Otázka",
 	"flashcardManagementAnswer": "Odpoveď",

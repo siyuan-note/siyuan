@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Quản lý thẻ ghi nhớ",
+	"flashcardManageDecks": "Quản lý bộ thẻ",
+	"flashcardImportAnki": "Nhập gói Anki",
+	"flashcardReviewDocument": "Ôn tập thẻ trong tài liệu này",
+	"flashcardManageDocument": "Quản lý thẻ trong tài liệu này",
+	"flashcardReviewNotebook": "Ôn tập thẻ trong sổ tay này",
+	"flashcardManageNotebook": "Quản lý thẻ trong sổ tay này",
+	"flashcardStatisticsDocumentTree": "Thống kê thẻ của tài liệu này và các tài liệu con",
 	"flashcardManagementParentBlock": "Khối cha",
 	"flashcardManagementPrompt": "Câu hỏi",
 	"flashcardManagementAnswer": "Câu trả lời",

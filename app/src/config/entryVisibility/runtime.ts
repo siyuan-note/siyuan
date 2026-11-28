@@ -242,6 +242,8 @@ export const syncDockEntryOrders = () => {
 
 const entryScope = (menuElement: HTMLElement): string => {
     switch (menuElement.dataset.name) {
+        case Constants.MENU_BAR_MAIN_MENU:
+            return "mainMenu";
         case Constants.MENU_DOC_TREE_PANEL_MORE:
             return "docTree.panel";
         case Constants.MENU_DOC_TREE_MORE:

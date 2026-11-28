@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Bilgi kartlarını yönet",
+	"flashcardManageDecks": "Desteleri yönet",
+	"flashcardImportAnki": "Anki paketini içe aktar",
+	"flashcardReviewDocument": "Bu belgedeki kartları tekrar et",
+	"flashcardManageDocument": "Bu belgedeki kartları yönet",
+	"flashcardReviewNotebook": "Bu not defterindeki kartları tekrar et",
+	"flashcardManageNotebook": "Bu not defterindeki kartları yönet",
+	"flashcardStatisticsDocumentTree": "Bu belge ve alt belgelerinin kart istatistikleri",
 	"flashcardManagementParentBlock": "Üst blok",
 	"flashcardManagementPrompt": "Soru",
 	"flashcardManagementAnswer": "Yanıt",

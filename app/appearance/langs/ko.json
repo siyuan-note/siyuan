@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "플래시카드 관리",
+	"flashcardManageDecks": "덱 관리",
+	"flashcardImportAnki": "Anki 패키지 가져오기",
+	"flashcardReviewDocument": "현재 문서의 카드 복습",
+	"flashcardManageDocument": "현재 문서의 카드 관리",
+	"flashcardReviewNotebook": "이 노트북의 카드 복습",
+	"flashcardManageNotebook": "이 노트북의 카드 관리",
+	"flashcardStatisticsDocumentTree": "현재 문서와 하위 문서의 카드 통계",
 	"flashcardManagementParentBlock": "상위 블록",
 	"flashcardManagementPrompt": "문제",
 	"flashcardManagementAnswer": "답변",

@@ -181,6 +181,14 @@ const browserCases = async ({css, modules, languages}) => {
             check.ok(!visible(menu.querySelector('[data-type="menu-search-empty"]')));
             check.ok(visible(title) && !visible(input.parentElement));
             check.equal(open.getAttribute("aria-expanded"), "false");
+
+            open.click();
+            input.value = "Anki";
+            input.dispatchEvent(new InputEvent("input"));
+            const importer = menu.querySelector('[data-menu-group="flashcards"] #menuFlashcards-anki');
+            check.ok(visible(importer.closest("[data-menu-group]")) && visible(importer));
+            check.equal(importer.textContent.trim(), languages.flashcardImportAnki);
+            close.click();
         }
     }
     check.ok(mounts > 0 && unmounts >= mounts);
@@ -221,7 +229,7 @@ if (process.versions.electron && process.type === "browser") {
             }).css;
             const modules = ["util/escape.ts", "config/search/normalize.ts", "mobile/menu/searchFilter.ts",
                 "mobile/dock/mobileFilterInput.ts", "mobile/menu/mainMenuCollapse.ts", "mobile/menu/workspaceManager.ts",
-                "mobile/menu/workspaceMenu.ts", "mobile/menu/mainMenu.ts", "mobile/menu/mainMenuSearch.ts",
+                "mobile/menu/workspaceMenu.ts", "card/flashcardMenu.ts", "mobile/menu/mainMenu.ts", "mobile/menu/mainMenuSearch.ts",
                 "mobile/menu/index.ts"].map(compile);
             const languages = JSON.parse(readFileSync(path.join(__dirname, "../appearance/langs/en.json"), "utf8"));
             for (const theme of ["daylight", "midnight"]) {

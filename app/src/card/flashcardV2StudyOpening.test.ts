@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {createFlashcardReviewTabData, resolveFlashcardOpenMode} from "./flashcardOpenMode";
+import {flashcardV2DocumentTreeQuery, flashcardV2LocationQuery} from "./flashcardV2Query";
 
 const compile = (source: string) => transpileModule(source, {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -11,6 +12,33 @@ const compile = (source: string) => transpileModule(source, {
 const routeSource = readFileSync("src/card/openFlashcardReviewTab.ts", "utf8");
 const route = compile(routeSource.slice(routeSource.indexOf("export const openFlashcardReviewTab =")));
 const flush = () => new Promise(resolve => setImmediate(resolve));
+
+test("scoped review options and statistics use the selected notebook or document tree", () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const start = source.indexOf("export const openFlashcardV2NotebookReviewOptions");
+    const scope = compile(source.slice(start, source.indexOf("export const openFlashcardV2ReviewPicker", start)));
+    const exports: Record<string, (...args: unknown[]) => unknown> = {};
+    const app = {};
+    const calls: unknown[][] = [];
+    runInNewContext(scope, {
+        exports, window: {siyuan: {languages: {flashcardReviewDocumentTree: "Document tree"}}},
+        ensureFlashcardV2: (action: () => void) => action(),
+        fetchPost: (_path: string, _payload: object, callback: (response: object) => void) =>
+            callback({data: {notebook: "box", path: "/parent/doc.sy"}}),
+        flashcardV2DocumentTreeQuery, flashcardV2LocationQuery,
+        openFlashcardV2ReviewSetSession: (...args: unknown[]) => calls.push(args),
+        openFlashcardV2Statistics: (...args: unknown[]) => calls.push(args),
+    });
+    exports.openFlashcardV2NotebookReviewOptions(app, "box", "Notebook");
+    exports.openFlashcardV2DocumentTree(app, "doc", "review");
+    exports.openFlashcardV2DocumentTree(app, "doc", "statistics");
+    const treeQuery = flashcardV2DocumentTreeQuery("doc", "box", "/parent/doc.sy");
+    assert.deepEqual(calls, [
+        [app, "", "Notebook", "normal", flashcardV2LocationQuery("notebookID", "box")],
+        [app, "", "Document tree", "normal", treeQuery],
+        ["", treeQuery],
+    ]);
+});
 
 test("tab and split success notify separately from serializable review options; failures do not notify", async () => {
     for (const mode of [1, 2]) {

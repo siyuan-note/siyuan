@@ -31,7 +31,14 @@ import {openFileById} from "../editor/util";
 import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
 import {openCardByScope} from "../card/openCard";
-import {openFlashcardV2ManagementByNotebook, openFlashcardV2ManagementByRoots} from "../card/flashcardV2";
+import {
+    openFlashcardV2ManagementByNotebook,
+    openFlashcardV2ManagementByRoots,
+    openFlashcardV2NotebookReviewOptions,
+    openFlashcardV2ScopeSettings,
+    openFlashcardV2Statistics,
+} from "../card/flashcardV2";
+import {flashcardV2LocationQuery} from "../card/flashcardV2Query";
 import {getDocTreeController} from "../layout/dock/docTree/DocTreeController";
 import type {IDocTreeItem} from "../layout/dock/docTree/types";
 import type {App} from "../index";
@@ -409,7 +416,7 @@ const initMultiMenu = (selection: IDocTreeMenuContext, app: App) => {
             id: "addToDeck",
             iconHTML: "",
             label: window.siyuan.languages.flashcardCardSource,
-            submenu: flashcardSourceMenuItems(app, blockIDs),
+            submenu: flashcardSourceMenuItems(blockIDs),
         });
         window.siyuan.menus.menu.append(new MenuItem({
             id: "riffCard",
@@ -602,7 +609,7 @@ const initNotebookMenu = (app: App, selection: IDocTreeMenuContext, item: IDocTr
             submenu: [{
                 id: "spaceRepetition",
                 iconHTML: "",
-                label: window.siyuan.languages.spaceRepetition,
+                label: window.siyuan.languages.flashcardReviewNotebook,
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
                     openCardByScope(app, "notebook", notebookId, name);
@@ -611,15 +618,45 @@ const initNotebookMenu = (app: App, selection: IDocTreeMenuContext, item: IDocTr
                     /// #endif
                 }
             }, {
+                id: "flashcardSessionMode",
+                iconHTML: "",
+                label: window.siyuan.languages.flashcardSessionMode,
+                click: () => {
+                    openFlashcardV2NotebookReviewOptions(app, notebookId, name);
+                    /// #if MOBILE
+                    closePanel();
+                    /// #endif
+                },
+            }, {
                 id: "manage",
                 iconHTML: "",
-                label: window.siyuan.languages.manage,
+                label: window.siyuan.languages.flashcardManageNotebook,
                 click: () => {
                     openFlashcardV2ManagementByNotebook(notebookId);
                     /// #if MOBILE
                     closePanel();
                     /// #endif
                 }
+            }, {
+                id: "statistics",
+                iconHTML: "",
+                label: window.siyuan.languages.flashcardStatistics,
+                click: () => {
+                    openFlashcardV2Statistics("", flashcardV2LocationQuery("notebookID", notebookId));
+                    /// #if MOBILE
+                    closePanel();
+                    /// #endif
+                },
+            }, {
+                id: "flashcardScopeSettings",
+                iconHTML: "",
+                label: window.siyuan.languages.flashcardNotebookSettings,
+                click: () => {
+                    openFlashcardV2ScopeSettings("notebook", notebookId);
+                    /// #if MOBILE
+                    closePanel();
+                    /// #endif
+                },
             }],
         }).element);
     }
@@ -1029,7 +1066,7 @@ export const initDocumentMenu = (app: App, options: {
             const riffCardMenu: IMenu[] = [{
                 id: "spaceRepetition",
                 iconHTML: "",
-                label: window.siyuan.languages.spaceRepetition,
+                label: window.siyuan.languages.flashcardReviewDocument,
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
                     openCardByScope(app, "doc", id, name);
@@ -1040,7 +1077,7 @@ export const initDocumentMenu = (app: App, options: {
             }, {
                 id: "manage",
                 iconHTML: "",
-                label: window.siyuan.languages.manage,
+                label: window.siyuan.languages.flashcardManageDocument,
                 click: () => {
                     openFlashcardV2ManagementByRoots([id], name);
                     /// #if MOBILE
@@ -1071,7 +1108,7 @@ export const initDocumentMenu = (app: App, options: {
                 id: "addToDeck",
                 iconHTML: "",
                 label: window.siyuan.languages.flashcardCardSource,
-                submenu: flashcardSourceMenuItems(app, [id]),
+                submenu: flashcardSourceMenuItems([id]),
             });
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "riffCard",

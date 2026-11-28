@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Керування картками",
+	"flashcardManageDecks": "Керування колодами",
+	"flashcardImportAnki": "Імпортувати пакет Anki",
+	"flashcardReviewDocument": "Повторити картки цього документа",
+	"flashcardManageDocument": "Керування картками цього документа",
+	"flashcardReviewNotebook": "Повторити картки цього нотатника",
+	"flashcardManageNotebook": "Керування картками цього нотатника",
+	"flashcardStatisticsDocumentTree": "Статистика карток цього документа та його піддокументів",
 	"flashcardManagementParentBlock": "Батьківський блок",
 	"flashcardManagementPrompt": "Запитання",
 	"flashcardManagementAnswer": "Відповідь",

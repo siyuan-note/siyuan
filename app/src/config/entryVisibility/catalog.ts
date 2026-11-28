@@ -152,12 +152,14 @@ const importChildren = () => [
 const flashcardSourceEntry = (simple = true) => node("addToDeck", lang("flashcardCardSource"), simple, [
     node("basic", lang("flashcardQA"), simple),
     node("advanced", lang("configGroupAdvanced"), simple),
-    node("reviewSets", lang("flashcardReviewSet"), simple),
-    node("presets", lang("flashcardPreset"), simple),
-    node("management", lang("manage"), simple),
-    node("statistics", lang("flashcardStatistics"), simple),
-    node("anki", literal("Anki"), simple),
 ]);
+
+const flashcardDocumentScopeEntries = () => [
+    node("flashcardReviewDocumentTree", lang("flashcardReviewDocumentTree"), false),
+    node("flashcardManageDocumentTree", lang("flashcardManageDocumentTree"), false),
+    node("flashcardStatisticsDocumentTree", lang("flashcardStatisticsDocumentTree"), false),
+    node("flashcardScopeSettings", lang("flashcardDocumentSettings"), false),
+];
 
 const docTreeCommon = (multi = false) => [
     node("copy", lang("copy"), true, [...copyChildren(), node("duplicate", lang("duplicateCopy")),
@@ -166,12 +168,9 @@ const docTreeCommon = (multi = false) => [
     node("addToDatabase", lang("addToDatabase"), false),
     node("delete", lang("delete")),
     node("riffCard", lang("riffCard"), false, [
-        node("spaceRepetition", lang("spaceRepetition")),
-        node("manage", lang("manage")),
-        ...(!multi ? [
-            node("flashcardReviewDocumentTree", lang("flashcardReviewDocumentTree"), false),
-            node("flashcardManageDocumentTree", lang("flashcardManageDocumentTree"), false),
-        ] : []),
+        node("spaceRepetition", lang("flashcardReviewDocument")),
+        node("manage", lang("flashcardManageDocument")),
+        ...(!multi ? flashcardDocumentScopeEntries() : []),
         node("quickMakeCard", lang("quickMakeCard")),
         node("removeCard", lang("removeCard")),
         flashcardSourceEntry(),
@@ -789,6 +788,19 @@ export const entryCatalog: IEntryCatalogSection[] = [
     statusBarCatalogSection,
     dockCatalogSection,
     {
+        key: "mainMenu",
+        label: lang("mainMenu"),
+        sortable: false,
+        children: [node("riffCard", lang("riffCard"), true, [
+            node("spaceRepetition", lang("spaceRepetition")),
+            node("manage", lang("flashcardManageCards")),
+            node("reviewSets", lang("flashcardManageDecks")),
+            node("presets", lang("flashcardPreset")),
+            node("statistics", lang("flashcardStatistics")),
+            node("anki", lang("flashcardImportAnki")),
+        ])],
+    },
+    {
         key: "docTree.panel",
         label: location(lang("entryDocPanel"), lang("more")),
         children: [
@@ -810,7 +822,13 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("pinDoc", lang("pinDoc")),
             node("unpinDoc", lang("unpinDoc")),
             node("sort", lang("sort"), true, sortChildren("sortByFiletree")),
-            node("riffCard", lang("riffCard"), false),
+            node("riffCard", lang("riffCard"), false, [
+                node("spaceRepetition", lang("flashcardReviewNotebook")),
+                node("flashcardSessionMode", lang("flashcardSessionMode"), false),
+                node("manage", lang("flashcardManageNotebook")),
+                node("statistics", lang("flashcardStatistics"), false),
+                node("flashcardScopeSettings", lang("flashcardNotebookSettings"), false),
+            ]),
             node("search", lang("search")),
             node("replace", lang("replace")),
             node("cleanUnusedAssets", lang("cleanUnusedAssets")),
@@ -896,10 +914,9 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("attr", lang("attr")),
             node("wechatReminder", lang("wechatReminder"), false),
             node("riffCard", lang("riffCard"), false, [
-                node("spaceRepetition", lang("spaceRepetition"), false),
-                node("manage", lang("manage"), false),
-                node("flashcardReviewDocumentTree", lang("flashcardReviewDocumentTree"), false),
-                node("flashcardManageDocumentTree", lang("flashcardManageDocumentTree"), false),
+                node("spaceRepetition", lang("flashcardReviewDocument"), false),
+                node("manage", lang("flashcardManageDocument"), false),
+                ...flashcardDocumentScopeEntries(),
                 node("quickMakeCard", lang("quickMakeCard"), false),
                 node("removeCard", lang("removeCard"), false),
                 flashcardSourceEntry(false),

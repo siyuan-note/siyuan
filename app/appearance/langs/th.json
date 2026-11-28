@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "จัดการแฟลชการ์ด",
+	"flashcardManageDecks": "จัดการสำรับการ์ด",
+	"flashcardImportAnki": "นำเข้าแพ็กเกจ Anki",
+	"flashcardReviewDocument": "ทบทวนการ์ดในเอกสารนี้",
+	"flashcardManageDocument": "จัดการการ์ดในเอกสารนี้",
+	"flashcardReviewNotebook": "ทบทวนการ์ดในสมุดบันทึกนี้",
+	"flashcardManageNotebook": "จัดการการ์ดในสมุดบันทึกนี้",
+	"flashcardStatisticsDocumentTree": "สถิติการ์ดของเอกสารนี้และเอกสารย่อย",
 	"flashcardManagementParentBlock": "บล็อกแม่",
 	"flashcardManagementPrompt": "คำถาม",
 	"flashcardManagementAnswer": "คำตอบ",

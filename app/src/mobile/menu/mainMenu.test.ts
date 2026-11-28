@@ -14,21 +14,35 @@ test("native mobile menus list workspaces before navigation and omit the standal
         {webkit: {messageHandlers: {openMarkdownEditor: {postMessage: unexpectedOpen}}}}]) {
         const exports = {} as {
             renderMobileMainMenuHTML: () => string;
-            getMobileMainMenuHandler: (id: string) => unknown;
+            getMobileMainMenuHandler: (id: string) => (app: object) => void;
         };
+        const flashcards: string[] = [];
+        const actions = {
+            openCard: () => flashcards.push("review"),
+            openFlashcardV2Management: () => flashcards.push("manage"),
+            openFlashcardV2ReviewSets: () => flashcards.push("decks"),
+            openFlashcardV2Presets: () => flashcards.push("presets"),
+            openFlashcardV2Statistics: () => flashcards.push("statistics"),
+            openFlashcardV2AnkiPreview: () => flashcards.push("anki"),
+        };
+        const flashcardModule = {};
+        runInNewContext(transpileModule(readFileSync("src/card/flashcardMenu.ts", "utf8"), {
+            compilerOptions: {module: ModuleKind.CommonJS},
+        }).outputText, {exports: flashcardModule, require: () => actions});
         runInNewContext(compiled, {
             exports,
             window: {...host, siyuan: {
                 languages: new Proxy({}, {get: (_target, key) => key}),
                 config: {readonly: false, lang: "en_US"},
             }},
-            require: () => ({
+            require: (name: string) => name === "../../card/flashcardMenu" ? flashcardModule : ({
                 isDisabledFeature: () => false,
                 isInMobileApp: () => true,
                 getHostCapabilities: () => ({importExport: true}),
                 getSettingTabDefs: (): never[] => [],
                 escapeAttr: (value: string) => value,
                 canManageMobileWorkspaces: () => Object.keys(host).length > 0,
+                closePanel: () => {},
             }),
         });
         const html = exports.renderMobileMainMenuHTML();
@@ -42,5 +56,12 @@ test("native mobile menus list workspaces before navigation and omit the standal
             assert.ok(html.includes(`id="${id}"`));
             assert.equal(typeof exports.getMobileMainMenuHandler(id), "function");
         }
+        assert.match(html, /data-menu-group="flashcards"/);
+        for (const id of ["menuCard", "menuFlashcards-manage", "menuFlashcards-reviewSets",
+            "menuFlashcards-presets", "menuFlashcards-statistics", "menuFlashcards-anki"]) {
+            assert.ok(html.includes(`id="${id}"`));
+            exports.getMobileMainMenuHandler(id)({});
+        }
+        assert.deepEqual(flashcards, ["review", "manage", "decks", "presets", "statistics", "anki"]);
     }
 });

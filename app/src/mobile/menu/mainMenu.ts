@@ -8,7 +8,7 @@ import {newFile} from "../../util/newFile";
 import {mountHelp, newDailyNote, newEncryptedNotebook, newNotebook} from "../../util/mount";
 import {exitSiYuan, lockScreen} from "../../dialog/processSystem";
 import {openHistory} from "../../history/history";
-import {openCard} from "../../card/openCard";
+import {flashcardMenuActions} from "../../card/flashcardMenu";
 import {syncGuide} from "../../sync/syncGuide";
 import {commandPanel} from "../../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../../plugin/openTopBarMenu";
@@ -137,16 +137,6 @@ export const MOBILE_MAIN_MENU_GROUPS: IMobileMainMenuGroup[] = [{
             },
         },
         {
-            id: "menuCard",
-            icon: "iconRiffCard",
-            label: lang("spaceRepetition"),
-            hidden: isReadonly,
-            click(app) {
-                openCard(app);
-                closePanel();
-            },
-        },
-        {
             id: "menuLock",
             icon: "iconLock",
             label: lang("lockScreen"),
@@ -166,6 +156,20 @@ export const MOBILE_MAIN_MENU_GROUPS: IMobileMainMenuGroup[] = [{
             },
         },
     ],
+}, {
+    id: "flashcards",
+    title: lang("riffCard"),
+    hidden: isReadonly,
+    entries: flashcardMenuActions.map(action => ({
+        id: action.id === "spaceRepetition" ? "menuCard" : `menuFlashcards-${action.id}`,
+        icon: action.icon,
+        label: lang(action.label),
+        hidden: isReadonly,
+        click(app) {
+            closePanel();
+            action.run(app);
+        },
+    })),
 }, {
     id: "create",
     title: lang("mobileMenuCreate"),

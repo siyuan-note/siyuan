@@ -7,25 +7,35 @@ import {transaction} from "../protyle/wysiwyg/transaction";
 import {renderFlashcardV2Badge} from "./flashcardV2Badge";
 import {
     openFlashcardV2AdvancedSource,
-    openFlashcardV2AnkiPreview,
     openFlashcardV2BasicSource,
     openFlashcardV2DocumentTree,
-    openFlashcardV2Management,
-    openFlashcardV2Presets,
-    openFlashcardV2ReviewSets,
-    openFlashcardV2Statistics
+    openFlashcardV2ScopeSettings,
 } from "./flashcardV2";
 
-export const flashcardDocumentTreeMenuItems = (app: App, id: string, onOpen?: () => void): IMenu[] =>
-    (["review", "manage"] as const).map(mode => ({
-        id: mode === "review" ? "flashcardReviewDocumentTree" : "flashcardManageDocumentTree",
-        label: mode === "review" ? window.siyuan.languages.flashcardReviewDocumentTree : window.siyuan.languages.flashcardManageDocumentTree,
+export const flashcardDocumentTreeMenuItems = (app: App, id: string, onOpen?: () => void): IMenu[] => [
+    ...([
+        ["review", "flashcardReviewDocumentTree"],
+        ["manage", "flashcardManageDocumentTree"],
+        ["statistics", "flashcardStatisticsDocumentTree"],
+    ] as const).map(([mode, key]) => ({
+        id: key,
+        label: window.siyuan.languages[key],
         iconHTML: "",
         click: () => {
             openFlashcardV2DocumentTree(app, id, mode);
             onOpen?.();
         },
-    }));
+    })),
+    {
+        id: "flashcardScopeSettings",
+        label: window.siyuan.languages.flashcardDocumentSettings,
+        iconHTML: "",
+        click: () => {
+            openFlashcardV2ScopeSettings("document", id);
+            onOpen?.();
+        },
+    },
+];
 
 export const createQuickSources = (blockIDs: string[], callback?: () => void) => {
     if (blockIDs.length === 0) {
@@ -77,7 +87,7 @@ export const createQuickSources = (blockIDs: string[], callback?: () => void) =>
     });
 };
 
-export const flashcardSourceMenuItems = (app: App, blockIDs: string[]): IMenu[] => {
+export const flashcardSourceMenuItems = (blockIDs: string[]): IMenu[] => {
     const lang = window.siyuan.languages;
     return [{
         id: "basic",
@@ -91,31 +101,6 @@ export const flashcardSourceMenuItems = (app: App, blockIDs: string[]): IMenu[] 
         label: lang.configGroupAdvanced,
         ignore: blockIDs.length === 0,
         click: () => openFlashcardV2AdvancedSource(blockIDs),
-    }, {
-        id: "reviewSets",
-        icon: "iconDatabase",
-        label: lang.flashcardReviewSet,
-        click: () => openFlashcardV2ReviewSets(app),
-    }, {
-        id: "presets",
-        icon: "iconSettings",
-        label: lang.flashcardPreset,
-        click: () => openFlashcardV2Presets(),
-    }, {
-        id: "management",
-        icon: "iconList",
-        label: lang.manage,
-        click: () => openFlashcardV2Management(),
-    }, {
-        id: "statistics",
-        icon: "iconGraph",
-        label: lang.flashcardStatistics,
-        click: () => openFlashcardV2Statistics(),
-    }, {
-        id: "anki",
-        icon: "iconUpload",
-        label: "Anki",
-        click: () => openFlashcardV2AnkiPreview(),
     }];
 };
 

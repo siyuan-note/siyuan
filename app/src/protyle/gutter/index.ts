@@ -1509,7 +1509,7 @@ export class Gutter {
                 id: "addToDeck",
                 label: window.siyuan.languages.flashcardCardSource,
                 icon: "iconRiffCard",
-                submenu: flashcardSourceMenuItems(protyle.app, ids),
+                submenu: flashcardSourceMenuItems(ids),
             }).element);
         }
 
@@ -3009,7 +3009,7 @@ export class Gutter {
                 id: "addToDeck",
                 label: window.siyuan.languages.flashcardCardSource,
                 icon: "iconRiffCard",
-                submenu: flashcardSourceMenuItems(protyle.app, [id]),
+                submenu: flashcardSourceMenuItems([id]),
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "flashcardReviewSubtree",

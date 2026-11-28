@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "إدارة البطاقات التعليمية",
+	"flashcardManageDecks": "إدارة مجموعات البطاقات",
+	"flashcardImportAnki": "استيراد حزمة Anki",
+	"flashcardReviewDocument": "مراجعة بطاقات المستند الحالي",
+	"flashcardManageDocument": "إدارة بطاقات المستند الحالي",
+	"flashcardReviewNotebook": "مراجعة بطاقات دفتر الملاحظات",
+	"flashcardManageNotebook": "إدارة بطاقات دفتر الملاحظات",
+	"flashcardStatisticsDocumentTree": "إحصاءات بطاقات المستند الحالي ومستنداته الفرعية",
 	"flashcardManagementParentBlock": "الكتلة الأصل",
 	"flashcardManagementPrompt": "السؤال",
 	"flashcardManagementAnswer": "الإجابة",

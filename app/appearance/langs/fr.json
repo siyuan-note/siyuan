@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Gérer les cartes mémoire",
+	"flashcardManageDecks": "Gérer les paquets",
+	"flashcardImportAnki": "Importer un paquet Anki",
+	"flashcardReviewDocument": "Réviser les cartes de ce document",
+	"flashcardManageDocument": "Gérer les cartes de ce document",
+	"flashcardReviewNotebook": "Réviser les cartes de ce carnet",
+	"flashcardManageNotebook": "Gérer les cartes de ce carnet",
+	"flashcardStatisticsDocumentTree": "Statistiques des cartes de ce document et de ses sous-documents",
 	"flashcardManagementParentBlock": "Bloc parent",
 	"flashcardManagementPrompt": "Question",
 	"flashcardManagementAnswer": "Réponse",

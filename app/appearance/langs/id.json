@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Kelola kartu hafalan",
+	"flashcardManageDecks": "Kelola dek",
+	"flashcardImportAnki": "Impor paket Anki",
+	"flashcardReviewDocument": "Tinjau kartu dalam dokumen ini",
+	"flashcardManageDocument": "Kelola kartu dalam dokumen ini",
+	"flashcardReviewNotebook": "Tinjau kartu dalam buku catatan ini",
+	"flashcardManageNotebook": "Kelola kartu dalam buku catatan ini",
+	"flashcardStatisticsDocumentTree": "Statistik kartu dokumen ini dan subdokumennya",
 	"flashcardManagementParentBlock": "Blok induk",
 	"flashcardManagementPrompt": "Pertanyaan",
 	"flashcardManagementAnswer": "Jawaban",

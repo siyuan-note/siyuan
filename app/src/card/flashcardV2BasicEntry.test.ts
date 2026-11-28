@@ -8,7 +8,7 @@ test("card source menu omits quick creation and keeps the question-answer handle
     const source = readFileSync("src/card/makeCard.ts", "utf8");
     const snippet = source.slice(source.indexOf("export const flashcardSourceMenuItems"),
         source.indexOf("export const quickMakeCard")).replace("export const", "const");
-    const code = transpileModule(snippet + "\nflashcardSourceMenuItems({}, ids);", {
+    const code = transpileModule(snippet + "\nflashcardSourceMenuItems(ids);", {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText;
     for (const ids of [[], ["a"], ["a", "b"], ["a", "b", "c"]]) {
@@ -17,8 +17,7 @@ test("card source menu omits quick creation and keeps the question-answer handle
             ids, window: {siyuan: {languages: {flashcardQA: "Question and answer"}}},
             openFlashcardV2BasicSource: (blockIDs: string[]) => { calls.push(blockIDs); },
         });
-        assert.deepEqual(Array.from(actions, item => item.id),
-            ["basic", "advanced", "reviewSets", "presets", "management", "statistics", "anki"]);
+        assert.deepEqual(Array.from(actions, item => item.id), ["basic", "advanced"]);
         const basic = actions.find(item => item.id === "basic");
         assert.equal(basic.ignore, ids.length < 2);
         assert.equal(actions.find(item => item.id === "advanced").ignore, ids.length === 0);

@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "フラッシュカードを管理",
+	"flashcardManageDecks": "デッキを管理",
+	"flashcardImportAnki": "Anki パッケージをインポート",
+	"flashcardReviewDocument": "現在のドキュメントのカードを復習",
+	"flashcardManageDocument": "現在のドキュメントのカードを管理",
+	"flashcardReviewNotebook": "このノートブックのカードを復習",
+	"flashcardManageNotebook": "このノートブックのカードを管理",
+	"flashcardStatisticsDocumentTree": "現在のドキュメントと子ドキュメントのカード統計",
 	"flashcardManagementParentBlock": "親ブロック",
 	"flashcardManagementPrompt": "問題",
 	"flashcardManagementAnswer": "答え",

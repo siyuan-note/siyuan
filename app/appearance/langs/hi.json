@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "फ़्लैशकार्ड प्रबंधित करें",
+	"flashcardManageDecks": "कार्ड डेक प्रबंधित करें",
+	"flashcardImportAnki": "Anki पैकेज आयात करें",
+	"flashcardReviewDocument": "इस दस्तावेज़ के कार्ड दोहराएँ",
+	"flashcardManageDocument": "इस दस्तावेज़ के कार्ड प्रबंधित करें",
+	"flashcardReviewNotebook": "इस नोटबुक के कार्ड दोहराएँ",
+	"flashcardManageNotebook": "इस नोटबुक के कार्ड प्रबंधित करें",
+	"flashcardStatisticsDocumentTree": "इस दस्तावेज़ और इसके उपदस्तावेज़ों के कार्ड के आँकड़े",
 	"flashcardManagementParentBlock": "मूल ब्लॉक",
 	"flashcardManagementPrompt": "प्रश्न",
 	"flashcardManagementAnswer": "उत्तर",

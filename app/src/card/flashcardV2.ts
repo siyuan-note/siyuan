@@ -54,7 +54,7 @@ import {openFlashcardV2EditLater, type IFlashcardV2EditLater} from "./flashcardV
 import {openFlashcardV2SubsetSession} from "./flashcardV2Subset";
 import type {App} from "../index";
 import {listFlashcardV2PluginTypes} from "./flashcardV2Plugin";
-import {flashcardV2DocumentTreeQuery, type IFlashcardQueryAST, type IFlashcardQueryExpression} from "./flashcardV2Query";
+import {flashcardV2DocumentTreeQuery, flashcardV2LocationQuery, type IFlashcardQueryAST, type IFlashcardQueryExpression} from "./flashcardV2Query";
 import {flashcardV2FlagColors, flashcardV2FlagLabel, flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {
     appendFlashcardV2ClozeTargets,
@@ -1380,7 +1380,7 @@ ${type === "preset" ? presetOptions : priorityOptions}
 
 const openFlashcardV2StudyPolicy = (scopeType: "document" | "notebook", scopeID: string,
     presets: IFlashcardPreset[],
-    callback: () => void) => {
+    callback?: () => void) => {
     if (!scopeID) {
         return;
     }
@@ -1426,11 +1426,21 @@ const openFlashcardV2StudyPolicy = (scopeType: "document" | "notebook", scopeID:
                 expectedRevisionID: current?.revisionID,
                 updatedAt: now,
             }, () => {
-                callback();
+                callback?.();
                 dialog.destroy();
             });
         });
     });
+};
+
+export const openFlashcardV2ScopeSettings = (scopeType: "document" | "notebook", scopeID: string) => {
+    ensureFlashcardV2(() => fetchPost("/api/flashcard/listEntities", {
+        entityType: "schedulerPreset",
+        options: {limit: 1000, offset: 0},
+    }, (response) => {
+        const presets = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardPreset).payload);
+        openFlashcardV2StudyPolicy(scopeType, scopeID, presets);
+    }));
 };
 
 const openFlashcardV2SourcePreset = (sourceID: string, effectiveSourcePresetID: string, presets: IFlashcardPreset[], callback: () => void) => {
@@ -3041,7 +3051,12 @@ export const openFlashcardV2ManagementByRoots = (rootIDs: string[], name: string
     ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", name, 0, {rootIDs: uniqueRootIDs}));
 };
 
-export const openFlashcardV2DocumentTree = (app: App, id: string, mode: "review" | "manage") => {
+export const openFlashcardV2NotebookReviewOptions = (app: App, id: string, name: string) => {
+    ensureFlashcardV2(() =>
+        openFlashcardV2ReviewSetSession(app, "", name, "normal", flashcardV2LocationQuery("notebookID", id)));
+};
+
+export const openFlashcardV2DocumentTree = (app: App, id: string, mode: "review" | "manage" | "statistics") => {
     ensureFlashcardV2(() => {
         void fetchPost("/api/filetree/getPathByID", {id}, ({data}) => {
             if (!data?.notebook || !data.path?.endsWith(".sy")) {
@@ -3050,6 +3065,8 @@ export const openFlashcardV2DocumentTree = (app: App, id: string, mode: "review"
             const query = flashcardV2DocumentTreeQuery(id, data.notebook, data.path);
             if (mode === "review") {
                 openFlashcardV2ReviewSetSession(app, "", window.siyuan.languages.flashcardReviewDocumentTree, "normal", query);
+            } else if (mode === "statistics") {
+                openFlashcardV2Statistics("", query);
             } else {
                 openFlashcardV2ReviewSetCards("", window.siyuan.languages.flashcardManageDocumentTree, 0, {documentTree: query.root});
             }
@@ -3085,7 +3102,7 @@ ${revisions.map((revision, index) => `<div class="card__v2-picker-row"><input da
 <div data-type="modeTip" class="ft__on-surface"></div>
 ${flashcardV2ReviewOptionsHTML()}
 </div></div>
-<div class="b3-dialog__action card__v2-picker-actions"><button data-type="pendingEdits" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardPendingEdits}</button><button data-type="manage" class="b3-button b3-button--outline">${window.siyuan.languages.manage}</button><button data-type="multiple" class="b3-button b3-button--outline" aria-pressed="false"${revisions.length === 0 ? " disabled" : ""}>${window.siyuan.languages.multiSelect}</button><button data-type="start" class="b3-button b3-button--text fn__none" disabled>${window.siyuan.languages.flashcardStudy}</button></div>`,
+<div class="b3-dialog__action card__v2-picker-actions"><button data-type="pendingEdits" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardPendingEdits}</button><button data-type="manage" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardManageDecks}</button><button data-type="multiple" class="b3-button b3-button--outline" aria-pressed="false"${revisions.length === 0 ? " disabled" : ""}>${window.siyuan.languages.multiSelect}</button><button data-type="start" class="b3-button b3-button--text fn__none" disabled>${window.siyuan.languages.flashcardStudy}</button></div>`,
             });
             const checkboxes = [...dialog.element.querySelectorAll<HTMLInputElement>('[data-type="selectSet"]')];
             const mode = dialog.element.querySelector<HTMLSelectElement>('[data-type="reviewMode"]');

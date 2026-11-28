@@ -47,6 +47,7 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
         exports: cardExports,
         require: (name: string) => name === "./flashcardV2" ? {
             openFlashcardV2DocumentTree: (_app: object, ...scope: unknown[]) => flashcards.push(["tree", ...scope]),
+            openFlashcardV2ScopeSettings: (...scope: unknown[]) => flashcards.push(["settings", ...scope]),
         } : {},
         window: {siyuan: {languages: {}}},
     });
@@ -262,7 +263,7 @@ test("mobile notebook icon menu uses the API position and internal anchor", () =
 });
 
 for (const mobile of [false, true]) {
-    test(`document menu keeps flashcard v2 study and management scopes without a mounted tree row (${mobile ? "mobile" : "desktop"})`, () => {
+    test(`document menu opens scoped flashcard actions without a mounted tree row (${mobile ? "mobile" : "desktop"})`, () => {
         const {open, items, flashcards} = setup(mobile);
         open();
         const cardItems = items.find(item => item.id === "riffCard").submenu as IMenu[];
@@ -270,8 +271,11 @@ for (const mobile of [false, true]) {
         cardItems.find(item => item.id === "manage").click(null, null);
         cardItems.find(item => item.id === "flashcardReviewDocumentTree").click(null, null);
         cardItems.find(item => item.id === "flashcardManageDocumentTree").click(null, null);
+        cardItems.find(item => item.id === "flashcardStatisticsDocumentTree").click(null, null);
+        cardItems.find(item => item.id === "flashcardScopeSettings").click(null, null);
         assert.equal(JSON.stringify(flashcards), JSON.stringify([
             ["study", "doc", "doc", "Document"], ["manage", ["doc"], "Document"], ["tree", "doc", "review"], ["tree", "doc", "manage"],
+            ["tree", "doc", "statistics"], ["settings", "document", "doc"],
         ]));
     });
 

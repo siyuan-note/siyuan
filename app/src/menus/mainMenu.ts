@@ -20,7 +20,7 @@ import {
     setStorageVal,
     writeText,
 } from "../protyle/util/compatibility";
-import {openCard} from "../card/openCard";
+import {flashcardMenuActions} from "../card/flashcardMenu";
 import {openSetting} from "../config";
 import {getAllDocks, getAllModels} from "../layout/getAll";
 import {getDockHotkey} from "../layout/dock/hotkey";
@@ -31,7 +31,6 @@ import {showMessage} from "../dialog/message";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 import {togglePinDock} from "./dockLayout";
 import {escapeAttr, escapeHtml} from "../util/escape";
-import {openFlashcardV2Management} from "../card/flashcardV2";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -317,22 +316,13 @@ export const mainMenu = async (app: App, rect: DOMRect, openOnly = false, target
                             label: window.siyuan.languages.riffCard,
                             type: "submenu",
                             icon: "iconRiffCard",
-                            submenu: [{
-                                id: "spaceRepetition",
-                                iconHTML: "",
-                                label: window.siyuan.languages.spaceRepetition,
-                                accelerator: window.siyuan.config.keymap.general.riffCard.custom,
-                                click: () => {
-                                    openCard(app);
-                                }
-                            }, {
-                                id: "manage",
-                                iconHTML: "",
-                                label: window.siyuan.languages.manage,
-                                click: () => {
-                                    openFlashcardV2Management();
-                                }
-                            }],
+                            submenu: flashcardMenuActions.map(action => ({
+                                id: action.id,
+                                icon: action.icon,
+                                label: window.siyuan.languages[action.label],
+                                accelerator: action.id === "spaceRepetition" ? window.siyuan.config.keymap.general.riffCard.custom : undefined,
+                                click: () => action.run(app),
+                            })),
                         }).element);
                     }
                     window.siyuan.menus.menu.append(new MenuItem({

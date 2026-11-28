@@ -103,7 +103,9 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText, {
         exports: cardExports,
-        require: (name: string) => name === "./flashcardV2" ? {openFlashcardV2DocumentTree: record("tree")} : {},
+        require: (name: string) => name === "./flashcardV2" ? {
+            openFlashcardV2DocumentTree: record("tree"), openFlashcardV2ScopeSettings: record("settings"),
+        } : {},
         ...globals,
     });
     dependencies["../../card/makeCard"] = {...cardExports, createQuickSources: record("quickMakeCard")};
@@ -201,8 +203,12 @@ test("graph flashcards use the selected document for review, management, and qui
         JSON.stringify([[menu.options.id], "Document"]));
     await cardItems.find(item => item.id === "flashcardReviewDocumentTree").click(null, null);
     await cardItems.find(item => item.id === "flashcardManageDocumentTree").click(null, null);
+    await cardItems.find(item => item.id === "flashcardStatisticsDocumentTree").click(null, null);
     assert.deepEqual(menu.calls.filter(call => call.name === "tree").map(call => call.args),
-        [[menu.options.app, menu.options.id, "review"], [menu.options.app, menu.options.id, "manage"]]);
+        [[menu.options.app, menu.options.id, "review"], [menu.options.app, menu.options.id, "manage"],
+            [menu.options.app, menu.options.id, "statistics"]]);
+    await cardItems.find(item => item.id === "flashcardScopeSettings").click(null, null);
+    assert.deepEqual(menu.calls.find(call => call.name === "settings").args, ["document", menu.options.id]);
     await cardItems.find(item => item.id === "quickMakeCard").click(null, null);
     assert.equal(JSON.stringify(menu.calls.find(call => call.name === "quickMakeCard").args),
         JSON.stringify([[menu.options.id]]));

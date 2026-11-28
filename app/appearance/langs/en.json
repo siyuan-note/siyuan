@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Manage flashcards",
+	"flashcardManageDecks": "Manage decks",
+	"flashcardImportAnki": "Import Anki package",
+	"flashcardReviewDocument": "Review cards in this document",
+	"flashcardManageDocument": "Manage cards in this document",
+	"flashcardReviewNotebook": "Review cards in this notebook",
+	"flashcardManageNotebook": "Manage cards in this notebook",
+	"flashcardStatisticsDocumentTree": "Card statistics for this document and its subdocuments",
 	"flashcardManagementParentBlock": "Parent block",
 	"flashcardManagementPrompt": "Prompt",
 	"flashcardManagementAnswer": "Answer",

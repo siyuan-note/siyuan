@@ -132,6 +132,26 @@ test("task state imports match kernel migrations and remain stable on reimport",
     }
 });
 
+test("flashcard imports move global tools and retain card-source and plugin settings", () => {
+    const doc = "docTree.document.riffCard.addToDeck";
+    const block = "gutter.single.addToDeck";
+    const target = "mainMenu.riffCard";
+    const profile = normalizeEntryVisibilityImportProfile({
+        name: "Custom",
+        entries: {[doc + ".presets"]: false, [block + ".presets"]: true, [doc + ".anki"]: true,
+            [target + ".anki"]: false, [block + ".management"]: false, [doc + ".advanced"]: false},
+        orders: {[doc]: ["anki", "plugin:item", "advanced", "presets"], [block]: ["management", "presets", "basic"]},
+    }, 7, {});
+    assert.deepEqual(profile.entries, {
+        [target + ".presets"]: true, [target + ".anki"]: false,
+        [target + ".manage"]: false, [doc + ".advanced"]: false, [frequentPath]: true,
+    });
+    assert.deepEqual(profile.orders, {
+        [doc]: ["plugin:item", "advanced"], [block]: ["basic"], [target]: ["anki", "presets", "manage"],
+    });
+    assert.deepEqual(normalizeEntryVisibilityImportProfile(profile, 7, {}), profile);
+});
+
 test("database submenu migration preserves visibility, order and plugin slots", () => {
     const profile = normalizeEntryVisibilityImportProfile({
         name: "Custom",

@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "管理闪卡",
+	"flashcardManageDecks": "管理卡包",
+	"flashcardImportAnki": "导入 Anki 卡包",
+	"flashcardReviewDocument": "复习当前文档的闪卡",
+	"flashcardManageDocument": "管理当前文档的闪卡",
+	"flashcardReviewNotebook": "复习当前笔记本的闪卡",
+	"flashcardManageNotebook": "管理当前笔记本的闪卡",
+	"flashcardStatisticsDocumentTree": "当前文档及子文档的闪卡统计",
 	"flashcardManagementParentBlock": "上级块",
 	"flashcardManagementPrompt": "题面",
 	"flashcardManagementAnswer": "答案",

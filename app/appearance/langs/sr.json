@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Управљање картицама",
+	"flashcardManageDecks": "Управљање шпиловима",
+	"flashcardImportAnki": "Увези Anki пакет",
+	"flashcardReviewDocument": "Понови картице из овог документа",
+	"flashcardManageDocument": "Управљај картицама овог документа",
+	"flashcardReviewNotebook": "Понови картице из ове бележнице",
+	"flashcardManageNotebook": "Управљај картицама ове бележнице",
+	"flashcardStatisticsDocumentTree": "Статистика картица овог документа и његових поддокумената",
 	"flashcardManagementParentBlock": "Родитељски блок",
 	"flashcardManagementPrompt": "Питање",
 	"flashcardManagementAnswer": "Одговор",

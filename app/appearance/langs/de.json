@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Lernkarten verwalten",
+	"flashcardManageDecks": "Stapel verwalten",
+	"flashcardImportAnki": "Anki-Paket importieren",
+	"flashcardReviewDocument": "Karten im aktuellen Dokument wiederholen",
+	"flashcardManageDocument": "Karten im aktuellen Dokument verwalten",
+	"flashcardReviewNotebook": "Karten im Notizbuch wiederholen",
+	"flashcardManageNotebook": "Karten im Notizbuch verwalten",
+	"flashcardStatisticsDocumentTree": "Kartenstatistik für dieses Dokument und seine Unterdokumente",
 	"flashcardManagementParentBlock": "Übergeordneter Block",
 	"flashcardManagementPrompt": "Frage",
 	"flashcardManagementAnswer": "Antwort",

@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Zarządzaj fiszkami",
+	"flashcardManageDecks": "Zarządzaj taliami",
+	"flashcardImportAnki": "Importuj pakiet Anki",
+	"flashcardReviewDocument": "Powtarzaj fiszki z tego dokumentu",
+	"flashcardManageDocument": "Zarządzaj fiszkami z tego dokumentu",
+	"flashcardReviewNotebook": "Powtarzaj fiszki z tego notatnika",
+	"flashcardManageNotebook": "Zarządzaj fiszkami z tego notatnika",
+	"flashcardStatisticsDocumentTree": "Statystyki fiszek z tego dokumentu i jego poddokumentów",
 	"flashcardManagementParentBlock": "Blok nadrzędny",
 	"flashcardManagementPrompt": "Pytanie",
 	"flashcardManagementAnswer": "Odpowiedź",

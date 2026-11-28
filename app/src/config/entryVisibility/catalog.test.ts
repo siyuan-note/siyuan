@@ -1561,14 +1561,28 @@ test("card source submenu has stable paths and follows its parent profile", () =
     for (const path of paths) {
         const parent = getEntryCatalogNode(path);
         const children = getEntryCatalogChildren(path);
-        assert.deepEqual(children.map(item => item.key),
-            ["basic", "advanced", "reviewSets", "presets", "management", "statistics", "anki"]);
+        assert.deepEqual(children.map(item => item.key), ["basic", "advanced"]);
         for (const child of children) {
             assert.equal(child.type, "entry");
             assert.equal(child.simple, parent.simple);
             assert.equal(getEntryParentPath(path + "." + child.key), path);
         }
     }
+});
+
+test("workspace and document flashcard menus give global and scoped actions separate paths", () => {
+    const path = "mainMenu.riffCard";
+    assert.deepEqual(getEntryCatalogChildren(path).map(item => item.key),
+        ["spaceRepetition", "manage", "reviewSets", "presets", "statistics", "anki"]);
+    assert.equal(isEntryOrderSortable(path), true);
+    for (const parent of ["docTree.document.riffCard", "document.title.riffCard"]) {
+        assert.deepEqual(getEntryCatalogChildren(parent).map(item => item.key), [
+            "spaceRepetition", "manage", "flashcardReviewDocumentTree", "flashcardManageDocumentTree",
+            "flashcardStatisticsDocumentTree", "flashcardScopeSettings", "quickMakeCard", "removeCard", "addToDeck",
+        ]);
+    }
+    assert.deepEqual(getEntryCatalogChildren("docTree.notebook.riffCard").map(item => item.key),
+        ["spaceRepetition", "flashcardSessionMode", "manage", "statistics", "flashcardScopeSettings"]);
 });
 
 test("single block menu opens subtree review and management in declaration order", () => {

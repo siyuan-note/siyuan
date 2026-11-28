@@ -1,4 +1,12 @@
 {
+	"flashcardManageCards": "Gestisci schede di ripasso",
+	"flashcardManageDecks": "Gestisci mazzi",
+	"flashcardImportAnki": "Importa pacchetto Anki",
+	"flashcardReviewDocument": "Ripassa le schede di questo documento",
+	"flashcardManageDocument": "Gestisci le schede di questo documento",
+	"flashcardReviewNotebook": "Ripassa le schede di questo taccuino",
+	"flashcardManageNotebook": "Gestisci le schede di questo taccuino",
+	"flashcardStatisticsDocumentTree": "Statistiche delle schede di questo documento e dei suoi sottodocumenti",
 	"flashcardManagementParentBlock": "Blocco padre",
 	"flashcardManagementPrompt": "Domanda",
 	"flashcardManagementAnswer": "Risposta",

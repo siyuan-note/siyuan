@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Bez odstránených kariet",
 	"ankiConnectNotebookUnset": "Nie je vybratý žiadny zápisník",
 	"flashcardImageExplanationBlock": "ID bloku s vysvetlením",
 	"flashcardImageUploadHint": "Vyberte jeden obrázok alebo ho sem presuňte",

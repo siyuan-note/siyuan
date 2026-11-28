@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Verwijderde kaarten uitsluiten",
 	"ankiConnectNotebookUnset": "Geen notitieboek geselecteerd",
 	"flashcardImageExplanationBlock": "ID van het uitlegblok",
 	"flashcardImageUploadHint": "Kies één afbeelding of sleep deze hierheen",

@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "باستثناء البطاقات المحذوفة",
 	"ankiConnectNotebookUnset": "لم يتم اختيار أي دفتر ملاحظات",
 	"flashcardImageExplanationBlock": "معرّف كتلة الشرح",
 	"flashcardImageUploadHint": "اختر صورة واحدة أو اسحبها إلى هنا",

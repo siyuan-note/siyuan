@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Ohne gelöschte Karten",
 	"ankiConnectNotebookUnset": "Kein Notizbuch ausgewählt",
 	"flashcardImageExplanationBlock": "ID des Erklärungsblocks",
 	"flashcardImageUploadHint": "Ein Bild auswählen oder hier ablegen",

@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Exclure les cartes supprimées",
 	"ankiConnectNotebookUnset": "Aucun carnet sélectionné",
 	"flashcardImageExplanationBlock": "Identifiant du bloc d’explication",
 	"flashcardImageUploadHint": "Choisissez une image ou déposez-la ici",

@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "ไม่รวมบัตรที่ลบแล้ว",
 	"ankiConnectNotebookUnset": "ไม่ได้เลือกสมุดบันทึก",
 	"flashcardImageExplanationBlock": "รหัสบล็อกคำอธิบาย",
 	"flashcardImageUploadHint": "เลือกภาพหนึ่งภาพหรือลากมาวางที่นี่",

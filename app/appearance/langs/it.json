@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Escludi le schede eliminate",
 	"ankiConnectNotebookUnset": "Nessun taccuino selezionato",
 	"flashcardImageExplanationBlock": "ID del blocco di spiegazione",
 	"flashcardImageUploadHint": "Scegli un’immagine o trascinala qui",

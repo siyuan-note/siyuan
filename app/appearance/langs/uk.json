@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Без видалених карток",
 	"ankiConnectNotebookUnset": "Записник не вибрано",
 	"flashcardImageExplanationBlock": "Ідентифікатор блоку пояснення",
 	"flashcardImageUploadHint": "Виберіть одне зображення або перетягніть його сюди",

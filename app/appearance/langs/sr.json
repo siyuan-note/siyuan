@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Bez obrisanih kartica",
 	"ankiConnectNotebookUnset": "Nije izabrana nijedna beležnica",
 	"flashcardImageExplanationBlock": "ИД блока са објашњењем",
 	"flashcardImageUploadHint": "Изаберите једну слику или је превуците овде",

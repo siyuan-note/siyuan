@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Bez usuniętych fiszek",
 	"ankiConnectNotebookUnset": "Nie wybrano notatnika",
 	"flashcardImageExplanationBlock": "Identyfikator bloku objaśnienia",
 	"flashcardImageUploadHint": "Wybierz jeden obraz lub upuść go tutaj",

@@ -529,7 +529,7 @@ const managementStateShortcuts = (filters: IFlashcardManagementFilters) => {
     }).join("");
 };
 
-const flashcardManagementQuery = (filters: IFlashcardManagementFilters): IFlashcardQueryAST | undefined => {
+const flashcardManagementQuery = (filters: IFlashcardManagementFilters, list = false): IFlashcardQueryAST | undefined => {
     const predicates: IFlashcardQueryExpression[] = [];
     if (filters.documentTree) {
         predicates.push(filters.documentTree);
@@ -584,8 +584,10 @@ const flashcardManagementQuery = (filters: IFlashcardManagementFilters): IFlashc
     if (filters.flag !== undefined && filters.flag !== "") {
         add("flag", "equal", Number(filters.flag));
     }
-    if (filters.generationStatus) {
+    if (filters.generationStatus && filters.generationStatus !== "all") {
         add("generationStatus", "equal", filters.generationStatus);
+    } else if (list && !filters.generationStatus) {
+        add("generationStatus", "notEqual", "deleted");
     }
     if (filters.reviewState) {
         add("reviewState", "equal", filters.reviewState);
@@ -1885,7 +1887,7 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
     const sourceTypeLabels = flashcardV2SourceTypeLabels();
     const sourceTypeOptions = Object.entries(sourceTypeLabels)
         .map(([value, label]) => `<option value="${escapeAttr(value)}">${escapeHtml(label)}</option>`).join("");
-    const generationOptions = `<option value="">${window.siyuan.languages.all}</option><option value="active">${window.siyuan.languages.enable}</option><option value="disabledByTemplate">${window.siyuan.languages.flashcardDirectionClosed}</option><option value="orphaned">${window.siyuan.languages.invalid}</option><option value="deleted">${window.siyuan.languages.delete}</option>`;
+    const generationOptions = `<option value="">${window.siyuan.languages.flashcardExcludeDeletedCards}</option><option value="all">${window.siyuan.languages.all}</option><option value="active">${window.siyuan.languages.enable}</option><option value="disabledByTemplate">${window.siyuan.languages.flashcardDirectionClosed}</option><option value="orphaned">${window.siyuan.languages.invalid}</option><option value="deleted">${window.siyuan.languages.flashcardDeletedCards}</option>`;
     const reviewStateOptions = `<option value="">${window.siyuan.languages.all}</option><option value="new">${window.siyuan.languages.flashcardNewCard}</option><option value="learning">${window.siyuan.languages.flashcardPriorityLearning}</option><option value="review">${window.siyuan.languages.flashcardReviewCard}</option><option value="relearning">${window.siyuan.languages.flashcardPriorityLearning} - ${window.siyuan.languages.flashcardReviewCard}</option>`;
     const dialog = new Dialog({
         title: window.siyuan.languages.filter,
@@ -2089,6 +2091,7 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
     }
     const now = Date.now();
     const managementQuery = flashcardManagementQuery(filters);
+    const listQuery = flashcardManagementQuery(filters, true);
     const sort = grouped ? undefined : owner.sort;
     const filterCount = flashcardManagementFilterCount(filters);
     const policyScope = filters.rootIDs?.length === 1 ?
@@ -2923,7 +2926,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
             query: detailCardIDs ? {
                 version: 1,
                 root: {operator: "predicate", field: "cardID", comparator: "in", value: detailCardIDs},
-            } : managementQuery,
+            } : listQuery,
             options: {
                 now,
                 includeInactive: true,
@@ -2964,7 +2967,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
     }
     fetchPost("/api/flashcard/previewReviewSet", {
         reviewSetID,
-        query: managementQuery,
+        query: listQuery,
         options: {
             now,
             includeInactive: true,

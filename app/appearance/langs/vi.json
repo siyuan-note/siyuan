@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Không gồm thẻ đã xóa",
 	"ankiConnectNotebookUnset": "Chưa chọn sổ tay",
 	"flashcardImageExplanationBlock": "ID khối giải thích",
 	"flashcardImageUploadHint": "Chọn một ảnh hoặc kéo thả vào đây",

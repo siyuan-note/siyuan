@@ -174,6 +174,7 @@ test("review set pages stay scoped and use one card per source to load missing t
         open();`, {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText;
     const members = ["first", "second"].map((id) => ({card: {id, sourceID: "shared"}}));
     const summary = {sourceBlockID: "block", sourceTitle: "Title"};
+    const listQuery = {version: 1, root: {operator: "predicate", field: "generationStatus", comparator: "notEqual", value: "deleted"}};
     const pages: {total: number, cardIDs: string[] | null, cards?: typeof members}[] = [
         {total: 0, cardIDs: null}, {total: 0, cardIDs: []},
         {total: 2, cardIDs: ["first", "second"], cards: members},
@@ -183,13 +184,14 @@ test("review set pages stay scoped and use one card per source to load missing t
             const requests: string[] = [];
             let rendered: unknown[];
             runInNewContext(script, {
-                reviewSetID: "review-set", managementQuery: undefined, now: 1000, grouped, offset: 0,
+                reviewSetID: "review-set", listQuery, now: 1000, grouped, offset: 0,
                 flashcardV2ManagementPageSize: 50, sort: grouped ? undefined : {sortBy: "due", sortDescending: true},
                 renderCards: (cards: unknown[]) => { rendered = Array.from(cards); },
                 fetchPost: (route: string, payload: {query?: {root: {value: string[]}}, options: {sortBy?: string}},
                     callback: (response: {data: unknown}) => void) => {
                     requests.push(route);
                     if (route === "/api/flashcard/previewReviewSet") {
+                        assert.equal(payload.query, listQuery);
                         assert.equal(payload.options.sortBy, grouped ? undefined : "due");
                         callback({data: structuredClone(page)});
                     } else {

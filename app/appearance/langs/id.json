@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Kecualikan kartu yang dihapus",
 	"ankiConnectNotebookUnset": "Belum ada buku catatan yang dipilih",
 	"flashcardImageExplanationBlock": "ID blok penjelasan",
 	"flashcardImageUploadHint": "Pilih satu gambar atau jatuhkan di sini",

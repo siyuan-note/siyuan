@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "Silinen kartları hariç tut",
 	"ankiConnectNotebookUnset": "Defter seçilmedi",
 	"flashcardImageExplanationBlock": "Açıklama bloğu kimliği",
 	"flashcardImageUploadHint": "Bir görsel seçin veya buraya bırakın",

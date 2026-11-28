@@ -1,4 +1,5 @@
 {
+	"flashcardExcludeDeletedCards": "हटाए गए कार्ड छोड़ें",
 	"ankiConnectNotebookUnset": "कोई नोटबुक नहीं चुनी गई",
 	"flashcardImageExplanationBlock": "व्याख्या ब्लॉक की आईडी",
 	"flashcardImageUploadHint": "एक चित्र चुनें या यहाँ छोड़ें",

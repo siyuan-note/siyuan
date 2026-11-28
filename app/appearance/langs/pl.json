@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Blok nadrzędny",
+	"flashcardManagementPrompt": "Pytanie",
+	"flashcardManagementAnswer": "Odpowiedź",
 	"flashcardExcludeDeletedCards": "Bez usuniętych fiszek",
 	"ankiConnectNotebookUnset": "Nie wybrano notatnika",
 	"flashcardImageExplanationBlock": "Identyfikator bloku objaśnienia",

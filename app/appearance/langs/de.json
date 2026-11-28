@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Übergeordneter Block",
+	"flashcardManagementPrompt": "Frage",
+	"flashcardManagementAnswer": "Antwort",
 	"flashcardExcludeDeletedCards": "Ohne gelöschte Karten",
 	"ankiConnectNotebookUnset": "Kein Notizbuch ausgewählt",
 	"flashcardImageExplanationBlock": "ID des Erklärungsblocks",

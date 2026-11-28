@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "الكتلة الأصل",
+	"flashcardManagementPrompt": "السؤال",
+	"flashcardManagementAnswer": "الإجابة",
 	"flashcardExcludeDeletedCards": "باستثناء البطاقات المحذوفة",
 	"ankiConnectNotebookUnset": "لم يتم اختيار أي دفتر ملاحظات",
 	"flashcardImageExplanationBlock": "معرّف كتلة الشرح",

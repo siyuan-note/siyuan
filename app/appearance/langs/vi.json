@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Khối cha",
+	"flashcardManagementPrompt": "Câu hỏi",
+	"flashcardManagementAnswer": "Câu trả lời",
 	"flashcardExcludeDeletedCards": "Không gồm thẻ đã xóa",
 	"ankiConnectNotebookUnset": "Chưa chọn sổ tay",
 	"flashcardImageExplanationBlock": "ID khối giải thích",

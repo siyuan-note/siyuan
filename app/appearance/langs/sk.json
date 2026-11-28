@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Nadradený blok",
+	"flashcardManagementPrompt": "Otázka",
+	"flashcardManagementAnswer": "Odpoveď",
 	"flashcardExcludeDeletedCards": "Bez odstránených kariet",
 	"ankiConnectNotebookUnset": "Nie je vybratý žiadny zápisník",
 	"flashcardImageExplanationBlock": "ID bloku s vysvetlením",

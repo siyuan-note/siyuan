@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Blok induk",
+	"flashcardManagementPrompt": "Pertanyaan",
+	"flashcardManagementAnswer": "Jawaban",
 	"flashcardExcludeDeletedCards": "Kecualikan kartu yang dihapus",
 	"ankiConnectNotebookUnset": "Belum ada buku catatan yang dipilih",
 	"flashcardImageExplanationBlock": "ID blok penjelasan",

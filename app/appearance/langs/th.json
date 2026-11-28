@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "บล็อกแม่",
+	"flashcardManagementPrompt": "คำถาม",
+	"flashcardManagementAnswer": "คำตอบ",
 	"flashcardExcludeDeletedCards": "ไม่รวมบัตรที่ลบแล้ว",
 	"ankiConnectNotebookUnset": "ไม่ได้เลือกสมุดบันทึก",
 	"flashcardImageExplanationBlock": "รหัสบล็อกคำอธิบาย",

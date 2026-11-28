@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Родитељски блок",
+	"flashcardManagementPrompt": "Питање",
+	"flashcardManagementAnswer": "Одговор",
 	"flashcardExcludeDeletedCards": "Bez obrisanih kartica",
 	"ankiConnectNotebookUnset": "Nije izabrana nijedna beležnica",
 	"flashcardImageExplanationBlock": "ИД блока са објашњењем",

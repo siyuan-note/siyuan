@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "上層區塊",
+	"flashcardManagementPrompt": "題面",
+	"flashcardManagementAnswer": "答案",
 	"flashcardExcludeDeletedCards": "排除已刪除卡片",
 	"ankiConnectNotebookUnset": "尚未選擇筆記本",
 	"flashcardImageExplanationBlock": "解析區塊 ID",

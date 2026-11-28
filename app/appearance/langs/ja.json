@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "親ブロック",
+	"flashcardManagementPrompt": "問題",
+	"flashcardManagementAnswer": "答え",
 	"flashcardExcludeDeletedCards": "削除済みカードを除く",
 	"ankiConnectNotebookUnset": "ノートブック未選択",
 	"flashcardImageExplanationBlock": "解説ブロックの ID",

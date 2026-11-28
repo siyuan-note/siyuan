@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "मूल ब्लॉक",
+	"flashcardManagementPrompt": "प्रश्न",
+	"flashcardManagementAnswer": "उत्तर",
 	"flashcardExcludeDeletedCards": "हटाए गए कार्ड छोड़ें",
 	"ankiConnectNotebookUnset": "कोई नोटबुक नहीं चुनी गई",
 	"flashcardImageExplanationBlock": "व्याख्या ब्लॉक की आईडी",

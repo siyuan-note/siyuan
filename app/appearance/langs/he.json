@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "בלוק אב",
+	"flashcardManagementPrompt": "שאלה",
+	"flashcardManagementAnswer": "תשובה",
 	"flashcardExcludeDeletedCards": "ללא כרטיסיות שנמחקו",
 	"ankiConnectNotebookUnset": "לא נבחרה מחברת",
 	"flashcardImageExplanationBlock": "מזהה בלוק ההסבר",

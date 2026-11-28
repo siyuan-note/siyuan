@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Батьківський блок",
+	"flashcardManagementPrompt": "Запитання",
+	"flashcardManagementAnswer": "Відповідь",
 	"flashcardExcludeDeletedCards": "Без видалених карток",
 	"ankiConnectNotebookUnset": "Записник не вибрано",
 	"flashcardImageExplanationBlock": "Ідентифікатор блоку пояснення",

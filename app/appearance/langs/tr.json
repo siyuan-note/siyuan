@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Üst blok",
+	"flashcardManagementPrompt": "Soru",
+	"flashcardManagementAnswer": "Yanıt",
 	"flashcardExcludeDeletedCards": "Silinen kartları hariç tut",
 	"ankiConnectNotebookUnset": "Defter seçilmedi",
 	"flashcardImageExplanationBlock": "Açıklama bloğu kimliği",

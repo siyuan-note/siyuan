@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Bovenliggend blok",
+	"flashcardManagementPrompt": "Vraag",
+	"flashcardManagementAnswer": "Antwoord",
 	"flashcardExcludeDeletedCards": "Verwijderde kaarten uitsluiten",
 	"ankiConnectNotebookUnset": "Geen notitieboek geselecteerd",
 	"flashcardImageExplanationBlock": "ID van het uitlegblok",

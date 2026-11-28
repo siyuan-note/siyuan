@@ -46,7 +46,7 @@ test("image groups share numbering while other card types require no lookup", as
     assert.equal(result.has("b6b"), false);
 });
 
-test("management renders immediately and enriches only current labels without replacing rows", () => {
+test("management loads group numbers into the current type and selection labels without replacing the prompt", () => {
     const source = readFileSync("src/card/flashcardV2.ts", "utf8");
     const start = source.indexOf("void loadFlashcardV2GroupNumbers(cards");
     const end = source.indexOf("owner.view.setRefresh", start);
@@ -54,9 +54,9 @@ test("management renders immediately and enriches only current labels without re
     assert.ok(start > source.indexOf("owner.dialog = new Dialog"));
     assert.match(snippet, /undefined, false, signal/);
     assert.match(snippet, /!isCurrent\(\) \|\| listenerOptions.signal.aborted/);
-    assert.match(snippet, /preview.textContent = title/);
-    assert.match(snippet, /setAttribute\("aria-label", title\)/);
-    assert.doesNotMatch(snippet, /innerHTML|outerHTML|\.focus\(|\.refresh\(/);
+    assert.match(snippet, /querySelector\("\[data-card-kind\]"\).textContent = kind/);
+    assert.match(snippet, /setAttribute\("aria-label", kind\)/);
+    assert.doesNotMatch(snippet, /preview|innerHTML|outerHTML|\.focus\(|\.refresh\(/);
     const title = source.slice(source.indexOf("const groupedTitle ="), source.indexOf("const statuses ="));
     assert.match(title, /\["cloze", "image-occlusion"\]/);
     assert.match(title, /variant \|\| position \+ 1/);

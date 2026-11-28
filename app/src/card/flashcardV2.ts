@@ -1004,14 +1004,15 @@ const managedCardMetrics = (state: IFlashcardSearchResult["reviewState"]) => {
 </span>`;
 };
 
-const managedCardHeader = (sort?: IFlashcardManagementDialog["sort"]) =>
+const managedCardHeader = (grouped: boolean, sort?: IFlashcardManagementDialog["sort"]) =>
     `<li class="b3-list-item b3-list-item--narrow card__v2-managed-header">
 <span class="card__v2-managed-leading"></span><span class="card__v2-managed-main"><span class="card__v2-managed-text">
-<span>${window.siyuan.languages.avParentItem}</span><span>${window.siyuan.languages.flashcardChoiceQuestion}</span><span>${window.siyuan.languages.flashcardCorrectAnswer}</span>
+<span>${window.siyuan.languages.flashcardManagementParentBlock}</span><span>${window.siyuan.languages.flashcardManagementPrompt}</span><span>${window.siyuan.languages.flashcardManagementAnswer}</span>
 </span></span>
 <span class="card__v2-managed-metrics">${flashcardManagementColumns.map(({key, label}) => {
-        const order = sort?.sortBy === key ? sort.sortDescending ? "desc" : "asc" : "";
         const title = window.siyuan.languages[label];
+        if (grouped) { return `<span title="${escapeAttr(title)}">${title}</span>`; }
+        const order = sort?.sortBy === key ? sort.sortDescending ? "desc" : "asc" : "";
         return `<button type="button" data-type="sortColumn" data-sort-key="${key}" class="b3-button b3-button--text" aria-pressed="${!!order}" aria-label="${escapeAttr(order ? title + " - " + window.siyuan.languages[order] : title)}">${title}${order ? `<svg aria-hidden="true"><use xlink:href="#icon${order === "asc" ? "Up" : "Down"}"></use></svg>` : ""}</button>`;
     }).join("")}</span><span class="card__v2-managed-header-actions"></span></li>`;
 
@@ -1024,8 +1025,7 @@ const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
     const groupedTitle = ["cloze", "image-occlusion"].includes(result.sourceType) ?
         type :
         `${type} ${variant || position + 1}`;
-    const title = grouped ? groupedTitle :
-        result.sourceTitle || result.sourceBlockID || result.card.id;
+    const title = result.sourceTitle || result.sourceBlockID || result.card.id;
     const statuses = [reviewStateLabel(result.reviewState.state)];
     if (result.card.editLater) {
         statuses.push(window.siyuan.languages.flashcardPendingEdits);
@@ -1044,22 +1044,22 @@ const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
     if (generationLabels[result.card.generationStatus]) {
         statuses.push(generationLabels[result.card.generationStatus]);
     }
-    return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card${grouped ? "" : " card__v2-managed-card--table"}${result.card.editLater ? " card__v2-managed-card--edit-later" : ""}" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
+    return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card${result.card.editLater ? " card__v2-managed-card--edit-later" : ""}" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
 <span class="card__v2-managed-leading">
-<input data-type="selectCard" aria-label="${escapeAttr(title)}" type="checkbox"${selectedCardIDs.has(result.card.id) ? " checked" : ""}>
+<input data-type="selectCard" aria-label="${escapeAttr(grouped ? groupedTitle : title)}" type="checkbox"${selectedCardIDs.has(result.card.id) ? " checked" : ""}>
 <button type="button" data-type="flag" data-menu="true" aria-haspopup="menu" data-position="north" class="block__icon block__icon--show block__icon--touch ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.flashcardFlag)} - ${escapeAttr(flashcardV2FlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconFlag"></use></svg></button>
 </span>
 <span class="card__v2-managed-main">
 <span class="card__v2-managed-text">
-${grouped ? "" : '<span data-card-parent class="card__v2-managed-summary">—</span>'}
+<span data-card-parent class="card__v2-managed-summary">—</span>
 <button data-type="preview" data-card-front class="card__v2-managed-title" aria-label="${escapeAttr(`${window.siyuan.languages.flashcardPreview} - ${title}`)}">${escapeHtml(title)}</button>
-${grouped ? "" : '<span data-card-back class="card__v2-managed-summary">—</span>'}
+<span data-card-back class="card__v2-managed-summary">—</span>
 </span>
-<span class="card__v2-managed-details">${grouped ? "" : `<span>${escapeHtml(`${type} ${variant}`.trim())}</span>`}${statuses.map((status) => `<span class="card__v2-managed-badge">${escapeHtml(status)}</span>`).join("")}<span>${window.siyuan.languages.flashcardReviews} ${result.reviewState.reps}</span>${result.effectivePriority === "unset" ? "" : `<span>${escapeHtml(priorityLabel(result.effectivePriority))}</span>`}</span>
+<span class="card__v2-managed-details"><span data-card-kind>${escapeHtml(grouped ? groupedTitle : `${type} ${variant}`.trim())}</span>${statuses.map((status) => `<span class="card__v2-managed-badge">${escapeHtml(status)}</span>`).join("")}<span>${window.siyuan.languages.flashcardReviews} ${result.reviewState.reps}</span>${result.effectivePriority === "unset" ? "" : `<span>${escapeHtml(priorityLabel(result.effectivePriority))}</span>`}</span>
 ${result.card.editLater?.note ? `<span class="card__v2-edit-later-note ft__on-surface">${escapeHtml(result.card.editLater.note)}</span>` : ""}
 ${result.card.editLater ? `<span class="card__v2-edit-later-tools">${result.sourceBlockID ? `<button data-type="editCard" class="b3-button b3-button--outline"><svg><use xlink:href="#iconEdit"></use></svg>${window.siyuan.languages.edit}</button>` : ""}<button data-type="editLater" class="b3-button b3-button--text">${window.siyuan.languages.flashcardEditLaterComplete}</button></span>` : ""}
 </span>
-${grouped ? "" : managedCardMetrics(result.reviewState)}
+${managedCardMetrics(result.reviewState)}
 ${result.sourceType === "qa" ? `<span data-type="direction" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDirectionSettings}"><svg><use xlink:href="#iconBoth"></use></svg></span>` : ""}
 <span data-type="preset" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardPreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
 <span data-type="priority" class="fn__none"></span>
@@ -2152,7 +2152,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
 </div>
 </div>
 <div class="card__v2-management-content">
-<ul class="b3-list b3-list--background fn__flex-1 card__v2-management-list" tabindex="-1">${cards.length === 0 ? `<li class="b3-list-item card__empty">${filters.editLater === "true" ? window.siyuan.languages.flashcardEditLaterEmpty : window.siyuan.languages.emptyContent}</li>` : (grouped ? "" : managedCardHeader(sort)) + renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul>
+<ul class="b3-list b3-list--background fn__flex-1 card__v2-management-list" tabindex="-1">${cards.length === 0 ? `<li class="b3-list-item card__empty">${filters.editLater === "true" ? window.siyuan.languages.flashcardEditLaterEmpty : window.siyuan.languages.emptyContent}</li>` : managedCardHeader(grouped, sort) + renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul>
 <aside data-card-source-preview class="card__v2-management-source-preview fn__none" aria-label="${escapeAttr(window.siyuan.languages.flashcardCardSource)}">
 <button type="button" data-type="closeSourcePreview" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.close)}"><svg aria-hidden="true"><use xlink:href="#iconClose"></use></svg></button>
 <div data-card-source-preview-body class="protyle-wysiwyg" data-readonly="true" contenteditable="false"></div></aside></div></div>`;
@@ -2165,9 +2165,13 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
             }
             const dialog = owner.dialog;
             const listenerOptions = owner.view.bind();
-            if (!grouped && window.matchMedia("(min-width: 960px) and (pointer: fine)").matches) {
+            const list = dialog.element.querySelector<HTMLElement>(".card__v2-management-list");
+            const wideLayout = window.matchMedia("(min-width: 960px) and (pointer: fine)");
+            const loadCardText = () => {
+                if (!wideLayout.matches) { return; }
+                wideLayout.removeEventListener("change", loadCardText);
                 void loadFlashcardManagementText(cards, listenerOptions.signal, (id, text) => {
-                    const row = dialog.element.querySelector<HTMLElement>(`[data-id="${CSS.escape(id)}"]`);
+                    const row = list.querySelector<HTMLElement>(`[data-id="${CSS.escape(id)}"]`);
                     for (const [key, value] of Object.entries(text)) {
                         const cell = row?.querySelector<HTMLElement>(`[data-card-${key}]`);
                         if (cell && value) {
@@ -2179,7 +2183,9 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                         }
                     }
                 });
-            }
+            };
+            wideLayout.addEventListener("change", loadCardText, listenerOptions);
+            loadCardText();
             const sourcePreview = dialog.element.querySelector<HTMLElement>("[data-card-source-preview]");
             const sourcePreviewBody = sourcePreview.querySelector<HTMLElement>("[data-card-source-preview-body]");
             let sourcePreviewRequest = 0;
@@ -2212,15 +2218,13 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return isFlashcardV2Object(payload) ? payload.generationConfig : undefined;
                 }).then(numbers => {
                     if (!isCurrent() || listenerOptions.signal.aborted) { return; }
-                    dialog.element.querySelectorAll<HTMLElement>(".card__v2-managed-card").forEach(item => {
+                    list.querySelectorAll<HTMLElement>(".card__v2-managed-card").forEach(item => {
                         const card = cards.find(candidate => candidate.card.id === item.dataset.id);
                         const number = numbers.get(item.dataset.id);
                         if (!card || number === undefined) { return; }
-                        const title = `${flashcardV2SourceTypeLabels()[card.sourceType] || card.sourceType} ${number}`;
-                        const preview = item.querySelector<HTMLElement>('[data-type="preview"]');
-                        preview.textContent = title;
-                        preview.setAttribute("aria-label", `${window.siyuan.languages.flashcardPreview} - ${title}`);
-                        item.querySelector('[data-type="selectCard"]').setAttribute("aria-label", title);
+                        const kind = `${flashcardV2SourceTypeLabels()[card.sourceType] || card.sourceType} ${number}`;
+                        item.querySelector("[data-card-kind]").textContent = kind;
+                        item.querySelector('[data-type="selectCard"]').setAttribute("aria-label", kind);
                     });
                 });
             }
@@ -2252,13 +2256,6 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     dialog.element.dataset.dialogClosing !== "true") {
                     refreshSelection();
                 }
-            };
-            const refreshList = () => {
-                owner.view.capture(dialog.element, true);
-                dialog.element.querySelector(".b3-list").innerHTML = renderManagedCards(cards, grouped, reviewSetID,
-                    selectedCardIDs, flagDefinitions);
-                refreshSelection();
-                owner.view.restore(dialog.element);
             };
             const reloadPage = () => {
                 if (!dialog.element.isConnected) {
@@ -2428,14 +2425,18 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "selectPage") {
+                    const checked = (target as HTMLInputElement).checked;
                     cards.forEach((card) => {
-                        if ((target as HTMLInputElement).checked) {
+                        if (checked) {
                             selectedCardIDs.add(card.card.id);
                         } else {
                             selectedCardIDs.delete(card.card.id);
                         }
                     });
-                    refreshList();
+                    list.querySelectorAll<HTMLInputElement>('[data-type="selectCard"]').forEach(checkbox => {
+                        checkbox.checked = checked;
+                    });
+                    refreshSelection();
                     return;
                 }
                 if (type === "batchMenu") {

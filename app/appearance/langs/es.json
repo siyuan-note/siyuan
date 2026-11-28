@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Bloque padre",
+	"flashcardManagementPrompt": "Pregunta",
+	"flashcardManagementAnswer": "Respuesta",
 	"flashcardExcludeDeletedCards": "Excluir las tarjetas eliminadas",
 	"ankiConnectNotebookUnset": "Ningún cuaderno seleccionado",
 	"flashcardImageExplanationBlock": "ID del bloque de explicación",

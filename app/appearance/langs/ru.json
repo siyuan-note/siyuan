@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "Родительский блок",
+	"flashcardManagementPrompt": "Вопрос",
+	"flashcardManagementAnswer": "Ответ",
 	"flashcardExcludeDeletedCards": "Без удалённых карточек",
 	"ankiConnectNotebookUnset": "Блокнот не выбран",
 	"flashcardImageExplanationBlock": "ID блока с пояснением",

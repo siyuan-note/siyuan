@@ -1,4 +1,7 @@
 {
+	"flashcardManagementParentBlock": "상위 블록",
+	"flashcardManagementPrompt": "문제",
+	"flashcardManagementAnswer": "답변",
 	"flashcardExcludeDeletedCards": "삭제된 카드 제외",
 	"ankiConnectNotebookUnset": "선택된 노트북 없음",
 	"flashcardImageExplanationBlock": "해설 블록 ID",

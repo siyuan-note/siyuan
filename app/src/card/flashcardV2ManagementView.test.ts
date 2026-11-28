@@ -343,15 +343,51 @@ test("the source preview ignores a superseded request and a response after the m
     assert.equal(sanitized, "current");
 });
 
-test("state shortcuts stay compact and wide table rows reserve the same columns as their header", () => {
+test("grouped and ungrouped management use the same columns with sorting in the ungrouped view", () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const script = source.slice(source.indexOf("const flashcardManagementColumns ="),
+        source.indexOf("const setFlashcardV2ReviewSetMembership ="));
+    const [renderHeader, renderCards] = runInNewContext(transpileModule(script + "\n[managedCardHeader, renderManagedCards];", {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText, {
+        window: {siyuan: {languages: JSON.parse(readFileSync("appearance/langs/en.json", "utf8"))}},
+        escapeAttr: (value: string) => value,
+        escapeHtml: (value: string) => value,
+        flashcardV2SourceTypeLabels: () => ({qa: "Q&A"}),
+        reviewStateLabel: () => "New",
+        flashcardV2FlagLabel: () => "Red",
+        flashcardFlagStyle: () => "",
+    });
+    const result = {
+        card: {id: "card-a", sourceID: "source-a", variantKey: "forward", flag: 1},
+        sourceType: "qa", sourceTitle: "Source text", effectivePriority: "unset",
+        reviewState: {due: 0, reps: 2, scheduledDays: 3, difficulty: 4, stability: 5},
+    };
+    const grouped = renderCards([result], true);
+    const ungrouped = renderCards([result], false);
+    assert.match(grouped, /card__v2-managed-source" data-source-id="source-a"[\s\S]*data-type="sourceMore"[\s\S]*data-id="card-a"/);
+    assert.doesNotMatch(ungrouped, /data-source-id=/);
+    for (const rows of [grouped, ungrouped]) {
+        assert.match(rows, /data-card-parent[\s\S]*data-card-front[\s\S]*data-card-back/);
+        assert.match(rows, /card__v2-managed-metrics">\s*<span>—<\/span>\s*<span>2<\/span><span>3<\/span><span>4<\/span><span>5<\/span>/);
+    }
+    const sort = {sortBy: "due", sortDescending: true};
+    for (const header of [renderHeader(true), renderHeader(false, sort)]) {
+        assert.match(header, /<span>Parent block<\/span><span>Prompt<\/span><span>Answer<\/span>/);
+    }
+    assert.doesNotMatch(renderHeader(true), /data-type="sortColumn"/);
+    assert.match(renderHeader(false, sort), /data-sort-key="due"[^>]*aria-pressed="true"/);
+});
+
+test("state shortcuts stay compact and card flags and columns align with the first content line", () => {
     const source = readFileSync("src/card/flashcardV2.ts", "utf8");
     const css = readFileSync("src/assets/scss/business/_card.scss", "utf8");
     assert.match(source, /class="card__v2-management-tools card__v2-management-tools--states">\$\{managementStateShortcuts/);
     assert.match(css, /&--states \{\s*flex: 0 0 auto;/);
     assert.match(css, /container: flashcard-management-list \/ inline-size;/);
     assert.match(css, /@container flashcard-management-list \(min-width: 680px\) \{\s*&__v2-managed-header \{/);
-    assert.match(source, /grouped \? "" : " card__v2-managed-card--table"/);
-    assert.match(css, /&__v2-managed-header,\s*&__v2-managed-card--table \{\s*> \.card__v2-managed-leading \{\s*inline-size: 43px;/);
-    assert.match(css, /&__v2-managed-card--table\.card__v2-managed-card\.b3-list-item--hide-action \{\s*> \[data-type="suspend"\],\s*> \[data-type="previewFull"\],\s*> \[data-type="more"\] \{\s*display: flex;\s*opacity: 0;/);
+    assert.match(css, /> \.card__v2-managed-leading,\s*> \.card__v2-managed-main \{\s*align-self: flex-start;/);
+    assert.match(css, /&__v2-managed-header,\s*&__v2-managed-card \{\s*> \.card__v2-managed-leading \{\s*inline-size: 43px;/);
+    assert.match(css, /&__v2-managed-card\.b3-list-item--hide-action \{\s*> \[data-type="suspend"\],\s*> \[data-type="previewFull"\],\s*> \[data-type="more"\] \{\s*display: flex;\s*opacity: 0;/);
     assert.match(css, /&:hover,\s*&:focus-within \{\s*> \[data-type="suspend"\],\s*> \[data-type="previewFull"\],\s*> \[data-type="more"\] \{\s*opacity: 1;/);
 });

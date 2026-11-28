@@ -1229,7 +1229,7 @@
     margin-top: 6px;
     background-color: var(--b3-theme-background);
 
-    &:first-child {
+    .card__v2-managed-header + & {
       margin-top: 0;
     }
   }
@@ -1294,6 +1294,11 @@
     position: relative;
     min-height: 34px;
 
+    > .card__v2-managed-leading,
+    > .card__v2-managed-main {
+      align-self: flex-start;
+    }
+
     &--edit-later {
       align-items: flex-start;
       padding-block: 6px;
@@ -1304,11 +1309,6 @@
 
       > .card__v2-managed-main {
         row-gap: 6px;
-      }
-
-      .card__v2-managed-title {
-        min-block-size: var(--b3-ui-list-height, 28px);
-        padding-block: 0;
       }
     }
   }
@@ -1335,7 +1335,15 @@
   }
 
   &__v2-managed-text {
-    display: contents;
+    display: flex;
+    align-items: center;
+    flex: 1 0 100%;
+    min-width: 0;
+    min-block-size: var(--b3-ui-list-height, 28px);
+
+    @media (pointer: coarse) {
+      min-block-size: max(44px, var(--b3-ui-list-height, 28px));
+    }
   }
 
   @media (min-width: 960px) and (pointer: fine) {
@@ -1355,13 +1363,13 @@
       }
 
       &__v2-managed-header,
-      &__v2-managed-card--table {
+      &__v2-managed-card {
         > .card__v2-managed-leading {
           inline-size: 43px;
         }
       }
 
-      &__v2-managed-card--table.card__v2-managed-card.b3-list-item--hide-action {
+      &__v2-managed-card.b3-list-item--hide-action {
         > [data-type="suspend"],
         > [data-type="previewFull"],
         > [data-type="more"] {
@@ -1416,9 +1424,7 @@
       &__v2-managed-text {
         display: grid;
         grid-template-columns: minmax(30px, .75fr) minmax(44px, 1fr) minmax(44px, 1fr);
-        flex: 1 0 100%;
         gap: 8px;
-        min-width: 0;
       }
 
       &__v2-managed-summary {
@@ -1426,10 +1432,6 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-      }
-
-      &__v2-managed-source ~ .card__v2-managed-card .card__v2-managed-text {
-        display: contents;
       }
     }
   }
@@ -1460,7 +1462,7 @@
   }
 
   &__v2-managed-title {
-    padding: 2px 0;
+    padding: 0;
     border: 0;
     color: inherit;
     background: transparent;

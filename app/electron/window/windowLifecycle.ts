@@ -9,7 +9,6 @@ import {cleanupBlockDragSessions, cleanupBlockDragWindow, touchWindowFocus} from
 import type {
     BrowserWindow,
     Event as ElectronEvent,
-    WebContentsDidStartNavigationEventParams,
     WebContentsWillFrameNavigateEventParams,
 } from "electron";
 import type {KernelTarget} from "../shared/types";
@@ -54,11 +53,10 @@ const rememberWindowKernelTarget = (window: BrowserWindow, target: KernelTarget,
         });
     }
 
-    window.webContents.on("did-start-navigation", (details: WebContentsDidStartNavigationEventParams) => {
-        if (details.isMainFrame && !details.isSameDocument) {
-            forgetWindowInitialized(webContentsId);
-            dragCleanup.session(webContentsId);
-        }
+    // 导航可能被取消，主框架换页提交后才清理旧页面的状态。
+    window.webContents.on("did-navigate", () => {
+        forgetWindowInitialized(webContentsId);
+        dragCleanup.session(webContentsId);
     });
     window.webContents.on("render-process-gone", () => {
         forgetWindowInitialized(webContentsId);

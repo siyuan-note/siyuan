@@ -17,7 +17,7 @@ const resetState = () => {
     state.workspaces.length = 0;
 };
 
-test("remote windows reject guests while local plugin guests keep their original attachment capabilities", () => {
+test("window boundaries restrict remote guests and preserve registration until navigation commits", () => {
     // 启动流程在 startup/bootstrap.ts，入口只剩环境变量与调用；两者都不得再引入跨进程消息桥。
     const entry = readFileSync(join(__dirname, "startup", "bootstrap.ts"), "utf8") +
         readFileSync(join(__dirname, "main.ts"), "utf8");
@@ -50,8 +50,19 @@ test("remote windows reject guests while local plugin guests keep their original
         contents.emit("will-frame-navigate", {isMainFrame: true, preventDefault() { blocked++; }});
         assert.equal(blocked, mode === "remote" ? 2 : 0);
 
+        contents.emit("did-start-navigation", {isMainFrame: false, isSameDocument: false});
+        contents.emit("did-frame-navigate");
+        contents.emit("did-start-navigation", {isMainFrame: true, isSameDocument: true});
+        contents.emit("did-navigate-in-page");
         contents.emit("did-start-navigation", {isMainFrame: true, isSameDocument: false});
+        assert.equal(state.windows.initialized.has(42), true);
+        assert.deepEqual(cleaned, []);
+
+        contents.emit("did-start-navigation", {isMainFrame: true, isSameDocument: false});
+        contents.emit("did-navigate");
         assert.equal(state.windows.initialized.has(42), false);
+        assert.equal(state.windows.targets.get(42), target);
+        assert.deepEqual(cleaned, [["session", 42]]);
         contents.emit("destroyed");
         assert.equal(state.windows.targets.has(42), false);
         assert.deepEqual(cleaned, [["session", 42], ["window", 42]]);

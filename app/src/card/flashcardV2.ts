@@ -17,6 +17,8 @@ import {withFetchTimeout} from "../util/fetchTimeout";
 import {ContractFormData} from "../util/contractFormData";
 import {isFlashcardV2Object, isFlashcardV2Strings, readFlashcardV2Payload, readFlashcardV2Revision, toFlashcardV2JSON} from "./flashcardV2Contract";
 import {isMobile} from "../util/functions";
+import {Constants} from "../constants";
+import {setStorageVal} from "../protyle/util/compatibility";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {genUUID} from "../util/genID";
 import {openFlashcardV2DocumentHistory, openFlashcardV2SourceHistory} from "./flashcardV2SourceHistory";
@@ -1998,7 +2000,8 @@ interface IFlashcardManagementDialog {
 }
 
 const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset = 0,
-    filters: IFlashcardManagementFilters = {}, managementOptions?: IFlashcardManagementOptions, grouped = true,
+    filters: IFlashcardManagementFilters = {}, managementOptions?: IFlashcardManagementOptions,
+    grouped = window.siyuan.storage[Constants.LOCAL_FLASHCARD]?.groupBySource !== false,
     owner: IFlashcardManagementDialog = {view: new FlashcardV2ManagementView()}, preserve = true) => {
     const isCurrent = owner.view.request(() =>
         openFlashcardV2ReviewSetCards(reviewSetID, name, offset, filters, undefined, grouped, owner, preserve));
@@ -2299,7 +2302,11 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "group") {
-                    openFlashcardV2ReviewSetCards(reviewSetID, name, 0, filters, managementOptions, !grouped, owner, false);
+                    const nextGrouped = (target as HTMLInputElement).checked;
+                    const layout = {...window.siyuan.storage[Constants.LOCAL_FLASHCARD], groupBySource: nextGrouped};
+                    window.siyuan.storage[Constants.LOCAL_FLASHCARD] = layout;
+                    void setStorageVal(Constants.LOCAL_FLASHCARD, layout);
+                    openFlashcardV2ReviewSetCards(reviewSetID, name, 0, filters, managementOptions, nextGrouped, owner, false);
                     return;
                 }
                 if (type === "selectPage") {

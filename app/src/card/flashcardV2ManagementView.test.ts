@@ -33,6 +33,43 @@ test("pending-edit entry keeps a stable management title while retaining its ini
     assert.equal(args[5], false);
 });
 
+test("management reopens in the last grouping mode and preserves other flashcard layout state", () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const start = source.indexOf("const openFlashcardV2ReviewSetCards =");
+    const body = source.indexOf("    const isCurrent = owner.view.request", start);
+    const toggle = source.indexOf('if (type === "group")', body);
+    const nextHandler = source.indexOf('if (type === "selectPage")', toggle);
+    const script = transpileModule(`${source.slice(start, body)}
+            return grouped;
+        };
+        const toggleGrouping = (target: HTMLInputElement) => {
+            const type = "group";
+            const owner = {view: new FlashcardV2ManagementView()};
+            const reviewSetID = "", name = "Manage", filters = {}, managementOptions = undefined;
+            ${source.slice(toggle, nextHandler)}
+        };
+        [openFlashcardV2ReviewSetCards, toggleGrouping];`, {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
+    const storage: Record<string, {fullscreen: boolean, groupBySource?: boolean}> = {card: {fullscreen: true}};
+    const writes: boolean[] = [];
+    const [open, toggleGrouping] = runInNewContext(script, {
+        FlashcardV2ManagementView, Constants: {LOCAL_FLASHCARD: "card"}, window: {siyuan: {storage}},
+        setStorageVal: (key: string, value: typeof storage.card) => {
+            assert.equal(key, "card");
+            assert.equal(value, storage.card);
+            assert.equal(value.fullscreen, true);
+            writes.push(value.groupBySource);
+        },
+    });
+    assert.equal(open("", "Manage"), true);
+    toggleGrouping({checked: false});
+    assert.equal(open("", "Manage"), false);
+    toggleGrouping({checked: true});
+    assert.equal(open("", "Manage"), true);
+    assert.deepEqual(writes, [false, true]);
+});
+
 test("batch labels distinguish configuration steps from direct actions", () => {
     const source = readFileSync("src/card/flashcardV2.ts", "utf8");
     const start = source.indexOf("batchApply.textContent =");

@@ -1143,6 +1143,17 @@
     }
   }
 
+  @media (hover: hover) and (pointer: fine) {
+    &__v2-managed-leading > input:not(:checked) {
+      opacity: 0;
+    }
+
+    &__v2-managed-card:hover .card__v2-managed-leading > input,
+    &__v2-managed-card:focus-within .card__v2-managed-leading > input {
+      opacity: 1;
+    }
+  }
+
   &__v2-managed-main {
     display: flex;
     flex: 1;

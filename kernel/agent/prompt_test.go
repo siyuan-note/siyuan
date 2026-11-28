@@ -36,6 +36,39 @@ func TestSystemPromptDailyNoteCreationMatchesTools(t *testing.T) {
 	}
 }
 
+func TestSystemPromptUsesCurrentToolFunctionNames(t *testing.T) {
+	for _, tc := range []struct {
+		name           string
+		blockAvailable bool
+	}{
+		{name: "block exposed", blockAvailable: true},
+		{name: "block unavailable"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			capabilities := &capabilitySet{registrations: map[string]*capabilityRegistration{}}
+			if tc.blockAvailable {
+				capabilities.registrations["block"] = &capabilityRegistration{ModelName: "block"}
+			}
+			prompt := buildSystemPrompt("English", capabilities)
+			if !strings.Contains(prompt, "Use the exact function name from the tool definitions supplied for the current round.") ||
+				!strings.Contains(prompt, "pass the operation in its action argument") {
+				t.Fatal("tool naming rule is missing from the system prompt")
+			}
+			for _, instruction := range []string{
+				"block.update means calling block with action=update",
+				"call block with action=update first",
+			} {
+				if strings.Contains(prompt, instruction) != tc.blockAvailable {
+					t.Errorf("unexpected availability of block instruction %q", instruction)
+				}
+			}
+			if strings.Contains(prompt, "call block.update") {
+				t.Error("the prompt still instructs the model to call a dotted function name")
+			}
+		})
+	}
+}
+
 func TestTurnContextStaysInUserMessage(t *testing.T) {
 	const userMessage = "summarize this"
 	references := []Reference{{ID: "ref-block", Title: "Referenced block"}}

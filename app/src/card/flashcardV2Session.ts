@@ -196,6 +196,7 @@ export interface IFlashcardV2SessionTransfer {
     sessionID: string;
     index: number;
     queue: IFlashcardV2SessionQueueCard[];
+    initialNewCardIDs?: string[];
     lastReview?: IFlashcardV2LastReview;
     deferredCardIDs: string[];
     ratings: [string, string][];
@@ -285,6 +286,7 @@ const createMovableSessionSurface = (options: ConstructorParameters<typeof Dialo
     const element = document.createElement("div");
     element.className = "fn__flex-column fn__flex-1 card__v2-session-host";
     element.innerHTML = options.content;
+    const title = element.querySelector("[data-flashcard-title]");
     let version = 0;
     let ended = false;
     let host: {close: () => void, detach: () => void};
@@ -304,18 +306,21 @@ const createMovableSessionSurface = (options: ConstructorParameters<typeof Dialo
             if (generation === version && !ended) { finish(); }
         };
         mount = target;
+        title.classList.toggle("fn__none", Boolean(mount));
+        title.classList.toggle("resize__move", !mount);
         if (mount) {
             mount.element.replaceChildren(element);
             mount.signal.addEventListener("abort", onClose, {once: true});
             host = {close: mount.close, detach: () => target.signal.removeEventListener("abort", onClose)};
         } else {
-            const dialog = new Dialog({...options, content: "", destroyCallback: onClose, beforeClose: () => {
+            const dialog = new Dialog({...options, title: undefined, content: "", destroyCallback: onClose, beforeClose: () => {
                 if (options.beforeClose?.() === false) { return false; }
                 if (generation === version) { element.dataset.dialogClosing = "true"; }
                 return true;
             }});
             dialog.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
             dialog.element.setAttribute("data-flashcard-v2-review", "");
+            dialog.element.querySelector(".b3-dialog__container").setAttribute("aria-label", options.title);
             dialog.element.querySelector(".b3-dialog__body").appendChild(element);
             dialog.element.firstElementChild.addEventListener("click", (event: MouseEvent) => {
                 if (typeof event.detail === "string") {
@@ -605,16 +610,17 @@ ${reviewMode === "normal" ? `<span class="ft__on-surface">${escapeHtml(window.si
 ${weakCount ? `<div class="fn__hr"></div><span class="ft__on-surface">${window.siyuan.languages.flashcardReviewReinforcementTip}</span>` : ""}
 <span class="card__v2-completion-actions"><button data-type="pending-edits" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardPendingEdits}</button>${weakCount ? `<button data-type="practice-weak" class="b3-button b3-button--outline">${escapeHtml(window.siyuan.languages.flashcardRetryWeak.replace("${count}", weakCount.toString()))}</button>` : ""}${canUndo ? `<button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button>` : ""}<button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.flashcardFinishSession}</button></span>`;
 
-const mobileSessionTitle = (name: string, showCount = false) => `<span class="fn__flex">
+const flashcardSessionTitle = (name: string) => `<span class="fn__flex">
     <svg class="block__logoicon fn__flex-center fn__flex-shrink" aria-hidden="true"><use xlink:href="#iconRiffCard"></use></svg>
-    <span class="fn__ellipsis">${escapeHtml(name)}</span>
-    ${showCount ? `<span class="fn__space"></span>${flashcardV2ReviewCounterHTML(true)}` : ""}
+    <span class="fn__ellipsis fn__flex-center">${escapeHtml(name)}</span>
 </span>`;
 
-const sessionContent = (mobile = false) => `<div class="b3-dialog__content fn__flex-column card__v2-session">
+const sessionContent = (mobile = false, name = "") => `<div class="b3-dialog__content fn__flex-column card__v2-session">
+<div class="card__v2-session-header">
+<span data-flashcard-title class="card__v2-session-title">${flashcardSessionTitle(name)}</span>
 <div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
-    ${mobile ? "" : flashcardV2ReviewCounterHTML(false)}
     <span data-flashcard-path class="card__v2-session-path ft__on-surface"></span>
+    ${flashcardV2ReviewCounterHTML(mobile)}
     <button data-type="flag" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.flashcardFlag}" aria-haspopup="menu" disabled><svg><use xlink:href="#iconFlag"></use></svg></button>
     <button data-type="read-aloud" class="block__icon block__icon--show ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
     <button data-type="edit-source" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
@@ -623,6 +629,7 @@ const sessionContent = (mobile = false) => `<div class="b3-dialog__content fn__f
     ${mobile ? "" : `<button data-type="review-placement" data-menu="true" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.flashcardOpenMode}" aria-haspopup="menu"><svg aria-hidden="true"><use xlink:href="#iconOpen"></use></svg></button>`}
     <button data-type="more" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
     <button data-type="undo-review" class="block__icon block__icon--show ariaLabel fn__none" aria-label="${window.siyuan.languages.undo}"><svg><use xlink:href="#iconUndo"></use></svg></button>
+</div>
 </div>
 <div class="fn__flex fn__flex-1 card__v2-session-body">
 <div class="card__block fn__flex-1 card__v2-session-content" aria-busy="true">
@@ -1051,7 +1058,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         return;
                     }
                     const completionDialog = createSessionSurface({
-                        title: mobile ? mobileSessionTitle(name) : name,
+                        title: mobile ? flashcardSessionTitle(name) : name,
                         mobileSheet,
                         width: "520px",
                         content: `<div class="b3-dialog__content card__empty card__empty--space card__v2-completion">${sessionCompletionContent(false, options.reviewMode)}</div>`,
@@ -1074,6 +1081,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 });
                 return;
             }
+            // 卡片在学习和重学时会改变排期状态，分项进度沿用会话开始时的分类。
+            const initialNewCardIDs = new Set(transfer?.initialNewCardIDs ?? queue
+                .filter(item => item.reviewState.state === "new").map(item => item.card.id));
+            const reviewProgress = (currentIndex = -1) => flashcardV2QueueBreakdown(queue, initialNewCardIDs, currentIndex);
             let index = transfer?.index || 0;
             let shownAt = performance.now();
             let revealController: IFlashcardV2RevealController | undefined;
@@ -1128,12 +1139,12 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             let restoreFullscreen: (() => void) | undefined;
             const createReviewSurface = mobile ? createSessionSurface : createMovableSessionSurface;
             const dialog = createReviewSurface({
-                title: mobile ? mobileSessionTitle(name, true) : name,
+                title: mobile ? undefined : name,
                 mobileSheet,
                 positionId: Constants.DIALOG_OPENCARD,
-                width: "860px",
-                height: "78vh",
-                content: sessionContent(mobile),
+                width: "min(80vw, 1024px)",
+                height: "70vh",
+                content: sessionContent(mobile, name),
                 destroyCallback: () => {
                     restoreFullscreen?.();
                     reviewCounter?.destroy();
@@ -1153,6 +1164,9 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 () => completedPending || sessionFinished ? undefined : queue[index]?.card.id);
             dialog.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
             dialog.element.setAttribute("data-flashcard-v2-review", "");
+            if (mobile) {
+                dialog.element.querySelector(".b3-dialog__container").setAttribute("aria-label", name);
+            }
             const surface = dialog.element.querySelector(".card__v2-session");
             const fullscreen = surface.querySelector<HTMLButtonElement>('[data-type="review-fullscreen"]');
             if (fullscreen) {
@@ -1238,7 +1252,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 }
                 clearWaiting();
                 completedPending = false;
-                reviewCounter.update(flashcardV2QueueBreakdown(queue));
+                reviewCounter.update(reviewProgress(index));
                 const generation = ++renderGeneration;
                 outline.update();
                 setFlashcardLocateBlockID(dialog.element);
@@ -1275,7 +1289,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 completedPending = true;
                 revealController?.destroy?.();
                 setReviewActionsEnabled(dialog, true);
-                reviewCounter.update(flashcardV2QueueBreakdown(queue));
+                reviewCounter.update(reviewProgress());
                 const contentElement = dialog.element.querySelector(".card__block");
                 const frontElement = contentElement.querySelector("[data-flashcard-front]");
                 dialog.element.querySelector("[data-flashcard-toolbar]").classList.add("fn__none");
@@ -1844,6 +1858,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                                         requestPending = true;
                                         const state: IFlashcardV2SessionTransfer = {
                                             sessionID, queue, index, lastReview, deferredCardIDs, ratings: weakCards.snapshot(),
+                                            initialNewCardIDs: [...initialNewCardIDs],
                                             answer: currentModel?.source.pluginNamespace ? undefined : {
                                                 reveals, values: answerInputs().map(({value, checked}) => ({value, checked})),
                                             },

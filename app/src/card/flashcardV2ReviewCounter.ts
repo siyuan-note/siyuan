@@ -75,12 +75,15 @@ export const bindFlashcardV2ReviewCounter = (root: HTMLElement, mobile: boolean,
     };
     const update = (value: QueueProgress) => {
         progress = value;
-        count.textContent = String(progress.remaining);
+        const {newCards, oldCards} = progress;
+        count.innerHTML = `<span class="ft__error">${newCards.position}</span> / <span class="ft__primary">${newCards.total}</span> + ` +
+            `<span class="ft__error">${oldCards.position}</span> / <span class="ft__success">${oldCards.total}</span>`;
         count.classList.toggle("fn__none", hidden);
         const lang = window.siyuan.languages;
         button.setAttribute("aria-label", mobile ? lang.flashcardSessionProgress :
             (hidden ? lang.flashcardShowSessionCount : lang.flashcardHideSessionCount));
-        button.setAttribute("aria-description", hidden ? "" : `${lang.flashcardSessionRemaining} ${progress.remaining}`);
+        button.setAttribute("aria-description", hidden ? "" :
+            `${lang.flashcardNewCard} ${newCards.position} / ${newCards.total}, ${lang.flashcardReviewCard} ${oldCards.position} / ${oldCards.total}`);
         if (details || tooltip && tooltipOpen()) {
             renderDetails();
         }

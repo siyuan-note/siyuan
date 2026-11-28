@@ -42,6 +42,15 @@
 }
 
 .mobile-bottom-sheet-dialog {
+  .card__v2-session-header {
+    gap: 4px;
+    padding-inline: 8px;
+
+    > .card__v2-session-toolbar {
+      gap: 4px;
+    }
+  }
+
   .card__v2-session-content {
     background-color: var(--b3-theme-background);
   }
@@ -236,6 +245,39 @@
     &-body {
       min-height: 0;
       min-width: 0;
+    }
+
+    &-header {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-inline: 16px;
+      box-shadow: inset 0 -1px var(--b3-border-color);
+
+      > .card__v2-session-toolbar {
+        flex: 1 1 0;
+        min-width: 0;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        padding-inline: 0;
+        border-bottom: 0;
+      }
+    }
+
+    &-title {
+      flex: 0 1 auto;
+      min-width: 0;
+      max-width: 30%;
+      padding-block: 8px;
+
+      &.resize__move {
+        flex-basis: min(96px, 25%);
+      }
+    }
+
+    &.fullscreen .card__v2-session-title {
+      pointer-events: none;
     }
 
     &-toolbar {
@@ -1746,6 +1788,11 @@
 @container flashcard-review (max-width: 350px) {
   .card__v2-session-toolbar {
     flex-wrap: wrap;
+    gap: 4px;
+    padding-inline: 8px;
+  }
+
+  .card__v2-session-header {
     gap: 4px;
     padding-inline: 8px;
   }

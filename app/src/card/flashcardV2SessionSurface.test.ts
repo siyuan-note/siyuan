@@ -21,11 +21,17 @@ const loadSurface = (globals: Record<string, unknown>, name = "createSessionSurf
 };
 
 test("moving a session retires the old host without destroying state", async () => {
-    const content = {className: "", innerHTML: "", dataset: {}, isConnected: true, focus() {}, remove() {}};
+    const titleClasses = new Set<string>();
+    const content = {className: "", innerHTML: "", dataset: {}, isConnected: true, focus() {}, remove() {},
+        querySelector: () => ({classList: {toggle: (name: string, enabled: boolean) =>
+            enabled ? titleClasses.add(name) : titleClasses.delete(name)}})};
     const events: string[] = [];
     const root = {
         setAttribute() {},
-        querySelector: () => ({appendChild: (element: typeof content) => assert.equal(element, content)}),
+        querySelector: () => ({setAttribute: (attribute: string, value: string) => {
+            assert.equal(attribute, "aria-label");
+            assert.equal(value, "Review");
+        }, appendChild: (element: typeof content) => assert.equal(element, content)}),
         firstElementChild: {addEventListener() {}},
     };
     const create = loadSurface({
@@ -37,15 +43,18 @@ test("moving a session retires the old host without destroying state", async () 
             destroy() { events.push("close-dialog"); this.options.destroyCallback(); }
         },
     }, "createMovableSessionSurface");
-    const surface = create({content: "active review", destroyCallback: () => events.push("end-session")});
+    const surface = create({title: "Review", content: "active review", destroyCallback: () => events.push("end-session")});
+    assert.deepEqual([...titleClasses], ["resize__move"]);
     const controller = new AbortController();
     const mount = {signal: controller.signal,
         element: {replaceChildren: (element: typeof content) => assert.equal(element, content)},
         close: () => { events.push("close-tab"); controller.abort(); }};
     assert.equal(surface.move(mount), true);
+    assert.deepEqual([...titleClasses], ["fn__none"]);
     assert.deepEqual(events, ["close-dialog"]);
     assert.equal(surface.mount, mount);
     assert.equal(surface.move(), true);
+    assert.deepEqual([...titleClasses], ["resize__move"]);
     assert.equal(surface.element, content);
     assert.deepEqual(events, ["close-dialog", "close-tab"]);
     assert.equal(surface.mount, undefined);
@@ -99,18 +108,18 @@ test("practice replaces a mounted session without closing its tab or leaving abo
         "cleanup-second", "remove-surface"]);
 });
 
-test("mobile review uses an expanded drawer and displays progress next to the title", () => {
+test("mobile review uses an expanded drawer with title, progress and actions in its header", () => {
     const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
-    const start = source.indexOf("const mobileSessionTitle =");
+    const start = source.indexOf("const flashcardSessionTitle =");
     const end = source.indexOf("const renderFlashcardV2Card =", start);
     const render = runInNewContext(transpileModule(`${source.slice(start, end)}
-        ({title: mobileSessionTitle("Review <cards>", true), mobile: sessionContent(true), desktop: sessionContent()});`, {
+        ({mobile: sessionContent(true, "Review <cards>"), desktop: sessionContent(false, "Review <cards>")});`, {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText, {escapeHtml, flashcardV2ReviewCounterHTML: () => "<button data-flashcard-count></button>",
         window: {siyuan: {languages: {}}}});
-    assert.match(render.title, /#iconRiffCard[\s\S]*Review &lt;cards>[\s\S]*data-flashcard-count/);
-    assert.doesNotMatch(render.mobile, /data-flashcard-count/);
-    assert.match(render.desktop, /data-flashcard-count/);
+    for (const markup of [render.mobile, render.desktop]) {
+        assert.match(markup, /card__v2-session-header[\s\S]*#iconRiffCard[\s\S]*Review &lt;cards>[\s\S]*data-flashcard-count[\s\S]*data-type="flag"/);
+    }
 
     const sheet = {initiallyExpanded: true};
     const create = loadSurface({AdaptiveDialog: class {
@@ -156,9 +165,10 @@ test("review displays the breadcrumb in the toolbar and filters source, answer a
 
 test("review shows toolbar controls without hover and keeps rating intervals with their buttons", () => {
     const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
-    const markup = source.slice(source.indexOf("const sessionContent ="), source.indexOf("const renderFlashcardV2Card ="));
-    const html = runInNewContext(`${markup}\nsessionContent();`, {
-        flashcardV2ReviewCounterHTML: () => "",
+    const markup = source.slice(source.indexOf("const flashcardSessionTitle ="), source.indexOf("const renderFlashcardV2Card ="));
+    const script = transpileModule(`${markup}\nsessionContent();`, {compilerOptions: {target: ScriptTarget.ES2021}}).outputText;
+    const html = runInNewContext(script, {
+        flashcardV2ReviewCounterHTML: () => "", escapeHtml,
         window: {speechSynthesis: {}, siyuan: {languages: {flashcardFlag: "Flag", skip: "Skip"}}},
     }) as string;
     const toolbar = html.slice(html.indexOf("data-flashcard-toolbar"), html.indexOf("card__v2-session-body"));
@@ -169,7 +179,8 @@ test("review shows toolbar controls without hover and keeps rating intervals wit
     }
     assert.doesNotMatch(html, /data-type="toggle-outline"|data-flashcard-outline/);
     assert.match(toolbar, /<button data-type="undo-review"[^>]*class="[^"]*fn__none/);
-    const withoutSpeech = runInNewContext(`${markup}\nsessionContent();`, {flashcardV2ReviewCounterHTML: () => "", window: {siyuan: {languages: {}}}});
+    const withoutSpeech = runInNewContext(script,
+        {flashcardV2ReviewCounterHTML: () => "", escapeHtml, window: {siyuan: {languages: {}}}});
     assert.match(withoutSpeech, /<button data-type="read-aloud"[^>]*class="[^"]*fn__none/);
     for (const rating of ["again", "hard", "good", "easy"]) {
         assert.match(html, new RegExp(`<button data-rating="${rating}"[^\\n]*<span class="card__v2-rating-label">[^<]*</span><span[^>]*data-rating-interval[^>]*></span></button>`));
@@ -262,7 +273,7 @@ test("real waiting completion chain clears the previous locate target and invali
             requestPending: false, waitingTimer: undefined, lastReview: undefined,
             dialog: {element}, setFlashcardLocateBlockID, revealController: undefined,
             outline: {update: () => { outlineResets++; }}, clearWaiting: () => { waitingClears++; },
-            setReviewActionsEnabled: () => {}, flashcardV2QueueBreakdown: () => ({}), reviewCounter: {update: () => {}},
+            setReviewActionsEnabled: () => {}, reviewProgress: () => ({}), reviewCounter: {update: () => {}},
             sessionCompletionContent: () => "Completed", weakCards: {cards: (): unknown[] => []},
             nextCard: () => assert.fail("not due yet"), Date: {now: () => 1000},
             window: {setInterval: () => 1, siyuan: {languages: {

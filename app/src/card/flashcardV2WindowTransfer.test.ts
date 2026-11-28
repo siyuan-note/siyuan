@@ -12,6 +12,7 @@ import type {IFlashcardV2SessionTransfer} from "./flashcardV2Session";
 
 const session: IFlashcardV2SessionTransfer = {
     sessionID: "existing", index: 2, queue: [], deferredCardIDs: ["later"], ratings: [["rated", "hard"]],
+    initialNewCardIDs: ["rated"],
     answer: {reveals: 1, values: [{value: "unfinished", checked: false}]},
 };
 

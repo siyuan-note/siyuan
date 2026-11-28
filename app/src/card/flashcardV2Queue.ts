@@ -76,16 +76,27 @@ export const refreshFlashcardV2Queue = <T extends IQueueCard>(queue: T[], refres
     });
 };
 
-export const flashcardV2QueueBreakdown = (queue: readonly (IQueueCard & {reviewState: {state: string}})[]) => {
-    const progress = {total: queue.length, completed: 0, remaining: 0, skipped: 0, new: 0, learning: 0, review: 0, relearning: 0};
-    for (const item of queue) {
+export const flashcardV2QueueBreakdown = (queue: readonly (IQueueCard & {reviewState: {state: string}})[],
+    initialNewCardIDs?: ReadonlySet<string>, currentIndex = -1) => {
+    const progress = {total: queue.length, completed: 0, remaining: 0, skipped: 0, new: 0, learning: 0, review: 0, relearning: 0,
+        newCards: {position: 0, total: 0}, oldCards: {position: 0, total: 0}};
+    for (const [index, item] of queue.entries()) {
         if (item.sessionCard.status === "skipped" || item.card.generationStatus !== "active" || item.card.editLater) {
             progress.skipped++;
-        } else if (item.sessionCard.status === "reviewed" && !item.repeatDue) {
+            continue;
+        }
+        const state = item.reviewState.state;
+        const newCard = initialNewCardIDs?.has(item.card.id) ?? (state === "new");
+        const counts = newCard ? progress.newCards : progress.oldCards;
+        const completed = item.sessionCard.status === "reviewed" && !item.repeatDue;
+        counts.total++;
+        if (item.sessionCard.status === "reviewed" || item.sessionCard.status === "shown" || index === currentIndex) {
+            counts.position++;
+        }
+        if (completed) {
             progress.completed++;
         } else {
             progress.remaining++;
-            const state = item.reviewState.state;
             if (state === "new" || state === "learning" || state === "review" || state === "relearning") {
                 progress[state]++;
             }

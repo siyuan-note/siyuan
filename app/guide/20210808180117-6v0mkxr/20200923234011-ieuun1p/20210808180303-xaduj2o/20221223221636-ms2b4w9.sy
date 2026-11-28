@@ -7,7 +7,7 @@
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
 		"type": "doc",
-		"updated": "20261128170056"
+		"updated": "20261128180103"
 	},
 	"Children": [
 		{
@@ -424,7 +424,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194307-emze915",
-				"updated": "20260804230000"
+				"updated": "20261128180103"
 			},
 			"Children": [
 				{
@@ -917,7 +917,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194307-s247j6d",
-				"updated": "20260804230000"
+				"updated": "20261128180103"
 			},
 			"Children": [
 				{
@@ -940,7 +940,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " also trigger the \"Good\" rating. Ratings directly affect the review interval for each card — higher ratings extend the time before the next review, and lower ratings shorten it. The system uses the FSRS algorithm to automatically optimize each user's review schedule based on their rating history. In normal review, each rating button shows the estimated time until the next review. Use the toolbar to flag or skip the current card, or undo the last rating. Flags are named by color by default. Clear a custom flag name to restore its color name. Use the tag dialog during review to create tags. Confirm to assign the selected tags to the current card or its source. Hover over the review count on desktop or tap it on mobile to see the breakdown. Click it on desktop to hide or show the remaining count. Reinforcement review can include suspended, buried or paused cards when starting from one deck, several decks or card management. In the review menu, hover over an information icon on desktop or tap it on mobile to see what that action does. Open the block menu to review or manage cards in the selected block and its descendants. A heading includes its section. Card management also has shortcuts for common review states. On desktop, the review toolbar can switch to full screen. The session shows a notice when it buries sibling cards. In a wide desktop window, click a card title to view its source block on the right. Use the row’s preview button to open the card preview."
+					"Data": " also trigger the \"Good\" rating. Ratings directly affect the review interval for each card — higher ratings extend the time before the next review, and lower ratings shorten it. The system uses the FSRS algorithm to automatically optimize each user's review schedule based on their rating history. In normal review, each rating button shows the estimated time until the next review. Use the toolbar to flag or skip the current card, or undo the last rating. Flags are named by color by default. Clear a custom flag name to restore its color name. Use the tag dialog during review to create tags. Confirm to assign the selected tags to the current card or its source. The toolbar shows separate session progress for new and existing cards. Hover over the counts on desktop or tap them on mobile to see the breakdown. Click on desktop to hide or show the counts. Reinforcement review can include suspended, buried or paused cards when starting from one deck, several decks or card management. In the review menu, hover over an information icon on desktop or tap it on mobile to see what that action does. Open the block menu to review or manage cards in the selected block and its descendants. A heading includes its section. Card management also has shortcuts for common review states. On desktop, the review toolbar can switch to full screen. The session shows a notice when it buries sibling cards. In a wide desktop window, click a card title to view its source block on the right. Use the row’s preview button to open the card preview."
 				}
 			]
 		},

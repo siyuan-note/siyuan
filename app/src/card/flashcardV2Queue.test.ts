@@ -86,5 +86,23 @@ it("reports pending repeats by state and separates completed and skipped cards",
         {...card("edit"), card: {id: "edit", generationStatus: "active", editLater: {note: "", updatedAt: 1}}},
     ];
     assert.deepEqual(flashcardV2QueueBreakdown(queue),
-        {total: 8, remaining: 4, completed: 1, skipped: 3, new: 1, learning: 1, review: 1, relearning: 1});
+        {total: 8, remaining: 4, completed: 1, skipped: 3, new: 1, learning: 1, review: 1, relearning: 1,
+            newCards: {position: 1, total: 2}, oldCards: {position: 3, total: 3}});
+});
+
+it("counts the current card once and preserves new and old groups through repeats, skips and undo", () => {
+    const initialNewCardIDs = new Set(["new", "skip"]);
+    const queue = [card("new"), card("old", "queued", 0, "active", "review"), card("skip")];
+    const progress = (index: number) => {
+        const {newCards, oldCards} = flashcardV2QueueBreakdown(queue, initialNewCardIDs, index);
+        return [newCards, oldCards];
+    };
+    assert.deepEqual(progress(0), [{position: 1, total: 2}, {position: 0, total: 1}]);
+    refreshFlashcardV2Queue(queue, [card("new", "reviewed", 500, "active", "learning"), queue[1], card("skip", "skipped")]);
+    assert.deepEqual(progress(1), [{position: 1, total: 1}, {position: 1, total: 1}]);
+    assert.deepEqual(progress(0), [{position: 1, total: 1}, {position: 0, total: 1}]);
+    queue[0] = card("new", "reviewed", 0, "active", "review");
+    assert.deepEqual(progress(0), [{position: 1, total: 1}, {position: 0, total: 1}]);
+    queue[0] = card("new");
+    assert.deepEqual(progress(1), [{position: 0, total: 1}, {position: 1, total: 1}]);
 });

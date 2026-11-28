@@ -243,6 +243,100 @@ const runPositionCases = async (dialogSource, positionSource, dialogCSS) => {
     }
 };
 
+const runFlashcardReviewHeaderCases = async (sources, mobile, mobileRuntimeSource) => {
+    const assert = require("node:assert/strict");
+    let id = 0;
+    const Constants = {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0, DIALOG_OPENCARD: "card", LOCAL_DIALOGPOSITION: "positions"};
+    window.siyuan = {dialogs: [], zIndex: 1, storage: {positions: {}}, config: {},
+        menus: {menu: {element: document.createElement("div"), remove() {}}},
+        languages: {flashcardNewCard: "New cards", flashcardReviewCard: "Review cards", flashcardSessionProgress: "Progress",
+            flashcardHideSessionCount: "Hide count", flashcardShowSessionCount: "Show count"}};
+    const load = (source, modules) => {
+        const exports = {};
+        new Function("require", "exports", source)(name => modules[name], exports);
+        return exports;
+    };
+    const move = load(sources.move, {
+        "../constants": {Constants}, "../protyle/ui/hideElements": {hideAllElements() {}},
+        "../protyle/util/compatibility": {setStorageVal() {}}, "../layout/getTopBarHeight": {getTopBarHeight: () => 0},
+        "../protyle/util/hasClosest": {hasClosestByClassName: (node, name) => node.closest("." + name)},
+    });
+    const {Dialog} = load(sources.dialog, {
+        "../constants": {Constants}, "../util/functions": {isMobile: () => mobile}, "../util/genID": {genUUID: () => `review-${++id}`},
+        "./moveResize": move, "../util/zIndex": {isAbove: () => false}, "../protyle/util/compatibility": {isNotCtrl: () => true},
+        "../block/panelOwnership": {getDialogBlockPanel() {}, destroyDialogBlockPanels() {}},
+    });
+    const {AdaptiveDialog} = new Function("Dialog", "mobile", "return " + mobileRuntimeSource)(Dialog, mobile);
+    const escape = load(sources.escape, {});
+    const counter = load(sources.counter, {"../dialog/message": {showMessage() {}}, "../dialog/adaptiveDialog": {AdaptiveDialog},
+        "../dialog/tooltip": {showTooltip() {}, hideTooltip() {}}, "../util/escape": escape,
+        "../util/fetch": {}, "./flashcardV2Study": {reviewStateLabel: state => state}});
+    const render = new Function("Dialog", "AdaptiveDialog", "Constants", "escapeHtml", "flashcardV2ReviewCounterHTML",
+        sources.session + "\nreturn {sessionContent, createSessionSurface, createMovableSessionSurface};")(
+        Dialog, AdaptiveDialog, Constants, escape.escapeHtml, counter.flashcardV2ReviewCounterHTML);
+    const style = document.createElement("style");
+    style.textContent = sources.css;
+    document.head.append(style);
+    const tick = () => new Promise(resolve => setTimeout(resolve, 40));
+    const open = mobile ? render.createSessionSurface : render.createMovableSessionSurface;
+    const surface = open({title: mobile ? undefined : "Review", mobileSheet: mobile ? {initiallyExpanded: true} : undefined,
+        ...sources.bounds, content: render.sessionContent(mobile, "Review"), disableAnimation: true});
+    const progress = counter.bindFlashcardV2ReviewCounter(surface.element, mobile, () => undefined);
+    try {
+        const modal = document.querySelector(".b3-dialog__container");
+        const visibleTitle = modal.querySelector("[data-flashcard-title]");
+        const toolbar = modal.querySelector("[data-flashcard-toolbar]");
+        const button = toolbar.querySelector("[data-flashcard-counter]");
+        const count = button.querySelector("[data-flashcard-count]");
+        const flag = toolbar.querySelector('[data-type="flag"]');
+        progress.update({total: 8, remaining: 6, completed: 2, new: 4, learning: 0, review: 2, relearning: 0,
+            newCards: {position: 2, total: 5}, oldCards: {position: 1, total: 3}});
+        assert.equal(count.textContent, "2 / 5 + 1 / 3");
+        assert.equal(button.getAttribute("aria-description"), "New cards 2 / 5, Review cards 1 / 3");
+        assert.equal(getComputedStyle(modal.querySelector(".b3-dialog__header")).display, "none");
+        await tick();
+        const center = node => node.getBoundingClientRect().top + node.getBoundingClientRect().height / 2;
+        modal.style.width = mobile ? "360px" : "800px";
+        const titleIcon = visibleTitle.querySelector("svg");
+        for (const [theme, css] of sources.themes) {
+            style.textContent = css + "\n" + sources.css;
+            assert.ok(Math.abs(center(titleIcon) - center(flag)) <= 2,
+                JSON.stringify({mobile, theme, title: center(titleIcon), flag: center(flag), count: center(button)}));
+            assert.ok(Math.abs(center(button) - center(flag)) <= 2);
+        }
+        modal.style.width = "300px";
+        modal.style.fontSize = "24px";
+        assert.ok(toolbar.scrollWidth <= toolbar.clientWidth + 1);
+        if (mobile) {
+            assert.equal(button.getAttribute("aria-haspopup"), "dialog");
+            button.click();
+            assert.equal(window.siyuan.dialogs.length, 2);
+            assert.ok(document.querySelector("[data-flashcard-queue-details]"));
+            window.siyuan.dialogs.at(-1).destroy();
+        } else {
+            assert.equal(modal.getAttribute("aria-label"), "Review");
+            assert.equal(modal.style.height, "70vh");
+            assert.equal(sources.bounds.width, "min(80vw, 1024px)");
+            button.click();
+            assert.equal(getComputedStyle(count).display, "none");
+            button.click();
+            assert.notEqual(getComputedStyle(count).display, "none");
+            const {left, top} = visibleTitle.getBoundingClientRect();
+            visibleTitle.dispatchEvent(new MouseEvent("mousedown", {bubbles: true, clientX: left + 3, clientY: top + 3}));
+            document.dispatchEvent(new MouseEvent("mousemove", {bubbles: true, clientX: left + 35, clientY: top + 14}));
+            document.dispatchEvent(new MouseEvent("mouseup", {bubbles: true}));
+            assert.ok(window.siyuan.storage.positions.card);
+        }
+        toolbar.classList.add("fn__none");
+        assert.notEqual(getComputedStyle(visibleTitle).display, "none");
+    } finally {
+        progress.destroy();
+        surface.destroy();
+        await tick();
+        style.remove();
+    }
+};
+
 const runFlashcardCases = async (dialogSource, cardSource, mobile, mobileRuntimeSource) => {
     const assert = require("node:assert/strict");
     const tick = () => new Promise(resolve => setTimeout(resolve, 20));
@@ -597,12 +691,30 @@ if (process.versions.electron && process.type === "browser") {
                 ${JSON.stringify(compileSearch("search/openOptions.ts"))},
                 ${JSON.stringify(compileSearch("command/databaseRowNavigation.ts"))}, ${JSON.stringify(mobileRuntimeSource)})`);
             const cardSource = fs.readFileSync(path.join(__dirname, "../src/card/openCard.ts"), "utf8");
+            const reviewSource = fs.readFileSync(path.join(__dirname, "../src/card/flashcardV2Session.ts"), "utf8");
+            const reviewHeaderSource = [
+                reviewSource.slice(reviewSource.indexOf("const createSessionSurface ="), reviewSource.indexOf("let flashcardV2ReviewOpening")),
+                reviewSource.slice(reviewSource.indexOf("const flashcardSessionTitle ="), reviewSource.indexOf("const renderFlashcardV2Card =")),
+            ].join("\n");
+            const layoutOptions = reviewSource.match(/positionId: Constants\.DIALOG_OPENCARD,\s*width: "([^"]+)",\s*height: "([^"]+)"/);
+            assert.ok(layoutOptions);
+            const reviewHeaderFixture = {dialog: source, move: compileSearch("dialog/moveResize.ts"),
+                escape: compileSearch("util/escape.ts"), counter: compileSearch("card/flashcardV2ReviewCounter.ts"),
+                bounds: {width: layoutOptions[1], height: layoutOptions[2]},
+                session: ts.transpileModule(reviewHeaderSource, {compilerOptions: {target: ts.ScriptTarget.ES2020}}).outputText,
+                css: dialogCSS + ["business/_card.scss", "business/_block.scss", "component/_button.scss"].map(file =>
+                    require("sass").compile(path.join(__dirname, "../src/assets/scss", file)).css).join("\n"),
+                themes: ["daylight", "midnight"].map(name => [name,
+                    fs.readFileSync(path.join(__dirname, "../appearance/themes", name, "theme.css"), "utf8")]),
+            };
             for (const mobile of [false, true]) {
                 const compiled = ts.transpileModule(parse(cardSource, {MOBILE: mobile, BROWSER: true}, false, true), {
                     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
                 }).outputText;
                 await win.webContents.executeJavaScript(
                     `(${runFlashcardCases.toString()})(${JSON.stringify(source)}, ${JSON.stringify(compiled)}, ${mobile}, ${JSON.stringify(mobileRuntimeSource)})`);
+                await win.webContents.executeJavaScript(
+                    `(${runFlashcardReviewHeaderCases.toString()})(${JSON.stringify(reviewHeaderFixture)}, ${mobile}, ${JSON.stringify(mobileRuntimeSource)})`);
             }
         } catch (error) {
             console.error(error);
@@ -616,7 +728,7 @@ if (process.versions.electron && process.type === "browser") {
     const {test} = require("node:test");
     const {execFile} = require("node:child_process");
     const {promisify} = require("node:util");
-    test("dialogs preserve positioning and focus, and flashcards reopen after cleanup failures on desktop and mobile", async () => {
+    test("dialogs preserve positioning and focus, and flashcard review headers and reopening work on desktop and mobile", async () => {
         const profile = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-dialog-focus-"));
         const env = {...process.env};
         delete env.ELECTRON_RUN_AS_NODE;

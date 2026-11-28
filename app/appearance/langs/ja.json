@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "赤",
+	"flashcardFlagOrange": "オレンジ",
+	"flashcardFlagGreen": "緑",
+	"flashcardFlagBlue": "青",
+	"flashcardFlagPurple": "紫",
+	"flashcardFlagCyan": "シアン",
+	"flashcardFlagPink": "ピンク",
 	"agentQuoteReadFailed": "選択したテキストを読み取れませんでした。選択し直して再試行してください",
 	"agentQuoteInsertFailed": "エージェントの入力欄に引用を挿入できませんでした。エージェントパネルを開いて再試行してください",
 	"flashcardCleanupScanTip": "暗号化されていないノートブックを検査します。欠落が確認されたカードソースのみ削除できます。",

@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "Červená",
+	"flashcardFlagOrange": "Oranžová",
+	"flashcardFlagGreen": "Zelená",
+	"flashcardFlagBlue": "Modrá",
+	"flashcardFlagPurple": "Fialová",
+	"flashcardFlagCyan": "Azúrová",
+	"flashcardFlagPink": "Ružová",
 	"agentQuoteReadFailed": "Vybraný text sa nepodarilo načítať. Vyberte ho znova a skúste to ešte raz",
 	"agentQuoteInsertFailed": "Citát sa nepodarilo vložiť do vstupného poľa agenta. Otvorte panel agenta a skúste to znova",
 	"flashcardCleanupScanTip": "Kontrolujú sa nešifrované zápisníky. Odstrániť možno iba zdroje, ktorých chýbanie je potvrdené.",

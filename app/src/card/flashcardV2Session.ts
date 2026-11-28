@@ -3,6 +3,7 @@ import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {notifyFlashcardV2ReviewChange} from "./flashcardV2ReviewChanges";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
+import {hideTooltip} from "../dialog/tooltip";
 import {Menu} from "../plugin/Menu";
 import {toggleMenu} from "../menus/menuToggle";
 import {Constants} from "../constants";
@@ -533,7 +534,7 @@ const sessionContent = (mobile = false) => `<div class="b3-dialog__content fn__f
 <div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
     ${mobile ? "" : '<span data-flashcard-count class="fn__flex-shrink ft__on-surface"></span>'}
     <span data-flashcard-path class="card__v2-session-path ft__on-surface"></span>
-    <button data-type="flag" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.flashcardFlag}" aria-haspopup="menu" disabled><svg><use xlink:href="#iconBookmark"></use></svg></button>
+    <button data-type="flag" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.flashcardFlag}" aria-haspopup="menu" disabled><svg><use xlink:href="#iconFlag"></use></svg></button>
     <button data-type="toggle-outline" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.outline}" aria-expanded="false"><svg><use xlink:href="#iconOutline"></use></svg></button>
     <button data-type="read-aloud" class="block__icon block__icon--show ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
     <button data-type="edit-source" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
@@ -1430,6 +1431,9 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     });
             const openCurrentFlagMenu = (button: HTMLElement) => {
                 const current = queue[index];
+                if (!isMobile()) {
+                    hideTooltip();
+                }
                 toggleMenu({
                     target: button,
                     build: (_menu, session) => {
@@ -1606,7 +1610,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         });
                         menu.addItem({
                             id: "flashcardV2SetFlag",
-                            icon: "iconBookmark",
+                            icon: "iconFlag",
                             label: window.siyuan.languages.flashcardFlag,
                             submenu: currentFlagItems(current),
                         });

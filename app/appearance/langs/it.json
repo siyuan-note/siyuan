@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "Rosso",
+	"flashcardFlagOrange": "Arancione",
+	"flashcardFlagGreen": "Verde",
+	"flashcardFlagBlue": "Blu",
+	"flashcardFlagPurple": "Viola",
+	"flashcardFlagCyan": "Ciano",
+	"flashcardFlagPink": "Rosa",
 	"agentQuoteReadFailed": "Impossibile leggere il testo selezionato. Selezionalo di nuovo e riprova",
 	"agentQuoteInsertFailed": "Impossibile inserire la citazione nel campo di input dell’agente. Apri il pannello dell’agente e riprova",
 	"flashcardCleanupScanTip": "Vengono esaminati i quaderni non crittografati. Si possono eliminare solo le fonti di cui è confermata l’assenza.",

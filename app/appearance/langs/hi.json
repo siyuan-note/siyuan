@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "लाल",
+	"flashcardFlagOrange": "नारंगी",
+	"flashcardFlagGreen": "हरा",
+	"flashcardFlagBlue": "नीला",
+	"flashcardFlagPurple": "बैंगनी",
+	"flashcardFlagCyan": "नीलहरित",
+	"flashcardFlagPink": "गुलाबी",
 	"agentQuoteReadFailed": "चुना गया टेक्स्ट नहीं पढ़ा जा सका। उसे फिर से चुनें और दोबारा कोशिश करें",
 	"agentQuoteInsertFailed": "उद्धरण एजेंट के इनपुट में नहीं जोड़ा जा सका। एजेंट पैनल खोलें और दोबारा कोशिश करें",
 	"flashcardCleanupScanTip": "केवल बिना एन्क्रिप्शन वाली नोटबुक जाँची जाती हैं। केवल वे स्रोत हटाए जा सकते हैं जिनका गायब होना सुनिश्चित है।",

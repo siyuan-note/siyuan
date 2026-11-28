@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "Rouge",
+	"flashcardFlagOrange": "Orange",
+	"flashcardFlagGreen": "Vert",
+	"flashcardFlagBlue": "Bleu",
+	"flashcardFlagPurple": "Violet",
+	"flashcardFlagCyan": "Cyan",
+	"flashcardFlagPink": "Rose",
 	"agentQuoteReadFailed": "Impossible de lire le texte sélectionné. Sélectionnez-le à nouveau et réessayez",
 	"agentQuoteInsertFailed": "Impossible d’insérer la citation dans le champ de saisie de l’agent. Ouvrez le panneau de l’agent et réessayez",
 	"flashcardCleanupScanTip": "Seuls les carnets non chiffrés sont analysés. Seules les sources dont l’absence est confirmée peuvent être supprimées.",

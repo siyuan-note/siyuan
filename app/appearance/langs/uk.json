@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "Червоний",
+	"flashcardFlagOrange": "Помаранчевий",
+	"flashcardFlagGreen": "Зелений",
+	"flashcardFlagBlue": "Синій",
+	"flashcardFlagPurple": "Фіолетовий",
+	"flashcardFlagCyan": "Бірюзовий",
+	"flashcardFlagPink": "Рожевий",
 	"agentQuoteReadFailed": "Не вдалося прочитати виділений текст. Виділіть його знову та повторіть спробу",
 	"agentQuoteInsertFailed": "Не вдалося вставити цитату в поле введення агента. Відкрийте панель агента та повторіть спробу",
 	"flashcardCleanupScanTip": "Перевіряються незашифровані записники. Видалити можна лише джерела, відсутність яких підтверджено.",

@@ -10,6 +10,7 @@ import {FlashcardV2ManagementView} from "./flashcardV2ManagementView";
 import {flashcardV2ConflictSummary, FlashcardV2ConflictProgress} from "./flashcardV2ConflictSummary";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
+import {hideTooltip} from "../dialog/tooltip";
 import {Menu} from "../plugin/Menu";
 import {toggleMenu} from "../menus/menuToggle";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -40,7 +41,7 @@ import {openFlashcardV2SubsetSession} from "./flashcardV2Subset";
 import type {App} from "../index";
 import {listFlashcardV2PluginTypes} from "./flashcardV2Plugin";
 import type {IFlashcardQueryAST, IFlashcardQueryExpression} from "./flashcardV2Query";
-import {flashcardV2FlagColors, flashcardV2FlagMenuItems} from "./flashcardV2Flag";
+import {flashcardV2FlagColors, flashcardV2FlagLabel, flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {
     appendFlashcardV2ClozeTargets,
     resolveFlashcardV2InlineOcclusions,
@@ -333,15 +334,8 @@ interface IAnkiImportReport {
 
 const mergedTagIDs = (...sets: string[][]) => [...new Set(sets.flat())].sort();
 
-const flashcardFlagStyle = (flag: number) => flag > 0 && flag < flashcardV2FlagColors.length ?
+const flashcardFlagStyle = (flag: number) => flashcardV2FlagColors[flag] ?
     ` style="color:${flashcardV2FlagColors[flag]}"` : "";
-
-const flashcardFlagLabel = (flag: number, definitions: IFlashcardFlagDefinition[]) => {
-    if (flag === 0) {
-        return window.siyuan.languages.flashcardNoFlag;
-    }
-    return `● ${definitions.find((definition) => definition.flag === flag)?.name || flag}`;
-};
 
 const priorityLabel = (priority: string) => {
     const labels: Record<string, string> = {
@@ -1010,7 +1004,7 @@ const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
     return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card${result.card.editLater ? " card__v2-managed-card--edit-later" : ""}" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
 <span class="card__v2-managed-leading">
 <input data-type="selectCard" aria-label="${escapeAttr(title)}" type="checkbox"${selectedCardIDs.has(result.card.id) ? " checked" : ""}>
-<button type="button" data-type="flag" data-menu="true" aria-haspopup="menu" class="block__icon block__icon--show block__icon--touch ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.flashcardFlag)} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></button>
+<button type="button" data-type="flag" data-menu="true" aria-haspopup="menu" data-position="north" class="block__icon block__icon--show block__icon--touch ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.flashcardFlag)} - ${escapeAttr(flashcardV2FlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconFlag"></use></svg></button>
 </span>
 <span class="card__v2-managed-main">
 <button data-type="preview" class="card__v2-managed-title" aria-label="${escapeAttr(`${window.siyuan.languages.flashcardPreview} - ${title}`)}">${escapeHtml(title)}</button>
@@ -1750,11 +1744,12 @@ const openFlashcardV2FlagDefinitions = (
         content: `<div class="b3-dialog__content card__v2-form card__v2-form--grid">${Array.from({length: 7}, (_, index) => {
             const flag = index + 1;
             const name = byFlag.get(flag)?.payload.name || "";
-            const label = `${window.siyuan.languages.flashcardFlag} - ${flag}`;
+            const defaultName = flashcardV2FlagLabel(flag);
+            const label = `${window.siyuan.languages.flashcardFlag} - ${defaultName}`;
             return `<div class="card__v2-flag-row">
-<span aria-hidden="true"${flashcardFlagStyle(flag)}>●</span>
-<button type="button" class="b3-button b3-button--text" aria-label="${escapeAttr(name ? `${label} - ${name}` : label)}"><span class="fn__ellipsis">${escapeHtml(name || String(flag))}</span></button>
-<input data-flag="${flag}" class="b3-text-field fn__none" aria-label="${escapeAttr(label)}" placeholder="${flag}" maxlength="100" value="${escapeAttr(name)}">
+<svg class="block__logoicon fn__flex-shrink" aria-hidden="true"${flashcardFlagStyle(flag)}><use xlink:href="#iconFlag"></use></svg>
+<button type="button" class="b3-button b3-button--text" aria-label="${escapeAttr(name ? `${label} - ${name}` : label)}"><span class="fn__ellipsis">${escapeHtml(name || defaultName)}</span></button>
+<input data-flag="${flag}" class="b3-text-field fn__none" aria-label="${escapeAttr(label)}" placeholder="${escapeAttr(defaultName)}" maxlength="100" value="${escapeAttr(name)}">
 </div>`;
         }).join("")}</div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
     });
@@ -1834,7 +1829,7 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
         .map((priority) => `<option value="${priority}">${escapeHtml(priorityLabel(priority))}</option>`).join("");
     const flagDefinitions = options.flagDefinitions.map((revision) => revision.payload);
     const flagOptions = Array.from({length: 8}, (_, flag) =>
-        `<option value="${flag}"${flashcardFlagStyle(flag)}>${escapeHtml(flashcardFlagLabel(flag, flagDefinitions))}</option>`).join("");
+        `<option value="${flag}"${flashcardFlagStyle(flag)}>${escapeHtml(flashcardV2FlagLabel(flag, flagDefinitions))}</option>`).join("");
     const booleanOptions = `<option value="">${window.siyuan.languages.all}</option><option value="true">${window.siyuan.languages.enable}</option><option value="false">${window.siyuan.languages.disable}</option>`;
     const sourceTypeLabels = flashcardV2SourceTypeLabels();
     const sourceTypeOptions = Object.entries(sourceTypeLabels)
@@ -2345,7 +2340,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                             option("setDue", lang.setDueTime), option("reset", lang.reset),
                         ]});
                         menu.addItem({label: lang.flashcardFlag, submenu: Array.from({length: 8}, (_, flag) =>
-                            option("setFlag:" + flag, flashcardFlagLabel(flag, flagDefinitions)))});
+                            option("setFlag:" + flag, flashcardV2FlagLabel(flag, flagDefinitions)))});
                         menu.addItem({label: lang.flashcardPreset, submenu: [option("setPreset:", lang.default),
                             ...managementOptions.presets.map(preset => option("setPreset:" + preset.id, preset.name))]});
                         menu.addItem({label: lang.flashcardPriority, submenu: ["", "exam", "learning", "retaining", "paused"]
@@ -2559,7 +2554,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                             addElementAction("flashcardV2Due", "due");
                             menu.addItem({
                                 id: "flashcardV2Flag",
-                                icon: "iconBookmark",
+                                icon: "iconFlag",
                                 label: window.siyuan.languages.flashcardFlag,
                                 submenu: flashcardV2FlagMenuItems(card.card.flag, flagDefinitions, (flag) => {
                                     fetchPost("/api/flashcard/manageCards", {
@@ -2720,6 +2715,9 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 if (type === "flag" && selectedCard) {
+                    if (!isMobile()) {
+                        hideTooltip();
+                    }
                     toggleMenu({
                         target: target,
                         build: (_menu, session) => {

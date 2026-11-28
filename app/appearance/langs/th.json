@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "แดง",
+	"flashcardFlagOrange": "ส้ม",
+	"flashcardFlagGreen": "เขียว",
+	"flashcardFlagBlue": "น้ำเงิน",
+	"flashcardFlagPurple": "ม่วง",
+	"flashcardFlagCyan": "ฟ้าอมเขียว",
+	"flashcardFlagPink": "ชมพู",
 	"agentQuoteReadFailed": "ไม่สามารถอ่านข้อความที่เลือกได้ โปรดเลือกข้อความใหม่แล้วลองอีกครั้ง",
 	"agentQuoteInsertFailed": "ไม่สามารถแทรกข้อความอ้างอิงในช่องป้อนข้อความของเอเจนต์ได้ โปรดเปิดแผงเอเจนต์แล้วลองอีกครั้ง",
 	"flashcardCleanupScanTip": "ตรวจสอบเฉพาะสมุดบันทึกที่ไม่ได้เข้ารหัส ลบได้เฉพาะแหล่งที่มาที่ยืนยันแล้วว่าสูญหาย",

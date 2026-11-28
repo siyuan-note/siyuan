@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "Красный",
+	"flashcardFlagOrange": "Оранжевый",
+	"flashcardFlagGreen": "Зелёный",
+	"flashcardFlagBlue": "Синий",
+	"flashcardFlagPurple": "Фиолетовый",
+	"flashcardFlagCyan": "Бирюзовый",
+	"flashcardFlagPink": "Розовый",
 	"agentQuoteReadFailed": "Не удалось прочитать выделенный текст. Выделите его заново и повторите попытку",
 	"agentQuoteInsertFailed": "Не удалось вставить цитату в поле ввода агента. Откройте панель агента и повторите попытку",
 	"flashcardCleanupScanTip": "Проверяются незашифрованные блокноты. Удалить можно только источники, отсутствие которых подтверждено.",

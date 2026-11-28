@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "Rot",
+	"flashcardFlagOrange": "Orange",
+	"flashcardFlagGreen": "Grün",
+	"flashcardFlagBlue": "Blau",
+	"flashcardFlagPurple": "Violett",
+	"flashcardFlagCyan": "Cyan",
+	"flashcardFlagPink": "Rosa",
 	"agentQuoteReadFailed": "Der ausgewählte Text konnte nicht gelesen werden. Wähle ihn erneut aus und versuche es noch einmal",
 	"agentQuoteInsertFailed": "Das Zitat konnte nicht in das Eingabefeld des Agenten eingefügt werden. Öffne das Agentenfenster und versuche es erneut",
 	"flashcardCleanupScanTip": "Geprüft werden unverschlüsselte Notizbücher. Nur nachweislich fehlende Quellen lassen sich löschen.",

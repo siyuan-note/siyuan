@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "Црвена",
+	"flashcardFlagOrange": "Наранџаста",
+	"flashcardFlagGreen": "Зелена",
+	"flashcardFlagBlue": "Плава",
+	"flashcardFlagPurple": "Љубичаста",
+	"flashcardFlagCyan": "Цијан",
+	"flashcardFlagPink": "Ружичаста",
 	"agentQuoteReadFailed": "Изабрани текст није могуће прочитати. Изаберите га поново и покушајте још једном",
 	"agentQuoteInsertFailed": "Цитат није могуће уметнути у поље за унос агента. Отворите панел агента и покушајте поново",
 	"flashcardCleanupScanTip": "Проверавају се нешифроване бележнице. Могу се обрисати само извори за које је потврђено да недостају.",

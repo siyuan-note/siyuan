@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "Czerwony",
+	"flashcardFlagOrange": "Pomarańczowy",
+	"flashcardFlagGreen": "Zielony",
+	"flashcardFlagBlue": "Niebieski",
+	"flashcardFlagPurple": "Fioletowy",
+	"flashcardFlagCyan": "Cyjan",
+	"flashcardFlagPink": "Różowy",
 	"agentQuoteReadFailed": "Nie można odczytać zaznaczonego tekstu. Zaznacz go ponownie i spróbuj jeszcze raz",
 	"agentQuoteInsertFailed": "Nie można wstawić cytatu do pola wprowadzania agenta. Otwórz panel agenta i spróbuj ponownie",
 	"flashcardCleanupScanTip": "Skanowane są niezaszyfrowane notatniki. Usunąć można tylko źródła, których brak potwierdzono.",

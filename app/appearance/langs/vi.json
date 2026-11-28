@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "Đỏ",
+	"flashcardFlagOrange": "Cam",
+	"flashcardFlagGreen": "Xanh lá",
+	"flashcardFlagBlue": "Xanh dương",
+	"flashcardFlagPurple": "Tím",
+	"flashcardFlagCyan": "Xanh lơ",
+	"flashcardFlagPink": "Hồng",
 	"agentQuoteReadFailed": "Không thể đọc văn bản đã chọn. Hãy chọn lại văn bản và thử lại",
 	"agentQuoteInsertFailed": "Không thể chèn trích dẫn vào ô nhập của tác nhân. Hãy mở bảng tác nhân rồi thử lại",
 	"flashcardCleanupScanTip": "Chỉ quét sổ tay không mã hóa. Chỉ có thể xóa nguồn đã được xác nhận là bị thiếu.",

@@ -1,4 +1,11 @@
 {
+	"flashcardFlagRed": "Kırmızı",
+	"flashcardFlagOrange": "Turuncu",
+	"flashcardFlagGreen": "Yeşil",
+	"flashcardFlagBlue": "Mavi",
+	"flashcardFlagPurple": "Mor",
+	"flashcardFlagCyan": "Camgöbeği",
+	"flashcardFlagPink": "Pembe",
 	"agentQuoteReadFailed": "Seçili metin okunamadı. Metni yeniden seçip tekrar deneyin",
 	"agentQuoteInsertFailed": "Alıntı ajan giriş alanına eklenemedi. Ajan panelini açıp tekrar deneyin",
 	"flashcardCleanupScanTip": "Şifrelenmemiş not defterleri taranır. Yalnızca eksik olduğu doğrulanan kaynaklar silinebilir.",

@@ -11,13 +11,15 @@ test("the leading flag is a named native menu button visible on mouse and touch 
     const line = source.split("\n").find(item => item.includes('data-type="flag" data-menu="true"'));
     const html = runInNewContext("`" + line + "`", {
         result: {card: {flag: 2}}, flagDefinitions: [], escapeAttr,
-        flashcardFlagLabel: () => 'Study "later"', flashcardFlagStyle: () => "",
+        flashcardV2FlagLabel: () => 'Study "later"', flashcardFlagStyle: () => "",
         window: {siyuan: {languages: {flashcardFlag: "Flag"}}},
     });
     assert.match(html, /^<button type="button" data-type="flag"/);
     assert.match(html, /aria-haspopup="menu"/);
+    assert.match(html, /data-position="north"/);
     assert.match(html, /aria-label="Flag - Study &quot;later&quot;"/);
     assert.match(html, /block__icon--show block__icon--touch/);
+    assert.match(html, /xlink:href="#iconFlag"/);
     assert.match(html, /<\/button>/);
     const leading = source.slice(source.indexOf('<span class="card__v2-managed-leading">'), source.indexOf('<span class="card__v2-managed-main">'));
     assert.ok(leading.includes(line));
@@ -25,6 +27,15 @@ test("the leading flag is a named native menu button visible on mouse and touch 
     const css = readFileSync("src/assets/scss/business/_card.scss", "utf8");
     assert.match(css, /\.card__v2-managed-leading > button:focus-visible,/);
     assert.match(css, /\.card__v2-managed-card > button:focus-visible\s*\{\s*outline: 2px solid var\(--b3-theme-primary\)/);
+});
+
+test("direct flag menus clear a visible tooltip before positioning", () => {
+    const sessionSource = readFileSync("src/card/flashcardV2Session.ts", "utf8");
+    const dismiss = /if \(!isMobile\(\)\) \{\s*hideTooltip\(\);\s*}\s*toggleMenu\(/;
+    for (const block of [source.slice(source.indexOf('if (type === "flag" && selectedCard)')),
+        sessionSource.slice(sessionSource.indexOf("const openCurrentFlagMenu"))]) {
+        assert.match(block.slice(0, block.indexOf("build:")), dismiss);
+    }
 });
 
 test("tag checkboxes announce escaped complete paths while retaining mixed and checked states", () => {

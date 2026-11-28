@@ -1449,11 +1449,19 @@ ${genHintItemHTML(item)}
             if (cardMode) {
                 const savedRange = range.cloneRange();
                 const currentHTML = nodeElement.outerHTML;
-                void import("../../card/flashcardV2Authoring").then(({runFlashcardSlashCommand}) => {
-                    if (nodeElement.isConnected && nodeElement.outerHTML === currentHTML) {
-                        runFlashcardSlashCommand(protyle, nodeElement, savedRange, cardMode);
-                    }
-                });
+                if (cardMode === "imageOcclusion") {
+                    void import("../../card/flashcardV2ImageUpload").then(({openFlashcardV2ImageUpload}) => {
+                        if (nodeElement.isConnected && nodeElement.outerHTML === currentHTML) {
+                            openFlashcardV2ImageUpload(protyle, nodeElement, savedRange);
+                        }
+                    });
+                } else {
+                    void import("../../card/flashcardV2Authoring").then(({runFlashcardSlashCommand}) => {
+                        if (nodeElement.isConnected && nodeElement.outerHTML === currentHTML) {
+                            runFlashcardSlashCommand(protyle, nodeElement, savedRange, cardMode);
+                        }
+                    });
+                }
                 return;
             }
             if (slashEntryKey && value !== Constants.ZWSP + 3) {

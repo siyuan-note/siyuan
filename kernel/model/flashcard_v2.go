@@ -509,6 +509,13 @@ func validateFlashcardV2EntityBoundary(entityType flashcardv2.EntityType, delete
 			}
 			return validateFlashcardV2QueryBoundary(config.DistractorQuery)
 		}
+		if source.SourceType == "image-occlusion" {
+			var config flashcardv2.ImageOcclusionConfig
+			if err := json.Unmarshal(source.GenerationConfig, &config); err != nil {
+				return err
+			}
+			return ValidateFlashcardBlockIDs(config.ExplanationBlockIDs())
+		}
 	case flashcardv2.EntityReviewSet:
 		var reviewSet flashcardv2.ReviewSet
 		if err := json.Unmarshal(payload, &reviewSet); err != nil {
@@ -901,6 +908,11 @@ func validateFlashcardV2AdvancedSourceInput(blockIDs []string,
 	imageConfig *flashcardv2.ImageOcclusionConfig, distractorQuery *flashcardv2.QueryAST) error {
 	if err := ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return err
+	}
+	if mode == flashcardv2.AdvancedModeImageOcclusion {
+		if err := ValidateFlashcardBlockIDs(imageConfig.ExplanationBlockIDs()); err != nil {
+			return err
+		}
 	}
 	if err := validateFlashcardV2QueryBoundary(distractorQuery); err != nil {
 		return err

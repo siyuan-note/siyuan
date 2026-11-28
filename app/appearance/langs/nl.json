@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "ID van het uitlegblok",
+	"flashcardImageUploadHint": "Kies één afbeelding of sleep deze hierheen",
 	"flashcardImageSequential": "Maskers één voor één onthullen",
 	"flashcardReviewDocumentTree": "Kaarten in dit document en zijn subdocumenten herhalen",
 	"flashcardManageDocumentTree": "Kaarten in dit document en zijn subdocumenten beheren",

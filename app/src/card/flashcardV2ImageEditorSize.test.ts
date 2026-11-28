@@ -39,6 +39,8 @@ const setup = () => {
             width: parseFloat(canvas.style.width) * .8, height: parseFloat(canvas.style.height) * .8})});
     const viewport = Object.assign(new Control(), {clientWidth: 600, clientHeight: 300, scrollLeft: 0, scrollTop: 0});
     const labelInput = new Control();
+    const answerInput = new Control();
+    const explanationInput = new Control();
     const controls = new Map<string, Control>([["img", image], ["canvas", canvas], [".card__v2-image-viewport", viewport]]);
     for (const key of ["imageShape", "imageGroup", "imageFrontMode", "finishPolygon", "undoImageShape", "deleteImageShape",
         "zoomImageIn", "zoomImageOut", "resetImageZoom", "selectImageShapes", "mergeImageShapes", "splitImageShapes",
@@ -46,7 +48,11 @@ const setup = () => {
         controls.set(`[data-type="${key}"]`, new Control());
     }
     controls.get('[data-type="imageShape"]').value = "rectangle";
-    controls.set('[data-type="imageMaskLabelField"]', Object.assign(new Control(), {querySelector: () => labelInput}));
+    const fields = new Map([["input", labelInput], ['[data-type="imageMaskAnswer"]', answerInput],
+        ['[data-type="imageMaskExplanation"]', explanationInput]]);
+    controls.set('[data-type="imageMaskLabelField"]', Object.assign(new Control(), {
+        querySelector: (selector: string) => fields.get(selector),
+    }));
     const orderControls = new Map(["input", '[data-type="imageStepUp"]', '[data-type="imageStepDown"]',
         '[data-type="imageStepNumber"]'].map(key => [key, new Control()]));
     controls.set('[data-type="imageStepOrder"]', Object.assign(new Control(), {
@@ -84,10 +90,33 @@ const setup = () => {
             disconnect() { disconnected = true; }
         },
     });
-    return {editor, image, canvas, draws, window, document, viewport, labelInput, messages, orderControls,
+    return {editor, image, canvas, draws, window, document, viewport, labelInput, answerInput, explanationInput, messages, orderControls,
         control: (key: string) => controls.get('[data-type="' + key + '"]'), frame: () => frame(), resize: () => resize(),
         disconnected: () => disconnected, cancelled: () => cancelled};
 };
+
+test("image mask answers and explanation IDs are saved independently and can be undone", () => {
+    const state = setup();
+    state.frame();
+    state.control("imageShape").value = "edit";
+    state.control("imageShape").emit("change");
+    const pointer = {clientX: 20 + .25 * 480, clientY: 30 + .4 * 240, button: 0, pointerId: 1};
+    state.canvas.emit("pointerdown", pointer);
+    state.canvas.emit("pointerup", pointer);
+    state.answerInput.value = " answer ";
+    state.answerInput.emit("input");
+    state.answerInput.emit("blur");
+    state.explanationInput.value = "20261128123000-abcdefg";
+    state.explanationInput.emit("input");
+    const shape = () => state.editor.getConfig().shapes[0];
+    assert.equal(shape().answer, "answer");
+    assert.equal(shape().explanationBlockID, "20261128123000-abcdefg");
+    state.control("undoImageShape").emit("click");
+    assert.equal(shape().answer, "answer");
+    assert.equal(shape().explanationBlockID, undefined);
+    assert.equal(shape().id, "existing");
+    state.editor.destroy();
+});
 
 test("a group crop must cover its masks, grows when they move, and can be reset and undone", () => {
     const state = setup();

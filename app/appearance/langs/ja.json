@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "解説ブロックの ID",
+	"flashcardImageUploadHint": "画像を1枚選択するか、ここにドロップ",
 	"flashcardImageSequential": "マスクを順番に表示",
 	"flashcardReviewDocumentTree": "このドキュメントと子ドキュメントのカードを復習",
 	"flashcardManageDocumentTree": "このドキュメントと子ドキュメントのカードを管理",

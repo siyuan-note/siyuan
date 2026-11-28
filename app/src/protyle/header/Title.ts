@@ -1,4 +1,5 @@
 import {escapeHtmlTextAndAttr} from "../../util/escape";
+import {handleFlashcardV2Badge, renderFlashcardV2Badge} from "../../card/flashcardV2Badge";
 import type {BlockQueryRequestInput} from "../../types/api";
 import {
     focusByOffset,
@@ -343,6 +344,9 @@ export class Title {
         this.element.querySelector(".protyle-attr").addEventListener("click", (event: MouseEvent & {
             target: HTMLElement
         }) => {
+            if (handleFlashcardV2Badge(event, protyle)) {
+                return;
+            }
             /// #if MOBILE
             if (event.target.closest(".protyle-attr--refcount") && commonClick(event, protyle)) {
                 return;
@@ -758,6 +762,7 @@ export class Title {
         if (response.data.refCount !== 0) {
             this.element.querySelector(":scope > .protyle-attr").insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block">${response.data.refCount}</div>`);
         }
+        renderFlashcardV2Badge(this.element);
         // 存在设置新建文档名模板，不能使用 Untitled 进行判断，https://ld246.com/article/1649301009888
         if (this.editElement && (protyle.block.action?.includes(Constants.CB_GET_OPENNEW) ||
             Date.now() - dayjs(response.data.id.split("-")[0]).toDate().getTime() < 2000)) {

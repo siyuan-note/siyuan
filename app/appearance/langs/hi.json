@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "व्याख्या ब्लॉक की आईडी",
+	"flashcardImageUploadHint": "एक चित्र चुनें या यहाँ छोड़ें",
 	"flashcardImageSequential": "आवरण एक-एक करके दिखाएँ",
 	"flashcardReviewDocumentTree": "इस दस्तावेज़ और उसके उपदस्तावेज़ों के कार्ड दोहराएँ",
 	"flashcardManageDocumentTree": "इस दस्तावेज़ और उसके उपदस्तावेज़ों के कार्ड प्रबंधित करें",

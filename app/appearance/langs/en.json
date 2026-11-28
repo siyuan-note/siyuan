@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "Explanation block ID",
+	"flashcardImageUploadHint": "Choose one image or drop it here",
 	"flashcardImageSequential": "Reveal masks one by one",
 	"flashcardReviewDocumentTree": "Review cards in this document and its subdocuments",
 	"flashcardManageDocumentTree": "Manage cards in this document and its subdocuments",

@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "ID des Erklärungsblocks",
+	"flashcardImageUploadHint": "Ein Bild auswählen oder hier ablegen",
 	"flashcardImageSequential": "Masken nacheinander aufdecken",
 	"flashcardReviewDocumentTree": "Karten dieses Dokuments und seiner Unterdokumente wiederholen",
 	"flashcardManageDocumentTree": "Karten dieses Dokuments und seiner Unterdokumente verwalten",

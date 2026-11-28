@@ -42,6 +42,9 @@ const browserCases = async (source: string, hideSource: string, selectionSource:
                 if (name === "../ui/hideElements") return ui;
                 if (name === "../../util/fetch") return {fetchSyncPost: () => new Promise(resolve => { accept = resolve; })};
                 if (name === "../render/autoDirection") return {setTitleAutoDirection: noop};
+                if (name === "../../card/flashcardV2Badge") return {
+                    renderFlashcardV2Badge: noop, handleFlashcardV2Badge: () => false,
+                };
                 if (name === "../util/selectionOffsets") return {focusByRange, getSelectionOffset: () => ({start: 0, end: 0})};
                 if (name === "../../dialog/tooltip") return {hideTooltip: noop};
                 if (name === "./documentTitleEditor") return {DocumentTitleEditor: class {

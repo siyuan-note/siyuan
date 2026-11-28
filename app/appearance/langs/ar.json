@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "معرّف كتلة الشرح",
+	"flashcardImageUploadHint": "اختر صورة واحدة أو اسحبها إلى هنا",
 	"flashcardImageSequential": "كشف الأقنعة بالتتابع",
 	"flashcardReviewDocumentTree": "مراجعة بطاقات المستند ومستنداته الفرعية",
 	"flashcardManageDocumentTree": "إدارة بطاقات المستند ومستنداته الفرعية",

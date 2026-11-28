@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "ID блока с пояснением",
+	"flashcardImageUploadHint": "Выберите одно изображение или перетащите его сюда",
 	"flashcardImageSequential": "Открывать маски по очереди",
 	"flashcardReviewDocumentTree": "Повторить карточки документа и его вложенных документов",
 	"flashcardManageDocumentTree": "Управлять карточками документа и его вложенных документов",

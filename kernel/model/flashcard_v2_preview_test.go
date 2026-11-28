@@ -133,3 +133,29 @@ func TestFlashcardDraftPreviewSnapshotValidation(t *testing.T) {
 		t.Fatal("accepted unsaved inline mark")
 	}
 }
+
+func TestImageOcclusionDraftPreviewReadsExplanationsInTheSameSnapshot(t *testing.T) {
+	const sourceID = "20261128123000-abcdefg"
+	const explanationID = "20261128123001-abcdefg"
+	request := flashcardv2.AdvancedSourceRequest{SourceID: "draft", Mode: flashcardv2.AdvancedModeImageOcclusion,
+		BlockIDs: []string{sourceID},
+		ImageConfig: &flashcardv2.ImageOcclusionConfig{
+			AssetID: "assets/image.png", FrontMode: "hideCurrent",
+			Shapes: []flashcardv2.ImageOcclusionShape{
+				{ID: "a", Type: "rectangle", Width: .2, Height: .2, ExplanationBlockID: explanationID},
+				{ID: "b", Type: "rectangle", X: .4, Width: .2, Height: .2, ExplanationBlockID: explanationID},
+			},
+			Groups: []flashcardv2.ImageOcclusionGroup{{ID: "group", ShapeIDs: []string{"a", "b"}}},
+		}}
+	read := func(_ context.Context, ids []string) (map[string]string, func() error, error) {
+		if len(ids) != 2 || ids[0] != sourceID || ids[1] != explanationID {
+			t.Fatalf("unexpected snapshot blocks: %v", ids)
+		}
+		return map[string]string{sourceID: `<img src="assets/image.png">`, explanationID: "<div>Explanation</div>"},
+			func() error { return nil }, nil
+	}
+	result, err := previewFlashcardV2AdvancedSource(context.Background(), request, read)
+	if err != nil || len(result.Models) != 1 || result.DOMs[explanationID] == "" {
+		t.Fatalf("preview result: %+v %v", result, err)
+	}
+}

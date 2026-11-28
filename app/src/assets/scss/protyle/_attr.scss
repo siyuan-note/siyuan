@@ -89,3 +89,14 @@
 .protyle-wysiwyg--select-attr .protyle-attr {
   user-select: auto;
 }
+
+.protyle-wysiwyg [data-flashcard-source="true"] > .protyle-attr,
+.protyle-title[data-flashcard-source="true"] > .protyle-attr {
+  opacity: 1;
+}
+
+.protyle-wysiwyg:not(.protyle-wysiwyg--attr) [data-flashcard-source="true"] > .protyle-attr > div,
+.protyle-title[data-flashcard-source="true"]:not(.protyle-wysiwyg--attr) > .protyle-attr > div {
+  opacity: 0;
+  pointer-events: none;
+}

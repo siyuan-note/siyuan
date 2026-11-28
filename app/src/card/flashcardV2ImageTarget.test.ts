@@ -7,6 +7,8 @@ import {ScriptTarget, transpileModule} from "typescript";
 class ElementStub {
     className = "";
     textContent = "";
+    value = "";
+    disabled = false;
     dataset: Record<string, string> = {};
     attributes: Record<string, string> = {};
     children: ElementStub[] = [];
@@ -27,12 +29,14 @@ class ElementStub {
     closest(): null { return null; }
     insertBefore(child: ElementStub) { this.appendChild(child); }
     appendChild(child: ElementStub) { child.parentElement = this; this.children.push(child); }
+    append(...children: ElementStub[]) { children.forEach(child => this.appendChild(child)); }
     insertAdjacentElement(_position: string, child: ElementStub) { this.parentElement.appendChild(child); }
     querySelectorAll() { return this.children.filter(child => child.dataset.shapeId); }
     remove() { this.removed = true; }
+    focus() {}
 }
 
-const render = (frontMode: string, stepOrder?: string[]) => {
+const render = (frontMode: string, stepOrder?: string[], selfCheck = false) => {
     const source = readFileSync("src/card/flashcardV2Render.ts", "utf8");
     const code = source.slice(source.lastIndexOf("const normalized =", source.indexOf("const shapeStyle =")),
         source.indexOf("export const prepareFlashcardV2Reveal ="));
@@ -44,20 +48,28 @@ const render = (frontMode: string, stepOrder?: string[]) => {
         assetID: "image.png", frontMode,
         groups: [{id: "current", shapeIDs: ["rect", "ellipse", "polygon"], stepOrder}],
         shapes: [
-            {id: "rect", type: "rectangle", x: .1, y: .1, width: .2, height: .2, label: "Region <A>"},
-            {id: "ellipse", type: "ellipse", x: .4, y: .1, width: .2, height: .2},
+            {id: "rect", type: "rectangle", x: .1, y: .1, width: .2, height: .2, label: "Region <A>",
+                ...(selfCheck ? {answer: "Alpha", explanationBlockID: "block-a"} : {})},
+            {id: "ellipse", type: "ellipse", x: .4, y: .1, width: .2, height: .2,
+                ...(selfCheck ? {answer: "Beta", explanationBlockID: "block-b"} : {})},
             {id: "polygon", type: "polygon", points: [{x: .1, y: .5}, {x: .2, y: .6}, {x: .3, y: .5}]},
-            {id: "other", type: "rectangle", x: .7, y: .1, width: .2, height: .2},
+            {id: "other", type: "rectangle", x: .7, y: .1, width: .2, height: .2,
+                ...(selfCheck ? {answer: "Other", explanationBlockID: "unrelated"} : {})},
         ],
-    }}, card: {variantData: {groupID: "current"}}};
+    }}, card: {variantData: {groupID: "current"}}, template: {}};
     const controls = new ElementStub();
     const focus: unknown[] = [];
-    const controller = runInNewContext(transpileModule(code +
-        "\nprepareImageOcclusions(element, model, bindFlashcardV2ImageViewport);", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText, {
+    const explanations: string[] = [];
+    const check = source.slice(source.indexOf("const unique ="), source.indexOf("const parseAnkiTemplate ="))
+        .replace("export const checkFlashcardV2Answer", "const checkFlashcardV2Answer");
+    const feedback = source.slice(source.indexOf("const renderFlashcardV2AnswerResult"),
+        source.indexOf("export const prepareFlashcardV2TypedAnswers"));
+    const controller = runInNewContext(transpileModule(check + feedback + code +
+        "\nprepareImageOcclusions(element, model, bindFlashcardV2ImageViewport, showExplanation);", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText, {
         document: {createElement: () => new ElementStub()},
         window: {siyuan: {languages: {flashcardImageTarget: "Current answer", flashcardImageTargetTip: "Striped answer"}}},
-        element: {querySelectorAll: () => [image]}, model,
-        unique: (items: string[]) => [...new Set(items)],
+        element: {querySelectorAll: () => [image], appendChild: (child: ElementStub) => parent.appendChild(child)}, model,
+        showExplanation: (id: string) => explanations.push(id),
         bindFlashcardV2ImageViewport: (_wrapper: unknown, _image: unknown, target: unknown) => {
             focus.push(target);
             return {controls, destroy: () => {}, setTarget: (next: unknown) => focus.push(next)};
@@ -65,7 +77,8 @@ const render = (frontMode: string, stepOrder?: string[]) => {
     });
     const wrapper = parent.children.find(child => child.className === "card__v2-image-occlusion");
     const hint = parent.children.find(child => child.textContent.startsWith("Striped answer"));
-    return {controller, wrapper, hint, controls, focus};
+    const fields = parent.children.find(child => child.className === "card__v2-image-review-fields");
+    return {controller, wrapper, hint, controls, focus, explanations, fields};
 };
 
 test("all-hidden mode marks every current shape accessibly and keeps other groups neutral", () => {
@@ -114,6 +127,29 @@ test("an ordered image card advances its focus and completes only after its fina
     assert.equal(hint.removed, true);
     assert.doesNotMatch(other.className, /--revealed/);
     assert.deepEqual(focus.map(target => (target as {top: number}).top), [.1, .1, .5]);
+});
+
+test("image answers and linked explanations are revealed per mask with one final completion", () => {
+    const {controller, fields, explanations} = render("hideAllAnswerOne", ["ellipse", "rect", "polygon"], true);
+    const [ellipse, rect] = fields.children;
+    assert.equal(fields.children.length, 2);
+    assert.doesNotMatch(ellipse.className, /fn__none/);
+    assert.match(rect.className, /fn__none/);
+    assert.notEqual(ellipse.children[1].value, "Beta");
+    assert.deepEqual(explanations, []);
+
+    ellipse.children[1].value = "beta";
+    assert.equal(controller.revealNext(), false);
+    assert.equal(ellipse.children[1].disabled, true);
+    assert.equal(controller.checkedAnswers[0].correct, true);
+    assert.deepEqual(explanations, ["block-b"]);
+    assert.doesNotMatch(rect.className, /fn__none/);
+    rect.children[1].value = "Gamma";
+    assert.equal(controller.revealNext(), false);
+    assert.equal(controller.checkedAnswers[1].correct, false);
+    assert.deepEqual(explanations, ["block-b", "block-a"]);
+    assert.equal(controller.revealNext(), true);
+    assert.equal(controller.checkedAnswers.length, 2);
 });
 
 test("target pattern overlays an opaque base and does not rely on clipped polygon borders", () => {

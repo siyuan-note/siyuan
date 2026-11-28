@@ -256,6 +256,18 @@ func TestImageOcclusionValidationAndStableGroupVariants(t *testing.T) {
 	if len(variants) != 1 || variants[0].Key != "group:group-a" {
 		t.Fatalf("unexpected image occlusion variants: %+v", variants)
 	}
+	config.Shapes[0].Answer = "Region A"
+	config.Shapes[0].ExplanationBlockID = "20261128123000-abcdefg"
+	source.GenerationConfig = mustRawJSON(t, config)
+	withAnswer, err := EnumerateCardVariants(source, template)
+	if err != nil || len(withAnswer) != 1 || withAnswer[0].Key != variants[0].Key {
+		t.Fatalf("answers and explanations must preserve existing variants: %+v (%v)", withAnswer, err)
+	}
+	config.Shapes[0].ExplanationBlockID = "not-a-block-id"
+	if err = config.validate(); err == nil {
+		t.Fatal("accepted an invalid explanation block ID")
+	}
+	config.Shapes[0].ExplanationBlockID = ""
 	config.Groups[0].VisibleRegion = &ImageOcclusionRegion{Width: 0.4, Height: 0.4}
 	source.GenerationConfig = mustRawJSON(t, config)
 	cropped, err := EnumerateCardVariants(source, template)

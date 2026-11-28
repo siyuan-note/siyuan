@@ -19,6 +19,7 @@ import {renderImageDisplay} from "../render/imageDisplay";
 import {renderMediaResize} from "../render/mediaResize";
 import {renderBlockDirection} from "../render/blockDirection";
 import {renderTableCorners} from "../render/tableCorners";
+import {renderFlashcardV2Badges} from "../../card/flashcardV2Badge";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
@@ -82,6 +83,7 @@ const RENDER_MAP: Record<string, (previewPanel: Element) => void> = {
 };
 
 export const processRender = (previewPanel: Element) => {
+    renderFlashcardV2Badges(previewPanel);
     renderBlockDirection(previewPanel);
     renderImageActions(previewPanel);
     renderImageDisplay(previewPanel);

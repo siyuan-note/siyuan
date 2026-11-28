@@ -320,6 +320,34 @@
 			]
 		},
 		{
+			"ID": "20261128115453-k7aeopi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128115453-k7aeopi",
+				"updated": "20261128115453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Type / in a paragraph and choose “Image occlusion”. Select an image or drop it into the dialog to insert it and open the mask editor. Select a mask to enter an optional typed answer or the ID of an explanation block in a regular notebook. Revealing that mask checks your answer and displays its linked explanation. You can jump to the original block. Rate the card after revealing its last mask."
+				}
+			]
+		},
+		{
+			"ID": "20261128115453-epoi4tr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128115453-epoi4tr",
+				"updated": "20261128115453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select the flashcard icon beside the source block to preview its cards, pause or resume individual cards, or open advanced card source settings. For a question-and-answer source, you can also switch between forward, reverse and bidirectional cards."
+				}
+			]
+		},
+		{
 			"ID": "20261128033010-iplf6fd",
 			"Type": "NodeHeading",
 			"HeadingLevel": 4,

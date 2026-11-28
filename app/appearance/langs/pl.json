@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "Identyfikator bloku objaśnienia",
+	"flashcardImageUploadHint": "Wybierz jeden obraz lub upuść go tutaj",
 	"flashcardImageSequential": "Odsłaniaj maski po kolei",
 	"flashcardReviewDocumentTree": "Powtarzaj fiszki z tego dokumentu i jego poddokumentów",
 	"flashcardManageDocumentTree": "Zarządzaj fiszkami z tego dokumentu i jego poddokumentów",

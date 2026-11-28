@@ -475,14 +475,18 @@ type FlashcardV2ImageOcclusionPoint struct {
 }
 
 type FlashcardV2ImageOcclusionShape struct {
-	ID     string                           `json:"id" api:"optional,nullable"`
-	Type   string                           `json:"type" api:"optional,nullable"`
-	Label  string                           `json:"label,omitempty" api:"optional,nullable"`
-	X      float64                          `json:"x,omitempty" api:"optional,nullable"`
-	Y      float64                          `json:"y,omitempty" api:"optional,nullable"`
-	Width  float64                          `json:"width,omitempty" api:"optional,nullable"`
-	Height float64                          `json:"height,omitempty" api:"optional,nullable"`
-	Points []FlashcardV2ImageOcclusionPoint `json:"points,omitempty" api:"optional,nullable"`
+	// Answer 用于揭晓时核对的可选文本答案，不影响排期评分。
+	Answer string `json:"answer,omitempty" api:"optional,nullable"`
+	// ExplanationBlockID 是普通笔记本中在此遮挡揭晓后显示的可选解析块。
+	ExplanationBlockID string                           `json:"explanationBlockID,omitempty" api:"optional,nullable"`
+	ID                 string                           `json:"id" api:"optional,nullable"`
+	Type               string                           `json:"type" api:"optional,nullable"`
+	Label              string                           `json:"label,omitempty" api:"optional,nullable"`
+	X                  float64                          `json:"x,omitempty" api:"optional,nullable"`
+	Y                  float64                          `json:"y,omitempty" api:"optional,nullable"`
+	Width              float64                          `json:"width,omitempty" api:"optional,nullable"`
+	Height             float64                          `json:"height,omitempty" api:"optional,nullable"`
+	Points             []FlashcardV2ImageOcclusionPoint `json:"points,omitempty" api:"optional,nullable"`
 }
 
 type FlashcardV2InvalidSource struct {

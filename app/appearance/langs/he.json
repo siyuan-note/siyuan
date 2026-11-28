@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "מזהה בלוק ההסבר",
+	"flashcardImageUploadHint": "יש לבחור תמונה אחת או לגרור אותה לכאן",
 	"flashcardImageSequential": "חשיפת המסכות לפי הסדר",
 	"flashcardReviewDocumentTree": "חזרה על כרטיסים במסמך ובמסמכי המשנה שלו",
 	"flashcardManageDocumentTree": "ניהול כרטיסים במסמך ובמסמכי המשנה שלו",

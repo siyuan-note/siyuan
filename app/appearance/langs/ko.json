@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "해설 블록 ID",
+	"flashcardImageUploadHint": "이미지 한 장을 선택하거나 여기에 놓으세요",
 	"flashcardImageSequential": "가림 영역을 하나씩 공개",
 	"flashcardReviewDocumentTree": "이 문서와 하위 문서의 카드 복습",
 	"flashcardManageDocumentTree": "이 문서와 하위 문서의 카드 관리",

@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "ID blok penjelasan",
+	"flashcardImageUploadHint": "Pilih satu gambar atau jatuhkan di sini",
 	"flashcardImageSequential": "Buka penutup satu per satu",
 	"flashcardReviewDocumentTree": "Ulas kartu dalam dokumen ini dan subdokumennya",
 	"flashcardManageDocumentTree": "Kelola kartu dalam dokumen ini dan subdokumennya",

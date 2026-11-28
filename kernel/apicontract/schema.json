@@ -33933,6 +33933,26 @@
     "FlashcardV2ImageOcclusionShapeInput": {
       "type": "object",
       "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "explanationBlockID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "height": {
           "anyOf": [
             {

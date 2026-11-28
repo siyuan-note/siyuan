@@ -18,6 +18,7 @@ import {openFlashcardV2Ordered} from "./flashcardV2Ordered";
 import {Dialog} from "../dialog";
 import {FlashcardV2DraftPreview} from "./flashcardV2DraftPreview";
 import {FlashcardV2TagSave} from "./flashcardV2TagSave";
+import {markFlashcardV2SourceBlock} from "./flashcardV2Badge";
 import {readFlashcardV2RenderModel} from "./flashcardV2Render";
 import {FlashcardV2ManagementView} from "./flashcardV2ManagementView";
 import {flashcardV2ConflictSummary, FlashcardV2ConflictProgress} from "./flashcardV2ConflictSummary";
@@ -3309,6 +3310,9 @@ export const openFlashcardV2BasicSource = (blockIDs: string[]) => {
                         ...payload, operationID: operation.operationID, createdAt: operation.changedAt,
                     }, () => {
                         saved = true;
+                        if (direction !== "closed") {
+                            markFlashcardV2SourceBlock(blockIDs[0]);
+                        }
                         dialog.destroy();
                     });
                     return saved;
@@ -3330,6 +3334,8 @@ interface IFlashcardV2ImageShape {
     groupID: string;
     type: TFlashcardV2ImageShapeType;
     label?: string;
+    answer?: string;
+    explanationBlockID?: string;
     x?: number;
     y?: number;
     width?: number;
@@ -3351,6 +3357,7 @@ interface IFlashcardV2ImageEditor {
 }
 
 interface IFlashcardV2AdvancedGenerationConfig {
+    assetID?: string;
     occlusions?: Array<{ id: string, groupIDs: string[], displayOrder: number }>;
     groups?: Array<{ id: string, displayOrder: number, shapeIDs?: string[], visibleRegion?: IFlashcardV2ImageRegion,
         stepOrder?: string[] }>;
@@ -3394,12 +3401,13 @@ const isFlashcardV2AdvancedGenerationConfig = (value: unknown): value is IFlashc
     }
     if (!optionalList(value.shapes, (item) => isFlashcardV2Object(item) && typeof item.id === "string" &&
         ["rectangle", "ellipse", "polygon"].includes(String(item.type)) &&
+        [item.label, item.answer, item.explanationBlockID].every(field => field === undefined || typeof field === "string") &&
         [item.x, item.y, item.width, item.height].every((number) => number === undefined || typeof number === "number") &&
         optionalList(item.points, (point) => isFlashcardV2Object(point) &&
             typeof point.x === "number" && typeof point.y === "number"))) {
         return false;
     }
-    return [value.frontMode, value.mode, value.revealMode].every((item) => item === undefined || typeof item === "string") &&
+    return [value.assetID, value.frontMode, value.mode, value.revealMode].every((item) => item === undefined || typeof item === "string") &&
         [value.randomize, value.caseSensitive, value.ignoreDiacritics, value.trimWhitespace, value.collapseWhitespace]
             .every((item) => item === undefined || typeof item === "boolean") &&
         [value.dynamicDistractorCount, value.fuzzyMaxDistance, value.fuzzyMaxRatio]
@@ -3476,8 +3484,33 @@ const fetchFlashcardV2Data = <T>(url: string, data: unknown) => new Promise<T | 
     });
 });
 
+const advancedSourceTypes = ["cloze", "ordered", "image-occlusion", "choice", "multi-line", "typed-answer"];
+
+const loadFlashcardV2AdvancedCandidate = async (card: IFlashcardSearchResult): Promise<IFlashcardV2AdvancedCandidate | undefined> => {
+    const [model, entity] = await Promise.all([
+        fetchFlashcardV2Data<IFlashcardV2AdvancedRenderModel>("/api/flashcard/getRenderModel", {cardID: card.card.id}),
+        fetchFlashcardV2Data<{found: boolean, revision: IFlashcardEntityRevision<unknown>}>(
+            "/api/flashcard/getEntity", {entityType: "cardSource", entityID: card.card.sourceID}),
+    ]);
+    if (!model || !entity?.found || !isFlashcardV2AdvancedGenerationConfig(model.source.generationConfig)) {
+        return;
+    }
+    const references = model.references.filter((reference) => reference.entityType === "block")
+        .sort((left, right) => left.sort - right.sort);
+    return {
+        edit: {
+            sourceID: card.card.sourceID,
+            expectedRevisionID: entity.revision.revisionID,
+            sourceType: model.source.sourceType,
+            generationConfig: model.source.generationConfig,
+            references,
+            modeHint: model.template.generationRule.mode,
+        },
+        updatedAt: entity.revision.updatedAt,
+    };
+};
+
 const loadFlashcardV2AdvancedCandidates = async (blockIDs: string[]) => {
-    const advancedSourceTypes = ["cloze", "ordered", "image-occlusion", "choice", "multi-line", "typed-answer"];
     const queryData = await fetchFlashcardV2Data<{cards: IFlashcardSearchResult[]}>("/api/flashcard/queryCards", {
         query: {
             version: 1,
@@ -3506,36 +3539,9 @@ const loadFlashcardV2AdvancedCandidates = async (blockIDs: string[]) => {
             cardBySource.set(card.card.sourceID, card);
         }
     });
-    const candidates = await Promise.all([...cardBySource.values()].map(async (card) => {
-        const [model, entity] = await Promise.all([
-            fetchFlashcardV2Data<IFlashcardV2AdvancedRenderModel>("/api/flashcard/getRenderModel", {
-                cardID: card.card.id,
-            }),
-            fetchFlashcardV2Data<{found: boolean, revision: IFlashcardEntityRevision<unknown>}>(
-                "/api/flashcard/getEntity", {entityType: "cardSource", entityID: card.card.sourceID}),
-        ]);
-        if (!model || !entity?.found) {
-            return;
-        }
-        const references = model.references.filter((reference) => reference.entityType === "block")
-            .sort((left, right) => left.sort - right.sort);
-        if (references.length !== blockIDs.length ||
-            references.some((reference, index) => reference.entityID !== blockIDs[index])) {
-            return;
-        }
-        return {
-            edit: {
-                sourceID: card.card.sourceID,
-                expectedRevisionID: entity.revision.revisionID,
-                sourceType: model.source.sourceType,
-                generationConfig: model.source.generationConfig,
-                references,
-                modeHint: model.template.generationRule.mode,
-            },
-            updatedAt: entity.revision.updatedAt,
-        } as IFlashcardV2AdvancedCandidate;
-    }));
-    return candidates.filter((candidate): candidate is IFlashcardV2AdvancedCandidate => !!candidate)
+    const candidates = await Promise.all([...cardBySource.values()].map(loadFlashcardV2AdvancedCandidate));
+    return candidates.filter(candidate => candidate?.edit.references.length === blockIDs.length &&
+        candidate.edit.references.every((reference, index) => reference.entityID === blockIDs[index]))
         .sort((left, right) => right.updatedAt - left.updatedAt);
 };
 
@@ -3597,7 +3603,9 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     const context = canvas.getContext("2d");
     const labelField = element.querySelector<HTMLElement>('[data-type="imageMaskLabelField"]');
     const labelInput = labelField.querySelector("input");
-    let editingLabel = false;
+    const answerInput = labelField.querySelector<HTMLInputElement>('[data-type="imageMaskAnswer"]');
+    const explanationInput = labelField.querySelector<HTMLInputElement>('[data-type="imageMaskExplanation"]');
+    let editingField = false;
     const shapeSelect = element.querySelector('[data-type="imageShape"]') as HTMLSelectElement;
     const groupSelect = element.querySelector('[data-type="imageGroup"]') as HTMLSelectElement;
     const frontMode = element.querySelector('[data-type="imageFrontMode"]') as HTMLSelectElement;
@@ -3905,9 +3913,11 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             }
         }
         selected = shapes.findIndex(shape => shape.id === [...selectedIDs].at(-1));
-        editingLabel = false;
+        editingField = false;
         labelField.classList.toggle("fn__none", selectedIDs.size !== 1 || shapeSelect.value !== "edit");
         labelInput.value = shapes[selected]?.label || "";
+        answerInput.value = shapes[selected]?.answer || "";
+        explanationInput.value = shapes[selected]?.explanationBlockID || "";
         const selectedGroups = new Set(shapes.filter(shape => selectedIDs.has(shape.id)).map(shape => shape.groupID));
         deleteButton.disabled = selected < 0;
         mergeButton.disabled = selectedGroups.size < 2;
@@ -4275,16 +4285,20 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     polygonButton.addEventListener("click", finishPolygon);
     undoButton.addEventListener("click", undo);
     deleteButton.addEventListener("click", deleteShape);
-    labelInput.addEventListener("input", () => {
-        if (selectedIDs.size !== 1) { return; }
-        if (!editingLabel) {
-            record();
-            editingLabel = true;
-        }
-        shapes[selected] = {...shapes[selected], label: labelInput.value.trim() || undefined};
-        onChange(true);
-    });
-    labelInput.addEventListener("blur", () => { editingLabel = false; });
+    const fields = {label: labelInput, answer: answerInput, explanationBlockID: explanationInput} as const;
+    for (const field of ["label", "answer", "explanationBlockID"] as const) {
+        const input = fields[field];
+        input.addEventListener("input", () => {
+            if (selectedIDs.size !== 1) { return; }
+            if (!editingField) {
+                record();
+                editingField = true;
+            }
+            shapes[selected] = {...shapes[selected], [field]: input.value.trim() || undefined};
+            onChange(true);
+        });
+        input.addEventListener("blur", () => { editingField = false; });
+    }
     mergeButton.addEventListener("click", mergeSelected);
     splitButton.addEventListener("click", splitSelected);
     drawRegionButton.addEventListener("click", () => {
@@ -4406,6 +4420,8 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
                 id: shape.id,
                 type: shape.type,
                 label: shape.label,
+                answer: shape.answer,
+                explanationBlockID: shape.explanationBlockID,
                 x: shape.x,
                 y: shape.y,
                 width: shape.width,
@@ -4521,7 +4537,11 @@ ${newInlineTargets.length > 0 ? `<div class="card__v2-advanced-section-action"><
     <span class="fn__space"></span>
     <button data-type="undoImageShape" class="b3-button b3-button--outline">${window.siyuan.languages.undo}</button>
 </div>
-<label data-type="imageMaskLabelField" class="b3-label fn__none"><div class="b3-label__text">${window.siyuan.languages.flashcardImageMaskLabel}</div><input type="text" class="b3-text-field fn__block"></label>
+<div data-type="imageMaskLabelField" class="card__v2-image-mask-fields fn__none">
+    <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardImageMaskLabel}</div><input type="text" class="b3-text-field fn__block"></label>
+    <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardTypedAnswer}</div><input data-type="imageMaskAnswer" type="text" maxlength="2048" class="b3-text-field fn__block"></label>
+    <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardImageExplanationBlock}</div><input data-type="imageMaskExplanation" type="text" class="b3-text-field fn__block" spellcheck="false" autocomplete="off"></label>
+</div>
 <div data-type="imageStepOrder" class="card__v2-advanced-image-toolbar fn__none">
     <label class="fn__flex-center"><input class="b3-switch" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardImageSequential}</label>
     <span data-type="imageStepNumber"></span>
@@ -4880,6 +4900,7 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                         let saved = false;
                         const onSaved = () => {
                             saved = true;
+                            markFlashcardV2SourceBlock(payload.blockIDs[0]);
                             dialog.destroy();
                             callback?.();
                         };
@@ -4901,9 +4922,11 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
             };
             fetchPost("/api/block/getBlockDOMs", {ids: blockIDs}, (domResponse) => {
                 const doms = domResponse.data as Record<string, string>;
+                const asset = selectedImageAsset || (edit?.sourceType === "image-occlusion" ? edit.generationConfig.assetID : undefined);
                 const imageSource = blockIDs.length === 1 ?
-                    flashcardV2ImageSource(blockIDs[0], doms[blockIDs[0]] || "", selectedImageAsset) : undefined;
-                if (selectedImageAsset && !imageSource) {
+                    flashcardV2ImageSource(blockIDs[0], doms[blockIDs[0]] || "", asset) : undefined;
+                if (asset && !imageSource) {
+                    showMessage(window.siyuan.languages.refExpired);
                     return;
                 }
                 openDialog(doms, imageSource);
@@ -4948,6 +4971,123 @@ ${candidates.map((candidate, index) => `<li><button type="button" data-candidate
 
 export const openFlashcardV2ImageSource = (blockID: string, asset: string) =>
     openFlashcardV2AdvancedSourceEditor([blockID], undefined, undefined, asset);
+
+export const openFlashcardV2BadgeMenu = (anchor: HTMLButtonElement, blockID: string, writable: boolean) => {
+    const lang = window.siyuan.languages;
+    void toggleMenu({
+        target: anchor,
+        build: async (_menu, session) => {
+            const data = await fetchFlashcardV2Data<{cards: IFlashcardSearchResult[]}>("/api/flashcard/queryCards", {
+                query: {
+                    version: 1,
+                    root: {operator: "predicate", field: "blockID", comparator: "equal", value: blockID},
+                },
+                options: {
+                    now: Date.now(), includeInactive: true, includeSuspended: true, includeBuried: true,
+                    includePaused: true, limit: 1000,
+                },
+            });
+            if (!session.isCurrent() || !anchor.isConnected) {
+                return;
+            }
+            const menu = new Menu();
+            const sources = new Map<string, IFlashcardSearchResult[]>();
+            for (const card of data?.cards || []) {
+                if (card.sourceBlockID !== blockID || card.sourceStatus !== "active" ||
+                    !["active", "disabledByTemplate"].includes(card.card.generationStatus)) {
+                    continue;
+                }
+                const sourceID = card.card.sourceID;
+                if (!sources.has(sourceID)) {
+                    sources.set(sourceID, []);
+                }
+                sources.get(sourceID).push(card);
+            }
+            const typeLabels = flashcardV2SourceTypeLabels();
+            let position = 0;
+            for (const [sourceID, cards] of sources) {
+                const active = cards.filter(card => card.card.generationStatus === "active");
+                if (!active.length) {
+                    continue;
+                }
+                const {sourceType} = cards[0];
+                const items: IMenu[] = [{
+                    label: lang.flashcardPreview,
+                    icon: "iconPreview",
+                    click: () => openFlashcardV2Preview(active.map(card => card.card.id)),
+                }];
+                if (writable) {
+                    if (sourceType === "qa") {
+                        const directions = [
+                            {direction: "forward", label: lang.flashcardDirectionForward},
+                            {direction: "reverse", label: lang.flashcardDirectionReverse},
+                            {direction: "bidirectional", label: lang.flashcardDirectionBidirectional},
+                        ] as const;
+                        const current = basicSourceDirection(cards);
+                        items.push({
+                            label: lang.flashcardDirectionSettings,
+                            icon: "iconBoth",
+                            submenu: directions.map(({direction, label}) => ({
+                                label, checked: direction === current,
+                                click: () => {
+                                    if (direction !== current) {
+                                        void fetchPost("/api/flashcard/updateBasicDirection", {
+                                            operationID: genUUID(), sourceID, direction, updatedAt: Date.now(),
+                                        });
+                                    }
+                                },
+                            })),
+                        });
+                    }
+                    const suspensionItems: IMenu[] = active.map((card, index) => {
+                        const suspended = card.reviewState.suspended;
+                        const label = suspended ? lang.flashcardResumeReview : lang.flashcardSuspendUntilResumed;
+                        const variant = card.card.variantKey === "forward" ? lang.flashcardDirectionForward :
+                            card.card.variantKey === "reverse" ? lang.flashcardDirectionReverse : String(index + 1);
+                        return {
+                            label: active.length > 1 ? variant + " - " + label : label,
+                            icon: suspended ? "iconPlay" : "iconPause",
+                            click: () => {
+                                void fetchPost("/api/flashcard/manageCards", {
+                                    operationID: genUUID(), cardIDs: [card.card.id],
+                                    action: suspended ? "resume" : "suspend", changedAt: Date.now(),
+                                });
+                            },
+                        };
+                    });
+                    items.push(...suspensionItems);
+                    if (advancedSourceTypes.includes(sourceType)) {
+                        items.push({label: lang.configGroupAdvanced, icon: "iconSettings", click: () => {
+                            void loadFlashcardV2AdvancedCandidate(active[0]).then(candidate => {
+                                if (!candidate?.edit.references.length || !anchor.isConnected) {
+                                    return;
+                                }
+                                openFlashcardV2AdvancedSource(candidate.edit.references.map(reference => reference.entityID),
+                                    candidate.edit);
+                            });
+                        }});
+                    }
+                }
+                if (sources.size > 1) {
+                    menu.addItem({label: `${++position}. ${escapeHtml(typeLabels[sourceType] || sourceType)}`, submenu: items});
+                } else {
+                    items.forEach(item => menu.addItem(item));
+                }
+            }
+            if (!menu.element.querySelector(".b3-menu__item")) {
+                menu.addItem({label: data ? lang.emptyContent : lang.flashcardLoadFailed, disabled: true});
+            }
+            session.show(() => {
+                const rect = anchor.getBoundingClientRect();
+                if (isMobile()) {
+                    menu.fullscreen();
+                } else {
+                    menu.open({x: rect.left, y: rect.bottom});
+                }
+            });
+        },
+    });
+};
 
 export const openFlashcardV2SourceMode = (blockIDs: string[], mode: TFlashcardAuthoringMode) => {
     if (mode === "qa") {

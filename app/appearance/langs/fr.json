@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "Identifiant du bloc d’explication",
+	"flashcardImageUploadHint": "Choisissez une image ou déposez-la ici",
 	"flashcardImageSequential": "Révéler les masques un par un",
 	"flashcardReviewDocumentTree": "Réviser les cartes de ce document et de ses sous-documents",
 	"flashcardManageDocumentTree": "Gérer les cartes de ce document et de ses sous-documents",

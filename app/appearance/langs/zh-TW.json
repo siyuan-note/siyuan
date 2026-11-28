@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "解析區塊 ID",
+	"flashcardImageUploadHint": "選擇一張圖片，或將圖片拖曳到這裡",
 	"flashcardImageSequential": "依序揭曉遮擋",
 	"flashcardReviewDocumentTree": "複習目前文件及子文件的閃卡",
 	"flashcardManageDocumentTree": "管理目前文件及子文件的閃卡",

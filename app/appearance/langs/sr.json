@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "ИД блока са објашњењем",
+	"flashcardImageUploadHint": "Изаберите једну слику или је превуците овде",
 	"flashcardImageSequential": "Otkrivaj maske redom",
 	"flashcardReviewDocumentTree": "Ponavljaj kartice ovog dokumenta i njegovih poddokumenata",
 	"flashcardManageDocumentTree": "Upravljaj karticama ovog dokumenta i njegovih poddokumenata",

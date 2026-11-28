@@ -4,6 +4,7 @@ import type {App} from "../index";
 import {fetchPost} from "../util/fetch";
 import {genUUID} from "../util/genID";
 import {transaction} from "../protyle/wysiwyg/transaction";
+import {renderFlashcardV2Badge} from "./flashcardV2Badge";
 import {
     openFlashcardV2AdvancedSource,
     openFlashcardV2AnkiPreview,
@@ -64,6 +65,7 @@ export const createQuickSources = (blockIDs: string[], callback?: () => void) =>
                         } else {
                             element.removeAttribute(Constants.DATA_FLASHCARD_SOURCE);
                         }
+                        renderFlashcardV2Badge(element);
                     });
                 }
             }

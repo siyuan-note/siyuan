@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "Açıklama bloğu kimliği",
+	"flashcardImageUploadHint": "Bir görsel seçin veya buraya bırakın",
 	"flashcardImageSequential": "Maskeleri sırayla aç",
 	"flashcardReviewDocumentTree": "Bu belgedeki ve alt belgelerindeki kartları tekrar et",
 	"flashcardManageDocumentTree": "Bu belgedeki ve alt belgelerindeki kartları yönet",

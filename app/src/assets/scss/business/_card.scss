@@ -1698,3 +1698,13 @@
     margin-inline-start: auto;
   }
 }
+.card__v2-image-mask-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12em), 1fr));
+  gap: 8px;
+}
+
+.card__v2-image-review-fields {
+  display: grid;
+  gap: 8px;
+}

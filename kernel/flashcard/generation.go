@@ -12,6 +12,9 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"unicode/utf16"
+
+	"github.com/88250/lute/ast"
 )
 
 const (
@@ -82,14 +85,30 @@ type ImageOcclusionConfig struct {
 
 // ImageOcclusionShape 支持矩形、椭圆和多边形。
 type ImageOcclusionShape struct {
-	ID     string                `json:"id"`
-	Type   string                `json:"type"`
-	Label  string                `json:"label,omitempty"`
-	X      float64               `json:"x,omitempty"`
-	Y      float64               `json:"y,omitempty"`
-	Width  float64               `json:"width,omitempty"`
-	Height float64               `json:"height,omitempty"`
-	Points []ImageOcclusionPoint `json:"points,omitempty"`
+	Answer             string                `json:"answer,omitempty"`
+	ExplanationBlockID string                `json:"explanationBlockID,omitempty"`
+	ID                 string                `json:"id"`
+	Type               string                `json:"type"`
+	Label              string                `json:"label,omitempty"`
+	X                  float64               `json:"x,omitempty"`
+	Y                  float64               `json:"y,omitempty"`
+	Width              float64               `json:"width,omitempty"`
+	Height             float64               `json:"height,omitempty"`
+	Points             []ImageOcclusionPoint `json:"points,omitempty"`
+}
+
+func (config *ImageOcclusionConfig) ExplanationBlockIDs() (ids []string) {
+	if config == nil {
+		return
+	}
+	seen := map[string]bool{}
+	for _, shape := range config.Shapes {
+		if id := shape.ExplanationBlockID; id != "" && !seen[id] {
+			ids = append(ids, id)
+			seen[id] = true
+		}
+	}
+	return
 }
 
 // ImageOcclusionPoint 使用相对于原图宽高的归一化坐标。
@@ -755,6 +774,12 @@ func (config *ImageOcclusionConfig) validate() error {
 	for _, shape := range config.Shapes {
 		if strings.TrimSpace(shape.ID) == "" {
 			return errors.New("image occlusion shape ID is required")
+		}
+		if len(utf16.Encode([]rune(shape.Answer))) > 2048 {
+			return errors.New("image occlusion answer exceeds 2048 characters")
+		}
+		if shape.ExplanationBlockID != "" && !ast.IsNodeIDPattern(shape.ExplanationBlockID) {
+			return errors.New("image occlusion explanation block ID is invalid")
 		}
 		if _, duplicate := shapes[shape.ID]; duplicate {
 			return fmt.Errorf("duplicate image occlusion shape ID [%s]", shape.ID)

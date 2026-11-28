@@ -76,6 +76,8 @@ interface IImageOcclusionConfig {
         id: string,
         type: "rectangle" | "ellipse" | "polygon",
         label?: string,
+        answer?: string,
+        explanationBlockID?: string,
         x?: number,
         y?: number,
         width?: number,
@@ -219,7 +221,11 @@ export interface IFlashcardV2OcclusionPlan {
 export interface IFlashcardV2RevealController {
     revealNext: () => boolean;
     destroy?: () => void;
+    checkedAnswers?: IFlashcardV2AnswerCheckResult[];
+    concealedContent?: {blockIDs: string[], texts: string[]};
 }
+
+type TImageExplanation = (blockID: string, target: HTMLElement) => void;
 
 export interface IFlashcardV2TypedAnswerController {
     check: () => IFlashcardV2AnswerCheckResult[];
@@ -989,7 +995,7 @@ const shapeStyle = (shape: IImageOcclusionConfig["shapes"][number]) => {
 };
 
 const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel,
-    bindViewport?: typeof bindFlashcardV2ImageViewport) => {
+    bindViewport?: typeof bindFlashcardV2ImageViewport, showExplanation?: TImageExplanation) => {
     const config = model.source.generationConfig as IImageOcclusionConfig;
     const variant = model.card.variantData || {};
     if (!Array.isArray(config?.shapes) || !Array.isArray(config.groups) || typeof variant.groupID !== "string") {
@@ -1037,6 +1043,39 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
         hint.setAttribute("aria-live", "polite");
     }
     wrapper.insertAdjacentElement("afterend", hint);
+    const numbered = new Set(steps.filter(ids => ids.length > 1 &&
+        ids.some(id => overlays.get(id).shape.answer || overlays.get(id).shape.explanationBlockID)).flat());
+    const reviewFields = new Map<string, { row: HTMLElement, input?: HTMLInputElement }>();
+    const fields = document.createElement("div");
+    fields.className = "card__v2-image-review-fields";
+    for (const id of steps.flat()) {
+        const {shape} = overlays.get(id);
+        if (!shape.answer?.trim() && !shape.explanationBlockID) {
+            continue;
+        }
+        const row = document.createElement("div");
+        row.className = "fn__none";
+        let input: HTMLInputElement | undefined;
+        if (shape.answer?.trim()) {
+            const label = document.createElement("div");
+            label.className = "b3-label__text";
+            label.textContent = (numbered.has(id) ? (targets.indexOf(id) + 1) + ". " : "") +
+                window.siyuan.languages.flashcardTypedAnswer;
+            input = document.createElement("input");
+            input.type = "text";
+            input.maxLength = maximumAnswerLength;
+            input.autocomplete = "off";
+            input.className = "b3-text-field fn__block";
+            input.setAttribute("aria-label", label.textContent);
+            input.setAttribute("data-flashcard-image-answer", "");
+            row.append(label, input);
+        }
+        fields.appendChild(row);
+        reviewFields.set(id, {row, input});
+    }
+    if (reviewFields.size) {
+        element.appendChild(fields);
+    }
     const maskLabels: HTMLElement[] = [];
     const highlightStep = () => {
         hint.textContent = window.siyuan.languages.flashcardImageTargetTip +
@@ -1044,10 +1083,15 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
         let targetBounds: {left: number, top: number, right: number, bottom: number} | undefined;
         for (const id of steps[step]) {
             const {element, shape} = overlays.get(id);
+            const reviewField = reviewFields.get(id);
+            if (reviewField?.input) {
+                reviewField.row.classList.remove("fn__none");
+            }
             element.classList.add("card__v2-image-shape--target");
             element.removeAttribute("aria-hidden");
             element.setAttribute("role", "img");
-            element.setAttribute("aria-label", shape.label || window.siyuan.languages.flashcardImageTarget);
+            const labelText = [numbered.has(id) ? String(targets.indexOf(id) + 1) : "", shape.label].filter(Boolean).join(" ");
+            element.setAttribute("aria-label", labelText || window.siyuan.languages.flashcardImageTarget);
             const points = shape.type === "polygon" ? shape.points :
                 [{x: shape.x, y: shape.y}, {x: shape.x + shape.width, y: shape.y + shape.height}];
             const xs = points.map(point => point.x);
@@ -1057,12 +1101,12 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
                 left: Math.min(targetBounds.left, box.left), top: Math.min(targetBounds.top, box.top),
                 right: Math.max(targetBounds.right, box.right), bottom: Math.max(targetBounds.bottom, box.bottom),
             } : box;
-            if (shape.label) {
+            if (labelText) {
                 const label = document.createElement("span");
                 label.className = "card__v2-image-mask-label";
                 label.setAttribute("aria-hidden", "true");
                 label.setAttribute("style", "left:" + (box.left + box.right) * 50 + "%;top:" + (box.top + box.bottom) * 50 + "%");
-                label.textContent = shape.label;
+                label.textContent = labelText;
                 wrapper.appendChild(label);
                 maskLabels.push(label);
             }
@@ -1087,13 +1131,36 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
             toggle.textContent = window.siyuan.languages[hideMasks ? "hideAll" : "showAll"];
         });
     }
+    const checkedAnswers: IFlashcardV2AnswerCheckResult[] = [];
+    const targetShapes = targets.map(id => overlays.get(id).shape);
     return {
         destroy: display?.destroy,
+        checkedAnswers,
+        concealedContent: {
+            blockIDs: targetShapes.map(shape => shape.explanationBlockID).filter(Boolean),
+            texts: targetShapes.map(shape => shape.answer).filter(Boolean),
+        },
         revealNext: () => {
             if (step >= steps.length) { return true; }
             maskLabels.splice(0).forEach(label => label.remove());
             for (const id of steps[step++]) {
-                const {element} = overlays.get(id);
+                const {element, shape} = overlays.get(id);
+                const reviewField = reviewFields.get(id);
+                if (reviewField?.input) {
+                    const result = checkFlashcardV2Answer(reviewField.input.value, [shape.answer],
+                        model.template.frontSpec?.answerCheck || {});
+                    checkedAnswers.push(result);
+                    renderFlashcardV2AnswerResult(reviewField.input, result);
+                }
+                if (reviewField && shape.explanationBlockID && showExplanation) {
+                    const explanation = document.createElement("div");
+                    if (numbered.has(id)) {
+                        explanation.dataset.imageExplanationNumber = String(targets.indexOf(id) + 1);
+                    }
+                    reviewField.row.classList.remove("fn__none");
+                    reviewField.row.appendChild(explanation);
+                    showExplanation(shape.explanationBlockID, explanation);
+                }
                 element.classList.remove("card__v2-image-shape--target");
                 element.classList.add("card__v2-image-shape--revealed");
                 element.removeAttribute("role");
@@ -1103,6 +1170,7 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
             if (step < steps.length) {
                 const nextTarget = highlightStep();
                 display?.setTarget(nextTarget);
+                reviewFields.get(steps[step][0])?.input?.focus({preventScroll: true});
                 return false;
             }
             hint.remove();
@@ -1113,9 +1181,9 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
 };
 
 export const prepareFlashcardV2Reveal = (element: Element, model: IFlashcardV2RenderModel,
-    imageViewport?: typeof bindFlashcardV2ImageViewport): IFlashcardV2RevealController | undefined => {
+    imageViewport?: typeof bindFlashcardV2ImageViewport, showExplanation?: TImageExplanation): IFlashcardV2RevealController | undefined => {
     if (model.source.sourceType === "image-occlusion") {
-        return prepareImageOcclusions(element, model, imageViewport);
+        return prepareImageOcclusions(element, model, imageViewport, showExplanation);
     }
     if (model.source.sourceType === "multi-line") {
         return prepareMultiLineAnswers(element, model);

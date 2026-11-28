@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "รหัสบล็อกคำอธิบาย",
+	"flashcardImageUploadHint": "เลือกภาพหนึ่งภาพหรือลากมาวางที่นี่",
 	"flashcardImageSequential": "เปิดส่วนปิดบังทีละส่วน",
 	"flashcardReviewDocumentTree": "ทบทวนการ์ดในเอกสารนี้และเอกสารย่อย",
 	"flashcardManageDocumentTree": "จัดการการ์ดในเอกสารนี้และเอกสารย่อย",

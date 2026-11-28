@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"path/filepath"
+	"slices"
 
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -35,7 +36,15 @@ func previewFlashcardV2AdvancedSource(ctx context.Context, request flashcardv2.A
 	if err != nil {
 		return FlashcardV2AdvancedPreview{}, err
 	}
-	doms, verify, err := readDOMs(ctx, request.BlockIDs)
+	blockIDs := slices.Clone(request.BlockIDs)
+	if request.Mode == flashcardv2.AdvancedModeImageOcclusion {
+		for _, id := range request.ImageConfig.ExplanationBlockIDs() {
+			if !slices.Contains(blockIDs, id) {
+				blockIDs = append(blockIDs, id)
+			}
+		}
+	}
+	doms, verify, err := readDOMs(ctx, blockIDs)
 	if err != nil {
 		return FlashcardV2AdvancedPreview{}, err
 	}

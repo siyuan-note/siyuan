@@ -644,6 +644,7 @@ test("slash menu catalog follows the built-in hint order", () => {
     assert.deepEqual(section?.children.map((item) => item.key), ["menu"]);
     const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
     const cardEntries = FLASHCARD_SLASH_TYPES.map(item => item.id);
+    assert.equal(cardEntries.at(-1), "flashcardImageOcclusion");
     const afterReference = slashMenuBuiltinOrder.indexOf("newSubDocRef") + 1;
     assert.deepEqual(children.map((item) => item.key), ["frequent", ...slashMenuBuiltinOrder.slice(0, afterReference),
         ...cardEntries, ...slashMenuBuiltinOrder.slice(afterReference)]);

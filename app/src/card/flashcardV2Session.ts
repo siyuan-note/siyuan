@@ -67,6 +67,54 @@ import {openFlashcardV2Due} from "./flashcardV2Due";
 import {openFlashcardV2EditLater, type IFlashcardV2EditLater} from "./flashcardV2EditLater";
 import {FlashcardV2WeakCards, flashcardV2SubsetOptions} from "./flashcardV2Study";
 
+const showFlashcardV2ImageExplanation = (blockID: string, target: HTMLElement,
+    isCurrent: () => boolean, snapshot?: Record<string, string>) => {
+    const lang = window.siyuan.languages;
+    const render = (dom?: string) => {
+        if (!isCurrent() || !target.isConnected) {
+            return;
+        }
+        if (!dom) {
+            target.textContent = lang.refExpired;
+            return;
+        }
+        const locate = document.createElement("button");
+        locate.type = "button";
+        locate.className = "b3-button b3-button--text";
+        locate.setAttribute("data-flashcard-explanation-link", "");
+        locate.textContent = (target.dataset.imageExplanationNumber ? target.dataset.imageExplanationNumber + ". " : "") +
+            lang.jumpTo;
+        locate.addEventListener("click", () => {
+            const app = window.siyuan.ws.app;
+            const action: TProtyleAction[] = [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL, Constants.CB_GET_HL];
+            if (isMobile()) {
+                void import("../mobile/editor").then(({openMobileFileById}) => openMobileFileById(app, blockID, action));
+            } else {
+                void import("../editor/util").then(({openFileById}) => openFileById({app, id: blockID, action}));
+            }
+        });
+        const body = document.createElement("div");
+        body.innerHTML = window.DOMPurify.sanitize(dom, {
+            FORBID_TAGS: ["script", "style", "iframe", "frame", "frameset", "object", "embed"],
+        });
+        target.replaceChildren(locate, body);
+        processRender(body);
+        highlightRender(body);
+    };
+    if (snapshot) {
+        render(snapshot[blockID]);
+        return;
+    }
+    target.textContent = lang.loading;
+    let loaded = false;
+    void fetchPost("/api/block/getBlockDOMs", {ids: [blockID]}, (response) => {
+        loaded = true;
+        render(response.data[blockID]);
+    }, undefined, () => {}).catch(error => console.error("Flashcard explanation failed", error)).finally(() => {
+        if (!loaded) { render(); }
+    });
+};
+
 interface IFlashcardV2SessionQueueCard {
     repeatDue?: number;
     sessionCard: {
@@ -349,7 +397,8 @@ const flashcardV2PlainText = (value: string) => {
 
 const renderFlashcardV2Context = (model: IFlashcardV2RenderModel, sourceBlockID: string,
     sensitiveReferences: IFlashcardV2SourceReference[], sensitiveTextValues: string[],
-    doms: Record<string, string>, element: HTMLElement, pathElement: HTMLElement, isCurrent: () => boolean) => {
+    doms: Record<string, string>, element: HTMLElement, pathElement: HTMLElement, isCurrent: () => boolean,
+    concealedBlockIDs: string[] = []) => {
     const policy = model.template.contextPolicy;
     const ancestorDepth = Math.min(5, Math.max(0, Math.floor(policy?.ancestorDepth || 0)));
     const adjacentBefore = Math.min(5, Math.max(0, Math.floor(policy?.adjacentBefore || 0)));
@@ -363,6 +412,7 @@ const renderFlashcardV2Context = (model: IFlashcardV2RenderModel, sourceBlockID:
         .filter((value) => value.length >= 3);
     const sensitiveIDs = new Set(sensitiveReferences.map((reference) => reference.entityID));
     sensitiveIDs.add(sourceBlockID);
+    concealedBlockIDs.forEach(id => sensitiveIDs.add(id));
     const containsSensitiveText = (value: string) => {
         const text = flashcardV2PlainText(value);
         return text.length >= 3 && sensitiveTexts.some((answer) => text.includes(answer) || answer.includes(text));
@@ -414,7 +464,7 @@ const renderFlashcardV2Context = (model: IFlashcardV2RenderModel, sourceBlockID:
         }
         const allPaths = response.data as Array<{ id: string, name?: string }>;
         const paths = allPaths.filter((item, index) => {
-            if (item.id === sourceBlockID || !item.name?.trim() || !policy.breadcrumb && index !== 0 ||
+            if (item.id === sourceBlockID || concealedBlockIDs.includes(item.id) || !item.name?.trim() || !policy.breadcrumb && index !== 0 ||
                 !policy.documentTitle && index === 0 && allPaths.length > 1) {
                 return false;
             }
@@ -722,7 +772,9 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
             answerElement.classList.add("fn__none");
             processRender(contentElement);
             highlightRender(contentElement);
-            const revealController = pluginResult?.revealController || prepareFlashcardV2Reveal(frontElement, model, bindFlashcardV2ImageViewport);
+            const revealController = pluginResult?.revealController || prepareFlashcardV2Reveal(frontElement, model,
+                bindFlashcardV2ImageViewport,
+                (blockID, target) => showFlashcardV2ImageExplanation(blockID, target, isCurrent, draft?.doms));
             const typedAnswerController = prepareFlashcardV2TypedAnswers(frontElement, model, doms);
             const choiceController = prepareFlashcardV2Choice(frontElement, model);
             const playbackController = prepareFlashcardV2Playback(model, frontElement, answerElement,
@@ -753,8 +805,10 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
                 .map((item) => item.textContent || "");
             // 草稿只使用经过权限检查的快照，避免再次读取正文触发修复写回。
             if (!draft) {
-                renderFlashcardV2Context(model, sourceBlockID, sensitiveReferences, sensitiveTextValues, doms,
-                    contextElement, pathElement, isCurrent);
+                const concealed = revealController?.concealedContent;
+                renderFlashcardV2Context(model, sourceBlockID, sensitiveReferences,
+                    sensitiveTextValues.concat(concealed?.texts.map(escapeHtml) || []), doms,
+                    contextElement, pathElement, isCurrent, concealed?.blockIDs);
             }
             callback({
                 shownAt: performance.now(),
@@ -775,7 +829,7 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
             if (!preview) {
                 playbackController.activate("front");
             }
-            (frontElement.querySelector("[data-anki-type-answer], [data-flashcard-type-answer]") as
+            (frontElement.querySelector("[data-anki-type-answer], [data-flashcard-type-answer], :not(.fn__none) > [data-flashcard-image-answer]") as
                 HTMLInputElement)?.focus();
         }).then(() => {
             if (!blocksLoaded && isCurrent()) {
@@ -1124,7 +1178,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             });
             const flagIcon = dialog.element.querySelector<SVGElement>('[data-type="flag"] svg');
             const answerInputs = () => [...dialog.element.querySelectorAll<HTMLInputElement>(
-                "input[data-anki-type-answer], input[data-flashcard-type-answer], [data-choice-option] input")];
+                "input[data-anki-type-answer], input[data-flashcard-type-answer], input[data-flashcard-image-answer], [data-choice-option] input")];
             const acceptRendered = (rendered: IFlashcardV2RenderedCard) => {
                 playbackController?.cancel();
                 shownAt = rendered.shownAt;
@@ -1331,7 +1385,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 reveals++;
                 if (complete) {
                     answerResult = checkFlashcardV2Answer(() => pluginAnswerController?.check() ??
-                        choiceController?.check() ?? typedAnswerController?.check(),
+                        choiceController?.check() ?? typedAnswerController?.check() ?? revealController?.checkedAnswers,
                     () => showMessage(window.siyuan.languages.flashcardAnswerCheckFailed, 6000, "error"));
                     showFlashcardAnswer(contentElement);
                     dialog.element.querySelector("[data-flashcard-answer]").classList.remove("fn__none");
@@ -2083,10 +2137,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     return;
                 }
                 const eventTarget = event.target as HTMLElement;
+                if ((event.key === "Enter" || event.key === " ") && eventTarget.closest("[data-flashcard-explanation-link]")) {
+                    return;
+                }
                 const editing = Boolean(eventTarget.closest("input,textarea,select,[contenteditable=true]"));
                 if (editing) {
                     if (event.key === "Enter" &&
-                        eventTarget.matches("[data-anki-type-answer], [data-flashcard-type-answer]")) {
+                        eventTarget.matches("[data-anki-type-answer], [data-flashcard-type-answer], [data-flashcard-image-answer]")) {
                         reveal();
                         event.preventDefault();
                         event.stopPropagation();

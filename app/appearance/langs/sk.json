@@ -1,4 +1,6 @@
 {
+	"flashcardImageExplanationBlock": "ID bloku s vysvetlením",
+	"flashcardImageUploadHint": "Vyberte jeden obrázok alebo ho sem presuňte",
 	"flashcardImageSequential": "Odhaliť masky postupne",
 	"flashcardReviewDocumentTree": "Opakovať kartičky z tohto dokumentu a jeho poddokumentov",
 	"flashcardManageDocumentTree": "Spravovať kartičky z tohto dokumentu a jeho poddokumentov",

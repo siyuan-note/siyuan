@@ -108,6 +108,7 @@ import {
 import {highlightRender} from "../render/highlightRender";
 import {openAttr} from "../../menus/commonMenuItem";
 import {blockRender} from "../render/blockRender";
+import {handleFlashcardV2Badge} from "../../card/flashcardV2Badge";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 import {pushBack, pushBackByClick} from "../../util/backForward";
@@ -4954,6 +4955,9 @@ export class WYSIWYG {
             if (protyle.toolbar.isMultiSelectMode()) {
                 event.preventDefault();
                 event.stopPropagation();
+                return;
+            }
+            if (handleFlashcardV2Badge(event, protyle)) {
                 return;
             }
             /// #if MOBILE

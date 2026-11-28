@@ -1526,7 +1526,7 @@ export type FlashcardV2ImageOcclusionPointInput = { "x"?: number | null; "y"?: n
 
 export type FlashcardV2ImageOcclusionRegionInput = { "height": number; "width": number; "x": number; "y": number; };
 
-export type FlashcardV2ImageOcclusionShapeInput = { "height"?: number | null; "id"?: string | null; "label"?: string | null; "points"?: Array<FlashcardV2ImageOcclusionPointInput> | null; "type"?: string | null; "width"?: number | null; "x"?: number | null; "y"?: number | null; };
+export type FlashcardV2ImageOcclusionShapeInput = { "answer"?: string | null; "explanationBlockID"?: string | null; "height"?: number | null; "id"?: string | null; "label"?: string | null; "points"?: Array<FlashcardV2ImageOcclusionPointInput> | null; "type"?: string | null; "width"?: number | null; "x"?: number | null; "y"?: number | null; };
 
 export type FlashcardV2InvalidSource = { "blockIDs": Array<string> | null; "cardCount": number; "reason": "closed" | "missing" | "unknown"; "revisionID": string; "sourceID": string; };
 

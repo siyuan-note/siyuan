@@ -108,7 +108,6 @@ func ChatGPT(msg string, contextMsgs []string, c *AIClient, apiBaseURL, protocol
 	ctx = ContextWithOpenAIChatTemperature(ctx, req.Temperature)
 	resp, err := CreateOpenAICompletion(ctx, c, protocol, req, nil)
 	if err != nil {
-		PushErrMsg("Requesting failed, please check kernel log for more details", 3000)
 		logging.LogErrorf("create chat completion failed: %s", err)
 		stop = true
 		return

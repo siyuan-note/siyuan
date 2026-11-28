@@ -90,3 +90,26 @@ test("progress tasks retain explicit actions and close independently", () => {
     f.api.progressLoading({code: 2} as IWebSocketData, "exitProgress");
     assert.equal(f.elements.size, 0);
 });
+
+test("AI request progress reuses its own dialog and closes independently of other tasks", () => {
+    const {api, elements} = setup();
+    const ai = {cmd: "progress", code: 1, msg: "Requesting...", data: {scope: "ai", current: 1, total: 1}};
+    api.progressLoading(ai);
+    const aiProgress = elements.get("progress-ai");
+    assert.ok(aiProgress);
+
+    api.progressLoading({code: 1, msg: "Importing"});
+    const progress = elements.get("progress");
+    api.progressLoading(ai);
+    assert.equal(elements.get("progress-ai"), aiProgress);
+    assert.equal(progress.querySelector('[data-type="message"]').textContent, "Importing");
+
+    api.progressLoading({...ai, code: 2, msg: ""});
+    assert.equal(elements.has("progress-ai"), false);
+    assert.equal(elements.get("progress"), progress);
+
+    api.progressLoading(ai);
+    api.progressLoading({code: 2, msg: ""});
+    assert.equal(elements.has("progress"), false);
+    assert.ok(elements.has("progress-ai"));
+});

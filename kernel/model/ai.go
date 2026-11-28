@@ -10,6 +10,7 @@ import (
 	"errors"
 	"io"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/lute/ast"
@@ -39,15 +40,15 @@ func DisabledBuiltinSkills() []string {
 }
 
 func ChatGPT(msg string) (ret string) {
-	if !isOpenAIAPIEnabled() {
+	if !isOpenAIAPIEnabled(false) {
 		return
 	}
 
 	return chatGPT(msg, false)
 }
 
-func ChatGPTWithAction(ids []string, action string) (ret string) {
-	if !isOpenAIAPIEnabled() {
+func ChatGPTWithAction(ids []string, action string, background bool) (ret string) {
+	if !isOpenAIAPIEnabled(background) {
 		return
 	}
 
@@ -58,7 +59,7 @@ func ChatGPTWithAction(ids []string, action string) (ret string) {
 	}
 
 	msg := getBlocksContent(ids)
-	ret = chatGPTWithAction(msg, action, false)
+	ret = chatGPTWithAction(msg, action, false, background)
 	return
 }
 
@@ -71,7 +72,7 @@ func chatGPT(msg string, cloud bool) (ret string) {
 		return
 	}
 
-	ret, retCtxMsgs, err := chatGPTComplete(msg, cachedContextMsg, cloud)
+	ret, retCtxMsgs, err := chatGPTComplete(msg, cachedContextMsg, cloud, false)
 	if err != nil {
 		return
 	}
@@ -79,9 +80,9 @@ func chatGPT(msg string, cloud bool) (ret string) {
 	return
 }
 
-func chatGPTWithAction(msg string, action string, cloud bool) (ret string) {
+func chatGPTWithAction(msg, action string, cloud, background bool) (ret string) {
 	msg = BuildAIEditorPrompt(msg, action)
-	ret, _, err := chatGPTComplete(msg, nil, cloud)
+	ret, _, err := chatGPTComplete(msg, nil, cloud, background)
 	if err != nil {
 		return
 	}
@@ -262,11 +263,34 @@ func IsAIEditorStreamDone(err error) bool {
 	return errors.Is(err, io.EOF)
 }
 
-func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, retContextMsgs []string, err error) {
+var aiRequestProgress struct {
+	sync.Mutex
+	active int
+}
+
+func updateAIRequestProgress(start bool) {
+	aiRequestProgress.Lock()
+	defer aiRequestProgress.Unlock()
+	if start {
+		aiRequestProgress.active++
+		util.BroadcastByType("main", "progress", util.PushProgressCodeEndless, "Requesting...",
+			map[string]any{"scope": "ai", "current": 1, "total": 1})
+		return
+	}
+	aiRequestProgress.active--
+	if aiRequestProgress.active == 0 {
+		util.BroadcastByType("main", "progress", util.PushProgressCodeEnd, "",
+			map[string]any{"scope": "ai", "current": 100, "total": 100})
+	}
+}
+
+func chatGPTComplete(msg string, contextMsgs []string, cloud, background bool) (ret string, retContextMsgs []string, err error) {
 	confAISnapshot := Conf.LoadAI()
 
-	util.PushEndlessProgress("Requesting...")
-	defer util.ClearPushProgress(100)
+	if !background {
+		updateAIRequestProgress(true)
+		defer updateAIRequestProgress(false)
+	}
 
 	prov, m := confAISnapshot.GetEditingModel()
 	if nil == prov || nil == m {
@@ -301,15 +325,15 @@ func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, 
 
 	part, stop, chatErr := gpt.chat(msg, contextMsgs)
 	if nil != chatErr {
+		if !cloud && !background {
+			util.PushErrMsg("Requesting failed, please check kernel log for more details", 3000)
+		}
 		err = chatErr
 		return
 	}
 
-	// stop==false means finish_reason=length: the output was truncated at
-	// MaxCompletionTokens. Retrying the same prompt would almost certainly hit
-	// the same limit again, so we return whatever was produced and notify the
-	// user instead of silently looping. See https://github.com/siyuan-note/siyuan/issues/17797
-	if !stop {
+	// 模型达到输出上限时返回已生成的内容，并提示前台调用方。https://github.com/siyuan-note/siyuan/issues/17797
+	if !stop && !background {
 		util.PushMsg(Conf.Language(297), 5000)
 	}
 
@@ -320,9 +344,11 @@ func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, 
 	return
 }
 
-func isOpenAIAPIEnabled() bool {
+func isOpenAIAPIEnabled(background bool) bool {
 	if !Conf.LoadAI().HasAnyProvider() {
-		util.PushMsg(Conf.Language(193), 5000)
+		if !background {
+			util.PushMsg(Conf.Language(193), 5000)
+		}
 		return false
 	}
 	return true

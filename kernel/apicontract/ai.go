@@ -190,8 +190,9 @@ type AIMessageRequest struct {
 	Msg string `json:"msg" api:"trim"`
 }
 type AIActionRequest struct {
-	IDs    []string `json:"ids"`
-	Action string   `json:"action"`
+	IDs        []string `json:"ids"`
+	Action     string   `json:"action"`
+	Background bool     `json:"background" api:"optional,nullable"`
 }
 type AIEditorActionSaveRequest struct {
 	ID     string `json:"id" api:"optional,nullable"`

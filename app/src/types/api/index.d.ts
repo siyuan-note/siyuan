@@ -1,6 +1,6 @@
 // 此文件由内核契约生成，请运行 pnpm run api:generate 更新。
 
-export type AIActionRequestInput = { "action": string; "ids": Array<string>; };
+export type AIActionRequestInput = { "action": string; "background"?: boolean | null; "ids": Array<string>; };
 
 export type AIAgentAttachment = { "detail"?: string; "documentId": string; "height"?: number; "mimeType"?: string; "path": string; "pdfImage"?: AIPDFImageSelection; "type": string; "width"?: number; };
 
@@ -3651,6 +3651,10 @@ export interface APIPOSTRoutes {
         /** 服务器路由要求；资源权限与笔记本租约仍由内核校验 */
         authorization?: readonly ["authenticated","admin"];
     };
+    /**
+     * 使用已配置的编辑模型处理指定内容块和操作。省略 background 或传 false 时，
+     * 进度遮罩在所有前台 AI 请求结束后关闭。传 true 时不显示全局进度和提示，取材范围和响应格式一致。
+     */
     "/api/ai/chatGPTWithAction": {
         request: AIActionRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

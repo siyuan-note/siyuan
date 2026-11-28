@@ -111,7 +111,14 @@ func init() {
 		value.Msg, err = aiLegacyString(fields, "msg", true, true)
 		return
 	})
-	fileTreeJSONDecoder(&AIChatGPTWithAction)
+	aiJSONDecoder(&AIChatGPTWithAction, func(fields fileTreeFields) (AIActionRequest, error) {
+		// background 在旧请求中是未知字段，兼容非布尔值。
+		background := bytes.Equal(bytes.TrimSpace(fields["background"]), []byte("true"))
+		delete(fields, "background")
+		value, err := fileTreeBind[AIActionRequest](fields)
+		value.Background = background
+		return value, err
+	})
 	aiJSONDecoder(&AISaveEditorAction, func(fields fileTreeFields) (value AIEditorActionSaveRequest, err error) {
 		if value.ID, err = aiLegacyString(fields, "id", false, false); err != nil {
 			return

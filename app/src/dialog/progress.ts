@@ -19,7 +19,8 @@ export const updateProgressContent = (element: Element, message: string, current
     element.querySelector('[data-type="message"]').textContent = message;
 };
 
-export const progressLoading = (data: IWebSocketData, id = "progress", action?: {label: string, callback: () => void},
+export const progressLoading = (data: IWebSocketData, id = data.data?.scope === "ai" ? "progress-ai" : "progress",
+                                action?: {label: string, callback: () => void},
                                 scrim: "frosted" | "standard" = "frosted") => {
     let progressElement = document.getElementById(id);
     // 关闭时只移除对应任务的遮罩。

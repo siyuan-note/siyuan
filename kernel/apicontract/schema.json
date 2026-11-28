@@ -7,6 +7,16 @@
         "action": {
           "type": "string"
         },
+        "background": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "ids": {
           "type": "array",
           "items": {

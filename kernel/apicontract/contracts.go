@@ -1823,6 +1823,9 @@ var BatchSetAttributeViewBlockAttrs = define[BatchSetAttributeViewBlockAttrsRequ
 var GetAttributeViewRowSort = define[GetAttributeViewRowSortRequest, AVRowSortPreview]("getAttributeViewRowSort", "/api/av/getAttributeViewRowSort", AuthenticatedAccess|AdminAccess, StructJSONBody, ResponseOptions{}, "POST")
 
 var AIChatGPT = define[AIMessageRequest, string]("chatGPT", "/api/ai/chatGPT", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
+
+// AIChatGPTWithAction 使用已配置的编辑模型处理指定内容块和操作。省略 background 或传 false 时，
+// 进度遮罩在所有前台 AI 请求结束后关闭。传 true 时不显示全局进度和提示，取材范围和响应格式一致。
 var AIChatGPTWithAction = define[AIActionRequest, string]("chatGPTWithAction", "/api/ai/chatGPTWithAction", AuthenticatedAccess|AdminAccess, JSONBody, ResponseOptions{}, "POST")
 var AIListEditorActions = define[EmptyRequest, []*AIEditorAction]("lsAIEditorActions", "/api/ai/editor/lsActions", AuthenticatedAccess|AdminAccess, NoBody, ResponseOptions{}, "POST")
 var AISaveEditorAction = define[AIEditorActionSaveRequest, *AIEditorAction]("saveAIEditorAction", "/api/ai/editor/saveAction", AuthenticatedAccess|AdminAccess|WritableAccess, JSONBody, ResponseOptions{}, "POST")

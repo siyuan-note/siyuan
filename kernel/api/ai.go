@@ -91,7 +91,7 @@ var chatGPTWithAction = contractHandler(apicontract.AIChatGPTWithAction, chatGPT
 
 func chatGPTWithActionContract(c *gin.Context, req apicontract.AIActionRequest) apicontract.Response[string] {
 
-	return apicontract.Success(model.ChatGPTWithAction(req.IDs, req.Action))
+	return apicontract.Success(model.ChatGPTWithAction(req.IDs, req.Action, req.Background))
 }
 
 var aiEditorChat = contractHandler(apicontract.AIEditorChat, aiEditorChatContract, aiProviderAdmission)

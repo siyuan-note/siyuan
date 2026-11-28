@@ -445,77 +445,8 @@ const emitFlashcardV2Lifecycle = (app: App, type: TEventBus, detail: Record<stri
     app.plugins.forEach((plugin) => plugin.eventBus.emit(type, detail));
 };
 
-interface IFlashcardV2SessionTag {
-    id: string;
-    parentID?: string;
-    name: string;
-}
-
-const isFlashcardV2SessionTag = (value: unknown): value is IFlashcardV2SessionTag => isFlashcardV2Object(value) &&
-    typeof value.id === "string" && typeof value.name === "string" &&
-    (value.parentID === undefined || typeof value.parentID === "string");
-
 const isFlashcardV2Flag = (value: unknown): value is {flag: number, name: string} => isFlashcardV2Object(value) &&
     typeof value.flag === "number" && typeof value.name === "string";
-
-const flashcardV2SessionTagPath = (tag: IFlashcardV2SessionTag, tags: Map<string, IFlashcardV2SessionTag>) => {
-    const names = [tag.name];
-    const seen = new Set([tag.id]);
-    let parentID = tag.parentID;
-    while (parentID && !seen.has(parentID)) {
-        seen.add(parentID);
-        const parent = tags.get(parentID);
-        if (!parent) {
-            break;
-        }
-        names.unshift(parent.name);
-        parentID = parent.parentID;
-    }
-    return names.join(" / ");
-};
-
-const openFlashcardV2SessionTags = (targetType: "source" | "card", targetID: string,
-    selectedTagIDs: string[]) => {
-    fetchPost("/api/flashcard/listEntities", {
-        entityType: "tag",
-        options: {limit: 1000, offset: 0},
-    }, (response) => {
-        const tags = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardV2SessionTag))
-            .map((revision) => revision.payload);
-        const selected = new Set(selectedTagIDs);
-        const byID = new Map(tags.map((tag) => [tag.id, tag]));
-        const choices = [...tags]
-            .sort((left, right) => flashcardV2SessionTagPath(left, byID)
-                .localeCompare(flashcardV2SessionTagPath(right, byID)))
-            .map((tag) => `<label class="b3-list-item b3-list-item--narrow">
-<span class="b3-list-item__text">${escapeHtml(flashcardV2SessionTagPath(tag, byID))}</span>
-<input class="b3-switch" type="checkbox" value="${escapeAttr(tag.id)}"${selected.has(tag.id) ? " checked" : ""}>
-</label>`).join("");
-        const tagDialog = new Dialog({
-            title: window.siyuan.languages.tag,
-            width: isMobile() ? "92vw" : "520px",
-            height: "70vh",
-            content: `<div class="b3-dialog__content card__v2-panel"><div class="b3-list b3-list--background fn__flex-1 card__v2-panel-list">${choices || `<div class="card__empty">${window.siyuan.languages.emptyContent}</div>`}</div></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-        });
-        const buttons = tagDialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
-        buttons[0].addEventListener("click", () => tagDialog.destroy());
-        buttons[1].addEventListener("click", () => {
-            const tagIDs = [...tagDialog.element.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked')]
-                .map((input) => input.value).sort();
-            fetchPost("/api/flashcard/setTagAssignments", {
-                operationID: genUUID(),
-                targetType,
-                targetIDs: [targetID],
-                tagIDs,
-                changedAt: Date.now(),
-            }, () => tagDialog.destroy());
-        });
-    });
-};
 
 const sessionCompletionContent = (canUndo: boolean, reviewMode: IFlashcardV2ReviewSessionOptions["reviewMode"],
     weakCount = 0) => `<div class="card__empty-icon">🔮</div>
@@ -1451,6 +1382,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             };
             const queryCurrentCardTags = (targetType: "source" | "card") => {
                 const current = queue[index];
+                const generation = renderGeneration;
+                const canOpen = () => !sessionFinished && dialog.element.isConnected &&
+                    dialog.element.dataset.dialogClosing !== "true" && renderGeneration === generation &&
+                    queue[index]?.card.id === current.card.id;
                 fetchPost("/api/flashcard/queryCards", {
                     query: {version: 1, root: {
                         operator: "predicate", field: "cardID", comparator: "equal", value: current.card.id,
@@ -1460,12 +1395,20 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         includeBuried: true, includePaused: true, includeConflicts: true, limit: 1,
                     },
                 }, (response) => {
-                    const result = response.data.cards?.[0] as {
-                        cardTagIDs?: string[], sourceTagIDs?: string[]
-                    } | undefined;
-                    openFlashcardV2SessionTags(targetType,
-                        targetType === "card" ? current.card.id : current.card.sourceID,
-                        targetType === "card" ? result?.cardTagIDs || [] : result?.sourceTagIDs || []);
+                    const result = response.data.cards?.[0];
+                    if (!result || !canOpen()) {
+                        return;
+                    }
+                    const cardTarget = targetType === "card";
+                    void import("./flashcardV2").then(({openFlashcardV2Tags}) => {
+                        if (!canOpen()) {
+                            return;
+                        }
+                        openFlashcardV2Tags(targetType, cardTarget ? current.card.id : current.card.sourceID,
+                            (cardTarget ? result.cardTagIDs : result.sourceTagIDs) || [],
+                            () => notifyFlashcardV2ReviewChange("flashcard-review-tags-changed"), undefined,
+                            cardTarget ? result.sourceTagIDs || [] : undefined, canOpen);
+                    });
                 });
             };
             const openCurrentManagementMenu = (button: HTMLElement) => {

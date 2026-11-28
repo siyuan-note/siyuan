@@ -1529,13 +1529,17 @@ const renderFlashcardInheritedTags = (tags: IFlashcardTag[], inheritedTagIDs: re
 <div class="ft__breakword">${escapeHtml(window.siyuan.languages.flashcardInheritedTags)}: ${names.length ? names.map(escapeHtml).join("; ") : escapeHtml(window.siyuan.languages.empty)}</div>`;
 };
 
-const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | string[], selectedTagIDs: string[],
+export const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | string[], selectedTagIDs: string[],
     callback: () => void,
-    initialAssignments?: Readonly<Record<string, readonly string[]>>, inheritedTagIDs?: readonly string[]) => {
+    initialAssignments?: Readonly<Record<string, readonly string[]>>, inheritedTagIDs?: readonly string[],
+    canOpen = () => true) => {
     fetchPost("/api/flashcard/listEntities", {
         entityType: "tag",
         options: {limit: 1000, offset: 0},
     }, (response) => {
+        if (!canOpen()) {
+            return;
+        }
         const revisions = response.data.entities.map((revision) => readFlashcardV2Revision(revision, isFlashcardTag));
         const tags = revisions.map((revision) => revision.payload);
         const targetIDs = [...new Set(Array.isArray(targetID) ? targetID : [targetID])];

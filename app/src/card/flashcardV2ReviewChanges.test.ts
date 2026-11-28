@@ -54,7 +54,7 @@ test("management refresh follows latest filters once per change and stops on clo
 test("real session lifecycle notifies management even with no plugins installed", () => {
     const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
     const snippet = source.slice(source.indexOf("const emitFlashcardV2Lifecycle ="),
-        source.indexOf("interface IFlashcardV2SessionTag"));
+        source.indexOf("const isFlashcardV2Flag"));
     const view = new FlashcardV2ManagementView();
     let calls = 0;
     view.setRefresh(() => calls++);

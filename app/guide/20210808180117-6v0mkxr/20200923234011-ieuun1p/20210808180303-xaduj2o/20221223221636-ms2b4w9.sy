@@ -841,7 +841,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " also trigger the \"Good\" rating. Ratings directly affect the review interval for each card — higher ratings extend the time before the next review, and lower ratings shorten it. The system uses the FSRS algorithm to automatically optimize each user's review schedule based on their rating history. In normal review, each rating button shows the estimated time until the next review. Use the toolbar to flag or skip the current card, or undo the last rating. Flags are named by color by default. Clear a custom flag name to restore its color name."
+					"Data": " also trigger the \"Good\" rating. Ratings directly affect the review interval for each card — higher ratings extend the time before the next review, and lower ratings shorten it. The system uses the FSRS algorithm to automatically optimize each user's review schedule based on their rating history. In normal review, each rating button shows the estimated time until the next review. Use the toolbar to flag or skip the current card, or undo the last rating. Flags are named by color by default. Clear a custom flag name to restore its color name. Use the tag dialog during review to create tags. Confirm to assign the selected tags to the current card or its source."
 				}
 			]
 		},

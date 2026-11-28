@@ -33,7 +33,7 @@ test("pending-edit entry keeps a stable management title while retaining its ini
     assert.equal(args[5], false);
 });
 
-test("management reopens in the last grouping mode and preserves other flashcard layout state", () => {
+test("management starts ungrouped and saves explicit grouping choices without changing other layout state", () => {
     const source = readFileSync("src/card/flashcardV2.ts", "utf8");
     const start = source.indexOf("const openFlashcardV2ReviewSetCards =");
     const body = source.indexOf("    const isCurrent = owner.view.request", start);
@@ -62,12 +62,12 @@ test("management reopens in the last grouping mode and preserves other flashcard
             writes.push(value.groupBySource);
         },
     });
-    assert.equal(open("", "Manage"), true);
-    toggleGrouping({checked: false});
     assert.equal(open("", "Manage"), false);
     toggleGrouping({checked: true});
     assert.equal(open("", "Manage"), true);
-    assert.deepEqual(writes, [false, true]);
+    toggleGrouping({checked: false});
+    assert.equal(open("", "Manage"), false);
+    assert.deepEqual(writes, [true, false]);
 });
 
 test("batch labels distinguish configuration steps from direct actions", () => {

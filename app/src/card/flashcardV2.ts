@@ -1996,7 +1996,7 @@ interface IFlashcardManagementDialog {
 
 const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset = 0,
     filters: IFlashcardManagementFilters = {}, managementOptions?: IFlashcardManagementOptions,
-    grouped = window.siyuan.storage[Constants.LOCAL_FLASHCARD]?.groupBySource !== false,
+    grouped = window.siyuan.storage[Constants.LOCAL_FLASHCARD]?.groupBySource === true,
     owner: IFlashcardManagementDialog = {view: new FlashcardV2ManagementView()}, preserve = true) => {
     const isCurrent = owner.view.request(() =>
         openFlashcardV2ReviewSetCards(reviewSetID, name, offset, filters, undefined, grouped, owner, preserve));

@@ -4,25 +4,30 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ScriptTarget, transpileModule} from "typescript";
 
-test("question-answer entry requires two blocks and keeps its original creation handler", () => {
+test("card source menu omits quick creation and keeps the question-answer handler", () => {
     const source = readFileSync("src/card/makeCard.ts", "utf8");
-    const snippet = source.slice(source.indexOf("const sourceActions ="), source.indexOf("const dialog =", source.indexOf("const sourceActions =")));
+    const snippet = source.slice(source.indexOf("export const flashcardSourceMenuItems"),
+        source.indexOf("export const quickMakeCard")).replace("export const", "const");
+    const code = transpileModule(snippet + "\nflashcardSourceMenuItems({}, ids);", {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
     for (const ids of [[], ["a"], ["a", "b"], ["a", "b", "c"]]) {
-        const actions: Array<{type: string, label: string}> = [];
-        runInNewContext(snippet, {ids, window: {siyuan: {languages: {flashcardQA: "Question and answer"}}},
-            actionHTML: (type: string, _icon: string, label: string) => { actions.push({type, label}); return ""; }});
-        assert.equal(actions.some(item => item.type === "basic"), ids.length >= 2);
-        if (ids.length >= 2) { assert.equal(actions.find(item => item.type === "basic").label, "Question and answer"); }
+        const calls: string[][] = [];
+        const actions: IMenu[] = runInNewContext(code, {
+            ids, window: {siyuan: {languages: {flashcardQA: "Question and answer"}}},
+            openFlashcardV2BasicSource: (blockIDs: string[]) => { calls.push(blockIDs); },
+        });
+        assert.deepEqual(Array.from(actions, item => item.id),
+            ["basic", "advanced", "reviewSets", "presets", "management", "statistics", "anki"]);
+        const basic = actions.find(item => item.id === "basic");
+        assert.equal(basic.ignore, ids.length < 2);
+        assert.equal(actions.find(item => item.id === "advanced").ignore, ids.length === 0);
+        if (!basic.ignore) {
+            assert.equal(basic.label, "Question and answer");
+            basic.click(null, null);
+            assert.equal(calls[0], ids);
+        }
     }
-    const action = source.slice(source.indexOf('} else if (type === "basic")') + "} else ".length,
-        source.indexOf('} else if (type === "advanced")')) + "}";
-    let closed = false;
-    let received: string[];
-    const ids = ["question", "answer"];
-    runInNewContext(action, {type: "basic", ids, dialog: {destroy: () => { closed = true; }},
-        openFlashcardV2BasicSource: (blockIDs: string[]) => { received = blockIDs; }});
-    assert.equal(closed, true);
-    assert.equal(received, ids);
 });
 
 test("basic source dialog uses the entry title without changing direction defaults or submitted value", () => {

@@ -1535,3 +1535,19 @@ test("the built-in Markdown asset action has a stable nested link menu identity"
     assert.ok(getEntryCatalogNode("inline.link.openBy.openMarkdownEditor"));
     assert.deepEqual(getEntryCatalogChildren("inline.link.openBy").map(item => item.key), ["openMarkdownEditor"]);
 });
+
+test("card source submenu has stable paths and follows its parent profile", () => {
+    const paths = getEntryPaths().filter(path => path.endsWith(".addToDeck"));
+    assert.equal(paths.length, 5);
+    for (const path of paths) {
+        const parent = getEntryCatalogNode(path);
+        const children = getEntryCatalogChildren(path);
+        assert.deepEqual(children.map(item => item.key),
+            ["basic", "advanced", "reviewSets", "presets", "management", "statistics", "anki"]);
+        for (const child of children) {
+            assert.equal(child.type, "entry");
+            assert.equal(child.simple, parent.simple);
+            assert.equal(getEntryParentPath(path + "." + child.key), path);
+        }
+    }
+});

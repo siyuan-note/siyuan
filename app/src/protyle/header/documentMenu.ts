@@ -15,7 +15,7 @@ import {Constants} from "../../constants";
 import {openCardByScope} from "../../card/openCard";
 import {openFlashcardV2ManagementByRoots} from "../../card/flashcardV2";
 import {getDocDisplayName, getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../../util/pathName";
-import {createQuickSources, makeCard} from "../../card/makeCard";
+import {createQuickSources, flashcardSourceMenuItems} from "../../card/makeCard";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import dayjs from "dayjs";
 import {popSearch} from "../../mobile/menu/search";
@@ -257,9 +257,7 @@ export const openDocumentMenu = (options: {
                 id: "addToDeck",
                 iconHTML: "",
                 label: window.siyuan.languages.flashcardCardSource,
-                click: () => {
-                    makeCard(app, [id]);
-                }
+                submenu: flashcardSourceMenuItems(app, [id]),
             }];
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "riffCard",

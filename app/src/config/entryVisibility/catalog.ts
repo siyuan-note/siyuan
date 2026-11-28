@@ -148,6 +148,16 @@ const importChildren = () => [
     node("importMarkdownFolder", () => `Markdown ${window.siyuan.languages.folder}`),
 ];
 
+const flashcardSourceEntry = (simple = true) => node("addToDeck", lang("flashcardCardSource"), simple, [
+    node("basic", lang("flashcardQA"), simple),
+    node("advanced", lang("configGroupAdvanced"), simple),
+    node("reviewSets", lang("flashcardReviewSet"), simple),
+    node("presets", lang("flashcardPreset"), simple),
+    node("management", lang("manage"), simple),
+    node("statistics", lang("flashcardStatistics"), simple),
+    node("anki", literal("Anki"), simple),
+]);
+
 const docTreeCommon = (multi = false) => [
     node("copy", lang("copy"), true, [...copyChildren(), node("duplicate", lang("duplicateCopy")),
         ...(!multi ? [node("duplicateTree", lang("duplicateDocTree"))] : [])]),
@@ -159,7 +169,7 @@ const docTreeCommon = (multi = false) => [
         node("manage", lang("manage")),
         node("quickMakeCard", lang("quickMakeCard")),
         node("removeCard", lang("removeCard")),
-        node("addToDeck", lang("flashcardCardSource")),
+        flashcardSourceEntry(),
     ]),
     node("openBy", lang("openBy"), true, openChildren()),
     node("export", lang("export"), true, multi ? [
@@ -374,7 +384,7 @@ const gutterMultiple = () => [
     separator("separator_quickMakeCard"),
     node("quickMakeCard", lang("quickMakeCard"), false),
     node("removeCard", lang("removeCard"), false),
-    node("addToDeck", lang("flashcardCardSource"), false),
+    flashcardSourceEntry(false),
 ];
 
 const gutterSingle = () => [
@@ -513,7 +523,7 @@ const gutterSingle = () => [
     node("wechatReminder", lang("wechatReminder"), false),
     node("quickMakeCard", lang("quickMakeCard"), false),
     node("removeCard", lang("removeCard"), false),
-    node("addToDeck", lang("flashcardCardSource"), false),
+    flashcardSourceEntry(false),
     separator("separator_5"),
     node("updateAndCreatedAt", () => `${window.siyuan.languages.modifiedAt} / ${window.siyuan.languages.createdAt}`, false),
 ];
@@ -880,7 +890,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("manage", lang("manage"), false),
                 node("quickMakeCard", lang("quickMakeCard"), false),
                 node("removeCard", lang("removeCard"), false),
-                node("addToDeck", lang("flashcardCardSource"), false),
+                flashcardSourceEntry(false),
             ]),
             node("search", lang("search")),
             node("transferBlockRef", lang("transferBlockRef")),

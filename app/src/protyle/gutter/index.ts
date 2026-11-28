@@ -83,7 +83,7 @@ import {mathRender} from "../render/mathRender";
 import {duplicateBlock} from "../wysiwyg/commonHotkey";
 import {isEncryptedBox, movePathTo, useShell} from "../../util/pathName";
 import {hintMoveBlock} from "../hint/extend";
-import {makeCard, quickMakeCard} from "../../card/makeCard";
+import {flashcardSourceMenuItems, quickMakeCard} from "../../card/makeCard";
 import {openFlashcardV2ManagementByBlocks} from "../../card/flashcardV2";
 import {transferBlockRef} from "../../menus/block";
 import {isMobile} from "../../util/functions";
@@ -1509,9 +1509,7 @@ export class Gutter {
                 id: "addToDeck",
                 label: window.siyuan.languages.flashcardCardSource,
                 icon: "iconRiffCard",
-                click() {
-                    makeCard(protyle.app, ids);
-                }
+                submenu: flashcardSourceMenuItems(protyle.app, ids),
             }).element);
         }
 
@@ -3011,9 +3009,7 @@ export class Gutter {
                 id: "addToDeck",
                 label: window.siyuan.languages.flashcardCardSource,
                 icon: "iconRiffCard",
-                click() {
-                    makeCard(protyle.app, [id]);
-                }
+                submenu: flashcardSourceMenuItems(protyle.app, [id]),
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_5", type: "separator"}).element);
         }

@@ -41,7 +41,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Turn content blocks into flashcards to review your notes with spaced repetition. SiYuan uses FSRS to schedule the next review based on your rating, so you can reuse existing notes without creating a separate copy."
+					"Data": "Turn content blocks into flashcards to review your notes with spaced repetition. SiYuan uses FSRS to schedule the next review based on your rating, so you can reuse existing notes without creating a separate copy. Open the Card Source submenu from a block icon or document title to find advanced creation and card management."
 				}
 			]
 		},

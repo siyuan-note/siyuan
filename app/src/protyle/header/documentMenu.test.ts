@@ -48,7 +48,7 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
         "../../layout/dock/util": {openOutline: record("outline"), openBacklink: record("backlinks"), openGraph: record("graphView")},
         "../../util/pathName": {getDocDisplayName: (name: string, empty: boolean) => empty ? globals.window.siyuan.languages._kernel[16] : name, isEncryptedBox: () => encrypted, pathPosix: () => posix,
             getNotebookName: () => "Notebook", getDisplayName: (value: string) => value.replace(/\.sy$/, ""), useShell: record("folder")},
-        "../../card/makeCard": {makeCard: record("makeCard"), createQuickSources: record("quickMakeCard")},
+        "../../card/makeCard": {flashcardSourceMenuItems: () => [{id: "advanced"}], createQuickSources: record("quickMakeCard")},
         "../../card/openCard": {openCardByScope: record("spaceRepetition")},
         "../../card/flashcardV2": {openFlashcardV2ManagementByRoots: record("manage")},
         "../../plugin/EventBus": {emitOpenMenu: (event: typeof events[number]) => {

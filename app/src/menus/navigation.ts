@@ -37,7 +37,7 @@ import type {IDocTreeItem} from "../layout/dock/docTree/types";
 import type {App} from "../index";
 import {openDocHistory} from "../history/doc";
 import {openEditorTab} from "./util";
-import {createQuickSources, makeCard} from "../card/makeCard";
+import {createQuickSources, flashcardSourceMenuItems} from "../card/makeCard";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {isPhablet, saveExportFile} from "../protyle/util/compatibility";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
@@ -389,7 +389,7 @@ const initMultiMenu = (selection: IDocTreeMenuContext, app: App) => {
     }
     window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
     if (!window.siyuan.config.readonly && !encryptedNotebookId) {
-        const riffCardMenu = [{
+        const riffCardMenu: IMenu[] = [{
             id: "quickMakeCard",
             iconHTML: "",
             accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
@@ -409,9 +409,7 @@ const initMultiMenu = (selection: IDocTreeMenuContext, app: App) => {
             id: "addToDeck",
             iconHTML: "",
             label: window.siyuan.languages.flashcardCardSource,
-            click: () => {
-                makeCard(app, blockIDs);
-            }
+            submenu: flashcardSourceMenuItems(app, blockIDs),
         });
         window.siyuan.menus.menu.append(new MenuItem({
             id: "riffCard",
@@ -1028,7 +1026,7 @@ export const initDocumentMenu = (app: App, options: {
             submenu: sortSubMenu,
         }).element);
         if (!window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
-            const riffCardMenu = [{
+            const riffCardMenu: IMenu[] = [{
                 id: "spaceRepetition",
                 iconHTML: "",
                 label: window.siyuan.languages.spaceRepetition,
@@ -1069,9 +1067,7 @@ export const initDocumentMenu = (app: App, options: {
                 id: "addToDeck",
                 iconHTML: "",
                 label: window.siyuan.languages.flashcardCardSource,
-                click: () => {
-                    makeCard(app, [id]);
-                }
+                submenu: flashcardSourceMenuItems(app, [id]),
             });
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "riffCard",

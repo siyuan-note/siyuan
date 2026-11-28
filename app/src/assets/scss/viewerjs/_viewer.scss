@@ -494,22 +494,18 @@
   }
 
   &-backdrop {
-    background-color: rgba(0, 0, 0, .24);
+    background-color: var(--b3-theme-background);
 
-    &.viewer-container--mobile {
+    @supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
+      background-color: color-mix(in srgb, var(--b3-theme-background) 42%, transparent);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+
+    @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
       background-color: var(--b3-theme-background);
-
-      @supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
-        background-color: color-mix(in srgb, var(--b3-theme-background) 42%, transparent);
-        -webkit-backdrop-filter: blur(8px);
-        backdrop-filter: blur(8px);
-      }
-
-      @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
-        background-color: var(--b3-theme-background);
-        -webkit-backdrop-filter: none;
-        backdrop-filter: none;
-      }
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
   }
 

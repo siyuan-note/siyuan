@@ -101,13 +101,19 @@ test("image gallery handles source scopes, copy feedback, Live Photos, and mobil
                 const deadline=performance.now()+8000;
                 while(!predicate()){if(performance.now()>deadline){throw new Error("gallery timeout: "+predicate.toString());}await new Promise(resolve=>setTimeout(resolve,10));}
             };
+            const checkBackdrop = gallery => {
+                const backdrop = getComputedStyle(gallery.viewer);
+                const footer = gallery.viewer.querySelector(".viewer-footer");
+                if (backdrop.backdropFilter !== "blur(8px)" || backdrop.transitionDuration !== "0s" ||
+                    backdrop.animationName !== "none" || !backdrop.backgroundColor.endsWith("0.42)") ||
+                    getComputedStyle(gallery.image).filter !== "none" || getComputedStyle(footer).filter !== "none") {
+                    throw new Error("Image gallery must blur only its backdrop when opened");
+                }
+            };
             exports.previewDocImage(image,"document","assets/second.mov");
             await wait(()=>window.siyuan.viewer?.viewed);
             const viewer=window.siyuan.viewer;
-            const desktopBackdrop = getComputedStyle(viewer.viewer);
-            if (desktopBackdrop.backdropFilter !== "none" || desktopBackdrop.backgroundColor !== "rgba(0, 0, 0, 0.24)") {
-                throw new Error("Desktop gallery backdrop changed");
-            }
+            checkBackdrop(viewer);
             if (getComputedStyle(viewer.navigation).display==="none" || viewer.toolbar.querySelector(".viewer-next") ||
                 !viewer.options.rotateOnTouch || !viewer.options.rotateOnGesture) {
                 throw new Error("Desktop gallery controls changed");
@@ -206,15 +212,9 @@ test("image gallery handles source scopes, copy feedback, Live Photos, and mobil
                 exports.previewImages(images, images[1].src, undefined, "assets/second.mov");
                 await wait(() => window.siyuan.viewer !== previousGallery && window.siyuan.viewer.viewed);
                 const mobile = window.siyuan.viewer;
+                checkBackdrop(mobile);
                 const footer = mobile.viewer.querySelector(".viewer-footer");
                 const canvas = mobile.viewer.querySelector(".viewer-canvas");
-                const backdrop = getComputedStyle(mobile.viewer);
-                const backdropColor = backdrop.backgroundColor;
-                if (backdrop.backdropFilter !== "blur(8px)" || backdrop.transitionDuration !== "0s" ||
-                    !backdropColor.endsWith("0.42)") ||
-                    getComputedStyle(mobile.image).filter !== "none" || getComputedStyle(footer).filter !== "none") {
-                    throw new Error("Mobile gallery must blur only its backdrop when opened");
-                }
                 const buttons = [...mobile.toolbar.querySelectorAll("li")].filter(item => item.getClientRects().length);
                 const positions = buttons.map(item => item.getBoundingClientRect());
                 const next = mobile.toolbar.querySelector(".viewer-next");

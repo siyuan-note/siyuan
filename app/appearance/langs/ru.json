@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Открыть источник карточки для редактирования",
+	"flashcardReviewSkipTip": "Пропустить карточку до конца сеанса, сохранив срок повторения",
+	"flashcardReviewBuryTip": "Скрыть карточку из обычного повторения до завтра",
+	"flashcardReviewUnburyTip": "Вернуть карточку к повторению по наступлении срока",
+	"flashcardReviewPendingEditsTip": "Открыть список карточек, отмеченных для редактирования позже",
 	"flashcardSessionProgress": "Ход повторения",
 	"flashcardSessionCompleted": "Завершено",
 	"flashcardSessionRemaining": "Осталось",

@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Buka sumber kartu untuk diedit sekarang",
+	"flashcardReviewSkipTip": "Lewati kartu hingga sesi ini berakhir dan pertahankan waktu jatuh temponya",
+	"flashcardReviewBuryTip": "Sembunyikan kartu dari tinjauan biasa hingga besok",
+	"flashcardReviewUnburyTip": "Sertakan kembali kartu dalam tinjauan ketika jatuh tempo",
+	"flashcardReviewPendingEditsTip": "Buka daftar kartu yang ditandai untuk diedit nanti",
 	"flashcardSessionProgress": "Progres peninjauan",
 	"flashcardSessionCompleted": "Selesai",
 	"flashcardSessionRemaining": "Tersisa",

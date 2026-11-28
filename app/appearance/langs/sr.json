@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Отворите извор картице за уређивање",
+	"flashcardReviewSkipTip": "Прескочите картицу до краја ове сесије и задржите рок",
+	"flashcardReviewBuryTip": "Сакријте картицу из редовног понављања до сутра",
+	"flashcardReviewUnburyTip": "Вратите картицу у понављање када јој дође рок",
+	"flashcardReviewPendingEditsTip": "Отворите списак картица означених за касније уређивање",
 	"flashcardSessionProgress": "Напредак понављања",
 	"flashcardSessionCompleted": "Завршено",
 	"flashcardSessionRemaining": "Преостало",

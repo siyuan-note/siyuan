@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Open de kaartbron om die nu te bewerken",
+	"flashcardReviewSkipTip": "Sla deze kaart over voor de rest van de sessie en behoud de vervaldatum",
+	"flashcardReviewBuryTip": "Verberg deze kaart tot morgen bij normale herhalingen",
+	"flashcardReviewUnburyTip": "Neem deze kaart weer mee zodra ze aan de beurt is",
+	"flashcardReviewPendingEditsTip": "Open de lijst met kaarten die voor later bewerken zijn gemarkeerd",
 	"flashcardSessionProgress": "Herhalingsvoortgang",
 	"flashcardSessionCompleted": "Voltooid",
 	"flashcardSessionRemaining": "Resterend",

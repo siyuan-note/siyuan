@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "افتح مصدر البطاقة لتحريره الآن",
+	"flashcardReviewSkipTip": "تخطّ البطاقة في الجلسة الحالية دون تغيير موعدها",
+	"flashcardReviewBuryTip": "أخفِ البطاقة من المراجعة العادية حتى الغد",
+	"flashcardReviewUnburyTip": "أعِد البطاقة إلى المراجعة عندما يحين موعدها",
+	"flashcardReviewPendingEditsTip": "افتح قائمة البطاقات المؤجلة للتحرير",
 	"flashcardSessionProgress": "تقدّم المراجعة",
 	"flashcardSessionCompleted": "مكتملة",
 	"flashcardSessionRemaining": "متبقية",

@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Kart kaynağını şimdi düzenlemek için aç",
+	"flashcardReviewSkipTip": "Kartı bu oturumun sonuna kadar atla ve tekrar zamanını koru",
+	"flashcardReviewBuryTip": "Kartı yarına kadar normal tekrarda gizle",
+	"flashcardReviewUnburyTip": "Tekrar zamanı geldiğinde kartı yeniden tekrara al",
+	"flashcardReviewPendingEditsTip": "Daha sonra düzenlemek üzere işaretlenen kartları aç",
 	"flashcardSessionProgress": "Tekrar ilerlemesi",
 	"flashcardSessionCompleted": "Tamamlanan",
 	"flashcardSessionRemaining": "Kalan",

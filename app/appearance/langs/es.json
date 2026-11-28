@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Abre el origen de la tarjeta para editarlo ahora",
+	"flashcardReviewSkipTip": "Omite la tarjeta durante el resto de la sesión y conserva su vencimiento",
+	"flashcardReviewBuryTip": "Oculta la tarjeta del repaso normal hasta mañana",
+	"flashcardReviewUnburyTip": "Permite volver a repasar esta tarjeta cuando venza",
+	"flashcardReviewPendingEditsTip": "Abre la lista de tarjetas marcadas para editar más tarde",
 	"flashcardSessionProgress": "Progreso del repaso",
 	"flashcardSessionCompleted": "Completadas",
 	"flashcardSessionRemaining": "Pendientes",

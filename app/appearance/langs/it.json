@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Apri la fonte della scheda per modificarla subito",
+	"flashcardReviewSkipTip": "Salta la scheda per il resto della sessione e mantieni la scadenza",
+	"flashcardReviewBuryTip": "Nascondi la scheda dal ripasso normale fino a domani",
+	"flashcardReviewUnburyTip": "Includi di nuovo la scheda nel ripasso alla scadenza",
+	"flashcardReviewPendingEditsTip": "Apri l’elenco delle schede contrassegnate per la modifica successiva",
 	"flashcardSessionProgress": "Avanzamento del ripasso",
 	"flashcardSessionCompleted": "Completate",
 	"flashcardSessionRemaining": "Rimanenti",

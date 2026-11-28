@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Mở nguồn thẻ để chỉnh sửa ngay",
+	"flashcardReviewSkipTip": "Bỏ qua thẻ trong phần còn lại của phiên và giữ nguyên hạn ôn tập",
+	"flashcardReviewBuryTip": "Ẩn thẻ khỏi lượt ôn tập thông thường đến ngày mai",
+	"flashcardReviewUnburyTip": "Đưa thẻ trở lại lượt ôn tập khi đến hạn",
+	"flashcardReviewPendingEditsTip": "Mở danh sách thẻ được đánh dấu để chỉnh sửa sau",
 	"flashcardSessionProgress": "Tiến độ ôn tập",
 	"flashcardSessionCompleted": "Đã hoàn thành",
 	"flashcardSessionRemaining": "Còn lại",

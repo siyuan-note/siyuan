@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "เปิดต้นทางของบัตรคำเพื่อแก้ไขทันที",
+	"flashcardReviewSkipTip": "ข้ามบัตรคำนี้จนจบรอบปัจจุบันโดยคงกำหนดเดิมไว้",
+	"flashcardReviewBuryTip": "ซ่อนบัตรคำนี้จากการทบทวนปกติจนถึงวันพรุ่งนี้",
+	"flashcardReviewUnburyTip": "นำบัตรคำนี้กลับมาทบทวนเมื่อถึงกำหนด",
+	"flashcardReviewPendingEditsTip": "เปิดรายการบัตรคำที่ทำเครื่องหมายให้แก้ไขภายหลัง",
 	"flashcardSessionProgress": "ความคืบหน้าการทบทวน",
 	"flashcardSessionCompleted": "เสร็จแล้ว",
 	"flashcardSessionRemaining": "คงเหลือ",

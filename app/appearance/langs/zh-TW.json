@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "開啟目前卡片的卡源，立即編輯",
+	"flashcardReviewSkipTip": "本輪剩餘時間略過這張卡片，保留原到期時間",
+	"flashcardReviewBuryTip": "將卡片從一般複習中隱藏到明天",
+	"flashcardReviewUnburyTip": "卡片到期時可重新進入複習",
+	"flashcardReviewPendingEditsTip": "開啟標記為稍後編輯的卡片清單",
 	"flashcardSessionProgress": "複習進度",
 	"flashcardSessionCompleted": "已完成",
 	"flashcardSessionRemaining": "待複習",

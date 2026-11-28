@@ -4,7 +4,7 @@ import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {notifyFlashcardV2ReviewChange} from "./flashcardV2ReviewChanges";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
-import {hideTooltip} from "../dialog/tooltip";
+import {hideTooltip, showTooltip} from "../dialog/tooltip";
 import {Menu} from "../plugin/Menu";
 import {toggleMenu} from "../menus/menuToggle";
 import {Constants} from "../constants";
@@ -87,6 +87,30 @@ interface IFlashcardV2SessionQueueCard {
         buriedUntil?: number;
     };
 }
+
+const reviewActionTip = (label: string, description: string): Pick<IMenu, "action" | "actionLabel" | "bind"> => ({
+    action: "iconInfo",
+    actionLabel: description,
+    bind: (element) => {
+        element.setAttribute("aria-description", description);
+        const icon = element.querySelector(".b3-menu__action--hint");
+        icon.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!isMobile()) {
+                showTooltip(escapeHtml(description), icon);
+                return;
+            }
+            const tip = new AdaptiveDialog({
+                title: escapeHtml(label),
+                content: '<div class="b3-dialog__content">' + escapeHtml(description) + "</div>" +
+                    '<div class="b3-dialog__action"><button type="button" class="b3-button b3-button--text">' +
+                    escapeHtml(window.siyuan.languages.close) + "</button></div>",
+            });
+            tip.element.querySelector(".b3-dialog__action button").addEventListener("click", () => tip.destroy());
+        });
+    },
+});
 
 const openPendingEditList = () => {
     void import("./flashcardV2").then(({openFlashcardV2PendingEdits}) => openFlashcardV2PendingEdits());
@@ -1421,24 +1445,27 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     build: (_menu, session) => {
                         const menu = new Menu();
                         menu.element.classList.add("b3-menu--compact-icons");
+                        const lang = window.siyuan.languages;
                         if (!mount && outline.available()) {
                             menu.addItem({
                                 id: "flashcardV2WorkspaceOutline",
                                 icon: "iconOutline",
-                                label: window.siyuan.languages.outline,
+                                label: lang.outline,
                                 click: () => outline.toggle(),
                             });
                         }
                         menu.addItem({
                             id: "flashcardV2EditSource",
                             icon: "iconEdit",
-                            label: window.siyuan.languages.edit,
+                            label: lang.edit,
+                            ...reviewActionTip(lang.edit, lang.flashcardReviewEditSourceTip),
                             click: () => (dialog.element.querySelector('[data-type="edit-source"]') as HTMLElement).click(),
                         });
                         menu.addItem({
                             id: "flashcardV2EditLater",
                             icon: "iconEdit",
-                            label: window.siyuan.languages.flashcardEditLater,
+                            label: lang.flashcardEditLater,
+                            ...reviewActionTip(lang.flashcardEditLater, lang.flashcardEditLaterTip),
                             click: () => {
                                 requestPending = true;
                                 void openFlashcardV2EditLater(current.card.id, () => {
@@ -1450,24 +1477,29 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         });
                         menu.addItem({
                             id: "flashcardV2StudyLater",
-                            label: window.siyuan.languages.flashcardStudyLater,
+                            label: lang.flashcardStudyLater,
+                            ...reviewActionTip(lang.flashcardStudyLater, lang.flashcardStudyLaterTip),
                             click: () => (dialog.element.querySelector('[data-type="study-later"]') as HTMLElement).click(),
                         });
                         menu.addItem({
                             id: "flashcardV2Skip",
-                            label: window.siyuan.languages.skip,
+                            label: lang.skip,
+                            ...reviewActionTip(lang.skip, lang.flashcardReviewSkipTip),
                             click: () => (dialog.element.querySelector('[data-type="skip"]') as HTMLElement).click(),
                         });
                         menu.addItem({
                             id: "flashcardV2PendingEdits",
                             icon: "iconEdit",
-                            label: window.siyuan.languages.flashcardPendingEdits,
+                            label: lang.flashcardPendingEdits,
+                            ...reviewActionTip(lang.flashcardPendingEdits, lang.flashcardReviewPendingEditsTip),
                             click: openPendingEditList,
                         });
                         const buried = (current.reviewState.buriedUntil || 0) > Date.now();
+                        const buryLabel = buried ? lang.flashcardUnbury : lang.flashcardBury;
                         menu.addItem({
                             id: "flashcardV2Bury",
-                            label: buried ? window.siyuan.languages.flashcardUnbury : window.siyuan.languages.flashcardBury,
+                            label: buryLabel,
+                            ...reviewActionTip(buryLabel, buried ? lang.flashcardReviewUnburyTip : lang.flashcardReviewBuryTip),
                             click: () => {
                                 if (buried) {
                                     manageWithoutSkipping([current.card.id], "unbury", {});

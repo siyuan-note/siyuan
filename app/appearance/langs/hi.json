@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "कार्ड का स्रोत अभी संपादित करने के लिए खोलें",
+	"flashcardReviewSkipTip": "नियत समय कायम रखते हुए इस सत्र के शेष भाग में कार्ड छोड़ें",
+	"flashcardReviewBuryTip": "सामान्य समीक्षा में इस कार्ड को कल तक छिपाएँ",
+	"flashcardReviewUnburyTip": "नियत समय आने पर इस कार्ड को फिर से समीक्षा में लें",
+	"flashcardReviewPendingEditsTip": "बाद में संपादित करने के लिए चिह्नित कार्ड खोलें",
 	"flashcardSessionProgress": "समीक्षा की प्रगति",
 	"flashcardSessionCompleted": "पूर्ण",
 	"flashcardSessionRemaining": "शेष",

@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Öffnet die Kartenquelle zur sofortigen Bearbeitung",
+	"flashcardReviewSkipTip": "Überspringt die Karte in dieser Sitzung und behält den Termin bei",
+	"flashcardReviewBuryTip": "Blendet die Karte bis morgen in der normalen Wiederholung aus",
+	"flashcardReviewUnburyTip": "Gibt die Karte für Wiederholungen frei, sobald sie fällig ist",
+	"flashcardReviewPendingEditsTip": "Öffnet die Liste der zur Bearbeitung vorgemerkten Karten",
 	"flashcardSessionProgress": "Lernfortschritt",
 	"flashcardSessionCompleted": "Abgeschlossen",
 	"flashcardSessionRemaining": "Verbleibend",

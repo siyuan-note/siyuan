@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Otwórz źródło karty do edycji",
+	"flashcardReviewSkipTip": "Pomiń kartę do końca tej sesji i zachowaj termin powtórki",
+	"flashcardReviewBuryTip": "Ukryj kartę w zwykłych powtórkach do jutra",
+	"flashcardReviewUnburyTip": "Przywróć kartę do powtórek po nadejściu terminu",
+	"flashcardReviewPendingEditsTip": "Otwórz listę kart oznaczonych do późniejszej edycji",
 	"flashcardSessionProgress": "Postęp powtórki",
 	"flashcardSessionCompleted": "Ukończone",
 	"flashcardSessionRemaining": "Pozostałe",

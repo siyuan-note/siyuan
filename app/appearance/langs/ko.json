@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "카드 원본을 열어 바로 편집합니다",
+	"flashcardReviewSkipTip": "예정일을 유지하며 이번 복습의 남은 과정에서 카드를 건너뜁니다",
+	"flashcardReviewBuryTip": "내일까지 일반 복습에서 이 카드를 숨깁니다",
+	"flashcardReviewUnburyTip": "예정일이 되면 이 카드를 다시 복습에 포함합니다",
+	"flashcardReviewPendingEditsTip": "나중에 편집하도록 표시한 카드의 목록을 엽니다",
 	"flashcardSessionProgress": "복습 진행 상황",
 	"flashcardSessionCompleted": "완료",
 	"flashcardSessionRemaining": "남음",

@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "カードの出典を開いて今すぐ編集します",
+	"flashcardReviewSkipTip": "期限を変えずに、今回の復習が終わるまでこのカードを飛ばします",
+	"flashcardReviewBuryTip": "明日まで通常の復習にこのカードを表示しません",
+	"flashcardReviewUnburyTip": "期限に達したときにこのカードを再び復習対象にします",
+	"flashcardReviewPendingEditsTip": "後で編集するようマークしたカードの一覧を開きます",
 	"flashcardSessionProgress": "復習の進捗",
 	"flashcardSessionCompleted": "完了",
 	"flashcardSessionRemaining": "残り",

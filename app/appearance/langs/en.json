@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Open the card source to edit it now",
+	"flashcardReviewSkipTip": "Skip this card for the rest of this session and keep its due time",
+	"flashcardReviewBuryTip": "Hide this card from normal review until tomorrow",
+	"flashcardReviewUnburyTip": "Allow this card in review again when it is due",
+	"flashcardReviewPendingEditsTip": "Open the list of cards marked for later editing",
 	"flashcardSessionProgress": "Review progress",
 	"flashcardSessionCompleted": "Completed",
 	"flashcardSessionRemaining": "Remaining",

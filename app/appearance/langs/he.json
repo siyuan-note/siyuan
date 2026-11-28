@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "פתיחת מקור הכרטיס לעריכה מיידית",
+	"flashcardReviewSkipTip": "דילוג על הכרטיס עד סוף הסבב תוך שמירה על מועד החזרה",
+	"flashcardReviewBuryTip": "הסתרת הכרטיס מחזרה רגילה עד מחר",
+	"flashcardReviewUnburyTip": "החזרת הכרטיס לחזרה כשיגיע מועדו",
+	"flashcardReviewPendingEditsTip": "פתיחת רשימת הכרטיסים שסומנו לעריכה בהמשך",
 	"flashcardSessionProgress": "התקדמות בחזרה",
 	"flashcardSessionCompleted": "הושלמו",
 	"flashcardSessionRemaining": "נותרו",

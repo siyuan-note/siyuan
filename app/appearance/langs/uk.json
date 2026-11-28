@@ -1,4 +1,9 @@
 {
+	"flashcardReviewEditSourceTip": "Відкрити джерело картки для негайного редагування",
+	"flashcardReviewSkipTip": "Пропустити картку до кінця цього сеансу зі збереженням терміну повторення",
+	"flashcardReviewBuryTip": "Приховати картку зі звичайного повторення до завтра",
+	"flashcardReviewUnburyTip": "Повернути картку до повторення, коли настане її термін",
+	"flashcardReviewPendingEditsTip": "Відкрити список карток, позначених для подальшого редагування",
 	"flashcardSessionProgress": "Перебіг повторення",
 	"flashcardSessionCompleted": "Завершено",
 	"flashcardSessionRemaining": "Залишилося",

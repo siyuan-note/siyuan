@@ -84,3 +84,58 @@ test("late source lookup cannot act after switching cards or closing the session
     stale.confirm();
     assert.equal(stale.mutations.length, 0);
 });
+
+test("review action hints open explanations without passing the click to the menu action", () => {
+    const source = readFileSync("src/card/flashcardV2Session.ts", "utf8");
+    const start = source.indexOf("const reviewActionTip =");
+    const end = source.indexOf("const openPendingEditList =", start);
+    const script = transpileModule(source.slice(start, end) + '\nreviewActionTip("Skip", "Only this session");', {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText;
+    for (const mobile of [false, true]) {
+        let click: (event: {preventDefault(): void; stopPropagation(): void}) => void;
+        let close: () => void;
+        let prevented = false;
+        let stopped = false;
+        let dismissed = false;
+        const messages: string[] = [];
+        const icon = {addEventListener: (type: string, callback: typeof click) => {
+            assert.equal(type, "click");
+            click = callback;
+        }};
+        const options = runInNewContext(script, {
+            isMobile: () => mobile, escapeHtml: (value: string) => value,
+            window: {siyuan: {languages: {close: "Close"}}},
+            showTooltip: (text: string, target: unknown) => {
+                assert.equal(target, icon);
+                messages.push(text);
+            },
+            AdaptiveDialog: class {
+                element = {querySelector: () => ({addEventListener: (_type: string, callback: typeof close) => { close = callback; }})};
+                constructor({title, content}: {title: string, content: string}) {
+                    assert.equal(title, "Skip");
+                    assert.match(content, /Close/);
+                    messages.push(content.match(/>Only this session</)[0].slice(1, -1));
+                }
+                destroy() { dismissed = true; }
+            },
+        }) as IMenu;
+        assert.equal(options.action, "iconInfo");
+        assert.equal(options.actionLabel, "Only this session");
+        options.bind({
+            setAttribute: (attribute: string, value: string) => {
+                assert.equal(attribute, "aria-description");
+                assert.equal(value, "Only this session");
+            },
+            querySelector: () => icon,
+        } as unknown as HTMLElement);
+        click({preventDefault: () => { prevented = true; }, stopPropagation: () => { stopped = true; }});
+        assert.deepEqual(messages, ["Only this session"]);
+        assert.equal(prevented, true);
+        assert.equal(stopped, true);
+        if (mobile) {
+            close();
+            assert.equal(dismissed, true);
+        }
+    }
+});

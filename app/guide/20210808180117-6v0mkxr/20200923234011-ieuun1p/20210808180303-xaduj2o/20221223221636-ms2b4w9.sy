@@ -7,7 +7,7 @@
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
 		"type": "doc",
-		"updated": "20261103094358"
+		"updated": "20261128033010"
 	},
 	"Children": [
 		{
@@ -51,7 +51,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194307-zktvfds",
-				"updated": "20261024163013"
+				"updated": "20261128033010"
 			},
 			"Children": [
 				{
@@ -66,7 +66,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194307-cejt9yo",
-				"updated": "20261024163013"
+				"updated": "20261128033010"
 			},
 			"Children": [
 				{
@@ -316,6 +316,77 @@
 				{
 					"Type": "NodeText",
 					"Data": "To create a flashcard: select \"Quick Make Card\" from the block icon menu. A yellow line appears beside the source block."
+				}
+			]
+		},
+		{
+			"ID": "20261128033010-iplf6fd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20261128033010-iplf6fd",
+				"updated": "20261128033010"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Blocks, card sources, and flashcards"
+				}
+			]
+		},
+		{
+			"ID": "20261128033010-h56n817",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128033010-h56n817",
+				"updated": "20261128033010"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Blocks hold your note content. A card source refers to those blocks and stores the settings for making cards without copying the note text. A source can refer to one or more blocks, and different sources can refer to the same block. For example, make a bidirectional Q&A from two blocks: “Capital of China” and “Beijing.” One source generates a forward and a reverse card. Choose types such as cloze or image occlusion for the source when creating cards, rather than setting a type on each card. Editing the note updates the card content, while each card keeps its own ratings and review progress."
+				}
+			]
+		},
+		{
+			"ID": "20261128033010-jijq653",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128033010-jijq653",
+				"updated": "20261128033010"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A deck contains individual cards, not card sources. Put the forward card in “Geography,” the reverse card in “Recall the question,” or both in “Exam review.” A card in more than one deck still shares the same review progress across decks."
+				}
+			]
+		},
+		{
+			"ID": "20261128033010-bw1q2g2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128033010-bw1q2g2",
+				"updated": "20261128033010"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Flashcard tags are separate from note tags. Tag the source “Capital cities” and both cards inherit it. Tag only the reverse card “Easy to miss” and the forward card is unaffected. When filtering flashcards by tag, both inherited and directly added tags count."
+				}
+			]
+		},
+		{
+			"ID": "20261128033010-6p25hfe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128033010-6p25hfe",
+				"updated": "20261128033010"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The card source provides the default scheduling preset; decks do not assign presets. If both cards use preset A by default and you set the reverse card to B, the forward card still uses A. Switch the reverse card back to inheritance to use the source preset again. If you do not choose a preset when making a source, SiYuan checks the current document, its ancestors, the notebook, and the workspace default, in that order, and saves the first available preset to the source."
 				}
 			]
 		},

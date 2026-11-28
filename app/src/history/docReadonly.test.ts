@@ -44,6 +44,7 @@ for (const mobile of [false, true]) {
                 "../../menus/commonMenuItem": {copySubMenu: (): IMenu[] => [], exportMd: () => ({}), movePathToMenu: () => ({})},
                 "../../util/fetch": {fetchPost: (_url: string, _body: unknown, callback: (response: unknown) => void) =>
                     callback({code: 0, data: {name: "Document", ial: {id: "20231011123456", updated: "20231011123456"}}})},
+                "../../card/makeCard": {flashcardDocumentTreeMenuItems: (): IMenu[] => [], flashcardSourceMenuItems: (): IMenu[] => []},
                 "../../history/doc": {openDocHistory: (options: typeof opened[number]) => opened.push(options)},
                 "../../util/pathName": {isEncryptedBox: () => false},
                 "../../util/hostCapabilities": {getHostCapabilities: () => ({})},

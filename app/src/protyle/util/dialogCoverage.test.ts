@@ -130,7 +130,7 @@ const coverage: Record<string, Record<string, number>> = {
         "AdaptiveDialog": 1,
         "openInputDialog": 1
     },
-    "card/makeCard.ts": {
+    "card/flashcardV2ImageViewport.ts": {
         "AdaptiveDialog": 1
     },
     "card/openCard.ts": {

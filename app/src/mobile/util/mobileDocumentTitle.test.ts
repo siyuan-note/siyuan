@@ -28,6 +28,7 @@ const browserCases = async (sources: Record<string, string>) => {
         "../../util/pathName": {getDocDisplayName: (text: string, empty: boolean) => empty ? "Untitled" : text},
         "../../util/hostCapabilities": {sanitizeKernelHTML: (html: string) => html},
         "../render/mathRender": {mathRender: () => Promise.resolve()},
+        "../../card/flashcardV2Badge": {renderFlashcardV2Badge: () => {}},
         "../../protyle/render/autoDirection": {setTitleAutoDirection: () => {}},
     };
     const load = (source: string) => {

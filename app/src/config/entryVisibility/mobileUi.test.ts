@@ -551,7 +551,7 @@ const runEntryUiCases = async (mobileBuild: boolean) => {
         "config/entryVisibility/dockOrder", "config/entryVisibility/touchOrder",
         "protyle/toolbar/defaults", "mobile/util/toolbarActions", "protyle/wysiwyg/codeBlockUtil", "protyle/gutter/turnIntoMenu",
         "protyle/wysiwyg/calloutType",
-        "plugin/dockKey", "plugin/topBarKey", "util/escape", "menus/declarations/imageOCRMenu", "menus/declarations/menuDeclaration"];
+        "plugin/dockKey", "plugin/topBarKey", "util/escape", "menus/declarations/imageOCRMenu", "menus/declarations/menuDeclaration", "card/flashcardV2AuthoringTypes"];
     modules.push("plugin/breadcrumbButtonRegistry");
     if (mobileBuild) {
         modules.push("config/setting/windowContext");

@@ -48,7 +48,6 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
         "../../layout/dock/util": {openOutline: record("outline"), openBacklink: record("backlinks"), openGraph: record("graphView")},
         "../../util/pathName": {getDocDisplayName: (name: string, empty: boolean) => empty ? globals.window.siyuan.languages._kernel[16] : name, isEncryptedBox: () => encrypted, pathPosix: () => posix,
             getNotebookName: () => "Notebook", getDisplayName: (value: string) => value.replace(/\.sy$/, ""), useShell: record("folder")},
-        "../../card/makeCard": {flashcardSourceMenuItems: () => [{id: "advanced"}], createQuickSources: record("quickMakeCard")},
         "../../card/openCard": {openCardByScope: record("spaceRepetition")},
         "../../card/flashcardV2": {openFlashcardV2ManagementByRoots: record("manage")},
         "../../plugin/EventBus": {emitOpenMenu: (event: typeof events[number]) => {
@@ -99,6 +98,15 @@ const setup = (mobile = false, readonly = false, encrypted = false) => {
         }).outputText, {exports, require: (name: string) => dependencies[name] || {}, ...globals});
         return exports;
     };
+    const cardExports: Record<string, unknown> = {};
+    runInNewContext(transpileModule(readFileSync("src/card/makeCard.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText, {
+        exports: cardExports,
+        require: (name: string) => name === "./flashcardV2" ? {openFlashcardV2DocumentTree: record("tree")} : {},
+        ...globals,
+    });
+    dependencies["../../card/makeCard"] = {...cardExports, createQuickSources: record("quickMakeCard")};
     const documentModule = load("documentMenu") as typeof import("./documentMenu");
     dependencies["../../menus/menuToggle"] = loadMenuToggle(globals);
     dependencies["./documentMenu"] = documentModule;
@@ -191,6 +199,10 @@ test("graph flashcards use the selected document for review, management, and qui
     await cardItems.find(item => item.id === "manage").click(null, null);
     assert.equal(JSON.stringify(menu.calls.find(call => call.name === "manage").args),
         JSON.stringify([[menu.options.id], "Document"]));
+    await cardItems.find(item => item.id === "flashcardReviewDocumentTree").click(null, null);
+    await cardItems.find(item => item.id === "flashcardManageDocumentTree").click(null, null);
+    assert.deepEqual(menu.calls.filter(call => call.name === "tree").map(call => call.args),
+        [[menu.options.app, menu.options.id, "review"], [menu.options.app, menu.options.id, "manage"]]);
     await cardItems.find(item => item.id === "quickMakeCard").click(null, null);
     assert.equal(JSON.stringify(menu.calls.find(call => call.name === "quickMakeCard").args),
         JSON.stringify([[menu.options.id]]));

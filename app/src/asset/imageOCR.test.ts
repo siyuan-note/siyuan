@@ -71,9 +71,9 @@ const browserCases = async (source: string, actionsSource: string, statusSource:
     let copies = 0;
     const images: string[] = [];
     let visible = true;
-    const render = new Function("Constants", "copyImageOCRText", "openImageOCR", "isEncryptedBox", "isEntryVisible", "getImageOCRStatus", "copyPNGByLink", actionsSource +
+    const render = new Function("Constants", "copyImageOCRText", "openImageOCR", "isEncryptedBox", "isEntryVisible", "getImageOCRStatus", "copyPNGByLink", "canCreateFlashcardFromImage", actionsSource +
         "\nreturn renderImageActions;")({TIMEOUT_DBLCLICK: 20}, () => copies++, () => opens++, () => false,
-        () => visible, status.getImageOCRStatus, (source: string) => images.push(source));
+        () => visible, status.getImageOCRStatus, (source: string) => images.push(source), () => false);
     const root = document.createElement("div");
     root.className = "protyle-wysiwyg";
     root.innerHTML = '<span class="img"><span></span><span><span class="protyle-icons"><span class="protyle-icon protyle-icon--only"></span></span><img data-src="assets/image.png"></span></span>';

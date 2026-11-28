@@ -40,6 +40,16 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
         remove: () => { items.length = 0; }, append: (item: IMenu) => { if (!item.ignore) { items.push(item); } }};
     const keymap = Object.fromEntries(["addToDatabase", "spaceRepetition", "quickMakeCard", "search", "replace", "duplicate"]
         .map(key => [key, {custom: ""}]));
+    const cardExports: Record<string, unknown> = {};
+    runInNewContext(transpileModule(readFileSync("src/card/makeCard.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
+    }).outputText, {
+        exports: cardExports,
+        require: (name: string) => name === "./flashcardV2" ? {
+            openFlashcardV2DocumentTree: (_app: object, ...scope: unknown[]) => flashcards.push(["tree", ...scope]),
+        } : {},
+        window: {siyuan: {languages: {}}},
+    });
     runInNewContext(transpileModule(parse(readFileSync("src/menus/navigation.ts", "utf8"),
         {MOBILE: mobile, BROWSER: true}, false, true, "navigation.ts"), {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -74,6 +84,7 @@ const setup = (mobile = false, readonly = false, controller?: Partial<DocTreeCon
                     deleteDocTreeItems: (items: unknown[]) => treeDeletions.push(items)},
                 "../layout/tabUtil": {getDockByType: (): undefined => undefined},
                 "../layout/dock/docTree/DocTreeController": {getDocTreeController: () => controller},
+                "../card/makeCard": cardExports,
                 "../card/openCard": {openCardByScope: (_app: object, ...scope: unknown[]) => flashcards.push(["study", ...scope])},
                 "../card/flashcardV2": {openFlashcardV2ManagementByRoots: (...scope: unknown[]) => flashcards.push(["manage", ...scope])},
                 "../mobile/util/closePanel": {closePanel() {}},
@@ -257,8 +268,10 @@ for (const mobile of [false, true]) {
         const cardItems = items.find(item => item.id === "riffCard").submenu as IMenu[];
         cardItems.find(item => item.id === "spaceRepetition").click(null, null);
         cardItems.find(item => item.id === "manage").click(null, null);
+        cardItems.find(item => item.id === "flashcardReviewDocumentTree").click(null, null);
+        cardItems.find(item => item.id === "flashcardManageDocumentTree").click(null, null);
         assert.equal(JSON.stringify(flashcards), JSON.stringify([
-            ["study", "doc", "doc", "Document"], ["manage", ["doc"], "Document"],
+            ["study", "doc", "doc", "Document"], ["manage", ["doc"], "Document"], ["tree", "doc", "review"], ["tree", "doc", "manage"],
         ]));
     });
 

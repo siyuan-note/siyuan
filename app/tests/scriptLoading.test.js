@@ -47,13 +47,8 @@ if (process.versions.electron && process.type === "browser") {
             const pathname = new URL(request.url, "http://localhost").pathname;
             requests.set(pathname, (requests.get(pathname) || 0) + 1);
             if (pathname === "/stage/build/app/settings.html") {
-                const template = fs.readFileSync(path.join(__dirname, "../src/assets/template/app/settings.tpl"), "utf8");
                 response.setHeader("Content-Type", "text/html; charset=utf-8");
-                response.end(template.replace("</head>", '<script defer src="/settings-bootstrap.js"></script></head>'));
-            } else if (pathname === "/settings-bootstrap.js") {
-                const bridge = fs.readFileSync(path.join(__dirname, "../src/asset/pdf/pdfjs.js"), "utf8");
-                response.setHeader("Content-Type", "text/javascript; charset=utf-8");
-                response.end(`window.settingsPDFSnapshot = (() => { const module = {}; ${bridge}\nreturn module.exports; })();`);
+                response.end(fs.readFileSync(path.join(__dirname, "../src/assets/template/app/settings.tpl"), "utf8"));
             } else if (pathname.startsWith("/stage/protyle/")) {
                 response.setHeader("Content-Type", "text/javascript; charset=utf-8");
                 const content = fs.readFileSync(path.join(__dirname, "..", pathname));
@@ -81,9 +76,14 @@ if (process.versions.electron && process.type === "browser") {
             assert.equal(requests.get("/stage/protyle/js/lute/lute.min.js"), 1);
             assert.equal(requests.get("/stage/protyle/js/protyle-html.js"), 1);
             await win.loadURL("http://127.0.0.1:" + server.address().port + "/stage/build/app/settings.html");
-            assert.equal(await win.webContents.executeJavaScript("typeof window.settingsPDFSnapshot?.AnnotationEditorType.DISABLE"),
-                "number");
-            assert.equal(await win.webContents.executeJavaScript("window.settingsPDFSnapshot === window.pdfjsLib"), true);
+            assert.equal(requests.get("/stage/protyle/js/pdf/pdf.min.mjs"), 1);
+            assert.equal(await win.webContents.executeJavaScript("typeof window.pdfjsLib?.AnnotationEditorType.DISABLE"), "number");
+            const bridge = fs.readFileSync(path.join(__dirname, "../src/asset/pdf/pdfjs.js"), "utf8");
+            assert.equal(await win.webContents.executeJavaScript(`(() => {
+                const module = {};
+                ${bridge}
+                return module.exports === window.pdfjsLib;
+            })()`), true);
         } catch (error) {
             console.error(error);
             exitCode = 1;

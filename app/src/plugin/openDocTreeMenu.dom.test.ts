@@ -92,11 +92,12 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
         "mobile/util/closePanel": {}, "mobile/menu/search": {}, "util/newFile": {}, "editor/deleteFile": {},
         "editor/util": {}, "layout/tabUtil": {getDockByType: (): undefined => undefined}, "layout/dock/Files": {},
         "layout/dock/docTree/DocTreeController": {getDocTreeController: () => { treeAccess++; throw new Error("Live tree access"); }},
-        "card/openCard": {}, "card/flashcardV2": {}, "history/doc": {}, "card/makeCard": {},
+        "card/openCard": {}, "card/flashcardV2": {}, "history/doc": {},
+        "card/flashcardV2Badge": {}, "dialog/message": {}, "util/genID": {},
         "protyle/wysiwyg/transaction": {}, "protyle/export/exportMd": {},
         "util/fileTreeSort": {}, "util/hostCapabilities": {getHostCapabilities: () => ({documentImportExport: false})},
         "emoji": {openEmojiPanel: (...args: unknown[]) => icons.push(args), unicode2Emoji: () => '<img src="data:,">'},
-        "mobile/editor": {}, "dialog/message": {}, "dialog/confirmDialog": {},
+        "mobile/editor": {}, "dialog/confirmDialog": {},
     };
     for (const name of ["viewType", "subItems", "cell", "action", "view", "col", "row", "openDatabaseRow",
         "columnWidth", "attributeValue", "cellValue", "richText", "blockIcon", "relationLayout", "relationKeyboard", "host"]) {
@@ -305,7 +306,7 @@ const browserCases = async (sources: Record<string, string>, css: string, mobile
 for (const mobile of [false, true]) {
     test(`plugin document tree menus use detached rows and real ${mobile ? "mobile sheet" : "desktop popup"} interactions`,
         {timeout: 45000}, async () => {
-        const sources = Object.fromEntries(["plugin/openDocTreeMenu", "plugin/EventBus", "plugin/Menu", "menus/navigation",
+        const sources = Object.fromEntries(["plugin/openDocTreeMenu", "plugin/EventBus", "plugin/Menu", "menus/navigation", "card/makeCard",
             "menus/navigationSelection", "menus/Menu", "menus/menuToggle", "menus/menuPosition", "menus/menuMouseScroll", "menus/overlayOwnership",
             "menus/menuGroup", "menus/sheetOpen", "menus/sheetActions", "mobile/util/mobileSheetGesture", "mobile/util/keyboardSheetState",
             "util/setPosition", "protyle/util/hasClosest", "layout/dock/docTree/row", "layout/dock/docTree/rowData",

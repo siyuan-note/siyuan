@@ -1,4 +1,5 @@
 {
+	"ankiConnectNotebookUnset": "Aucun carnet sélectionné",
 	"flashcardImageExplanationBlock": "Identifiant du bloc d’explication",
 	"flashcardImageUploadHint": "Choisissez une image ou déposez-la ici",
 	"flashcardImageSequential": "Révéler les masques un par un",

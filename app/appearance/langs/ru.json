@@ -1,4 +1,5 @@
 {
+	"ankiConnectNotebookUnset": "Блокнот не выбран",
 	"flashcardImageExplanationBlock": "ID блока с пояснением",
 	"flashcardImageUploadHint": "Выберите одно изображение или перетащите его сюда",
 	"flashcardImageSequential": "Открывать маски по очереди",

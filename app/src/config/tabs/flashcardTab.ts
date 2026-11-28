@@ -102,7 +102,7 @@ const registerAnkiConnectGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.targetNotebook,
         desc: window.siyuan.languages.ankiConnectNotebookTip,
         options: [
-            {value: "", label: window.siyuan.languages.select},
+            {value: "", label: window.siyuan.languages.ankiConnectNotebookUnset},
             ...(window.siyuan.notebooks || []).filter((notebook) => !notebook.closed && !notebook.encrypted)
                 .map((notebook) => ({value: notebook.id, label: notebook.name})),
         ],

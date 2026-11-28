@@ -1,4 +1,5 @@
 {
+	"ankiConnectNotebookUnset": "No notebook selected",
 	"flashcardImageExplanationBlock": "Explanation block ID",
 	"flashcardImageUploadHint": "Choose one image or drop it here",
 	"flashcardImageSequential": "Reveal masks one by one",

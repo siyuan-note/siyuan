@@ -298,9 +298,20 @@ func TestDivergedLegacyMigrationRebasesExistingEntities(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	rebased, err := store.rebaseDivergedLegacyMigration(ctx, secondPlan, status)
+	if err != nil || rebased.OperationID == secondPlan.OperationID {
+		t.Fatalf("incremental preparation did not get its own operation ID: %s (%v)", rebased.OperationID, err)
+	}
+	persisted, err := store.Apply(ctx, rebased.OperationID, rebased.Changes)
+	if err != nil {
+		t.Fatal(err)
+	}
 	activation, err := store.ActivateLegacyMigration(ctx, legacyRoot, secondPlan)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if activation.PreparedBatch.BatchID != persisted.BatchID || activation.ActivationBatch.OperationID == "legacy-migration:"+secondPlan.MigrationID+":activate" {
+		t.Fatalf("incremental activation did not resume its persisted preparation: %+v", activation.Status)
 	}
 	if activation.Status.State != MigrationStateActive || activation.Status.MigrationID != secondPlan.MigrationID {
 		t.Fatalf("incremental migration did not reactivate v2: %+v", activation.Status)

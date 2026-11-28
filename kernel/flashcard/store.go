@@ -51,7 +51,7 @@ func OpenStore(ctx context.Context, journalRoot, projectionPath, deviceID string
 		return nil, err
 	}
 	store := &Store{journal: journal, projection: projection, projectionPath: projectionPath}
-	rebuild, err := store.hasOriginalLegacyProjection(ctx)
+	rebuild, err := store.hasOutdatedLegacyProjection(ctx)
 	if err == nil {
 		if rebuild {
 			err = store.rebuildProjectionLocked(ctx, batches)
@@ -148,7 +148,7 @@ func (store *Store) Refresh(ctx context.Context) error {
 	if err := store.journal.Reload(); err != nil {
 		return store.invalidateLocked(fmt.Errorf("reload flashcard journal: %w", err))
 	}
-	rebuild, err := store.hasOriginalLegacyProjection(ctx)
+	rebuild, err := store.hasOutdatedLegacyProjection(ctx)
 	if err != nil {
 		return store.invalidateLocked(err)
 	}
@@ -166,15 +166,15 @@ func (store *Store) Refresh(ctx context.Context) error {
 	return nil
 }
 
-func (store *Store) hasOriginalLegacyProjection(ctx context.Context) (bool, error) {
-	for batchID, originalChecksum := range store.journal.legacyProjectionChecksums() {
+func (store *Store) hasOutdatedLegacyProjection(ctx context.Context) (bool, error) {
+	for batchID, replayChecksum := range store.journal.legacyProjectionChecksums() {
 		var appliedChecksum string
 		err := store.projection.db.QueryRowContext(ctx, `SELECT checksum FROM operation_batches WHERE batch_id = ?`, batchID).
 			Scan(&appliedChecksum)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return false, fmt.Errorf("check projected legacy migration batch: %w", err)
 		}
-		if err == nil && appliedChecksum == originalChecksum {
+		if err == nil && appliedChecksum != replayChecksum {
 			return true, nil
 		}
 	}

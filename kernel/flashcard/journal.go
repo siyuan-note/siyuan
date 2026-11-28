@@ -496,6 +496,9 @@ func (journal *Journal) buildReplayBatches() error {
 			prepared[variant] = replay
 		}
 	}
+	if err := replayLegacyMigrationCollisions(batches, prepared); err != nil {
+		return err
+	}
 	operations := make(map[string]operationEntry, len(batches))
 	legacyChecksums := map[string]string{}
 	activationAliases := map[string]string{}
@@ -513,7 +516,7 @@ func (journal *Journal) buildReplayBatches() error {
 		}
 		operations[batch.OperationID] = operationEntry{batch: *batch, digest: batch.OperationDigest}
 		if originalChecksum := journal.batchChecksums[batch.BatchID]; originalChecksum != batch.Checksum {
-			legacyChecksums[batch.BatchID] = originalChecksum
+			legacyChecksums[batch.BatchID] = batch.Checksum
 		}
 	}
 	journal.batches = batches

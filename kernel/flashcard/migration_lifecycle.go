@@ -117,7 +117,7 @@ func (store *Store) ActivateLegacyMigration(ctx context.Context, legacyRoot stri
 	if err = activation.Validate(); err != nil {
 		return LegacyActivationResult{}, err
 	}
-	operationID := "legacy-migration:" + plan.MigrationID + ":activate"
+	operationID := strings.TrimSuffix(plan.OperationID, ":prepare") + ":activate"
 	activationBatch, err := store.applyLocked(ctx, operationID, []Change{{Kind: RecordEvent, Event: &activation}})
 	if err != nil {
 		return LegacyActivationResult{}, err
@@ -160,6 +160,23 @@ func validateLegacyMigrationContinuation(status LegacyMigrationStatus, plan Lega
 // rebaseDivergedLegacyMigration 将旧存储全量候选衔接到当前实体，避免把增量重新写成并发根修订。
 func (store *Store) rebaseDivergedLegacyMigration(ctx context.Context, plan LegacyMigrationPlan,
 	status LegacyMigrationStatus) (LegacyMigrationPlan, error) {
+	plan.OperationID = "legacy-migration:" + plan.MigrationID + ":incremental:" + status.Activated.EventID + ":prepare"
+	preparedID := DeterministicID("migration-prepared-event", plan.OperationID)
+	if batch, found := store.journal.FindOperation(plan.OperationID); found {
+		prepared := batch.Changes[len(batch.Changes)-1].Event
+		if prepared == nil || prepared.EventID != preparedID {
+			return LegacyMigrationPlan{}, errors.New("invalid incremental flashcard migration preparation")
+		}
+		var payload MigrationPreparedPayload
+		if err := decodeStrictJSON(prepared.Payload, &payload); err != nil {
+			return LegacyMigrationPlan{}, err
+		}
+		if !sameLegacyFingerprints(plan.InputFiles, payload.InputFiles) {
+			return LegacyMigrationPlan{}, errors.New("incremental flashcard migration inputs changed")
+		}
+		plan.Changes, plan.RecordDigest = batch.Changes, payload.RecordDigest
+		return plan, nil
+	}
 	preparedIndex := len(plan.Changes) - 1
 	changes := make([]Change, 0, len(plan.Changes))
 	entityCount := 0
@@ -168,21 +185,33 @@ func (store *Store) rebaseDivergedLegacyMigration(ctx context.Context, plan Lega
 		change := plan.Changes[index]
 		switch change.Kind {
 		case RecordEntityRevision:
-			current, found, err := store.projection.CurrentEntity(ctx, change.Revision.EntityType,
-				change.Revision.EntityID)
+			revision := *change.Revision
+			current, found, err := store.projection.CurrentEntity(ctx, revision.EntityType, revision.EntityID)
 			if err != nil {
 				return LegacyMigrationPlan{}, err
 			}
 			if found {
-				apply, mergeErr := mergeDivergedLegacyRevision(change.Revision, current)
+				apply, mergeErr := mergeDivergedLegacyRevision(&revision, current)
 				if mergeErr != nil {
 					return LegacyMigrationPlan{}, mergeErr
 				}
 				if !apply {
 					continue
 				}
-				change.Revision.ParentRevisionIDs = []string{current.RevisionID}
+				revision.ParentRevisionIDs = []string{current.RevisionID}
 			}
+			revision.RevisionID = OperationRevisionID(plan.OperationID, revision.EntityType, revision.EntityID)
+			if revision.EntityType == EntityReviewState {
+				var state ReviewState
+				if err = decodeStrictJSON(revision.Payload, &state); err != nil {
+					return LegacyMigrationPlan{}, err
+				}
+				state.StateRevisionID = revision.RevisionID
+				if revision.Payload, err = CanonicalJSON(state); err != nil {
+					return LegacyMigrationPlan{}, err
+				}
+			}
+			change.Revision = &revision
 			changes = append(changes, change)
 			entityCount++
 		case RecordEvent:
@@ -204,6 +233,7 @@ func (store *Store) rebaseDivergedLegacyMigration(ctx context.Context, plan Lega
 		return LegacyMigrationPlan{}, err
 	}
 	prepared := *plan.Changes[preparedIndex].Event
+	prepared.EventID = preparedID
 	var payload MigrationPreparedPayload
 	if err = decodeStrictJSON(prepared.Payload, &payload); err != nil {
 		return LegacyMigrationPlan{}, err

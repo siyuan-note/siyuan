@@ -261,6 +261,169 @@ func TestLegacyMigrationAvailabilityReplayRejectsDifferentCardContent(t *testing
 	}
 }
 
+func writeCollidingIncrementalMigration(t *testing.T, ctx context.Context, store *Store, full LegacyMigrationPlan,
+	status LegacyMigrationStatus) {
+	t.Helper()
+	incremental, err := store.rebaseDivergedLegacyMigration(ctx, full, status)
+	if err != nil {
+		t.Fatal(err)
+	}
+	last := len(incremental.Changes) - 1
+	for _, change := range incremental.Changes[:last] {
+		if revision := change.Revision; revision != nil {
+			revision.RevisionID = OperationRevisionID(full.OperationID, revision.EntityType, revision.EntityID)
+			if revision.EntityType == EntityReviewState {
+				var state ReviewState
+				if err = decodeStrictJSON(revision.Payload, &state); err != nil {
+					t.Fatal(err)
+				}
+				state.StateRevisionID = revision.RevisionID
+				revision.Payload = mustCanonicalJSON(t, state)
+			}
+		}
+	}
+	prepared := incremental.Changes[last].Event
+	prepared.EventID = full.Changes[len(full.Changes)-1].Event.EventID
+	var payload MigrationPreparedPayload
+	if err = decodeStrictJSON(prepared.Payload, &payload); err != nil {
+		t.Fatal(err)
+	}
+	payload.RecordDigest, err = checksum(incremental.Changes[:last])
+	if err != nil {
+		t.Fatal(err)
+	}
+	prepared.Payload = mustCanonicalJSON(t, payload)
+	if _, err = store.Apply(ctx, full.OperationID, incremental.Changes); err != nil {
+		t.Fatal(err)
+	}
+	activation := Event{EventType: EventMigrationActivated,
+		EventID:  DeterministicID("migration-activated-event", full.MigrationID, payload.RecordDigest),
+		EntityID: full.MigrationID, OccurredAt: prepared.OccurredAt,
+		Payload: mustCanonicalJSON(t, MigrationActivatedPayload{
+			MigrationID: full.MigrationID, PreparedEventID: prepared.EventID, InputFiles: full.InputFiles,
+			RecordDigest: payload.RecordDigest, FormatVersion: FormatVersion, MinimumClient: DefaultManifest().MinimumClient,
+			ValidationMethod: "authority-digest+sqlite-quick-check-v1",
+		}),
+	}
+	if _, err = store.Apply(ctx, "legacy-migration:"+full.MigrationID+":activate", []Change{{Kind: RecordEvent, Event: &activation}}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestLegacyFullAndIncrementalMigrationCollisionRetainsSchedulesAndHistory(t *testing.T) {
+	ctx := context.Background()
+	legacy, options := legacyMigrationReplayFixture(t)
+	initial, err := PrepareLegacyMigration(ctx, legacy, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rootA, rootB := t.TempDir(), t.TempDir()
+	dbA, dbB := filepath.Join(t.TempDir(), "a.db"), filepath.Join(t.TempDir(), "b.db")
+	storeA, err := OpenStore(ctx, rootA, dbA, "incremental", &JournalOptions{WriterID: testWriterA})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = storeA.ActivateLegacyMigration(ctx, legacy, initial); err != nil {
+		t.Fatal(err)
+	}
+	cardA := GeneratedCardID(LegacyQuickSourceID(replayBlock), legacyQuickTemplateID, "legacy-quick")
+	const otherBlock = "migration-replay-other-block"
+	cardB := GeneratedCardID(LegacyQuickSourceID(otherBlock), legacyQuickTemplateID, "legacy-quick")
+	review := func(store *Store, cardID, operationID string, days int64) EntityRevision {
+		t.Helper()
+		_, err := store.ReviewCard(ctx, ReviewRequest{OperationID: operationID, CardID: cardID,
+			Rating: ReviewGood, ReviewedAt: replayReview + days*86400000, ReviewMode: "normal"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		state, found, err := store.Projection().CurrentEntity(ctx, EntityReviewState, cardID)
+		if err != nil || !found {
+			t.Fatalf("review state missing: %v", err)
+		}
+		return state
+	}
+	stateA := review(storeA, cardA, "prior-v2-review", 2)
+	writeMsgpack(t, filepath.Join(legacy, "replay.deck"), riff.Deck{ID: "replay", Name: "Replay", Algo: riff.AlgoFSRS,
+		Created: replayReview, Updated: replayReview + 4*86400000})
+	writeMsgpack(t, filepath.Join(legacy, "replay.cards"), map[string]*riff.FSRSCard{
+		"old-card":   legacyFSRSCard("old-card", replayBlock, replayReview, 3),
+		"other-card": legacyFSRSCard("other-card", otherBlock, replayReview+86400000, 2),
+	})
+	writeMsgpack(t, filepath.Join(legacy, "logs", "202608.msgpack"), []*riff.Log{
+		{ID: "legacy-score", CardID: "old-card", Rating: riff.Good, Reviewed: replayReview / 1000, State: riff.Review},
+		{ID: "legacy-score-new", CardID: "other-card", Rating: riff.Easy,
+			Reviewed: (replayReview + 86400000) / 1000, State: riff.Review},
+	})
+	status, err := storeA.CheckLegacyDivergence(ctx, legacy)
+	if err != nil || status.State != MigrationStateLegacyDiverged {
+		t.Fatalf("divergence not recorded: %+v (%v)", status, err)
+	}
+	full, err := PrepareLegacyMigration(ctx, legacy, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeCollidingIncrementalMigration(t, ctx, storeA, full, status)
+	if _, err = storeA.CreateSnapshot(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err = storeA.Close(); err != nil {
+		t.Fatal(err)
+	}
+	storeB, err := OpenStore(ctx, rootB, dbB, "full", &JournalOptions{WriterID: testWriterB})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = storeB.ActivateLegacyMigration(ctx, legacy, full); err != nil {
+		t.Fatal(err)
+	}
+	stateB := review(storeB, cardB, "full-v2-review", 6)
+	if err = storeB.Close(); err != nil {
+		t.Fatal(err)
+	}
+	copyMigrationWriter(t, rootA, rootB, testWriterB)
+	copyMigrationWriter(t, rootB, rootA, testWriterA)
+	raw := os.DirFS(rootA)
+	segments, err := fs.Glob(raw, "writers/*/segments/*.json")
+	if err != nil || len(segments) == 0 {
+		t.Fatalf("find colliding segments: %v", err)
+	}
+	originals := make(map[string][]byte, len(segments))
+	for _, name := range segments {
+		if originals[name], err = fs.ReadFile(raw, name); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, local := range []struct{ root, db string }{{rootA, dbA}, {rootB, dbB}, {rootA, filepath.Join(t.TempDir(), "fresh.db")}} {
+		restored, err := OpenStore(ctx, local.root, local.db, "restored", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, expected := range []EntityRevision{stateA, stateB} {
+			current, found, err := restored.Projection().CurrentEntity(ctx, EntityReviewState, expected.EntityID)
+			if err != nil || !found || current.RevisionID != expected.RevisionID || !bytes.Equal(current.Payload, expected.Payload) {
+				t.Fatalf("restored schedule differs for %s: %+v (%v)", expected.EntityID, current, err)
+			}
+		}
+		var count int
+		if err = restored.Projection().db.QueryRowContext(ctx, "SELECT COUNT(*) FROM review_events").Scan(&count); err != nil || count != 4 {
+			t.Fatalf("restored review history has %d events, want 4 (%v)", count, err)
+		}
+		restoredStatus, err := restored.LegacyMigrationStatus(ctx)
+		if err != nil || restoredStatus.State != MigrationStateActive || restoredStatus.MigrationID != full.MigrationID {
+			t.Fatalf("legacy migration not active after recovery: %+v (%v)", restoredStatus, err)
+		}
+		if err = restored.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for name, expected := range originals {
+		actual, err := fs.ReadFile(raw, name)
+		if err != nil || !bytes.Equal(actual, expected) {
+			t.Fatalf("recovery changed source segment %s: %v", name, err)
+		}
+	}
+}
+
 func TestLegacyMigrationAvailabilityReplayPreservesLegacyDivergence(t *testing.T) {
 	ctx := context.Background()
 	legacy, options := legacyMigrationReplayFixture(t)

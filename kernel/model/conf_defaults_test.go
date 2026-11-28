@@ -99,9 +99,9 @@ func TestMigrateEditorBlockRefCheck(t *testing.T) {
 		raw  string
 		want bool
 	}{
-		{"legacy without editor", `{"confVersion":7}`, true},
-		{"legacy without option", `{"confVersion":7,"editor":{}}`, true},
-		{"legacy with null option", `{"confVersion":7,"editor":{"checkBlockRef":null}}`, true},
+		{"legacy without editor", `{"confVersion":7}`, false},
+		{"legacy without option", `{"confVersion":7,"editor":{}}`, false},
+		{"legacy with null option", `{"confVersion":7,"editor":{"checkBlockRef":null}}`, false},
 		{"legacy with saved true", `{"confVersion":7,"editor":{"checkBlockRef":true}}`, true},
 		{"legacy with saved false", `{"confVersion":7,"editor":{"checkBlockRef":false}}`, false},
 		{"current without option", `{"confVersion":8,"editor":{}}`, false},

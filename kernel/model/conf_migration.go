@@ -110,15 +110,16 @@ var confMigrations = []confMigration{
 		return true, nil
 	}},
 	{8, "editorBlockRefCheck", func(c *AppConf, raw []byte) (bool, error) {
-		// 已有工作空间缺失该选项时保留旧默认值；显式保存的开关状态不变。
+		// 缺失该选项时使用编辑器默认值；显式保存的开关状态不变。
 		editor := c.Editor.Load()
 		if editor != nil && editor.CheckBlockRef != nil {
 			return false, nil
 		}
 		if editor == nil {
 			editor = conf.NewEditor()
+		} else {
+			editor.CheckBlockRef = conf.NewEditor().CheckBlockRef
 		}
-		editor.CheckBlockRef = new(true)
 		c.Editor.Store(editor)
 		return true, nil
 	}},

@@ -604,6 +604,13 @@ export const flashcardV2ReferenceHTML = (reference: IFlashcardV2SourceReference,
     return `<div class="ft__secondary" data-flashcard-reference="${escapeAttr(reference.entityID)}"${occlusionAttr}>${escapeHtml(reference.entityID)}</div>`;
 };
 
+export const makeFlashcardV2ContentReadOnly = (element: Element) => {
+    // 引用块中的显式编辑属性会覆盖外层卡面的只读状态。
+    element.querySelectorAll('[contenteditable]:not([contenteditable="false"])').forEach(child => {
+        child.setAttribute("contenteditable", "false");
+    });
+};
+
 export const renderFlashcardV2AnkiTemplate = (model: IFlashcardV2RenderModel, side: "front" | "back",
     doms: Record<string, string>, frontHTML = "") => {
     const spec = side === "front" ? model.template.frontSpec : model.template.backSpec;

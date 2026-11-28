@@ -34,6 +34,7 @@ import {
     applyFlashcardV2AnkiCloze,
     createFlashcardV2TemplateStyle,
     flashcardV2ReferenceHTML,
+    makeFlashcardV2ContentReadOnly,
     selectFlashcardV2References,
     prepareFlashcardV2Choice,
     prepareFlashcardV2Reveal,
@@ -100,6 +101,7 @@ const showFlashcardV2ImageExplanation = (blockID: string, target: HTMLElement,
         target.replaceChildren(locate, body);
         processRender(body);
         highlightRender(body);
+        makeFlashcardV2ContentReadOnly(body);
     };
     if (snapshot) {
         render(snapshot[blockID]);
@@ -452,6 +454,7 @@ const renderFlashcardV2Context = (model: IFlashcardV2RenderModel, sourceBlockID:
             element.insertAdjacentHTML("beforeend", blocks);
             processRender(element);
             highlightRender(element);
+            makeFlashcardV2ContentReadOnly(element);
             showContext();
         });
     };
@@ -772,6 +775,10 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
             answerElement.classList.add("fn__none");
             processRender(contentElement);
             highlightRender(contentElement);
+            if (!model.source.sourceType.startsWith("plugin:")) {
+                makeFlashcardV2ContentReadOnly(frontElement);
+                makeFlashcardV2ContentReadOnly(answerElement);
+            }
             const revealController = pluginResult?.revealController || prepareFlashcardV2Reveal(frontElement, model,
                 bindFlashcardV2ImageViewport,
                 (blockID, target) => showFlashcardV2ImageExplanation(blockID, target, isCurrent, draft?.doms));

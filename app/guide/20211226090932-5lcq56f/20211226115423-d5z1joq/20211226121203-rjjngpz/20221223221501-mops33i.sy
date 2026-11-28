@@ -949,6 +949,20 @@
 			]
 		},
 		{
+			"ID": "20261128141000-k0tcdjb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128141000-k0tcdjb",
+				"updated": "20261128141000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "複習時，卡面正文唯讀。卡片上的答題框和選項只用於作答。若要修改以筆記區塊製作的卡片內容，請按一下鉛筆圖示「編輯」，在開啟的編輯器中修改原文。"
+				}
+			]
+		},
+		{
 			"ID": "20261103094358-21afdb9",
 			"Type": "NodeParagraph",
 			"Properties": {

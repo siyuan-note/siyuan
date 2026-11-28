@@ -196,6 +196,7 @@ test("draft renderer consumes its snapshot without model, block, context, or ses
             return doms.a;
         },
         processRender() {}, highlightRender() {},
+        makeFlashcardV2ContentReadOnly() {},
         prepareFlashcardV2Reveal: (): undefined => undefined,
         bindFlashcardV2ImageViewport: (): undefined => undefined,
         prepareFlashcardV2TypedAnswers: (): undefined => undefined,

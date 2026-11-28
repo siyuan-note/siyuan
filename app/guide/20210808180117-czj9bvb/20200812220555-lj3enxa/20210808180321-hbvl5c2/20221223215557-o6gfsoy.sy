@@ -949,6 +949,20 @@
 			]
 		},
 		{
+			"ID": "20261128141000-ld5diqz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128141000-ld5diqz",
+				"updated": "20261128141000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "复习时，卡面正文只读。卡片上的答题框和选项只用于作答。要修改用笔记块制作的卡片内容，请点击铅笔图标「编辑」，在打开的编辑器中修改原文。"
+				}
+			]
+		},
+		{
 			"ID": "20261103094358-f7c58e0",
 			"Type": "NodeParagraph",
 			"Properties": {

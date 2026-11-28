@@ -1164,6 +1164,7 @@ func AgentChat(ctx context.Context, client *util.AIClient, protocol, model, imag
 					}
 				}
 				aggregatedToolCalls = filtered
+				logUnexposedToolCalls(roundID, model, protocol, req.Tools, aggregatedToolCalls, roundCapabilities)
 				toolCallRounds++
 
 				messages = append(messages, openai.ChatCompletionMessage{
@@ -1749,6 +1750,27 @@ var safeNativeToolActions = map[string]map[string]bool{
 	"export": {
 		"html": true, "preview": true,
 	},
+}
+
+func logUnexposedToolCalls(roundID, model, protocol string, requestTools []openai.Tool, calls []openai.ToolCall, capabilities *capabilitySet) {
+	if !slices.ContainsFunc(calls, func(call openai.ToolCall) bool {
+		return !capabilities.hasModelName(call.Function.Name)
+	}) {
+		return
+	}
+
+	requestToolNames := make([]string, 0, len(requestTools))
+	for _, tool := range requestTools {
+		if tool.Function != nil {
+			requestToolNames = append(requestToolNames, tool.Function.Name)
+		}
+	}
+	returnedToolNames := make([]string, 0, len(calls))
+	for _, call := range calls {
+		returnedToolNames = append(returnedToolNames, call.Function.Name)
+	}
+	logging.LogWarnf("agent returned unexposed tool calls [roundID=%q, model=%q, protocol=%q, requestToolNames=%q, returnedToolNames=%q]",
+		roundID, model, protocol, requestToolNames, returnedToolNames)
 }
 
 func capabilityEffects(registration *capabilityRegistration, action string) mcptools.ToolEffects {

@@ -740,6 +740,13 @@
         }
       }
     }
+
+    .protyle-image-title--above ~ .protyle-icons,
+    .protyle-image-title--above ~ .img__net {
+      // 绝对定位控件从标题之后的正常流位置对齐图片上缘。
+      top: auto;
+      margin-top: 4px;
+    }
   }
 
   .iframe {

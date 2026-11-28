@@ -433,6 +433,29 @@
 			]
 		},
 		{
+			"ID": "20261128134618-msr0742",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128134618-msr0742",
+				"updated": "20261128134618"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在同一组中开启 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "在图片上方显示标题"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 即可将标题放在图片上方。开启「显示图片文件名」时，标题仍显示在图片下方。"
+				}
+			]
+		},
+		{
 			"ID": "20260930092955-skpw6hv",
 			"Type": "NodeParagraph",
 			"Properties": {

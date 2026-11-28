@@ -32,8 +32,17 @@ export const bindImageResize = (root: HTMLElement) => {
             positions.forEach(({image, frame, width, height, left, top}) => {
                 image.parentElement.classList.toggle("protyle-image-container--compact", width < 96 || height < 48);
                 // 说明文字按图片显示宽度缩放，派生样式只写入说明节点，避免影响图片容器的宽度规则。
+                const fontSize = Math.max(8, width / 10) + "px";
                 image.parentElement.querySelectorAll<HTMLElement>(":scope > .img__name, :scope > .protyle-action__title, :scope > .img__alt")
-                    .forEach(caption => caption.style.setProperty("--protyle-image-font-size", Math.max(8, width / 10) + "px"));
+                    .forEach(caption => {
+                        if (caption.style.getPropertyValue("--protyle-image-font-size") !== fontSize) {
+                            caption.style.setProperty("--protyle-image-font-size", fontSize);
+                            // 上方文字字号改变后，图片可能移动，即使容器总高度不变。
+                            if (caption.compareDocumentPosition(image) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                                schedulePosition(image);
+                            }
+                        }
+                    });
                 frame.style.left = left + "px";
                 frame.style.top = top + "px";
                 frame.style.width = width + "px";
@@ -60,7 +69,8 @@ export const bindImageResize = (root: HTMLElement) => {
         if (container.parentElement?.getAttribute("data-type") !== "img") {
             return;
         }
-        const captions = Array.from(container.querySelectorAll<HTMLElement>(":scope > .protyle-action__title, :scope > .img__alt"));
+        const captions = Array.from(container.querySelectorAll<HTMLElement>(
+            ":scope > .protyle-action__title:not(.protyle-image-title--above), :scope > .img__alt"));
         const previous = images.get(image);
         if (previous?.container === container && container.classList.contains("protyle-image-container") &&
             previous.frame.parentElement === container &&

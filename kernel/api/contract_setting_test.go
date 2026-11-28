@@ -135,6 +135,8 @@ func TestAPIContractSettingImageDisplayCompatibility(t *testing.T) {
 		`{"displayImgName":null}`, `{"DisplayImgName":true}`, `{"displayImgName":"bad"}`,
 		`{"displayImgAlt":true}`, `{"displayImgAlt":false}`, `{"displayImgAlt":null}`,
 		`{"DisplayImgAlt":true}`, `{"displayImgAlt":"bad"}`,
+		`{"displayImgTitleAbove":true}`, `{"displayImgTitleAbove":false}`, `{"displayImgTitleAbove":null}`,
+		`{"DisplayImgTitleAbove":true}`, `{"displayImgTitleAbove":"bad"}`,
 	})
 }
 
@@ -168,6 +170,23 @@ func TestAPIContractSettingImageDisplayUpdates(t *testing.T) {
 		}
 		if code != 0 || model.Conf.Editor.Load().DisplayImgName != entry.want || response.DisplayImgName != entry.want {
 			t.Fatalf("image display update %s: code=%d message=%s data=%s", entry.body, code, message, data)
+		}
+	}
+	for _, entry := range []struct {
+		body string
+		want bool
+	}{
+		{`{"displayImgTitleAbove":true}`, true}, {`{"displayImgName":true}`, true},
+		{`{"displayImgName":false}`, true}, {`{"displayImgTitleAbove":null}`, false},
+		{`{"DisplayImgTitleAbove":true}`, true}, {`{"displayImgTitleAbove":false}`, false},
+	} {
+		code, message, data := settingContractRequest(t, "setEditor", setEditor, entry.body)
+		var response apicontract.SettingEditor
+		if err := json.Unmarshal(data, &response); err != nil {
+			t.Fatal(err)
+		}
+		if code != 0 || model.Conf.Editor.Load().DisplayImgTitleAbove != entry.want || response.DisplayImgTitleAbove != entry.want {
+			t.Fatalf("image title position update %s: code=%d message=%s data=%s", entry.body, code, message, data)
 		}
 	}
 	for _, entry := range []struct {

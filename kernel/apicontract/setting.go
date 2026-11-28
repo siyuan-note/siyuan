@@ -242,7 +242,7 @@ type SettingFlashcard struct {
 	Weights                    string  `json:"weights" api:"optional,nullable"`
 }
 
-// SettingEditor 描述编辑器配置。displayImgName、displayImgAlt、blockGutterMode 和 pageScrollButtons 默认关闭，
+// SettingEditor 描述编辑器配置。displayImgName、displayImgTitleAbove、displayImgAlt、blockGutterMode 和 pageScrollButtons 默认关闭，
 // null 表示回到默认值，其他非布尔类型拒绝更新。
 type SettingEditor struct {
 	AllowSVGScript             bool                 `json:"allowSVGScript" api:"optional,nullable"`
@@ -263,6 +263,7 @@ type SettingEditor struct {
 	BlockGutterMode            bool                 `json:"blockGutterMode" api:"optional,nullable"`
 	DisplayNetImgMark          bool                 `json:"displayNetImgMark" api:"optional,nullable"`
 	DisplayImgName             bool                 `json:"displayImgName" api:"optional,nullable"`
+	DisplayImgTitleAbove       bool                 `json:"displayImgTitleAbove" api:"optional,nullable"`
 	DisplayImgAlt              bool                 `json:"displayImgAlt" api:"optional,nullable"`
 	// 新建数据库视图的主键内容图标默认开关，默认 true；不修改已有视图，null 恢复默认值。
 	DatabaseShowIcon *bool `json:"databaseShowIcon" api:"optional,nullable"`

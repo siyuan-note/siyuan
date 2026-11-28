@@ -12,7 +12,9 @@ const browserCases = async (source: string, luteSource: string, css: string, cas
     const check: typeof assert = require("node:assert/strict");
     new Function(luteSource)();
     const lute = Lute.New();
-    Object.assign(window, {siyuan: {config: {editor: {displayImgName: false, displayImgAlt: false}, readonly: false},
+    Object.assign(window, {siyuan: {config: {editor: {
+        displayImgName: false, displayImgTitleAbove: caseName !== "daylight", displayImgAlt: false,
+    }, readonly: false},
         languages: {title: "Title"}, zIndex: 1}});
     const style = document.createElement("style");
     style.textContent = css;
@@ -45,6 +47,7 @@ const browserCases = async (source: string, luteSource: string, css: string, cas
     root.addEventListener("keydown", () => editorKeys++);
     const caption = () => root.querySelector<HTMLElement>(".protyle-action__title");
     const image = () => root.querySelector<HTMLImageElement>("img");
+    check.equal(caption().classList.contains("protyle-image-title--above"), caseName !== "daylight");
     const textarea = () => document.querySelector<HTMLTextAreaElement>(".b3-text-field__mask textarea");
     const original = lute.BlockDOM2StdMd(root.innerHTML);
     image().style.width = "180px";

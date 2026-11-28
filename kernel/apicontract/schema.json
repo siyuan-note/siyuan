@@ -52241,6 +52241,16 @@
             }
           ]
         },
+        "displayImgTitleAbove": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "displayNetImgMark": {
           "anyOf": [
             {
@@ -56872,6 +56882,9 @@
         "displayImgName": {
           "type": "boolean"
         },
+        "displayImgTitleAbove": {
+          "type": "boolean"
+        },
         "displayNetImgMark": {
           "type": "boolean"
         },
@@ -57104,6 +57117,7 @@
         "displayBookmarkIcon",
         "displayImgAlt",
         "displayImgName",
+        "displayImgTitleAbove",
         "displayNetImgMark",
         "dragHTMLFileToIframe",
         "dynamicLoadBlocks",
@@ -57558,6 +57572,16 @@
           ]
         },
         "displayImgName": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "displayImgTitleAbove": {
           "anyOf": [
             {
               "type": "boolean"

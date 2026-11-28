@@ -433,6 +433,29 @@
 			]
 		},
 		{
+			"ID": "20261128134618-gq4rm3a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128134618-gq4rm3a",
+				"updated": "20261128134618"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To place image titles above images, turn on "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Show image titles above images"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the same group. While image file names are enabled, titles stay below images."
+				}
+			]
+		},
+		{
 			"ID": "20260930092955-wsw0tvh",
 			"Type": "NodeParagraph",
 			"Properties": {

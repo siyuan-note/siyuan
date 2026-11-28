@@ -433,6 +433,29 @@
 			]
 		},
 		{
+			"ID": "20261128134618-t490db8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128134618-t490db8",
+				"updated": "20261128134618"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Чтобы разместить заголовки над изображениями, в той же группе включите параметр "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Показывать заголовок над изображением"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Если включён показ имён файлов изображений, заголовки остаются под изображениями."
+				}
+			]
+		},
+		{
 			"ID": "20261122113000-rw3nvpo",
 			"Type": "NodeParagraph",
 			"Properties": {

@@ -16,6 +16,23 @@ export const renderImageDisplay = (root: Element) => {
         const container = image.parentElement;
         const title = container.querySelector<HTMLElement>(".protyle-action__title");
         if (title) {
+            const above = window.siyuan.config.editor.displayImgTitleAbove && !window.siyuan.config.editor.displayImgName;
+            if (above && !title.classList.contains("protyle-image-title--above")) {
+                title.classList.add("protyle-image-title--above");
+                title.classList.remove("protyle-image-caption");
+                container.prepend(title);
+                const net = container.querySelector(":scope > .img__net");
+                if (net) {
+                    image.before(net);
+                }
+            } else if (!above && title.classList.contains("protyle-image-title--above")) {
+                title.classList.remove("protyle-image-title--above");
+                container.append(title);
+                const net = container.querySelector(":scope > .img__net");
+                if (net) {
+                    title.before(net);
+                }
+            }
             const wysiwyg = image.closest(".protyle-wysiwyg");
             if (getImageTitle(image) && wysiwyg && wysiwyg.getAttribute("data-readonly") !== "true" &&
                 !window.siyuan.config.readonly && !window.siyuan.isPublish &&

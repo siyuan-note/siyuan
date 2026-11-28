@@ -9,7 +9,8 @@ import {compileString} from "sass";
 import {createSourceFile, isIfStatement, ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 const browserCases = async (source: string, resizeSource: string, luteSource: string, css: string,
-                            bridgeSource: string, coreSource: string, selectionSource: string, touchMode: boolean) => {
+                            bridgeSource: string, coreSource: string, selectionSource: string, touchMode: boolean,
+                            displaySource: string) => {
     const check: typeof assert = require("node:assert/strict");
     check.equal(matchMedia("(hover: none) and (pointer: coarse)").matches, touchMode,
         "the test exercises the requested input mode");
@@ -36,6 +37,67 @@ const browserCases = async (source: string, resizeSource: string, luteSource: st
     context.fillRect(0, 0, 200, 100);
     const url = canvas.toDataURL();
     const settle = () => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    {
+        const editor = {displayImgName: false, displayImgTitleAbove: false, displayImgAlt: true};
+        Object.assign(window, {siyuan: {config: {editor}, languages: {title: "Title", rename: "Rename"}}});
+        const renderDisplay = new Function("getAssetName", "getAssetExtension", displaySource +
+            "\nreturn renderImageDisplay;")(() => "sample", () => ".png") as typeof import("./imageDisplay").renderImageDisplay;
+        for (const [path, align] of [["assets/sample.png", "center"], ["https://example.invalid/sample.png", "left"]]) {
+            const captionText = "A long image title that wraps without widening the image or covering its controls";
+            root.innerHTML = lute.Md2BlockDOM(`![description](${path} "${captionText}")`);
+            const image = root.querySelector<HTMLImageElement>("img");
+            image.loading = "eager";
+            image.src = url;
+            const container = image.parentElement;
+            container.style.textAlign = align;
+            if (!container.querySelector(".img__net") && path.startsWith("https:")) {
+                image.after(Object.assign(document.createElement("span"), {className: "img__net"}));
+            }
+            const title = container.querySelector<HTMLElement>(".protyle-action__title");
+            await image.decode();
+            await settle();
+            const original = lute.BlockDOM2StdMd(root.innerHTML);
+            const rect = () => image.getBoundingClientRect();
+            for (const [preferAbove, showName, expectedAbove] of [
+                [false, false, false], [true, false, true], [true, true, false], [true, false, true], [false, false, false],
+            ]) {
+                editor.displayImgTitleAbove = preferAbove;
+                editor.displayImgName = showName;
+                renderDisplay(root);
+                renderDisplay(root);
+                await settle();
+                await settle();
+                const titleRect = title.getBoundingClientRect();
+                const frame = container.querySelector(".protyle-image-resize");
+                const mode = `${path} titleAbove=${expectedAbove} fileName=${showName} touch=${touchMode}`;
+                check.ok(Math.abs(frame.getBoundingClientRect().top - rect().top) <= 1,
+                    `${mode}: frame top ${frame.getBoundingClientRect().top}, image top ${rect().top}, offset ${image.offsetTop}, ` +
+                    `style ${frame.getAttribute("style")}, margin ${getComputedStyle(frame).marginTop}`);
+                check.ok(Math.abs(frame.getBoundingClientRect().bottom - rect().bottom) <= 1, `${mode}: frame bottom`);
+                check.equal(getComputedStyle(title).textAlign, align);
+                check.equal(titleRect.width, rect().width, `${mode}: title width`);
+                check.equal(title.classList.contains("protyle-image-title--above"), expectedAbove);
+                check.ok(expectedAbove ? titleRect.bottom <= rect().top : titleRect.top >= rect().bottom);
+                const filename = container.querySelector(".img__name");
+                check.equal(!!filename, showName && path.startsWith("assets/"));
+                if (filename) check.ok(filename.getBoundingClientRect().bottom <= rect().top);
+                const alt = container.querySelector<HTMLElement>(".img__alt");
+                check.ok(alt.getBoundingClientRect().top >= rect().bottom);
+                check.equal(alt.classList.contains("protyle-image-caption"), expectedAbove);
+                const hit = document.elementFromPoint(titleRect.left + 10, titleRect.top + 8);
+                check.equal(hit.closest(".protyle-action__title"), title);
+                if (expectedAbove) {
+                    container.querySelectorAll<HTMLElement>(".protyle-icons, .img__net").forEach(control => {
+                        if (getComputedStyle(control).display !== "none") {
+                            check.ok(Math.abs(control.getBoundingClientRect().top - rect().top - 4) <= 1,
+                                `the image overlay follows the image: ${control.className}`);
+                        }
+                    });
+                }
+                check.equal(lute.BlockDOM2StdMd(root.innerHTML), original, "the title position is not stored in the note");
+            }
+        }
+    }
     {
         const batch = document.createElement("div");
         batch.className = "protyle-wysiwyg";
@@ -688,9 +750,12 @@ test("image handles batch mutations and retain selection, touch visibility, sour
         {loadPaths: ["src/assets/scss"], logger: {warn() {}, debug() {}}}).css;
     const bridgeSources = ["src/util/touchDragBridge.ts", "src/util/touchDragBridgeCore.ts"].map(file =>
         transpileModule(readFileSync(file, "utf8"), {compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021}}).outputText);
+    const displaySource = ["imageTitle.ts", "imageDisplay.ts"].map(file =>
+        transpileModule(readFileSync(path.resolve(__dirname, file), "utf8").replace(/^import .*;\r?\n/gm, "").replace(/^export /gm, ""),
+            {compilerOptions: {target: ScriptTarget.ES2021}}).outputText).join("\n");
     const makeCode = (styles: string, touchMode: boolean) => "const __name = value => value; (" + browserCases.toString() + ")(" +
         [transpile("src/protyle/render/imageResize.ts"), resizeSource,
-            readFileSync("stage/protyle/js/lute/lute.min.js", "utf8"), styles, ...bridgeSources, selectionSource, touchMode]
+            readFileSync("stage/protyle/js/lute/lute.min.js", "utf8"), styles, ...bridgeSources, selectionSource, touchMode, displaySource]
             .map(value => JSON.stringify(value)).join(",") + ")";
     const temporary = mkdtempSync(path.join(tmpdir(), "siyuan-image-resize-test-"));
     const script = path.join(temporary, "run.cjs");

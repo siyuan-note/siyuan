@@ -50,6 +50,7 @@ type Editor struct {
 	BlockGutterMode                 bool           `json:"blockGutterMode"`                 // 是否显示完整块标
 	DisplayNetImgMark               bool           `json:"displayNetImgMark"`               // 是否显示网络图片角标
 	DisplayImgName                  bool           `json:"displayImgName"`                  // 是否显示图片文件名
+	DisplayImgTitleAbove            bool           `json:"displayImgTitleAbove"`            // 是否在图片上方显示标题
 	DisplayImgAlt                   bool           `json:"displayImgAlt"`                   // 是否显示图片提示文本
 	DatabaseShowIcon                *bool          `json:"databaseShowIcon"`                // 新建数据库视图是否显示主键内容图标
 	DatabaseShowRelationIcon        *bool          `json:"databaseShowRelationIcon"`        // 新建数据库视图是否显示关联、汇总内容图标

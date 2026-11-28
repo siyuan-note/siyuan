@@ -429,6 +429,29 @@
 			]
 		},
 		{
+			"ID": "20261128134618-ldzatua",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128134618-ldzatua",
+				"updated": "20261128134618"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在同一組中開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "在圖片上方顯示標題"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 即可將標題放在圖片上方。開啟「顯示圖片檔名」時，標題仍顯示在圖片下方。"
+				}
+			]
+		},
+		{
 			"ID": "20260930092955-yhn9ixh",
 			"Type": "NodeParagraph",
 			"Properties": {

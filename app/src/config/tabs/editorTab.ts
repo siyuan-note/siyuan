@@ -263,6 +263,10 @@ const registerEditorImagesGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.displayImgName,
         desc: window.siyuan.languages.displayImgNameTip,
     });
+    group.switch("editor.displayImgTitleAbove", {
+        title: window.siyuan.languages.displayImgTitleAbove,
+        desc: window.siyuan.languages.displayImgTitleAboveTip,
+    });
     group.switch("editor.displayImgAlt", {
         title: window.siyuan.languages.displayImgAlt,
         desc: window.siyuan.languages.displayImgAltTip,

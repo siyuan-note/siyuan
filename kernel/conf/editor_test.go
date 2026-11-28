@@ -68,10 +68,11 @@ func TestEditorEmbedBreadcrumbParentPathDefaults(t *testing.T) {
 	}
 }
 
-func TestNewEditorEnablesBlockRefCheck(t *testing.T) {
-	editor := NewEditor()
-	if nil == editor.CheckBlockRef || !*editor.CheckBlockRef {
-		t.Fatalf("block reference checks should be enabled by default: %#v", editor.CheckBlockRef)
+func TestNewEditorDisablesBlockRefCheck(t *testing.T) {
+	for _, editor := range []*Editor{NewEditor(), NormalizeEditor(nil), NormalizeEditor(&Editor{})} {
+		if editor.CheckBlockRef == nil || *editor.CheckBlockRef {
+			t.Fatal("block reference checks should be disabled by default")
+		}
 	}
 }
 

@@ -109,6 +109,19 @@ var confMigrations = []confMigration{
 		c.FileTree.Store(fileTree)
 		return true, nil
 	}},
+	{8, "editorBlockRefCheck", func(c *AppConf, raw []byte) (bool, error) {
+		// 已有工作空间缺失该选项时保留旧默认值；显式保存的开关状态不变。
+		editor := c.Editor.Load()
+		if editor != nil && editor.CheckBlockRef != nil {
+			return false, nil
+		}
+		if editor == nil {
+			editor = conf.NewEditor()
+		}
+		editor.CheckBlockRef = new(true)
+		c.Editor.Store(editor)
+		return true, nil
+	}},
 }
 
 // CurrentConfVersion 是本内核支持的最高配置版本。

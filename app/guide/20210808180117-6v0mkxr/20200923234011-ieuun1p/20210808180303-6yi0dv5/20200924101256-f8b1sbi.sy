@@ -6,7 +6,7 @@
 		"id": "20200924101256-f8b1sbi",
 		"title": "Reference content blocks",
 		"type": "doc",
-		"updated": "20261024164212"
+		"updated": "20261128033450"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200924101312-jj4e0v3",
-				"updated": "20261024164212"
+				"updated": "20261128033450"
 			},
 			"Children": [
 				{
@@ -286,7 +286,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20261123123905-yw9b1tq",
-				"updated": "20261123123905"
+				"updated": "20261128033450"
 			},
 			"Children": [
 				{
@@ -301,12 +301,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261123123905-nab9czh",
-				"updated": "20261123123905"
+				"updated": "20261128033450"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If the check for block references and database bindings takes a while, select “Cancel” in the progress dialog to stop the pending delete or cut."
+					"Data": "This check is off by default in new workspaces. To be warned before deleting or cutting blocks that are referenced or bound to a database, enable “Check block references before deleting or cutting” in the editor settings. If the check for block references and database bindings takes a while, select “Cancel” in the progress dialog to stop the pending delete or cut."
 				}
 			]
 		},

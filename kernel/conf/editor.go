@@ -218,7 +218,7 @@ func NewEditor() *Editor {
 		HistoryRetentionDays:            30,
 		Emoji:                           []string{},
 		VirtualBlockRef:                 false,
-		CheckBlockRef:                   new(true),
+		CheckBlockRef:                   new(false),
 		BlockRefDynamicAnchorTextMaxLen: 96,
 		AssetOpen:                       NewAssetOpen(),
 		PlantUMLServePath:               "https://www.plantuml.com/plantuml/svg/~1",

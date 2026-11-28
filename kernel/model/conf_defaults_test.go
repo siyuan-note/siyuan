@@ -5,6 +5,7 @@
 package model
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
@@ -87,6 +88,38 @@ func TestNormalizeOCRConfig(t *testing.T) {
 			}
 			if test.value != nil && got != test.value {
 				t.Fatal("saved OCR config should be retained")
+			}
+		})
+	}
+}
+
+func TestMigrateEditorBlockRefCheck(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		raw  string
+		want bool
+	}{
+		{"legacy without editor", `{"confVersion":7}`, true},
+		{"legacy without option", `{"confVersion":7,"editor":{}}`, true},
+		{"legacy with null option", `{"confVersion":7,"editor":{"checkBlockRef":null}}`, true},
+		{"legacy with saved true", `{"confVersion":7,"editor":{"checkBlockRef":true}}`, true},
+		{"legacy with saved false", `{"confVersion":7,"editor":{"checkBlockRef":false}}`, false},
+		{"current without option", `{"confVersion":8,"editor":{}}`, false},
+		{"current with saved true", `{"confVersion":8,"editor":{"checkBlockRef":true}}`, true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			raw := []byte(test.raw)
+			c := NewAppConf()
+			if err := json.Unmarshal(raw, c); err != nil {
+				t.Fatal(err)
+			}
+			applyConfMigrations(c, raw)
+			if c.ConfVersion != CurrentConfVersion {
+				t.Fatalf("conf version = %d, want %d", c.ConfVersion, CurrentConfVersion)
+			}
+			editor := conf.NormalizeEditor(c.Editor.Load())
+			if editor.CheckBlockRef == nil || *editor.CheckBlockRef != test.want {
+				t.Fatalf("unexpected block reference check setting, want %t", test.want)
 			}
 		})
 	}

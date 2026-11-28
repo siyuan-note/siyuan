@@ -172,8 +172,16 @@ test("review shows toolbar controls without hover and keeps rating intervals wit
     const withoutSpeech = runInNewContext(`${markup}\nsessionContent();`, {flashcardV2ReviewCounterHTML: () => "", window: {siyuan: {languages: {}}}});
     assert.match(withoutSpeech, /<button data-type="read-aloud"[^>]*class="[^"]*fn__none/);
     for (const rating of ["again", "hard", "good", "easy"]) {
-        assert.match(html, new RegExp(`<button data-rating="${rating}"[^\\n]*data-rating-interval[^\\n]*</button>`));
+        assert.match(html, new RegExp(`<button data-rating="${rating}"[^\\n]*<span class="card__v2-rating-label">[^<]*</span><span[^>]*data-rating-interval[^>]*></span></button>`));
     }
+});
+
+test("review footer and toolbar adapt to the panel rather than clipping inside a split", () => {
+    const styles = readFileSync("src/assets/scss/business/_card.scss", "utf8");
+    assert.match(styles, /&__v2-session\s*\{\s*container: flashcard-review \/ inline-size;/);
+    assert.match(styles, /@container flashcard-review \(max-width: 480px\)\s*\{\s*\.card__v2-session-actions\s*\{\s*flex-wrap: wrap;[\s\S]*?flex-basis: calc\(50% - 4px\)/);
+    assert.match(styles, /@container flashcard-review \(max-width: 350px\)\s*\{\s*\.card__v2-session-toolbar\s*\{\s*flex-wrap: wrap;/);
+    assert.match(styles, /&__v2-rating-label,\s*&__v2-rating-interval\s*\{\s*display: block;/);
 });
 
 test("waiting text stays outside the empty-state icon rule and actions share one row", () => {

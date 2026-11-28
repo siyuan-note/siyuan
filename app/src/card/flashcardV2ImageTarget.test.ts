@@ -36,7 +36,7 @@ class ElementStub {
     focus() {}
 }
 
-const render = (frontMode: string, stepOrder?: string[], selfCheck = false) => {
+const render = (frontMode: string, stepOrder?: string[], selfCheck = false, edgeOrigins = false) => {
     const source = readFileSync("src/card/flashcardV2Render.ts", "utf8");
     const code = source.slice(source.lastIndexOf("const normalized =", source.indexOf("const shapeStyle =")),
         source.indexOf("export const prepareFlashcardV2Reveal ="));
@@ -46,15 +46,20 @@ const render = (frontMode: string, stepOrder?: string[], selfCheck = false) => {
     parent.appendChild(image);
     const model = {source: {generationConfig: {
         assetID: "image.png", frontMode,
-        groups: [{id: "current", shapeIDs: ["rect", "ellipse", "polygon"], stepOrder}],
+        groups: [{id: "current", shapeIDs: ["rect", "ellipse", "polygon", ...(edgeOrigins ? ["other"] : [])], stepOrder}],
         shapes: [
-            {id: "rect", type: "rectangle", x: .1, y: .1, width: .2, height: .2, label: "Region <A>",
+            {id: "rect", type: "rectangle", ...(edgeOrigins ? {} : {x: .1}), y: .1, width: .2, height: .2, label: "Region <A>",
                 ...(selfCheck ? {answer: "Alpha", explanationBlockID: "block-a"} : {})},
-            {id: "ellipse", type: "ellipse", x: .4, y: .1, width: .2, height: .2,
+            {id: "ellipse", type: "ellipse", x: .4, ...(edgeOrigins ? {} : {y: .1}), width: .2, height: .2,
                 ...(selfCheck ? {answer: "Beta", explanationBlockID: "block-b"} : {})},
             {id: "polygon", type: "polygon", points: [{x: .1, y: .5}, {x: .2, y: .6}, {x: .3, y: .5}]},
-            {id: "other", type: "rectangle", x: .7, y: .1, width: .2, height: .2,
+            {id: "other", type: "rectangle", ...(edgeOrigins ? {} : {x: .7, y: .1}), width: .2, height: .2,
                 ...(selfCheck ? {answer: "Other", explanationBlockID: "unrelated"} : {})},
+            ...(edgeOrigins ? [
+                {id: "invalid-null", type: "rectangle", x: null, y: 0, width: .2, height: .2},
+                {id: "invalid-negative", type: "ellipse", x: 0, y: -.1, width: .2, height: .2},
+                {id: "invalid-polygon", type: "polygon", points: [{y: 0}, {x: .4, y: .3}, {x: .5, y: .3}]},
+            ] : []),
         ],
     }}, card: {variantData: {groupID: "current"}}, template: {}};
     const controls = new ElementStub();
@@ -150,6 +155,29 @@ test("image answers and linked explanations are revealed per mask with one final
     assert.deepEqual(explanations, ["block-b", "block-a"]);
     assert.equal(controller.revealNext(), true);
     assert.equal(controller.checkedAnswers.length, 2);
+});
+
+test("omitted zero origins still position and reveal every ordered mask and its answer", () => {
+    const {controller, wrapper, hint, focus, fields, explanations} =
+        render("hideAllAnswerOne", ["rect", "ellipse", "other", "polygon"], true, true);
+    const [rect, ellipse, polygon, corner] = wrapper.querySelectorAll();
+    assert.equal(wrapper.querySelectorAll().length, 4);
+    assert.match(rect.attributes.style, /^left:0%;top:10%;/);
+    assert.match(ellipse.attributes.style, /^left:40%;top:0%;.*border-radius:50%/);
+    assert.match(corner.attributes.style, /^left:0%;top:0%;/);
+    assert.match(polygon.attributes.style, /^inset:0;clip-path:polygon/);
+    assert.equal(hint.textContent, "Striped answer 1 / 4");
+    assert.equal(fields.children.length, 3);
+    for (const [index, value] of ["Alpha", "Beta", "Other"].entries()) {
+        const row = fields.children[index];
+        assert.doesNotMatch(row.className, /fn__none/);
+        row.children[1].value = value;
+        assert.equal(controller.revealNext(), false);
+        assert.equal(controller.checkedAnswers[index].correct, true);
+    }
+    assert.equal(controller.revealNext(), true);
+    assert.deepEqual(explanations, ["block-a", "block-b", "unrelated"]);
+    assert.deepEqual(focus.map(({left, top}: {left: number, top: number}) => [left, top]), [[0, .1], [.4, 0], [0, 0], [.1, .5]]);
 });
 
 test("target pattern overlays an opaque base and does not rely on clipped polygon borders", () => {

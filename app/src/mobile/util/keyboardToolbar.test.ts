@@ -16,7 +16,7 @@ const compiled = transpileModule(`${declaration.getText(source).replace(/^export
     compilerOptions: {target: ScriptTarget.ES2021},
 }).outputText;
 
-test("keyboard quick card uses the editable block at the caret", () => {
+test("keyboard quick card uses the editable block at the caret only in an ordinary notebook", () => {
     const declaration = source.statements.find(node => isVariableStatement(node) &&
         node.declarationList.declarations.some(item => item.name.getText(source) === "getMobileQuickCardBlockID"));
     assert.ok(declaration);
@@ -31,15 +31,17 @@ test("keyboard quick card uses the editable block at the caret", () => {
     const config = {readonly: false};
     const getBlockID = runInNewContext(code, {
         window: {siyuan: {config}},
+        isEncryptedBox: (notebookId: string) => notebookId === "encrypted",
         hasClosestByClassName: () => owner,
         hasClosestBlock: () => ({
             getAttribute: (name: string) => name === "data-type" ? type : "sample-block",
             closest: () => embedded,
         }),
     });
-    const protyle = {block: {rootID: "doc"}, wysiwyg: {element: editor}};
+    const protyle = {block: {rootID: "doc"}, notebookId: "ordinary", wysiwyg: {element: editor}};
     const caret = {startContainer: node, collapsed: true};
     assert.equal(getBlockID(protyle, caret), "sample-block");
+    assert.equal(getBlockID({...protyle, notebookId: "encrypted"}, caret), undefined);
     assert.equal(getBlockID(protyle, {...caret, collapsed: false}), undefined);
     assert.equal(getBlockID({...protyle, disabled: true}, caret), undefined);
     assert.equal(getBlockID({...protyle, lite: true}, caret), undefined);

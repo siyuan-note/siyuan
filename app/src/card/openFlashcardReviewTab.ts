@@ -8,6 +8,8 @@ import {registerFlashcardSurfaceTransfer} from "./flashcardV2SurfaceTransfer";
 import {sendFlashcardReviewToWindow} from "./flashcardV2WindowTransfer";
 /// #if !MOBILE
 import {openFile} from "../editor/util";
+import {getAllWnds} from "../layout/getAll";
+import type {Wnd} from "../layout/Wnd";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import {Constants} from "../constants";
@@ -42,17 +44,39 @@ export const moveFlashcardReviewToWindow = (reviewSetID: string, name: string,
     return sendFlashcardReviewToWindow(windowTransferID, state, () => openReviewWindow(data), takeOwnership);
 };
 
+/// #if !MOBILE
+const findReviewRelocationAnchor = (source?: IFlashcardSessionMount) => {
+    if (!source || source.signal.aborted) { return; }
+    const sourceID = source.element.closest<HTMLElement>('[data-type="wnd"][data-id]')?.dataset.id;
+    if (!sourceID) { return; }
+    const layout = window.siyuan.layout.centerLayout || window.siyuan.layout.layout;
+    if (!layout) { return; }
+    const wnds: Wnd[] = [];
+    getAllWnds(layout, wnds);
+    const index = wnds.findIndex(wnd => wnd.id === sourceID);
+    if (index < 0 || wnds[index].children.length !== 1) { return; }
+    // 复习是源窗格的唯一页签时，在该窗格分屏会随源页签关闭而折叠。
+    for (let distance = 1; distance < wnds.length; distance++) {
+        const neighbor = [wnds[index - distance], wnds[index + distance]].find(wnd =>
+            wnd?.element.isConnected && wnd.children[0]?.headElement);
+        if (neighbor) { return neighbor; }
+    }
+};
+/// #endif
+
 export const moveFlashcardReviewToTab = async (app: App, reviewSetID: string, name: string,
     options: IFlashcardV2ReviewSessionOptions, position: "tab" | "right" | "bottom",
-    attach: (mount: IFlashcardSessionMount) => boolean) => {
+    attach: (mount: IFlashcardSessionMount) => boolean, source?: IFlashcardSessionMount) => {
     /// #if !MOBILE
+    if (source?.signal.aborted) { return false; }
+    const anchor = findReviewRelocationAnchor(source);
     const transferID = genUUID();
     let moved = false;
     const release = registerFlashcardSurfaceTransfer(transferID, mount => moved = attach(mount));
     try {
         await openFile({app, position: position === "tab" ? undefined : position, openNewTab: true, removeCurrentTab: false,
             custom: {icon: "iconRiffCard", title: window.siyuan.languages.spaceRepetition, id: "siyuan-card",
-                data: {...createFlashcardReviewTabData(reviewSetID, name, options), transferID}}});
+                data: {...createFlashcardReviewTabData(reviewSetID, name, options), transferID}}}, anchor);
         return moved;
     } finally {
         release();

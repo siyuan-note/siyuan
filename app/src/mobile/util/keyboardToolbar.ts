@@ -112,7 +112,7 @@ let unmountLiteSlashMenu: (() => void) | undefined;
 
 const getMobileQuickCardBlockID = (protyle: IProtyle | undefined, range: Range | undefined) => {
     if (!protyle?.block.rootID || protyle.lite || protyle.disabled || !range?.collapsed ||
-        window.siyuan.config.readonly || window.siyuan.isPublish) {
+        window.siyuan.config.readonly || window.siyuan.isPublish || isEncryptedBox(protyle.notebookId)) {
         return;
     }
     const node = range.startContainer;

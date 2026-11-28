@@ -159,7 +159,7 @@ export const openAssetInBackground = (app: App, assetPath: string, page: number 
     openAssetWithOptions(app, assetPath, page, {keepCursor: true});
 };
 
-export const openFile = async (options: IOpenFileOptions) => {
+export const openFile = async (options: IOpenFileOptions, anchor?: Wnd) => {
     if (typeof options.removeCurrentTab === "undefined") {
         options.removeCurrentTab = true;
     }
@@ -303,10 +303,10 @@ export const openFile = async (options: IOpenFileOptions) => {
     }
     /// #endif
 
-    let wnd: Wnd = undefined;
+    let wnd = anchor?.element.isConnected && anchor.children.length ? anchor : undefined;
     // 获取光标所在 tab
     const element = document.querySelector(".layout__wnd--active");
-    if (element) {
+    if (!wnd && element) {
         wnd = getInstanceById(element.getAttribute("data-id")) as Wnd;
     }
     if (!wnd) {

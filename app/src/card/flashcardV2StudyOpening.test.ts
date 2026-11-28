@@ -136,3 +136,69 @@ test("subset cancellation preserves management and confirmation passes the callb
         assert.equal(notified, 0);
     }
 });
+
+test("a closing sole review tab anchors relocation on a neighboring live pane", async () => {
+    const start = routeSource.indexOf("const findReviewRelocationAnchor");
+    const move = compile(routeSource.slice(start, routeSource.indexOf("export const openFlashcardReviewTab", start)));
+    const pane = (id: string, connected = true, count = 1) => ({
+        id, element: {isConnected: connected},
+        children: Array.from({length: count}, () => ({headElement: {}})),
+    });
+    const left = pane("left"), right = pane("right"), detached = pane("detached", false), source = pane("review");
+    type Pane = typeof source;
+
+    const run = async (position: "tab" | "right" | "bottom", panes: Pane[], sourceID?: string, abort = false,
+                       fail = false, accepts = true) => {
+        const wrappers = {exports: {} as Record<string, (...args: unknown[]) => unknown>};
+        const layout = {panes};
+        const events: string[] = [];
+        const controller = new AbortController();
+        if (abort) { controller.abort(); }
+        let open: {options: Record<string, unknown>, anchor?: Pane};
+        let handoff: (target: object) => boolean;
+        const destination = {};
+        runInNewContext(move, {...wrappers, window: {siyuan: {layout: {centerLayout: layout},
+            languages: {spaceRepetition: "Study"}}},
+        getAllWnds: (parent: typeof layout, result: Pane[]) => result.push(...parent.panes),
+        genUUID: () => "transfer-id", createFlashcardReviewTabData: () => ({sameSession: true}),
+        registerFlashcardSurfaceTransfer: (id: string, attach: typeof handoff) => {
+            assert.equal(id, "transfer-id");
+            handoff = attach;
+            return () => { events.push("release"); };
+        },
+        openFile: async (options: Record<string, unknown>, anchor?: Pane) => {
+            open = {options, anchor};
+            if (fail) { throw new Error("open failed"); }
+            handoff(destination);
+        }});
+        const moved = wrappers.exports.moveFlashcardReviewToTab({}, "set", "Review", {reviewMode: "normal"},
+            position, (mount: object) => {
+                events.push("attach");
+                assert.equal(mount, destination);
+                return accepts;
+            }, sourceID ? {signal: controller.signal, element: {closest: () => ({dataset: {id: sourceID}})}} : undefined);
+        if (fail) {
+            await assert.rejects(moved as Promise<boolean>, /open failed/);
+            assert.deepEqual(events, ["release"]);
+        } else {
+            assert.equal(await moved, !abort && accepts);
+            assert.deepEqual(events, abort ? [] : ["attach", "release"]);
+        }
+        return open;
+    };
+
+    const samePanel = await run("tab", [left, detached, source, right], "review");
+    assert.equal(samePanel.anchor, right);
+    assert.equal(samePanel.options.position, undefined);
+    assert.equal((await run("bottom", [left, source], "review")).anchor, left);
+    assert.equal((await run("right", [source, right], "review")).options.position, "right");
+    assert.equal((await run("bottom", [left, pane("review", true, 2)], "review")).anchor, undefined);
+    assert.equal((await run("bottom", [left, source])).anchor, undefined);
+    assert.equal((await run("bottom", [source], "review")).anchor, undefined);
+    assert.equal(await run("right", [left, source], "review", true), undefined);
+    await run("bottom", [left, source], "review", false, true);
+    await run("bottom", [left, source], "review", false, false, false);
+
+    const editor = readFileSync("src/editor/util.ts", "utf8");
+    assert.match(editor, /let wnd = anchor\?\.element\.isConnected && anchor\.children\.length \? anchor : undefined;[\s\S]*?if \(!wnd && element\)/);
+});

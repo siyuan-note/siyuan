@@ -12,6 +12,7 @@ import {transaction} from "../protyle/wysiwyg/transaction";
 import {isMobile} from "../util/functions";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {isEncryptedBox} from "../util/pathName";
+import {captureFlashcardSlashCancellation} from "./flashcardV2Authoring";
 import {createFlashcardFromImage} from "./flashcardV2ImageEntry";
 
 const imageExtension = (path: string) => {
@@ -44,9 +45,12 @@ export const openFlashcardV2ImageUpload = (protyle: IProtyle, block: HTMLElement
         !remaining.querySelector("img, audio, video, iframe, [data-type~=inline-math], [data-type~=block-ref]");
     const targetAvailable = () => available() && protyle.wysiwyg.element.contains(block) &&
         block.contains(editable) && editable.innerHTML === beforeContent;
+    const cancelCommand = captureFlashcardSlashCancellation(protyle, block, range);
     const lang = window.siyuan.languages;
     let pending = false;
     let closed = false;
+    let inserting = false;
+    let committed = false;
     const dialog = new Dialog({
         title: lang.flashcardImageOcclusion,
         width: isMobile() ? "92vw" : "420px",
@@ -56,7 +60,12 @@ export const openFlashcardV2ImageUpload = (protyle: IProtyle, block: HTMLElement
     <div class="b3-label__text" role="status">${lang.flashcardImageUploadHint}</div>
 </div>
 <div class="b3-dialog__action"><button type="button" class="b3-button b3-button--cancel">${lang.cancel}</button></div>`,
-        destroyCallback: () => { closed = true; },
+        destroyCallback: () => {
+            closed = true;
+            if (!inserting && !committed) {
+                cancelCommand();
+            }
+        },
     });
     const panel = dialog.element.querySelector<HTMLElement>(".b3-dialog__content");
     const picker = panel.querySelector<HTMLButtonElement>("[data-image-upload-picker]");
@@ -78,9 +87,9 @@ export const openFlashcardV2ImageUpload = (protyle: IProtyle, block: HTMLElement
             return;
         }
         const file = files[0];
-        let inserting = false;
         const reset = () => {
             pending = false;
+            inserting = false;
             picker.disabled = false;
             status.textContent = lang.flashcardImageUploadHint;
         };
@@ -116,10 +125,16 @@ export const openFlashcardV2ImageUpload = (protyle: IProtyle, block: HTMLElement
                 changes.push({action: "insert", id: imageID, previousID: id, data: imageBlock.outerHTML});
                 undo.unshift({action: "delete", id: imageID});
             }
+            // 事务会保留选区所在块的旧 DOM；这里尚未修改原块，需要由事务更新并插入图片。
+            const selection = window.getSelection();
+            if (selection && block.contains(selection.anchorNode) && block.contains(selection.focusNode)) {
+                selection.removeAllRanges();
+            }
             inserting = true;
             void Promise.resolve(transaction(protyle, changes, undo, {
                 awaitResponse: true,
                 callback: () => {
+                    committed = true;
                     if (!isCurrent() || !available()) { return; }
                     const inserted = protyle.wysiwyg.element.querySelector<HTMLImageElement>(
                         `[data-node-id="${CSS.escape(imageID)}"] img[data-src="${CSS.escape(asset)}"]`);

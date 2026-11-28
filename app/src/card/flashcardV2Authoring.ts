@@ -1,9 +1,10 @@
 import {genEmptyElement} from "../block/util";
 import {Constants} from "../constants";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {focusBlock} from "../protyle/util/selection";
+import {focusBlock, getUndoFocusContext} from "../protyle/util/selection";
+import {focusByRange} from "../protyle/util/selectionOffsets";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
-import {transaction} from "../protyle/wysiwyg/transaction";
+import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {isEncryptedBox} from "../util/pathName";
 import type {TFlashcardAuthoringMode} from "./flashcardV2AuthoringTypes";
 
@@ -20,6 +21,39 @@ const childListParagraphs = (block: HTMLElement) => {
         ':scope > [data-type="NodeList"] > [data-type="NodeListItem"] > [data-type="NodeParagraph"]'));
 };
 
+export const captureFlashcardSlashCancellation = (protyle: IProtyle, block: HTMLElement, range: Range) => {
+    const rootID = protyle.block.rootID;
+    const notebookID = protyle.notebookId;
+    const editor = protyle.wysiwyg.element;
+    const beforeHTML = block.outerHTML;
+    const commandRange = range.cloneRange();
+    const {startContainer, endContainer, startOffset, endOffset, collapsed} = commandRange;
+    return () => {
+        if (collapsed || !block.isConnected || protyle.wysiwyg.element !== editor || !editor.contains(block) ||
+            protyle.block.rootID !== rootID || protyle.notebookId !== notebookID || block.outerHTML !== beforeHTML ||
+            protyle.disabled || protyle.lite || window.siyuan.config.readonly || window.siyuan.isPublish ||
+            commandRange.startContainer !== startContainer || commandRange.endContainer !== endContainer ||
+            commandRange.startOffset !== startOffset || commandRange.endOffset !== endOffset ||
+            !block.contains(startContainer) || !block.contains(endContainer) || !/^[\/、]/.test(commandRange.toString())) {
+            return;
+        }
+        const selection = window.getSelection();
+        for (const node of [selection?.anchorNode, selection?.focusNode]) {
+            const element = node instanceof Element ? node : node?.parentElement;
+            if (element?.closest(".protyle-wysiwyg") && !block.contains(node)) {
+                return;
+            }
+        }
+        const caret = commandRange.cloneRange();
+        caret.collapse(false);
+        const undoContext = getUndoFocusContext(editor, caret, true);
+        commandRange.deleteContents();
+        commandRange.collapse(true);
+        focusByRange(commandRange);
+        updateTransaction(protyle, block, beforeHTML, undoContext);
+    };
+};
+
 export const runFlashcardSlashCommand = (protyle: IProtyle, block: HTMLElement, range: Range,
     mode: Exclude<TFlashcardAuthoringMode, "cloze">) => {
     if (protyle.disabled || protyle.lite || window.siyuan.config.readonly || window.siyuan.isPublish ||
@@ -33,6 +67,8 @@ export const runFlashcardSlashCommand = (protyle: IProtyle, block: HTMLElement, 
     }
     const rootID = protyle.block.rootID;
     const beforeHTML = block.outerHTML;
+    const isCurrent = () => block.isConnected && protyle.wysiwyg.element.contains(block) &&
+        protyle.block.rootID === rootID && block.outerHTML === beforeHTML;
     const leftRange = document.createRange();
     leftRange.selectNodeContents(editable);
     leftRange.setEnd(range.startContainer, range.startOffset);
@@ -47,8 +83,7 @@ export const runFlashcardSlashCommand = (protyle: IProtyle, block: HTMLElement, 
     const bindExisting = existing.length >= count;
     const blank = !hasContent(front) && !hasContent(back);
     const apply = () => {
-        if (!block.isConnected || !protyle.wysiwyg.element.contains(block) ||
-            protyle.block.rootID !== rootID || block.outerHTML !== beforeHTML) {
+        if (!isCurrent()) {
             return;
         }
         const id = block.dataset.nodeId;
@@ -95,6 +130,7 @@ export const runFlashcardSlashCommand = (protyle: IProtyle, block: HTMLElement, 
         apply();
     } else {
         confirmDialog({title: window.siyuan.languages.flashcardQA,
-            text: window.siyuan.languages.flashcardSplitParagraphTip, confirm: apply});
+            text: window.siyuan.languages.flashcardSplitParagraphTip, confirm: apply,
+            cancel: captureFlashcardSlashCancellation(protyle, block, range)});
     }
 };

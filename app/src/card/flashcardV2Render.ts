@@ -1022,7 +1022,13 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
     image.parentElement.insertBefore(wrapper, image);
     wrapper.appendChild(image);
     const overlays = new Map<string, {element: HTMLElement, shape: IImageOcclusionConfig["shapes"][number]}>();
-    for (const shape of visibleShapes) {
+    for (const storedShape of visibleShapes) {
+        // 内核可能省略值为 0 的 x/y，描画遮挡和定位使用同一组坐标。
+        const shape = storedShape.type === "rectangle" || storedShape.type === "ellipse" ? {
+            ...storedShape,
+            x: storedShape.x === undefined ? 0 : storedShape.x,
+            y: storedShape.y === undefined ? 0 : storedShape.y,
+        } : storedShape;
         const style = shapeStyle(shape);
         if (!style) { continue; }
         const overlay = document.createElement("span");

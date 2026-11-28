@@ -340,3 +340,16 @@ test("the source preview ignores a superseded request and a response after the m
     assert.equal(body.textContent, "Loading");
     assert.equal(sanitized, "current");
 });
+
+test("state shortcuts stay compact and wide table rows reserve the same columns as their header", () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const css = readFileSync("src/assets/scss/business/_card.scss", "utf8");
+    assert.match(source, /class="card__v2-management-tools card__v2-management-tools--states">\$\{managementStateShortcuts/);
+    assert.match(css, /&--states \{\s*flex: 0 0 auto;/);
+    assert.match(css, /container: flashcard-management-list \/ inline-size;/);
+    assert.match(css, /@container flashcard-management-list \(min-width: 680px\) \{\s*&__v2-managed-header \{/);
+    assert.match(source, /grouped \? "" : " card__v2-managed-card--table"/);
+    assert.match(css, /&__v2-managed-header,\s*&__v2-managed-card--table \{\s*> \.card__v2-managed-leading \{\s*inline-size: 43px;/);
+    assert.match(css, /&__v2-managed-card--table\.card__v2-managed-card\.b3-list-item--hide-action \{\s*> \[data-type="suspend"\],\s*> \[data-type="previewFull"\],\s*> \[data-type="more"\] \{\s*display: flex;\s*opacity: 0;/);
+    assert.match(css, /&:hover,\s*&:focus-within \{\s*> \[data-type="suspend"\],\s*> \[data-type="previewFull"\],\s*> \[data-type="more"\] \{\s*opacity: 1;/);
+});

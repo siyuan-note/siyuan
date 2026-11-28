@@ -1042,7 +1042,7 @@ const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
     if (generationLabels[result.card.generationStatus]) {
         statuses.push(generationLabels[result.card.generationStatus]);
     }
-    return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card${result.card.editLater ? " card__v2-managed-card--edit-later" : ""}" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
+    return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card${grouped ? "" : " card__v2-managed-card--table"}${result.card.editLater ? " card__v2-managed-card--edit-later" : ""}" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
 <span class="card__v2-managed-leading">
 <input data-type="selectCard" aria-label="${escapeAttr(title)}" type="checkbox"${selectedCardIDs.has(result.card.id) ? " checked" : ""}>
 <button type="button" data-type="flag" data-menu="true" aria-haspopup="menu" data-position="north" class="block__icon block__icon--show block__icon--touch ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.flashcardFlag)} - ${escapeAttr(flashcardV2FlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconFlag"></use></svg></button>
@@ -2137,7 +2137,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
 <label class="card__v2-checkbox"><input data-type="group" type="checkbox"${grouped ? " checked" : ""}><span>${window.siyuan.languages.flashcardGroupBySource}</span></label>
 </div>
 </div>
-<div class="card__v2-management-tools">${managementStateShortcuts(filters)}</div>
+<div class="card__v2-management-tools card__v2-management-tools--states">${managementStateShortcuts(filters)}</div>
 <div class="card__v2-management-selection">
 <div class="fn__flex">
 <label class="card__v2-checkbox"><input data-type="selectPage" type="checkbox"><span>${window.siyuan.languages.flashcardSelectPage}</span></label>
@@ -3661,7 +3661,12 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             group.shapeIDs?.forEach((shapeID) => {
                 const shape = initial.shapes.find((item) => item.id === shapeID);
                 if (shape) {
-                    shapes.push({...shape, groupID: group.id});
+                    // 内核可能省略值为 0 的 x/y，编辑时仍按图片边缘定位。
+                    const geometry = shape.type === "rectangle" || shape.type === "ellipse" ? {
+                        x: shape.x === undefined ? 0 : shape.x,
+                        y: shape.y === undefined ? 0 : shape.y,
+                    } : {};
+                    shapes.push({...shape, ...geometry, groupID: group.id});
                 }
             });
         });
@@ -3744,7 +3749,8 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         const factor = Math.min(1, 1 / (maxX - minX), 1 / (maxY - minY));
         const centerX = Math.max(-minX * factor, Math.min(1 - maxX * factor, x));
         const centerY = Math.max(-minY * factor, Math.min(1 - maxY * factor, y));
-        return {id: shape.id, groupID: shape.groupID, label: shape.label, type: "polygon" as const,
+        return {id: shape.id, groupID: shape.groupID, label: shape.label, answer: shape.answer,
+            explanationBlockID: shape.explanationBlockID, type: "polygon" as const,
             points: rotated.map(point => ({x: point.x * factor + centerX, y: point.y * factor + centerY}))};
     };
     const contains = (shape: IFlashcardV2ImageShape, point: IFlashcardV2ImagePoint) => {
@@ -4091,7 +4097,8 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         updateAfterEdit();
     };
     const keydown = (event: KeyboardEvent) => {
-        if (event.target === labelInput || element.classList.contains("fn__none") || event.altKey || !(event.ctrlKey || event.metaKey) ||
+        if (event.target === labelInput || event.target === answerInput || event.target === explanationInput ||
+            element.classList.contains("fn__none") || event.altKey || !(event.ctrlKey || event.metaKey) ||
             event.key.toLowerCase() !== "z") {
             return;
         }
@@ -4542,11 +4549,13 @@ ${newInlineTargets.length > 0 ? `<div class="card__v2-advanced-section-action"><
     <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardTypedAnswer}</div><input data-type="imageMaskAnswer" type="text" maxlength="2048" class="b3-text-field fn__block"></label>
     <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardImageExplanationBlock}</div><input data-type="imageMaskExplanation" type="text" class="b3-text-field fn__block" spellcheck="false" autocomplete="off"></label>
 </div>
-<div data-type="imageStepOrder" class="card__v2-advanced-image-toolbar fn__none">
-    <label class="fn__flex-center"><input class="b3-switch" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardImageSequential}</label>
-    <span data-type="imageStepNumber"></span>
-    <button type="button" data-type="imageStepUp" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.moveToUp)}"><svg aria-hidden="true"><use xlink:href="#iconUp"></use></svg></button>
-    <button type="button" data-type="imageStepDown" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.moveToDown)}"><svg aria-hidden="true"><use xlink:href="#iconDown"></use></svg></button>
+<div data-type="imageStepOrder" class="card__v2-advanced-image-toolbar card__v2-image-step-order fn__none">
+    <label class="fn__flex-center"><input class="b3-switch" type="checkbox"><span class="fn__space"></span><span>${window.siyuan.languages.flashcardImageSequential}</span></label>
+    <div class="fn__flex fn__flex-center card__v2-image-step-actions">
+        <span data-type="imageStepNumber"></span>
+        <button type="button" data-type="imageStepUp" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.moveToUp)}"><svg aria-hidden="true"><use xlink:href="#iconUp"></use></svg></button>
+        <button type="button" data-type="imageStepDown" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.moveToDown)}"><svg aria-hidden="true"><use xlink:href="#iconDown"></use></svg></button>
+    </div>
 </div>
 <div class="card__v2-advanced-image-toolbar">
     <button type="button" data-type="drawImageRegion" class="b3-button b3-button--outline fn__none" aria-pressed="false" disabled>${window.siyuan.languages.flashcardDrawImageRegion}</button>
@@ -4571,8 +4580,13 @@ ${newInlineTargets.length > 0 ? `<div class="card__v2-advanced-section-action"><
 <div class="b3-label b3-label--inner card__v2-advanced-field"><div class="b3-label__text">${window.siyuan.languages.flashcardCorrectAnswer}</div>
 ${blockIDs.slice(1).map((blockID, index) => `<label class="fn__flex card__v2-choice-source"><input data-type="choiceCorrect" data-choice-index="${index}" type="radio" name="flashcardChoiceCorrect"><span>${escapeHtml(flashcardV2BlockText(blockID, doms[blockID] || ""))}</span></label>`).join("")}
 </div>
-<label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="choiceRandomize" class="b3-switch fn__flex-center" type="checkbox" checked><span class="fn__space"></span>${window.siyuan.languages.flashcardRandomizeOptions}</label>
-<label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="choiceDynamic" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardDynamicDistractors}<span class="fn__flex-1"></span><input data-type="choiceDynamicCount" class="b3-text-field" style="width:72px" type="number" min="1" max="50" value="3" disabled></label>
+<div class="b3-label b3-label--inner card__v2-advanced-switch card__v2-choice-switch">
+    <label class="fn__flex fn__flex-center"><input data-type="choiceRandomize" class="b3-switch" type="checkbox" checked><span>${window.siyuan.languages.flashcardRandomizeOptions}</span></label>
+</div>
+<div class="b3-label b3-label--inner card__v2-advanced-switch card__v2-choice-switch">
+    <label class="fn__flex fn__flex-center"><input data-type="choiceDynamic" class="b3-switch" type="checkbox"><span>${window.siyuan.languages.flashcardDynamicDistractors}</span></label>
+    <input data-type="choiceDynamicCount" class="b3-text-field" aria-label="${escapeAttr(window.siyuan.languages.flashcardDynamicDistractors)}" type="number" min="1" max="50" value="3" disabled>
+</div>
 </div>` : "";
                 const typedFuzzyDistance = edit?.generationConfig.fuzzyMaxDistance;
                 const typedFuzzyRatio = edit?.generationConfig.fuzzyMaxRatio ?? 0.1;

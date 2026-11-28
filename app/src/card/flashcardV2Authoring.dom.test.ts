@@ -22,16 +22,35 @@ const browserCase = (source: string) => {
     };
     let id = 0;
     let confirm: () => void;
+    let cancel: () => void;
     const transactions: Array<Array<{action: string; data: string}>> = [];
+    const undoMarks: boolean[] = [];
+    const undoContext = {focus: "caret"};
     const dependencies: Record<string, unknown> = {
         "../block/util": {genEmptyElement: () => paragraph("new-" + (++id), "")},
         "../constants": {Constants: {ZWSP: "\u200b"}},
-        "../dialog/confirmDialog": {confirmDialog: (options: {confirm: () => void}) => { confirm = options.confirm; }},
-        "../protyle/util/selection": {},
-        "../protyle/wysiwyg/getBlock": {getContenteditableElement: (block: HTMLElement) => block.firstElementChild},
-        "../protyle/wysiwyg/transaction": {transaction: (_editor: unknown, operations: Array<{action: string; data: string}>) => {
-            transactions.push(operations);
+        "../dialog/confirmDialog": {confirmDialog: (options: {confirm: () => void; cancel: () => void}) => {
+            ({confirm, cancel} = options);
         }},
+        "../protyle/util/selection": {getUndoFocusContext: (_editor: unknown, caret: Range) => {
+            undoMarks.push(caret.collapsed);
+            return undoContext;
+        }},
+        "../protyle/util/selectionOffsets": {focusByRange: (range: Range) => {
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }},
+        "../protyle/wysiwyg/getBlock": {getContenteditableElement: (block: HTMLElement) => block.firstElementChild},
+        "../protyle/wysiwyg/transaction": {
+            transaction: (_editor: unknown, operations: Array<{action: string; data: string}>) => {
+                transactions.push(operations);
+            },
+            updateTransaction: (_editor: unknown, element: Element, oldHTML: string, context: unknown) => {
+                undoMarks.push(context === undoContext && oldHTML.includes("/qa"));
+                transactions.push([{action: "update", data: element.outerHTML}]);
+            },
+        },
         "../util/pathName": {isEncryptedBox: () => false},
     };
     const exports = {};
@@ -73,7 +92,47 @@ const browserCase = (source: string) => {
     item.append(question, list);
     editor.appendChild(item);
     invoke(question, 9, 12);
-    return {confirmationRequired, split, template, blankNeedsNoConfirmation, list: content(transactions[2])};
+    const listChanges = content(transactions[2]);
+    const formatted = paragraph("formatted", "");
+    formatted.firstElementChild.innerHTML = '<span data-type="strong">Question/qaAnswer</span><code>tail</code>';
+    editor.appendChild(formatted);
+    const formattedText = formatted.querySelector("span").firstChild;
+    const formattedRange = document.createRange();
+    formattedRange.setStart(formattedText, 8);
+    formattedRange.setEnd(formattedText, 11);
+    run(protyle, formatted, formattedRange, "qa");
+    cancel();
+    const selection = window.getSelection();
+    const cancelled = {
+        actions: content(transactions[3]),
+        content: formatted.firstElementChild.innerHTML,
+        caret: [selection.isCollapsed, selection.focusNode === formattedText, selection.focusOffset],
+    };
+    const changed = paragraph("changed", "Question/qaAnswer");
+    editor.appendChild(changed);
+    invoke(changed, 8, 11);
+    changed.firstElementChild.firstChild.textContent += " new edit";
+    cancel();
+    const replaced = paragraph("replaced", "Question/qaAnswer");
+    editor.appendChild(replaced);
+    invoke(replaced, 8, 11);
+    replaced.firstElementChild.replaceChildren(document.createTextNode(replaced.textContent));
+    cancel();
+    const collapsed = paragraph("collapsed", "QuestionAnswer");
+    editor.appendChild(collapsed);
+    invoke(collapsed, 8, 8);
+    cancel();
+    const selected = paragraph("selected", "QuestionAnswer");
+    editor.appendChild(selected);
+    invoke(selected, 0, 8);
+    cancel();
+    const switched = paragraph("switched", "Question/qaAnswer");
+    editor.appendChild(switched);
+    invoke(switched, 8, 11);
+    protyle.block.rootID = "different";
+    cancel();
+    return {confirmationRequired, split, template, blankNeedsNoConfirmation, list: listChanges, cancelled, undoMarks,
+        unaffected: [changed, replaced, collapsed, selected, switched].map(block => block.textContent), updates: transactions.length};
 };
 
 const runInAuthoringBrowser = async (body: string) => {
@@ -112,10 +171,18 @@ test("slash card commands ask before splitting and directly handle empty paragra
         template: [["update", "Question"], ["insert", "Answer"]],
         blankNeedsNoConfirmation: true,
         list: [["update", "Question "]],
+        cancelled: {
+            actions: [["update", "QuestionAnswertail"]],
+            content: '<span data-type="strong">QuestionAnswer</span><code>tail</code>',
+            caret: [true, true, 8],
+        },
+        undoMarks: [true, true],
+        unaffected: ["Question/qaAnswer new edit", "Question/qaAnswer", "QuestionAnswer", "QuestionAnswer", "Question/qaAnswer"],
+        updates: 4,
     });
 });
 
-const imageAndBadgeCase = async (imageSource: string, badgeSource: string) => {
+const imageAndBadgeCase = async (imageSource: string, badgeSource: string, authoringSource: string) => {
     const root = document.createElement("div");
     root.className = "protyle";
     root.innerHTML = '<div class="protyle-wysiwyg"></div>';
@@ -130,12 +197,15 @@ const imageAndBadgeCase = async (imageSource: string, badgeSource: string) => {
         return block;
     };
     let dialog: HTMLElement;
+    let closeDialog: () => void;
     let upload: () => void;
     let uploads = 0;
     const messages: string[] = [];
     const opened: string[] = [];
     const menus: Array<[string, boolean]> = [];
     const undos: string[][] = [];
+    const transactionSelections: Array<string | null> = [];
+    const cancellations: Array<[string, string, string]> = [];
     const constants = {ZWSP: "\u200b", SIYUAN_ASSETS_IMAGE: [".png"], DATA_FLASHCARD_SOURCE: "data-flashcard-source"};
     const dependencies: Record<string, unknown> = {
         "../asset/renderAssets": {genAssetHTML: (_extension: string, path: string) => '<img data-src="' + path + '">'},
@@ -146,6 +216,7 @@ const imageAndBadgeCase = async (imageSource: string, badgeSource: string) => {
             constructor(private options: {content: string, destroyCallback: () => void}) {
                 this.element.innerHTML = options.content;
                 dialog = this.element;
+                closeDialog = () => this.destroy();
                 document.body.appendChild(dialog);
             }
             destroy() {
@@ -154,6 +225,12 @@ const imageAndBadgeCase = async (imageSource: string, badgeSource: string) => {
             }
         }},
         "../dialog/message": {showMessage: (message: string) => messages.push(message)},
+        "../protyle/util/selection": {getUndoFocusContext: () => ({restoreSelection: "true"})},
+        "../protyle/util/selectionOffsets": {focusByRange: (range: Range) => {
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }},
         "../protyle/runtimeCapabilities": {isProtyleUploadDisabled: () => false},
         "../protyle/upload": {uploadFiles: (_protyle: unknown, _files: unknown, _input: unknown,
             saved: (response: string, result: string) => void, complete: (success: boolean) => void) => {
@@ -168,15 +245,27 @@ const imageAndBadgeCase = async (imageSource: string, badgeSource: string) => {
         "../protyle/wysiwyg/getBlock": {getContenteditableElement: (block: HTMLElement) => block.firstElementChild},
         "../protyle/wysiwyg/transaction": {transaction: (_protyle: unknown, changes: IOperation[],
             undo: IOperation[], options: {callback: () => void}) => {
+            const selection = window.getSelection();
+            const anchor = selection.rangeCount ? selection.getRangeAt(0).startContainer : null;
+            transactionSelections.push(anchor?.parentElement?.closest("[data-node-id]")?.getAttribute("data-node-id") ?? null);
             for (const change of changes) {
+                const block = editor.querySelector('[data-node-id="' +
+                    (change.action === "update" ? change.id : change.previousID) + '"]');
+                if (anchor && block.contains(anchor)) {
+                    continue;
+                }
                 if (change.action === "update") {
-                    editor.querySelector('[data-node-id="' + change.id + '"]').outerHTML = String(change.data);
+                    block.outerHTML = String(change.data);
                 } else {
-                    editor.querySelector('[data-node-id="' + change.previousID + '"]').insertAdjacentHTML("afterend", String(change.data));
+                    block.insertAdjacentHTML("afterend", String(change.data));
                 }
             }
             undos.push(undo.map(change => change.action + ":" + change.id));
             options.callback();
+        }, updateTransaction: (_protyle: unknown, block: HTMLElement, oldHTML: string) => {
+            const previous = document.createElement("template");
+            previous.innerHTML = oldHTML;
+            cancellations.push([block.dataset.nodeId, previous.content.textContent, block.textContent]);
         }},
         "../util/functions": {isMobile: () => false},
         "../util/imageURL": {isBrowserRenderableImagePath: () => true},
@@ -187,6 +276,9 @@ const imageAndBadgeCase = async (imageSource: string, badgeSource: string) => {
     };
     const imageModule = {};
     const badgeModule = {};
+    const authoringModule = {};
+    new Function("exports", "require", authoringSource)(authoringModule, (path: string) => dependencies[path]);
+    dependencies["./flashcardV2Authoring"] = authoringModule;
     new Function("exports", "require", imageSource)(imageModule, (path: string) => dependencies[path]);
     new Function("exports", "require", badgeSource)(badgeModule, (path: string) => dependencies[path]);
     const {openFlashcardV2ImageUpload} = imageModule as typeof import("./flashcardV2ImageUpload");
@@ -199,6 +291,9 @@ const imageAndBadgeCase = async (imageSource: string, badgeSource: string) => {
         const range = document.createRange();
         range.setStart(text, start);
         range.setEnd(text, start + 6);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
         openFlashcardV2ImageUpload(protyle, block, range);
     };
     const drop = (name: string) => {
@@ -219,6 +314,50 @@ const imageAndBadgeCase = async (imageSource: string, badgeSource: string) => {
     drop("diagram.png");
     protyle.block.rootID = "other-document";
     upload();
+    protyle.block.rootID = "root";
+    const blank = paragraph("blank", "/image");
+    const unrelated = paragraph("unrelated", "Keep this selection");
+    editor.append(blank, unrelated);
+    invoke(blank);
+    const files = new DataTransfer();
+    files.items.add(new File(["bytes"], "diagram.png"));
+    const input = dialog.querySelector("input");
+    input.files = files.files;
+    input.dispatchEvent(new Event("change"));
+    const selection = window.getSelection();
+    selection.collapse(unrelated.firstElementChild.firstChild, 4);
+    upload();
+    const unrelatedSelectionPreserved = selection.anchorNode === unrelated.firstElementChild.firstChild && selection.anchorOffset === 4;
+    const declined = paragraph("declined", "");
+    declined.firstElementChild.innerHTML = '<span data-type="strong">Keep/image text</span>';
+    editor.appendChild(declined);
+    const declinedText = declined.querySelector("span").firstChild;
+    const declinedRange = document.createRange();
+    declinedRange.setStart(declinedText, 4);
+    declinedRange.setEnd(declinedText, 10);
+    selection.removeAllRanges();
+    selection.addRange(declinedRange);
+    openFlashcardV2ImageUpload(protyle, declined, declinedRange);
+    dialog.querySelector("input").dispatchEvent(new Event("change"));
+    const emptyPickerRetainedCommand = declined.textContent === "Keep/image text" && dialog.isConnected;
+    dialog.querySelector<HTMLButtonElement>(".b3-button--cancel").click();
+    const cancelCaret = selection.anchorNode === declinedText && selection.isCollapsed && selection.anchorOffset === 4;
+    const interrupted = paragraph("interrupted", "/image");
+    editor.appendChild(interrupted);
+    invoke(interrupted);
+    drop("diagram.png");
+    closeDialog();
+    upload();
+    const changed = paragraph("changed", "/image");
+    editor.appendChild(changed);
+    invoke(changed);
+    changed.firstElementChild.firstChild.textContent += " edited";
+    closeDialog();
+    const switched = paragraph("switched", "/image");
+    editor.appendChild(switched);
+    invoke(switched);
+    selection.collapse(unrelated.firstElementChild.firstChild, 2);
+    closeDialog();
 
     const imageBlock = editor.querySelector<HTMLElement>('[data-node-id="image-block"]');
     imageBlock.dataset.flashcardSource = "true";
@@ -232,9 +371,13 @@ const imageAndBadgeCase = async (imageSource: string, badgeSource: string) => {
     imageBlock.dataset.flashcardSource = "false";
     renderFlashcardV2Badge(imageBlock);
     return {
-        uploads, messages, opened, undos, menus, badgeCount, remainingBadges: editor.querySelectorAll("[data-flashcard-badge]").length,
+        uploads, messages, opened, undos, menus, badgeCount, transactionSelections, unrelatedSelectionPreserved,
+        remainingBadges: editor.querySelectorAll("[data-flashcard-badge]").length,
         original: editor.firstElementChild.textContent, stale: cancel.textContent,
         image: imageBlock.querySelector("img").dataset.src,
+        blankImage: editor.querySelector<HTMLElement>('[data-node-id="blank"] img').dataset.src,
+        cancellations, emptyPickerRetainedCommand, cancelCaret, declinedHTML: declined.firstElementChild.innerHTML,
+        protectedCommands: [changed.textContent, switched.textContent],
     };
 };
 
@@ -242,10 +385,15 @@ test("image slash upload preserves surrounding text and its document, and the so
     const result = await runInAuthoringBrowser("window.siyuan={config:{},languages:{flashcardImageUploadHint:'image-only'," +
         "uploadInsertTargetUnavailable:'stale-target',riffCard:'Cards'}};(" + imageAndBadgeCase.toString() + ")(" +
         JSON.stringify(authoringSource("flashcardV2ImageUpload.ts")) + "," +
-        JSON.stringify(authoringSource("flashcardV2Badge.ts")) + ");");
+        JSON.stringify(authoringSource("flashcardV2Badge.ts")) + "," +
+        JSON.stringify(authoringSource("flashcardV2Authoring.ts")) + ");");
     assert.deepEqual(result, {
-        uploads: 2, messages: ["image-only", "stale-target"], opened: ["assets/diagram.png"],
-        undos: [["delete:image-block", "update:original"]], menus: [["image-block", true]], badgeCount: 1, remainingBadges: 0,
-        original: "Keep  the text", stale: "/image", image: "assets/diagram.png",
+        uploads: 4, messages: ["image-only", "stale-target"], opened: ["assets/diagram.png", "assets/diagram.png"],
+        undos: [["delete:image-block", "update:original"], ["update:blank"]], menus: [["image-block", true]],
+        badgeCount: 1, remainingBadges: 0, transactionSelections: [null, "unrelated"], unrelatedSelectionPreserved: true,
+        original: "Keep  the text", stale: "/image", image: "assets/diagram.png", blankImage: "assets/diagram.png",
+        cancellations: [["declined", "Keep/image text", "Keep text"], ["interrupted", "/image", ""]],
+        emptyPickerRetainedCommand: true, cancelCaret: true, declinedHTML: '<span data-type="strong">Keep text</span>',
+        protectedCommands: ["/image edited", "/image"],
     });
 });

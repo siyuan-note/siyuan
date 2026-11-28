@@ -638,13 +638,13 @@ const sessionContent = (mobile = false) => `<div class="b3-dialog__content fn__f
     <button data-type="study-later" class="b3-button b3-button--cancel ariaLabel" aria-label="${window.siyuan.languages.flashcardStudyLaterTip}" disabled><div class="card__icon">💤</div>${window.siyuan.languages.flashcardStudyLater}</button>
 </div>
 <div data-flashcard-action="ratings" class="fn__flex card__action card__v2-session-actions fn__none">
-    <button data-rating="again" class="b3-button b3-button--error" disabled><div class="card__icon">🙈</div>${window.siyuan.languages.cardRatingAgain}<span class="fn__block" data-rating-interval></span></button>
+    <button data-rating="again" class="b3-button b3-button--error" disabled><div class="card__icon">🙈</div><span class="card__v2-rating-label">${window.siyuan.languages.cardRatingAgain}</span><span class="fn__block card__v2-rating-interval" data-rating-interval></span></button>
     <span class="fn__space"></span>
-    <button data-rating="hard" class="b3-button b3-button--warning" disabled><div class="card__icon">😬</div>${window.siyuan.languages.cardRatingHard}<span class="fn__block" data-rating-interval></span></button>
+    <button data-rating="hard" class="b3-button b3-button--warning" disabled><div class="card__icon">😬</div><span class="card__v2-rating-label">${window.siyuan.languages.cardRatingHard}</span><span class="fn__block card__v2-rating-interval" data-rating-interval></span></button>
     <span class="fn__space"></span>
-    <button data-rating="good" class="b3-button b3-button--info" disabled><div class="card__icon">😊</div>${window.siyuan.languages.cardRatingGood}<span class="fn__block" data-rating-interval></span></button>
+    <button data-rating="good" class="b3-button b3-button--info" disabled><div class="card__icon">😊</div><span class="card__v2-rating-label">${window.siyuan.languages.cardRatingGood}</span><span class="fn__block card__v2-rating-interval" data-rating-interval></span></button>
     <span class="fn__space"></span>
-    <button data-rating="easy" class="b3-button b3-button--success" disabled><div class="card__icon">🌈</div>${window.siyuan.languages.cardRatingEasy}<span class="fn__block" data-rating-interval></span></button>
+    <button data-rating="easy" class="b3-button b3-button--success" disabled><div class="card__icon">🌈</div><span class="card__v2-rating-label">${window.siyuan.languages.cardRatingEasy}</span><span class="fn__block card__v2-rating-interval" data-rating-interval></span></button>
 </div>
 <div data-flashcard-action="finish" class="fn__flex card__action card__v2-session-actions fn__none">
     <button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
@@ -1854,7 +1854,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                                         return;
                                     }
                                     movingReview = true;
-                                    void moveFlashcardReviewToTab(app, reviewSetID, name, options, mode, dialog.move)
+                                    void moveFlashcardReviewToTab(app, reviewSetID, name, options, mode, dialog.move, dialog.mount)
                                         .catch(error => console.error("Flashcard review relocation failed", error))
                                         .finally(() => { movingReview = false; });
                                 },

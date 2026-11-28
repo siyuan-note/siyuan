@@ -23,7 +23,15 @@ class Control {
     emit(type: string, event?: unknown) { this.listeners.get(type)?.(event); }
 }
 
-const setup = () => {
+test("image reveal order keeps its position and arrow controls together at narrow widths", () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const css = readFileSync("src/assets/scss/business/_card.scss", "utf8");
+    assert.match(source, /fn__flex fn__flex-center card__v2-image-step-actions">\s*<span data-type="imageStepNumber"><\/span>\s*<button[^>]+data-type="imageStepUp"[\s\S]*?<button[^>]+data-type="imageStepDown"/);
+    assert.match(css, /\.card__v2-image-step-actions \{\s*flex: 0 0 auto;/);
+    assert.match(css, /\.card__v2-image-step-order \{[\s\S]*?word-break: normal;/);
+});
+
+const setup = (initialShapeType = "rectangle", origin = {x: .1, y: .2} as {x?: number, y?: number}) => {
     const draws: number[][] = [];
     const messages: string[] = [];
     const context = {beginPath() {}, closePath() {}, moveTo() {}, lineTo() {}, ellipse() {},
@@ -67,7 +75,9 @@ const setup = () => {
     let frame: () => void;
     let id = 0;
     const initial = {groups: [{id: "group", displayOrder: 0, shapeIDs: ["existing"]}],
-        shapes: [{id: "existing", type: "rectangle", x: .1, y: .2, width: .3, height: .4}]};
+        shapes: [{id: "existing", type: initialShapeType, ...(initialShapeType === "polygon" ?
+            {points: [{x: .1, y: .2}, {x: .4, y: .2}, {x: .4, y: .6}, {x: .1, y: .6}]} :
+            {...origin, width: .3, height: .4})}]};
     const source = readFileSync("src/card/flashcardV2.ts", "utf8");
     const snippet = source.slice(source.indexOf("const bindFlashcardV2ImageEditor ="),
         source.indexOf("const openFlashcardV2AdvancedSourceEditor ="));
@@ -75,7 +85,8 @@ const setup = () => {
         '\nbindFlashcardV2ImageEditor(element, "image.png", () => {}, initial);', {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText, {
-        window, document, initial, AbortController, element: {querySelector: (selector: string) => controls.get(selector)},
+        window, document, initial, AbortController,
+        element: Object.assign(new Control(), {querySelector: (selector: string) => controls.get(selector)}),
         bindFlashcardV2Pinch: () => {}, escapeAttr: (value: string) => value, genUUID: () => `generated-${++id}`,
         extendFlashcardV2ImageRegion, flashcardV2ImageRegionContains,
         showMessage: (value: string) => messages.push(value),
@@ -273,7 +284,47 @@ test("merging uses the active group ID and splitting assigns new IDs to the othe
     state.editor.destroy();
 });
 
-test("rotation preserves the shape identity with normalized polygon points", () => {
+for (const [type, pointCount] of [["rectangle", 4], ["ellipse", 32], ["polygon", 4]] as const) {
+    test(`rotation preserves ${type} identity and metadata with only normalized polygon geometry`, () => {
+        const state = setup(type);
+        state.frame();
+        const mode = state.control("imageShape");
+        mode.value = "edit";
+        mode.emit("change");
+        const at = (x: number, y: number) => ({
+            clientX: 20 + x * 480, clientY: 30 + y * 240, pointerId: 1, button: 0,
+        });
+        state.canvas.emit("pointerdown", at(.25, .4));
+        state.canvas.emit("pointerup", at(.25, .4));
+        state.labelInput.value = "External landmark";
+        state.labelInput.emit("input");
+        state.answerInput.value = "Mercury";
+        state.answerInput.emit("input");
+        state.explanationInput.value = "20261128123000-abcdefg";
+        state.explanationInput.emit("input");
+        state.canvas.emit("pointerdown", at(.25, .2 - 22 / 240));
+        state.canvas.emit("pointerup", at(.4, .4));
+        const config = state.editor.getConfig();
+        const shape = config.shapes[0];
+        assert.equal(shape.id, "existing");
+        assert.equal(config.groups[0].id, "group");
+        assert.equal(config.groups[0].shapeIDs[0], shape.id);
+        assert.equal(shape.type, "polygon");
+        assert.equal(shape.points.length, pointCount);
+        assert.notEqual(shape.points[0].x, .1);
+        assert.equal(shape.x, undefined);
+        assert.equal(shape.y, undefined);
+        assert.equal(shape.width, undefined);
+        assert.equal(shape.height, undefined);
+        assert.equal(shape.label, "External landmark");
+        assert.equal(shape.answer, "Mercury");
+        assert.equal(shape.explanationBlockID, "20261128123000-abcdefg");
+        assert.ok(shape.points.every(({x, y}: {x: number, y: number}) => x >= 0 && x <= 1 && y >= 0 && y <= 1));
+        state.editor.destroy();
+    });
+}
+
+test("text inputs retain native undo and redo while the canvas handles shape undo", () => {
     const state = setup();
     state.frame();
     const mode = state.control("imageShape");
@@ -284,15 +335,67 @@ test("rotation preserves the shape identity with normalized polygon points", () 
     });
     state.canvas.emit("pointerdown", at(.25, .4));
     state.canvas.emit("pointerup", at(.25, .4));
-    state.labelInput.value = "External landmark";
-    state.labelInput.emit("input");
-    state.canvas.emit("pointerdown", at(.25, .2 - 22 / 240));
-    state.canvas.emit("pointerup", at(.4, .4));
-    const shape = state.editor.getConfig().shapes[0];
-    assert.equal(shape.id, "existing");
-    assert.equal(shape.type, "polygon");
-    assert.equal(shape.points.length, 4);
-    assert.equal(shape.label, "External landmark");
-    assert.ok(shape.points.every(({x, y}: {x: number, y: number}) => x >= 0 && x <= 1 && y >= 0 && y <= 1));
+    state.answerInput.value = "Mercury";
+    state.answerInput.emit("input");
+    const before = state.editor.getConfig();
+    const sendUndo = (target: Control, modifier: string, shiftKey: boolean) => {
+        let prevented = false;
+        let stopped = false;
+        state.document.emit("keydown", {
+            target, key: shiftKey ? "Z" : "z", [modifier]: true, shiftKey,
+            preventDefault: () => { prevented = true; },
+            stopPropagation: () => { stopped = true; },
+        });
+        assert.equal(prevented, target === state.canvas);
+        assert.equal(stopped, target === state.canvas);
+    };
+    for (const target of [state.labelInput, state.answerInput, state.explanationInput]) {
+        for (const modifier of ["ctrlKey", "metaKey"]) {
+            for (const shiftKey of [true, false]) {
+                sendUndo(target, modifier, shiftKey);
+                assert.deepEqual(state.editor.getConfig(), before);
+            }
+        }
+    }
+    sendUndo(state.canvas, "ctrlKey", true);
+    assert.deepEqual(state.editor.getConfig(), before);
+    sendUndo(state.canvas, "ctrlKey", false);
+    assert.equal(state.editor.getConfig().shapes[0].answer, undefined);
     state.editor.destroy();
+});
+
+test("editing and rotating reopened edge masks uses omitted zero origins", () => {
+    const cases = [
+        {type: "rectangle", origin: {y: .2}, x: 0, y: .2},
+        {type: "ellipse", origin: {x: .1}, x: .1, y: 0},
+        {type: "rectangle", origin: {}, x: 0, y: 0},
+    ];
+    for (const {type, origin, x, y} of cases) {
+        const state = setup(type, origin);
+        state.frame();
+        const shape = () => state.editor.getConfig().shapes[0];
+        assert.equal(shape().x, x);
+        assert.equal(shape().y, y);
+        const mode = state.control("imageShape");
+        mode.value = "edit";
+        mode.emit("change");
+        const at = (x: number, y: number) => ({
+            clientX: 20 + x * 480, clientY: 30 + y * 240, pointerId: 1, button: 0,
+        });
+        state.canvas.emit("pointerdown", at(x + .15, y + .2));
+        state.canvas.emit("pointerup", at(x + .20, y + .3));
+        const moved = shape();
+        assert.ok(Math.abs(moved.x - (x + .05)) < 1e-9);
+        assert.ok(Math.abs(moved.y - (y + .10)) < 1e-9);
+        state.answerInput.value = "Edge mask answer";
+        state.answerInput.emit("input");
+        state.canvas.emit("pointerdown", at(moved.x + .15, moved.y - 22 / 240));
+        state.canvas.emit("pointerup", at(moved.x + .30, moved.y + .2));
+        const rotated = shape();
+        assert.equal(rotated.type, "polygon");
+        assert.equal(rotated.id, "existing");
+        assert.equal(rotated.answer, "Edge mask answer");
+        assert.ok(rotated.points.every(({x, y}: {x: number, y: number}) => x >= 0 && x <= 1 && y >= 0 && y <= 1));
+        state.editor.destroy();
+    }
 });

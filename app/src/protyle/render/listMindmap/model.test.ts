@@ -336,7 +336,7 @@ test("layout rejects cyclic or invalid trees and supports deep nesting without r
 const browserCases = async (sourceCode: string, css: string, taskSource: string, taskCSS: string, dragSource: string,
                             inputSource: string, controllerSource: string) => {
     const check = require("node:assert/strict");
-    const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, addListMindmapNode, " +
+    const api = new Function("mathRender", "Constants", "highlightRender", sourceCode + "; return {readListMindmap, moveListMindmapNode, moveListMindmapNodes, addListMindmapNode, " +
         "deleteListMindmapNode, replaceListMindmapContent, cleanListMindmapHTML, updateListMindmapTimestamps, " +
         "convertListMindmapToList, listMindmapConversionSource, remapListMindmapIDs, writeListMindmapMetadata, retagMindmapBranch, " +
         "getListMindmapSiblingIDs, normalizeListMindmapSummaryMetadata, getListMindmapSummaryRange, getListMindmapSiblingFoldStates, " +
@@ -994,6 +994,31 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.deepEqual(ids(list).filter(id => id !== source.element.parentElement.dataset.nodeId).sort(),
         allIds.filter(id => id !== previousChildListId).sort());
 
+    // 批量拖放以原文档顺序移动最外层节点，禁止任一分支形成循环。
+    const multiList = reset("* A\n  * A child\n* B\n* C\n* Destination\n");
+    const multiModel = api.readListMindmap(multiList);
+    const [moveA, moveB, moveC, moveTarget] = multiModel.root.children;
+    const moveChild = moveA.children[0];
+    const beforeBatch = multiList.outerHTML;
+    check.equal(api.moveListMindmapNodes(multiList, [moveC.id, moveA.id], moveChild.id, "child"), false);
+    check.equal(api.moveListMindmapNodes(multiList, [moveC.id, "missing"], moveTarget.id, "child"), false);
+    check.equal(multiList.outerHTML, beforeBatch);
+    api.writeListMindmapMetadata(multiList, {...multiModel.metadata,
+        summaries: [{id: "test-batch-summary", parentId: multiModel.root.id,
+            nodeIds: [moveA.id, moveB.id, moveC.id], label: "Before", color: "red"}]});
+    check.equal(api.moveListMindmapNodes(multiList, [moveC.id, moveChild.id, moveB.id, moveA.id], moveTarget.id, "child"), true);
+    let afterBatch = api.readListMindmap(multiList);
+    check.deepEqual(afterBatch.nodes.get(moveTarget.id).children.map((item: {id: string}) => item.id),
+        [moveA.id, moveB.id, moveC.id]);
+    check.equal(afterBatch.nodes.get(moveA.id).element, moveA.element);
+    check.equal(afterBatch.nodes.get(moveChild.id).element, moveChild.element);
+    check.equal(afterBatch.metadata.summaries[0].parentId, moveTarget.id);
+    check.equal(api.moveListMindmapNodes(multiList, [moveC.id, moveB.id], moveA.id, "after"), true,
+        "the next sibling may itself be in the dragged selection");
+    afterBatch = api.readListMindmap(multiList);
+    check.deepEqual(afterBatch.nodes.get(moveTarget.id).children.map((item: {id: string}) => item.id),
+        [moveA.id, moveB.id, moveC.id]);
+
     // 有序列表移动首项时保留原起始编号，目标列表同时重新编号。
     list = reset("0. First\n1. Second\n2. Third\n");
     model = api.readListMindmap(list);
@@ -1352,6 +1377,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     const edits: string[] = [];
     const editTexts: Array<string | undefined> = [];
     const moves: unknown[] = [];
+    const batchMoves: unknown[] = [];
     const additions: unknown[] = [];
     const folds: string[] = [];
     const deletions: string[] = [];
@@ -1387,6 +1413,7 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
         isAddChildShortcut: (event: KeyboardEvent) => event.ctrlKey && event.key === "Enter" && event.shiftKey,
         finishEdit: () => finishAllowed,
         onMove: (...args: unknown[]) => moves.push(args),
+        onMoveNodes: (...args: unknown[]) => batchMoves.push(args),
         onAdd: (...args: unknown[]) => additions.push(args),
         onDelete: (id: string) => {
             deletions.push(id);
@@ -2020,6 +2047,24 @@ const browserCases = async (sourceCode: string, css: string, taskSource: string,
     check.equal(nodeElement(beta).dataset.mindmapDrop, "child");
     sendPointer(viewport, "pointerup", targetPoint.x, targetPoint.y);
     check.deepEqual(moves, [[alpha, beta, "child"]]);
+    const alphaChild = model.nodes.get(alpha).children[0].id;
+    view.selectNode(alphaChild);
+    view.selectNode(alpha, true);
+    sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y);
+    check.deepEqual(new Set(view.getSelectedIds()), new Set([alpha, alphaChild]));
+    sendPointer(viewport, "pointerup", sourcePoint.x, sourcePoint.y);
+    check.deepEqual(view.getSelectedIds(), [alpha], "a click without a drag still selects one node");
+    view.selectNode(alphaChild, true);
+    sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y);
+    sendPointer(viewport, "pointermove", targetPoint.x, targetPoint.y);
+    check.equal(nodeElement(beta).dataset.mindmapDrop, "child");
+    sendPointer(viewport, "pointerup", targetPoint.x, targetPoint.y);
+    check.equal(batchMoves.length, 1);
+    const [batchIds, batchTarget, placement] = batchMoves[0] as [string[], string, string];
+    check.deepEqual(new Set(batchIds), new Set([alpha, alphaChild]));
+    check.deepEqual([batchTarget, placement], [beta, "child"]);
+    check.equal(moves.length, 1);
+    view.selectNode(alpha);
     check.equal(host.querySelector(".mindmap-view__ghost"), null);
     sendPointer(nodeElement(alpha), "pointerdown", sourcePoint.x, sourcePoint.y);
     sendPointer(viewport, "pointermove", targetPoint.x, targetPoint.y);

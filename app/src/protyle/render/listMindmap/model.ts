@@ -1,7 +1,7 @@
 import {Constants} from "../../../constants";
 import {getOrderedListMarkerUpdates, isListConversionType} from "../../wysiwyg/listContext";
 import type {MindmapManualRoute, MindmapRelationAnchor} from "./routing";
-import {getListMindmapSiblingIDs, isListMindmapSummaryCrossing, normalizeListMindmapSummaries} from "./summary";
+import {getListMindmapSiblingIDs, getListMindmapSummaryParentID, isListMindmapSummaryCrossing, normalizeListMindmapSummaries} from "./summary";
 import type {ListMindmapSummary} from "./summary";
 import {LIST_MINDMAP_CONNECTOR_STYLES} from "./connectors";
 import type {ListMindmapConnectorStyle} from "./connectors";
@@ -763,6 +763,66 @@ export const moveListMindmapNode = (list: HTMLElement, sourceId: string, targetI
         }
     }
     normalizeListMindmapSummaryMetadata(list, getListMindmapSiblingIDs(model), new Set([sourceId]));
+    return true;
+};
+
+export const moveListMindmapNodes = (list: HTMLElement, sourceIds: readonly string[], targetId: string,
+                                     placement: ListMindmapPlacement, createListId = () => Lute.NewNodeID()): boolean => {
+    const model = readListMindmap(list);
+    const selected = new Set(sourceIds);
+    if (!selected.size || [...selected].some(id => !model.nodes.get(id)?.element) || selected.has(model.root.id)) {
+        return false;
+    }
+    const roots: ListMindmapNode[] = [];
+    const pending = [model.root];
+    while (pending.length) {
+        const node = pending.pop();
+        if (selected.has(node.id)) {
+            roots.push(node);
+        } else {
+            pending.push(...node.children.slice().reverse());
+        }
+    }
+    const target = model.nodes.get(targetId)?.element;
+    if (!roots.length || (!target && targetId !== list.dataset.nodeId) ||
+        roots.some(node => target && node.element.contains(target))) {
+        return false;
+    }
+    const previous = getListMindmapSiblingIDs(model);
+    const moved = new Set(roots.map(node => node.id));
+    const origins = new Map(roots.map(({element}) => [element.parentElement, getListStart(element.parentElement)]));
+    const destination = getDestinationList(model, targetId, placement, createListId);
+    if (!destination) {
+        return false;
+    }
+    const destinationStart = getListStart(destination);
+    let reference = placement === "before" ? target : placement === "after" ? target.nextElementSibling :
+        Array.from(destination.children).find(child => child.classList.contains("protyle-attr")) || null;
+    // 插入点位于选区中时，沿用第一个不会被移走的同级节点，避免颠倒原顺序。
+    while (reference && moved.has(reference.getAttribute("data-node-id"))) {
+        reference = reference.nextElementSibling;
+    }
+    roots.forEach(({element}) => destination.insertBefore(element, reference));
+    normalizeList(destination, destinationStart);
+    origins.forEach((start, oldList) => {
+        if (oldList !== destination) {
+            if (oldList !== list && directItems(oldList).length === 0) {
+                oldList.remove();
+            } else {
+                normalizeList(oldList, start);
+            }
+        }
+    });
+    // 完整搬走的概括随范围迁移；部分搬走仍按现有规则重算原范围。
+    const parentId = destination === list ? list.dataset.nodeId : destination.parentElement.dataset.nodeId;
+    if (model.metadata.summaries?.some(summary => summary.parentId !== parentId &&
+        summary.nodeIds.every(id => moved.has(id) && getListMindmapSummaryParentID(model, id) === summary.parentId))) {
+        model.metadata.summaries = model.metadata.summaries.map(summary =>
+            summary.nodeIds.every(id => moved.has(id) && getListMindmapSummaryParentID(model, id) === summary.parentId) ?
+                {...summary, parentId} : summary);
+        writeListMindmapMetadata(list, model.metadata);
+    }
+    normalizeListMindmapSummaryMetadata(list, previous, moved);
     return true;
 };
 

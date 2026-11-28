@@ -26,7 +26,7 @@ import {getCurrentInlineStyleMode, getInlineStylesCache} from "../../toolbar/inl
 import {openInlineStyleDialog} from "../../toolbar/inlineStyleDialog";
 import {
     addListMindmapNode, cleanListMindmapHTML, deleteListMindmapNode,
-    moveListMindmapNode, readListMindmap, replaceListMindmapContent,
+    moveListMindmapNode, moveListMindmapNodes, readListMindmap, replaceListMindmapContent,
     writeListMindmapMetadata, getListMindmapTabItem, retagMindmapBranch, normalizeListMindmapSummaryMetadata,
     convertListMindmapToList, hasListMindmapRootTitle, clearListMindmapHeight, initializeListMindmapConnectorStyle,
     updateListMindmapTimestamps,
@@ -522,6 +522,7 @@ class ListMindmapController {
                 metadata.rootTitle = title;
             }),
             onMove: (id, target, placement) => this.change(() => moveListMindmapNode(list, id, target, placement)),
+            onMoveNodes: (ids, target, placement) => this.change(() => moveListMindmapNodes(list, ids, target, placement)),
             onAdd: (id, kind) => this.add(id, kind),
             onDelete: id => this.deleteNode(id),
             onFold: id => this.change(() => {

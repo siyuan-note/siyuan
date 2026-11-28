@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20261112025426"
+		"updated": "20261128035041"
 	},
 	"Children": [
 		{
@@ -4502,7 +4502,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20261024163013"
+				"updated": "20261128035041"
 			},
 			"Children": [
 				{
@@ -13244,7 +13244,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260921105011-4zeuyl4",
-				"updated": "20261026090134"
+				"updated": "20261128035041"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -14156,7 +14156,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261020162345-sclp2zh",
-				"updated": "20261020162345"
+				"updated": "20261128035041"
 			},
 			"Children": [
 				{
@@ -14197,7 +14197,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to leave this mode. Copy and cut include complete subtrees; selecting both a parent and its descendants copies the branch once. Copies retain node styles, internal connections and complete summaries. The root cannot be cut. Failed clipboard writes and systems that support only plain text leave the original nodes intact."
+					"Data": " to leave this mode. Copy and cut include complete subtrees; selecting both a parent and its descendants copies the branch once. Copies retain node styles, internal connections and complete summaries. The root cannot be cut. Failed clipboard writes and systems that support only plain text leave the original nodes intact. With a mouse, drag any selected node to move the whole selection. Drop it in the middle of another node to make the selection its children, or above or below to make the selection its siblings. If a parent and its child are both selected, the branch moves only once. Undo restores the entire move in one step."
 				}
 			]
 		},

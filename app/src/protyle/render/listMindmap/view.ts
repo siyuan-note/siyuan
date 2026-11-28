@@ -59,6 +59,7 @@ export interface ListMindmapViewOptions {
     onRootTitleChange?: (title: string) => void;
     finishEdit?: () => boolean | void | Promise<boolean | void>;
     onMove?: (id: string, targetId: string, placement: "before" | "child" | "after") => void;
+    onMoveNodes?: (ids: string[], targetId: string, placement: "before" | "child" | "after") => void;
     onAdd?: (id: string, kind: "child" | "sibling") => void;
     onDelete?: (id: string) => boolean | void | Promise<boolean | void>;
     onFold?: (id: string) => void;
@@ -93,6 +94,7 @@ interface PointerState {
     pan?: boolean;
     id?: string;
     nodeId?: string;
+    dragSelection?: Set<string>;
     touchNode?: string;
     touchDragTimer?: number;
     startX: number;
@@ -2938,8 +2940,16 @@ export class ListMindmapView {
             }
             return;
         }
+        let dragSelection: Set<string>;
         if (id) {
-            if (event.pointerType !== "touch" || event.ctrlKey || event.metaKey || this.multiSelect) {
+            if (event.pointerType === "mouse" && event.button === 0 && !this.readOnly && this.options.onMoveNodes &&
+                !event.ctrlKey && !event.metaKey && !this.multiSelect && !this.model.nodes.get(id)?.virtual) {
+                const selected = this.getSelectedIds().filter(nodeId => this.model.nodes.get(nodeId)?.element);
+                if (selected.length > 1 && selected.includes(id)) {
+                    dragSelection = new Set(selected);
+                }
+            }
+            if (!dragSelection && (event.pointerType !== "touch" || event.ctrlKey || event.metaKey || this.multiSelect)) {
                 this.selectNode(id, event.button === 0 && (event.ctrlKey || event.metaKey || this.multiSelect));
             }
             if (event.ctrlKey || event.metaKey || this.multiSelect) {
@@ -2965,6 +2975,7 @@ export class ListMindmapView {
             pan: this.panning || event.button === 1 || event.button === 2 || event.pointerType === "touch",
             id: event.pointerType !== "touch" && !this.readOnly && id && !this.model.nodes.get(id)?.virtual ? id : undefined,
             nodeId: id,
+            dragSelection,
             touchNode: event.pointerType === "touch" && !this.readOnly && this.options.onMove &&
                 id !== this.model.root.id && this.model.nodes.has(id) && !this.model.nodes.get(id).virtual ? id : undefined,
             startX: event.clientX,
@@ -3158,14 +3169,14 @@ export class ListMindmapView {
             const bounds = this.viewport.getBoundingClientRect();
             const x = (event.clientX - bounds.left - this.offsetX) / this.scale;
             const y = (event.clientY - bounds.top - this.offsetY) / this.scale;
-            const drop = findMindmapDrop(this.positions.values(), x, y, id => this.canDrop(pointer.id, id));
+            const drop = findMindmapDrop(this.positions.values(), x, y, id => this.canDrop(pointer, id));
             if (drop) {
                 target = this.nodeElements.get(drop.id);
                 blankPlacement = drop.placement;
             }
         }
         let targetId = target?.dataset.mindmapId;
-        if (!targetId || !this.world.contains(target) || !this.canDrop(pointer.id, targetId)) {
+        if (!targetId || !this.world.contains(target) || !this.canDrop(pointer, targetId)) {
             return;
         }
         const rect = target.getBoundingClientRect();
@@ -3180,7 +3191,7 @@ export class ListMindmapView {
         if (placement === "after" && node.parentId) {
             const siblings = this.model.nodes.get(node.parentId).children;
             const next = siblings[siblings.indexOf(node) + 1];
-            if (next && this.positions.has(next.id) && this.canDrop(pointer.id, next.id)) {
+            if (next && this.positions.has(next.id) && this.canDrop(pointer, next.id)) {
                 targetId = next.id;
                 target = this.nodeElements.get(next.id);
                 placement = "before";
@@ -3191,10 +3202,10 @@ export class ListMindmapView {
         target.dataset.mindmapDrop = placement;
     };
 
-    private canDrop(id: string, targetId: string) {
+    private canDrop(pointer: PointerState, targetId: string) {
         let current = this.model.nodes.get(targetId);
         while (current) {
-            if (current.id === id) {
+            if (current.id === pointer.id || pointer.dragSelection?.has(current.id)) {
                 return false;
             }
             current = this.model.nodes.get(current.parentId);
@@ -3279,7 +3290,13 @@ export class ListMindmapView {
             this.selectNode(pointer.nodeId);
         }
         if (moved && id && targetId && placement) {
-            this.options.onMove?.(id, targetId, placement);
+            if (pointer.dragSelection) {
+                this.options.onMoveNodes?.([...pointer.dragSelection], targetId, placement);
+            } else {
+                this.options.onMove?.(id, targetId, placement);
+            }
+        } else if (!moved && pointer.dragSelection && id) {
+            this.selectNode(id);
         } else if (!moved && !pointer.nodeId && !pointer.panButton && !this.readOnly && !this.panning) {
             if (this.editingId) {
                 this.clearSelection();

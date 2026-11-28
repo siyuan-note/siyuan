@@ -7,7 +7,7 @@
 		"id": "20261126135802-hu8m57i",
 		"title": "Внешние подключения",
 		"type": "doc",
-		"updated": "20261126150544"
+		"updated": "20261128193057"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261126141053-a0d91jv",
-				"updated": "20261126141053"
+				"updated": "20261128193057"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261126135802-jet4h9y",
-				"updated": "20261126135802"
+				"updated": "20261128193057"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan поддерживает подключение к WorkBuddy, Doubao и OpenAI. После подключения в этих приложениях можно искать, читать и редактировать заметки SiYuan."
+					"Data": "SiYuan поддерживает подключение к WorkBuddy, Doubao, OpenAI и QwenWork. После подключения в этих приложениях можно искать, читать и редактировать заметки SiYuan."
 				}
 			]
 		},
@@ -165,6 +165,76 @@
 				{
 					"Type": "NodeText",
 					"Data": "Репозиторий на GitHub: siyuan-note/siyuan-openai-plugin"
+				}
+			]
+		},
+		{
+			"ID": "20261128193057-ff1her2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261128193057-ff1her2",
+				"updated": "20261128193057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "QwenWork"
+				}
+			]
+		},
+		{
+			"ID": "20261128193057-kydgleh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128193057-kydgleh",
+				"updated": "20261128193057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Коннектор для настольного приложения QwenWork использует встроенную команду SiYuan для доступа к локальному рабочему пространству без токена API. После публикации найдите и добавьте «思源笔记» (SiYuan) в разделе "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Расширения"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Коннекторы"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Каталог"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20261128193057-z4k0m0y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128193057-z4k0m0y",
+				"updated": "20261128193057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "GitHub repo: siyuan-note/siyuan-qwenwork-connector"
 				}
 			]
 		}

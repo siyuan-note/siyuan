@@ -7,7 +7,7 @@
 		"id": "20261126135802-quhjq75",
 		"title": "外部连接",
 		"type": "doc",
-		"updated": "20261126141053"
+		"updated": "20261128193057"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261126141053-z45zsym",
-				"updated": "20261126141053"
+				"updated": "20261128193057"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261126135802-upstlpk",
-				"updated": "20261126135802"
+				"updated": "20261128193057"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源支持连接 WorkBuddy、豆包和 OpenAI。连接后，可在相应的应用中搜索、阅读和编辑思源笔记。"
+					"Data": "思源支持连接 WorkBuddy、豆包、OpenAI 和千问办公。连接后，可在相应的应用中搜索、阅读和编辑思源笔记。"
 				}
 			]
 		},
@@ -165,6 +165,76 @@
 				{
 					"Type": "NodeText",
 					"Data": "GitHub repo: siyuan-note/siyuan-openai-plugin"
+				}
+			]
+		},
+		{
+			"ID": "20261128193057-1cr97i8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261128193057-1cr97i8",
+				"updated": "20261128193057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "千问办公"
+				}
+			]
+		},
+		{
+			"ID": "20261128193057-mactfwm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128193057-mactfwm",
+				"updated": "20261128193057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "千问办公连接器适用于桌面客户端，通过思源内置的命令行工具访问本地工作空间，无需 API Token。上架后，可在千问办公的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "扩展"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "连接器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "市场"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中搜索并添加「思源笔记」。"
+				}
+			]
+		},
+		{
+			"ID": "20261128193057-l5encj1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128193057-l5encj1",
+				"updated": "20261128193057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "GitHub repo: siyuan-note/siyuan-qwenwork-connector"
 				}
 			]
 		}

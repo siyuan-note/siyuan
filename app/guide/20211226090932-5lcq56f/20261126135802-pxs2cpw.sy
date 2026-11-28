@@ -7,7 +7,7 @@
 		"id": "20261126135802-pxs2cpw",
 		"title": "外部連線",
 		"type": "doc",
-		"updated": "20261126141053"
+		"updated": "20261128193057"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20261126141053-zkjfxyw",
-				"updated": "20261126141053"
+				"updated": "20261128193057"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20261126135802-97f9xbe",
-				"updated": "20261126135802"
+				"updated": "20261128193057"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源支援連線至 WorkBuddy、豆包和 OpenAI。連線後，可在對應的應用程式中搜尋、閱讀和編輯思源筆記。"
+					"Data": "思源支援連線至 WorkBuddy、豆包、OpenAI 和千問辦公。連線後，可在對應的應用程式中搜尋、閱讀和編輯思源筆記。"
 				}
 			]
 		},
@@ -165,6 +165,76 @@
 				{
 					"Type": "NodeText",
 					"Data": "GitHub repo: siyuan-note/siyuan-openai-plugin"
+				}
+			]
+		},
+		{
+			"ID": "20261128193057-3mo2b8s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20261128193057-3mo2b8s",
+				"updated": "20261128193057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "千問辦公"
+				}
+			]
+		},
+		{
+			"ID": "20261128193057-4mx5cd9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128193057-4mx5cd9",
+				"updated": "20261128193057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "千問辦公連接器適用於桌面版，透過思源內建的命令列工具存取本機工作空間，無需 API Token。上架後，可在千問辦公的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "擴充"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "連接器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "市集"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中搜尋並新增「思源笔记」。"
+				}
+			]
+		},
+		{
+			"ID": "20261128193057-hop61ha",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20261128193057-hop61ha",
+				"updated": "20261128193057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "GitHub repo: siyuan-note/siyuan-qwenwork-connector"
 				}
 			]
 		}

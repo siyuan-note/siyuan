@@ -9,6 +9,9 @@ class Control {
     textContent = "";
     dataset: Record<string, string> = {};
     toggleAttribute() {}
+    attributes = new Map<string, string>();
+    getAttribute(key: string) { return this.attributes.get(key); }
+    setAttribute(key: string, value: string) { this.attributes.set(key, value); }
     innerHTML = "";
     disabled = false;
     classList = {contains: () => false, toggle: () => {}};
@@ -31,12 +34,15 @@ const setup = () => {
         getBoundingClientRect: () => ({left: 20, top: 30,
             width: parseFloat(canvas.style.width) * .8, height: parseFloat(canvas.style.height) * .8})});
     const viewport = Object.assign(new Control(), {clientWidth: 600, clientHeight: 300, scrollLeft: 0, scrollTop: 0});
+    const labelInput = new Control();
     const controls = new Map<string, Control>([["img", image], ["canvas", canvas], [".card__v2-image-viewport", viewport]]);
     for (const key of ["imageShape", "imageGroup", "imageFrontMode", "finishPolygon", "undoImageShape", "deleteImageShape",
-        "zoomImageIn", "zoomImageOut", "resetImageZoom"]) {
+        "zoomImageIn", "zoomImageOut", "resetImageZoom", "selectImageShapes", "mergeImageShapes", "splitImageShapes",
+        "actualImageSize", "fullscreenImageEditor"]) {
         controls.set(`[data-type="${key}"]`, new Control());
     }
     controls.get('[data-type="imageShape"]').value = "rectangle";
+    controls.set('[data-type="imageMaskLabelField"]', Object.assign(new Control(), {querySelector: () => labelInput}));
     const window = Object.assign(new Control(), {devicePixelRatio: 2, innerHeight: 900});
     const document = new Control();
     let resize: () => void;
@@ -54,7 +60,7 @@ const setup = () => {
         compilerOptions: {target: ScriptTarget.ES2021},
     }).outputText, {
         window, document, initial, element: {querySelector: (selector: string) => controls.get(selector)},
-        escapeAttr: (value: string) => value, genUUID: () => `generated-${++id}`,
+        bindFlashcardV2Pinch: () => {}, escapeAttr: (value: string) => value, genUUID: () => `generated-${++id}`,
         requestAnimationFrame: (callback: () => void) => { frame = callback; return 1; },
         cancelAnimationFrame: () => { cancelled = true; },
         ResizeObserver: class {
@@ -66,7 +72,7 @@ const setup = () => {
             disconnect() { disconnected = true; }
         },
     });
-    return {editor, image, canvas, draws, window, document, viewport,
+    return {editor, image, canvas, draws, window, document, viewport, labelInput,
         control: (key: string) => controls.get('[data-type="' + key + '"]'), frame: () => frame(), resize: () => resize(),
         disconnected: () => disconnected, cancelled: () => cancelled};
 };
@@ -163,5 +169,58 @@ test("zoom and panning leave normalized shape coordinates unchanged", () => {
     state.canvas.emit("pointercancel", {pointerId: 1});
     state.control("resetImageZoom").emit("click");
     assert.equal(state.image.style.width, "");
+    state.editor.destroy();
+});
+
+test("merging uses the active group ID and splitting assigns new IDs to the other shapes", () => {
+    const state = setup();
+    state.frame();
+    const at = (x: number, y: number, shiftKey = false) => ({
+        clientX: 20 + x * 480, clientY: 30 + y * 240, pointerId: 1, button: 0, shiftKey,
+    });
+    state.canvas.emit("pointerdown", at(.6, .2));
+    state.canvas.emit("pointerup", at(.9, .5));
+    const added = state.editor.getConfig().groups[1];
+    const mode = state.control("imageShape");
+    mode.value = "edit";
+    mode.emit("change");
+    state.canvas.emit("pointerdown", at(.75, .35, true));
+    state.canvas.emit("pointerdown", at(.2, .3, true));
+    state.control("mergeImageShapes").emit("click");
+    const merged = state.editor.getConfig();
+    assert.equal(merged.groups.length, 1);
+    assert.equal(merged.groups[0].id, "group");
+    assert.equal(merged.groups[0].shapeIDs.length, 2);
+    state.canvas.emit("pointerdown", at(.2, .3, true));
+    state.control("splitImageShapes").emit("click");
+    const split = state.editor.getConfig();
+    assert.equal(split.groups[0].id, "group");
+    assert.equal(split.groups[0].shapeIDs[0], "existing");
+    assert.notEqual(split.groups[1].id, added.id);
+    assert.equal(split.groups[1].shapeIDs[0], added.shapeIDs[0]);
+    state.editor.destroy();
+});
+
+test("rotation preserves the shape identity with normalized polygon points", () => {
+    const state = setup();
+    state.frame();
+    const mode = state.control("imageShape");
+    mode.value = "edit";
+    mode.emit("change");
+    const at = (x: number, y: number) => ({
+        clientX: 20 + x * 480, clientY: 30 + y * 240, pointerId: 1, button: 0,
+    });
+    state.canvas.emit("pointerdown", at(.25, .4));
+    state.canvas.emit("pointerup", at(.25, .4));
+    state.labelInput.value = "External landmark";
+    state.labelInput.emit("input");
+    state.canvas.emit("pointerdown", at(.25, .2 - 22 / 240));
+    state.canvas.emit("pointerup", at(.4, .4));
+    const shape = state.editor.getConfig().shapes[0];
+    assert.equal(shape.id, "existing");
+    assert.equal(shape.type, "polygon");
+    assert.equal(shape.points.length, 4);
+    assert.equal(shape.label, "External landmark");
+    assert.ok(shape.points.every(({x, y}: {x: number, y: number}) => x >= 0 && x <= 1 && y >= 0 && y <= 1));
     state.editor.destroy();
 });

@@ -296,3 +296,45 @@ test("notebook entry keeps its initial scope but uses the stable management titl
     assert.equal(args[1], "Manage");
     assert.equal((args[3] as {notebookID: string}).notebookID, "notebook-a");
 });
+
+test("the source preview ignores a superseded request and a response after the management page closes", async () => {
+    const source = readFileSync("src/card/flashcardV2.ts", "utf8");
+    const start = source.indexOf("let sourcePreviewRequest = 0");
+    const end = source.indexOf("if (grouped) {", start);
+    const script = transpileModule(source.slice(start, end) + "\nshowSourcePreview;", {
+        compilerOptions: {target: ScriptTarget.ES2021},
+    }).outputText;
+    const controller = new AbortController();
+    const requests: Array<{id: string; complete: (dom: string) => void}> = [];
+    let sanitized = "";
+    const body = {
+        textContent: "",
+        childElementCount: 0,
+        set innerHTML(value: string) {
+            this.textContent = value;
+            this.childElementCount = value ? 1 : 0;
+        },
+    };
+    const open = runInNewContext(script, {
+        sourcePreview: {classList: {remove: () => {}}}, sourcePreviewBody: body,
+        listenerOptions: {signal: controller.signal},
+        window: {siyuan: {languages: {loading: "Loading", emptyContent: "Empty"}},
+            DOMPurify: {sanitize: (value: string) => { sanitized = value; return value; }}},
+        fetchPost: (_url: string, {id}: {id: string}, callback: (response: {data: {dom: string}}) => void) =>
+            new Promise<void>(resolve => requests.push({id, complete: dom => { callback({data: {dom}}); resolve(); }})),
+    });
+    open("first");
+    open("second");
+    requests[0].complete("out of date");
+    requests[1].complete("current");
+    await Promise.resolve();
+    assert.equal(body.textContent, "current");
+    assert.equal(sanitized, "current");
+
+    open("third");
+    controller.abort();
+    requests[2].complete("after close");
+    await Promise.resolve();
+    assert.equal(body.textContent, "Loading");
+    assert.equal(sanitized, "current");
+});

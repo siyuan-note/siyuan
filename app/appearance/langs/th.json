@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "คำใบ้บนส่วนที่ปิดบัง",
+	"flashcardFocusImageMask": "โฟกัสส่วนที่ปิดบังปัจจุบันโดยอัตโนมัติ",
+	"flashcardReviewSubtree": "ทบทวนบัตรคำในบล็อกนี้และบล็อกย่อย",
+	"flashcardManageSubtree": "จัดการบัตรคำในบล็อกนี้และบล็อกย่อย",
+	"flashcardReviewCountHidden": "ซ่อนตัวนับการทบทวนแล้ว",
+	"flashcardReviewCountShown": "แสดงตัวนับการทบทวนแล้ว",
+	"flashcardReviewSiblingsBuried": "ซ่อนบัตรคำจากแหล่งเดียวกันจนถึงวันพรุ่งนี้ (${count})",
 	"flashcardReviewEditSourceTip": "เปิดต้นทางของบัตรคำเพื่อแก้ไขทันที",
 	"flashcardReviewSkipTip": "ข้ามบัตรคำนี้จนจบรอบปัจจุบันโดยคงกำหนดเดิมไว้",
 	"flashcardReviewBuryTip": "ซ่อนบัตรคำนี้จากการทบทวนปกติจนถึงวันพรุ่งนี้",

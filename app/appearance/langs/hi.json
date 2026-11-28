@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "ढके क्षेत्र का संकेत",
+	"flashcardFocusImageMask": "वर्तमान ढके क्षेत्र पर अपने आप फ़ोकस करें",
+	"flashcardReviewSubtree": "इस ब्लॉक और इसके अधीन ब्लॉकों के कार्ड की समीक्षा करें",
+	"flashcardManageSubtree": "इस ब्लॉक और इसके अधीन ब्लॉकों के कार्ड प्रबंधित करें",
+	"flashcardReviewCountHidden": "समीक्षा की गिनती छिप गई",
+	"flashcardReviewCountShown": "समीक्षा की गिनती दिख रही है",
+	"flashcardReviewSiblingsBuried": "एक ही स्रोत के कार्ड कल तक छिपाए गए (${count})",
 	"flashcardReviewEditSourceTip": "कार्ड का स्रोत अभी संपादित करने के लिए खोलें",
 	"flashcardReviewSkipTip": "नियत समय कायम रखते हुए इस सत्र के शेष भाग में कार्ड छोड़ें",
 	"flashcardReviewBuryTip": "सामान्य समीक्षा में इस कार्ड को कल तक छिपाएँ",

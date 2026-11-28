@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Наговештај на маски",
+	"flashcardFocusImageMask": "Аутоматски фокусирај тренутну маску",
+	"flashcardReviewSubtree": "Понављај картице овог блока и његових потомака",
+	"flashcardManageSubtree": "Управљај картицама овог блока и његових потомака",
+	"flashcardReviewCountHidden": "Бројач понављања је сакривен",
+	"flashcardReviewCountShown": "Бројач понављања је приказан",
+	"flashcardReviewSiblingsBuried": "Картице из истог извора су сакривене до сутра (${count})",
 	"flashcardReviewEditSourceTip": "Отворите извор картице за уређивање",
 	"flashcardReviewSkipTip": "Прескочите картицу до краја ове сесије и задржите рок",
 	"flashcardReviewBuryTip": "Сакријте картицу из редовног понављања до сутра",

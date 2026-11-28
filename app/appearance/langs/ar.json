@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "تلميح منطقة الحجب",
+	"flashcardFocusImageMask": "التركيز تلقائيًا على المنطقة المحجوبة الحالية",
+	"flashcardReviewSubtree": "مراجعة بطاقات هذه الكتلة والكتل التابعة",
+	"flashcardManageSubtree": "إدارة بطاقات هذه الكتلة والكتل التابعة",
+	"flashcardReviewCountHidden": "تم إخفاء عداد المراجعة",
+	"flashcardReviewCountShown": "تم إظهار عداد المراجعة",
+	"flashcardReviewSiblingsBuried": "تم تأجيل البطاقات من المصدر نفسه حتى الغد (${count})",
 	"flashcardReviewEditSourceTip": "افتح مصدر البطاقة لتحريره الآن",
 	"flashcardReviewSkipTip": "تخطّ البطاقة في الجلسة الحالية دون تغيير موعدها",
 	"flashcardReviewBuryTip": "أخفِ البطاقة من المراجعة العادية حتى الغد",

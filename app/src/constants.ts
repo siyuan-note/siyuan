@@ -17,6 +17,8 @@ const getFunctionKey = () => {
 export const TAG_SORT_MANUAL = 6;
 export const TAG_SORT_CREATED_DESC = 16;
 
+export const FLASHCARD_LEECH_TAG_ID = "3c050374-538e-5d86-860e-0170b438042b";
+
 export abstract class Constants {
     public static readonly TABLE_CORNERS = "data-table-corners";
     public static readonly TABLE_CELL_CORNER = "data-table-cell-corner";

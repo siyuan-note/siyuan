@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Hint op het masker",
+	"flashcardFocusImageMask": "Automatisch scherpstellen op het huidige masker",
+	"flashcardReviewSubtree": "Herhaal kaarten in dit blok en de afstammende blokken",
+	"flashcardManageSubtree": "Beheer kaarten in dit blok en de afstammende blokken",
+	"flashcardReviewCountHidden": "Herhalingsteller verborgen",
+	"flashcardReviewCountShown": "Herhalingsteller zichtbaar",
+	"flashcardReviewSiblingsBuried": "Kaarten uit dezelfde bron verborgen tot morgen (${count})",
 	"flashcardReviewEditSourceTip": "Open de kaartbron om die nu te bewerken",
 	"flashcardReviewSkipTip": "Sla deze kaart over voor de rest van de sessie en behoud de vervaldatum",
 	"flashcardReviewBuryTip": "Verberg deze kaart tot morgen bij normale herhalingen",

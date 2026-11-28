@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Gợi ý trên vùng che",
+	"flashcardFocusImageMask": "Tự động tập trung vào vùng che hiện tại",
+	"flashcardReviewSubtree": "Ôn các thẻ trong khối này và các khối con",
+	"flashcardManageSubtree": "Quản lý các thẻ trong khối này và các khối con",
+	"flashcardReviewCountHidden": "Đã ẩn bộ đếm ôn tập",
+	"flashcardReviewCountShown": "Đã hiện bộ đếm ôn tập",
+	"flashcardReviewSiblingsBuried": "Đã ẩn các thẻ cùng nguồn đến ngày mai (${count})",
 	"flashcardReviewEditSourceTip": "Mở nguồn thẻ để chỉnh sửa ngay",
 	"flashcardReviewSkipTip": "Bỏ qua thẻ trong phần còn lại của phiên và giữ nguyên hạn ôn tập",
 	"flashcardReviewBuryTip": "Ẩn thẻ khỏi lượt ôn tập thông thường đến ngày mai",

@@ -86,7 +86,7 @@ test("image OCR actions retain their configurable paths and order", t => {
     assert.equal(imageAction.simple, false);
     assert.equal(imageAction.sortable, false);
     assert.equal(getEntryParentPath("editor.image.ocrText"), "editor.image");
-    assert.deepEqual(getEntryCatalogChildren("editor.image").map(item => item.key), ["ocrText", "copyAsPNG"]);
+    assert.deepEqual(getEntryCatalogChildren("editor.image").map(item => item.key), ["ocrText", "copyAsPNG", "flashcardImageOcclusion"]);
     const copyImage = getEntryCatalogNode("editor.image.copyAsPNG");
     assert.equal(copyImage.type, "entry");
     assert.equal(copyImage.simple, false);
@@ -1076,7 +1076,7 @@ test("conditional copy and image actions have configuration entries in menu orde
     ]);
     const image = getEntryCatalogChildren("inline.image").map(item => item.key);
     assert.deepEqual(image.slice(image.indexOf("separator_3")), [
-        "separator_3", "openBy", "export", "shareAsset", "saveToGallery", "copyFile", "copyAsPNG",
+        "separator_3", "openBy", "export", "shareAsset", "saveToGallery", "copyFile", "flashcardImageOcclusion", "copyAsPNG",
     ]);
     assert.deepEqual(getEntryCatalogChildren("gutter.single.assetVideo").map(item => item.key).slice(-4),
         ["export", "shareAsset", "saveToGallery", "copyFile"]);
@@ -1550,4 +1550,12 @@ test("card source submenu has stable paths and follows its parent profile", () =
             assert.equal(getEntryParentPath(path + "." + child.key), path);
         }
     }
+});
+
+test("single block menu opens subtree review and management in declaration order", () => {
+    const entries = getEntryCatalogChildren("gutter.single").map(item => item.key);
+    const source = entries.indexOf("addToDeck");
+    assert.ok(source >= 0);
+    assert.deepEqual(entries.slice(source + 1, source + 3), ["flashcardReviewSubtree", "flashcardManageSubtree"]);
+    assert.equal(getEntryCatalogNode("gutter.multi.flashcardReviewSubtree"), undefined);
 });

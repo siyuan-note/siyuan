@@ -84,7 +84,7 @@ import {duplicateBlock} from "../wysiwyg/commonHotkey";
 import {isEncryptedBox, movePathTo, useShell} from "../../util/pathName";
 import {hintMoveBlock} from "../hint/extend";
 import {flashcardSourceMenuItems, quickMakeCard} from "../../card/makeCard";
-import {openFlashcardV2ManagementByBlocks} from "../../card/flashcardV2";
+import {openFlashcardV2BlockScope, openFlashcardV2ManagementByBlocks} from "../../card/flashcardV2";
 import {transferBlockRef} from "../../menus/block";
 import {isMobile} from "../../util/functions";
 import {AIActions} from "../../ai/actions";
@@ -3010,6 +3010,18 @@ export class Gutter {
                 label: window.siyuan.languages.flashcardCardSource,
                 icon: "iconRiffCard",
                 submenu: flashcardSourceMenuItems(protyle.app, [id]),
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "flashcardReviewSubtree",
+                icon: "iconPlay",
+                label: window.siyuan.languages.flashcardReviewSubtree,
+                click: () => openFlashcardV2BlockScope(protyle.app, id, type, "review"),
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "flashcardManageSubtree",
+                icon: "iconList",
+                label: window.siyuan.languages.flashcardManageSubtree,
+                click: () => openFlashcardV2BlockScope(protyle.app, id, type, "manage"),
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_5", type: "separator"}).element);
         }

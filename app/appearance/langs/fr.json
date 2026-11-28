@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Indice du masque",
+	"flashcardFocusImageMask": "Centrer automatiquement sur le masque actuel",
+	"flashcardReviewSubtree": "Réviser les cartes de ce bloc et de ses descendants",
+	"flashcardManageSubtree": "Gérer les cartes de ce bloc et de ses descendants",
+	"flashcardReviewCountHidden": "Compteur de révision masqué",
+	"flashcardReviewCountShown": "Compteur de révision affiché",
+	"flashcardReviewSiblingsBuried": "Cartes de même source écartées jusqu’à demain (${count})",
 	"flashcardReviewEditSourceTip": "Ouvrir la source de la carte pour la modifier maintenant",
 	"flashcardReviewSkipTip": "Ignorer cette carte pour le reste de la séance et conserver sa date d’échéance",
 	"flashcardReviewBuryTip": "Masquer cette carte dans la révision normale jusqu’à demain",

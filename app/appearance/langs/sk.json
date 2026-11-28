@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Pomôcka na maske",
+	"flashcardFocusImageMask": "Automaticky priblížiť aktuálnu masku",
+	"flashcardReviewSubtree": "Opakovať karty tohto bloku a jeho potomkov",
+	"flashcardManageSubtree": "Spravovať karty tohto bloku a jeho potomkov",
+	"flashcardReviewCountHidden": "Počet kariet na opakovanie je skrytý",
+	"flashcardReviewCountShown": "Počet kariet na opakovanie sa zobrazuje",
+	"flashcardReviewSiblingsBuried": "Karty z rovnakého zdroja sú skryté do zajtra (${count})",
 	"flashcardReviewEditSourceTip": "Otvoriť zdroj karty na okamžitú úpravu",
 	"flashcardReviewSkipTip": "Preskočiť kartu do konca relácie a zachovať termín opakovania",
 	"flashcardReviewBuryTip": "Skryť kartu z bežného opakovania do zajtra",

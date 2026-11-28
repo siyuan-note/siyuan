@@ -1,3 +1,4 @@
+import {canCreateFlashcardFromImage, createFlashcardFromImage} from "../card/flashcardV2ImageEntry";
 import {createImageOCRMenu} from "./imageOCRMenu";
 import {toggleMenu, IMenuSession} from "./menuToggle";
 import {escapeHtmlTextAndAttr} from "../util/escape";
@@ -1593,6 +1594,14 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     if (dataSrc && dataSrc.startsWith("assets/")) {
         getMediaAssetExportItems(dataSrc).forEach(item => window.siyuan.menus.menu.append(new MenuItem(item).element));
         window.siyuan.menus.menu.append(new MenuItem(writeAssetToClipboard(dataSrc)).element);
+    }
+    if (!protyle.disabled && canCreateFlashcardFromImage(imgElement)) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "flashcardImageOcclusion",
+            icon: "iconRiffCard",
+            label: window.siyuan.languages.flashcardImageOcclusion,
+            click: () => createFlashcardFromImage(imgElement),
+        }).element);
     }
     window.siyuan.menus.menu.append(new MenuItem({
         id: "copyAsPNG",

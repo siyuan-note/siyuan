@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "遮擋提示語",
+	"flashcardFocusImageMask": "自動聚焦目前遮擋",
+	"flashcardReviewSubtree": "複習目前區塊及其子區塊的閃卡",
+	"flashcardManageSubtree": "管理目前區塊及其子區塊的閃卡",
+	"flashcardReviewCountHidden": "已隱藏複習計數",
+	"flashcardReviewCountShown": "已顯示複習計數",
+	"flashcardReviewSiblingsBuried": "已埋藏 ${count} 張同源卡片，明天解除",
 	"flashcardReviewEditSourceTip": "開啟目前卡片的卡源，立即編輯",
 	"flashcardReviewSkipTip": "本輪剩餘時間略過這張卡片，保留原到期時間",
 	"flashcardReviewBuryTip": "將卡片從一般複習中隱藏到明天",

@@ -84,6 +84,7 @@ type ImageOcclusionConfig struct {
 type ImageOcclusionShape struct {
 	ID     string                `json:"id"`
 	Type   string                `json:"type"`
+	Label  string                `json:"label,omitempty"`
 	X      float64               `json:"x,omitempty"`
 	Y      float64               `json:"y,omitempty"`
 	Width  float64               `json:"width,omitempty"`

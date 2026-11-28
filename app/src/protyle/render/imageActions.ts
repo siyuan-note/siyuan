@@ -1,3 +1,4 @@
+import {canCreateFlashcardFromImage, createFlashcardFromImage} from "../../card/flashcardV2ImageEntry";
 import {Constants} from "../../constants";
 import {copyImageOCRText, openImageOCR} from "../../asset/imageOCR";
 import {isEncryptedBox} from "../../util/pathName";
@@ -7,6 +8,7 @@ import {copyPNGByLink} from "../../menus/util";
 
 const boundImageActions = new WeakSet<HTMLElement>();
 const boundImages = new WeakSet<HTMLImageElement>();
+const flashcardImages = new WeakSet<HTMLImageElement>();
 const requests = new WeakMap<HTMLImageElement, AbortController>();
 
 const updateActionCorners = (actions: Element) => {
@@ -35,6 +37,7 @@ const canShowImageAction = (image: HTMLImageElement) => !window.siyuan.isPublish
 export const renderImageActions = (root: Element) => {
     root.querySelectorAll<HTMLImageElement>(".img img").forEach(image => {
         renderCopyImageAction(image);
+        renderFlashcardImageAction(image);
         requests.get(image)?.abort();
         requests.delete(image);
         removeImageAction(image);
@@ -127,6 +130,55 @@ const addImageAction = (image: HTMLImageElement) => {
     });
     const more = actions.querySelector(".protyle-icon--only");
     more?.classList.replace("protyle-icon--only", "protyle-icon--last");
+    actions.prepend(action);
+    updateActionCorners(actions);
+};
+
+const renderFlashcardImageAction = (image: HTMLImageElement) => {
+    const actions = image.parentElement?.querySelector(".protyle-icons");
+    if (!actions) {
+        return;
+    }
+    const existing = actions.querySelector<HTMLElement>("[data-flashcard-image-action]");
+    const available = () => canCreateFlashcardFromImage(image) && isEntryVisible("editor.image.flashcardImageOcclusion");
+    if (!available()) {
+        if (existing) {
+            existing.remove();
+            updateActionCorners(actions);
+        }
+        return;
+    }
+    if (!flashcardImages.has(image)) {
+        flashcardImages.add(image);
+        image.addEventListener("click", event => {
+            if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey && available()) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                createFlashcardFromImage(image);
+            }
+        }, true);
+    }
+    if (existing) {
+        return;
+    }
+    const action = document.createElement("span");
+    action.className = "protyle-icon ariaLabel";
+    action.tabIndex = 0;
+    action.setAttribute("role", "button");
+    action.setAttribute("data-flashcard-image-action", "");
+    action.setAttribute("aria-label", window.siyuan.languages.flashcardImageOcclusion);
+    action.innerHTML = '<svg aria-hidden="true"><use xlink:href="#iconRiffCard"></use></svg>';
+    const activate = (event: Event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        createFlashcardFromImage(image);
+    };
+    action.addEventListener("click", activate);
+    action.addEventListener("keydown", event => {
+        if (!event.isComposing && (event.key === "Enter" || event.key === " ")) {
+            activate(event);
+        }
+    });
     actions.prepend(action);
     updateActionCorners(actions);
 };

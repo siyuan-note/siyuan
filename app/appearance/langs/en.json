@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Mask hint",
+	"flashcardFocusImageMask": "Auto-focus the current mask",
+	"flashcardReviewSubtree": "Review cards in this block and its descendants",
+	"flashcardManageSubtree": "Manage cards in this block and its descendants",
+	"flashcardReviewCountHidden": "Review count hidden",
+	"flashcardReviewCountShown": "Review count shown",
+	"flashcardReviewSiblingsBuried": "Cards from the same source buried until tomorrow (${count})",
 	"flashcardReviewEditSourceTip": "Open the card source to edit it now",
 	"flashcardReviewSkipTip": "Skip this card for the rest of this session and keep its due time",
 	"flashcardReviewBuryTip": "Hide this card from normal review until tomorrow",

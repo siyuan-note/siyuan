@@ -524,6 +524,8 @@ const gutterSingle = () => [
     node("quickMakeCard", lang("quickMakeCard"), false),
     node("removeCard", lang("removeCard"), false),
     flashcardSourceEntry(false),
+    node("flashcardReviewSubtree", lang("flashcardReviewSubtree"), false),
+    node("flashcardManageSubtree", lang("flashcardManageSubtree"), false),
     separator("separator_5"),
     node("updateAndCreatedAt", () => `${window.siyuan.languages.modifiedAt} / ${window.siyuan.languages.createdAt}`, false),
 ];
@@ -972,6 +974,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
         children: [
             node("ocrText", lang("ocrResult"), false, undefined, false),
             node("copyAsPNG", lang("copyAsPNG"), false, undefined, false),
+            node("flashcardImageOcclusion", lang("flashcardImageOcclusion"), false, undefined, false),
         ],
     },
     {
@@ -1087,6 +1090,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("shareAsset", lang("shareAsset")),
             node("saveToGallery", lang("saveToGallery")),
             node("copyFile", lang("copyFile"), false),
+            node("flashcardImageOcclusion", lang("flashcardImageOcclusion"), false),
             node("copyAsPNG", lang("copyAsPNG"), false),
         ],
     },

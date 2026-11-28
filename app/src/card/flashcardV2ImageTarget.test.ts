@@ -12,7 +12,16 @@ class ElementStub {
     children: ElementStub[] = [];
     removed = false;
     parentElement: ElementStub;
-    classList = {add: (value: string) => { this.className += ` ${value}`; }};
+    listeners = new Map<string, () => void>();
+    classList = {
+        add: (value: string) => { this.className += " " + value; },
+        remove: (value: string) => { this.className = this.className.split(" ").filter(item => item !== value).join(" "); },
+        toggle: (value: string, enabled: boolean) => {
+            if (enabled) { this.classList.add(value); } else { this.classList.remove(value); }
+        },
+    };
+    addEventListener(type: string, listener: () => void) { this.listeners.set(type, listener); }
+    removeAttribute(name: string) { delete this.attributes[name]; }
     setAttribute(name: string, value: string) { this.attributes[name] = value; }
     getAttribute(name: string) { return this.attributes[name]; }
     closest(): null { return null; }
@@ -35,38 +44,47 @@ const render = (frontMode: string) => {
         assetID: "image.png", frontMode,
         groups: [{id: "current", shapeIDs: ["rect", "ellipse", "polygon"]}],
         shapes: [
-            {id: "rect", type: "rectangle", x: .1, y: .1, width: .2, height: .2},
+            {id: "rect", type: "rectangle", x: .1, y: .1, width: .2, height: .2, label: "Region <A>"},
             {id: "ellipse", type: "ellipse", x: .4, y: .1, width: .2, height: .2},
             {id: "polygon", type: "polygon", points: [{x: .1, y: .5}, {x: .2, y: .6}, {x: .3, y: .5}]},
             {id: "other", type: "rectangle", x: .7, y: .1, width: .2, height: .2},
         ],
     }}, card: {variantData: {groupID: "current"}}};
+    const controls = new ElementStub();
     const controller = runInNewContext(transpileModule(code +
-        "\nprepareImageOcclusions(element, model);", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText, {
+        "\nprepareImageOcclusions(element, model, bindFlashcardV2ImageViewport);", {compilerOptions: {target: ScriptTarget.ES2021}}).outputText, {
         document: {createElement: () => new ElementStub()},
         window: {siyuan: {languages: {flashcardImageTarget: "Current answer", flashcardImageTargetTip: "Striped answer"}}},
         element: {querySelectorAll: () => [image]}, model,
+        bindFlashcardV2ImageViewport: () => ({controls, destroy: () => {}}),
     });
     const wrapper = parent.children.find(child => child.className === "card__v2-image-occlusion");
     const hint = parent.children.find(child => child.textContent === "Striped answer");
-    return {controller, wrapper, hint};
+    return {controller, wrapper, hint, controls};
 };
 
 test("all-hidden mode marks every current shape accessibly and keeps other groups neutral", () => {
-    const {controller, wrapper, hint} = render("hideAllAnswerOne");
+    const {controller, wrapper, hint, controls} = render("hideAllAnswerOne");
     const shapes = wrapper.querySelectorAll();
     assert.equal(shapes.length, 4);
     for (const shape of shapes.slice(0, 3)) {
         assert.match(shape.className, /--target/);
         assert.equal(shape.attributes.role, "img");
-        assert.equal(shape.attributes["aria-label"], "Current answer");
+        assert.equal(shape.attributes["aria-label"], shape === shapes[0] ? "Region <A>" : "Current answer");
     }
     assert.doesNotMatch(shapes[3].className, /--target/);
     assert.equal(shapes[3].attributes["aria-hidden"], "true");
     assert.ok(hint);
+    const label = wrapper.children.find(child => child.className === "card__v2-image-mask-label");
+    assert.equal(label.textContent, "Region <A>");
     controller.revealNext();
-    assert.ok(shapes.slice(0, 3).every(shape => shape.removed));
-    assert.equal(shapes[3].removed, false);
+    assert.equal(label.removed, true);
+    assert.ok(shapes.slice(0, 3).every(shape => shape.className.includes("--revealed") && shape.attributes["aria-hidden"] === "true"));
+    assert.doesNotMatch(shapes[3].className, /--revealed|fn__none/);
+    controls.children[0].listeners.get("click")();
+    assert.match(shapes[3].className, /fn__none/);
+    controls.children[0].listeners.get("click")();
+    assert.doesNotMatch(shapes[3].className, /fn__none/);
     assert.equal(hint.removed, true);
 });
 

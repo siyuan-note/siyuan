@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Pista de la máscara",
+	"flashcardFocusImageMask": "Enfocar automáticamente la máscara actual",
+	"flashcardReviewSubtree": "Repasar tarjetas de este bloque y sus descendientes",
+	"flashcardManageSubtree": "Gestionar tarjetas de este bloque y sus descendientes",
+	"flashcardReviewCountHidden": "Contador de repaso oculto",
+	"flashcardReviewCountShown": "Contador de repaso visible",
+	"flashcardReviewSiblingsBuried": "Tarjetas del mismo origen enterradas hasta mañana (${count})",
 	"flashcardReviewEditSourceTip": "Abre el origen de la tarjeta para editarlo ahora",
 	"flashcardReviewSkipTip": "Omite la tarjeta durante el resto de la sesión y conserva su vencimiento",
 	"flashcardReviewBuryTip": "Oculta la tarjeta del repaso normal hasta mañana",

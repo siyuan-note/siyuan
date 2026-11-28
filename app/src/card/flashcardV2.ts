@@ -1,4 +1,6 @@
+import {getFlashcardV2BlockScope} from "./flashcardV2BlockScope";
 import {bindFlashcardV2ReviewOptions, flashcardV2ReviewOptionsHTML} from "./flashcardV2ReviewOptions";
+import {bindFlashcardV2Pinch} from "./flashcardV2ImageViewport";
 import {priorityLabel, reviewStateLabel} from "./flashcardV2Study";
 import {createFlashcardV2AnkiImportState} from "./flashcardV2AnkiImport";
 import {loadFlashcardV2GroupNumbers} from "./flashcardV2GroupNumber";
@@ -20,7 +22,7 @@ import {withFetchTimeout} from "../util/fetchTimeout";
 import {ContractFormData} from "../util/contractFormData";
 import {isFlashcardV2Object, isFlashcardV2Strings, readFlashcardV2Payload, readFlashcardV2Revision, toFlashcardV2JSON} from "./flashcardV2Contract";
 import {isMobile} from "../util/functions";
-import {Constants} from "../constants";
+import {Constants, FLASHCARD_LEECH_TAG_ID} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {genUUID} from "../util/genID";
@@ -285,6 +287,7 @@ interface IFlashcardManagementFilters {
     generationStatus?: string;
     reviewState?: string;
     suspended?: string;
+    leech?: string;
     editLater?: string;
     buried?: string;
     priority?: string;
@@ -493,11 +496,34 @@ const reviewSetQuery = (values: Record<string, string>, base?: IFlashcardQueryAS
     return {version: 1, root};
 };
 
+const managementStateFilters = ["leech", "suspended", "editLater", "buried", "reviewState"] as const;
+
+const managementStateShortcuts = (filters: IFlashcardManagementFilters) => {
+    const lang = window.siyuan.languages;
+    const buttons = [
+        ["", "", lang.all],
+        ["leech", "true", lang.flashcardLeeches],
+        ["suspended", "true", lang.flashcardSuspendedCards],
+        ["editLater", "true", lang.flashcardPendingEdits],
+        ["buried", "true", lang.flashcardBuriedCards],
+        ["reviewState", "new", lang.flashcardNewCard],
+    ] as const;
+    const activeFilters = managementStateFilters.filter(key => !!filters[key]);
+    return buttons.map(([key, value, label]) => {
+        const active = key ? activeFilters.length === 1 && filters[key] === value : activeFilters.length === 0;
+        return '<button type="button" data-type="stateShortcut" data-filter-key="' + key + '" data-filter-value="' + value +
+            '" class="b3-button b3-button--outline" aria-pressed="' + active + '">' + escapeHtml(label) + "</button>";
+    }).join("");
+};
+
 const flashcardManagementQuery = (filters: IFlashcardManagementFilters): IFlashcardQueryAST | undefined => {
     const predicates: IFlashcardQueryExpression[] = [];
     const add = (field: string, comparator: string, value: IFlashcardQueryExpression["value"]) => {
         predicates.push({operator: "predicate", field, comparator, value});
     };
+    if (filters.leech === "true") {
+        add("tagID", "equal", FLASHCARD_LEECH_TAG_ID);
+    }
     if (filters.content) {
         add("content", "contains", filters.content);
     }
@@ -895,7 +921,7 @@ export const openFlashcardV2Presets = () => {
 };
 
 const openFlashcardV2ReviewSetSession = (app: App, reviewSetID: string, name: string,
-    defaultMode: "normal" | "reinforcement") => {
+    defaultMode: "normal" | "reinforcement", query?: IFlashcardQueryAST) => {
     const dialog = new Dialog({
         title: name,
         width: isMobile() ? "92vw" : "480px",
@@ -915,7 +941,7 @@ ${flashcardV2ReviewOptionsHTML()}</div>
     const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
     buttons[0].addEventListener("click", () => dialog.destroy());
     buttons[1].addEventListener("click", () => {
-        openFlashcardV2ReviewSession(app, reviewSetID, name, getReviewOptions());
+        openFlashcardV2ReviewSession(app, reviewSetID, name, {...getReviewOptions(), query});
         dialog.destroy();
     });
 };
@@ -991,6 +1017,7 @@ ${result.sourceType === "qa" ? `<span data-type="direction" class="fn__none b3-l
 <span data-type="sourceHistory" class="fn__none" aria-label="${window.siyuan.languages.flashcardSourceHistory}"></span>
 ${reviewSetID ? `<span data-type="exclude" class="fn__none b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconClose"></use></svg></span>` : '<span data-type="membership" class="fn__none"></span>'}
 <span data-type="reset" class="fn__none b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}"><svg><use xlink:href="#iconUndo"></use></svg></span>
+<button data-type="previewFull" type="button" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${escapeAttr(window.siyuan.languages.flashcardPreview)}"><svg aria-hidden="true"><use xlink:href="#iconPreview"></use></svg></button>
 <button data-type="more" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
 </li>`;
 };
@@ -1870,7 +1897,7 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
                 return;
             }
         }
-        const next: IFlashcardManagementFilters = {blockIDs: filters.blockIDs, rootIDs: filters.rootIDs};
+        const next: IFlashcardManagementFilters = {blockIDs: filters.blockIDs, rootIDs: filters.rootIDs, leech: filters.leech};
         elements.forEach((element) => {
             const value = element.value.trim();
             if (value !== "") {
@@ -2044,7 +2071,6 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
 </div>
 <div class="card__v2-management-tools">
 <button data-type="study" class="b3-button b3-button--text"${filters.editLater === "true" ? " disabled" : ""}>${window.siyuan.languages.flashcardStudy}</button>
-<button data-type="pendingEdits" class="b3-button b3-button--outline" aria-pressed="${filters.editLater === "true"}">${window.siyuan.languages.flashcardPendingEdits}</button>
 <button data-type="filter" class="b3-button b3-button--outline">${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button>
 <button data-type="conflicts" class="fn__none b3-button b3-button--outline">${window.siyuan.languages.conflict}</button>
 <button data-type="cleanup" class="fn__none b3-button b3-button--outline">${window.siyuan.languages.invalid}</button>
@@ -2056,6 +2082,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
 <label class="card__v2-checkbox"><input data-type="group" type="checkbox"${grouped ? " checked" : ""}><span>${window.siyuan.languages.flashcardGroupBySource}</span></label>
 </div>
 </div>
+<div class="card__v2-management-tools">${managementStateShortcuts(filters)}</div>
 <div class="card__v2-management-selection">
 <div class="fn__flex">
 <label class="card__v2-checkbox"><input data-type="selectPage" type="checkbox"><span>${window.siyuan.languages.flashcardSelectPage}</span></label>
@@ -2066,7 +2093,11 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
 <button data-type="batchApply" class="b3-button b3-button--text" disabled>${window.siyuan.languages.confirm}</button>
 </div>
 </div>
-<ul class="b3-list b3-list--background fn__flex-1 card__v2-management-list" tabindex="-1">${cards.length === 0 ? `<li class="b3-list-item card__empty">${filters.editLater === "true" ? window.siyuan.languages.flashcardEditLaterEmpty : window.siyuan.languages.emptyContent}</li>` : renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul></div>`;
+<div class="card__v2-management-content">
+<ul class="b3-list b3-list--background fn__flex-1 card__v2-management-list" tabindex="-1">${cards.length === 0 ? `<li class="b3-list-item card__empty">${filters.editLater === "true" ? window.siyuan.languages.flashcardEditLaterEmpty : window.siyuan.languages.emptyContent}</li>` : renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul>
+<aside data-card-source-preview class="card__v2-management-source-preview fn__none" aria-label="${escapeAttr(window.siyuan.languages.flashcardCardSource)}">
+<button type="button" data-type="closeSourcePreview" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.close)}"><svg aria-hidden="true"><use xlink:href="#iconClose"></use></svg></button>
+<div data-card-source-preview-body class="protyle-wysiwyg" data-readonly="true" contenteditable="false"></div></aside></div></div>`;
             if (owner.dialog) {
                 owner.dialog.element.querySelector(".card__v2-management").outerHTML = content;
             } else {
@@ -2076,6 +2107,28 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
             }
             const dialog = owner.dialog;
             const listenerOptions = owner.view.bind();
+            const sourcePreview = dialog.element.querySelector<HTMLElement>("[data-card-source-preview]");
+            const sourcePreviewBody = sourcePreview.querySelector<HTMLElement>("[data-card-source-preview-body]");
+            let sourcePreviewRequest = 0;
+            const showSourcePreview = (blockID: string) => {
+                const request = ++sourcePreviewRequest;
+                sourcePreview.classList.remove("fn__none");
+                sourcePreviewBody.textContent = window.siyuan.languages.loading;
+                void fetchPost("/api/block/getBlockDOM", {id: blockID}, (response) => {
+                    if (request !== sourcePreviewRequest || listenerOptions.signal.aborted) { return; }
+                    sourcePreviewBody.innerHTML = window.DOMPurify.sanitize(response.data.dom || "", {
+                        FORBID_TAGS: ["script", "style", "iframe", "frame", "frameset", "object", "embed"],
+                    });
+                    if (!sourcePreviewBody.childElementCount) {
+                        sourcePreviewBody.textContent = window.siyuan.languages.emptyContent;
+                    }
+                }).catch(error => console.error("Flashcard source preview failed", error)).finally(() => {
+                    if (request === sourcePreviewRequest && !listenerOptions.signal.aborted &&
+                        sourcePreviewBody.textContent === window.siyuan.languages.loading && !sourcePreviewBody.childElementCount) {
+                        sourcePreviewBody.textContent = window.siyuan.languages.emptyContent;
+                    }
+                });
+            };
             if (grouped) {
                 void loadFlashcardV2GroupNumbers(cards, async sourceID => {
                     const response = await withFetchTimeout(signal => fetchSyncPost(
@@ -2179,9 +2232,15 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     return;
                 }
                 const type = target.dataset.type;
-                if (type === "pendingEdits") {
-                    openFlashcardV2ReviewSetCards(reviewSetID, name, 0,
-                        {...filters, editLater: filters.editLater === "true" ? undefined : "true"}, managementOptions, false, owner, false);
+                if (type === "stateShortcut") {
+                    const nextFilters = {...filters};
+                    for (const key of managementStateFilters) {
+                        delete nextFilters[key];
+                        if (key === target.dataset.filterKey) {
+                            nextFilters[key] = target.dataset.filterValue;
+                        }
+                    }
+                    openFlashcardV2ReviewSetCards(reviewSetID, name, 0, nextFilters, managementOptions, grouped, owner, false);
                     return;
                 }
                 if (type === "editLater" && item) {
@@ -2217,7 +2276,18 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="fn__none b3-but
                     });
                     return;
                 }
-                if (type === "preview" && item) {
+                if (type === "closeSourcePreview") {
+                    sourcePreviewRequest++;
+                    sourcePreviewBody.replaceChildren();
+                    sourcePreview.classList.add("fn__none");
+                    return;
+                }
+                if ((type === "preview" || type === "previewFull") && item) {
+                    const blockID = cards.find(card => card.card.id === item.dataset.id)?.sourceBlockID;
+                    if (type === "preview" && blockID && !isMobile() && matchMedia("(min-width: 960px)").matches) {
+                        showSourcePreview(blockID);
+                        return;
+                    }
                     openFlashcardV2Preview(cards.map((card) => card.card.id),
                         cards.findIndex((card) => card.card.id === item.dataset.id));
                     return;
@@ -2852,6 +2922,21 @@ export const openFlashcardV2ManagementByBlocks = (blockIDs: string[], name: stri
     ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", name, 0, {blockIDs: uniqueBlockIDs}));
 };
 
+export const openFlashcardV2BlockScope = (app: App, id: string, type: string, mode: "review" | "manage") => {
+    ensureFlashcardV2(async () => {
+        const blockIDs = await getFlashcardV2BlockScope(id, type);
+        if (!blockIDs?.length) {
+            return;
+        }
+        if (mode === "review") {
+            openFlashcardV2ReviewSetSession(app, "", window.siyuan.languages.flashcardReviewSubtree,
+                "normal", flashcardManagementQuery({blockIDs}));
+        } else {
+            openFlashcardV2ReviewSetCards("", window.siyuan.languages.flashcardManageSubtree, 0, {blockIDs});
+        }
+    });
+};
+
 export const openFlashcardV2ManagementByRoots = (rootIDs: string[], name: string) => {
     const uniqueRootIDs = [...new Set(rootIDs.filter(Boolean))];
     ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", name, 0, {rootIDs: uniqueRootIDs}));
@@ -3149,6 +3234,7 @@ interface IFlashcardV2ImageShape {
     id: string;
     groupID: string;
     type: TFlashcardV2ImageShapeType;
+    label?: string;
     x?: number;
     y?: number;
     width?: number;
@@ -3354,13 +3440,14 @@ const loadFlashcardV2AdvancedCandidates = async (blockIDs: string[]) => {
         .sort((left, right) => right.updatedAt - left.updatedAt);
 };
 
-const flashcardV2ImageSource = (blockID: string, dom: string) => {
+const flashcardV2ImageSource = (blockID: string, dom: string, selectedAsset?: string) => {
     const template = document.createElement("template");
     template.innerHTML = window.DOMPurify.sanitize(dom, {
         FORBID_TAGS: ["script", "style", "iframe", "frame", "frameset", "object", "embed"],
     });
-    const image = template.content.querySelector("img");
-    const assetID = image?.getAttribute("data-src") || image?.getAttribute("src") || "";
+    const assets = [...template.content.querySelectorAll("img")].map(image =>
+        image.getAttribute("data-src") || image.getAttribute("src") || "");
+    const assetID = selectedAsset ? assets.find(asset => asset === selectedAsset) : assets[0];
     if (!assetID || /^(?:javascript|data|blob):/i.test(assetID)) {
         return;
     }
@@ -3409,27 +3496,39 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     const canvas = element.querySelector("canvas") as HTMLCanvasElement;
     const viewport = element.querySelector<HTMLElement>(".card__v2-image-viewport");
     const context = canvas.getContext("2d");
+    const labelField = element.querySelector<HTMLElement>('[data-type="imageMaskLabelField"]');
+    const labelInput = labelField.querySelector("input");
+    let editingLabel = false;
     const shapeSelect = element.querySelector('[data-type="imageShape"]') as HTMLSelectElement;
     const groupSelect = element.querySelector('[data-type="imageGroup"]') as HTMLSelectElement;
     const frontMode = element.querySelector('[data-type="imageFrontMode"]') as HTMLSelectElement;
     const polygonButton = element.querySelector('[data-type="finishPolygon"]') as HTMLButtonElement;
     const undoButton = element.querySelector('[data-type="undoImageShape"]') as HTMLButtonElement;
     const deleteButton = element.querySelector<HTMLButtonElement>('[data-type="deleteImageShape"]');
+    const multiButton = element.querySelector<HTMLButtonElement>('[data-type="selectImageShapes"]');
+    const mergeButton = element.querySelector<HTMLButtonElement>('[data-type="mergeImageShapes"]');
+    const splitButton = element.querySelector<HTMLButtonElement>('[data-type="splitImageShapes"]');
     const zoomIn = element.querySelector<HTMLButtonElement>('[data-type="zoomImageIn"]');
     const zoomOut = element.querySelector<HTMLButtonElement>('[data-type="zoomImageOut"]');
     const zoomReset = element.querySelector<HTMLButtonElement>('[data-type="resetImageZoom"]');
+    const originalButton = element.querySelector<HTMLButtonElement>('[data-type="actualImageSize"]');
+    const fullscreenButton = element.querySelector<HTMLButtonElement>('[data-type="fullscreenImageEditor"]');
     const shapes: IFlashcardV2ImageShape[] = [];
     const groupOrder: string[] = [];
     const history: {shapes: IFlashcardV2ImageShape[], groups: string[]}[] = [];
     let zoom = 1;
+    let spaceHeld = false;
     let pointerID: number | undefined;
     let selected = -1;
-    let editDrag: {origin: IFlashcardV2ImagePoint, shape: IFlashcardV2ImageShape, resize: boolean,
+    const selectedIDs = new Set<string>();
+    type Handle = {x: number, y: number, horizontal: number, vertical: number, rotate?: boolean};
+    let editDrag: {origin: IFlashcardV2ImagePoint, shape: IFlashcardV2ImageShape, handle?: Handle,
         draft?: IFlashcardV2ImageShape} | undefined;
     let pan: {x: number, y: number, left: number, top: number} | undefined;
     let start: IFlashcardV2ImagePoint | undefined;
     let current: IFlashcardV2ImagePoint | undefined;
     let polygon: IFlashcardV2ImagePoint[] = [];
+    let touchPolygonPoint: number | undefined;
     let destroyed = false;
     if (initial?.groups && initial?.shapes) {
         [...initial.groups].sort((left, right) => left.displayOrder - right.displayOrder).forEach((group) => {
@@ -3460,6 +3559,58 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         const x = Math.min(...xs);
         const y = Math.min(...ys);
         return {x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y};
+    };
+    const handles = (box: ReturnType<typeof bounds>, width: number, height: number): Handle[] => {
+        const controls: Handle[] = [{x: box.x + box.width / 2,
+            y: Math.max(10 / height, box.y - 22 / height), horizontal: 0, vertical: 0, rotate: true}];
+        for (const horizontal of [-1, 0, 1]) {
+            for (const vertical of [-1, 0, 1]) {
+                if (horizontal || vertical) {
+                    controls.push({horizontal, vertical, x: box.x + (horizontal + 1) * box.width / 2,
+                        y: box.y + (vertical + 1) * box.height / 2});
+                }
+            }
+        }
+        return width < 18 || height < 18 ? [] : controls;
+    };
+    const rotateShape = (shape: IFlashcardV2ImageShape, origin: IFlashcardV2ImagePoint, current: IFlashcardV2ImagePoint) => {
+        const box = bounds(shape);
+        const rect = canvas.getBoundingClientRect();
+        const x = box.x + box.width / 2;
+        const y = box.y + box.height / 2;
+        const angle = (point: IFlashcardV2ImagePoint) => Math.atan2((point.y - y) * rect.height, (point.x - x) * rect.width);
+        const delta = angle(current) - angle(origin);
+        if (Math.abs(Math.sin(delta)) < .001 && Math.cos(delta) > 0) {
+            return;
+        }
+        let points = shape.points;
+        if (shape.type === "rectangle") {
+            points = [{x: box.x, y: box.y}, {x: box.x + box.width, y: box.y},
+                {x: box.x + box.width, y: box.y + box.height}, {x: box.x, y: box.y + box.height}];
+        } else if (shape.type === "ellipse") {
+            points = Array.from({length: 32}, (_, index) => {
+                const theta = index * Math.PI / 16;
+                return {x: x + Math.cos(theta) * box.width / 2, y: y + Math.sin(theta) * box.height / 2};
+            });
+        }
+        const cos = Math.cos(delta);
+        const sin = Math.sin(delta);
+        const rotated = points.map(point => {
+            const dx = (point.x - x) * rect.width;
+            const dy = (point.y - y) * rect.height;
+            return {x: (dx * cos - dy * sin) / rect.width, y: (dx * sin + dy * cos) / rect.height};
+        });
+        const xs = rotated.map(point => point.x);
+        const ys = rotated.map(point => point.y);
+        const minX = Math.min(...xs);
+        const minY = Math.min(...ys);
+        const maxX = Math.max(...xs);
+        const maxY = Math.max(...ys);
+        const factor = Math.min(1, 1 / (maxX - minX), 1 / (maxY - minY));
+        const centerX = Math.max(-minX * factor, Math.min(1 - maxX * factor, x));
+        const centerY = Math.max(-minY * factor, Math.min(1 - maxY * factor, y));
+        return {id: shape.id, groupID: shape.groupID, label: shape.label, type: "polygon" as const,
+            points: rotated.map(point => ({x: point.x * factor + centerX, y: point.y * factor + centerY}))};
     };
     const contains = (shape: IFlashcardV2ImageShape, point: IFlashcardV2ImagePoint) => {
         const {x, y, width, height} = bounds(shape);
@@ -3534,8 +3685,25 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             context.strokeStyle = groupColor(shape.groupID, 1);
             context.strokeRect(box.x * width, box.y * height, box.width * width, box.height * height);
             context.fillStyle = context.strokeStyle;
-            context.fillRect((box.x + box.width) * width - 4, (box.y + box.height) * height - 4, 8, 8);
+            if (selectedIDs.size === 1) {
+                handles(box, width, height).forEach(handle => {
+                    if (handle.rotate) {
+                        context.beginPath();
+                        context.arc(handle.x * width, handle.y * height, 6, 0, Math.PI * 2);
+                        context.stroke();
+                    } else {
+                        context.fillRect(handle.x * width - 3, handle.y * height - 3, 6, 6);
+                    }
+                });
+            }
         }
+        shapes.forEach(shape => {
+            if (selectedIDs.has(shape.id) && shape.id !== shapes[selected]?.id) {
+                const box = bounds(shape);
+                context.strokeStyle = groupColor(shape.groupID, 1);
+                context.strokeRect(box.x * width, box.y * height, box.width * width, box.height * height);
+            }
+        });
         if (start && current && shapeSelect.value !== "polygon") {
             const x = Math.min(start.x, current.x);
             const y = Math.min(start.y, current.y);
@@ -3553,37 +3721,67 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             });
         }
     };
-    const select = (index: number) => {
-        selected = index;
+    const select = (index: number, toggle = false) => {
+        if (!toggle) {
+            selectedIDs.clear();
+        }
+        if (index >= 0) {
+            const id = shapes[index].id;
+            if (selectedIDs.has(id)) {
+                selectedIDs.delete(id);
+            } else {
+                selectedIDs.add(id);
+            }
+        }
+        selected = shapes.findIndex(shape => shape.id === [...selectedIDs].at(-1));
+        editingLabel = false;
+        labelField.classList.toggle("fn__none", selectedIDs.size !== 1 || shapeSelect.value !== "edit");
+        labelInput.value = shapes[selected]?.label || "";
+        const selectedGroups = new Set(shapes.filter(shape => selectedIDs.has(shape.id)).map(shape => shape.groupID));
         deleteButton.disabled = selected < 0;
+        mergeButton.disabled = selectedGroups.size < 2;
+        const seenGroups = new Set<string>();
+        splitButton.disabled = !shapes.some(({groupID}) => {
+            if (!selectedGroups.has(groupID)) { return false; }
+            if (seenGroups.has(groupID)) { return true; }
+            seenGroups.add(groupID);
+            return false;
+        });
         redraw();
     };
+    const fitWidth = () => Math.min(image.naturalWidth, viewport.clientWidth,
+        window.innerHeight * (document.fullscreenElement === element ? .8 : .48) * image.naturalWidth / image.naturalHeight);
+    const actualZoom = () => {
+        const width = fitWidth();
+        return width > 0 ? image.naturalWidth / width : 1;
+    };
+    const zoomLimit = () => Math.max(8, actualZoom());
     const layoutImage = () => {
         if (destroyed) {
             return;
         }
         viewport.toggleAttribute("data-zoomed", zoom !== 1);
-        const width = Math.min(image.naturalWidth, viewport.clientWidth, window.innerHeight * .48 *
-            image.naturalWidth / image.naturalHeight);
+        const width = fitWidth();
         image.style.width = zoom !== 1 && width > 0 ? `${width * zoom}px` : "";
+        zoomIn.disabled = zoom >= zoomLimit();
+        zoomOut.disabled = zoom <= 1;
+        zoomReset.disabled = zoom === 1;
+        zoomReset.textContent = `${Math.round(zoom * 100 / actualZoom())}%`;
+        originalButton.disabled = !image.naturalWidth || Math.abs(zoom - actualZoom()) < .001;
         redraw();
     };
-    const changeZoom = (value: number) => {
-        const next = Math.max(1, Math.min(4, value));
-        if (next === zoom || pointerID !== undefined) {
+    const changeZoom = (value: number, anchorX = viewport.clientWidth / 2, anchorY = viewport.clientHeight / 2) => {
+        const next = Math.max(1, Math.min(zoomLimit(), value));
+        if (next === zoom || !Number.isFinite(next) || pointerID !== undefined) {
             return;
         }
         const stage = image.parentElement;
-        const x = (viewport.scrollLeft + viewport.clientWidth / 2 - stage.offsetLeft) / Math.max(1, image.clientWidth);
-        const y = (viewport.scrollTop + viewport.clientHeight / 2 - stage.offsetTop) / Math.max(1, image.clientHeight);
+        const x = (viewport.scrollLeft + anchorX - stage.offsetLeft) / Math.max(1, image.clientWidth);
+        const y = (viewport.scrollTop + anchorY - stage.offsetTop) / Math.max(1, image.clientHeight);
         zoom = next;
         layoutImage();
-        viewport.scrollLeft = stage.offsetLeft + x * image.clientWidth - viewport.clientWidth / 2;
-        viewport.scrollTop = stage.offsetTop + y * image.clientHeight - viewport.clientHeight / 2;
-        zoomIn.disabled = zoom === 4;
-        zoomOut.disabled = zoom === 1;
-        zoomReset.disabled = zoom === 1;
-        zoomReset.textContent = `${Math.round(zoom * 100)}%`;
+        viewport.scrollLeft = stage.offsetLeft + x * image.clientWidth - anchorX;
+        viewport.scrollTop = stage.offsetTop + y * image.clientHeight - anchorY;
     };
     const updateGroups = () => {
         const selected = groupSelect.value;
@@ -3592,6 +3790,47 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         if (groupOrder.includes(selected)) {
             groupSelect.value = selected;
         }
+    };
+    const updateAfterEdit = () => {
+        const remainingGroups = new Set(shapes.map(shape => shape.groupID));
+        groupOrder.splice(0, groupOrder.length, ...groupOrder.filter(id => remainingGroups.has(id)));
+        updateGroups();
+        select(-1);
+        onChange(shapes.length > 0);
+    };
+    const mergeSelected = () => {
+        if (mergeButton.disabled || pointerID !== undefined) {
+            return;
+        }
+        const groupID = shapes[selected].groupID;
+        record();
+        shapes.forEach((shape, index) => {
+            if (selectedIDs.has(shape.id) && shape.groupID !== groupID) {
+                shapes[index] = {...shape, groupID};
+            }
+        });
+        updateAfterEdit();
+    };
+    const splitSelected = () => {
+        if (splitButton.disabled || pointerID !== undefined) {
+            return;
+        }
+        const selectedGroups = new Set(shapes.filter(shape => selectedIDs.has(shape.id)).map(shape => shape.groupID));
+        record();
+        for (const groupID of selectedGroups) {
+            const indices = shapes.flatMap((shape, index) => shape.groupID === groupID ? [index] : []);
+            const retained = indices.includes(selected) ? selected : indices[0];
+            const newGroups: string[] = [];
+            for (const index of indices) {
+                if (index !== retained) {
+                    const newID = genUUID();
+                    shapes[index] = {...shapes[index], groupID: newID};
+                    newGroups.push(newID);
+                }
+            }
+            groupOrder.splice(groupOrder.indexOf(groupID) + 1, 0, ...newGroups);
+        }
+        updateAfterEdit();
     };
     updateGroups();
     const addShape = (shape: Omit<IFlashcardV2ImageShape, "id" | "groupID">) => {
@@ -3640,16 +3879,12 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             return;
         }
         record();
-        const [removed] = shapes.splice(selected, 1);
-        if (!shapes.some(({groupID}) => groupID === removed.groupID)) {
-            groupOrder.splice(groupOrder.indexOf(removed.groupID), 1);
-            updateGroups();
-        }
-        select(-1);
-        onChange(shapes.length > 0);
+        const retained = shapes.filter(shape => !selectedIDs.has(shape.id));
+        shapes.splice(0, shapes.length, ...retained);
+        updateAfterEdit();
     };
     const keydown = (event: KeyboardEvent) => {
-        if (element.classList.contains("fn__none") || event.altKey || !(event.ctrlKey || event.metaKey) ||
+        if (event.target === labelInput || element.classList.contains("fn__none") || event.altKey || !(event.ctrlKey || event.metaKey) ||
             event.key.toLowerCase() !== "z") {
             return;
         }
@@ -3661,41 +3896,51 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     };
     document.addEventListener("keydown", keydown, true);
     canvas.addEventListener("keydown", event => {
+        if (event.code === "Space") {
+            spaceHeld = true;
+            event.preventDefault();
+            event.stopPropagation();
+        }
         if (event.key === "Delete" && selected >= 0) {
             event.preventDefault();
             event.stopPropagation();
             deleteShape();
         }
     });
+    const resetSpace = () => { spaceHeld = false; };
+    canvas.addEventListener("keyup", resetSpace);
+    canvas.addEventListener("blur", resetSpace);
     canvas.addEventListener("pointerdown", (event) => {
         if (event.button !== 0 || pointerID !== undefined) {
             return;
         }
         const at = point(event);
-        if (shapeSelect.value === "polygon") {
+        if (!spaceHeld && shapeSelect.value === "polygon") {
             polygon.push(at);
+            touchPolygonPoint = event.pointerType === "touch" ? event.pointerId : undefined;
             polygonButton.disabled = polygon.length < 3;
             redraw();
             return;
         }
-        if (shapeSelect.value === "pan") {
+        if (spaceHeld || shapeSelect.value === "pan") {
             pan = {x: event.clientX, y: event.clientY, left: viewport.scrollLeft, top: viewport.scrollTop};
         } else if (shapeSelect.value === "edit") {
             const box = selected >= 0 ? bounds(shapes[selected]) : undefined;
             const rect = canvas.getBoundingClientRect();
-            const resize = !!box && Math.abs(at.x - box.x - box.width) * rect.width <= 12 &&
-                Math.abs(at.y - box.y - box.height) * rect.height <= 12;
-            if (!resize) {
+            const multi = event.shiftKey || multiButton.getAttribute("aria-pressed") === "true";
+            const handle = box && !multi && selectedIDs.size === 1 ? handles(box, rect.width, rect.height)
+                .find(item => Math.abs(at.x - item.x) * rect.width <= 9 && Math.abs(at.y - item.y) * rect.height <= 9) : undefined;
+            if (!handle) {
                 let index = shapes.length - 1;
                 while (index >= 0 && !contains(shapes[index], at)) {
                     index--;
                 }
-                select(index);
+                select(index, multi);
             }
-            if (selected < 0) {
+            if (selected < 0 || multi) {
                 return;
             }
-            editDrag = {origin: at, shape: shapes[selected], resize};
+            editDrag = {origin: at, shape: shapes[selected], handle};
         } else {
             start = at;
             current = at;
@@ -3710,17 +3955,25 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             viewport.scrollTop = pan.top + pan.y - event.clientY;
         } else if (editDrag) {
             const at = point(event);
-            const {origin, shape, resize} = editDrag;
+            const {origin, shape, handle} = editDrag;
             const box = bounds(shape);
             const dx = at.x - origin.x;
             const dy = at.y - origin.y;
             if (!dx && !dy) {
                 editDrag.draft = undefined;
             } else {
-                const x = resize ? box.x : Math.max(0, Math.min(1 - box.width, box.x + dx));
-                const y = resize ? box.y : Math.max(0, Math.min(1 - box.height, box.y + dy));
-                const width = resize ? Math.min(1 - x, Math.max(.005, box.width + dx)) : box.width;
-                const height = resize ? Math.min(1 - y, Math.max(.005, box.height + dy)) : box.height;
+                if (handle?.rotate) {
+                    editDrag.draft = rotateShape(shape, origin, at);
+                    return;
+                }
+                const x = handle ? (handle.horizontal < 0 ? Math.max(0, Math.min(box.x + box.width - .005, box.x + dx)) : box.x) :
+                    Math.max(0, Math.min(1 - box.width, box.x + dx));
+                const y = handle ? (handle.vertical < 0 ? Math.max(0, Math.min(box.y + box.height - .005, box.y + dy)) : box.y) :
+                    Math.max(0, Math.min(1 - box.height, box.y + dy));
+                const width = handle?.horizontal > 0 ? Math.min(1 - x, Math.max(.005, box.width + dx)) :
+                    box.width + (handle?.horizontal < 0 ? box.x - x : 0);
+                const height = handle?.vertical > 0 ? Math.min(1 - y, Math.max(.005, box.height + dy)) :
+                    box.height + (handle?.vertical < 0 ? box.y - y : 0);
                 editDrag.draft = shape.type === "polygon" ? {...shape, points: shape.points.map(point => ({
                     x: box.width ? x + (point.x - box.x) * width / box.width : x,
                     y: box.height ? y + (point.y - box.y) * height / box.height : y,
@@ -3745,6 +3998,9 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         }
     });
     canvas.addEventListener("pointerup", (event) => {
+        if (touchPolygonPoint === event.pointerId) {
+            touchPolygonPoint = undefined;
+        }
         if (event.pointerId !== pointerID) {
             return;
         }
@@ -3765,28 +4021,85 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         clearPointer();
     });
     const cancelPointer = (event: PointerEvent) => {
+        if (touchPolygonPoint === event.pointerId) {
+            polygon.pop();
+            touchPolygonPoint = undefined;
+            polygonButton.disabled = polygon.length < 3;
+            redraw();
+        }
         if (event.pointerId === pointerID) {
             clearPointer();
         }
     };
     canvas.addEventListener("pointercancel", cancelPointer);
     canvas.addEventListener("lostpointercapture", cancelPointer);
+    bindFlashcardV2Pinch(canvas, () => {
+        if (touchPolygonPoint !== undefined) {
+            polygon.pop();
+            touchPolygonPoint = undefined;
+            polygonButton.disabled = polygon.length < 3;
+        }
+        clearPointer();
+    }, (scale, x, y, dx, dy) => {
+        const rect = viewport.getBoundingClientRect();
+        changeZoom(zoom * scale, x - rect.left, y - rect.top);
+        viewport.scrollLeft -= dx;
+        viewport.scrollTop -= dy;
+    });
     shapeSelect.addEventListener("change", () => {
         clearPointer();
         polygon = [];
         canvas.dataset.mode = shapeSelect.value;
         polygonButton.classList.toggle("fn__none", shapeSelect.value !== "polygon");
         polygonButton.disabled = true;
-        deleteButton.classList.toggle("fn__none", shapeSelect.value !== "edit");
+        [deleteButton, multiButton, mergeButton, splitButton].forEach(button =>
+            button.classList.toggle("fn__none", shapeSelect.value !== "edit"));
         select(-1);
     });
     groupSelect.addEventListener("change", redraw);
     polygonButton.addEventListener("click", finishPolygon);
     undoButton.addEventListener("click", undo);
     deleteButton.addEventListener("click", deleteShape);
+    labelInput.addEventListener("input", () => {
+        if (selectedIDs.size !== 1) { return; }
+        if (!editingLabel) {
+            record();
+            editingLabel = true;
+        }
+        shapes[selected] = {...shapes[selected], label: labelInput.value.trim() || undefined};
+        onChange(true);
+    });
+    labelInput.addEventListener("blur", () => { editingLabel = false; });
+    mergeButton.addEventListener("click", mergeSelected);
+    splitButton.addEventListener("click", splitSelected);
+    multiButton.addEventListener("click", () => {
+        const enabled = multiButton.getAttribute("aria-pressed") === "true";
+        multiButton.setAttribute("aria-pressed", String(!enabled));
+        if (enabled) {
+            select(selected);
+        }
+    });
     zoomIn.addEventListener("click", () => changeZoom(zoom + .5));
     zoomOut.addEventListener("click", () => changeZoom(zoom - .5));
     zoomReset.addEventListener("click", () => changeZoom(1));
+    originalButton.addEventListener("click", () => changeZoom(actualZoom()));
+    fullscreenButton.classList.toggle("fn__none", !document.fullscreenEnabled);
+    fullscreenButton.addEventListener("click", () => {
+        const change = document.fullscreenElement === element ? document.exitFullscreen() : element.requestFullscreen();
+        void change.catch(error => console.error("Image editor fullscreen failed", error));
+    });
+    document.addEventListener("fullscreenchange", layoutImage);
+    viewport.addEventListener("wheel", event => {
+        if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            const rect = viewport.getBoundingClientRect();
+            changeZoom(zoom * (event.deltaY < 0 ? 1.25 : .8), event.clientX - rect.left, event.clientY - rect.top);
+        }
+        if (event.shiftKey && !event.ctrlKey && !event.metaKey && event.deltaX === 0) {
+            event.preventDefault();
+            viewport.scrollLeft += event.deltaY;
+        }
+    }, {passive: false});
     image.addEventListener("load", layoutImage);
     window.addEventListener("resize", layoutImage);
     const observer = new ResizeObserver(redraw);
@@ -3800,6 +4113,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             shapes: shapes.map((shape) => ({
                 id: shape.id,
                 type: shape.type,
+                label: shape.label,
                 x: shape.x,
                 y: shape.y,
                 width: shape.width,
@@ -3823,12 +4137,13 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             image.removeEventListener("load", layoutImage);
             window.removeEventListener("resize", layoutImage);
             document.removeEventListener("keydown", keydown, true);
+            document.removeEventListener("fullscreenchange", layoutImage);
         },
     };
 };
 
 const openFlashcardV2AdvancedSourceEditor = (blockIDs: string[], edit?: IFlashcardV2AdvancedEdit,
-    callback?: () => void) => {
+    callback?: () => void, selectedImageAsset?: string) => {
     if (blockIDs.length === 0) {
         return;
     }
@@ -3904,18 +4219,24 @@ ${newInlineTargets.length > 0 ? `<div class="card__v2-advanced-section-action"><
     <label class="fn__flex-center">${window.siyuan.languages.group}<span class="fn__space"></span><select data-type="imageGroup" class="b3-select"><option value="">+</option></select></label>
     <span class="fn__space"></span>
     <button data-type="finishPolygon" class="b3-button b3-button--outline fn__none" disabled>${window.siyuan.languages.confirm}</button>
+    <button data-type="selectImageShapes" class="b3-button b3-button--outline fn__none" aria-pressed="false">${window.siyuan.languages.multiSelect}</button>
+    <button data-type="mergeImageShapes" class="b3-button b3-button--outline fn__none" disabled>${window.siyuan.languages.merge}</button>
+    <button data-type="splitImageShapes" class="b3-button b3-button--outline fn__none" disabled>${window.siyuan.languages.split}</button>
     <button data-type="deleteImageShape" class="b3-button b3-button--outline fn__none" disabled>${window.siyuan.languages.delete}</button>
     <span class="fn__space"></span>
     <button data-type="undoImageShape" class="b3-button b3-button--outline">${window.siyuan.languages.undo}</button>
 </div>
+<label data-type="imageMaskLabelField" class="b3-label fn__none"><div class="b3-label__text">${window.siyuan.languages.flashcardImageMaskLabel}</div><input type="text" class="b3-text-field fn__block"></label>
 <select data-type="imageFrontMode" class="b3-select fn__block">
     <option value="hideAllAnswerOne">${window.siyuan.languages.flashcardImageHideAll}</option>
     <option value="hideCurrent">${window.siyuan.languages.flashcardImageHideCurrent}</option>
 </select>
 <div class="card__v2-advanced-image-toolbar">
     <button data-type="zoomImageOut" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.zoomOut)}" disabled><svg aria-hidden="true"><use xlink:href="#iconZoomOut"></use></svg></button>
-    <button data-type="resetImageZoom" class="b3-button b3-button--text ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.reset)}" disabled>100%</button>
+    <button data-type="resetImageZoom" class="b3-button b3-button--text ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.fitImage)}" disabled>100%</button>
+    <button data-type="actualImageSize" class="b3-button b3-button--outline">100%</button>
     <button data-type="zoomImageIn" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.zoomIn)}"><svg aria-hidden="true"><use xlink:href="#iconZoomIn"></use></svg></button>
+    <button data-type="fullscreenImageEditor" class="block__icon block__icon--show ariaLabel" aria-label="${escapeAttr(window.siyuan.languages.fullscreen)}"><svg aria-hidden="true"><use xlink:href="#iconFullscreen"></use></svg></button>
 </div>
 <div class="card__v2-image-viewport"><div class="card__v2-image-editor"><img src="${escapeAttr(imageSource.assetID)}" alt=""><canvas tabindex="0"></canvas></div></div>
 </div>` : "";
@@ -4110,7 +4431,7 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                     dynamicChoiceCount.disabled = !dynamicChoice.checked;
                     updateConfirm();
                 });
-                modeElement.value = flashcardV2AdvancedEditMode(edit);
+                modeElement.value = selectedImageAsset ? "imageOcclusion" : flashcardV2AdvancedEditMode(edit);
                 if (edit?.sourceType === "choice") {
                     const correctOptionIDs = new Set(edit.generationConfig.correctOptionIDs || []);
                     choiceInputs.forEach((input) => {
@@ -4275,7 +4596,10 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
             fetchPost("/api/block/getBlockDOMs", {ids: blockIDs}, (domResponse) => {
                 const doms = domResponse.data as Record<string, string>;
                 const imageSource = blockIDs.length === 1 ?
-                    flashcardV2ImageSource(blockIDs[0], doms[blockIDs[0]] || "") : undefined;
+                    flashcardV2ImageSource(blockIDs[0], doms[blockIDs[0]] || "", selectedImageAsset) : undefined;
+                if (selectedImageAsset && !imageSource) {
+                    return;
+                }
                 openDialog(doms, imageSource);
             });
         });
@@ -4315,6 +4639,9 @@ ${candidates.map((candidate, index) => `<li><button type="button" data-candidate
         }
     });
 };
+
+export const openFlashcardV2ImageSource = (blockID: string, asset: string) =>
+    openFlashcardV2AdvancedSourceEditor([blockID], undefined, undefined, asset);
 
 export const openFlashcardV2AdvancedSource = (blockIDs: string[], edit?: IFlashcardV2AdvancedEdit,
     callback?: () => void) => {

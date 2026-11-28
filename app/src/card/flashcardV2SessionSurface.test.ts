@@ -217,7 +217,7 @@ test("real waiting completion chain clears the previous locate target and invali
             due, queue: [{}], index: 0, completedPending: false, renderPending: false, renderGeneration: 7,
             options: {reviewMode: "normal"},
             requestPending: false, waitingTimer: undefined, lastReview: undefined,
-            dialog: {element}, setFlashcardLocateBlockID,
+            dialog: {element}, setFlashcardLocateBlockID, revealController: undefined,
             outline: {update: () => { outlineResets++; }}, clearWaiting: () => { waitingClears++; },
             setReviewActionsEnabled: () => {}, flashcardV2QueueBreakdown: () => ({}), reviewCounter: {update: () => {}},
             sessionCompletionContent: () => "Completed", weakCards: {cards: (): unknown[] => []},

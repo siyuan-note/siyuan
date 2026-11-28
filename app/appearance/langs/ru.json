@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Подсказка на маске",
+	"flashcardFocusImageMask": "Автоматически фокусироваться на текущей маске",
+	"flashcardReviewSubtree": "Повторять карточки этого блока и его потомков",
+	"flashcardManageSubtree": "Управлять карточками этого блока и его потомков",
+	"flashcardReviewCountHidden": "Счётчик повторения скрыт",
+	"flashcardReviewCountShown": "Счётчик повторения показан",
+	"flashcardReviewSiblingsBuried": "Карточки из того же источника скрыты до завтра (${count})",
 	"flashcardReviewEditSourceTip": "Открыть источник карточки для редактирования",
 	"flashcardReviewSkipTip": "Пропустить карточку до конца сеанса, сохранив срок повторения",
 	"flashcardReviewBuryTip": "Скрыть карточку из обычного повторения до завтра",

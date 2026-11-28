@@ -33830,6 +33830,16 @@
             }
           ]
         },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "points": {
           "anyOf": [
             {

@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Maske ipucu",
+	"flashcardFocusImageMask": "Mevcut maskeye otomatik odaklan",
+	"flashcardReviewSubtree": "Bu bloktaki ve alt bloklardaki kartları tekrarla",
+	"flashcardManageSubtree": "Bu bloktaki ve alt bloklardaki kartları yönet",
+	"flashcardReviewCountHidden": "Tekrar sayacı gizlendi",
+	"flashcardReviewCountShown": "Tekrar sayacı gösteriliyor",
+	"flashcardReviewSiblingsBuried": "Aynı kaynaktaki kartlar yarına kadar gizlendi (${count})",
 	"flashcardReviewEditSourceTip": "Kart kaynağını şimdi düzenlemek için aç",
 	"flashcardReviewSkipTip": "Kartı bu oturumun sonuna kadar atla ve tekrar zamanını koru",
 	"flashcardReviewBuryTip": "Kartı yarına kadar normal tekrarda gizle",

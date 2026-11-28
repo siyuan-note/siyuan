@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Suggerimento sulla maschera",
+	"flashcardFocusImageMask": "Centra automaticamente la maschera corrente",
+	"flashcardReviewSubtree": "Ripassa le schede di questo blocco e dei suoi discendenti",
+	"flashcardManageSubtree": "Gestisci le schede di questo blocco e dei suoi discendenti",
+	"flashcardReviewCountHidden": "Conteggio del ripasso nascosto",
+	"flashcardReviewCountShown": "Conteggio del ripasso mostrato",
+	"flashcardReviewSiblingsBuried": "Schede della stessa fonte nascoste fino a domani (${count})",
 	"flashcardReviewEditSourceTip": "Apri la fonte della scheda per modificarla subito",
 	"flashcardReviewSkipTip": "Salta la scheda per il resto della sessione e mantieni la scadenza",
 	"flashcardReviewBuryTip": "Nascondi la scheda dal ripasso normale fino a domani",

@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "רמז על האזור המוסתר",
+	"flashcardFocusImageMask": "מיקוד אוטומטי באזור ההסתרה הנוכחי",
+	"flashcardReviewSubtree": "חזרה על כרטיסים בבלוק הזה ובצאצאיו",
+	"flashcardManageSubtree": "ניהול כרטיסים בבלוק הזה ובצאצאיו",
+	"flashcardReviewCountHidden": "מונה החזרה הוסתר",
+	"flashcardReviewCountShown": "מונה החזרה מוצג",
+	"flashcardReviewSiblingsBuried": "כרטיסים מאותו מקור הוסתרו עד מחר (${count})",
 	"flashcardReviewEditSourceTip": "פתיחת מקור הכרטיס לעריכה מיידית",
 	"flashcardReviewSkipTip": "דילוג על הכרטיס עד סוף הסבב תוך שמירה על מועד החזרה",
 	"flashcardReviewBuryTip": "הסתרת הכרטיס מחזרה רגילה עד מחר",

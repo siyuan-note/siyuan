@@ -240,7 +240,7 @@ func TestImageOcclusionValidationAndStableGroupVariants(t *testing.T) {
 	config := ImageOcclusionConfig{
 		AssetID: "assets/image.png",
 		Shapes: []ImageOcclusionShape{
-			{ID: "shape-a", Type: "rectangle", X: 0.1, Y: 0.2, Width: 0.2, Height: 0.1},
+			{ID: "shape-a", Type: "rectangle", Label: "Region A", X: 0.1, Y: 0.2, Width: 0.2, Height: 0.1},
 			{ID: "shape-b", Type: "polygon", Points: []ImageOcclusionPoint{{X: 0, Y: 0}, {X: 0.2, Y: 0},
 				{X: 0.1, Y: 0.2}}},
 		},

@@ -464,6 +464,7 @@ type FlashcardV2ImageOcclusionPoint struct {
 type FlashcardV2ImageOcclusionShape struct {
 	ID     string                           `json:"id" api:"optional,nullable"`
 	Type   string                           `json:"type" api:"optional,nullable"`
+	Label  string                           `json:"label,omitempty" api:"optional,nullable"`
 	X      float64                          `json:"x,omitempty" api:"optional,nullable"`
 	Y      float64                          `json:"y,omitempty" api:"optional,nullable"`
 	Width  float64                          `json:"width,omitempty" api:"optional,nullable"`

@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Підказка на масці",
+	"flashcardFocusImageMask": "Автоматично наближати поточну маску",
+	"flashcardReviewSubtree": "Повторювати картки цього блока та його нащадків",
+	"flashcardManageSubtree": "Керувати картками цього блока та його нащадків",
+	"flashcardReviewCountHidden": "Лічильник повторення приховано",
+	"flashcardReviewCountShown": "Лічильник повторення показано",
+	"flashcardReviewSiblingsBuried": "Картки з того самого джерела приховано до завтра (${count})",
 	"flashcardReviewEditSourceTip": "Відкрити джерело картки для негайного редагування",
 	"flashcardReviewSkipTip": "Пропустити картку до кінця цього сеансу зі збереженням терміну повторення",
 	"flashcardReviewBuryTip": "Приховати картку зі звичайного повторення до завтра",

@@ -1,3 +1,4 @@
+import {showMessage} from "../dialog/message";
 import {AdaptiveDialog} from "../dialog/adaptiveDialog";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
 import {escapeAttr, escapeHtml} from "../util/escape";
@@ -103,6 +104,7 @@ export const bindFlashcardV2ReviewCounter = (root: HTMLElement, mobile: boolean,
             hidden = !hidden;
             button.setAttribute("aria-pressed", String(hidden));
             update(progress);
+            showMessage(window.siyuan.languages[hidden ? "flashcardReviewCountHidden" : "flashcardReviewCountShown"], 1800);
         }
     }, options);
     if (!mobile) {

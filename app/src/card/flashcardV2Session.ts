@@ -1,3 +1,5 @@
+import {bindFlashcardV2ImageViewport} from "./flashcardV2ImageViewport";
+import {setFullscreen} from "../protyle/breadcrumb/action";
 import {bindFlashcardV2ReviewCounter, flashcardV2ReviewCounterHTML} from "./flashcardV2ReviewCounter";
 import {Dialog} from "../dialog";
 import {AdaptiveDialog} from "../dialog/adaptiveDialog";
@@ -495,6 +497,7 @@ const sessionContent = (mobile = false) => `<div class="b3-dialog__content fn__f
     <button data-type="read-aloud" class="block__icon block__icon--show ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
     <button data-type="edit-source" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
     <button data-type="skip" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.skip}" disabled><svg><use xlink:href="#iconForward"></use></svg></button>
+    ${mobile ? "" : `<button data-type="review-fullscreen" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.fullscreen}" aria-pressed="false"><svg><use xlink:href="#iconFullscreen"></use></svg></button>`}
     <button data-type="more" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
     <button data-type="undo-review" class="block__icon block__icon--show ariaLabel fn__none" aria-label="${window.siyuan.languages.undo}"><svg><use xlink:href="#iconUndo"></use></svg></button>
 </div>
@@ -649,7 +652,7 @@ const renderFlashcardV2Card = (dialog: IFlashcardSessionSurface,
             answerElement.classList.add("fn__none");
             processRender(contentElement);
             highlightRender(contentElement);
-            const revealController = pluginResult?.revealController || prepareFlashcardV2Reveal(frontElement, model);
+            const revealController = pluginResult?.revealController || prepareFlashcardV2Reveal(frontElement, model, bindFlashcardV2ImageViewport);
             const typedAnswerController = prepareFlashcardV2TypedAnswers(frontElement, model, doms);
             const choiceController = prepareFlashcardV2Choice(frontElement, model);
             const playbackController = prepareFlashcardV2Playback(model, frontElement, answerElement,
@@ -747,6 +750,7 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0,
         height: "min(760px, 86vh)",
         destroyCallback: () => {
             generation++;
+            rendered?.revealController?.destroy?.();
             rendered?.playbackController.cancel();
         },
         content: `<div class="b3-dialog__content fn__flex-column card__v2-session card__v2-preview">
@@ -774,6 +778,7 @@ export const openFlashcardV2Preview = (cardIDs: string[], initialIndex = 0,
     const load = () => {
         const request = ++generation;
         const isCurrent = () => request === generation && dialog.element.isConnected;
+        rendered?.revealController?.destroy?.();
         rendered?.playbackController.cancel();
         rendered = undefined;
         show.disabled = true;
@@ -1015,6 +1020,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     status,
                 });
             };
+            let restoreFullscreen: (() => void) | undefined;
             const dialog = createSessionSurface({
                 title: mobile ? mobileSessionTitle(name, true) : name,
                 mobileSheet,
@@ -1023,10 +1029,12 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 height: "78vh",
                 content: sessionContent(mobile),
                 destroyCallback: () => {
+                    restoreFullscreen?.();
                     reviewCounter?.destroy();
                     outline?.destroy();
                     clearWaiting();
                     renderGeneration++;
+                    revealController?.destroy?.();
                     playbackController?.cancel();
                     if (!sessionFinished) {
                         sessionFinished = true;
@@ -1039,6 +1047,16 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 () => completedPending || sessionFinished ? undefined : queue[index]?.card.id);
             dialog.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
             dialog.element.setAttribute("data-flashcard-v2-review", "");
+            const surface = dialog.element.querySelector(".card__v2-session");
+            const fullscreen = surface.querySelector<HTMLButtonElement>('[data-type="review-fullscreen"]');
+            if (fullscreen) {
+                const changeFullscreen = (enabled: boolean) => {
+                    setFullscreen(surface, enabled, fullscreen);
+                    fullscreen.setAttribute("aria-pressed", String(enabled));
+                    restoreFullscreen = enabled ? () => changeFullscreen(false) : undefined;
+                };
+                fullscreen.addEventListener("click", () => changeFullscreen(!surface.classList.contains("fullscreen")));
+            }
             let outlineSourceOpen = false;
             const outline = bindWorkspaceReviewOutline(app, dialog.element, mobile, (blockID) => {
                 if (outlineSourceOpen || sessionFinished || requestPending || renderPending ||
@@ -1100,6 +1118,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 outline.update();
                 setFlashcardLocateBlockID(dialog.element);
                 renderPending = true;
+                revealController?.destroy?.();
                 revealController = undefined;
                 typedAnswerController = undefined;
                 choiceController = undefined;
@@ -1129,6 +1148,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 setFlashcardLocateBlockID(dialog.element);
                 renderPending = false;
                 completedPending = true;
+                revealController?.destroy?.();
                 setReviewActionsEnabled(dialog, true);
                 reviewCounter.update(flashcardV2QueueBreakdown(queue));
                 const contentElement = dialog.element.querySelector(".card__block");
@@ -1755,6 +1775,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         });
                         if (result.leechTagged || (!result.beforeState.suspended && result.afterState?.suspended)) {
                             showMessage(window.siyuan.languages.flashcardLeeches, 6000, "warning");
+                        }
+                        if (result.buriedSiblingIDs?.length) {
+                            showMessage(window.siyuan.languages.flashcardReviewSiblingsBuried
+                                .replace("${count}", String(result.buriedSiblingIDs.length)));
                         }
                         nextCard();
                     }).then(() => {

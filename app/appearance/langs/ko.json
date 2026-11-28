@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "가림 영역 힌트",
+	"flashcardFocusImageMask": "현재 가림 영역에 자동 초점",
+	"flashcardReviewSubtree": "이 블록과 하위 블록의 카드 복습",
+	"flashcardManageSubtree": "이 블록과 하위 블록의 카드 관리",
+	"flashcardReviewCountHidden": "복습 카드 수를 숨겼습니다",
+	"flashcardReviewCountShown": "복습 카드 수를 표시했습니다",
+	"flashcardReviewSiblingsBuried": "같은 원본의 카드가 내일까지 숨겨집니다 (${count}장)",
 	"flashcardReviewEditSourceTip": "카드 원본을 열어 바로 편집합니다",
 	"flashcardReviewSkipTip": "예정일을 유지하며 이번 복습의 남은 과정에서 카드를 건너뜁니다",
 	"flashcardReviewBuryTip": "내일까지 일반 복습에서 이 카드를 숨깁니다",

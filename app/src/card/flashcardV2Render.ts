@@ -1,3 +1,4 @@
+import type {bindFlashcardV2ImageViewport} from "./flashcardV2ImageViewport";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {genUUID} from "../util/genID";
 import type {FlashcardV2CardRenderModel} from "../types/api";
@@ -73,6 +74,7 @@ interface IImageOcclusionConfig {
     shapes: Array<{
         id: string,
         type: "rectangle" | "ellipse" | "polygon",
+        label?: string,
         x?: number,
         y?: number,
         width?: number,
@@ -215,6 +217,7 @@ export interface IFlashcardV2OcclusionPlan {
 
 export interface IFlashcardV2RevealController {
     revealNext: () => boolean;
+    destroy?: () => void;
 }
 
 export interface IFlashcardV2TypedAnswerController {
@@ -966,7 +969,8 @@ const shapeStyle = (shape: IImageOcclusionConfig["shapes"][number]) => {
     return `left:${shape.x * 100}%;top:${shape.y * 100}%;width:${shape.width * 100}%;height:${shape.height * 100}%${shape.type === "ellipse" ? ";border-radius:50%" : ""}`;
 };
 
-const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel) => {
+const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel,
+    bindViewport?: typeof bindFlashcardV2ImageViewport) => {
     const config = model.source.generationConfig as IImageOcclusionConfig;
     const variant = model.card.variantData || {};
     if (!Array.isArray(config?.shapes) || !Array.isArray(config.groups) || typeof variant.groupID !== "string") {
@@ -977,7 +981,8 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
         return;
     }
     const images = [...element.querySelectorAll("img")];
-    const image = images.find((item) => item.getAttribute("src")?.includes(config.assetID)) || images[0];
+    const image = images.find(item => item.getAttribute("data-src") === config.assetID) ||
+        images.find(item => item.getAttribute("src")?.includes(config.assetID)) || images[0];
     if (!image || image.closest(".card__v2-image-occlusion")) {
         return;
     }
@@ -991,6 +996,8 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
     wrapper.className = "card__v2-image-occlusion";
     image.parentElement.insertBefore(wrapper, image);
     wrapper.appendChild(image);
+    let targetBounds: {left: number, top: number, right: number, bottom: number} | undefined;
+    const maskLabels: HTMLElement[] = [];
     visibleShapes.forEach((shape) => {
         const style = shapeStyle(shape);
         if (!style) {
@@ -1001,7 +1008,27 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
         if (targetShapeIDs.has(shape.id)) {
             overlay.classList.add("card__v2-image-shape--target");
             overlay.setAttribute("role", "img");
-            overlay.setAttribute("aria-label", window.siyuan.languages.flashcardImageTarget);
+            overlay.setAttribute("aria-label", shape.label || window.siyuan.languages.flashcardImageTarget);
+            const points = shape.type === "polygon" ? shape.points :
+                [{x: shape.x, y: shape.y}, {x: shape.x + shape.width, y: shape.y + shape.height}];
+            targetBounds ||= {left: 1, top: 1, right: 0, bottom: 0};
+            if (shape.label) {
+                const xs = points.map(point => point.x);
+                const ys = points.map(point => point.y);
+                const label = document.createElement("span");
+                label.className = "card__v2-image-mask-label";
+                label.setAttribute("aria-hidden", "true");
+                label.setAttribute("style", "left:" + (Math.min(...xs) + Math.max(...xs)) * 50 +
+                    "%;top:" + (Math.min(...ys) + Math.max(...ys)) * 50 + "%");
+                label.textContent = shape.label;
+                maskLabels.push(label);
+            }
+            for (const point of points) {
+                targetBounds.left = Math.min(targetBounds.left, point.x);
+                targetBounds.top = Math.min(targetBounds.top, point.y);
+                targetBounds.right = Math.max(targetBounds.right, point.x);
+                targetBounds.bottom = Math.max(targetBounds.bottom, point.y);
+            }
         } else {
             overlay.setAttribute("aria-hidden", "true");
         }
@@ -1009,26 +1036,52 @@ const prepareImageOcclusions = (element: Element, model: IFlashcardV2RenderModel
         overlay.setAttribute("style", style);
         wrapper.appendChild(overlay);
     });
+    maskLabels.forEach(label => wrapper.appendChild(label));
     const hint = document.createElement("div");
     hint.className = "b3-label__text ft__on-surface";
     hint.textContent = window.siyuan.languages.flashcardImageTargetTip;
     wrapper.insertAdjacentElement("afterend", hint);
+    const display = bindViewport?.(wrapper, image, targetBounds);
+    const otherShapes = [...wrapper.querySelectorAll<HTMLElement>("[data-shape-id]")]
+        .filter(shape => !targetShapeIDs.has(shape.dataset.shapeId));
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "b3-button b3-button--outline fn__none";
+    toggle.textContent = window.siyuan.languages.showAll;
+    toggle.setAttribute("aria-pressed", "false");
+    if (otherShapes.length && display) {
+        display.controls.appendChild(toggle);
+        toggle.addEventListener("click", () => {
+            const hideMasks = toggle.getAttribute("aria-pressed") === "false";
+            otherShapes.forEach(shape => shape.classList.toggle("fn__none", hideMasks));
+            toggle.setAttribute("aria-pressed", String(hideMasks));
+            toggle.textContent = window.siyuan.languages[hideMasks ? "hideAll" : "showAll"];
+        });
+    }
     return {
+        destroy: display?.destroy,
         revealNext: () => {
             hint.remove();
-            wrapper.querySelectorAll("[data-shape-id]").forEach((overlay) => {
-                if (targetShapeIDs.has((overlay as HTMLElement).dataset.shapeId)) {
-                    overlay.remove();
+            maskLabels.forEach(label => label.remove());
+            wrapper.querySelectorAll<HTMLElement>("[data-shape-id]").forEach((overlay) => {
+                if (targetShapeIDs.has(overlay.dataset.shapeId)) {
+                    overlay.classList.remove("card__v2-image-shape--target");
+                    overlay.classList.add("card__v2-image-shape--revealed");
+                    overlay.removeAttribute("role");
+                    overlay.removeAttribute("aria-label");
+                    overlay.setAttribute("aria-hidden", "true");
                 }
             });
+            toggle.classList.remove("fn__none");
             return true;
         },
     };
 };
 
-export const prepareFlashcardV2Reveal = (element: Element, model: IFlashcardV2RenderModel): IFlashcardV2RevealController | undefined => {
+export const prepareFlashcardV2Reveal = (element: Element, model: IFlashcardV2RenderModel,
+    imageViewport?: typeof bindFlashcardV2ImageViewport): IFlashcardV2RevealController | undefined => {
     if (model.source.sourceType === "image-occlusion") {
-        return prepareImageOcclusions(element, model);
+        return prepareImageOcclusions(element, model, imageViewport);
     }
     if (model.source.sourceType === "multi-line") {
         return prepareMultiLineAnswers(element, model);

@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "マスクのヒント",
+	"flashcardFocusImageMask": "現在のマスクに自動で焦点を合わせる",
+	"flashcardReviewSubtree": "このブロックと子孫ブロックのカードを復習",
+	"flashcardManageSubtree": "このブロックと子孫ブロックのカードを管理",
+	"flashcardReviewCountHidden": "復習枚数を非表示にしました",
+	"flashcardReviewCountShown": "復習枚数を表示しました",
+	"flashcardReviewSiblingsBuried": "同じ出典のカードを明日まで一時除外しました（${count}枚）",
 	"flashcardReviewEditSourceTip": "カードの出典を開いて今すぐ編集します",
 	"flashcardReviewSkipTip": "期限を変えずに、今回の復習が終わるまでこのカードを飛ばします",
 	"flashcardReviewBuryTip": "明日まで通常の復習にこのカードを表示しません",

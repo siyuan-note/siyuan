@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Podpowiedź na masce",
+	"flashcardFocusImageMask": "Automatycznie przybliż aktualną maskę",
+	"flashcardReviewSubtree": "Powtarzaj karty tego bloku i jego potomków",
+	"flashcardManageSubtree": "Zarządzaj kartami tego bloku i jego potomków",
+	"flashcardReviewCountHidden": "Licznik powtórek ukryty",
+	"flashcardReviewCountShown": "Licznik powtórek widoczny",
+	"flashcardReviewSiblingsBuried": "Karty z tego samego źródła ukryto do jutra (${count})",
 	"flashcardReviewEditSourceTip": "Otwórz źródło karty do edycji",
 	"flashcardReviewSkipTip": "Pomiń kartę do końca tej sesji i zachowaj termin powtórki",
 	"flashcardReviewBuryTip": "Ukryj kartę w zwykłych powtórkach do jutra",

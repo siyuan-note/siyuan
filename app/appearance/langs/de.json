@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Hinweis auf der Abdeckung",
+	"flashcardFocusImageMask": "Auf die aktuelle Abdeckung fokussieren",
+	"flashcardReviewSubtree": "Karten dieses Blocks und seiner Unterblöcke lernen",
+	"flashcardManageSubtree": "Karten dieses Blocks und seiner Unterblöcke verwalten",
+	"flashcardReviewCountHidden": "Lernzähler ausgeblendet",
+	"flashcardReviewCountShown": "Lernzähler eingeblendet",
+	"flashcardReviewSiblingsBuried": "Karten derselben Quelle bis morgen ausgeblendet (${count})",
 	"flashcardReviewEditSourceTip": "Öffnet die Kartenquelle zur sofortigen Bearbeitung",
 	"flashcardReviewSkipTip": "Überspringt die Karte in dieser Sitzung und behält den Termin bei",
 	"flashcardReviewBuryTip": "Blendet die Karte bis morgen in der normalen Wiederholung aus",

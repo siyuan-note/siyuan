@@ -1,4 +1,11 @@
 {
+	"flashcardImageMaskLabel": "Petunjuk area tertutup",
+	"flashcardFocusImageMask": "Fokus otomatis pada area tertutup saat ini",
+	"flashcardReviewSubtree": "Tinjau kartu dalam blok ini dan turunannya",
+	"flashcardManageSubtree": "Kelola kartu dalam blok ini dan turunannya",
+	"flashcardReviewCountHidden": "Jumlah kartu ulasan disembunyikan",
+	"flashcardReviewCountShown": "Jumlah kartu ulasan ditampilkan",
+	"flashcardReviewSiblingsBuried": "Kartu dari sumber yang sama ditunda hingga besok (${count})",
 	"flashcardReviewEditSourceTip": "Buka sumber kartu untuk diedit sekarang",
 	"flashcardReviewSkipTip": "Lewati kartu hingga sesi ini berakhir dan pertahankan waktu jatuh temponya",
 	"flashcardReviewBuryTip": "Sembunyikan kartu dari tinjauan biasa hingga besok",
